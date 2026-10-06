@@ -1,0 +1,63 @@
+{
+  "schema": "szl.screenshot-evidence.v1",
+  "filename": "a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.png",
+  "original_capture_filename": "a11oy-workcell-replay-detail-2026-10-06-390x900.png",
+  "route": "/a11oy/workcells/wc-001/replay",
+  "surface": "a11oy-workcell-replay-detail",
+  "capture_date": "2026-10-06",
+  "captured_at": "2026-10-06T03:28:06.069Z",
+  "captured_by": "Codex-PixelProof",
+  "capture_environment": "local-exact-head",
+  "source_revision": "b758bcfbc177236876c524e27cb2e765c87e00d7",
+  "source_tree": "ec9eb4859a3d4d97eb11f062a8cc3b52c42b0461",
+  "source_identity": {
+    "kind": "git-checkout",
+    "revision": "b758bcfbc177236876c524e27cb2e765c87e00d7"
+  },
+  "capture_run_identity": "codex-cloud-local-b758bcfbc-source-bound-capture",
+  "workflow_run_or_command": "SOURCE_REVISION=b758bcfbc177236876c524e27cb2e765c87e00d7 SOURCE_TREE_SHA=ec9eb4859a3d4d97eb11f062a8cc3b52c42b0461 SOURCE_REF=work SOURCE_REPOSITORY=szl-holdings/platform CAPTURE_ENVIRONMENT=local-exact-head RUN_IDENTITY=codex-cloud-local-b758bcfbc-source-bound-capture CAPTURED_BY=Codex-PixelProof PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium node scripts/qa/capture-series-a-product-matrix-proof.mjs",
+  "viewport": {
+    "width": 390,
+    "height": 900
+  },
+  "artifact_sha256": "a462d2ed21900c0ad2751578782982448e2af6b0c13a67f5fa1ca35420b5b245",
+  "response_status": 200,
+  "console_errors": [],
+  "page_errors": [],
+  "request_failures": [],
+  "bad_responses": [],
+  "undeclared_requests": [],
+  "scroll_reveal": {
+    "marked_elements": 1,
+    "unrevealed_elements": 0,
+    "maximum_scroll_top": 6116,
+    "reached_bottom_scroll_top": 6116,
+    "final_scroll_top": 0,
+    "sweep_steps": 22
+  },
+  "state": {
+    "readyState": "complete",
+    "screenshotReady": true,
+    "clientWidth": 390,
+    "scrollWidth": 390,
+    "horizontalOverflow": false,
+    "interactiveCount": 15,
+    "unnamedInteractiveElements": [],
+    "undersizedInteractiveElements": [],
+    "localLinkFailures": [],
+    "mainCount": 1,
+    "h1Count": 1,
+    "headings": ["↩ Revenue Friction Remediation"],
+    "busy": 0
+  },
+  "source_metadata": {
+    "sha256": "9081594be429614aebf9e787ca4206c374cdb8431587b95e30dfc6868c92501f",
+    "evidence_records": 75
+  },
+  "retained_source_bound_receipt_sha256": "c2d86053fa04854731dc23bc641efacae575db483830afa4195aede9cab3bf35",
+  "workcell_id": "A11OY-WORKCELL-PROOF-COVERAGE-20261002",
+  "authority": "LOCAL_NON_AUTHORITATIVE",
+  "proof_level": 4,
+  "status": "current",
+  "claim_boundary": "Headless exact-source local presentation evidence; not hosted deployment, cryptographic authenticity, durable storage, external execution, or production readiness."
+}

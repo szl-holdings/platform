@@ -1,5 +1,7 @@
 # Launch Day Runbook — SZL Holdings Platform
 
+> **HISTORICAL / SUPERSEDED:** This April 2026 planning artifact is not current readiness authority. Use the [October 2026 estate pre-publish audit](../../audit/SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md) for current status and launch decisions.
+
 **Version:** 1.0 | **Date:** April 2026 | **Audience:** Launch team, engineering, product, founder
 
 **Related:** [ROLLBACK_PLAYBOOK.md](../operations/rollback-playbook.md) · [ENVIRONMENT_VALIDATION.md](../operations/environment-validation.md) · [RELEASE_INTELLIGENCE.md](../operations/release-intelligence.md) · [LAUNCH_ANALYTICS_PLAN.md](launch-analytics-plan.md)

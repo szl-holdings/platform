@@ -16,7 +16,12 @@ Every screenshot submitted as proof must:
 
 4. **Bind the route and application frame.** Show browser chrome or an app frame when the capture method supports it. Headless captures are acceptable only with a metadata sidecar and catalog entry containing the exact route, viewport, source revision, capture environment, capture time, and screenshot SHA-256.
 
-5. **Be stored with the correct naming convention.** Files go in `docs/assets/screenshots/current/`. Filename format: `{surface-name}-{YYYY-MM-DD}.jpg` (e.g., `a11oy-now-board-2026-04-25.jpg`).
+5. **Be stored with the correct naming convention.** Files go in
+   `docs/assets/screenshots/current/`. Filename format:
+   `{surface-name}-{YYYY-MM-DD}.jpg` or
+   `{surface-name}-{YYYY-MM-DD}.png` (for example,
+   `a11oy-now-board-2026-04-25.jpg`). JPEG and lossless PNG are both admitted;
+   the catalog digest binds the committed bytes.
 
 6. **Have a corresponding catalog entry.** Every screenshot used as proof must have an entry in `audit/screenshot-catalog.md` with filename, route, capture date, capture environment, exact source revision, workflow run or command, viewport, screenshot SHA-256, capturing agent, and associated Workcell ID or task number.
 

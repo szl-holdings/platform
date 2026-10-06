@@ -1,8 +1,15 @@
 # Screenshot Catalog — SZL Holdings Platform
 **Track 6 — 2026-04-21**
+**Updated — 2026-10-05 (A11oy Workcell proof-coverage hardening)**
 **Updated — 2026-07-31 (Workcell VERTICAL-RUNTIME-CONTRACTS-2026-07-31)**
 **Updated — 2026-04-22 (Task #3103, README screenshot block refresh)**
-**Status:** Complete disposition ledger. Per-file keep/archive executed.
+**Status:** Historical Track 6 disposition plus append-only later evidence.
+
+The original April table is not a current exhaustive inventory. Later proof
+sections were appended as the evidence set grew; their exact-source receipts
+and per-image entries are authoritative for those runs. As of 2026-10-05,
+`docs/assets/screenshots/current/` contains 392 files (390 tracked at the
+captured base plus the two new hardened PNGs in this documentation successor).
 
 ---
 
@@ -29,7 +36,7 @@
 
 | Location | File Count | Disposition |
 |----------|-----------|-------------|
-| `docs/assets/screenshots/current/` | 7 | **REFRESHED 2026-04-22 (Task #3103)** — README screenshot block. Files renamed from product slugs to in-app codenames so captions match chrome (KORA, SEXTANT, DOMAINE, TENAX, FORGE). See Section 0 below. |
+| `docs/assets/screenshots/current/` | 7 in the April README subset; 392 total as of 2026-10-05 | **HISTORICAL SUBSET + LATER APPENDS** — the seven-file count describes only Task #3103. Later exact-source evidence sections account for subsequent additions; this row is not a complete current-file ledger. See Section 0 below. |
 | `screenshots/approved/` | 3 committed (13 catalogued) | **KEPT** — 3 post-DB authenticated-surface captures from 2026-04-22 (Task #2890) are the only files currently committed to this directory. The 10 entries dated 2026-04-21 in Section 1 below were captured live from dev servers but were never committed to the repository; they are documented for reference only. See "Repository state" note in Section 1. |
 | `screenshots/archive/` | 280 | **ARCHIVED** — legacy/pre-redesign/iteration/superseded |
 | `demo-assets/screenshots/` | 9 | **KEPT in place** — actively linked from LinkedIn carousel |
@@ -869,13 +876,17 @@ The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so 
 | /a11oy/resources | [320x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1728x1000.png) |
 | /a11oy/trust | [320x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1728x1000.png) |
 
-## A11oy Workcell Proof Coverage Inspector — 2026-10-02 exact-source local proof
+## A11oy Workcell Proof Coverage Inspector — 2026-10-02 superseded exact-source local proof
 
 The two captures below are **LOCAL_NON_AUTHORITATIVE** evidence from source
 `677c9ab3ed6ce8d1d839c264a49f9a61f3646c74` (tree
 `73efe371333fd5162f9eca9d5fdd38198c313871`). They prove the local build and
 responsive fixture interface; they do not prove hosted deployment, external
 execution, durable storage, cryptographic verification, or production readiness.
+The 12-obligation evaluator represented here was later found to fail open for
+duplicate identifiers and unresolved trace evidence. Keep these bytes only as
+historical evidence; use the 2026-10-05 hardened section below for current
+evaluator claims.
 
 ### Desktop capture
 
@@ -891,7 +902,7 @@ execution, durable storage, cryptographic verification, or production readiness.
 - `artifact_sha256`: `4b867ba9ecbf1952d2147ef6de6349be57c2237ac78ab2f6602cc31363cb1f4a`
 - `workcell_id`: `A11OY-WORKCELL-PROOF-COVERAGE-20261002`
 - `proof_level`: `4`
-- `status`: `current`
+- `status`: `superseded`
 - `notes`: Stable loaded DEMO fixture with the inspector heading, aggregate incomplete result, challenge controls, and obligation results visible. Direct JPEG capture; no edit, crop, overlay, or synthetic image. [Metadata sidecar](a11oy-workcell-proof-coverage-desktop-2026-10-02.screenshot.json) · [capture script snapshot](a11oy-workcell-proof-coverage-capture-2026-10-02.mjs.txt) · [Proof Packet](A11OY_WORKCELL_PROOF_COVERAGE_PROOF_2026-10-02.md).
 
 ### Mobile capture
@@ -908,5 +919,67 @@ execution, durable storage, cryptographic verification, or production readiness.
 - `artifact_sha256`: `99a0aca18856155e1769f955329f10b13233c5491e60be300b380f57f67a5082`
 - `workcell_id`: `A11OY-WORKCELL-PROOF-COVERAGE-20261002`
 - `proof_level`: `4`
-- `status`: `current`
+- `status`: `superseded`
 - `notes`: Stable loaded narrow DEMO fixture with the inspector heading, aggregate incomplete result, and all three challenge controls visible without horizontal overflow. Direct JPEG capture; no edit, crop, overlay, or synthetic image. [Metadata sidecar](a11oy-workcell-proof-coverage-mobile-2026-10-02.screenshot.json) · [capture script snapshot](a11oy-workcell-proof-coverage-capture-2026-10-02.mjs.txt) · [Proof Packet](A11OY_WORKCELL_PROOF_COVERAGE_PROOF_2026-10-02.md).
+
+## A11oy Workcell Proof Coverage hardening — 2026-10-05 exact-source local proof
+
+These selected captures come from a clean, source-bound build of revision
+`b758bcfbc177236876c524e27cb2e765c87e00d7` (tree
+`ec9eb4859a3d4d97eb11f062a8cc3b52c42b0461`). The complete local matrix
+finished **VERIFIED** with 75 captures, zero failures, and 180/180 interaction
+states passing across five viewport widths. The retained source-bound receipt
+has SHA-256
+`c2d86053fa04854731dc23bc641efacae575db483830afa4195aede9cab3bf35`;
+the retained interaction receipt has SHA-256
+`1c6248f3fd5dc347ddcb6e79b342d1a26dc95758d60e989e038c0675f2a6a752`.
+
+- [Source-bound receipt](a11oy-workcell-proof-coverage-hardened-source-bound-metadata-2026-10-05.json.txt) — exact retained bytes; served-asset manifest SHA-256 `de43cc7533f856653fc4bb9de54843973465e9c418b6803e424d15cc1ea7d500`, 348 assets / 16,669,400 bytes.
+- [Interaction receipt](a11oy-workcell-proof-coverage-hardened-interactions-2026-10-05.json.txt) — exact retained bytes; source identity **VERIFIED**, proof-coverage baseline honestly **INCOMPLETE** at 8/17 obligations.
+- `route`: `/a11oy/workcells/wc-001/replay`
+- `authority`: **LOCAL_NON_AUTHORITATIVE**
+
+### Hardened desktop capture
+
+- `filename`: [a11oy-workcell-proof-coverage-hardened-desktop-2026-10-05.png](../docs/assets/screenshots/current/a11oy-workcell-proof-coverage-hardened-desktop-2026-10-05.png)
+- `route`: `/a11oy/workcells/wc-001/replay`
+- `surface`: A11oy Workcell Proof Coverage Inspector
+- `capture_date`: `2026-10-06`
+- `captured_at`: `2026-10-06T03:28:11.162Z`
+- `captured_by`: `Codex-PixelProof`
+- `capture_environment`: `local-exact-head`
+- `source_revision`: `b758bcfbc177236876c524e27cb2e765c87e00d7`
+- `workflow_run_or_command`: `SOURCE_REVISION=b758bcfbc177236876c524e27cb2e765c87e00d7 SOURCE_TREE_SHA=ec9eb4859a3d4d97eb11f062a8cc3b52c42b0461 SOURCE_REF=work SOURCE_REPOSITORY=szl-holdings/platform CAPTURE_ENVIRONMENT=local-exact-head RUN_IDENTITY=codex-cloud-local-b758bcfbc-source-bound-capture CAPTURED_BY=Codex-PixelProof PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium node scripts/qa/capture-series-a-product-matrix-proof.mjs`
+- `viewport`: `1366x900`
+- `artifact_sha256`: `33886e8549c9f58e3b727f6f9cf370d23b215e4771c496ee27ad0a5c408d869a`
+- `metadata_sidecar`: [a11oy-workcell-proof-coverage-hardened-desktop-2026-10-05.screenshot.json](a11oy-workcell-proof-coverage-hardened-desktop-2026-10-05.screenshot.json), SHA-256 `670808e37b5f50a2d677605438c013d740eca5b5c3b4ef066d5155674c277b20`
+- `workcell_id`: `A11OY-WORKCELL-PROOF-COVERAGE-20261002`
+- `proof_level`: `4`
+- `status`: `current`
+- `notes`: Stable loaded DEMO fixture at the honest `INCOMPLETE` 8/17 baseline. Direct browser PNG from the source-bound run; no edit, crop, overlay, compositing, or synthetic generation. The filename follows the client date; `captured_at` preserves UTC.
+
+### Hardened mobile capture
+
+- `filename`: [a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.png](../docs/assets/screenshots/current/a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.png)
+- `route`: `/a11oy/workcells/wc-001/replay`
+- `surface`: A11oy Workcell Proof Coverage Inspector
+- `capture_date`: `2026-10-06`
+- `captured_at`: `2026-10-06T03:28:06.069Z`
+- `captured_by`: `Codex-PixelProof`
+- `capture_environment`: `local-exact-head`
+- `source_revision`: `b758bcfbc177236876c524e27cb2e765c87e00d7`
+- `workflow_run_or_command`: `SOURCE_REVISION=b758bcfbc177236876c524e27cb2e765c87e00d7 SOURCE_TREE_SHA=ec9eb4859a3d4d97eb11f062a8cc3b52c42b0461 SOURCE_REF=work SOURCE_REPOSITORY=szl-holdings/platform CAPTURE_ENVIRONMENT=local-exact-head RUN_IDENTITY=codex-cloud-local-b758bcfbc-source-bound-capture CAPTURED_BY=Codex-PixelProof PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium node scripts/qa/capture-series-a-product-matrix-proof.mjs`
+- `viewport`: `390x900`
+- `artifact_sha256`: `a462d2ed21900c0ad2751578782982448e2af6b0c13a67f5fa1ca35420b5b245`
+- `metadata_sidecar`: [a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.screenshot.json](a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.screenshot.json), SHA-256 `06ba4f36ad224b90bc3c094feeee1aa818486f0e1c0f234666055ef2a0f955a0`
+- `workcell_id`: `A11OY-WORKCELL-PROOF-COVERAGE-20261002`
+- `proof_level`: `4`
+- `status`: `current`
+- `notes`: Stable loaded narrow DEMO fixture at the honest `INCOMPLETE` 8/17 baseline with no horizontal overflow. Direct browser PNG from the source-bound run; no edit, crop, overlay, compositing, or synthetic generation. The filename follows the client date; `captured_at` preserves UTC.
+
+This evidence binds local presentation and deterministic browser interactions
+to the recorded source, tree, and served bytes. It does not prove hosted
+deployment, external execution, durable storage, operator identity,
+cryptographic signature verification, external attestation, or production
+readiness. The `2026-10-05` catalog date follows the client timezone; the
+timestamps above preserve the actual UTC capture instants.

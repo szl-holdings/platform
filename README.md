@@ -19,7 +19,7 @@ Product: [a-11-oy.com](https://a-11-oy.com) ·
 Proof: [a11oy.net](https://a11oy.net)
 <!-- /szl:header -->
 
-### The SZL governed-inference monorepo — every AI action signed, gated, and verifiable.
+### The SZL governed-inference monorepo — building policy-gated, evidence-bearing AI paths.
 
 [![CI](https://github.com/szl-holdings/platform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/ci.yml)
 [![Tests](https://github.com/szl-holdings/platform/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/tests.yml)
@@ -30,19 +30,32 @@ Proof: [a11oy.net](https://a11oy.net)
 [![Doctrine v11](https://img.shields.io/badge/Doctrine-v11_LOCKED-3b82f6?style=flat-square)](https://github.com/szl-holdings/.github/tree/main/doctrine)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434276.svg)](https://doi.org/10.5281/zenodo.20434276)
 
-[Live platform](https://a-11-oy.com) · [Hugging Face Org](https://huggingface.co/SZLHOLDINGS) · [SZL Holdings](https://github.com/szl-holdings)
+[Product endpoint](https://a-11-oy.com) · [Hugging Face Org](https://huggingface.co/SZLHOLDINGS) · [SZL Holdings](https://github.com/szl-holdings)
 
 </div>
 
 ---
 
+> **Current evidence boundary — 2026-10-06:** a bounded TLS-verified read of
+> `a-11-oy.com` returned HTTP 503 with the Hugging Face Space error marker;
+> `a11oy.net` returned its static proof-registry homepage. The current local
+> hardening commits are not a deployment receipt. GitHub settings, live
+> Hugging Face completeness, end-to-end signing, substrate adapters, and
+> production operation remain unverified. See the
+> [current prepublication audit](audit/SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md).
+
 ## What this is
 
 This is the SZL Holdings platform monorepo — a TypeScript/pnpm workspace containing the **a11oy** Command Center, the governed-inference runtime, domain verticals, and all shared infrastructure.
 
-Every AI action that runs in this platform passes through a policy gate, gets bound to its evidence, is scored by a trust function (Λ), and is sealed into a **DSSE-signed receipt** that anyone can verify offline. No action reaches execution without an approval gate. The audit trail is append-only and cryptographically chained.
+The target governed path sends an AI action through policy, evidence binding,
+trust scoring (Λ), approval, and a verifiable receipt. The repository contains
+implemented and tested pieces of that path, deterministic demos, historical
+receipts, and still-unconnected scaffolds. It does **not** establish that every
+current route or deployment enforces the complete path. Some local fallback
+envelopes are explicitly placeholders rather than cryptographic signatures.
 
-**What it does in seven layers:**
+**The seven-layer target contract:**
 
 1. **Sense** — ingest live signals across connected domains
 2. **Structure** — correlate signals into outcomes across people, revenue, infrastructure, security, and market data
@@ -52,17 +65,23 @@ Every AI action that runs in this platform passes through a policy gate, gets bo
 6. **Approve** — enforce human approval gates; no consequential action bypasses this layer
 7. **Execute** — run durable workflows and seal a signed proof record
 
-**Key invariant:** No action reaches layer 7 without layer 6 approval. This is structurally enforced, not policy-configured.
+**Target invariant:** a consequential action must not reach layer 7 without its
+required layer 6 approval. Enforcement must be proven per executable route and
+exact deployed revision; it is not inferred from this architecture statement.
 
 ---
 
 ## The Command Center — a11oy
 
-**[a-11-oy.com](https://a-11-oy.com)** is the live product surface of this monorepo. It provides:
+**[a-11-oy.com](https://a-11-oy.com)** is the intended product endpoint for
+this monorepo. The latest bounded observation returned HTTP 503, so the list
+below describes product design and repository surfaces, not current hosted
+availability:
 
 - Deny-by-default safety gates with five transparent classifiers (cyber, bio, reasoning extraction, prompt injection, self-harm)
 - Trust scoring with confidence intervals (ceiling 0.97 — never 100% by doctrine)
-- A live decision feed with signed receipts on every action
+- A decision-feed design with governed receipt records; complete live signing
+  coverage remains unverified
 - Governed agentic coding — plan-and-act with quorum approval before any write
 - Sovereign deployment: runs on your own hardware, air-gapped if needed
 
@@ -72,7 +91,7 @@ Every AI action that runs in this platform passes through a policy gate, gets bo
 
 | Claim | Status |
 |---|---|
-| Signed DSSE receipts on every governed action | **LIVE** |
+| Signed DSSE receipts on every governed action | **UNVERIFIED END TO END** — tested receipt paths exist; placeholder signing and unobserved deployments remain |
 | 8 formulas locked-proven in Lean 4 (lutar-lean) | **LOCKED · kernel c7c0ba17** |
 | Λ trust aggregator — unconditional uniqueness | **Conjecture 1 · OPEN** — statement-only, machine-checked false as stated; conditional uniqueness = **Theorem U** (axiom-free, modulo ≈Λ under IA; strict only under Anchored/Normalized) |
 | SLSA supply-chain | **L1 honest · L2 build-attested · L3 roadmap** |
@@ -114,7 +133,10 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the full monorepo orien
 
 ## Security
 
-Hardened by default: CodeQL static analysis, Dependabot, secret scanning, SBOM generation, and OpenSSF Scorecard on every CI run. Report vulnerabilities via [security policy](SECURITY.md).
+The repository configures CodeQL, Dependabot, secret scanning, SBOM generation,
+and OpenSSF Scorecard workflows. Their presence in source does not prove that
+every protected branch, promoted artifact, or current run is covered. Report
+vulnerabilities via the [security policy](SECURITY.md).
 
 ---
 
