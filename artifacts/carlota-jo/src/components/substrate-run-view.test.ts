@@ -12,9 +12,9 @@ describe('Carlota Jo substrate run presentation', () => {
   });
 
   it('keeps dry-run completion separate from live success', () => {
-    expect(parsePipelineRun({ status: 'dry-run-complete', mode: 'dry-run' }, 'dry-run').status).toBe(
-      'dry-run-complete',
-    );
+    expect(
+      parsePipelineRun({ runId: 'demo-1', status: 'dry-run-complete', mode: 'dry-run' }, 'dry-run').status,
+    ).toBe('dry-run-complete');
     expect(parsePipelineRun({ status: 'completed', mode: 'dry-run' }, 'dry-run').status).toBe(
       'unknown',
     );
@@ -43,6 +43,19 @@ describe('Carlota Jo substrate run presentation', () => {
     expect(run.mode).toBe('dry-run');
     expect(run.requestedMode).toBe('dry-run');
     expect(run.stages[0]?.status).toBe('pending-approval');
+  });
+
+  it.each([
+    ['completed', 'live'],
+    ['dry-run-complete', 'dry-run'],
+  ] as const)('requires a nonblank run identity for %s', (status, mode) => {
+    for (const runId of [undefined, null, '', '   ', 42, {}, []]) {
+      const run = parsePipelineRun({ status, mode, runId }, mode);
+      expect(run.status).toBe('unknown');
+      expect(run.runId).toBeNull();
+      expect(run.reportedStatus).toBe(status);
+    }
+    expect(parsePipelineRun({ status, mode, runId: 'run-identified' }, mode).status).toBe(status);
   });
 
   it.each([

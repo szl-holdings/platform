@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Locator, type Page, type TestInfo } from '@playwright/test';
+import { expect, test, type Locator, type Page, type Route, type TestInfo } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -105,6 +105,74 @@ async function captureWorkflowPanel(
 }
 
 test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
+  for (const mode of ['dry-run', 'live'] as const) {
+    test(`a returned ${mode} running run keeps controls locked`, async ({ page }, testInfo) => {
+      const { panel, requests } = await mountWorkflowPanel(page, [{
+        runId: `fixture-running-${mode}`, status: 'running', mode,
+      }]);
+      await panel.locator('select').selectOption(mode);
+      await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+      await expect(panel.getByText(`fixture-running-${mode}`, { exact: true })).toBeVisible();
+      const runButton = panel.getByRole('button', { name: 'Run on Substrate' });
+      await expect(runButton).toBeDisabled();
+      await expect(panel.locator('select')).toBeDisabled();
+      // Native repeated clicks cannot start another live or demo run while active.
+      await runButton.evaluate((button) => {
+        (button as HTMLButtonElement).click();
+        (button as HTMLButtonElement).click();
+      });
+      expect(requests).toHaveLength(1);
+      expect(requests[0]?.mode).toBe(mode);
+      await captureWorkflowPanel(panel, page, testInfo, `running-${mode}`);
+    });
+
+    test(`${mode} completion without a run identity remains unverified`, async ({ page }, testInfo) => {
+      const { panel } = await mountWorkflowPanel(page, [{
+        status: mode === 'live' ? 'completed' : 'dry-run-complete', mode,
+        ...(mode === 'live' ? { runId: '   ' } : {}),
+      }]);
+      await panel.locator('select').selectOption(mode);
+      await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+      await expect(panel.getByText('STATE UNVERIFIED', { exact: true })).toBeVisible();
+      await expect(panel.getByText(/COMPLETED|DRY-RUN COMPLETE/)).toHaveCount(0);
+      await expect(panel.getByRole('button', { name: 'Run on Substrate' })).toBeEnabled();
+      await captureWorkflowPanel(panel, page, testInfo, `missing-identity-${mode}`);
+    });
+  }
+
+  test('an interrupted submission stays locked until failure then permits an identified retry', async ({ page }) => {
+    const { panel, requests } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-recovered', status: 'completed', mode: 'live',
+    }]);
+    let interrupt!: () => void;
+    const interrupted = new Promise<void>((resolve) => { interrupt = resolve; });
+    let submissions = 0;
+    const interruptRequest = async (route: Route) => {
+      submissions += 1;
+      await interrupted;
+      await route.abort('connectionreset');
+    };
+    await page.route('**/api/control-tower/substrate/run', interruptRequest);
+    await panel.locator('select').selectOption('live');
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    const runningButton = panel.getByRole('button', { name: /^Running/ });
+    await expect(runningButton).toBeDisabled();
+    await expect(panel.locator('select')).toBeDisabled();
+    await runningButton.evaluate((button) => {
+      (button as HTMLButtonElement).click();
+      (button as HTMLButtonElement).click();
+    });
+    await expect.poll(() => submissions).toBe(1);
+    interrupt();
+    await expect(panel.getByText(/FAILED$/, { exact: true })).toBeVisible();
+    await expect(panel.getByRole('button', { name: 'Run on Substrate' })).toBeEnabled();
+    await expect(panel.locator('select')).toBeEnabled();
+    await page.unroute('**/api/control-tower/substrate/run', interruptRequest);
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    await expect(panel.getByText('fixture-recovered', { exact: true })).toBeVisible();
+    expect(requests).toHaveLength(1);
+  });
+
   test('dry-run confidence escalation remains pending human review', async ({ page }, testInfo) => {
     const { panel, requests } = await mountWorkflowPanel(page, [{
       runId: 'fixture-dry-pending',
@@ -161,6 +229,8 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
       await panel.getByRole('button', { name: 'Run on Substrate' }).click();
       await expect(panel.getByText(`fixture-${outcome.status}`, { exact: true })).toBeVisible();
       await expect(panel.getByText(outcome.label, { exact: true })).toBeVisible();
+      await expect(panel.getByRole('button', { name: 'Run on Substrate' })).toBeEnabled();
+      await expect(panel.locator('select')).toBeEnabled();
       await expect(panel.getByText('✓ COMPLETED', { exact: true })).toHaveCount(0);
       if (outcome.status === 'failed') {
         await expect(panel.getByText('Synthetic verifier failed', { exact: true })).toBeVisible();

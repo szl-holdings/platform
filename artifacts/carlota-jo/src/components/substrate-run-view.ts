@@ -59,6 +59,7 @@ function confidence(value: unknown): number | null {
 
 export function parsePipelineRun(value: unknown, requestedMode: RunMode): RunResult {
   const run = asRecord(value);
+  const runId = typeof run.runId === 'string' && run.runId.trim().length > 0 ? run.runId : null;
   const reportedStatus = typeof run.status === 'string' ? run.status : 'missing';
   const mode = typeof run.mode === 'string' ? run.mode : 'missing';
   const rawStages = Array.isArray(run.stageResults) ? run.stageResults.map(asRecord) : [];
@@ -84,12 +85,13 @@ export function parsePipelineRun(value: unknown, requestedMode: RunMode): RunRes
       : null;
 
   // An HTTP-success response is only an acknowledgement. Trust the run state and
-  // mode together; a mismatched or unrecognised report cannot prove completion.
+  // mode together; terminal success also needs a traceable run identity.
   let status: PanelStatus = RUN_STATUSES.has(reportedStatus as PanelStatus)
     ? (reportedStatus as PanelStatus)
     : 'unknown';
   if (
     mode !== requestedMode ||
+    ((status === 'completed' || status === 'dry-run-complete') && runId === null) ||
     (status === 'completed' && mode !== 'live') ||
     (status === 'dry-run-complete' && mode !== 'dry-run')
   ) {
@@ -97,7 +99,7 @@ export function parsePipelineRun(value: unknown, requestedMode: RunMode): RunRes
   }
 
   return {
-    runId: typeof run.runId === 'string' && run.runId.length > 0 ? run.runId : null,
+    runId,
     requestedMode,
     status,
     reportedStatus,

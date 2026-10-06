@@ -872,9 +872,9 @@ The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so 
 
 ## Carlota Jo PR #892 substrate workflow panel — 2026-10-05
 
-These captures show the running Carlota Jo UI in GitHub Actions Chromium with intercepted synthetic workflow responses. They qualify rendered result states and repeated Run reset only. They do not establish provider inference, live backend execution, runtime persistence, human approval, cryptographic evidence signatures, or estate production readiness. A11oy remains an active prototype and investor demo.
+These historical captures show the running Carlota Jo UI in GitHub Actions Chromium with intercepted synthetic workflow responses. They qualify rendered result states and repeated Run reset only. They do not establish provider inference, live backend execution, runtime persistence, human approval, cryptographic evidence signatures, or estate production readiness. A11oy remains an active prototype and investor demo.
 
-The original PNG bytes and source sidecars are retained unchanged. The `.png` extension preserves the actual captured format. All eight captures came from [E2E workflow run 37309171751](https://github.com/szl-holdings/platform/actions/runs/37309171751), artifact `11345077223`, at the exact source revision recorded below. GitHub's synthetic PR test merge `42e97fbc92447555cd700389006d0986e613e885` has tree `f329da317191745a95e7ae8498f2541bb634c161`, identical to candidate `a8a5fd7322854e7f9b18b635ccc0453ca3f71f92`. That generated test merge is capture provenance only; it is not an authored commit signature, DCO attestation, approval, or merge to protected main. Sidecars retain `candidateTree: null` from the shallow checkout; tree equality was subsequently verified through GitHub Git objects. This catalog append changes evidence retention only; the captured panel, parser and browser-spec source hashes remain unchanged.
+The original PNG bytes and source sidecars are retained unchanged. The `.png` extension preserves the actual captured format. All eight captures came from [E2E workflow run 37309171751](https://github.com/szl-holdings/platform/actions/runs/37309171751), artifact `11345077223`, at the exact source revision recorded below. GitHub's synthetic PR test merge `42e97fbc92447555cd700389006d0986e613e885` has tree `f329da317191745a95e7ae8498f2541bb634c161`, identical to candidate `a8a5fd7322854e7f9b18b635ccc0453ca3f71f92`. That generated test merge is capture provenance only; it is not an authored commit signature, DCO attestation, approval, or merge to protected main. Sidecars retain `candidateTree: null` from the shallow checkout; tree equality was subsequently verified through GitHub Git objects. The 2026-10-06 review repair changes the panel, parser and browser spec. These captures retain their original identity and bytes but are superseded for current-source qualification; fresh affected-state captures will be recorded after hosted verification.
 
 ### cancelled
 
@@ -890,7 +890,7 @@ The original PNG bytes and source sidecars are retained unchanged. The `.png` ex
 - artifact_sha256: `bf3f336588c0916bbb885ab3736f98d31235158956c3fd8ce94d1e87f296dd3d`
 - workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
 - proof_level: `3` (synthetic UI result presentation only)
-- status: `current`
+- status: `superseded`
 - notes: Synthetic cancelled result remains CANCELLED.
 - sidecar: [`carlota-jo-substrate-cancelled-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-cancelled-2026-10-05.screenshot.json)
 
@@ -908,7 +908,7 @@ The original PNG bytes and source sidecars are retained unchanged. The `.png` ex
 - artifact_sha256: `381a81d0babb8e73eded1e7ce4068fb57e1c2210a97a0763a8ed9faebe199fac`
 - workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
 - proof_level: `3` (synthetic UI result presentation only)
-- status: `current`
+- status: `superseded`
 - notes: Engine-shaped low-confidence dry-run remains DEMO / PENDING APPROVAL with human review required; no claim that an explicit ApprovalGate was reached.
 - sidecar: [`carlota-jo-substrate-dry-run-pending-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-dry-run-pending-2026-10-05.screenshot.json)
 
@@ -926,7 +926,7 @@ The original PNG bytes and source sidecars are retained unchanged. The `.png` ex
 - artifact_sha256: `e029bc516d388d0fe700b2f37294f5a202cd89053ba1d0291ccbb21d62cd2d58`
 - workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
 - proof_level: `3` (synthetic UI result presentation only)
-- status: `current`
+- status: `superseded`
 - notes: HTTP 200 carrying a failed run is shown as FAILED with the supplied run error.
 - sidecar: [`carlota-jo-substrate-failed-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-failed-2026-10-05.screenshot.json)
 
@@ -944,7 +944,7 @@ The original PNG bytes and source sidecars are retained unchanged. The `.png` ex
 - artifact_sha256: `d10dafaf270f5e7ae651c2195138d2cbd2d0edc05367b4b1b6c88463c75d82d0`
 - workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
 - proof_level: `3` (synthetic UI result presentation only)
-- status: `current`
+- status: `superseded`
 - notes: Synthetic live-mode completed response is shown as COMPLETED; absent confidence remains Not reported and no SLA or signature claim is displayed. The fixture mode does not prove live execution.
 - sidecar: [`carlota-jo-substrate-live-completed-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-live-completed-2026-10-05.screenshot.json)
 
@@ -962,7 +962,7 @@ The original PNG bytes and source sidecars are retained unchanged. The `.png` ex
 - artifact_sha256: `f9458788e6dd5c136cd28b81302e59004df845cac40579b3a526e2667e1e16ab`
 - workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
 - proof_level: `3` (synthetic UI result presentation only)
-- status: `current`
+- status: `superseded`
 - notes: Returned mode inconsistent with the request is shown as UNKNOWN and cannot prove completion.
 - sidecar: [`carlota-jo-substrate-mode-mismatch-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-mode-mismatch-2026-10-05.screenshot.json)
 
@@ -980,7 +980,7 @@ The original PNG bytes and source sidecars are retained unchanged. The `.png` ex
 - artifact_sha256: `96f582b83aaa38c2ed6151ae8bea2c520d6200cee55852701e076cb63c80d670`
 - workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
 - proof_level: `3` (synthetic UI result presentation only)
-- status: `current`
+- status: `superseded`
 - notes: First synthetic response in repeated Run scenario is DEMO / DRY-RUN COMPLETE.
 - sidecar: [`carlota-jo-substrate-repeated-dry-run-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-repeated-dry-run-2026-10-05.screenshot.json)
 
@@ -998,7 +998,7 @@ The original PNG bytes and source sidecars are retained unchanged. The `.png` ex
 - artifact_sha256: `6ac07ed2aa21479de65ec3b27a69ac83ae6456452aaaf713ac3427fe0334c5bb`
 - workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
 - proof_level: `3` (synthetic UI result presentation only)
-- status: `current`
+- status: `superseded`
 - notes: Second synthetic response replaces the first result, shows its live mode and missing confidence, and removes the prior dry-run result.
 - sidecar: [`carlota-jo-substrate-repeated-live-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-repeated-live-2026-10-05.screenshot.json)
 
@@ -1016,6 +1016,6 @@ The original PNG bytes and source sidecars are retained unchanged. The `.png` ex
 - artifact_sha256: `435fd0e1c5c89dbe80e844a2ff0de77ce80e9695f46cc02530a92333325d878e`
 - workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
 - proof_level: `3` (synthetic UI result presentation only)
-- status: `current`
+- status: `superseded`
 - notes: Unrecognised returned status is shown as UNKNOWN.
 - sidecar: [`carlota-jo-substrate-unrecognised-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-unrecognised-2026-10-05.screenshot.json)

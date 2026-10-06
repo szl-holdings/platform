@@ -52,9 +52,11 @@ export function SubstrateWorkflowPanel({
   const [result, setResult] = useState<RunResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
-  const isSubmitting = status === 'running' && result === null;
+  const isRunning = status === 'running';
+  const isSubmitting = isRunning && result === null;
 
   async function handleRun() {
+    if (isRunning) return;
     setStatus('running');
     setResult(null);
     setError(null);
@@ -103,7 +105,7 @@ export function SubstrateWorkflowPanel({
               <select
                 value={mode}
                 onChange={(e) => setMode(e.target.value as RunMode)}
-                disabled={isSubmitting}
+                disabled={isRunning}
                 className="text-[10px] font-mono bg-amber-950/60 border border-amber-500/20 text-amber-300 rounded px-1.5 py-0.5 focus:outline-none"
               >
                 <option value="dry-run">dry-run</option>
@@ -111,7 +113,7 @@ export function SubstrateWorkflowPanel({
               </select>
               <button
                 onClick={handleRun}
-                disabled={isSubmitting}
+                disabled={isRunning}
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-mono hover:bg-amber-500/25 transition-colors disabled:opacity-40"
               >
                 {isSubmitting ? (
