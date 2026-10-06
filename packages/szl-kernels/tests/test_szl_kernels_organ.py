@@ -521,7 +521,7 @@ class WakeReceiptEndpointTests(unittest.TestCase):
         self.assertEqual(wrong_type.status_code, 415)
         self.assertEqual(manager.get("sign").codex.count(), 0)
 
-    def test_tick_fails_closed_when_admin_secret_is_unavailable_or_weak(self) -> None:
+    def test_tick_fails_closed_when_admin_secret_is_unavailable_or_invalid(self) -> None:
         for token in ("", "too-short"):
             client, manager = self.make_client(admin_token=token)
 
@@ -530,6 +530,24 @@ class WakeReceiptEndpointTests(unittest.TestCase):
             with self.subTest(token_length=len(token)):
                 self.assertEqual(response.status_code, 503)
                 self.assertEqual(manager.get("sign").codex.count(), 0)
+
+    def test_equal_admin_and_wake_tokens_disable_both_mutation_gates(self) -> None:
+        client, manager = self.make_client(token=TOKEN, admin_token=TOKEN)
+
+        wake = client.post(
+            ENDPOINT,
+            json=valid_payload(),
+            headers=self.authorization(TOKEN),
+        )
+        tick = client.post(
+            TICK_ENDPOINT,
+            path_params={"name": "sign"},
+            headers=self.authorization(TOKEN),
+        )
+
+        self.assertEqual(wake.status_code, 503)
+        self.assertEqual(tick.status_code, 503)
+        self.assertEqual(manager.get("sign").codex.count(), 0)
 
     def test_tick_rejects_missing_wrong_and_legacy_admin_credentials(self) -> None:
         client, manager = self.make_client(admin_token=ADMIN_TOKEN)
