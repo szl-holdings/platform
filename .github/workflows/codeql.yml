@@ -70,14 +70,29 @@ jobs:
         with:
           category: /language:${{ matrix.language }}
           upload: always
+          wait-for-processing: true
+
+  severity-gate-contract:
+    name: severity-gate contract
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Test release-security workflow contracts
+        run: node --test scripts/ci/release-security-workflows.test.mjs
 
   # Explicit merge gate: independent of repo-level code-scanning settings, this
   # job fails the PR check when CodeQL reports any open critical/high alert on
-  # the head ref. Set `CodeQL / severity-gate` as a required status check in
-  # branch protection to block merges on those findings (KG011).
+  # the exact synthetic PR merge ref. Set `CodeQL / severity-gate` as a required
+  # status check in branch protection to block merges on those findings (KG011).
   severity-gate:
     name: severity-gate
-    needs: analyze
+    needs: [analyze, severity-gate-contract]
     # `always()` is intentional: a failed or cancelled analyzer must make the
     # required gate run and fail closed instead of silently skipping.
     if: always() && github.event_name == 'pull_request'
@@ -89,26 +104,87 @@ jobs:
       - name: Fail on open critical/high CodeQL alerts
         env:
           ANALYZE_RESULT: ${{ needs.analyze.result }}
+          CONTRACT_RESULT: ${{ needs.severity-gate-contract.result }}
           GH_TOKEN: ${{ github.token }}
-          REF: ${{ github.event.pull_request.head.ref }}
+          CODEQL_REPOSITORY: ${{ github.repository }}
+          CODEQL_REF: refs/pull/${{ github.event.pull_request.number }}/merge
         run: |
           set -euo pipefail
           if [ "${ANALYZE_RESULT}" != "success" ]; then
             echo "::error::CodeQL analysis ended ${ANALYZE_RESULT}; blocking merge because the analyzer did not produce a trustworthy result."
             exit 1
           fi
-          # Open alerts for the PR head ref, filtered to the CodeQL tool.
-          if ! alerts=$(gh api \
-              "repos/${{ github.repository }}/code-scanning/alerts?state=open&ref=refs/heads/${REF}&tool_name=CodeQL&per_page=100" \
-              --jq '[.[] | {sev: (.rule.security_severity_level // .rule.severity), num: .number, rule: .rule.id}]'); then
+          if [ "${CONTRACT_RESULT}" != "success" ]; then
+            echo "::error::CodeQL severity-gate contract ended ${CONTRACT_RESULT}; blocking merge because the gate itself was not validated."
+            exit 1
+          fi
+
+          alerts_file="${RUNNER_TEMP}/codeql-alert-pages.json"
+          trap 'rm -f "${alerts_file}"' EXIT
+
+          # `--paginate --slurp` follows every REST Link cursor and retains page
+          # boundaries so the schema guard can distinguish one complete empty
+          # page (`[[]]`) from missing/malformed output (`[]`, an object, or EOF).
+          if ! gh api --method GET --paginate --slurp \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "repos/${CODEQL_REPOSITORY}/code-scanning/alerts" \
+              -f state=open \
+              -f "ref=${CODEQL_REF}" \
+              -f tool_name=CodeQL \
+              -F per_page=100 > "${alerts_file}"; then
             echo "::error::Unable to read CodeQL alerts; blocking merge because absence of evidence is not evidence of absence."
             exit 1
           fi
-          blocking=$(echo "$alerts" | jq '[.[] | select(.sev=="critical" or .sev=="high")]')
-          count=$(echo "$blocking" | jq 'length')
-          echo "Open critical/high CodeQL alerts on ${REF}: ${count}"
+          if [ ! -s "${alerts_file}" ]; then
+            echo "::error::CodeQL alert pagination returned no payload; blocking merge."
+            exit 1
+          fi
+
+          # Reject truncated, malformed, cross-ref, cross-tool, duplicate, or
+          # otherwise ambiguous evidence instead of interpreting it as zero.
+          if ! jq -e --arg expected_ref "${CODEQL_REF}" '
+              def member($allowed): . as $value | ($allowed | index($value)) != null;
+              type == "array" and
+              length > 0 and
+              all(.[]; type == "array" and length <= 100) and
+              all(.[][];
+                type == "object" and
+                (.number as $number |
+                  ($number | type) == "number" and
+                  ($number | floor) == $number) and
+                .state == "open" and
+                (.tool | type == "object") and
+                .tool.name == "CodeQL" and
+                (.rule | type == "object") and
+                (.rule.id | type == "string" and length > 0) and
+                (if .rule.security_severity_level == null then
+                   (.rule.severity | member(["none", "note", "warning", "error"]))
+                 else
+                   (.rule.security_severity_level |
+                     member(["low", "medium", "high", "critical"]))
+                 end) and
+                (.most_recent_instance | type == "object") and
+                .most_recent_instance.ref == $expected_ref) and
+              ([.[][] | .number] | length) ==
+                ([.[][] | .number] | unique | length)
+            ' "${alerts_file}" >/dev/null; then
+            echo "::error::CodeQL alert pagination was malformed, incomplete, duplicated, or not bound to ${CODEQL_REF}; blocking merge."
+            exit 1
+          fi
+
+          blocking=$(jq '[.[][] | {
+              sev: (.rule.security_severity_level // .rule.severity),
+              num: .number,
+              rule: .rule.id
+            } | select(.sev == "critical" or .sev == "high")]' "${alerts_file}")
+          count=$(jq 'length' <<<"${blocking}")
+          page_count=$(jq 'length' "${alerts_file}")
+          alert_count=$(jq '[.[][]] | length' "${alerts_file}")
+          echo "CodeQL pagination exhausted ${page_count} page(s) and observed ${alert_count} open alert(s) on ${CODEQL_REF}."
+          echo "Open critical/high CodeQL alerts on ${CODEQL_REF}: ${count}"
           if [ "${count}" -gt 0 ]; then
-            echo "$blocking" | jq -r '.[] | "  - #\(.num) [\(.sev)] \(.rule)"'
+            jq -r '.[] | "  - #\(.num) [\(.sev)] \(.rule)"' <<<"${blocking}"
             echo "::error::CodeQL found ${count} open critical/high alert(s); blocking merge (KG011)."
             exit 1
           fi
