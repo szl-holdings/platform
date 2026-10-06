@@ -1,4 +1,4 @@
-name: Trivy + Grype container vulnerability scan
+name: Trivy + Grype filesystem dependency scan
 
 # CI-fix 2026-06-09: anchore/scan-action@v3.6.4 shipped an old grype whose
 # vulnerability-DB endpoint now serves a >13-week-old database; grype refuses a
@@ -20,13 +20,13 @@ permissions:
   contents: read
 jobs:
   trivy-scan:
-    name: Trivy filesystem scan
+    name: Trivy filesystem/SCA scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Trivy vulnerability scan (filesystem)
+      - name: Scan repository filesystem with Trivy
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
         with:
           scan-type: 'fs'
@@ -46,13 +46,13 @@ jobs:
       contents: read
       security-events: write
   grype-gate:
-    name: Grype CVE gate (fail on HIGH/CRITICAL)
+    name: Grype filesystem/SCA gate (fail on HIGH/CRITICAL)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Scan with Grype (fail build on HIGH/CRITICAL)
+      - name: Scan repository filesystem with Grype (blocking)
         # .grype.yaml deliberately contains an empty ignore list. Every HIGH or
         # CRITICAL finding is a release blocker; there is no advisory exception path.
         uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
@@ -62,7 +62,7 @@ jobs:
           severity-cutoff: high
           output-format: table
 
-      - name: Scan with Grype (SARIF for Security tab)
+      - name: Scan repository filesystem with Grype (SARIF)
         uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
         id: grype-sarif
         if: always()
