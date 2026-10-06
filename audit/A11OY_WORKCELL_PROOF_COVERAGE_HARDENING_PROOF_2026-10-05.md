@@ -220,9 +220,9 @@ pre- and post-capture manifest hashes match.
 | Served `index.html` | `554868ec088a9883d993c8b06451b5a8f7a81b5cea9aaf3c8c0fb8a6e15897c1` |
 | Proof nonce digest | `9ef42f5ab81ab5e5944da90e48a1056d44318b6e112b4b8ef5e48b435c3b9afa` |
 | Desktop PNG | `33886e8549c9f58e3b727f6f9cf370d23b215e4771c496ee27ad0a5c408d869a` |
-| [Desktop metadata sidecar](a11oy-workcell-proof-coverage-hardened-desktop-2026-10-05.screenshot.json) | `670808e37b5f50a2d677605438c013d740eca5b5c3b4ef066d5155674c277b20` |
+| [Desktop metadata sidecar](a11oy-workcell-proof-coverage-hardened-desktop-2026-10-05.screenshot.json) | `36d46e710893e6ab855ebff5012f65c81d60e56786a5eb00748fa6e6e0fd12c6` |
 | Mobile PNG | `a462d2ed21900c0ad2751578782982448e2af6b0c13a67f5fa1ca35420b5b245` |
-| [Mobile metadata sidecar](a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.screenshot.json) | `06ba4f36ad224b90bc3c094feeee1aa818486f0e1c0f234666055ef2a0f955a0` |
+| [Mobile metadata sidecar](a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.screenshot.json) | `e41a762181bc7eda58f9bd4062b9fe4154b1562ccd23a4e4883556a26db619a2` |
 
 ### Captured verifier-input hashes
 

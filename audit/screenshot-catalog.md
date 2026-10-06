@@ -952,7 +952,7 @@ the retained interaction receipt has SHA-256
 - `workflow_run_or_command`: `SOURCE_REVISION=b758bcfbc177236876c524e27cb2e765c87e00d7 SOURCE_TREE_SHA=ec9eb4859a3d4d97eb11f062a8cc3b52c42b0461 SOURCE_REF=work SOURCE_REPOSITORY=szl-holdings/platform CAPTURE_ENVIRONMENT=local-exact-head RUN_IDENTITY=codex-cloud-local-b758bcfbc-source-bound-capture CAPTURED_BY=Codex-PixelProof PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium node scripts/qa/capture-series-a-product-matrix-proof.mjs`
 - `viewport`: `1366x900`
 - `artifact_sha256`: `33886e8549c9f58e3b727f6f9cf370d23b215e4771c496ee27ad0a5c408d869a`
-- `metadata_sidecar`: [a11oy-workcell-proof-coverage-hardened-desktop-2026-10-05.screenshot.json](a11oy-workcell-proof-coverage-hardened-desktop-2026-10-05.screenshot.json), SHA-256 `670808e37b5f50a2d677605438c013d740eca5b5c3b4ef066d5155674c277b20`
+- `metadata_sidecar`: [a11oy-workcell-proof-coverage-hardened-desktop-2026-10-05.screenshot.json](a11oy-workcell-proof-coverage-hardened-desktop-2026-10-05.screenshot.json), SHA-256 `36d46e710893e6ab855ebff5012f65c81d60e56786a5eb00748fa6e6e0fd12c6`
 - `workcell_id`: `A11OY-WORKCELL-PROOF-COVERAGE-20261002`
 - `proof_level`: `4`
 - `status`: `current`
@@ -971,7 +971,7 @@ the retained interaction receipt has SHA-256
 - `workflow_run_or_command`: `SOURCE_REVISION=b758bcfbc177236876c524e27cb2e765c87e00d7 SOURCE_TREE_SHA=ec9eb4859a3d4d97eb11f062a8cc3b52c42b0461 SOURCE_REF=work SOURCE_REPOSITORY=szl-holdings/platform CAPTURE_ENVIRONMENT=local-exact-head RUN_IDENTITY=codex-cloud-local-b758bcfbc-source-bound-capture CAPTURED_BY=Codex-PixelProof PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium node scripts/qa/capture-series-a-product-matrix-proof.mjs`
 - `viewport`: `390x900`
 - `artifact_sha256`: `a462d2ed21900c0ad2751578782982448e2af6b0c13a67f5fa1ca35420b5b245`
-- `metadata_sidecar`: [a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.screenshot.json](a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.screenshot.json), SHA-256 `06ba4f36ad224b90bc3c094feeee1aa818486f0e1c0f234666055ef2a0f955a0`
+- `metadata_sidecar`: [a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.screenshot.json](a11oy-workcell-proof-coverage-hardened-mobile-2026-10-05.screenshot.json), SHA-256 `e41a762181bc7eda58f9bd4062b9fe4154b1562ccd23a4e4883556a26db619a2`
 - `workcell_id`: `A11OY-WORKCELL-PROOF-COVERAGE-20261002`
 - `proof_level`: `4`
 - `status`: `current`
