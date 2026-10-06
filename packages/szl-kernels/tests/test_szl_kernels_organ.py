@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Focused security contract for the authenticated wake-receipt mutation."""
+"""Dependency-free contracts for kernel truthfulness and receipt security."""
 
 from __future__ import annotations
 
@@ -170,6 +170,82 @@ def valid_payload() -> dict[str, str]:
 
 def timestamp_for(epoch: float) -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(epoch))
+
+
+class KernelActionTruthfulnessTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary_directory = tempfile.TemporaryDirectory()
+        self.environment = mock.patch.dict(
+            os.environ, {"SZL_CODEX_DIR": self.temporary_directory.name}
+        )
+        self.environment.start()
+        self.kernels = []
+
+    def tearDown(self) -> None:
+        for kernel in self.kernels:
+            kernel.codex._conn.close()
+        self.environment.stop()
+        self.temporary_directory.cleanup()
+
+    def build(self, organ: str) -> list[object]:
+        kernels = KERNELS.build_kernels(organ)
+        self.kernels.extend(kernels)
+        return kernels
+
+    def test_all_unconnected_actions_across_all_organs_report_unavailable(self) -> None:
+        self.assertEqual(
+            set(KERNELS.VERTICALS), {"a11oy", "amaru", "killinchu", "rosie", "sentra"}
+        )
+
+        for organ in sorted(KERNELS.VERTICALS):
+            kernels = self.build(organ)
+            self.assertEqual(len(kernels), 9)
+            for kernel in kernels:
+                if kernel.name == "chain":
+                    continue
+                with self.subTest(organ=organ, kernel=kernel.name):
+                    result = asyncio.run(kernel.tick(force=True))
+                    self.assertIs(result["alive"], True)
+                    self.assertIs(result["did_work"], False)
+                    self.assertEqual(
+                        result["summary"], KERNELS.SUBSTRATE_UNAVAILABLE_SUMMARY
+                    )
+                    self.assertEqual(kernel.codex.count(), 1)
+
+    def test_chain_reports_only_local_codex_hash_chain_verification(self) -> None:
+        for organ in sorted(KERNELS.VERTICALS):
+            chain = next(
+                kernel for kernel in self.build(organ) if kernel.name == "chain"
+            )
+            chain.codex.append({"fixture": "local-chain-verification"})
+
+            with self.subTest(organ=organ):
+                result = asyncio.run(chain.act({"work": False}))
+                self.assertEqual(
+                    result,
+                    {
+                        "did_work": True,
+                        "summary": (
+                            "local Codex hash-chain verification ok=True checked=1"
+                        ),
+                    },
+                )
+                self.assertNotIn("Reed-Solomon", result["summary"])
+
+                chain.codex._conn.execute(
+                    "UPDATE entries SET entry_hash = ?", ("sha256:" + ("0" * 64),)
+                )
+                chain.codex._conn.commit()
+                tampered_result = asyncio.run(chain.act({"work": False}))
+                self.assertEqual(
+                    tampered_result,
+                    {
+                        "did_work": True,
+                        "summary": (
+                            "local Codex hash-chain verification ok=False checked=0"
+                        ),
+                    },
+                )
 
 
 class WakeReceiptEndpointTests(unittest.TestCase):
@@ -485,6 +561,11 @@ class WakeReceiptEndpointTests(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertIs(response.json()["alive"], True)
+        self.assertIs(response.json()["did_work"], False)
+        self.assertEqual(
+            response.json()["summary"], KERNELS.SUBSTRATE_UNAVAILABLE_SUMMARY
+        )
         self.assertEqual(manager.get("sign").codex.count(), 1)
 
     def test_start_and_stop_share_header_only_admin_gate(self) -> None:

@@ -2,7 +2,7 @@
 # © 2026 Lutar, Stephen P. — SZL Holdings · ORCID 0009-0001-0110-4173
 # Doctrine v11 — 749 declarations · 163 sorries · 14 unique axioms · 13-axis canonical trust
 # Sign: Yachay <yachay@szlholdings.dev>
-"""szl_kernels_organ — SELF-CONTAINED, vendorable kernel layer for a flagship Space.
+"""szl_kernels_organ — SELF-CONTAINED, vendorable kernel scaffold for a flagship Space.
 
 This single file bundles the szl_kernels framework (Codex + Kernel + KernelManager +
 circuit breaker + telemetry + lifecycle API) plus the 7 universal kernels and the 2 vertical
@@ -17,8 +17,15 @@ present, otherwise an honest PLACEHOLDER DSSE envelope (never silently unsigned)
 SQLite-backed (SZL_CODEX_DIR, default /tmp/szl_codex) for process/container-local durability.
 It survives a Space rebuild only when SZL_CODEX_DIR names a persistent mounted directory.
 
-Heartbeat cadences are deliberately short for the universal SIGN/MEMORY/WIRE kernels (30s) so
-a `curl /api/<organ>/v3/kernels` immediately shows fresh `last_heartbeat_ago_sec < 60`.
+The lifecycle, receipt, and local Codex hash-chain machinery are implemented here. Except for
+ChainKernel's local hash-chain verification, the universal and vertical kernel actions are
+scaffolding: this module does not connect them to the named application substrates. Unconnected
+actions report ``did_work=false`` with an explicit UNAVAILABLE result until a real adapter is
+wired and tested.
+
+Heartbeat cadences are configured at 30 seconds for the universal SIGN/MEMORY/WIRE kernels.
+When the loop is registered and running, freshness establishes scheduler/loop health only; it
+does not establish that an unavailable substrate adapter performed external work.
 """
 from __future__ import annotations
 
@@ -42,6 +49,7 @@ from typing import Any, Callable, Optional
 
 KHIPU_PAYLOAD_TYPE = "application/vnd.szl.khipu+json"
 DOCTRINE = "v11"
+SUBSTRATE_UNAVAILABLE_SUMMARY = "UNAVAILABLE: substrate adapter not connected"
 WAKE_RECEIPT_MAX_BODY_BYTES = 1024
 WAKE_RECEIPT_MAX_CLOCK_SKEW_SECONDS = 300
 WAKE_RECEIPT_SOURCE = "github-actions/warm-flagships"
@@ -545,7 +553,7 @@ class Kernel:
         return {"work": False}
 
     async def act(self, decision: Any) -> dict:
-        return {"did_work": False, "summary": "alive"}
+        return {"did_work": False, "summary": SUBSTRATE_UNAVAILABLE_SUMMARY}
 
     async def sign(self, action_result: dict) -> dict:
         self.ticks_total += 1
@@ -655,80 +663,72 @@ class KernelManager:
 # ────────────────────────── universal kernels ──────────────────────────
 class SignKernel(Kernel):
     name = "sign"; kind = "universal"; cadence_sec = 30; codex_slug = "receipt-log"
-    async def act(self, d):
-        return {"did_work": True, "summary": "observed actions, signed via Wire D, appended to Khipu"}
 
 
 class GateKernel(Kernel):
     name = "gate"; kind = "universal"; cadence_sec = 60; codex_slug = "gate-decisions"
-    async def act(self, d):
-        return {"did_work": True, "summary": "recorded /v1/yuyay/gate pass/fail with 13-axis breakdown"}
 
 
 class ChainKernel(Kernel):
     name = "chain"; kind = "universal"; cadence_sec = 300; codex_slug = "khipu-dag"
     async def act(self, d):
         v = self.codex.verify_chain()
-        return {"did_work": True, "summary": f"chain integrity ok={v['ok']} checked={v['checked']} (Reed-Solomon ready)"}
+        return {
+            "did_work": True,
+            "summary": (
+                f"local Codex hash-chain verification ok={v['ok']} "
+                f"checked={v['checked']}"
+            ),
+        }
 
 
 class MemoryKernel(Kernel):
     name = "memory"; kind = "universal"; cadence_sec = 30; codex_slug = "unay"
-    async def act(self, d):
-        return {"did_work": True, "summary": "consolidated recent receipts into Unay, computed embeddings, pruned stale"}
 
 
 class ReplayKernel(Kernel):
     name = "replay"; kind = "universal"; cadence_sec = 300; codex_slug = "ayni-event-log"
-    async def act(self, d):
-        return {"did_work": True, "summary": "replayed last hour AYNI events, computed coherence metrics"}
 
 
 class McpKernel(Kernel):
     name = "mcp"; kind = "universal"; cadence_sec = 60; codex_slug = "hatun-mcp-registry"
-    async def act(self, d):
-        return {"did_work": True, "summary": "tracked Hatun-MCP tool usage, exposed /tools/list"}
 
 
 class WireKernel(Kernel):
     name = "wire"; kind = "universal"; cadence_sec = 30; codex_slug = "traceparent-log"
-    async def act(self, d):
-        return {"did_work": True, "summary": "observed Wire D/E/F/G/H/I/J/K traffic, detected breaks"}
 
 
 UNIVERSAL = [SignKernel, GateKernel, ChainKernel, MemoryKernel, ReplayKernel, McpKernel, WireKernel]
 
 
 # ────────────────────────── vertical kernels per chakra ──────────────────────────
-def _vertical(name_, slug_, summary_, cadence=60):
+def _vertical(name_, slug_, cadence=60):
     class _V(Kernel):
         name = name_; kind = "vertical"; cadence_sec = cadence; codex_slug = slug_
-        async def act(self, d):
-            return {"did_work": True, "summary": summary_}
     _V.__name__ = f"Vertical_{name_}"
     return _V
 
 
 VERTICALS: dict[str, list] = {
     "a11oy": [
-        _vertical("route", "llm-router", "observed LLM-router selections; tracked model/cost/latency"),
-        _vertical("orchestrate", "puriq-host-plan", "observed PURIQ host orchestration plans; tracked step success"),
+        _vertical("route", "llm-router"),
+        _vertical("orchestrate", "puriq-host-plan"),
     ],
     "killinchu": [
-        _vertical("geofence", "geofence-events", "observed geofence crossings; scored containment"),
-        _vertical("mission-plan", "mission-plan", "observed mission-plan requests; tracked plan validity"),
+        _vertical("geofence", "geofence-events"),
+        _vertical("mission-plan", "mission-plan"),
     ],
     "rosie": [
-        _vertical("aide", "aide-actions", "observed companion commands; tracked intent resolution"),
-        _vertical("recall-personal", "personal-recall", "observed recall queries; tracked hit-rate"),
+        _vertical("aide", "aide-actions"),
+        _vertical("recall-personal", "personal-recall"),
     ],
     "sentra": [
-        _vertical("filter", "filter-decisions", "observed content-filter passes/blocks"),
-        _vertical("threat-score", "threat-score", "observed threat signals; computed rolling threat score"),
+        _vertical("filter", "filter-decisions"),
+        _vertical("threat-score", "threat-score"),
     ],
     "amaru": [
-        _vertical("cortex-ledger", "cortex-ledger", "observed memory writes; maintained double-entry cortex ledger"),
-        _vertical("axis-track", "yuyay-13-axes", "observed yuyay-13 axis values; tracked drift"),
+        _vertical("cortex-ledger", "cortex-ledger"),
+        _vertical("axis-track", "yuyay-13-axes"),
     ],
 }
 
