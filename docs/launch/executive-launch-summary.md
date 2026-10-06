@@ -1,5 +1,7 @@
 # SZL Holdings — Executive Launch Readiness Summary (Final)
 
+> **HISTORICAL / SUPERSEDED:** This April 2026 planning artifact is not current readiness authority. Use the [October 2026 estate pre-publish audit](../../audit/SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md) for current status and launch decisions.
+
 **Date:** 2026-04-16 · **Audit scope:** Phases 0–13 (complete)
 **Prepared by:** Engineering team — full operational audit  
 **Audience:** Stephen Lutar (Founder), board advisors, Series A technical reviewers  

@@ -1,5 +1,7 @@
 # Launch Analytics Plan — SZL Holdings Platform
 
+> **HISTORICAL / SUPERSEDED:** This April 2026 planning artifact is not current readiness authority. Use the [October 2026 estate pre-publish audit](../../audit/SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md) for current status and launch decisions.
+
 **Version:** 1.0 | **Date:** April 2026 | **Audience:** Founder, product, engineering, growth
 
 **Related:** [ANALYTICS-EVENTS.md](../architecture/analytics-events.md) · [NORTH_STAR_METRICS.md](../sales/north-star-metrics.md) · [EXECUTIVE_SCORECARD.md](../sales/executive-scorecard.md) · [CUSTOMER_HEALTH_MODEL.md](../sales/customer-health-model.md)
