@@ -134,11 +134,26 @@ jobs:
     steps:
       - name: Enforce a11y gate
         run: |
+          result="${{ needs.a11y-axe.result }}"
+
           echo "Accessibility gate — WCAG 2.1 AA (wcag2a, wcag2aa, wcag21a, wcag21aa)"
           echo "Tool: @axe-core/playwright — 6 CI-scanned web artifacts."
           echo "See audit/a11y/findings.md for the findings register."
-          if [[ "${{ needs.a11y-axe.result }}" == "failure" ]]; then
-            echo "::error::One or more axe scans failed — zero critical/serious violations required."
-            exit 1
-          fi
-          echo "All axe scans passed."
+
+          case "$result" in
+            success)
+              echo "All axe matrix jobs completed and passed."
+              ;;
+            failure)
+              echo "::error::One or more axe matrix jobs failed. Inspect the per-artifact install, build, serve, browser, and scan steps."
+              exit 1
+              ;;
+            cancelled|skipped)
+              echo "::error::Accessibility evidence is incomplete because the axe matrix was $result."
+              exit 1
+              ;;
+            *)
+              echo "::error::Unexpected axe matrix result: $result."
+              exit 1
+              ;;
+          esac
