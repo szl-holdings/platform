@@ -243,6 +243,8 @@ test('keeps canonical Series A proof intact and adds a bounded 75-view local mat
   assert.match(captureController, /final_scroll_top/);
   assert.match(captureController, /The boot marker does not establish lazy-route readiness/);
   assert.match(captureController, /mains\.length === 1/);
+  assert.match(captureController, /PLAYWRIGHT_CHROMIUM_PATH/);
+  assert.match(captureController, /executable_source: chromiumExecutablePath/);
   assert.match(matrixWrapper, /scripts\/qa\/capture-series-a-product-matrix-proof\.mjs/);
   assert.match(matrixWrapper, /LOCAL_NON_AUTHORITATIVE/);
   assert.match(matrixWrapper, /SOURCE_IDENTITY_PATH = '\/a11oy\/__source-identity\.json'/);
