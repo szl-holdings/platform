@@ -768,6 +768,17 @@ def register(
         if wake_receipt_token is not None
         else os.environ.get("SZL_WAKE_RECEIPT_TOKEN")
     )
+    if (
+        admin_token is not None
+        and wake_receipt_token is not None
+        and hmac.compare_digest(
+            admin_token.encode("ascii"), wake_receipt_token.encode("ascii")
+        )
+    ):
+        # The two capabilities must not collapse to one bearer credential. Make
+        # both mutation surfaces unavailable rather than silently sharing power.
+        admin_token = None
+        wake_receipt_token = None
     base = f"/api/{organ}/v3/kernels"
 
     def _admin_authentication_error(request):
