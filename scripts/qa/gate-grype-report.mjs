@@ -600,10 +600,32 @@ async function main() {
     });
     writeFileSync(DEFAULT_OUTPUT, renderGrypeGateReport(normalized, evaluation));
     process.stdout.write(`${evaluation.passed ? 'PASS' : 'FAIL'}: ${evaluation.reason}\n`);
-    if (!evaluation.passed) process.exitCode = 1;
+    if (!evaluation.passed) {
+      const details = [
+        evaluation.reason,
+        ...evaluation.errors,
+        ...evaluation.findings
+          .filter((finding) => finding.disposition !== 'VERIFIED LOCAL PATCH')
+          .map(
+            (finding) =>
+              `${finding.packageName}@${finding.packageVersion}: ${finding.vulnerabilityId}: ${finding.reason}`,
+          ),
+      ].join('\n');
+      if (process.env.GITHUB_ACTIONS === 'true') {
+        process.stderr.write(
+          `::error title=Grype admission failure::${details.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')}\n`,
+        );
+      }
+      process.exitCode = 1;
+    }
   } catch (error) {
     writeFileSync(DEFAULT_OUTPUT, renderFatalReport(error));
     process.stderr.write(`FAIL: ${error.message}\n`);
+    if (process.env.GITHUB_ACTIONS === 'true') {
+      process.stderr.write(
+        `::error title=Grype evidence failure::${String(error.message).replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')}\n`,
+      );
+    }
     process.exitCode = 1;
   }
 }
