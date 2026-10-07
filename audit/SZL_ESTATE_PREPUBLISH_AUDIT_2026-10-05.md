@@ -58,10 +58,13 @@ security, or customer-use claim.
 | Estate | Current disposition | Basis |
 | --- | --- | --- |
 | GitHub `szl-holdings` | **CURRENT METADATA + PLATFORM RULESET / HOLD** | The cursor-complete 2026-10-06 metadata receipt observed 140 unique repositories (128 public, 12 private); a read-only authenticated recount on 2026-10-07 matched those totals and the 111 active/29 archived split. An authenticated read also observed active Platform ruleset `22286649` and its five current required contexts. Hosted conclusions, organization-wide rule details, alerts, packages, and exact-head qualification remain unobserved; local workflow review found material release-integrity gaps. |
-| Hugging Face `SZLHOLDINGS` | **DATED PUBLIC CATALOG SNAPSHOT / HOLD** | The repository-controlled `audit/evidence/huggingface-public-catalog.snapshot.json` records 47 models, 37 datasets, and 35 Spaces at `2026-10-07T11:48:26.618Z`, with exact IDs and its pagination/completeness rule. Collections, private completeness, Kernels, runtime behavior, publication authority, execution, quality, training rights, and readiness remain unobserved or unavailable. |
+| Hugging Face `SZLHOLDINGS` | **DATED PUBLIC CATALOG SNAPSHOT / HOLD** | The repository-controlled `audit/evidence/huggingface-public-catalog.snapshot.json` records 47 models, 37 datasets, and 35 Spaces at the observation timestamp below, with exact IDs and its pagination/completeness rule. Collections, private completeness, Kernels, runtime behavior, publication authority, execution, quality, training rights, and readiness remain unobserved or unavailable. |
 | `a-11-oy.com` | **CURRENT BOUNDED ROUTE CONTRACTS / HOLD** | A 2026-10-07 full bounded freshness sweep passed after reviewed contracts were aligned to the intentional same-origin `/killinchu` status page and `/command/` modeled page. Killinchu's separate build identity is source-bound, while readiness explicitly reports an EPHEMERAL process-memory canonical ledger with `production_ready=false`; route success is not aggregate production readiness. |
 | `a11oy.net` | **CURRENT BOUNDED ROUTE CONTRACTS / HOLD** | The same full sweep validated the intentional HTTP 301 `/chat` and `/code` trailing-slash documentation gateways and the exact lowercase webmanifest identity. Passing these bounded transactions is not whole-site, application-runtime, or backend health. |
 | Python and web architecture | **PARTIAL / MIGRATE BY CONTRACT** | A dated tracked-Python syntax sweep passed on the kernel successor, but the release candidate has since changed and the Python dependency/test/package boundary is still fragmented. The browser product is React/TypeScript and should not be cosmetically rewritten in Python. |
+
+The catalog observation timestamp is `2026-10-07T11:48:26.618Z`; this retained
+receipt is not a new live probe.
 
 The local checks and pinned tooling support a repeatable development-environment
 candidate. They do not yet support the statement that the whole estate is
@@ -97,7 +100,9 @@ This is source remediation, not a hosted-deployment receipt.
 At pre-patch source `b758bcfbc177236876c524e27cb2e765c87e00d7`, the
 warm-controller workflow runs on a ten-minute schedule, manual dispatch,
 selected pushes, and pull requests at
-`.github/workflows/warm-flagships.yml:8-23`. Its `wake-receipt` job is excluded
+the source path `.github/workflows/warm-flagships.yml`
+(lines 8–23).
+Its `wake-receipt` job is excluded
 only for pull requests and sends an unauthenticated JSON `POST` to a public-form
 Hugging Face Space URL:
 
@@ -109,7 +114,9 @@ Hugging Face Space URL:
   `packages/szl-kernels/deploy/szl_kernels_organ.py:488-499` registers the
   handler, parses arbitrary JSON, and appends it to `k.codex`.
 - At that same source,
-  `packages/szl-kernels/deploy/szl_kernels_organ.py:126-144` identifies that
+  `packages/szl-kernels/deploy/szl_kernels_organ.py`
+  (lines 126–144),
+  identifies that
   Codex as a hash-linked SQLite store.
 - At that same source, the module has an admin-token helper at
   `packages/szl-kernels/deploy/szl_kernels_organ.py:469-473`, but the
@@ -418,8 +425,10 @@ feature completeness, or whole-host health.
 4. Reconcile generic health, API health, readiness, build-info, source revision,
    signer state, database state, and receipt-chain state. Any contradiction
    keeps the aggregate blocked.
-5. Update `config/public-surfaces.json` only from the completed observation and
+5. Update the public-route registry only from the completed observation and
    rerun both structural and freshness gates.
+
+The registry path for that final step is `config/public-surfaces.json`.
 
 ## Python, frontend, and backend audit
 

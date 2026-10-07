@@ -74,6 +74,9 @@ an all-Python frontend or completed migration of backend authority to Python.
 
 ## Test results recorded so far
 
+The catalog checkpoint below uses observation timestamp
+`2026-10-07T11:48:26.618Z` from the retained snapshot, not a new live probe.
+
 | Evidence | Result | Boundary |
 | --- | --- | --- |
 | `pnpm install --offline --frozen-lockfile` | PASS (delegated toolchain lane) | Candidate checkpoint; tree continued changing |
@@ -84,7 +87,7 @@ an all-Python frontend or completed migration of backend authority to Python.
 | `node --experimental-vm-modules scripts/docs/check-docs-sync.js` | PASS with a diagnostic about absent legacy GraphQL path | Exit 0; not a runtime check |
 | `corepack pnpm run docs:claims-check` | PASS, 26 claims | Rerun after the truth edits; only the validator's enumerated claims |
 | `node scripts/audit/validate-overclaim-ledger.js` | PASS | Ledger binding only |
-| `node tools/hf-catalog/catalog.mjs --check` | PASS: 47 models, 37 datasets, 35 Spaces | Structural validation of the `2026-10-07T11:48:26.618Z` public snapshot; no live/private/runtime claim |
+| `node tools/hf-catalog/catalog.mjs --check` | PASS: 47 models, 37 datasets, 35 Spaces | Structural validation of the dated public snapshot identified above; no live/private/runtime claim |
 | `security/vuln-report.md` generated checkpoint | PASS at `2026-10-07T11:26:02.054Z`: 0 Critical, 2 High (both exact local-patch mitigated), 2 Moderate, 0 Low | Frozen-manifest local artifact; detailed `sprintf-js` Moderate has no patched upstream version, one Moderate is aggregate-only, exact-head hosted runs remain unobserved |
 | `security/license-report.md` generated checkpoint | PASS at `2026-10-07T11:26:18.409Z`: 1,726 unique package/version pairs, 11 REVIEW, 6 CHECK, 17 exact admissions, 0 parse errors, 0 violations | Engineering-policy evidence only; exact-head hosted gate remains unobserved |
 | `security/sbom-latest.json` generated checkpoint | OBSERVED: 1,989 components; SHA-256 `4ddcac69665a80ef9e7ebd53606ceb76c48fbc55b7d72bd09fd9a3b38736f198` | Inventory-only frozen-manifest local artifact; exact-head schema/provenance rerun and hosted binding remain pending |
