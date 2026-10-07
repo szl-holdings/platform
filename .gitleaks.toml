@@ -25,6 +25,18 @@ title = "SZL Holdings — Secret Scanning Policy"
 [extend]
 useDefault = true
 
+# The tokenizer's public Hugging Face commit SHA is not credential material.
+# Keep upstream generic-api-key detection unchanged; exempt only this exact
+# assignment in this exact file (including historical versions in PR diffs).
+[[rules]]
+  id = "generic-api-key"
+  [rules.allowlist]
+    description = "Exact public Xenova/all-MiniLM-L6-v2 tokenizer revision"
+    condition = "AND"
+    regexTarget = "line"
+    paths = ['''^workers/alloy-vector-worker/src/tokenizer\.ts$''']
+    regexes = ['''^const DEFAULT_TOKENIZER_REVISION = '751bff37182d3f1213fa05d7196b954e230abad9';$''']
+
 # ── Global allowlist ──────────────────────────────────────────────────────────
 # Entries here suppress matches across ALL rules.
 # Policy: prefer targeted regex suppressions over broad path/directory skips.
