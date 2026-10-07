@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { deployProduction } from './deploy-production.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const PNPM = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
@@ -567,6 +568,17 @@ async function assertProductionExportsUseDist() {
 }
 
 async function assertContainerReadinessContracts() {
+  for (const service of SERVICES) {
+    const dockerfile = await readFile(
+      join(REPO_ROOT, dirname(service.source), '..', 'Dockerfile'),
+      'utf8',
+    );
+    assert.match(
+      dockerfile,
+      /RUN --mount=type=cache,id=pnpm-store,target=\/root\/\.local\/share\/pnpm\/store \\\n\s+node scripts\/ci\/deploy-production\.mjs/,
+    );
+    assert.doesNotMatch(dockerfile, /deploy[^\n]*--legacy/);
+  }
   const orchestratorDockerfile = await readFile(
     join(REPO_ROOT, 'apps/alloy-ingestion-orchestrator/Dockerfile'),
     'utf8',
@@ -594,11 +606,7 @@ async function deployAndProbeServices(scratch, embeddingContractServer) {
   const deployed = [];
   for (const service of SERVICES) {
     const deployRoot = join(scratch, service.name);
-    run(
-      PNPM,
-      ['--filter', service.packageName, 'deploy', '--prod', '--legacy', deployRoot],
-      `${service.name} production deploy`,
-    );
+    await deployProduction(service.packageName, deployRoot);
     await access(join(deployRoot, 'package.json'));
     await access(join(deployRoot, service.compiled));
     deployed.push({ ...service, deployRoot });

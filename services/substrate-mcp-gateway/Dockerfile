@@ -40,7 +40,8 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --offline --ignore-scripts --prod=false
 # tsc --build compiles this package and its referenced workspace projects.
 RUN pnpm --filter @szl/substrate-mcp-gateway exec tsc --build --force tsconfig.json
-RUN pnpm --filter @szl/substrate-mcp-gateway deploy --prod --legacy /app/deploy
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    node scripts/ci/deploy-production.mjs @szl/substrate-mcp-gateway /app/deploy
 
 # ─── Stage 3: runtime (minimal) ──────────────────────────────────────────────
 FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS runtime

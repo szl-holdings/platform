@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { deployProduction } from './deploy-production.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const PNPM = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
@@ -552,6 +553,11 @@ async function assertContainerBuildContracts() {
       dockerfile,
       /pnpm install --frozen-lockfile --offline --ignore-scripts --prod=false/,
     );
+    assert.match(
+      dockerfile,
+      /RUN --mount=type=cache,id=pnpm-store,target=\/root\/\.local\/share\/pnpm\/store \\\n\s+node scripts\/ci\/deploy-production\.mjs/,
+    );
+    assert.doesNotMatch(dockerfile, /deploy[^\n]*--legacy/);
   }
   for (const file of [
     'services/alloy-fabric-api/Dockerfile',
@@ -1242,20 +1248,7 @@ async function deployServices(scratch) {
   const deployed = [];
   for (const service of SERVICES) {
     const deployRoot = join(scratch, service.name);
-    run(
-      PNPM,
-      [
-        '--ignore-scripts',
-        '--offline',
-        '--filter',
-        service.packageName,
-        'deploy',
-        '--prod',
-        '--legacy',
-        deployRoot,
-      ],
-      `${service.name} production deploy`,
-    );
+    await deployProduction(service.packageName, deployRoot);
     await access(join(deployRoot, service.compiled));
     deployed.push({ ...service, deployRoot });
   }

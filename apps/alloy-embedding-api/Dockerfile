@@ -32,7 +32,8 @@ ENV NODE_ENV=production
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --offline --ignore-scripts --prod=false
 RUN pnpm turbo run build --filter=@workspace/alloy-embedding-api
-RUN pnpm --filter @workspace/alloy-embedding-api deploy --prod --legacy /app/deploy
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    node scripts/ci/deploy-production.mjs @workspace/alloy-embedding-api /app/deploy
 
 # ─── Stage 3: runtime (minimal) ──────────────────────────────────────────────
 FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS runtime
