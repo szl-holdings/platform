@@ -210,6 +210,74 @@ describe('EncryptedLocalAtelierStateStore', () => {
     expect(removed).toBe(true);
   });
 
+  it('rejects unrelated ctime changes during authenticated readback', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const first = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await first.ready();
+
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const temporaryPath = `${markerPath}.unrelated.tmp`;
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    let changed = false;
+    vi.mocked(open).mockImplementation(async (path, flags, mode) => {
+      const handle = await actual.open(path, flags, mode);
+      if (path === markerPath) {
+        const read = handle.read.bind(handle);
+        vi.spyOn(handle, 'read').mockImplementation(async (...args) => {
+          const result = await read(...args);
+          if (!changed) {
+            changed = true;
+            await new Promise((resolve) => setTimeout(resolve, 20));
+            await actual.link(markerPath, temporaryPath);
+            await actual.unlink(temporaryPath);
+          }
+          return result;
+        });
+      }
+      return handle;
+    });
+
+    const second = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await expect(second.ready()).rejects.toMatchObject({ code: 'ATELIER_CAPSULE_INTEGRITY' });
+    expect(changed).toBe(true);
+  });
+
+  it('rejects a bad authentication tag despite completed hard-link retirement', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const first = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await first.ready();
+
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const marker = JSON.parse(await readFile(markerPath, 'utf8')) as { verifier: string };
+    await writeFile(markerPath, `${JSON.stringify({ ...marker, verifier: '0'.repeat(64) })}\n`);
+    const temporaryPath = `${markerPath}.publisher.tmp`;
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    await actual.link(markerPath, temporaryPath);
+    let retired = false;
+    vi.mocked(open).mockImplementation(async (path, flags, mode) => {
+      const handle = await actual.open(path, flags, mode);
+      if (path === markerPath) {
+        const read = handle.read.bind(handle);
+        vi.spyOn(handle, 'read').mockImplementation(async (...args) => {
+          const result = await read(...args);
+          if (!retired) {
+            retired = true;
+            await new Promise((resolve) => setTimeout(resolve, 20));
+            await actual.unlink(temporaryPath);
+          }
+          return result;
+        });
+      }
+      return handle;
+    });
+
+    const second = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await expect(second.ready()).rejects.toThrow('Continuity index authentication failed.');
+    expect(retired).toBe(true);
+  });
+
   it('persists encrypted full replay state and reopens a verifiable session', async () => {
     const rootDirectory = await tempRoot();
     const masterKey = randomBytes(32);
