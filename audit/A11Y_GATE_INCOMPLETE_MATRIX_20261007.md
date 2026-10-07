@@ -20,7 +20,7 @@ Require the `A11y Gate` fan-in job to pass only when every axe matrix job comple
 
 | Command | Exit | Result |
 |---|---:|---|
-| `node --test scripts/ci/lighthouse-workflow.test.mjs` | 0 | 5/5 workflow contract tests pass |
+| `node --test scripts/ci/lighthouse-workflow.test.mjs` | 0 | Five workflow contract tests pass |
 | `node -e` YAML parse using repository `yaml` package | 0 | `a11y-gate` job parses and exists |
 | Extracted gate condition under Git Bash | 0 harness | `success` exits 0; `failure`, `cancelled`, `skipped`, and empty exit 1 |
 | `git diff --check` | 0 | No whitespace errors |
