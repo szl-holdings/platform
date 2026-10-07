@@ -397,7 +397,7 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "MEASURED: a bounded exact JSON body read reported OBSERVED Killinchu source 13477c429f5742cdc718a6294a80d00c7e8dc634 and GitHub OIDC deployment-release reference attestation 53547813 for manifest sha256:915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c. The endpoint and release reference do not assert aggregate health or authorization."
+      "note": "MEASURED: a bounded exact JSON body read reported OBSERVED Killinchu source 33e54ffed4723e5dd3d0dcdf69a6052769e69de3 and GitHub OIDC deployment-release reference attestation 53653748 for manifest sha256:048d19673af818122a068f0fcc0027885f2b04eb8c8ba4626e3407986c7346eb. The endpoint and release reference do not assert aggregate health or authorization."
     },
     {
       "id": "killinchu-public-console",

@@ -1,25 +1,26 @@
 # Public-surface exact-declaration successor — Proof Packet
 
-- **workcell_id:** `WC-PLATFORM-SURFACE-SUCCESSOR-20261005`
+- **workcell_id:** `WC-PLATFORM-SURFACE-SUCCESSOR-20261007`
 - **task_reference:** append-only successor to
   `PLATFORM_OWNER_SOURCE_SURFACE_ALIGNMENT_2026-10-03_PROOF.md`
 - **agent:** Codex BuildWarden repair lane
-- **objective:** Replace presentation-dependent public-evidence checks with exact owner-declared
-  metadata, refresh the public-surface registry to current protected owner sources and bounded live
-  observations, and preserve the blocking security workflow and exact `fflate@0.8.3` guard.
-- **plan_summary:** Admit protected owner source first; publish only through the existing governed
-  A11oy workflow; re-observe every approved public target; require one exact
-  `szl-evidence-boundary` declaration in the explicit document head; refresh the exact Killinchu
-  API contracts; regenerate deterministic evidence; and run focused live, freshness, truth,
-  claim, dependency-security, formatting, TypeScript, and diff gates.
-- **patch_summary:** Owner-backed HTML verification now requires exactly one surface-specific
-  declaration in the explicit document head alongside the exact title and canonical URL. Missing,
-  duplicate, commented, misplaced, or changed declarations fail closed. Body text, CSS, computed
-  style, and rendered visibility are deliberately outside this source-declaration contract. The
-  registry records the restored A11oy origin, current A11oy.net static source witness, and current
-  Killinchu endpoint contracts without converting reachability into authorization or production
-  readiness. Generated evidence and the known-gaps register were refreshed from the same reviewed
-  registry.
+- **objective:** Refresh the exact protected A11oy source/runtime boundary, repair current truth
+  drift, upgrade every dependency with an available High-severity remediation, retain both
+  no-release High advisories as explicit blockers, and preserve the blocking security workflow and
+  exact `fflate@0.8.3` guard.
+- **plan_summary:** Re-read Platform and A11oy doctrine; preserve the existing PR branch and its
+  owner-backed public-surface verifier; refresh protected-source, publisher, and bounded runtime
+  evidence; review the six dependency overrides and regenerated lockfile; regenerate and validate
+  `SOURCE_OF_TRUTH`; retain the two no-fix High advisories without suppression; prove the fflate
+  guard is unchanged; then run focused live, freshness, truth, claim, security, and diff gates
+  against the exact current Platform main base.
+- **patch_summary:** The existing owner-backed HTML verifier and public-surface schema remain
+  intact. The successor pins six patched dependency versions, regenerates the frozen lockfile,
+  refreshes `SOURCE_OF_TRUTH` from admitted local and remote sources, and refreshes the exact
+  Killinchu source/manifest/attestation evidence binding plus its deterministic public-surface
+  artifact and fixtures. This packet and the known-gaps register record the exact A11oy deployment
+  and unresolved security boundary. It does not add an advisory exception, audit waiver, alternate
+  publisher, deployment authority, or production-readiness claim.
 - **screenshot_refs:** `N/A` — no owning UI layout, style, interaction, or rendered presentation
   changed in this Platform successor. The owner changes are metadata declarations verified by
   bounded source and live-body checks.
@@ -32,13 +33,14 @@
   timeout/retry/concurrency limits, blocking security workflow, focused negative fixtures, and
   exact dependency guard remain active. No secret, credential, permission, writer, deployment
   authority, or security threshold was added or relaxed.
-- **known_gaps_update:** `docs/operations/known-gaps.md` rev 33 records the restored A11oy owner
-  deployment, exact static declarations, current A11oy.net source witness and edge-security gaps,
-  current Killinchu release identity, and Killinchu's non-durable readiness boundary.
+- **known_gaps_update:** `docs/operations/known-gaps.md` rev 34 records the current A11oy protected
+  source and deployed runtime, the terminal readiness-verdict failure, the six patched dependency
+  upgrades, the two remaining no-release High blockers, the exact fflate guard, and the regenerated
+  truth snapshot.
 - **proof_level:** `4` — local source, focused contract, live-route, claim, and security evidence;
   Platform hosted exact-candidate checks, review, protected merge, and an independent witness remain
   separate evidence states.
-- **recorded_at:** `2026-10-07T16:57:50Z`
+- **recorded_at:** `2026-10-07T17:55:27Z`
 - **recorded_by:** Codex BuildWarden repair lane
 
 ## Exact source and observation binding
@@ -47,37 +49,78 @@
 
 - protected base and refreshed merge base:
   `f2f8df6f89056e9104587674ccec0855dd5b177a`
-- GitHub-verified signed branch head before this successor:
-  `eec8c76c7b3a676fb9d68e11010d44f35dcf254e`
+- GitHub-verified signed branch head before this dependency/truth successor:
+  `88a7c8d1abe079e48f4ff9d3265b36896e79d747`
 - public-surface observation:
   `2026-10-07T16:57:50Z`
+- regenerated truth observation:
+  `2026-10-07T17:19:03.621Z`
 - candidate commit identity: established by the signed commit and hosted pull-request metadata after
   this packet is written; this document does not self-assert its containing commit SHA.
 
 ### A11oy owner source and Hugging Face runtime
 
 - current protected main and GitHub-verified source:
-  `78d08ceb891e476a0a89d3f687add8c0c96060f5`
-- current source pull request: `szl-holdings/a11oy#2638`
-- boundary-declaration squash merge and GitHub-verified source:
-  `b64f14462413b7f80e00947fe1864122344aae5c`
-- boundary-declaration pull request: `szl-holdings/a11oy#2634`
-- governed deployment run for the currently served revision: `37653882494`
-- exact live build-info source: `b64f14462413b7f80e00947fe1864122344aae5c`
+  `75e2977def8faabd16173de74a56055542cc9454`
+- current source pull request: `szl-holdings/a11oy#2637`
+- governed deployment run for the currently served revision: `37660374147`
+- exact Hugging Face Space commit: `1ceb75cd127638e49579615ba0f5db522ec18a29`
+- exact live build-info source: `75e2977def8faabd16173de74a56055542cc9454`
 - build-info boundary: `receipt_minted: false`
 - readiness and product-origin transport: HTTP 200 during the bounded observation
+- readiness snapshot at `2026-10-07T17:46:48Z`: `application_ready: true`, `stale: false`,
+  provider stage `RUNNING`, live Space SHA matching the deployed Space commit
+- readiness repository and release reads: `unreachable`; parity: `unknown`
 - Killinchu page declaration:
   `szl.public-surface-boundary/v1;surface=killinchu-console;effectors=SIMULATED;authorization=UNAVAILABLE`
 - command page declaration:
   `szl.public-surface-boundary/v1;surface=a11oy-command;origin=MODELED;energy=UNAVAILABLE;signer=UNAVAILABLE`
 
-The later protected source run `37655406967` admitted exact main but left deployment closed and
-skipped every provider publication and post-deploy proof job; the served runtime therefore remains
-the earlier `b64f14462413b7f80e00947fe1864122344aae5c` revision. Run `37653882494` deployed that exact
-revision, but its terminal readiness-verdict job failed because the immutable probe observed one
-stale readiness snapshot. The exact runtime binding and route responses establish the observed
-deployment and static declarations only. They do not establish authorization, durable storage,
-complete product readiness, certification, or a signed write receipt.
+Run `37660374147` admitted exact protected main, published the Dockerfile-derived payload, bound the
+runtime source, and passed its deployment-attestation and runtime-configuration jobs. The run still
+ended in failure: `Validate the source-bound verdict without a Space write` rejected the probe with
+`probe summary contains unavailable required sources`. Its downstream strict parity, exact live
+proof, and final protected-main reauthorization jobs were skipped. The current source/runtime
+match, `RUNNING` provider stage, and HTTP 200 responses establish the observed deployment only. They
+do not establish a fully admitted release, authorization, certification, or a signed write receipt.
+
+### Dependency-security successor
+
+The frozen lockfile now resolves the six available High-severity remediations selected by the
+reviewed workspace overrides:
+
+| Package | Prior resolution | Successor resolution |
+|---|---:|---:|
+| `@modelcontextprotocol/sdk` | `1.29.0` | `1.31.0` |
+| `source-map-js` | `1.2.1` | `1.2.2` |
+| `proxy-addr` | `2.0.7` | `2.0.8` |
+| `compression` | `1.8.1` | `1.8.2` |
+| `shell-quote` | `1.9.0` | `1.11.0` |
+| `sharp` | `0.35.4` | `0.35.5` |
+
+A fresh `pnpm audit --json --audit-level=high` returned exit `1` with `2` High, `0` Critical,
+`12` Moderate, and `2` Low findings. The remaining High findings are explicitly **BLOCKED**:
+
+- `node-forge@1.4.0` — `GHSA-86w9-cpqp-85rv`; the reviewed advisory affects `<=1.4.0` and lists no
+  patched release.
+- `braces@3.0.3` — `GHSA-vfj7-8cjw-p6xm`; the reviewed advisory affects `<=3.0.3` and lists no
+  patched release.
+
+No advisory is muted, ignored, waived, assigned a fabricated version, or hidden behind a Git source
+that the npm-version scanner cannot classify. The blocking security gate is expected to remain red
+until compatible reviewed releases remove both resolutions.
+
+The central `fflate` override remains exactly `0.8.3`. The fail-closed resolution script, its
+positive and negative fixtures, and the blocking `security.yml` wiring are byte-identical to
+protected Platform main. The dependency successor changes no fflate implementation or threshold.
+
+### Regenerated source of truth
+
+`artifacts/SOURCE_OF_TRUTH.json` was regenerated at `2026-10-07T17:19:03.621Z` from the admitted
+local registry and remote sources. The reviewed drift repair changes the measured customer-facing
+surface count from `2` to `1` and refreshes the Hugging Face snapshot to `47` models, `37` datasets,
+and `35` Spaces. These values are bounded registry/provider observations, not deployment,
+authorization, availability, or model-qualification claims.
 
 ### A11oy.net owner source and static witness
 
@@ -105,10 +148,10 @@ control-plane gaps.
 ### Killinchu owner source and scoped runtime readback
 
 - GitHub-verified owner source and exact live build-info source:
-  `13477c429f5742cdc718a6294a80d00c7e8dc634`
+  `33e54ffed4723e5dd3d0dcdf69a6052769e69de3`
 - deployment-manifest SHA-256:
-  `915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c`
-- deployment-release reference attestation: `53547813`
+  `048d19673af818122a068f0fcc0027885f2b04eb8c8ba4626e3407986c7346eb`
+- deployment-release reference attestation: `53653748`
 - build-info boundary: `receipt_minted_on_request: false`
 - readiness boundary: canonical receipt ledger `EPHEMERAL`, `PROCESS_MEMORY` scoped,
   `production_ready: false`; backend provider persistence `UNKNOWN`
@@ -120,9 +163,10 @@ storage, aggregate service health, authorization, or deployment by this Platform
 
 - `corepack pnpm install --filter . --frozen-lockfile --ignore-scripts` — **MEASURED PASS** after a
   free-space check; only the root verification toolchain was linked from the lockfile.
-- `corepack pnpm surfaces:test` — **MEASURED PASS** after correcting the stale paused-state summary
-  fixture; the focused positive and negative cases passed.
-- `corepack pnpm truth:test` — **MEASURED PASS**; the truth and public-surface contract cases passed.
+- `corepack pnpm surfaces:test` — **MEASURED PASS**; all 41 focused positive and negative cases
+  passed after refreshing only the exact Killinchu evidence fixtures.
+- `corepack pnpm truth:test` — **MEASURED PASS**; all 133 truth and public-surface contract cases
+  passed.
 - `corepack pnpm claims:validate` — **MEASURED PASS**; truth validation, allowlist coverage, and the
   contract suite passed.
 - `corepack pnpm surfaces:generate -- --check` — **MEASURED PASS**; generated evidence matches the
@@ -133,18 +177,28 @@ storage, aggregate service health, authorization, or deployment by this Platform
   the fresh-observation requirement enabled.
 - `TRUTH_ALLOWLIST_BASE_SHA=f2f8df6f89056e9104587674ccec0855dd5b177a corepack pnpm
   claims:drift` — **MEASURED PASS**; the protected base admitted no unsupported claim drift.
+- `corepack pnpm truth:generate -- --check --verify-remote` — **MEASURED PASS**; the regenerated
+  truth snapshot matched its admitted local and remote inputs.
 - `node --test scripts/qa/check-fflate-resolution.test.mjs` — **MEASURED PASS**; the focused positive
-  and negative cases passed, including blocking workflow wiring.
+  and negative cases passed 4/4, including blocking workflow wiring.
 - `node scripts/qa/check-fflate-resolution.mjs` — **MEASURED PASS**; all observed dependency edges
   converged on exact `fflate@0.8.3`.
 - `git diff --exit-code origin/main -- scripts/qa/check-fflate-resolution.mjs
-  scripts/qa/check-fflate-resolution.test.mjs .github/workflows/security.yml pnpm-workspace.yaml` —
-  **MEASURED PASS**; the security implementation, exact guard, negative fixtures, blocking workflow,
-  and dependency override are unchanged from current main.
+  scripts/qa/check-fflate-resolution.test.mjs .github/workflows/security.yml` — **MEASURED PASS**;
+  the security implementation, exact guard, negative fixtures, and blocking workflow are unchanged
+  from current main. `Select-String -LiteralPath pnpm-workspace.yaml -Pattern
+  '^\s+fflate:\s+0\.8\.3$'` separately confirmed the exact central override at line 92.
+- `node --test scripts/qa/generate-vuln-report.test.js` — **MEASURED PASS**; all 6 report-parser
+  contract cases passed.
+- `corepack pnpm audit --json --audit-level=high` — **BLOCKED** with expected exit `1`: `2` High,
+  `0` Critical, `12` Moderate, and `2` Low. The only High findings are `node-forge@1.4.0`
+  (`GHSA-86w9-cpqp-85rv`) and `braces@3.0.3` (`GHSA-vfj7-8cjw-p6xm`); the registry reports no
+  patched release for either. No suppression or waiver was added.
 - `corepack pnpm exec biome check tools/truth/public-surfaces.ts
-  tools/truth/public-surfaces.test.ts config/public-surfaces.json artifacts/PUBLIC_SURFACES.json` —
-  **MEASURED PASS** after formatter-only corrections. The existing literal GitHub-expression test
-  warnings remain warnings, not failures.
+  tools/truth/public-surfaces.test.ts config/public-surfaces.json artifacts/PUBLIC_SURFACES.json
+  artifacts/SOURCE_OF_TRUTH.json audit/PLATFORM_PUBLIC_SURFACE_SUCCESSOR_2026-10-07_PROOF.md
+  docs/operations/known-gaps.md pnpm-workspace.yaml` — **MEASURED PASS** with no fixes applied. The
+  two existing literal GitHub-expression test warnings remain warnings, not failures.
 - `corepack pnpm exec tsc --ignoreConfig --noEmit --strict --skipLibCheck --target ESNext
   --module ESNext --moduleResolution bundler --lib es2022,dom
   tools/truth/public-surfaces.ts` — **MEASURED PASS**.

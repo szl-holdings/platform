@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-07 (rev 33 — protected owner deployment and declared evidence boundaries)
+**Last updated:** 2026-10-07 (rev 34 — exact runtime refresh and dependency-security blockers)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -12,14 +12,22 @@ This document is the canonical reference for known security, quality, and compli
 
 The generated public-surface manifest distinguishes source-tree product inventory from public
 route evidence. MEASURED: protected A11oy main
-`78d08ceb891e476a0a89d3f687add8c0c96060f5` is GitHub-verified. Its automatic publisher run
-`37655406967` admitted exact main but kept the deployment window closed, so every provider
-publication and post-deploy proof job was skipped. The live build-info endpoint still reports the
-earlier governed deployment `b64f14462413b7f80e00947fe1864122344aae5c` with
-`receipt_minted: false`. Run `37653882494` deployed that exact revision, but its terminal
-readiness-verdict job failed because the immutable probe observed one stale readiness snapshot.
-The live readiness endpoint and shared product origin return HTTP 200; neither response closes that
-recorded verdict failure.
+`75e2977def8faabd16173de74a56055542cc9454` is GitHub-verified. Governed publisher run
+`37660374147` admitted and deployed that exact source to Hugging Face Space commit
+`1ceb75cd127638e49579615ba0f5db522ec18a29`; its exact-source deployment, runtime attestation,
+and configuration-verification jobs passed. A bounded live `/api/build-info` read reported the
+same source and `receipt_minted: false`. `/readyz` returned HTTP 200 and self-reported SQLite as
+the Khipu backend with `khipu_durable: true`, an empty valid chain, and Doctrine v11. The
+source-bound readiness body observed at `2026-10-07T17:46:48Z` reported
+`application_ready: true`, `stale: false`, the same deployed Git SHA, matching live Space SHA,
+and provider stage `RUNNING`.
+
+BLOCKED: run `37660374147` still ended in failure. Its terminal verdict validator rejected the
+probe because the summary contained unavailable required sources; the live readiness body likewise
+reported its GitHub repository, CI, and release reads `unreachable` and deployment-to-repository
+parity `unknown`. The downstream strict parity, exact live proof, and final protected-main
+reauthorization jobs were skipped. Exact deployed-source binding, provider `RUNNING`, and HTTP 200
+therefore do not establish a fully admitted release, signed write receipt, or independent witness.
 The Killinchu page exposes exactly one explicit-head declaration marking its effectors `SIMULATED`
 and authorization `UNAVAILABLE`; the command page exposes exactly one declaration marking its
 origin `MODELED` and energy and signer `UNAVAILABLE`. Those declarations, route reachability, and
@@ -41,9 +49,9 @@ with TLS 1.3 and the route remained reachable, but the provider and registrar se
 external authority that was unavailable to this refresh. An HTTP 200 does not close those gaps.
 
 MEASURED: the separate Killinchu Hugging Face runtime returned an exact build-info body for source
-`13477c429f5742cdc718a6294a80d00c7e8dc634` plus deployment-release reference attestation
-`53547813` for manifest SHA-256
-`915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c`. Its readiness body labels
+`33e54ffed4723e5dd3d0dcdf69a6052769e69de3` plus deployment-release reference attestation
+`53653748` for manifest SHA-256
+`048d19673af818122a068f0fcc0027885f2b04eb8c8ba4626e3407986c7346eb`. Its readiness body labels
 the canonical receipt ledger `EPHEMERAL`, process-memory scoped, and explicitly not
 production-ready; backend provider persistence remains `UNKNOWN`. These scoped endpoint witnesses
 do not establish durable storage, aggregate health, or authorization.
@@ -81,6 +89,43 @@ daily schedule and an explicit manual `require_truth_freshness` input run
 requires rerunning the canonical generator with its admitted local and remote
 sources and reviewing the resulting evidence; changing only the timestamp is
 not an accepted remediation.
+
+The current reviewed regeneration is timestamped `2026-10-07T17:19:03.621Z`. It repairs the
+measured public-surface count from `2` to `1` and refreshes the Hugging Face organization snapshot
+to `47` models, `37` datasets, and `35` Spaces. These are generator and provider observations, not
+product-maturity, deployment, authorization, or availability claims.
+
+## Current dependency-security boundary
+
+MEASURED: the reviewed lockfile successor upgrades six patchable dependency resolutions without
+weakening the audit policy:
+
+- `@modelcontextprotocol/sdk` `1.29.0` -> `1.31.0`
+- `source-map-js` `1.2.1` -> `1.2.2`
+- `proxy-addr` `2.0.7` -> `2.0.8`
+- `compression` `1.8.1` -> `1.8.2`
+- `shell-quote` `1.9.0` -> `1.11.0`
+- `sharp` `0.35.4` -> `0.35.5`
+
+A fresh `pnpm audit --json --audit-level=high` reports `2` High, `0` Critical, `12` Moderate,
+and `2` Low findings. The High/Critical gate therefore remains red. No advisory is suppressed,
+muted, waived, or relabelled.
+
+BLOCKED: the two remaining High findings have no published patched version:
+
+- `node-forge@1.4.0`, `GHSA-86w9-cpqp-85rv`, through
+  `lib/mobile-shared -> expo -> @expo/cli -> node-forge`
+- `braces@3.0.3`, `GHSA-vfj7-8cjw-p6xm`, through
+  `lib/mobile-shared -> expo -> @expo/metro -> metro-file-map -> micromatch -> braces`
+
+An unmerged source candidate, an unreviewed backport, a Git dependency that disappears from npm
+version matching, or a fabricated version number is not an honest release fix. Promotion remains
+BLOCKED until reviewed compatible releases remove both affected resolutions and the unchanged
+blocking audit passes.
+
+The existing `fflate@0.8.3` central override remains exact. The fail-closed resolution guard,
+positive and negative fixtures, and blocking security-workflow wiring are unchanged from protected
+Platform main; the six upgrades do not replace or weaken that control.
 
 ### 2026-08-26 A11oy Series A route boundary
 
