@@ -444,7 +444,7 @@ test('runtime audit boots the compiled backend with TypeScript execution disable
 
   assert.equal(
     packageJson.scripts['test:service-runtime'],
-    'node --test scripts/ci/service-runtime-packaging.test.mjs scripts/ci/substrate-compose-packaging.test.mjs',
+    'node --test --test-reporter=spec --test-reporter=./scripts/ci/clone-guard-reporter.mjs --test-reporter-destination=stdout --test-reporter-destination=stdout scripts/ci/service-runtime-packaging.test.mjs scripts/ci/substrate-compose-packaging.test.mjs',
   );
   assert.match(serviceRuntime, /^ {8}run: pnpm run test:service-runtime$/m);
   assert.doesNotMatch(serviceRuntime, /continue-on-error/);

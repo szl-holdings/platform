@@ -22,7 +22,7 @@
     "typecheck": "turbo run typecheck --concurrency=2",
     "test": "node scripts/audit/validate-overclaim-ledger.js && pnpm run test:compiled-runtime && pnpm run test:gateway-security && node --test scripts/audit/validate-overclaim-ledger.test.js scripts/qa/generate-sbom.test.mjs scripts/qa/generate-vuln-report.test.js scripts/qa/gate-grype-report.test.mjs scripts/qa/dependency-patches.test.mjs scripts/qa/third-party-licenses.test.mjs scripts/ci/lighthouse-workflow.test.mjs scripts/ci/governance-workflows.test.mjs scripts/ci/release-security-workflows.test.mjs && turbo run test --concurrency=2",
     "test:compiled-runtime": "node --test scripts/ci/compiled-runtime-packaging.test.mjs",
-    "test:service-runtime": "node --test scripts/ci/service-runtime-packaging.test.mjs scripts/ci/substrate-compose-packaging.test.mjs",
+    "test:service-runtime": "node --test --test-reporter=spec --test-reporter=./scripts/ci/clone-guard-reporter.mjs --test-reporter-destination=stdout --test-reporter-destination=stdout scripts/ci/service-runtime-packaging.test.mjs scripts/ci/substrate-compose-packaging.test.mjs",
     "test:gateway-security": "vitest run --config packages/gateway/vitest.config.ts",
     "test:legacy": "pnpm run test:api && pnpm run test:components && pnpm run test:proof-chain && pnpm run test:placeholder-empty-states",
     "test:proof-chain": "node scripts/check-proof-chain.js && vitest run --config vitest.config.ts scripts/check-proof-chain.test.js",

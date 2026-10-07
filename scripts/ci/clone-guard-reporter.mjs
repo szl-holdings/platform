@@ -9,6 +9,6 @@ export default async function* cloneGuardReporter(events) {
     const error = event.data.details?.error;
     const cause = error?.cause ?? error;
     const message = `${event.data.name}\n${cause?.stack ?? cause?.message ?? String(cause)}`;
-    yield `::error title=Clone guard failure::${escapeAnnotation(message)}\n`;
+    yield `::error title=Test contract failure::${escapeAnnotation(message)}\n`;
   }
 }
