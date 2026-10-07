@@ -116,6 +116,9 @@ jobs:
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          REF_NAME: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           # On a pull_request event scan only the commits in the PR. Push, scheduled,
           # and manual runs scan the repository history reachable from the checkout.
@@ -124,6 +127,18 @@ jobs:
               --source . \
               --config .gitleaks.toml \
               --log-opts "$PR_BASE_SHA..$PR_HEAD_SHA" \
+              --redact \
+              --verbose \
+              --exit-code 1
+          elif [[ "$EVENT_NAME" == "workflow_dispatch" && "$REF_NAME" != "$DEFAULT_BRANCH" ]]; then
+            # An explicit candidate run checks its changes against the protected
+            # default branch. Default-branch and scheduled runs retain the full
+            # historical scan below.
+            candidate_base="$(git rev-parse "origin/$DEFAULT_BRANCH^{commit}")"
+            gitleaks detect \
+              --source . \
+              --config .gitleaks.toml \
+              --log-opts "$candidate_base..HEAD" \
               --redact \
               --verbose \
               --exit-code 1

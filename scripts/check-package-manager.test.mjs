@@ -37,6 +37,18 @@ function bashPath(path) {
   return result.stdout.trim();
 }
 
+function physicalBashDirectory(path) {
+  const result = spawnSync(
+    bashExecutable,
+    ['-c', 'cd -- "$1" && pwd -P', 'fixture', bashPath(path)],
+    {
+      encoding: 'utf8',
+    },
+  );
+  assert.equal(result.status, 0, result.stderr || result.error?.message);
+  return result.stdout.trim();
+}
+
 function escapedRegex(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -91,7 +103,9 @@ test('activation survives an unusable HOME and failing Corepack under caller set
   const unusableHome = join(root, 'unwritable-home');
   const activationLog = join(root, 'activation.log');
   const explicitCorepackHome = join(root, 'corepack-state');
-  const expectedPnpmHome = join(root, '.pnpm-home');
+  // The workspace fallback is derived from pwd -P by the activation helper.
+  // Git Bash's /tmp alias may differ from its physical Windows temp path.
+  const expectedPnpmHome = `${physicalBashDirectory(root)}/.pnpm-home`;
 
   mkdirSync(scripts, { recursive: true });
   mkdirSync(fakeBin);
@@ -158,30 +172,27 @@ test('activation survives an unusable HOME and failing Corepack under caller set
 
   assert.equal(result.status, 0, `stderr:\n${result.stderr}`);
   assert.match(result.stdout, new RegExp(`^home=${escapedRegex(bashPath(unusableHome))}$`, 'm'));
-  assert.match(
-    result.stdout,
-    new RegExp(`^pnpm_home=${escapedRegex(bashPath(expectedPnpmHome))}$`, 'm'),
-  );
+  assert.match(result.stdout, new RegExp(`^pnpm_home=${escapedRegex(expectedPnpmHome)}$`, 'm'));
   assert.match(
     result.stdout,
     new RegExp(`^corepack_home=${escapedRegex(bashPath(explicitCorepackHome))}$`, 'm'),
   );
   assert.match(
     result.stdout,
-    new RegExp(`^pnpm_command=${escapedRegex(bashPath(expectedPnpmHome))}/pnpm$`, 'm'),
+    new RegExp(`^pnpm_command=${escapedRegex(expectedPnpmHome)}/pnpm$`, 'm'),
   );
   assert.match(result.stdout, /^pnpm_version=10\.26\.1$/m);
 
   const log = readFileSync(activationLog, 'utf8');
   assert.match(
     log,
-    new RegExp(`corepack:enable --install-directory ${escapedRegex(bashPath(expectedPnpmHome))}`),
+    new RegExp(`corepack:enable --install-directory ${escapedRegex(expectedPnpmHome)}`),
   );
   assert.match(log, /corepack:prepare pnpm@10\.26\.1 --activate/);
   assert.match(
     log,
     new RegExp(
-      `npm:install --prefix ${escapedRegex(bashPath(expectedPnpmHome))}/\\.npm-bootstrap --no-save --package-lock=false --ignore-scripts --no-audit --no-fund pnpm@10\\.26\\.1`,
+      `npm:install --prefix ${escapedRegex(expectedPnpmHome)}/\\.npm-bootstrap --no-save --package-lock=false --ignore-scripts --no-audit --no-fund pnpm@10\\.26\\.1`,
     ),
   );
   assert.equal(existsSync(join(unusableHome, '.local/share/pnpm')), false);
