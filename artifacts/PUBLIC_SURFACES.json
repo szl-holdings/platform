@@ -1,21 +1,21 @@
 {
   "schema": "szl.public-surfaces/v1",
   "generated_by": "tools/truth/generate-public-surfaces.ts@szl.public-surfaces/v1",
-  "observed_at": "2026-08-11T08:36:44.786Z",
+  "observed_at": "2026-10-07T16:57:50Z",
   "summary": {
     "declared": 29,
-    "customer_facing_products": 2,
-    "customer_facing_routes": 12,
+    "customer_facing_products": 1,
+    "customer_facing_routes": 15,
     "by_availability": {
-      "REACHABLE": 18,
-      "REDIRECTED": 1,
-      "UNAVAILABLE": 10
+      "REACHABLE": 20,
+      "REDIRECTED": 2,
+      "UNAVAILABLE": 7
     },
     "by_mode": {
       "LIVE": 5,
-      "MIXED": 9,
-      "DOCUMENTATION": 5,
-      "UNAVAILABLE": 10
+      "MIXED": 10,
+      "DOCUMENTATION": 7,
+      "UNAVAILABLE": 7
     }
   },
   "surfaces": [
@@ -37,7 +37,7 @@
         "status": 200,
         "final_url": "https://szlholdings-a11oy.hf.space/api/build-info"
       },
-      "note": "Measured HTTP 200 at the canonical route; reachability does not assert payload correctness, deployment provenance, or exact source parity."
+      "note": "MEASURED: a bounded live JSON read reported status and build state OBSERVED at deployed A11oy source b64f14462413b7f80e00947fe1864122344aae5c with receipt_minted false. Exact deployed-source binding is not a receipt, certification, or byte-for-byte deployment attestation."
     },
     {
       "id": "a11oy-console",
@@ -121,43 +121,43 @@
     },
     {
       "id": "a11oy-net-chat-gap",
-      "name": "A11oy.net chat route",
+      "name": "A11oy.net chat gateway",
       "kind": "WEB",
       "audience": ["DEVELOPER", "INVESTOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "DOCUMENTATION",
+      "availability": "REDIRECTED",
       "canonical_url": "https://a11oy.net/chat",
       "source_owner": {
         "repository": "szl-holdings/a11oy-net",
-        "path": "index.html",
-        "role": "REMEDIATION_OWNER"
+        "path": "chat/index.html",
+        "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
-        "status": 404,
-        "final_url": "https://a11oy.net/chat"
+        "status": 200,
+        "final_url": "https://a11oy.net/chat/"
       },
-      "note": "Route is not implemented on the current static site and is excluded from the measured public-surface count."
+      "note": "MEASURED: the live source witness binds this static Pages artifact to GitHub-verified source f659e9a827df1dcb938eb08f0ca1c667b46cb0b3, and the canonicalized page exposes exactly one head declaration marking execution UNAVAILABLE. Cloudflare transforms the edge HTML, so source binding is not a byte-identity claim or evidence that the separate interactive console is ready."
     },
     {
       "id": "a11oy-net-code-gap",
-      "name": "A11oy.net code route",
+      "name": "A11oy.net code gateway",
       "kind": "WEB",
       "audience": ["DEVELOPER", "INVESTOR"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "DOCUMENTATION",
+      "availability": "REDIRECTED",
       "canonical_url": "https://a11oy.net/code",
       "source_owner": {
         "repository": "szl-holdings/a11oy-net",
-        "path": "index.html",
-        "role": "REMEDIATION_OWNER"
+        "path": "code/index.html",
+        "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
-        "status": 404,
-        "final_url": "https://a11oy.net/code"
+        "status": 200,
+        "final_url": "https://a11oy.net/code/"
       },
-      "note": "Route is not implemented on the current static site and is excluded from the measured public-surface count."
+      "note": "MEASURED: the live source witness binds this static Pages artifact to GitHub-verified source f659e9a827df1dcb938eb08f0ca1c667b46cb0b3, and the canonicalized page exposes exactly one head declaration marking execution UNAVAILABLE. Cloudflare transforms the edge HTML, so source binding is not a byte-identity claim or evidence that the separate governed run-loop is ready."
     },
     {
       "id": "a11oy-net-robots-gap",
@@ -237,7 +237,7 @@
         "status": 200,
         "final_url": "https://a11oy.net/manifest.webmanifest"
       },
-      "note": "A11oy.net manifest is currently reachable as JSON metadata and tracked with explicit metadata validation."
+      "note": "MEASURED: the reachable manifest declares name 'a11oy Proof Registry' and short_name 'a11oy.net', while the live source witness binds the static Pages artifact to source f659e9a827df1dcb938eb08f0ca1c667b46cb0b3. Reachability, source binding, and metadata identity do not establish product-runtime readiness or byte identity after edge transformation."
     },
     {
       "id": "a11oy-observability",
@@ -397,7 +397,7 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "A bounded JSON body read reported OBSERVED source 859e26cf27164b38c4e289e40a751ce80d403368, matching protected Killinchu main, and OIDC attestation 39971795 for manifest sha256:7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960; this source-binding endpoint does not assert or infer the separate HF runtime content revision."
+      "note": "MEASURED: a bounded exact JSON body read reported OBSERVED Killinchu source 33e54ffed4723e5dd3d0dcdf69a6052769e69de3 and GitHub OIDC deployment-release reference attestation 53653748 for manifest sha256:048d19673af818122a068f0fcc0027885f2b04eb8c8ba4626e3407986c7346eb. The endpoint and release reference do not assert aggregate health or authorization."
     },
     {
       "id": "killinchu-public-console",
@@ -405,19 +405,19 @@
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
       "mode": "MIXED",
-      "availability": "REDIRECTED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/killinchu",
       "source_owner": {
-        "repository": "szl-holdings/killinchu",
-        "path": "web/console.html",
+        "repository": "szl-holdings/a11oy",
+        "path": "pages/killinchu.html",
         "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
         "status": 200,
-        "final_url": "https://szlholdings-killinchu.hf.space/"
+        "final_url": "https://a-11-oy.com/killinchu"
       },
-      "note": "The full public-surface sweep observed the approved redirect and final HTTP 200 at the Killinchu Space; this records route reachability only, not aggregate Killinchu health or source parity."
+      "note": "MEASURED: the live A11oy origin returned HTTP 200 from deployed source b64f14462413b7f80e00947fe1864122344aae5c and exposed exactly one head declaration marking effectors SIMULATED and authorization UNAVAILABLE. The page keeps twin-runtime state fail-closed; reachability and source binding do not establish Killinchu runtime health or authorization."
     },
     {
       "id": "killinchu-readiness-api",
@@ -437,7 +437,7 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/readyz"
       },
-      "note": "A bounded JSON body read reported ready, durable Khipu storage, an intact Khipu chain, and Doctrine v11; this scoped witness does not establish aggregate Killinchu API or alert-channel health."
+      "note": "MEASURED: a bounded exact JSON body read reported ready under Doctrine v11 while labeling the canonical receipt ledger EPHEMERAL, PROCESS_MEMORY scoped, and not production-ready; backend provider persistence is UNKNOWN. This scoped witness does not establish durable storage, aggregate Killinchu health, or authorization."
     },
     {
       "id": "legacy-aegis-route",
@@ -481,23 +481,23 @@
     },
     {
       "id": "legacy-command-route",
-      "name": "Historical Command route claim",
+      "name": "A11oy Command Center",
       "kind": "WEB",
       "audience": ["INVESTOR", "DEVELOPER"],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/command/",
       "source_owner": {
-        "repository": "szl-holdings/platform",
-        "path": "PRODUCT-SURFACES.md",
-        "role": "CLAIM_OWNER"
+        "repository": "szl-holdings/a11oy",
+        "path": "pages/command-center.html",
+        "role": "RUNTIME_OWNER"
       },
       "observation": {
         "method": "GET",
-        "status": 404,
+        "status": 200,
         "final_url": "https://a-11-oy.com/command/"
       },
-      "note": "Measured HTTP 404 at this historical route; it remains unavailable and no product-surface claim is made."
+      "note": "MEASURED: the live A11oy origin returned HTTP 200 from deployed source b64f14462413b7f80e00947fe1864122344aae5c and exposed exactly one head declaration marking origin MODELED and energy and signer UNAVAILABLE. Reachability and source binding are not runtime authorization."
     },
     {
       "id": "legacy-counsel-route",

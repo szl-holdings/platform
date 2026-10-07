@@ -1,4 +1,5 @@
 import { XMLParser, XMLValidator } from 'fast-xml-parser';
+import { type DefaultTreeAdapterMap, parse } from 'parse5';
 
 export const PUBLIC_SURFACE_REGISTRY_SCHEMA = 'szl.public-surfaces.registry/v1';
 export const PUBLIC_SURFACE_MANIFEST_SCHEMA = 'szl.public-surfaces/v1';
@@ -76,10 +77,10 @@ const MAX_OBSERVATION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
 const MAX_METADATA_BODY_BYTES = 128 * 1024;
 const JSON_WHITESPACE = new Set([' ', '\t', '\n', '\r']);
-const KILLINCHU_SOURCE_REVISION = '859e26cf27164b38c4e289e40a751ce80d403368';
+const KILLINCHU_SOURCE_REVISION = '33e54ffed4723e5dd3d0dcdf69a6052769e69de3';
 const KILLINCHU_MANIFEST_SHA256 =
-  '7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960';
-const KILLINCHU_ATTESTATION_ID = '39971795';
+  '048d19673af818122a068f0fcc0027885f2b04eb8c8ba4626e3407986c7346eb';
+const KILLINCHU_ATTESTATION_ID = '53653748';
 const LIVE_SURFACE_PROBE_CONCURRENCY = 4;
 const LIVE_SURFACE_RETRY_DELAYS_MS = [750, 1_500] as const;
 const TRANSIENT_TRANSPORT_CODES = new Set([
@@ -89,6 +90,7 @@ const TRANSIENT_TRANSPORT_CODES = new Set([
   'UND_ERR_CONNECT_TIMEOUT',
   'UND_ERR_SOCKET',
 ]);
+const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 // A worker owns the whole surface transaction. The approved two-hop redirect path is therefore
 // bounded to 2 * (3 * 15 seconds + 750 ms + 1,500 ms) = 94.5 seconds of slot occupancy.
 
@@ -120,11 +122,11 @@ const APPROVED_PUBLIC_SURFACE_TARGETS = {
   },
   'a11oy-net-chat-gap': {
     canonicalUrl: 'https://a11oy.net/chat',
-    finalUrl: 'https://a11oy.net/chat',
+    finalUrl: 'https://a11oy.net/chat/',
   },
   'a11oy-net-code-gap': {
     canonicalUrl: 'https://a11oy.net/code',
-    finalUrl: 'https://a11oy.net/code',
+    finalUrl: 'https://a11oy.net/code/',
   },
   'a11oy-net-robots-gap': {
     canonicalUrl: 'https://a11oy.net/robots.txt',
@@ -176,7 +178,7 @@ const APPROVED_PUBLIC_SURFACE_TARGETS = {
   },
   'killinchu-public-console': {
     canonicalUrl: 'https://a-11-oy.com/killinchu',
-    finalUrl: 'https://szlholdings-killinchu.hf.space/',
+    finalUrl: 'https://a-11-oy.com/killinchu',
   },
   'killinchu-readiness-api': {
     canonicalUrl: 'https://szlholdings-killinchu.hf.space/readyz',
@@ -221,6 +223,42 @@ function approvedTargetFor(surfaceId: string): ApprovedSurfaceTarget | null {
     return null;
   }
   return APPROVED_PUBLIC_SURFACE_TARGETS[surfaceId as keyof typeof APPROVED_PUBLIC_SURFACE_TARGETS];
+}
+
+type PublicWebContract = Readonly<{
+  title: string;
+  canonicalUrl: string;
+  evidenceBoundary: string;
+}>;
+
+const PUBLIC_WEB_CONTRACTS = {
+  'a11oy-net-chat-gap': {
+    title: 'A11oy Chat Gateway | Governed Product Console',
+    canonicalUrl: 'https://a11oy.net/chat/',
+    evidenceBoundary: 'szl.public-surface-boundary/v1;surface=a11oy-net-chat;execution=UNAVAILABLE',
+  },
+  'a11oy-net-code-gap': {
+    title: 'A11oy Code Gateway | Governed Run-Loop',
+    canonicalUrl: 'https://a11oy.net/code/',
+    evidenceBoundary: 'szl.public-surface-boundary/v1;surface=a11oy-net-code;execution=UNAVAILABLE',
+  },
+  'killinchu-public-console': {
+    title: 'a11oy · Killinchu',
+    canonicalUrl: 'https://a-11-oy.com/killinchu',
+    evidenceBoundary:
+      'szl.public-surface-boundary/v1;surface=killinchu-console;effectors=SIMULATED;authorization=UNAVAILABLE',
+  },
+  'legacy-command-route': {
+    title: 'a11oy Command Center',
+    canonicalUrl: 'https://a-11-oy.com/command',
+    evidenceBoundary:
+      'szl.public-surface-boundary/v1;surface=a11oy-command;origin=MODELED;energy=UNAVAILABLE;signer=UNAVAILABLE',
+  },
+} as const satisfies Record<string, PublicWebContract>;
+
+function publicWebContractFor(surfaceId: string): PublicWebContract | null {
+  if (!Object.hasOwn(PUBLIC_WEB_CONTRACTS, surfaceId)) return null;
+  return PUBLIC_WEB_CONTRACTS[surfaceId as keyof typeof PUBLIC_WEB_CONTRACTS];
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -540,7 +578,7 @@ async function cancelResponseBody(response: SurfaceFetchResponse): Promise<void>
 async function readBoundedResponseBody(
   surfaceId: string,
   response: SurfaceFetchResponse,
-  bodyKind: 'metadata' | 'API' = 'metadata',
+  bodyKind: 'metadata' | 'API' | 'WEB' = 'metadata',
 ): Promise<{ text: string | null; failure: string | null }> {
   const contentLength = response.headers?.get('content-length');
   if (contentLength && /^\d+$/.test(contentLength)) {
@@ -732,10 +770,20 @@ function hasExactKeys(value: Record<string, unknown>, expected: readonly string[
 function isExactKillinchuBuildInfo(value: unknown): boolean {
   if (!isObject(value)) return false;
   if (
-    !hasExactKeys(value, ['status', 'service', 'build', 'receipt_minted', 'release_receipt']) ||
+    !hasExactKeys(value, [
+      'status',
+      'service',
+      'build',
+      'receipt_minted',
+      'receipt_minted_on_request',
+      'receipt_minted_scope',
+      'release_receipt',
+    ]) ||
     value.status !== 'OBSERVED' ||
     value.service !== 'killinchu' ||
     value.receipt_minted !== true ||
+    value.receipt_minted_on_request !== false ||
+    value.receipt_minted_scope !== 'DEPLOYMENT_RELEASE_REFERENCE' ||
     !isObject(value.build) ||
     !isObject(value.release_receipt)
   ) {
@@ -772,26 +820,108 @@ function isExactKillinchuBuildInfo(value: unknown): boolean {
 
 function isExactKillinchuReadiness(value: unknown): boolean {
   if (!isObject(value)) return false;
-  return (
-    hasExactKeys(value, [
+  if (
+    !hasExactKeys(value, [
       'status',
       'organ',
-      'khipu_backend',
-      'khipu_durable',
-      'khipu_depth',
-      'khipu_chain_ok',
-      'khipu_first_break_seq',
       'doctrine',
+      'ledger',
+      'ledger_role',
+      'backend_store_diagnostics',
+      'receipt_minted',
+    ]) ||
+    value.status !== 'ready' ||
+    value.organ !== 'killinchu' ||
+    value.doctrine !== 'v11' ||
+    value.ledger_role !== 'CANONICAL_RECEIPT_LEDGER' ||
+    value.receipt_minted !== false ||
+    !isObject(value.ledger) ||
+    !isObject(value.backend_store_diagnostics)
+  ) {
+    return false;
+  }
+
+  const ledger = value.ledger;
+  const backend = value.backend_store_diagnostics;
+  if (
+    !hasExactKeys(ledger, [
+      'schema',
+      'durability_state',
+      'requested_mode',
+      'ready',
+      'production_ready',
+      'production_readiness_basis',
+      'readiness_probe',
+      'persistence_scope',
+      'startup_state',
+      'adapter_configured',
+      'adapter_state',
+      'integrity',
+      'replay',
+      'recovery',
+      'reason',
+    ]) ||
+    ledger.schema !== 'szl.killinchu.ledger-readiness/v1' ||
+    ledger.durability_state !== 'EPHEMERAL' ||
+    ledger.requested_mode !== 'EPHEMERAL' ||
+    ledger.ready !== true ||
+    ledger.production_ready !== false ||
+    ledger.production_readiness_basis !== 'NOT_APPLICABLE' ||
+    ledger.readiness_probe !== 'READ_ONLY' ||
+    ledger.persistence_scope !== 'PROCESS_MEMORY' ||
+    ledger.startup_state !== 'READY' ||
+    ledger.adapter_configured !== false ||
+    ledger.adapter_state !== 'NOT_APPLICABLE' ||
+    ledger.reason !== 'ephemeral ledger is available for this process only' ||
+    !isObject(ledger.integrity) ||
+    !isObject(ledger.replay) ||
+    !isObject(ledger.recovery)
+  ) {
+    return false;
+  }
+
+  const integrity = ledger.integrity;
+  const replay = ledger.replay;
+  const recovery = ledger.recovery;
+  const integrityNodes = integrity.nodes;
+  const integrityRoot = integrity.root;
+  return (
+    hasExactKeys(integrity, ['state', 'verified', 'nodes', 'root']) &&
+    integrity.state === 'VERIFIED' &&
+    integrity.verified === true &&
+    Number.isSafeInteger(integrityNodes) &&
+    (integrityNodes as number) >= 0 &&
+    ((integrityNodes === 0 && integrityRoot === null) ||
+      ((integrityNodes as number) > 0 &&
+        typeof integrityRoot === 'string' &&
+        /^[a-f0-9]{64}$/.test(integrityRoot))) &&
+    hasExactKeys(replay, ['state', 'nodes']) &&
+    replay.state === 'NOT_APPLICABLE' &&
+    Number.isSafeInteger(replay.nodes) &&
+    (replay.nodes as number) >= 0 &&
+    hasExactKeys(recovery, ['attempts', 'retry_after_s']) &&
+    Number.isSafeInteger(recovery.attempts) &&
+    (recovery.attempts as number) >= 0 &&
+    typeof recovery.retry_after_s === 'number' &&
+    Number.isFinite(recovery.retry_after_s) &&
+    recovery.retry_after_s >= 0 &&
+    hasExactKeys(backend, [
+      'ledger_role',
+      'backend',
+      'depth',
+      'chain_ok',
+      'first_break_seq',
+      'provider_persistence',
+      'production_ready',
     ]) &&
-    value.status === 'ready' &&
-    value.organ === 'killinchu' &&
-    value.khipu_backend === 'sqlite' &&
-    value.khipu_durable === true &&
-    Number.isSafeInteger(value.khipu_depth) &&
-    (value.khipu_depth as number) >= 0 &&
-    value.khipu_chain_ok === true &&
-    value.khipu_first_break_seq === -1 &&
-    value.doctrine === 'v11'
+    backend.ledger_role === 'BACKEND_HARDENING_DIAGNOSTIC_STORE' &&
+    backend.backend === 'sqlite' &&
+    Number.isSafeInteger(backend.depth) &&
+    (backend.depth as number) >= 0 &&
+    backend.chain_ok === true &&
+    backend.first_break_seq === -1 &&
+    backend.provider_persistence === 'UNKNOWN' &&
+    backend.production_ready === false
   );
 }
 
@@ -824,6 +954,157 @@ async function validatePublicApiResponse(
       : [`${surfaceId}: API body does not match the exact readiness contract`];
   }
   return [`${surfaceId}: routed API has no body validator`];
+}
+
+type HtmlNode = DefaultTreeAdapterMap['node'];
+type HtmlElement = DefaultTreeAdapterMap['element'];
+type HtmlTextNode = DefaultTreeAdapterMap['textNode'];
+
+type PublicWebDocument = Readonly<{
+  title: string | null;
+  canonicalUrls: readonly (string | null)[];
+  evidenceBoundaries: readonly (string | null)[];
+}>;
+
+function isElementNode(node: HtmlNode): node is HtmlElement {
+  return 'tagName' in node;
+}
+
+function isHtmlElement(node: HtmlNode): node is HtmlElement {
+  return isElementNode(node) && node.namespaceURI === HTML_NAMESPACE;
+}
+
+function isTextNode(node: HtmlNode): node is HtmlTextNode {
+  return node.nodeName === '#text' && 'value' in node;
+}
+
+function childNodesOf(node: HtmlNode): HtmlNode[] {
+  return 'childNodes' in node ? node.childNodes : [];
+}
+
+function findHtmlElements(root: HtmlNode, tagName: string): HtmlElement[] {
+  const elements: HtmlElement[] = [];
+  const visit = (node: HtmlNode): void => {
+    if (isHtmlElement(node) && node.tagName === tagName) elements.push(node);
+    for (const child of childNodesOf(node)) visit(child);
+  };
+  visit(root);
+  return elements;
+}
+
+function collectHtmlText(node: HtmlNode): string {
+  if (isTextNode(node)) return node.value;
+  return childNodesOf(node)
+    .map((child) => collectHtmlText(child))
+    .join('');
+}
+
+function normalizedHtmlText(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function hasExplicitContainer(element: HtmlElement): boolean {
+  return Boolean(element.sourceCodeLocation?.startTag && element.sourceCodeLocation.endTag);
+}
+
+function parsePublicWebDocument(input: string): PublicWebDocument | null {
+  const parseErrors: string[] = [];
+  let document: DefaultTreeAdapterMap['document'];
+  try {
+    document = parse(input, {
+      scriptingEnabled: true,
+      sourceCodeLocationInfo: true,
+      onParseError: (error) => parseErrors.push(error.code),
+    });
+  } catch {
+    return null;
+  }
+  if (parseErrors.length > 0) return null;
+
+  const heads = findHtmlElements(document, 'head');
+  const bodies = findHtmlElements(document, 'body');
+  if (
+    heads.length !== 1 ||
+    bodies.length !== 1 ||
+    !hasExplicitContainer(heads[0]) ||
+    !hasExplicitContainer(bodies[0])
+  ) {
+    return null;
+  }
+
+  const titles = findHtmlElements(heads[0], 'title');
+  const title =
+    titles.length === 1 && hasExplicitContainer(titles[0])
+      ? normalizedHtmlText(collectHtmlText(titles[0]))
+      : null;
+
+  const canonicalUrls = findHtmlElements(heads[0], 'link')
+    .filter((element) => {
+      const rel = element.attrs.find((attribute) => attribute.name.toLowerCase() === 'rel')?.value;
+      return rel
+        ?.toLowerCase()
+        .split(/\s+/)
+        .some((token) => token === 'canonical');
+    })
+    .map(
+      (element) =>
+        element.attrs.find((attribute) => attribute.name.toLowerCase() === 'href')?.value ?? null,
+    );
+
+  const evidenceBoundaries = findHtmlElements(heads[0], 'meta')
+    .filter((element) => {
+      const name = element.attrs.find(
+        (attribute) => attribute.name.toLowerCase() === 'name',
+      )?.value;
+      return name?.trim().toLowerCase() === 'szl-evidence-boundary';
+    })
+    .map(
+      (element) =>
+        element.attrs.find((attribute) => attribute.name.toLowerCase() === 'content')?.value ??
+        null,
+    );
+
+  return {
+    title,
+    canonicalUrls,
+    evidenceBoundaries,
+  };
+}
+
+async function validatePublicWebResponse(
+  surfaceId: string,
+  response: SurfaceFetchResponse,
+): Promise<string[]> {
+  const contract = publicWebContractFor(surfaceId);
+  if (!contract) return [`${surfaceId}: routed WEB surface has no body validator`];
+
+  const contentType = response.headers?.get('content-type')?.toLowerCase() ?? '';
+  if (!/^text\/html(?:;|$)/i.test(contentType)) {
+    await cancelResponseBody(response);
+    return [`${surfaceId}: expected a text/html response, observed ${contentType || 'missing'}`];
+  }
+
+  const { text, failure } = await readBoundedResponseBody(surfaceId, response, 'WEB');
+  if (failure || text === null) return [failure ?? `${surfaceId}: WEB body is unavailable`];
+  const document = parsePublicWebDocument(text);
+  if (!document) return [`${surfaceId}: WEB body is not structurally valid HTML`];
+
+  if (document.title !== contract.title) {
+    return [`${surfaceId}: WEB body has an unexpected product identity`];
+  }
+
+  const canonicalUrl = document.canonicalUrls.length === 1 ? document.canonicalUrls[0] : null;
+  if (canonicalUrl !== contract.canonicalUrl) {
+    return [`${surfaceId}: WEB body has an unexpected canonical URL`];
+  }
+
+  if (
+    document.evidenceBoundaries.length !== 1 ||
+    document.evidenceBoundaries[0] !== contract.evidenceBoundary
+  ) {
+    return [`${surfaceId}: WEB head lacks its exact evidence-boundary declaration`];
+  }
+  return [];
 }
 
 function isXmlRecord(value: unknown): value is Record<string, unknown> {
@@ -905,16 +1186,13 @@ async function validateMetadataResponse(
         `${surfaceId}: expected an application/manifest+json response, observed ${contentType || 'missing'}`,
       ];
     }
-    let manifest: unknown;
-    try {
-      manifest = JSON.parse(body);
-    } catch {
-      return [`${surfaceId}: manifest metadata is not valid JSON`];
-    }
+    const parsed = parseDuplicateFreeJson(body);
+    if (!parsed.ok) return [`${surfaceId}: manifest metadata is not valid duplicate-free JSON`];
+    const manifest = parsed.value;
     if (!isObject(manifest)) {
       return [`${surfaceId}: manifest metadata must be a JSON object`];
     }
-    if (manifest.name !== 'A11oy Proof Registry' || manifest.short_name !== 'A11oy.net') {
+    if (manifest.name !== 'a11oy Proof Registry' || manifest.short_name !== 'a11oy.net') {
       return [`${surfaceId}: manifest metadata has an unexpected product identity`];
     }
     if (manifest.start_url !== '/' || manifest.scope !== '/') {
@@ -1020,13 +1298,16 @@ async function verifyLivePublicSurface(
     const validateRoutedBody =
       surface.availability !== 'UNAVAILABLE' &&
       (surface.kind === 'METADATA' ||
+        (surface.kind === 'WEB' && publicWebContractFor(surface.id) !== null) ||
         surface.id === 'killinchu-build-info-api' ||
         surface.id === 'killinchu-readiness-api')
         ? async (candidate: SurfaceFetchResponse): Promise<string[]> => {
             if (candidate.status >= 200 && candidate.status < 300) {
               return surface.kind === 'METADATA'
                 ? await validateMetadataResponse(surface.id, candidate)
-                : await validatePublicApiResponse(surface.id, candidate);
+                : surface.kind === 'WEB'
+                  ? await validatePublicWebResponse(surface.id, candidate)
+                  : await validatePublicApiResponse(surface.id, candidate);
             }
             await cancelResponseBody(candidate);
             return [];

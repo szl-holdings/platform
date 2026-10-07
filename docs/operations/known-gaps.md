@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
+**Last updated:** 2026-10-07 (rev 34 — exact runtime refresh and dependency-security blockers)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -10,21 +10,57 @@ This document is the canonical reference for known security, quality, and compli
 
 ## Current Public Surface Truth
 
-The generated public-surface manifest now distinguishes source-tree product inventory from public
-route evidence. Customer-facing web route records are measured as `REACHABLE` or `REDIRECTED` and
-bound to a named runtime repository and path. Public quantitative claims remain governed by the
-canonical metrics registry and generated [`docs/platform-facts.md`](../platform-facts.md), not by
-historical app directories or marketing copy.
+The generated public-surface manifest distinguishes source-tree product inventory from public
+route evidence. MEASURED: protected A11oy main
+`75e2977def8faabd16173de74a56055542cc9454` is GitHub-verified. Governed publisher run
+`37660374147` admitted and deployed that exact source to Hugging Face Space commit
+`1ceb75cd127638e49579615ba0f5db522ec18a29`; its exact-source deployment, runtime attestation,
+and configuration-verification jobs passed. A bounded live `/api/build-info` read reported the
+same source and `receipt_minted: false`. `/readyz` returned HTTP 200 and self-reported SQLite as
+the Khipu backend with `khipu_durable: true`, an empty valid chain, and Doctrine v11. The
+source-bound readiness body observed at `2026-10-07T17:46:48Z` reported
+`application_ready: true`, `stale: false`, the same deployed Git SHA, matching live Space SHA,
+and provider stage `RUNNING`.
 
-This closes the zero-manifest tooling gap, not every web gap. The historical `/lyte`, `/aegis`,
-`/vessels`, `/terra`, `/counsel`, `/carlota-jo`, `/command`, and `/pulse` preview paths currently
-return HTTP 404 and remain explicit `UNAVAILABLE` records. `a11oy.net/chat` and `a11oy.net/code`
-remain unavailable at HTTP 404. The independently measured `manifest.webmanifest`, `robots.txt`,
-and `sitemap.xml` files now return their expected machine-readable content and are recorded as
-`REACHABLE` metadata; they are not customer-facing product surfaces and do not change the
-routed-product count. A routed page is not an uptime, customer, feature-completeness, or
-correctness claim;
-`LIVE`, `MIXED`, and `DOCUMENTATION` modes retain that boundary.
+BLOCKED: run `37660374147` still ended in failure. Its terminal verdict validator rejected the
+probe because the summary contained unavailable required sources; the live readiness body likewise
+reported its GitHub repository, CI, and release reads `unreachable` and deployment-to-repository
+parity `unknown`. The downstream strict parity, exact live proof, and final protected-main
+reauthorization jobs were skipped. Exact deployed-source binding, provider `RUNNING`, and HTTP 200
+therefore do not establish a fully admitted release, signed write receipt, or independent witness.
+The Killinchu page exposes exactly one explicit-head declaration marking its effectors `SIMULATED`
+and authorization `UNAVAILABLE`; the command page exposes exactly one declaration marking its
+origin `MODELED` and energy and signer `UNAVAILABLE`. Those declarations, route reachability, and
+source binding do not establish feature completeness, authorization, durable storage, or aggregate
+runtime health. Historical A11oy routes that return HTTP 404 remain explicitly `UNAVAILABLE`.
+
+MEASURED: A11oy.net protected main and its live static source witness report revision
+`f659e9a827df1dcb938eb08f0ca1c667b46cb0b3`. The thesis and metadata are reachable, and the chat
+and code gateways canonicalize to their trailing-slash pages with one exact declaration marking
+execution `UNAVAILABLE`. Cloudflare injects edge content into the served HTML, so the source witness
+is an exact revision binding, not a byte-identity claim. The static witness also labels product
+runtime readiness, uptime, and live DSSE `UNAVAILABLE`; none of these records establishes the
+separate interactive console or governed run-loop.
+
+BLOCKED: the A11oy.net edge-security readback still reports GitHub Pages HTTPS enforcement disabled,
+an origin-certificate `bad_authz` state, no parent DS record for DNSSEC, and missing CSP, COOP, CORP,
+Permissions-Policy, Referrer-Policy, and X-Frame-Options headers. Public Cloudflare TLS answered
+with TLS 1.3 and the route remained reachable, but the provider and registrar settings require
+external authority that was unavailable to this refresh. An HTTP 200 does not close those gaps.
+
+MEASURED: the separate Killinchu Hugging Face runtime returned an exact build-info body for source
+`33e54ffed4723e5dd3d0dcdf69a6052769e69de3` plus deployment-release reference attestation
+`53653748` for manifest SHA-256
+`048d19673af818122a068f0fcc0027885f2b04eb8c8ba4626e3407986c7346eb`. Its readiness body labels
+the canonical receipt ledger `EPHEMERAL`, process-memory scoped, and explicitly not
+production-ready; backend provider persistence remains `UNKNOWN`. These scoped endpoint witnesses
+do not establish durable storage, aggregate health, or authorization.
+
+Public quantitative claims remain governed by the canonical metrics registry and generated
+[`docs/platform-facts.md`](../platform-facts.md), not by historical app directories or marketing
+copy. A routed page is not an uptime, customer, feature-completeness, correctness,
+deployment-authorization, or production-readiness claim; `LIVE`, `MIXED`, `DOCUMENTATION`, and
+`UNAVAILABLE` modes retain that boundary.
 
 The existing `truth-drift` job validates schema, deterministic generated bytes, source ownership,
 expected status and redirect behavior, bounded `robots.txt` and sitemap content, and current live
@@ -36,6 +72,13 @@ the protected PR/main check. An expired observation is remediated by re-observin
 target, updating the registry evidence, regenerating the deterministic artifacts, reviewing the
 diff, and rerunning the freshness gate.
 
+Owner-backed HTML evidence checks parse the structural document and require exactly one
+surface-specific `szl-evidence-boundary` metadata declaration inside the explicit document head,
+alongside the exact title and canonical URL. Missing, duplicate, commented, misplaced, or changed
+declarations fail closed. This establishes only static declaration presence. It does not establish
+rendered visibility, browser layout, screenshot quality, externally loaded CSS behavior, runtime
+readiness, or authorization.
+
 The generated `artifacts/SOURCE_OF_TRUTH.json` timestamp follows the same
 honest-snapshot rule. Pull requests and protected-main pushes still validate
 its schema, labels, canonical metric set, future skew, deterministic local
@@ -46,6 +89,43 @@ daily schedule and an explicit manual `require_truth_freshness` input run
 requires rerunning the canonical generator with its admitted local and remote
 sources and reviewing the resulting evidence; changing only the timestamp is
 not an accepted remediation.
+
+The current reviewed regeneration is timestamped `2026-10-07T17:19:03.621Z`. It repairs the
+measured public-surface count from `2` to `1` and refreshes the Hugging Face organization snapshot
+to `47` models, `37` datasets, and `35` Spaces. These are generator and provider observations, not
+product-maturity, deployment, authorization, or availability claims.
+
+## Current dependency-security boundary
+
+MEASURED: the reviewed lockfile successor upgrades six patchable dependency resolutions without
+weakening the audit policy:
+
+- `@modelcontextprotocol/sdk` `1.29.0` -> `1.31.0`
+- `source-map-js` `1.2.1` -> `1.2.2`
+- `proxy-addr` `2.0.7` -> `2.0.8`
+- `compression` `1.8.1` -> `1.8.2`
+- `shell-quote` `1.9.0` -> `1.11.0`
+- `sharp` `0.35.4` -> `0.35.5`
+
+A fresh `pnpm audit --json --audit-level=high` reports `2` High, `0` Critical, `12` Moderate,
+and `2` Low findings. The High/Critical gate therefore remains red. No advisory is suppressed,
+muted, waived, or relabelled.
+
+BLOCKED: the two remaining High findings have no published patched version:
+
+- `node-forge@1.4.0`, `GHSA-86w9-cpqp-85rv`, through
+  `lib/mobile-shared -> expo -> @expo/cli -> node-forge`
+- `braces@3.0.3`, `GHSA-vfj7-8cjw-p6xm`, through
+  `lib/mobile-shared -> expo -> @expo/metro -> metro-file-map -> micromatch -> braces`
+
+An unmerged source candidate, an unreviewed backport, a Git dependency that disappears from npm
+version matching, or a fabricated version number is not an honest release fix. Promotion remains
+BLOCKED until reviewed compatible releases remove both affected resolutions and the unchanged
+blocking audit passes.
+
+The existing `fflate@0.8.3` central override remains exact. The fail-closed resolution guard,
+positive and negative fixtures, and blocking security-workflow wiring are unchanged from protected
+Platform main; the six upgrades do not replace or weaken that control.
 
 ### 2026-08-26 A11oy Series A route boundary
 

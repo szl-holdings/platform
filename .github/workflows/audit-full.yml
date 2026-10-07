@@ -43,6 +43,9 @@ jobs:
       - name: Install dependencies (skip ONNXRuntime download to avoid postinstall network flake)
         run: ONNXRUNTIME_NODE_INSTALL=skip pnpm install --frozen-lockfile
 
+      - name: Validate claims and public-surface contracts
+        run: pnpm claims:validate
+
       # ── Boot the real servers the qa-site smoke fetches against ───────────────
       # audit:full's `qa-site` step (scripts/qa/smoke-routes.js) is a LIVE HTTP
       # smoke: it fetches every product route and the runtime API health surface.
