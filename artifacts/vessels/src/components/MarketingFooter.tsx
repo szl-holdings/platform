@@ -32,7 +32,7 @@ export function MarketingFooter() {
               </div>
               <span className="font-bold text-[14px] text-[#f5f5f5]">Vessels</span>
             </div>
-            <p className="text-[#8a8a8a]/80 text-[13px] leading-relaxed max-w-xs mb-3">
+            <p className="text-[#8a8a8a] text-[13px] leading-relaxed max-w-xs mb-3">
               {aboutSzlParagraph()}
             </p>
           </div>
@@ -46,7 +46,7 @@ export function MarketingFooter() {
                 <li key={l.label}>
                   <Link
                     href={l.href}
-                    className="text-[#8a8a8a]/80 text-[13px] hover:text-[#e0e0e0] transition-colors"
+                    className="text-[#8a8a8a] text-[13px] hover:text-[#e0e0e0] transition-colors"
                   >
                     {l.label}
                   </Link>
@@ -64,7 +64,7 @@ export function MarketingFooter() {
                 <li key={l.label}>
                   <a
                     href={l.href}
-                    className="text-[#8a8a8a]/80 text-[13px] hover:text-[#e0e0e0] transition-colors"
+                    className="text-[#8a8a8a] text-[13px] hover:text-[#e0e0e0] transition-colors"
                   >
                     {l.label}
                   </a>
