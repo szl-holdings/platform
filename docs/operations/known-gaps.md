@@ -153,6 +153,18 @@ identity-to-tenant binding before this route is publicly exposed. Protected
 source merge also does not itself deploy Atelier: a separately witnessed
 hosted build, identity configuration, and functional provider probe remain open.
 
+### 2026-10-07 A11oy terminal source-launch boundary
+
+The CLI package now includes `a11oy-atelier.ps1`, a repository-local Windows
+source launcher for an already-installed workspace with PowerShell 7.3+ and
+Node 24+. It does not depend on the generated `dist/atelier-cli.js` bin. This
+addresses source-checkout launch ergonomics only: it does not register a global
+command, edit Windows Terminal or PowerShell profiles, start the API, repair
+provider balance/authentication, or establish successful inference. A11oy's
+Partial status and all provider/deployment/security release gaps remain unchanged.
+See `packages/a11oy-cli/README.md` and
+`audit/A11OY_CLI_SOURCE_LAUNCHER_PROOF_20261007.md` for commands and scoped evidence.
+
 ### 2026-10-03 A11oy Atelier Proofweave compile-only boundary
 
 The A11oy Atelier source now includes a deterministic Proofweave compiler,

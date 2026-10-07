@@ -11,7 +11,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/cli.ts",
-    "test": "node --import tsx --test src/*.test.mjs",
+    "test": "node --import tsx --test src/*.test.mjs tests/*.test.cjs",
+    "test:launcher": "node --test tests/launcher.test.cjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
