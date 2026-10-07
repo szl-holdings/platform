@@ -1,0 +1,40 @@
+﻿{
+  "name": "@szl-holdings/braces-safe",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Private SZL derivative of braces 3.0.3 with bounded AST depth and parent-cycle rejection.",
+  "license": "MIT",
+  "author": "SZL Holdings; derived from braces by Jon Schlinkert and contributors",
+  "homepage": "https://github.com/szl-holdings/platform",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/platform.git",
+    "directory": "packages/braces-safe"
+  },
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "lib",
+    "LICENSE",
+    "UPSTREAM.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.cjs"
+  },
+  "dependencies": {
+    "fill-range": "^7.1.1"
+  },
+  "szlSecurityBackport": {
+    "upstreamPackage": "braces@3.0.3",
+    "upstreamRepository": "micromatch/braces",
+    "upstreamFixReview": "micromatch/braces#72",
+    "importedSourceRepository": "FSDevelop/braces",
+    "sourceCommit": "28d440b5dd449dbf1fe6f3506cf94ecca4d02660",
+    "sourceTree": "0ffbc33a63a6f2365865e69b4217683268067847",
+    "advisory": "GHSA-vfj7-8cjw-p6xm",
+    "cve": "CVE-2026-93687"
+  }
+}
