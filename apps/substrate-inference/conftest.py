@@ -21,3 +21,13 @@ if _ROOT not in sys.path:
 _TMP = tempfile.mkdtemp(prefix="substrate_test_")
 os.environ.setdefault("SUBSTRATE_MODELS_DIR", os.path.join(_TMP, "models"))
 os.environ.setdefault("SUBSTRATE_CACHE_DIR", os.path.join(_TMP, "cache"))
+
+# Functional API tests deliberately exercise the explicit test-only bypass.
+# Auth-specific tests replace these values in isolated app imports.
+os.environ.pop("SUBSTRATE_API_KEY", None)
+os.environ.pop("APP_ENV", None)
+os.environ.pop("NODE_ENV", None)
+os.environ.pop("SZL_ENV", None)
+os.environ.pop("RUNTIME_MODE", None)
+os.environ["SUBSTRATE_INFERENCE_ENV"] = "test"
+os.environ["SUBSTRATE_INFERENCE_AUTH_BYPASS"] = "true"

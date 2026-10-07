@@ -82,18 +82,16 @@ test.describe('Accessibility — SZL Holdings Public Routes', () => {
 const ARTIFACT_NAME = process.env.A11Y_ARTIFACT_NAME ?? 'all';
 
 const ARTIFACTS = [
-  { name: 'a11oy',         rootPath: '/a11oy/' },
-  { name: 'sentra',        rootPath: '/sentra/' },
-  { name: 'terra',         rootPath: '/terra/' },
-  { name: 'carlota-jo',    rootPath: '/carlota-jo/' },
-  { name: 'counsel',       rootPath: '/counsel/' },
-  { name: 'vessels',       rootPath: '/vessels/' },
+  { name: 'a11oy', rootPath: '/a11oy/' },
+  { name: 'sentra', rootPath: '/sentra/' },
+  { name: 'terra', rootPath: '/terra/' },
+  { name: 'carlota-jo', rootPath: '/carlota-jo/' },
+  { name: 'counsel', rootPath: '/counsel/' },
+  { name: 'vessels', rootPath: '/vessels/' },
 ];
 
 const artifactsToScan =
-  ARTIFACT_NAME === 'all'
-    ? ARTIFACTS
-    : ARTIFACTS.filter((a) => a.name === ARTIFACT_NAME);
+  ARTIFACT_NAME === 'all' ? ARTIFACTS : ARTIFACTS.filter((a) => a.name === ARTIFACT_NAME);
 
 test.describe('Accessibility — Per-Artifact Root Page axe Scan', () => {
   for (const artifact of artifactsToScan) {
@@ -111,10 +109,21 @@ test.describe('Accessibility — Per-Artifact Root Page axe Scan', () => {
         }
       });
 
-      test('root page has no critical or serious axe violations (WCAG 2.1 AA)', async ({ page }) => {
+      test('root page has no critical or serious axe violations (WCAG 2.1 AA)', async ({
+        page,
+      }) => {
         const url = `${resolvedBaseUrl}${resolvedRootPath}`.replace(/([^:])\/\//g, '$1/');
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
         await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => null);
+
+        const root = page.locator('#root');
+        await expect(root, `React root must exist on ${artifact.name}`).toBeAttached();
+        await expect
+          .poll(() => root.locator(':scope > *').count(), {
+            message: `React must mount non-empty content on ${artifact.name}`,
+            timeout: 10000,
+          })
+          .toBeGreaterThan(0);
 
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

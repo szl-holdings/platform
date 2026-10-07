@@ -1,6 +1,6 @@
 # Link & Image Validation Report
 
-**Generated:** 2026-10-06T05:57:16.386Z
+**Generated:** 2026-10-07T11:40:11.321Z
 **Summary:** 243 pass · 0 warn · 0 fail
 
 ---

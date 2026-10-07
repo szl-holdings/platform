@@ -39,6 +39,8 @@ const STDOUT_MODE = args.includes('--stdout');
 
 // ─── load spec ───────────────────────────────────────────────────────────────
 if (!existsSync(SPEC_PATH)) {
+  // biome-ignore lint/suspicious/noConsole: CLI failures must be visible outside GitHub Actions.
+  console.error(`[api-catalogue] OpenAPI source is missing: ${SPEC_PATH}`);
   process.exit(1);
 }
 
@@ -221,9 +223,13 @@ if (CHECK_MODE) {
     if (upToDate) {
       summaryLines.push('**Result:** ✅ `API-CATALOGUE.md` is up to date with the OpenAPI spec.');
     } else {
-      summaryLines.push('**Result:** ⚠️ `API-CATALOGUE.md` is stale — it does not match the current OpenAPI spec.');
+      summaryLines.push(
+        '**Result:** ⚠️ `API-CATALOGUE.md` is stale — it does not match the current OpenAPI spec.',
+      );
       summaryLines.push('');
-      summaryLines.push('Run `pnpm docs:generate` locally and commit the updated file to fix this.');
+      summaryLines.push(
+        'Run `pnpm docs:generate` locally and commit the updated file to fix this.',
+      );
     }
     summaryLines.push('');
     summaryLines.push(`| Metric | Value |`);
@@ -235,11 +241,15 @@ if (CHECK_MODE) {
     appendFileSync(GH_SUMMARY, `${summaryLines.join('\n')}\n`);
   }
 
-  if (upToDate) {
-    process.exit(0);
-  } else {
-    process.exit(1);
-  }
+  if (upToDate) process.exit(0);
+
+  // GITHUB_STEP_SUMMARY is unavailable in local preflight and many CI runners;
+  // never return a silent non-zero status for an actionable drift failure.
+  // biome-ignore lint/suspicious/noConsole: CLI failures must explain remediation.
+  console.error(
+    '[api-catalogue] API-CATALOGUE.md is stale. Run `pnpm docs:generate` and commit the result.',
+  );
+  process.exit(1);
 }
 
 writeFileSync(OUT_PATH, output, 'utf8');

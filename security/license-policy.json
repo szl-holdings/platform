@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "reviews": [
+    {
+      "package": "@axe-core/playwright",
+      "version": "4.11.3",
+      "license": "MPL-2.0",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Development-only accessibility test adapter; retain notices and distribute no modified MPL source.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "@img/sharp-libvips-linux-x64",
+      "version": "1.3.2",
+      "license": "LGPL-3.0-or-later",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Conditionally reviewed dynamic shared-library boundary for sharp; preserve notices, source offer, and replaceability requirements.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "@img/sharp-libvips-linux-x64",
+      "version": "1.3.3",
+      "license": "LGPL-3.0-or-later",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Conditionally reviewed dynamic shared-library boundary for sharp; preserve notices, source offer, and replaceability requirements.",
+      "reviewedAt": "2026-10-07",
+      "expires": "2027-04-07"
+    },
+    {
+      "package": "@img/sharp-libvips-linux-x64",
+      "version": "1.3.4",
+      "license": "LGPL-3.0-or-later",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Conditionally reviewed dynamic shared-library boundary for sharp; preserve notices, source offer, and replaceability requirements.",
+      "reviewedAt": "2026-10-07",
+      "expires": "2027-04-07"
+    },
+    {
+      "package": "axe-core",
+      "version": "4.11.4",
+      "license": "MPL-2.0",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Development accessibility scanner used unmodified; retain upstream MPL notices and source-file boundary.",
+      "reviewedAt": "2026-10-07",
+      "expires": "2027-04-07"
+    },
+    {
+      "package": "axe-core",
+      "version": "4.12.1",
+      "license": "MPL-2.0",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Development accessibility scanner used unmodified; retain upstream MPL notices and source-file boundary.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "dompurify",
+      "version": "3.4.13",
+      "license": "(MPL-2.0 OR Apache-2.0)",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Dual-licensed dependency admitted under the Apache-2.0 option with required notices retained.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "dompurify",
+      "version": "3.4.16",
+      "license": "(MPL-2.0 OR Apache-2.0)",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Dual-licensed dependency admitted under the Apache-2.0 option with required notices retained.",
+      "reviewedAt": "2026-10-07",
+      "expires": "2027-04-07"
+    },
+    {
+      "package": "jszip",
+      "version": "3.10.1",
+      "license": "(MIT OR GPL-3.0-or-later)",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Dual-licensed dependency admitted under the permissive MIT option with its copyright notice retained.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "lightningcss",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Build-time CSS transformer used unmodified; retain the upstream MPL notice and source-file boundary.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "lightningcss-linux-x64-gnu",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Platform binary for the reviewed build-time lightningcss tool; used unmodified with upstream notices retained.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "node-forge",
+      "version": "1.4.0",
+      "license": "(BSD-3-Clause OR GPL-2.0)",
+      "classification": "REVIEW",
+      "decision": "allow",
+      "rationale": "Dual-licensed dependency admitted under BSD-3-Clause; the exact locally patched version remains separately digest-gated.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "@replit/connectors-sdk",
+      "version": "0.3.0",
+      "license": "UNKNOWN",
+      "classification": "CHECK",
+      "decision": "allow",
+      "rationale": "Time-bounded provider-SDK exception while upstream package metadata remains absent; distribution authority must be rechecked before expiry.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "browser-assert",
+      "version": "1.2.1",
+      "license": "UNKNOWN",
+      "classification": "CHECK",
+      "decision": "allow",
+      "rationale": "Package manifest omits SPDX metadata, but the installed package carries the standard MIT license text; retain that notice.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "mapbox-gl",
+      "version": "3.27.0",
+      "license": "SEE LICENSE IN LICENSE.txt",
+      "classification": "CHECK",
+      "decision": "allow",
+      "rationale": "Time-bounded SDK exception conditioned on an active Mapbox account and compliance with the bundled Mapbox TOS; no blanket redistribution approval.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "png-js",
+      "version": "1.1.0",
+      "license": "UNKNOWN",
+      "classification": "CHECK",
+      "decision": "allow",
+      "rationale": "Package manifest omits SPDX metadata, but the installed package carries the standard MIT license text; retain that notice.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "posthog-js",
+      "version": "1.386.6",
+      "license": "SEE LICENSE IN LICENSE",
+      "classification": "CHECK",
+      "decision": "allow",
+      "rationale": "Package metadata points to the bundled Apache-2.0 license text; retain the license and attribution notices.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    },
+    {
+      "package": "rgbcolor",
+      "version": "1.0.1",
+      "license": "MIT OR SEE LICENSE IN FEEL-FREE.md",
+      "classification": "CHECK",
+      "decision": "allow",
+      "rationale": "Package includes the standard MIT grant and permits selecting it; retain the bundled copyright and license notice.",
+      "reviewedAt": "2026-10-06",
+      "expires": "2027-04-06"
+    }
+  ]
+}

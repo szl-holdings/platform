@@ -10,6 +10,7 @@
  * createApp() factory so tests can boot the same instrumented app.
  */
 
+import { isProductionRuntime } from '@workspace/aef-contracts';
 import cors from 'cors';
 import express, { type Express } from 'express';
 import { logger, requestLogger } from './logger.js';
@@ -19,6 +20,13 @@ import {
   shutdownOrchestratorOtel,
 } from './otel.js';
 import { createOrchestratorRouter } from './router.js';
+import { resolveOrchestratorRuntimeAdmission } from './runtime-admission.js';
+import {
+  createBearerAuthentication,
+  createRestrictedCors,
+  resolveCorsAllowedOrigins,
+  resolveOrchestratorAuthConfiguration,
+} from './security.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3003;
 
@@ -27,17 +35,44 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3003;
  * in. The span middleware runs before the access log so the request id it sets
  * on the response is available to the logger for correlation.
  */
-export async function createApp(): Promise<Express> {
+export interface CreateAppOptions {
+  env?: NodeJS.ProcessEnv;
+}
+
+export async function createApp(options: CreateAppOptions = {}): Promise<Express> {
+  const env = options.env ?? process.env;
+  // Validate the entire security boundary before OTEL initialization or a
+  // listener can advertise readiness.
+  const authConfiguration = resolveOrchestratorAuthConfiguration(env);
+  const allowedOrigins = resolveCorsAllowedOrigins(env);
+
   await initOrchestratorOtel();
 
   const app: Express = express();
 
-  app.use(cors());
-  app.use(express.json({ limit: '10mb' }));
+  app.use(createRestrictedCors(allowedOrigins));
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin) {
+          callback(null, false);
+          return;
+        }
+        callback(null, allowedOrigins.has(origin) ? origin : false);
+      },
+      credentials: true,
+    }),
+  );
   app.use(otelRequestSpanMiddleware());
   app.use(requestLogger);
 
-  app.use('/orchestrator', createOrchestratorRouter());
+  app.use(
+    '/orchestrator',
+    createOrchestratorRouter({
+      authenticate: createBearerAuthentication(authConfiguration),
+      env,
+    }),
+  );
 
   app.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok', service: 'alloy-ingestion-orchestrator' });
@@ -49,7 +84,8 @@ export async function createApp(): Promise<Express> {
   });
 
   app.get('/readyz', (_req, res) => {
-    res.status(200).json({ ready: true });
+    const admission = resolveOrchestratorRuntimeAdmission(env);
+    res.status(admission.ready ? 200 : 503).json(admission);
   });
 
   return app;
@@ -72,6 +108,9 @@ async function main(): Promise<void> {
 }
 
 // Start listening when run directly, but not when imported by tests.
-if (process.env.NODE_ENV !== 'test') {
+if (
+  process.env.NODE_ENV !== 'test' ||
+  isProductionRuntime(process.env, ['AEF_ENV', 'ORCHESTRATOR_ENV'])
+) {
   void main();
 }

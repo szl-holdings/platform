@@ -11,8 +11,11 @@
  * development mode). In production the gateway refuses to start without the key.
  */
 
+import { createHash, timingSafeEqual } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
-import { resolveEnterpriseAuthContext } from './enterprise-auth.js';
+import { getRevocationSyncReadiness, resolveEnterpriseAuthContext } from './enterprise-auth.js';
+import { resolveLocalOAuthToken } from './oauth-token-store.js';
+import { getGatewayApiKey, getGatewayTenantId, isProductionRuntime } from './runtime-config.js';
 
 /**
  * MCP calls that are allowed without authentication (public read-only subset).
@@ -26,18 +29,11 @@ const PUBLIC_METHODS = new Set(['tools/list', 'ping']);
 const PUBLIC_GET_PATHS = new Set(['/', '/health']);
 
 /**
- * HTTP GET path prefixes that are allowed without a Bearer token
- * (matched against router-relative `req.path`, i.e. the portion AFTER
- * the mount point — so for `app.use('/mcp', router)`, `req.path` is
- * `/nexus/verify/:hash`, not `/mcp/nexus/verify/:hash`).
- *
- * /nexus/verify/ is intentionally public: it is a read-only, hash-gated
- * lookup. Callers can only retrieve proof metadata they already have the hash
- * for, so exempting it from auth does not expose sensitive data while enabling
- * external auditors to independently verify proof records without needing a
- * gateway API key.
+ * No prefix-based GET exemption is currently safe. Governance receipt hashes
+ * are identifiers, not authorization secrets, so receipt lookup requires the
+ * same authenticated tenant context as every other tenant-scoped resource.
  */
-const PUBLIC_GET_PATH_PREFIXES: string[] = ['/nexus/verify/'];
+const PUBLIC_GET_PATH_PREFIXES: string[] = [];
 
 /**
  * HTTP POST paths that are allowed without a Bearer token.
@@ -48,24 +44,31 @@ const PUBLIC_GET_PATH_PREFIXES: string[] = ['/nexus/verify/'];
  */
 const PUBLIC_POST_PATHS = new Set(['/token', '/revoke']);
 
-export function resolveAuthContext(req: Request): {
+export interface GatewayAuthContext {
   authenticated: boolean;
   actorId: string;
+  tenantId?: string;
   apiKey: string | null;
   enterprise?: boolean;
+  oauth?: boolean;
   enterpriseRole?: string;
   enterpriseScope?: string;
-} {
-  const apiKey = process.env.SUBSTRATE_GATEWAY_API_KEY;
-  const isDev = process.env.NODE_ENV !== 'production';
+}
+
+export function resolveAuthContext(req: Request): GatewayAuthContext {
+  const apiKey = getGatewayApiKey();
+  const gatewayTenantId = getGatewayTenantId();
+  const isDev = !isProductionRuntime();
 
   const authHeader = req.headers.authorization ?? '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const token = /^Bearer ([^\s]+)$/i.exec(authHeader)?.[1] ?? null;
 
   if (!apiKey && isDev) {
+    const tenantId = gatewayTenantId ?? 'substrate-gateway';
     return {
       authenticated: true,
-      actorId: token ? `api-key:${token.slice(0, 8)}...` : 'anonymous:dev',
+      actorId: token ? `gateway-dev:${tenantId}` : 'anonymous:dev',
+      tenantId,
       apiKey: token,
     };
   }
@@ -77,18 +80,33 @@ export function resolveAuthContext(req: Request): {
       return {
         authenticated: true,
         actorId: enterpriseCtx.actorId,
+        tenantId: enterpriseCtx.tenantId,
         apiKey: null,
         enterprise: true,
         enterpriseRole: enterpriseCtx.role,
         enterpriseScope: enterpriseCtx.scope,
       };
     }
+
+    const oauthToken = resolveLocalOAuthToken(token);
+    if (oauthToken) {
+      return {
+        authenticated: true,
+        actorId: `oauth:${oauthToken.actorId}`,
+        tenantId: oauthToken.tenantId,
+        apiKey: null,
+        oauth: true,
+        enterpriseScope: oauthToken.scope,
+      };
+    }
   }
 
-  if (token && token === apiKey) {
+  if (token && apiKey && constantTimeTokenEqual(token, apiKey)) {
+    const tenantId = gatewayTenantId ?? 'substrate-gateway';
     return {
       authenticated: true,
-      actorId: `api-key:${token.slice(0, 8)}...`,
+      actorId: `gateway:${tenantId}`,
+      tenantId,
       apiKey: token,
     };
   }
@@ -96,12 +114,36 @@ export function resolveAuthContext(req: Request): {
   return { authenticated: false, actorId: 'anonymous', apiKey: null };
 }
 
+function constantTimeTokenEqual(candidate: string, expected: string): boolean {
+  const candidateDigest = createHash('sha256').update(candidate, 'utf8').digest();
+  const expectedDigest = createHash('sha256').update(expected, 'utf8').digest();
+  return timingSafeEqual(candidateDigest, expectedDigest);
+}
+
 /**
  * Express middleware that enforces auth for non-public MCP methods.
  */
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const revocationReadiness = getRevocationSyncReadiness();
   const ctx = resolveAuthContext(req);
   (req as Request & { authCtx: typeof ctx }).authCtx = ctx;
+
+  const isReadinessDiagnostic =
+    req.method === 'GET' && (req.path === '/' || req.path === '/health');
+  const isRevocationWebhook = req.method === 'POST' && req.path === '/revoke';
+  const isTokenExchange = req.method === 'POST' && req.path === '/token';
+  if (
+    !revocationReadiness.ready &&
+    !isReadinessDiagnostic &&
+    !isRevocationWebhook &&
+    (ctx.authenticated || isTokenExchange)
+  ) {
+    res.status(503).json({
+      error: 'SERVICE_NOT_READY',
+      reason: 'Persisted enterprise revocation state is unavailable.',
+    });
+    return;
+  }
 
   if (ctx.authenticated) {
     next();
@@ -113,7 +155,10 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     return;
   }
 
-  if (req.method === 'GET' && PUBLIC_GET_PATH_PREFIXES.some((prefix) => req.path.startsWith(prefix))) {
+  if (
+    req.method === 'GET' &&
+    PUBLIC_GET_PATH_PREFIXES.some((prefix) => req.path.startsWith(prefix))
+  ) {
     next();
     return;
   }
@@ -125,7 +170,10 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 
   const body = req.body as { method?: string } | undefined;
   const method = body?.method ?? '';
-  if (PUBLIC_METHODS.has(method)) {
+  // JSON-RPC method exemptions apply only to the MCP request endpoint. Never
+  // let an attacker smuggle a public method name into the JSON body of a
+  // privileged REST route such as /register.
+  if (req.method === 'POST' && req.path === '/' && PUBLIC_METHODS.has(method)) {
     next();
     return;
   }

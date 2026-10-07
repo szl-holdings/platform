@@ -7,7 +7,9 @@ function b(path: string) {
   return path === '/' ? `${BASE}/` : `${BASE}${path}`;
 }
 
-const NAV_GROUPS = [
+// Retained in source for migration reference only. The public candidate renders
+// the evidence-reviewed navigation below, so Rollup drops this legacy catalogue.
+const _LEGACY_NAV_GROUPS = [
   {
     label: 'SYSTEM',
     items: [
@@ -225,6 +227,23 @@ const NAV_GROUPS = [
     items: [{ href: '/karpathy-evolution', label: 'Karpathy Evolution' }],
   },
 ];
+
+const NAV_GROUPS = [
+  {
+    label: 'CANDIDATE',
+    items: [{ href: '/', label: 'Home' }],
+  },
+  {
+    label: 'REVIEWED FIXTURES',
+    items: [
+      { href: '/agent-viz', label: 'Agent visualization' },
+      { href: '/adversarial', label: 'Governance stress test' },
+      { href: '/frontier', label: 'Positioning UI' },
+      { href: '/verifier', label: 'Verification workflow' },
+      { href: '/security-agents', label: 'Security-agent workflow' },
+    ],
+  },
+] as const;
 
 const TOKENS = {
   bg: '#0a0a0a',
@@ -473,7 +492,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             <span>Active prototype</span>
           </div>
           <Link
-            href={b('/start')}
+            href={b('/')}
             style={{
               padding: isDesktop ? '0.4rem 0.875rem' : '0.4rem 0.5rem',
               minHeight: 44,
@@ -490,7 +509,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
               letterSpacing: '-0.005em',
             }}
           >
-            Series A view
+            Candidate home
           </Link>
         </div>
       </div>

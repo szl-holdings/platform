@@ -35,17 +35,18 @@ die()  { echo "[bootstrap] FATAL: $*" >&2; exit 1; }
 # ── 0. Verify tool prerequisites ────────────────────────────────────────────
 log "Checking prerequisites…"
 command -v node  >/dev/null 2>&1 || die "node not found — install Node >=24"
-command -v pnpm  >/dev/null 2>&1 || die "pnpm not found — run: npm i -g pnpm"
 node_version=$(node -e "process.stdout.write(process.version)")
+node_major=$(node -p 'process.versions.node.split(".")[0]')
+if [[ ! "$node_major" =~ ^[0-9]+$ ]] || (( node_major < 24 )); then
+  die "Node >=24 is required; found $node_version"
+fi
+# shellcheck source=activate-pnpm.sh
+source "$REPO_ROOT/scripts/activate-pnpm.sh"
 log "node $node_version | pnpm $(pnpm --version)"
 
 # ── 1. Install dependencies ──────────────────────────────────────────────────
-log "Installing dependencies…"
-if [ "$CI_MODE" = "true" ]; then
-  pnpm install --frozen-lockfile
-else
-  pnpm install
-fi
+log "Installing dependencies from the committed lockfile…"
+pnpm install --frozen-lockfile
 log "Dependencies installed."
 
 # ── 2. Codegen (API spec → client types) ────────────────────────────────────
@@ -89,5 +90,7 @@ else
 fi
 
 log "Bootstrap complete. Start the platform with:"
+log "  source scripts/activate-pnpm.sh  # activate pnpm 10.26.1 in your current shell"
 log "  pnpm dev            # development (all artifacts in parallel)"
-log "  pnpm start          # production (uses NODE_ENV=production)"
+log "  pnpm start          # alias for the same artifact development servers"
+log "Production promotion uses the reviewed deployment workflows, not pnpm start."

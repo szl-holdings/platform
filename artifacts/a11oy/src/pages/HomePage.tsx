@@ -1,8 +1,8 @@
-import { useState, type CSSProperties, type ReactNode } from 'react';
-import { Link } from 'wouter';
 import { motion } from 'framer-motion';
-import { INDUSTRY_SOLUTIONS, CANONICAL_STEPS } from '../data/solutionsData';
+import { type CSSProperties, type ReactNode, useState } from 'react';
+import { Link } from 'wouter';
 import { SEVEN_PRINCIPLES } from '../data/blueprint';
+import { CANONICAL_STEPS, INDUSTRY_SOLUTIONS } from '../data/solutionsData';
 import { useAlloyDashboard } from '../graphql';
 
 const T = {
@@ -13,7 +13,9 @@ const T = {
   borderStrong: 'rgba(255,255,255,0.14)',
   text: '#f5f5f5',
   textDim: '#8a8a8a',
-  textMuted: '#5e5e5e',
+  // Small labels use this token extensively; keep it above WCAG AA contrast
+  // against both the page background and translucent surface cards.
+  textMuted: '#828282',
   accent: '#c9b787',
   accentDim: 'rgba(201,183,135,0.15)',
   accentGlow: 'rgba(201,183,135,0.06)',
@@ -31,9 +33,9 @@ const CAPABILITIES = [
     icon: 'S',
     title: 'Signal Intelligence',
     sub: "Like Claude's analysis — but governed",
-    desc: 'Ingest signals from any source — market feeds, IoT telemetry, document streams, API webhooks. Every signal is classified, enriched, and attributed before it reaches a decision-maker.',
+    desc: 'Candidate ingestion contracts cover market feeds, telemetry, documents, and webhooks. Each source still requires explicit attribution and runtime qualification.',
     features: [
-      'Real-time ingestion',
+      'Ingestion contract',
       'Multi-source fusion',
       'Anomaly detection',
       'Signal attribution',
@@ -42,32 +44,27 @@ const CAPABILITIES = [
   {
     icon: 'G',
     title: 'Governed Agents',
-    sub: "Beyond Claude's agents — with proof",
-    desc: 'Autonomous agents that plan, act, and collaborate — but every action passes through covenant policy gates. No agent executes without human approval on material decisions.',
-    features: [
-      'Policy-gated execution',
-      'Durable workflows',
-      'Human-in-the-loop',
-      'Full audit trail',
-    ],
+    sub: 'Candidate agent workflows with explicit proof boundaries',
+    desc: 'The prototype demonstrates planning, policy, approval, and evidence contracts. Production execution remains held unless its live policy, workflow, tenant, and durable evidence dependencies are admitted.',
+    features: ['Policy contract', 'Workflow design', 'Human-in-the-loop', 'Evidence boundary'],
   },
   {
     icon: 'E',
     title: 'Enterprise Connectors',
-    sub: "Like Claude's connectors — governed by MCP",
-    desc: 'Connect to 200+ enterprise systems through the Model Context Protocol. Every data flow is logged, every integration is policy-gated, every connector carries proof-chain attribution.',
-    features: ['200+ integrations', 'MCP-native', 'Governed data flow', 'Zero-trust architecture'],
+    sub: 'MCP-oriented connector catalogue',
+    desc: 'Explore 24 named connector examples in this interface. A listed name is not evidence of a configured, authorized, or production-admitted integration.',
+    features: ['24 catalogue examples', 'MCP-oriented', 'Admission required', 'Tenant boundary'],
   },
   {
     icon: 'P',
     title: 'Proof Chain',
-    sub: 'What no one else has',
-    desc: 'Immutable, append-only ledger of every consequential action. Who proposed it, who approved it, which model recommended it, what evidence supported it. Cryptographically verifiable.',
+    sub: 'Target evidence contract',
+    desc: 'The interface demonstrates the fields a durable proof record must carry. Current local fixtures and process-local stores are not immutable, production evidence or cryptographic attestations.',
     features: [
-      'Immutable records',
-      'Cryptographic verification',
-      'Auditor-ready',
-      'Regulator-ready',
+      'Deterministic fixtures',
+      'Durability required',
+      'Signing required',
+      'Independent verification required',
     ],
   },
 ];
@@ -76,7 +73,7 @@ const ALLOY_CHARS = [
   {
     ch: 'a',
     word: 'Attribution',
-    desc: 'Every action records who proposed it, who approved it, what evidence supported it, and which model recommended it.',
+    desc: 'The target contract attributes proposer, approver, evidence, and model; candidate runtimes must prove those fields before promotion.',
   },
   {
     ch: '1',
@@ -86,12 +83,12 @@ const ALLOY_CHARS = [
   {
     ch: '1',
     word: 'One Proof Chain',
-    desc: 'Immutable, append-only record of every consequential action across every product. Tamper-resistant. Queryable.',
+    desc: 'Target: durable, append-only, tenant-bound records. The current prototype does not claim that production property.',
   },
   {
     ch: 'o',
     word: 'Orchestration',
-    desc: 'Durable multi-step workflow execution with checkpoint recovery, agent coordination, and policy gates at the platform layer.',
+    desc: 'Target: durable multi-step execution with checkpoint recovery, coordination, and policy gates; current candidate services remain held without durable infrastructure.',
   },
   {
     ch: 'y',
@@ -109,12 +106,12 @@ const PRIMITIVES = [
   {
     name: 'Proof Chain',
     num: '02',
-    desc: 'Immutable append-only ledger of every consequential action. Cryptographically verifiable. Queryable by actor or decision.',
+    desc: 'Target contract for durable, signed, queryable records; current demo fixtures are explicitly non-authoritative.',
   },
   {
     name: 'Covenant Policy',
     num: '03',
-    desc: 'Policy-as-code engine that gates every action. Who can approve, when, under what conditions — enforced at the platform layer.',
+    desc: 'Policy-as-code contract for approvals and execution. Production use requires a live policy engine and fail-closed runtime admission.',
   },
   {
     name: 'Outcome Graph',
@@ -134,7 +131,7 @@ const PRIMITIVES = [
   {
     name: 'Compliance Fabric',
     num: '07',
-    desc: 'Compliance-as-Runtime — maps every A11oy primitive to EU AI Act, NIST AI RMF, ISO 42001, and CSA Agentic Profile controls. Compass dashboard, Agent-BOM (CycloneDX), Delegation Chain governance, Federated Trust Exchange, and CARE engine.',
+    desc: 'Candidate control mappings for EU AI Act, NIST AI RMF, ISO 42001, and CSA Agentic Profile, plus demo Compass, Agent-BOM, delegation, trust-exchange, and CARE surfaces. These are not certifications.',
   },
 ];
 
@@ -166,55 +163,20 @@ const VERTICALS = [
 ];
 
 const MODEL_PROVIDERS = [
-  {
-    name: 'Anthropic',
-    models: ['Claude Mythos', 'Claude 4 Opus', 'Claude 4 Sonnet', 'Claude Haiku'],
-    tier: 'frontier',
-    desc: 'Constitutional AI with the strongest safety guarantees. Powers sensitive legal analysis, security assessments, and governance-critical reasoning through the a11oy Covenant layer.',
-  },
-  {
-    name: 'OpenAI',
-    models: ['GPT-5.1', 'o3', 'o4-mini', 'GPT-4.1 nano'],
-    tier: 'frontier',
-    desc: 'Frontier reasoning, function calling, multimodal. Powers the a11oy Responses API layer, Codex execution, and complex multi-step agentic workflows.',
-  },
-  {
-    name: 'DeepSeek',
-    models: ['V4-Pro (236B MoE)', 'V3', 'R1'],
-    tier: 'frontier',
-    desc: '236B MoE, 22B active params. Exceptional at complex reasoning and mathematical modeling — ideal for voyage economics and portfolio analytics.',
-  },
-  {
-    name: 'Google',
-    models: ['Gemma-4-31B-IT', 'Gemini 2.5 Pro'],
-    tier: 'frontier',
-    desc: '31B dense model, 128K context. Strong multilingual and instruction-following for legal document analysis and threat intelligence reports.',
-  },
-  {
-    name: 'Qwen',
-    models: ['Qwen3.6-35B-A3B', 'Qwen2.5-Coder'],
-    tier: 'open',
-    desc: '35B MoE, 3B active. Hybrid thinking mode — fast responses for operations, deep reasoning for compliance. Exceptional code generation.',
-  },
-  {
-    name: 'Meta',
-    models: ['Llama 4 Maverick', 'Llama 3.3-70B'],
-    tier: 'open',
-    desc: 'Open-weight workhorse. Cost-effective for high-throughput classification, entity extraction, and batch data processing across all verticals.',
-  },
-  {
-    name: 'Moonshot',
-    models: ['KIMI-K2.5'],
-    tier: 'open',
-    desc: 'Long-context specialist with massive synthetic training. Powers deep research tasks and comprehensive legal document review.',
-  },
-  {
-    name: 'HuggingFace',
-    models: ['700K+ models', 'Inference API'],
-    tier: 'platform',
-    desc: 'Universal model registry. a11oy discovers, evaluates, and deploys any model through governed inference with full proof-chain attribution.',
-  },
-];
+  'Anthropic',
+  'OpenAI',
+  'DeepSeek',
+  'Google',
+  'Qwen',
+  'Meta',
+  'Moonshot',
+  'HuggingFace',
+].map((name) => ({
+  name,
+  models: ['No model admitted in this candidate'],
+  tier: 'catalogue target',
+  desc: 'Registry placeholder only. Access, exact model identity, licensing, task suitability, safety posture, and execution receipts require deployment-specific qualification.',
+}));
 
 const CONNECTORS = [
   { name: 'Salesforce', cat: 'CRM' },
@@ -246,19 +208,19 @@ const CONNECTORS = [
 const SOLUTIONS = [
   {
     title: 'Governed AI Agents',
-    desc: 'Autonomous agents with covenant policy gates. Every action approved, every outcome recorded.',
+    desc: 'Prototype agent flows with explicit policy, approval, outcome, and production-admission boundaries.',
   },
   {
     title: 'Code Modernization',
-    desc: 'Migrate legacy systems with governed proof at every step. Business logic integrity guaranteed.',
+    desc: 'Candidate modernization workflow with reviewable diffs and evidence fields; no integrity guarantee is made without workload-specific verification.',
   },
   {
     title: 'Financial Intelligence',
-    desc: 'Portfolio analytics, risk scoring, regulatory filing — with full attribution on every conclusion.',
+    desc: 'Candidate portfolio, risk, and filing workflows with an explicit attribution requirement.',
   },
   {
     title: 'Legal Operations',
-    desc: 'Matter management, contract analysis, compliance monitoring — proof-chained and auditor-ready.',
+    desc: 'Candidate matter, contract, and compliance workflows with reviewable evidence requirements.',
   },
   {
     title: 'Security & Defense',
@@ -266,7 +228,7 @@ const SOLUTIONS = [
   },
   {
     title: 'Maritime Intelligence',
-    desc: 'Fleet positioning, voyage economics, sanctions screening — real-time with proof.',
+    desc: 'Candidate fleet, voyage, and sanctions workflows with source and evidence requirements.',
   },
 ];
 
@@ -312,7 +274,13 @@ function SectionLabel({ children }: { children: ReactNode }) {
 
 function HeroArt() {
   return (
-    <svg viewBox="0 0 500 500" fill="none" style={{ width: '100%', maxWidth: 480, opacity: 0.9 }}>
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      viewBox="0 0 500 500"
+      fill="none"
+      style={{ width: '100%', maxWidth: 480, opacity: 0.9 }}
+    >
       <defs>
         <radialGradient id="glow" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor={T.accent} stopOpacity="0.15" />
@@ -330,7 +298,7 @@ function HeroArt() {
         strokeWidth="0.5"
         fill="none"
       />
-      {[0, 60, 120, 180, 240, 300].map((angle, i) => {
+      {[0, 60, 120, 180, 240, 300].map((angle) => {
         const r1 = 80,
           r2 = 160;
         const x1 = 250 + r1 * Math.cos((angle * Math.PI) / 180);
@@ -339,7 +307,7 @@ function HeroArt() {
         const y2 = 250 + r2 * Math.sin((angle * Math.PI) / 180);
         return (
           <line
-            key={i}
+            key={angle}
             x1={x1}
             y1={y1}
             x2={x2}
@@ -349,18 +317,20 @@ function HeroArt() {
           />
         );
       })}
-      {[0, 72, 144, 216, 288].map((angle, i) => {
+      {[0, 72, 144, 216, 288].map((angle) => {
         const r = 120;
         const cx = 250 + r * Math.cos((angle * Math.PI) / 180);
         const cy = 250 + r * Math.sin((angle * Math.PI) / 180);
-        return <circle key={i} cx={cx} cy={cy} r="4" fill={T.accent} opacity="0.6" />;
+        return <circle key={angle} cx={cx} cy={cy} r="4" fill={T.accent} opacity="0.6" />;
       })}
       <circle cx="250" cy="250" r="6" fill={T.accent} opacity="0.9" />
-      {[30, 90, 150, 210, 270, 330].map((angle, i) => {
+      {[30, 90, 150, 210, 270, 330].map((angle) => {
         const r = 160;
         const cx = 250 + r * Math.cos((angle * Math.PI) / 180);
         const cy = 250 + r * Math.sin((angle * Math.PI) / 180);
-        return <circle key={`o-${i}`} cx={cx} cy={cy} r="2.5" fill={T.textMuted} opacity="0.4" />;
+        return (
+          <circle key={`outer-${angle}`} cx={cx} cy={cy} r="2.5" fill={T.textMuted} opacity="0.4" />
+        );
       })}
       <text
         x="250"
@@ -382,7 +352,7 @@ function CommandPrompt() {
   const placeholder = 'What decision needs governing?';
 
   return (
-    <div
+    <fieldset
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -393,6 +363,8 @@ function CommandPrompt() {
         border: `1px solid ${T.border}`,
         maxWidth: 520,
         width: '100%',
+        margin: 0,
+        minWidth: 0,
         transition: 'border-color 0.3s ease',
       }}
       onFocus={(e) => {
@@ -402,6 +374,7 @@ function CommandPrompt() {
         e.currentTarget.style.borderColor = T.border;
       }}
     >
+      <legend className="sr-only">Governed command prompt</legend>
       <label htmlFor="a11oy-command" className="sr-only">
         Command prompt
       </label>
@@ -429,7 +402,7 @@ function CommandPrompt() {
         }}
       />
       <Link
-        href={b('/now')}
+        href={b('/agent-viz')}
         style={{
           padding: '0.5rem 1.125rem',
           background: T.accent,
@@ -442,13 +415,13 @@ function CommandPrompt() {
           letterSpacing: '-0.01em',
         }}
       >
-        Execute
+        Explore fixture
       </Link>
-    </div>
+    </fieldset>
   );
 }
 
-function LivePulseStrip() {
+function RuntimeSampleStrip() {
   const { data: dashboard } = useAlloyDashboard();
   if (!dashboard) return null;
   const stats = [
@@ -494,7 +467,7 @@ function LivePulseStrip() {
                 color: T.accent,
               }}
             >
-              LIVE
+              CONNECTED SAMPLE · SOURCE MUST BE VERIFIED
             </span>
           </div>
           {stats.map((s) => (
@@ -592,11 +565,11 @@ export function HomePage() {
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2.25rem' }}>
           {[
-            { label: 'Architecture', href: b('/architecture') },
-            { label: 'Applications', href: b('/applications') },
-            { label: 'Resources', href: b('/resources') },
-            { label: 'Platform', href: b('/fabric') },
-            { label: 'Now Board', href: b('/now') },
+            { label: 'Agent visualization', href: b('/agent-viz') },
+            { label: 'Stress test', href: b('/adversarial') },
+            { label: 'Positioning UI', href: b('/frontier') },
+            { label: 'Verifier', href: b('/verifier') },
+            { label: 'Security agents', href: b('/security-agents') },
           ].map((link) => (
             <Link
               key={link.label}
@@ -613,7 +586,7 @@ export function HomePage() {
             </Link>
           ))}
           <Link
-            href={b('/investor-demo')}
+            href={b('/agent-viz')}
             style={{
               padding: '0.45rem 1.125rem',
               fontSize: '0.8125rem',
@@ -625,7 +598,7 @@ export function HomePage() {
               letterSpacing: '-0.01em',
             }}
           >
-            Request access
+            Explore fixtures
           </Link>
         </div>
       </nav>
@@ -644,7 +617,13 @@ export function HomePage() {
           aria-hidden="true"
           style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}
         >
-          <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, opacity: 0.25 }}>
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            width="100%"
+            height="100%"
+            style={{ position: 'absolute', inset: 0, opacity: 0.25 }}
+          >
             <defs>
               <pattern id="hero-grid" width="80" height="80" patternUnits="userSpaceOnUse">
                 <path
@@ -693,7 +672,7 @@ export function HomePage() {
                 marginBottom: '2.5rem',
               }}
             >
-              Governed Decision Operating System
+              CANDIDATE PROTOTYPE · NOT PRODUCTION-ADMITTED
             </motion.p>
 
             <motion.h1
@@ -726,10 +705,10 @@ export function HomePage() {
                 margin: '0 0 2.5rem',
               }}
             >
-              A governed agentic OS that perceives business events, reasons across domains, calls
-              tools, executes workflows, verifies outcomes, and leaves a proof trail. Every action
-              policy-gated. Every outcome proven. Built for the enterprise that can't afford to
-              guess — and can't afford to not know.
+              This interface demonstrates a governed decision loop across signals, models, tools,
+              workflows, approvals, and evidence. Production execution, durable state, and signed
+              proof remain unavailable until each dependency passes its admission and verification
+              gate.
             </motion.p>
 
             <motion.div
@@ -801,7 +780,7 @@ export function HomePage() {
               marginBottom: '2rem',
             }}
           >
-            Powering governed decisions with frontier intelligence
+            Provider families represented in the routing design · availability is not implied
           </p>
           <div
             style={{
@@ -810,7 +789,7 @@ export function HomePage() {
               justifyContent: 'center',
               gap: 'clamp(2rem, 5vw, 4rem)',
               flexWrap: 'wrap',
-              opacity: 0.4,
+              opacity: 0.7,
             }}
           >
             {['OpenAI', 'Anthropic', 'DeepSeek', 'Google', 'Meta', 'Qwen', 'HuggingFace'].map(
@@ -833,7 +812,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <LivePulseStrip />
+      <RuntimeSampleStrip />
 
       <section style={{ padding: 'clamp(7rem, 14vw, 12rem) 0' }}>
         <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 2rem', textAlign: 'center' }}>
@@ -862,9 +841,9 @@ export function HomePage() {
                 margin: '0 auto',
               }}
             >
-              It needs a system that senses signals across every domain, understands their cause,
-              recommends governed responses, executes them with human approval, and proves it did so
-              correctly.
+              It needs a system that can attribute signals, propose governed responses, require
+              human approval where policy demands it, and preserve independently verifiable
+              evidence. This prototype demonstrates that contract, not a production guarantee.
             </p>
           </FadeIn>
         </div>
@@ -898,8 +877,8 @@ export function HomePage() {
                   margin: 0,
                 }}
               >
-                Every action in a11oy flows through the same seven governing principles — the
-                canonical lifecycle of a governed agentic intelligence layer.
+                The prototype organizes candidate actions around seven governing principles — a
+                reviewable lifecycle whose production guarantees depend on admitted runtimes.
               </p>
             </div>
           </FadeIn>
@@ -988,11 +967,12 @@ export function HomePage() {
                   margin: '0 0 1.25rem',
                 }}
               >
-                Everything Claude offers. <span style={{ color: T.accent }}>Plus proof.</span>
+                Governed intelligence.{' '}
+                <span style={{ color: T.accent }}>Inspectable boundaries.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
-                Signal intelligence, governed agents, enterprise connectors, and an immutable proof
-                chain on every decision. No other platform has all four.
+                The candidate brings signal, agent, connector, policy, and evidence contracts into
+                one reviewable interface. It does not claim immutable production proof today.
               </p>
             </div>
           </FadeIn>
@@ -1127,7 +1107,7 @@ export function HomePage() {
             }}
           >
             {ALLOY_CHARS.map((c, i) => (
-              <FadeIn key={i} delay={i * 0.06}>
+              <FadeIn key={`${c.ch}-${c.word}`} delay={i * 0.06}>
                 <div style={{ background: T.bg, padding: '2.5rem 1.5rem', height: '100%' }}>
                   <div
                     style={{
@@ -1185,8 +1165,9 @@ export function HomePage() {
                 Four governed objects. <span style={{ color: T.accent }}>One coherent system.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
-                Every action that matters flows through the same primitives — the building blocks
-                that make decisions reproducible, auditable, and improvable.
+                Candidate actions are modeled through the same primitives — building blocks for
+                reproducibility, auditability, and improvement once their runtime dependencies are
+                admitted.
               </p>
             </div>
           </FadeIn>
@@ -1266,8 +1247,9 @@ export function HomePage() {
                   maxWidth: '56ch',
                 }}
               >
-                200+ governed connectors powered by the Model Context Protocol. Every data flow is
-                policy-gated, every integration carries proof-chain attribution.
+                This catalogue contains {CONNECTORS.length} named examples organized for an MCP
+                integration path. Each connector needs separate credentials, authorization, tenant
+                isolation, runtime tests, and evidence admission before it is called live.
               </p>
             </div>
           </FadeIn>
@@ -1283,6 +1265,7 @@ export function HomePage() {
           >
             {connectorCats.map((cat) => (
               <button
+                type="button"
                 key={cat}
                 onClick={() => setConnectorFilter(cat)}
                 style={{
@@ -1314,7 +1297,7 @@ export function HomePage() {
               border: `1px solid ${T.border}`,
             }}
           >
-            {filteredConnectors.map((c, i) => (
+            {filteredConnectors.map((c) => (
               <div
                 key={c.name}
                 style={{
@@ -1370,7 +1353,8 @@ export function HomePage() {
                   margin: '0 0 1rem',
                 }}
               >
-                One platform. <span style={{ color: T.accent }}>Every governed use case.</span>
+                One candidate platform.{' '}
+                <span style={{ color: T.accent }}>Reviewable use cases.</span>
               </h2>
             </div>
           </FadeIn>
@@ -1427,7 +1411,7 @@ export function HomePage() {
                   margin: '0 0 1rem',
                 }}
               >
-                One agentic layer. <span style={{ color: T.accent }}>Every governed domain.</span>
+                One candidate layer. <span style={{ color: T.accent }}>Seven design domains.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
                 Each vertical runs on the same seven governing principles — from Ingest to Learn —
@@ -1505,12 +1489,12 @@ export function HomePage() {
                   margin: '0 0 1rem',
                 }}
               >
-                Every model. <span style={{ color: T.accent }}>One governance layer.</span>
+                Provider catalogue. <span style={{ color: T.accent }}>One admission contract.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
-                a11oy routes requests to the right model — frontier reasoning, open-weight
-                efficiency, or domain specialists — with full proof-chain attribution on every
-                inference.
+                The router design selects among frontier, open-weight, and domain candidates. A
+                provider is usable only after access, model identity, policy, and durable evidence
+                are configured and verified.
               </p>
             </div>
           </FadeIn>
@@ -1624,11 +1608,12 @@ export function HomePage() {
                   margin: '0 0 1rem',
                 }}
               >
-                One governed loop. <span style={{ color: T.accent }}>Every industry.</span>
+                One governed-loop design. <span style={{ color: T.accent }}>Seven domains.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
                 Other platforms give you a chatbot. a11oy gives you a governed decision operating
-                system — the same nine-stage canonical loop applied across every vertical.
+                system — this prototype applies the same nine-stage contract across seven design
+                verticals.
               </p>
             </div>
           </FadeIn>
@@ -1636,6 +1621,7 @@ export function HomePage() {
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
             {INDUSTRY_SOLUTIONS.map((s) => (
               <button
+                type="button"
                 key={s.id}
                 onClick={() => {
                   setActiveIndustry(s.id);
@@ -1803,17 +1789,24 @@ export function HomePage() {
                   gap: '0.75rem',
                 }}
               >
-                {activeSolution.useCases.map((uc, i) => {
-                  const key = `${activeSolution.id}-${i}`;
+                {activeSolution.useCases.map((uc) => {
+                  const key = `${activeSolution.id}-${uc.title}`;
                   const isExpanded = expandedUseCase === key;
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={key}
+                      aria-expanded={isExpanded}
                       onClick={() => setExpandedUseCase(isExpanded ? null : key)}
                       style={{
+                        display: 'block',
+                        width: '100%',
                         padding: '1.25rem',
                         borderRadius: 10,
                         cursor: 'pointer',
+                        color: 'inherit',
+                        font: 'inherit',
+                        textAlign: 'left',
                         border: `1px solid ${isExpanded ? 'rgba(201,183,135,0.25)' : T.border}`,
                         background: isExpanded ? T.accentGlow : T.bg,
                         transition: 'all 0.2s ease',
@@ -1925,7 +1918,7 @@ export function HomePage() {
                           </div>
                         </motion.div>
                       )}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -1953,8 +1946,9 @@ export function HomePage() {
                 Nine stages. <span style={{ color: T.accent }}>One canonical path.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
-                While others offer chat windows, a11oy enforces the governed Decision Loop — from
-                signal detection to real-world outcome, with immutable proof at every stage.
+                The candidate models a governed Decision Loop from signal detection to outcome. Each
+                stage exposes the evidence it would need; durable signed proof is a production
+                admission requirement, not a property of these fixtures.
               </p>
             </div>
           </FadeIn>
@@ -2034,7 +2028,7 @@ export function HomePage() {
                   margin: '0 0 1rem',
                 }}
               >
-                Live Example — {activeSolution.icon} {activeSolution.name}
+                Deterministic Scenario — {activeSolution.icon} {activeSolution.name}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {Object.entries(activeSolution.loopExample).map(([stage, text], i) => (
@@ -2116,8 +2110,9 @@ export function HomePage() {
                   maxWidth: '58ch',
                 }}
               >
-                Chatbots answer questions. a11oy governs decisions. Every model call is attributed.
-                Every action is proof-chained. Every outcome feeds back to calibrate the next cycle.
+                The prototype shows how model calls, approvals, actions, and outcomes can share one
+                governance contract. Runtime attribution, proof persistence, and learning must be
+                observed in an admitted deployment before those capabilities are claimed.
               </p>
             </div>
           </FadeIn>
@@ -2134,24 +2129,24 @@ export function HomePage() {
           >
             {[
               {
-                title: 'Proof on Every Decision',
-                desc: 'Immutable, append-only record of every model call, every approval, every outcome. Cryptographically verifiable. Auditor-ready.',
+                title: 'Proof Contract on Every Decision',
+                desc: 'A reviewable target schema for model calls, approvals, and outcomes. Durable append-only storage, signatures, and independent verification remain required.',
               },
               {
-                title: '8 Model Providers, One Router',
-                desc: 'OpenAI, Anthropic, DeepSeek, Google, Qwen, Meta, Moonshot, HuggingFace — routed by task type, vertical, cost, and compliance policy.',
+                title: '8 Provider Families, One Router Design',
+                desc: 'OpenAI, Anthropic, DeepSeek, Google, Qwen, Meta, Moonshot, and HuggingFace are catalogue targets; configured access and qualified model identity must be verified separately.',
               },
               {
-                title: 'Policy Gates, Not Guardrails',
-                desc: 'Covenant policies enforce who can approve, when, under what conditions. Not optional safety warnings — mandatory governance gates.',
+                title: 'Fail-Closed Policy Contract',
+                desc: 'The design requires an admitted live policy engine to decide who can approve, when, and under what conditions; unavailable dependencies hold execution.',
               },
               {
-                title: 'Outcomes Close the Loop',
-                desc: 'The Outcome Graph records what actually happened and compares it to the recommendation. Models recalibrate. The system evolves.',
+                title: 'Outcome Feedback Target',
+                desc: 'The design compares observed outcomes with recommendations. Production learning requires durable lineage and separately validated recalibration.',
               },
               {
-                title: 'Durable Execution',
-                desc: 'Checkpoint recovery, agent coordination, human-in-the-loop handoffs. Not a stateless API call — a governed, durable workflow.',
+                title: 'Durable Execution Requirement',
+                desc: 'Checkpoint recovery, coordination, and human handoffs are promotion requirements. Process-local candidate services remain held.',
               },
               {
                 title: '7 Industry Verticals',
@@ -2159,7 +2154,7 @@ export function HomePage() {
               },
               {
                 title: 'Glasswing Transparency',
-                desc: 'Public trust portal, CAVD coordinated disclosure, 90-day transparency reports, adversarial robustness wall. Every governance claim backed by a verifiable open-spec artifact.',
+                desc: 'Candidate trust portal, disclosure, transparency-report, and robustness surfaces. Published artifacts must be bound to exact source and independently verified before promotion.',
               },
             ].map((item, i) => (
               <FadeIn key={item.title} delay={i * 0.05}>
@@ -2221,8 +2216,8 @@ export function HomePage() {
                   <p style={{ margin: '0 0 1.25rem' }}>
                     The name comes from metallurgy: an alloy is multiple elements fused into
                     something stronger than any single part. a11oy fuses signal intelligence, causal
-                    reasoning, policy enforcement, and cryptographic proof into one execution
-                    fabric.
+                    reasoning, policy contracts, and an evidence architecture into one candidate
+                    execution fabric.
                   </p>
                   <p style={{ margin: '0 0 1.25rem' }}>
                     Most AI platforms stop at recommendation. a11oy governs what happens after the
@@ -2230,8 +2225,9 @@ export function HomePage() {
                     evidence, and how the outcome is recorded.
                   </p>
                   <p style={{ margin: 0 }}>
-                    Every action carries proof. Every decision carries attribution. Every outcome
-                    feeds back into the system to make the next decision better.
+                    The target is attributable actions, reviewable decisions, and outcome feedback.
+                    This prototype separates that design from the durable, signed runtime evidence
+                    still required for production promotion.
                   </p>
                 </div>
               </div>
@@ -2270,8 +2266,9 @@ export function HomePage() {
                       fontStyle: 'italic',
                     }}
                   >
-                    No material action executes without human approval. Not as an option. Not as a
-                    feature flag. As a structural guarantee embedded in the execution fabric.
+                    Target invariant: material actions require the approvals selected by policy.
+                    Candidate runtimes stay held until a live policy engine, durable workflow, and
+                    fail-closed evidence path prove that invariant.
                   </blockquote>
                   <div
                     style={{
@@ -2288,7 +2285,7 @@ export function HomePage() {
                       { val: '59', label: 'SDK Primitives' },
                       { val: '133', label: 'API Endpoints' },
                       { val: '7', label: 'Fabric Layers' },
-                      { val: '100%', label: 'Proof Integrity' },
+                      { val: 'HOLD', label: 'Production Proof' },
                     ].map((m) => (
                       <div key={m.label} style={{ padding: '1rem', background: T.bg }}>
                         <p
@@ -2351,11 +2348,12 @@ export function HomePage() {
                   margin: '0 0 1rem',
                 }}
               >
-                Beyond aggregation. <span style={{ color: T.accent }}>Into governance.</span>
+                Questions before <span style={{ color: T.accent }}>comparison.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
-                Other platforms observe signals or automate workflows. a11oy governs the entire path
-                from signal to consequence — with structural proof at every step.
+                The entries below are procurement questions, not findings, rankings, or claims about
+                another vendor. Current product documentation, commercial terms, and reproducible
+                testing are required before any comparison is published.
               </p>
             </div>
           </FadeIn>
@@ -2374,38 +2372,38 @@ export function HomePage() {
               {
                 name: 'Palantir',
                 category: 'Decision Intelligence',
-                has: 'Enterprise data integration, analytical workflows, government credibility',
-                gap: 'Governance is proprietary and opaque. No open SDK. No developer primitives for proof or policy.',
+                has: 'UNASSESSED — confirm current scope and deployment model directly with the vendor.',
+                gap: 'PROCUREMENT QUESTION — verify approval controls, policy enforcement, provenance, auditability, and developer interfaces.',
               },
               {
                 name: 'Datadog / New Relic',
                 category: 'Technical Observability',
-                has: 'APM, logging, metrics, distributed tracing for infrastructure',
-                gap: 'Observes technical systems, not business decisions. No governance layer, no proof chain, no policy enforcement.',
+                has: 'UNASSESSED — confirm current scope and deployment model directly with each vendor.',
+                gap: 'PROCUREMENT QUESTION — test business-decision context, approval controls, policy enforcement, and durable evidence.',
               },
               {
                 name: 'ServiceNow',
                 category: 'Workflow Automation',
-                has: 'Enterprise workflow automation, ITSM, AI-assisted operations',
-                gap: 'Executes workflows but carries no proof of why a workflow executed. No immutable audit trail connecting signal to outcome.',
+                has: 'UNASSESSED — confirm current scope and deployment model directly with the vendor.',
+                gap: 'PROCUREMENT QUESTION — compare workflow, evidence, policy, approval, and audit capabilities using current documentation and tests.',
               },
               {
                 name: 'BOSS Technology',
                 category: 'Business Observability',
-                has: 'Signal aggregation, business observability concept, real-time data unification',
-                gap: 'Stops at aggregation. Does not govern what happens after data is aggregated. No policy engine, no proof chain.',
+                has: 'UNASSESSED — confirm the product identity, current scope, and deployment model directly with the vendor.',
+                gap: 'PROCUREMENT QUESTION — verify post-aggregation policy, approval, execution, and evidence capabilities.',
               },
               {
                 name: 'OpenAI / LangChain',
                 category: 'Agent Frameworks',
-                has: 'Agent building blocks, tool calling, memory, handoffs, multi-agent coordination',
-                gap: 'Builds the engine. Does not govern the engine. No structural enforcement that prevents agents from executing material actions without approval.',
+                has: 'UNASSESSED — these are distinct products; evaluate each current surface independently.',
+                gap: 'PROCUREMENT QUESTION — test authenticated approval, policy enforcement, durable state, and evidence boundaries for the proposed deployment.',
               },
               {
                 name: 'a11oy',
                 category: 'Governed Execution',
-                has: 'Full stack: signal ingestion, causal reasoning, governed orchestration, cryptographic proof, alignment monitoring, 7 enterprise verticals. Glasswing distinction layer — CAVD coordinated disclosure, public trust portal, 90-day transparency, adversarial robustness wall, constitution-as-code DSL.',
-                gap: '',
+                has: 'Candidate stack: signal, causal, policy, orchestration, evidence, and alignment contracts across seven design verticals, with explicit non-promotion holds for unqualified runtimes.',
+                gap: 'Durable state, signed evidence, external infrastructure, provider access, and independent production observations remain admission requirements.',
               },
             ].map((comp, i) => (
               <FadeIn key={comp.name} delay={i * 0.05}>
@@ -2512,8 +2510,8 @@ export function HomePage() {
                 margin: '0 auto 2.5rem',
               }}
             >
-              A guided walk-through of a single decision — from signal capture to executed outcome,
-              with the proof chain visible at every step.
+              A deterministic walk-through of a candidate decision, with the intended evidence
+              fields visible at each step. It is not a production execution receipt.
             </p>
             <div
               style={{
@@ -2524,7 +2522,7 @@ export function HomePage() {
               }}
             >
               <Link
-                href={b('/investor-demo')}
+                href={b('/agent-viz')}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -2538,10 +2536,10 @@ export function HomePage() {
                   letterSpacing: '-0.01em',
                 }}
               >
-                Request access
+                Agent trace fixture
               </Link>
               <Link
-                href={b('/proof')}
+                href={b('/verifier')}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -2555,10 +2553,10 @@ export function HomePage() {
                   textDecoration: 'none',
                 }}
               >
-                Browse Proof Ledger
+                Verification fixture
               </Link>
               <Link
-                href={b('/sdk')}
+                href={b('/security-agents')}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -2572,7 +2570,7 @@ export function HomePage() {
                   textDecoration: 'none',
                 }}
               >
-                SDK & Cookbook
+                Security workflow fixture
               </Link>
             </div>
           </FadeIn>
@@ -2623,46 +2621,30 @@ export function HomePage() {
                 lineHeight: 1.6,
               }}
             >
-              Governed Decision Operating System. Proof on every decision that matters.
+              Governed decision-system prototype. Production proof requires durable signed evidence.
             </p>
           </div>
           <div style={{ display: 'flex', gap: 'clamp(2rem, 5vw, 4rem)' }}>
             {[
               {
-                title: 'Platform',
+                title: 'Candidate',
                 links: [
-                  { label: 'Now Board', href: b('/now') },
-                  { label: 'Proof Chain', href: b('/proof') },
-                  { label: 'Governance', href: b('/governance') },
-                  { label: 'Fabric', href: b('/fabric') },
+                  { label: 'Home', href: b('/') },
+                  { label: 'Agent Visualization', href: b('/agent-viz') },
                 ],
               },
               {
-                title: 'Solutions',
+                title: 'Governance Fixtures',
                 links: [
-                  { label: 'Verticals', href: b('/verticals') },
-                  { label: 'Agents', href: b('/agents') },
-                  { label: 'Connectors', href: b('/connectors') },
-                  { label: 'Model Router', href: b('/model-router') },
+                  { label: 'Stress Test', href: b('/adversarial') },
+                  { label: 'Verifier', href: b('/verifier') },
                 ],
               },
               {
-                title: 'Resources',
+                title: 'Research Fixtures',
                 links: [
-                  { label: 'Investor Demo', href: b('/investor-demo') },
-                  { label: 'SDK & Cookbook', href: b('/sdk') },
-                  { label: 'Deep Research', href: b('/deep-research') },
-                ],
-              },
-              {
-                title: 'Trust & Policies',
-                links: [
-                  { label: 'Constitution', href: b('/constitution') },
-                  { label: 'Security & Compliance', href: b('/security-compliance') },
-                  { label: 'Right to Audit', href: b('/right-to-audit') },
-                  { label: 'Trust Center', href: b('/trust') },
-                  { label: 'Public Trust Portal', href: b('/trust-portal') },
-                  { label: '90-Day Report', href: b('/transparency-report') },
+                  { label: 'Positioning UI', href: b('/frontier') },
+                  { label: 'Security Agents', href: b('/security-agents') },
                 ],
               },
             ].map((col) => (

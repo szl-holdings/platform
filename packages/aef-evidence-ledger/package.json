@@ -6,24 +6,34 @@
   "description": "Alloy Embedding Fabric — append-only evidence ledger recording request, chunk, source, scoring, and policy provenance for every retrieval operation. Ships an in-memory adapter and a JSONL filesystem adapter for development.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./store": {
+      "development": "./src/store.ts",
+      "workspace": "./src/store.ts",
       "types": "./dist/store.d.ts",
-      "import": "./src/store.ts"
+      "import": "./dist/store.js"
     },
     "./fs-store": {
+      "development": "./src/fs-store.ts",
+      "workspace": "./src/fs-store.ts",
       "types": "./dist/fs-store.d.ts",
-      "import": "./src/fs-store.ts"
+      "import": "./dist/fs-store.js"
     },
     "./query": {
+      "development": "./src/query.ts",
+      "workspace": "./src/query.ts",
       "types": "./dist/query.d.ts",
-      "import": "./src/query.ts"
+      "import": "./dist/query.js"
     }
   },
   "dependencies": {

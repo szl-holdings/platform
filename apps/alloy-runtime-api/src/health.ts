@@ -24,6 +24,7 @@
  */
 import { createRequire } from 'node:module';
 import { createWorkflowRun, executeWorkflowRun } from '@szl-holdings/workflow-runtime';
+import { isProductionRuntime, UNWIRED_PRODUCTION_CAPABILITIES } from './runtime-capabilities.js';
 import { getMemoryStore, runStore } from './store.js';
 
 const require = createRequire(import.meta.url);
@@ -129,15 +130,24 @@ function probe(name: string, fn: () => void): DependencyProbe {
 export function runReadinessProbes(): DependencyProbe[] {
   const HEALTH_TENANT = '__healthz_probe__';
 
-  return [
+  const probes = [
     // Memory fabric: write → read-back → evict a disposable entry.
     probe('memory-store', () => {
       const store = getMemoryStore(HEALTH_TENANT);
       const key = `probe_${Date.now()}`;
-      store.set({ memoryId: key, scope: 'working', key, value: 1, createdAt: new Date().toISOString() });
-      const read = store.get('working', key);
-      if (!read) throw new Error('write/read-back failed');
-      store.expireStale();
+      try {
+        store.set({
+          memoryId: key,
+          scope: 'working',
+          key,
+          value: 1,
+          createdAt: new Date().toISOString(),
+        });
+        const read = store.get('working', key);
+        if (!read) throw new Error('write/read-back failed');
+      } finally {
+        store.delete('working', key);
+      }
     }),
     // Run registry: set → tenant-scoped get → delete a disposable run.
     probe('run-registry', () => {
@@ -165,6 +175,18 @@ export function runReadinessProbes(): DependencyProbe[] {
       }
     }),
   ];
+
+  if (isProductionRuntime()) {
+    probes.push(
+      probe('production-capability-backends', () => {
+        throw new Error(
+          `unwired production capabilities: ${UNWIRED_PRODUCTION_CAPABILITIES.join(', ')}`,
+        );
+      }),
+    );
+  }
+
+  return probes;
 }
 
 /** Build the readiness payload by running every dependency probe. */

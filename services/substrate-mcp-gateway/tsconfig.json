@@ -8,6 +8,16 @@
     "composite": true,
     "types": ["node"]
   },
+  "references": [
+    { "path": "../../packages/approvals-inbox" },
+    { "path": "../../packages/cognitive-observability" },
+    { "path": "../../packages/evidence-graph" },
+    { "path": "../../packages/nexus-mcp" },
+    { "path": "../../packages/policy-engine" },
+    { "path": "../../packages/substrate" },
+    { "path": "../../packages/substrate-client" },
+    { "path": "../../packages/tool-mesh" }
+  ],
   "include": ["src/**/*"],
   "exclude": ["tests/**/*"]
 }

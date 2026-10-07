@@ -20,6 +20,7 @@
  */
 
 import { createHash, randomBytes } from 'node:crypto';
+import { isProductionRuntime } from './runtime-config.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -73,6 +74,10 @@ export interface McpEnterpriseToken {
   issuer: string;
   tenantId: string;
   mappedRole: string;
+}
+
+export function satisfiesEmailVerificationRequirement(required: boolean, claim: unknown): boolean {
+  return !required || claim === true;
 }
 
 // ─── JWKS Cache ────────────────────────────────────────────────────────────────
@@ -141,8 +146,14 @@ function parseJwtUnsafe(token: string): {
   const parts = token.split('.');
   if (parts.length !== 3) return null;
   try {
-    const header = JSON.parse(base64UrlDecode(parts[0]!).toString('utf8')) as Record<string, unknown>;
-    const payload = JSON.parse(base64UrlDecode(parts[1]!).toString('utf8')) as Record<string, unknown>;
+    const header = JSON.parse(base64UrlDecode(parts[0]!).toString('utf8')) as Record<
+      string,
+      unknown
+    >;
+    const payload = JSON.parse(base64UrlDecode(parts[1]!).toString('utf8')) as Record<
+      string,
+      unknown
+    >;
     return {
       header,
       payload,
@@ -181,12 +192,20 @@ async function verifyJwtSignature(
       let signature: string;
       if (alg === 'RS256' || alg === 'RS384' || alg === 'RS512') {
         const hashAlg = alg.replace('RS', 'SHA-') as 'SHA-256' | 'SHA-384' | 'SHA-512';
-        const verifier = createVerify(hashAlg === 'SHA-256' ? 'RSA-SHA256' : hashAlg === 'SHA-384' ? 'RSA-SHA384' : 'RSA-SHA512');
+        const verifier = createVerify(
+          hashAlg === 'SHA-256'
+            ? 'RSA-SHA256'
+            : hashAlg === 'SHA-384'
+              ? 'RSA-SHA384'
+              : 'RSA-SHA512',
+        );
         verifier.update(signingInput);
         if (verifier.verify(cryptoKey as string, signatureBytes)) return true;
       } else if (alg === 'ES256' || alg === 'ES384' || alg === 'ES512') {
         const hashAlg = alg.replace('ES', 'SHA-');
-        const verifier = createVerify(hashAlg === 'SHA-256' ? 'SHA256' : hashAlg === 'SHA-384' ? 'SHA384' : 'SHA512');
+        const verifier = createVerify(
+          hashAlg === 'SHA-256' ? 'SHA256' : hashAlg === 'SHA-384' ? 'SHA384' : 'SHA512',
+        );
         verifier.update(signingInput);
         if (verifier.verify(cryptoKey as string, signatureBytes)) return true;
       }
@@ -202,9 +221,10 @@ async function importJwkKey(key: JwkKey): Promise<string | null> {
   if (key.kty === 'RSA' && key.n && key.e) {
     const { createPublicKey } = await import('node:crypto');
     try {
-      const cryptoKey = createPublicKey(
-        { key: { kty: 'RSA', n: key.n, e: key.e }, format: 'jwk' } as unknown as Parameters<typeof createPublicKey>[0],
-      );
+      const cryptoKey = createPublicKey({
+        key: { kty: 'RSA', n: key.n, e: key.e },
+        format: 'jwk',
+      } as unknown as Parameters<typeof createPublicKey>[0]);
       return cryptoKey.export({ type: 'spki', format: 'pem' }) as string;
     } catch {
       return null;
@@ -213,9 +233,10 @@ async function importJwkKey(key: JwkKey): Promise<string | null> {
   if (key.kty === 'EC' && key.x && key.y && key.crv) {
     const { createPublicKey } = await import('node:crypto');
     try {
-      const cryptoKey = createPublicKey(
-        { key: { kty: 'EC', x: key.x, y: key.y, crv: key.crv }, format: 'jwk' } as unknown as Parameters<typeof createPublicKey>[0],
-      );
+      const cryptoKey = createPublicKey({
+        key: { kty: 'EC', x: key.x, y: key.y, crv: key.crv },
+        format: 'jwk',
+      } as unknown as Parameters<typeof createPublicKey>[0]);
       return cryptoKey.export({ type: 'spki', format: 'pem' }) as string;
     } catch {
       return null;
@@ -229,6 +250,8 @@ async function importJwkKey(key: JwkKey): Promise<string | null> {
 const ROLE_TO_MCP_SCOPE: Record<string, string> = {
   // Platform roles
   super_admin: 'mcp:admin mcp:read mcp:write mcp:approve',
+  // Deliberately excludes mcp:admin: only super_admin and the explicit
+  // enterprise mcp_admin role may mutate gateway-global control-plane state.
   admin: 'mcp:read mcp:write mcp:approve',
   ops: 'mcp:read mcp:write mcp:approve',
   operator: 'mcp:read mcp:write',
@@ -246,7 +269,8 @@ export function mapClaimsToRole(
   mapping: ClaimsToRoleMapping,
   defaultRole: string,
 ): string {
-  const groups = (payload.groups as string[]) ?? (payload['https://platform.szl.ai/groups'] as string[]) ?? [];
+  const groups =
+    (payload.groups as string[]) ?? (payload['https://platform.szl.ai/groups'] as string[]) ?? [];
   const roles = (payload.roles as string[]) ?? (payload.appRoles as string[]) ?? [];
 
   if (mapping.roles) {
@@ -358,6 +382,67 @@ export function revokeEnterpriseTokensForSubject(issuer: string, subject: string
 
 const revokedSubjects = new Set<string>();
 
+export type RevocationSyncStatus = 'not-started' | 'syncing' | 'ready' | 'skipped' | 'failed';
+
+export interface RevocationSyncReadiness {
+  ready: boolean;
+  required: boolean;
+  status: RevocationSyncStatus;
+  loaded: number;
+  attemptedAt?: string;
+  completedAt?: string;
+  error?: string;
+}
+
+let revocationSyncState: Omit<RevocationSyncReadiness, 'ready' | 'required'> = {
+  status: 'not-started',
+  loaded: 0,
+};
+
+function isProduction(): boolean {
+  return isProductionRuntime();
+}
+
+function persistenceConfig(): { apiBase: string; internalToken: string } | undefined {
+  const internalToken = process.env.ALLOY_INTERNAL_TOKEN?.trim();
+  const configuredBase = process.env.MCP_API_SERVER_BASE_URL?.trim();
+  if (!internalToken || (!configuredBase && isProduction())) {
+    if (isProduction()) {
+      throw new Error(
+        !internalToken
+          ? 'ALLOY_INTERNAL_TOKEN is required for production revocation persistence'
+          : 'MCP_API_SERVER_BASE_URL is required for production revocation persistence',
+      );
+    }
+    return undefined;
+  }
+
+  const apiBase =
+    configuredBase ??
+    (process.env.REPLIT_DEV_DOMAIN
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+      : 'http://localhost:3000');
+  let parsed: URL;
+  try {
+    parsed = new URL(apiBase);
+  } catch {
+    throw new Error('MCP_API_SERVER_BASE_URL must be a valid HTTP(S) URL');
+  }
+  if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) {
+    throw new Error('MCP_API_SERVER_BASE_URL must be an HTTP(S) origin without credentials');
+  }
+  return { apiBase: parsed.origin, internalToken };
+}
+
+export function getRevocationSyncReadiness(): RevocationSyncReadiness {
+  const required = isProduction();
+  return {
+    ...revocationSyncState,
+    required,
+    ready: !required || revocationSyncState.status === 'ready',
+  };
+}
+
 function revokedKey(issuer: string, subject: string): string {
   return createHash('sha256').update(`${issuer}|${subject}`).digest('hex');
 }
@@ -370,57 +455,87 @@ export function isSubjectRevoked(issuer: string, subject: string): boolean {
   return revokedSubjects.has(revokedKey(issuer, subject));
 }
 
-// persistRevocationToDb fire-and-forgets a DB write via the api-server internal endpoint.
-async function persistRevocationToDb(issuer: string, subject: string, reason?: string, revokedBy?: string): Promise<void> {
-  const apiBase = process.env.MCP_API_SERVER_BASE_URL ??
-    (process.env.REPLIT_DEV_DOMAIN
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-      : 'http://localhost:3000');
-  const internalToken = process.env.ALLOY_INTERNAL_TOKEN;
-  if (!internalToken) return;
-
-  try {
-    await fetch(`${apiBase}/api/enterprise-mcp/internal-revoke`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-internal-token': internalToken },
-      body: JSON.stringify({ issuer, subject, reason, revokedBy }),
-      signal: AbortSignal.timeout(3_000),
-    });
-  } catch {
-    // Best-effort — revocation is already applied in-memory
+async function persistRevocationToDb(
+  issuer: string,
+  subject: string,
+  reason?: string,
+  revokedBy?: string,
+): Promise<void> {
+  const config = persistenceConfig();
+  if (!config) {
+    throw new Error('Revocation persistence is not configured');
+  }
+  const response = await fetch(`${config.apiBase}/api/enterprise-mcp/internal-revoke`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-internal-token': config.internalToken },
+    body: JSON.stringify({ issuer, subject, reason, revokedBy }),
+    signal: AbortSignal.timeout(3_000),
+  });
+  if (!response.ok) {
+    throw new Error(`Revocation persistence returned HTTP ${response.status}`);
   }
 }
 
 // syncRevokedSubjectsFromDb loads all previously revoked (issuer, subject) pairs
 // from the api-server DB into the local in-memory set. Call this once at startup.
 export async function syncRevokedSubjectsFromDb(): Promise<void> {
-  const apiBase = process.env.MCP_API_SERVER_BASE_URL ??
-    (process.env.REPLIT_DEV_DOMAIN
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-      : 'http://localhost:3000');
-  const internalToken = process.env.ALLOY_INTERNAL_TOKEN;
-  if (!internalToken) return;
-
+  revocationSyncState = {
+    status: 'syncing',
+    loaded: 0,
+    attemptedAt: new Date().toISOString(),
+  };
   try {
-    const resp = await fetch(`${apiBase}/api/enterprise-mcp/revoked-subjects`, {
-      headers: { 'x-internal-token': internalToken },
+    const config = persistenceConfig();
+    if (!config) {
+      revocationSyncState = {
+        ...revocationSyncState,
+        status: 'skipped',
+        completedAt: new Date().toISOString(),
+      };
+      return;
+    }
+    const resp = await fetch(`${config.apiBase}/api/enterprise-mcp/revoked-subjects`, {
+      headers: { 'x-internal-token': config.internalToken },
       signal: AbortSignal.timeout(5_000),
     });
-    if (!resp.ok) return;
+    if (!resp.ok) throw new Error(`Revocation sync returned HTTP ${resp.status}`);
 
-    const data = (await resp.json()) as { subjects: Array<{ issuer: string; subject: string }> };
+    const data = (await resp.json()) as { subjects?: unknown };
+    if (!Array.isArray(data.subjects)) {
+      throw new Error('Revocation sync returned a malformed response');
+    }
     let loaded = 0;
-    for (const { issuer, subject } of data.subjects ?? []) {
+    for (const entry of data.subjects) {
+      if (
+        !entry ||
+        typeof entry !== 'object' ||
+        typeof (entry as { issuer?: unknown }).issuer !== 'string' ||
+        typeof (entry as { subject?: unknown }).subject !== 'string'
+      ) {
+        throw new Error('Revocation sync returned a malformed subject entry');
+      }
+      const { issuer, subject } = entry as { issuer: string; subject: string };
       revokedSubjects.add(revokedKey(issuer, subject));
       loaded++;
     }
+    revocationSyncState = {
+      ...revocationSyncState,
+      status: 'ready',
+      loaded,
+      completedAt: new Date().toISOString(),
+    };
     if (loaded > 0) {
       console.log(`[enterprise-auth] Synced ${loaded} revoked subject(s) from DB at startup`);
     }
-  } catch {
-    // Non-fatal — the gateway can still operate; revocations will be
-    // re-applied as webhooks arrive and are re-persisted on the next revoke event.
-    console.warn('[enterprise-auth] Could not sync revoked subjects from DB at startup');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown revocation sync failure';
+    revocationSyncState = {
+      ...revocationSyncState,
+      status: 'failed',
+      completedAt: new Date().toISOString(),
+      error: message,
+    };
+    throw error;
   }
 }
 
@@ -429,7 +544,8 @@ export async function syncRevokedSubjectsFromDb(): Promise<void> {
 // registry starts empty after a restart and rejects all enterprise token exchanges
 // until each IdP is manually re-pushed via the admin API.
 export async function syncIdpConfigsFromDb(): Promise<void> {
-  const apiBase = process.env.MCP_API_SERVER_BASE_URL ??
+  const apiBase =
+    process.env.MCP_API_SERVER_BASE_URL ??
     (process.env.REPLIT_DEV_DOMAIN
       ? `https://${process.env.REPLIT_DEV_DOMAIN}`
       : 'http://localhost:3000');
@@ -477,7 +593,8 @@ type AuditEvent = {
 };
 
 async function emitAuditEvent(event: AuditEvent): Promise<void> {
-  const apiBase = process.env.MCP_API_SERVER_BASE_URL ??
+  const apiBase =
+    process.env.MCP_API_SERVER_BASE_URL ??
     (process.env.REPLIT_DEV_DOMAIN
       ? `https://${process.env.REPLIT_DEV_DOMAIN}`
       : 'http://localhost:3000');
@@ -532,7 +649,12 @@ export async function validateIdJag(
   const nbf = payload.nbf as number | undefined;
 
   if (!exp || exp < now) {
-    await emitAuditEvent({ eventType: 'idjag_validation_failure', issuer, errorCode: 'token_expired', ipAddress });
+    await emitAuditEvent({
+      eventType: 'idjag_validation_failure',
+      issuer,
+      errorCode: 'token_expired',
+      ipAddress,
+    });
     return failure('invalid_grant', 'JWT has expired');
   }
   if (nbf && nbf > now + 60) {
@@ -540,25 +662,35 @@ export async function validateIdJag(
   }
 
   const aud = payload.aud as string | string[] | undefined;
-  const audiences = Array.isArray(aud) ? aud : (aud ? [aud] : []);
+  const audiences = Array.isArray(aud) ? aud : aud ? [aud] : [];
   if (!audiences.includes(idp.expectedAudience)) {
-    await emitAuditEvent({ eventType: 'idjag_validation_failure', issuer, errorCode: 'invalid_audience', ipAddress });
+    await emitAuditEvent({
+      eventType: 'idjag_validation_failure',
+      issuer,
+      errorCode: 'invalid_audience',
+      ipAddress,
+    });
     return failure('invalid_grant', `JWT audience mismatch. Expected: ${idp.expectedAudience}`);
   }
 
-  if (idp.requireEmailVerified) {
-    const emailVerified = payload.email_verified as boolean | undefined;
-    if (emailVerified === false) {
-      return failure('access_denied', 'IdP requires a verified email address');
-    }
+  if (!satisfiesEmailVerificationRequirement(idp.requireEmailVerified, payload.email_verified)) {
+    return failure('access_denied', 'IdP requires a verified email address');
   }
 
   let keys: JwkKey[];
   try {
     keys = await fetchJwks(idp.jwksUri, idp.jwksCacheTtlSeconds);
   } catch (err) {
-    await emitAuditEvent({ eventType: 'idjag_validation_failure', issuer, errorCode: 'jwks_fetch_error', ipAddress });
-    return failure('server_error', `JWKS fetch failed: ${err instanceof Error ? err.message : 'unknown'}`);
+    await emitAuditEvent({
+      eventType: 'idjag_validation_failure',
+      issuer,
+      errorCode: 'jwks_fetch_error',
+      ipAddress,
+    });
+    return failure(
+      'server_error',
+      `JWKS fetch failed: ${err instanceof Error ? err.message : 'unknown'}`,
+    );
   }
 
   let signatureValid: boolean;
@@ -580,21 +712,38 @@ export async function validateIdJag(
     }
 
     if (!signatureValid) {
-      await emitAuditEvent({ eventType: 'idjag_validation_failure', issuer, errorCode: 'invalid_signature', ipAddress });
+      await emitAuditEvent({
+        eventType: 'idjag_validation_failure',
+        issuer,
+        errorCode: 'invalid_signature',
+        ipAddress,
+      });
       return failure('invalid_grant', 'JWT signature verification failed');
     }
   }
 
   const subject = (payload.sub as string | undefined) ?? null;
   const email = (payload.email as string | undefined) ?? null;
-  const displayName = (payload.name as string | undefined) ?? (payload.preferred_username as string | undefined) ?? email ?? subject ?? 'Unknown';
+  const displayName =
+    (payload.name as string | undefined) ??
+    (payload.preferred_username as string | undefined) ??
+    email ??
+    subject ??
+    'Unknown';
 
   if (!subject) {
     return failure('invalid_grant', 'JWT missing sub claim');
   }
 
   if (isSubjectRevoked(issuer, subject)) {
-    await emitAuditEvent({ eventType: 'idjag_validation_failure', issuer, subject, email, errorCode: 'subject_revoked', ipAddress });
+    await emitAuditEvent({
+      eventType: 'idjag_validation_failure',
+      issuer,
+      subject,
+      email,
+      errorCode: 'subject_revoked',
+      ipAddress,
+    });
     return failure('access_denied', 'User has been revoked from enterprise MCP access');
   }
 
@@ -641,7 +790,8 @@ export async function linkOrProvisionUser(
   mappedRole: string,
   ipAddress?: string,
 ): Promise<number | null> {
-  const apiBase = process.env.MCP_API_SERVER_BASE_URL ??
+  const apiBase =
+    process.env.MCP_API_SERVER_BASE_URL ??
     (process.env.REPLIT_DEV_DOMAIN
       ? `https://${process.env.REPLIT_DEV_DOMAIN}`
       : 'http://localhost:3000');
@@ -668,7 +818,7 @@ export async function linkOrProvisionUser(
       signal: AbortSignal.timeout(3_000),
     });
     if (!resp.ok) return null;
-    const data = await resp.json() as { userId?: number | null };
+    const data = (await resp.json()) as { userId?: number | null };
     return data.userId ?? null;
   } catch {
     return null;
@@ -734,6 +884,7 @@ export async function issueEnterpriseToken(
 export function resolveEnterpriseAuthContext(bearerToken: string): {
   authenticated: boolean;
   actorId: string;
+  tenantId: string;
   role: string;
   scope: string;
   enterprise: true;
@@ -749,6 +900,7 @@ export function resolveEnterpriseAuthContext(bearerToken: string): {
   return {
     authenticated: true,
     actorId: `enterprise:${tok.issuer}:${tok.subject}`,
+    tenantId: tok.tenantId,
     role: tok.mappedRole,
     scope: tok.scope,
     enterprise: true,
@@ -774,11 +926,12 @@ export async function handleRevocationWebhook(
   // subsequent token validations in this process without any network round-trip).
   revokeSubject(issuer, subject);
 
-  // Persist to DB asynchronously so other gateway instances (and restarts)
-  // inherit the revocation state without relying on a fresh webhook delivery.
-  void persistRevocationToDb(issuer, subject, reason, revokedBy);
-
   const tokenCount = revokeEnterpriseTokensForSubject(issuer, subject);
+
+  // Do not acknowledge the webhook until durable persistence succeeds. The
+  // in-memory revocation above remains fail-safe locally when persistence fails,
+  // while the non-2xx response instructs the caller to retry for fleet-wide state.
+  await persistRevocationToDb(issuer, subject, reason, revokedBy);
 
   await emitAuditEvent({
     eventType: 'token_revoked',

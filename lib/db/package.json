@@ -13,11 +13,27 @@
   },
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./schema": "./src/schema/index.ts",
-    "./schema/canonical": "./src/schema/canonical.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schema": {
+      "development": "./src/schema/index.ts",
+      "workspace": "./src/schema/index.ts",
+      "types": "./dist/schema/index.d.ts",
+      "import": "./dist/schema/index.js"
+    },
+    "./schema/canonical": {
+      "development": "./src/schema/canonical.ts",
+      "workspace": "./src/schema/canonical.ts",
+      "types": "./dist/schema/canonical.d.ts",
+      "import": "./dist/schema/canonical.js"
+    }
   },
   "scripts": {
+    "build": "tsc --build",
     "generate": "drizzle-kit generate --config ./drizzle.config.ts",
     "migrate": "node ./scripts/backfill-migrations.mjs && drizzle-kit migrate --config ./drizzle.config.ts && node ./scripts/apply-manual-migrations.mjs",
     "migrate:backfill": "node ./scripts/backfill-migrations.mjs",

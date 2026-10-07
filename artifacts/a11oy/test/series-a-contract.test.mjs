@@ -77,12 +77,13 @@ test('keeps Observe, Gate, Act, Prove and the exact six-state vocabulary explici
   assert.doesNotMatch(page, /production[- ]ready|SOC 2 certified|enterprise customers|proven ROI/i);
 });
 
-test('maps both Series A entry points to the same truth-qualified view', () => {
-  assert.match(app, /path=\{`\$\{base\}\/start`\} component=\{SeriesAView\}/);
-  assert.match(app, /path=\{`\$\{base\}\/investor-demo`\} component=\{SeriesAView\}/);
-  assert.doesNotMatch(app, /component=\{InvestorDemo\}|import\('\.\/pages\/InvestorDemo'\)/);
-  assert.match(layout, /href=\{b\('\/start'\)\}/);
-  assert.match(layout, />\s*Series A view\s*</);
+test('keeps Series A source rails offline while the public candidate holds those routes', () => {
+  assert.doesNotMatch(app, /SeriesAView|InvestorDemo|\/start|\/investor-demo|\/series-a/);
+  assert.match(app, /PUBLICATION HOLD · UNREVIEWED ROUTE/);
+  assert.match(app, /<Route component=\{PublicationHoldPage\} \/>/);
+  assert.doesNotMatch(layout, /href=\{b\('\/start'\)\}/);
+  assert.match(layout, /href=\{b\('\/'\)\}/);
+  assert.match(layout, />\s*Candidate home\s*</);
 });
 
 test('provides keyboard-operable tabs and narrow-screen layouts', () => {

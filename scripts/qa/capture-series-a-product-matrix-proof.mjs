@@ -2,10 +2,12 @@
 
 import { execFileSync, spawn } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
+import { constants as fsConstants } from 'node:fs';
 import {
   lstat,
   mkdir,
   mkdtemp,
+  open,
   readdir,
   readFile,
   realpath,
@@ -389,20 +391,25 @@ async function startExactBuildServer(buildRoot, assetManifest, servedIdentity) {
         response.end();
         return;
       }
-      let details;
+      let bytes;
       try {
-        details = await lstat(candidate);
+        const handle = await open(candidate, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
+        try {
+          const details = await handle.stat();
+          if (!details.isFile()) {
+            response.writeHead(404);
+            response.end();
+            return;
+          }
+          bytes = await handle.readFile();
+        } finally {
+          await handle.close();
+        }
       } catch {
         response.writeHead(404);
         response.end();
         return;
       }
-      if (!details.isFile() || details.isSymbolicLink()) {
-        response.writeHead(404);
-        response.end();
-        return;
-      }
-      const bytes = await readFile(candidate);
       const manifestEntry = assetByPath.get(relativePath);
       if (
         !manifestEntry ||

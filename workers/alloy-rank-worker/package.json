@@ -3,9 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Alloy Embedding Fabric \u2014 cross-encoder reranking worker. Runs per-profile cross-encoder scoring in CPU mode with a lightweight fallback mode (score inversion) when no model is loaded. Accepts candidates from the hybrid-search pipeline and returns ranked results with score breakdowns.",
-  "main": "src/index.ts",
+  "description": "Alloy Embedding Fabric development reranking worker. Lexical-overlap and score-passthrough are non-production heuristics; production readiness stays on HOLD until a qualified immutable model is wired.",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "dependencies": {
     "@workspace/aef-contracts": "workspace:*",
     "express": "^5.0.0",
@@ -20,7 +28,7 @@
   "scripts": {
     "build": "tsc --build",
     "dev": "tsx watch src/server.ts",
-    "start": "tsx src/server.ts",
+    "start": "node --enable-source-maps dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

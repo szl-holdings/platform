@@ -141,6 +141,28 @@ test('fails closed when the file scan limit is exceeded', () => {
   assert.match(result.coverageIssues[0].label, /File scan limit of 1 was exceeded/);
 });
 
+test('default coverage scans repository-sized inputs above the legacy 20k cap', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'szl-secret-scan-scale-'));
+  const entries = Array.from({ length: 20_001 }, (_, index) => ({
+    name: `candidate-${index}.md`,
+    isDirectory: () => false,
+    isFile: () => true,
+  }));
+
+  try {
+    const result = scanTarget(root, {
+      readFileSync: () => 'safe',
+      readdirSync: () => entries,
+    });
+
+    assert.equal(result.scannedFiles, entries.length);
+    assert.deepEqual(result.hits, []);
+    assert.deepEqual(result.coverageIssues, []);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('fails closed when a candidate file cannot be read', () => {
   const result = inspect(
     { 'unreadable.md': 'safe' },
@@ -191,6 +213,15 @@ test('scans generated-name directories outside dependency and metadata skips', (
     'src/build/leaked.md',
     'src/dist/leaked.md',
   ]);
+});
+
+test('scans Python service source for project-specific secret patterns', () => {
+  const result = inspect({
+    'services/python-api/app.py': `OPENAI_API_KEY = "${['sk-', 'a'.repeat(24)].join('')}"\n`,
+  });
+
+  assert.deepEqual(result.hits, [{ rel: 'services/python-api/app.py', label: 'OpenAI API key' }]);
+  assert.deepEqual(result.coverageIssues, []);
 });
 
 test('skips installed dependencies at every workspace depth', () => {

@@ -102,9 +102,11 @@ availability:
 
 ## Quick start
 
+Requires Node.js 24 or newer. The activation helper resolves pnpm 10.26.1 exactly.
+
 ```bash
-corepack enable
-pnpm install
+source scripts/activate-pnpm.sh
+pnpm install --frozen-lockfile
 pnpm run dev
 ```
 

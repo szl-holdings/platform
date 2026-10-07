@@ -2,7 +2,7 @@
  * Alloy workflow engine contracts — request/response schemas.
  */
 import { z } from 'zod';
-import { idParamSchema, paginationQuerySchema, sortQuerySchema } from './common';
+import { idParamSchema, paginationQuerySchema, sortQuerySchema } from './common.js';
 
 export const workflowStatusSchema = z.enum([
   'pending',

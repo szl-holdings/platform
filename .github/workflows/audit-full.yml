@@ -43,6 +43,9 @@ jobs:
       - name: Install dependencies (skip ONNXRuntime download to avoid postinstall network flake)
         run: ONNXRUNTIME_NODE_INSTALL=skip pnpm install --frozen-lockfile
 
+      - name: Verify deployable service runtime closure
+        run: pnpm run test:service-runtime
+
       # ── Boot the real servers the qa-site smoke fetches against ───────────────
       # audit:full's `qa-site` step (scripts/qa/smoke-routes.js) is a LIVE HTTP
       # smoke: it fetches every product route and the runtime API health surface.
@@ -62,6 +65,9 @@ jobs:
           # Per-run credential for the ephemeral loopback runtime only. This is
           # not a repository or environment secret and grants no external access.
           ALLOY_API_KEY: runtime-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          # Bind that credential to the smoke harness's fixed tenant so the
+          # loopback test cannot select a different tenant by header.
+          ALLOY_API_TENANT_ID: runtime-audit-${{ github.run_id }}
           COMMIT_SHA: ${{ github.sha }}
         run: |
           set -uo pipefail
@@ -99,15 +105,15 @@ jobs:
           node_modules/.bin/serve artifacts/terra/dist/public       -s -l 6100 > /tmp/serve-terra.log      2>&1 &
           node_modules/.bin/serve artifacts/vessels/dist/public     -s -l 8097 > /tmp/serve-vessels.log    2>&1 &
 
-          # Runtime API on :8080 (artifact-ports.js api-server port). The internal
-          # @szl-holdings/* packages export TypeScript source (exports -> src/*.ts),
-          # so the app runs from source via tsx — exactly how `pnpm dev` boots it
-          # (dev script: `tsx watch src/server.ts`). Plain `node dist/server.js`
-          # only resolves those src-export deps inside the Docker `pnpm deploy`
-          # image, not in a plain workspace checkout. server.ts refuses to listen
-          # when NODE_ENV=test, so boot it as production.
-          ( cd apps/alloy-runtime-api && NODE_ENV=production PORT=8080 \
-              pnpm exec tsx src/server.ts > /tmp/runtime-api.log 2>&1 ) &
+          # Runtime API on :8080 (artifact-ports.js api-server port). The build
+          # above emits the app and its complete workspace dependency closure;
+          # the package start script must therefore boot only compiled JS.
+          # Disabling Node's TypeScript stripping makes any leaked src/*.ts
+          # production export fail closed. server.ts refuses to listen when
+          # NODE_ENV=test, so boot the compiled artifact as production.
+          ( NODE_ENV=production PORT=8080 NODE_OPTIONS=--no-strip-types \
+              pnpm --filter @workspace/alloy-runtime-api run start \
+              > /tmp/runtime-api.log 2>&1 ) &
 
           # Block until every target answers, so the audit's qa-site step never
           # races server startup.

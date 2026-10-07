@@ -6,24 +6,32 @@
   "description": "NEXUS MCP SDK — official @modelcontextprotocol/sdk foundation wrapped with SZL governance: Guardian policy evaluation, proof chain audit, tenant isolation, approval gates, and the full 2025 spec innovation layer (Sampling, Elicitation, Tasks, Apps, Instructions, Discovery, Roots).",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./server": {
+      "development": "./src/server.ts",
+      "workspace": "./src/server.ts",
       "types": "./dist/server.d.ts",
-      "import": "./src/server.ts"
+      "import": "./dist/server.js"
     },
     "./capabilities": {
+      "development": "./src/capabilities/index.ts",
+      "workspace": "./src/capabilities/index.ts",
       "types": "./dist/capabilities/index.d.ts",
-      "import": "./src/capabilities/index.ts"
+      "import": "./dist/capabilities/index.js"
     },
     "./transport": {
+      "development": "./src/transport.ts",
+      "workspace": "./src/transport.ts",
       "types": "./dist/transport.d.ts",
-      "import": "./src/transport.ts"
+      "import": "./dist/transport.js"
     }
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "zod": "catalog:"
   },
   "scripts": {

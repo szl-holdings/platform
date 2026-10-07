@@ -1,35 +1,86 @@
-version: "3.9"
-
-# ─── CPU-Stub Overlay ─────────────────────────────────────────────────────────
-# Overlay this file over docker-compose.gpu.yml on machines without an NVIDIA GPU.
-# All API contracts are identical; inference and worker responses use deterministic
-# stub implementations instead of real GPU execution.
+# ─── CPU Development Stub ───────────────────────────────────────────────────────────
+# Standalone local-development stack. Do not layer this file over the production
+# GPU stack: it intentionally has no production environment markers, credential
+# interpolation, model promotion inputs, or GPU device reservations.
 #
 # Usage:
-#   docker compose -f docker-compose.gpu.yml -f docker-compose.cpu-stub.yml up
+#   docker compose -f docker-compose.cpu-stub.yml up --build
 #
-# The engine auto-detects GPU availability; in stub mode:
-#   - /health reports engine=oLLM/Substrate (stub)
-#   - /ready returns ready=true once the process is up
-#   - Inference responses are labelled as stubs (isDemo: true via the bridge)
+# The inference stub deliberately returns HTTP 503 from /ready because it cannot
+# serve live inference. Its healthcheck therefore remains unhealthy by design;
+# /healthz liveness must not be used to promote it as a ready backend.
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "2"
+
+networks:
+  substrate-dev-net:
+    driver: bridge
 
 services:
-
   substrate-inference:
-    deploy:
-      resources:
-        reservations: {}
-        limits:
-          memory: "${INFERENCE_MEMORY_LIMIT:-4g}"
+    build:
+      context: ../apps/substrate-inference
+      dockerfile: Dockerfile
+      target: cpu-stub
+    image: substrate-inference:cpu-stub-dev
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - substrate-dev-net
+    ports:
+      - "${SUBSTRATE_INFERENCE_PORT:-8070}:8070"
     environment:
+      PORT: "8070"
+      SUBSTRATE_INFERENCE_PORT: "8070"
+      SUBSTRATE_INFERENCE_ENV: "development"
+      SUBSTRATE_INFERENCE_AUTH_BYPASS: "true"
+      SUBSTRATE_BIND_HOST: "0.0.0.0"
+      SUBSTRATE_MODELS_DIR: /tmp/substrate/models
+      SUBSTRATE_CACHE_DIR: /tmp/substrate/cache
       SUBSTRATE_MAX_CONCURRENT: "2"
+      SUBSTRATE_ALLOWED_ORIGINS: "${SUBSTRATE_ALLOWED_ORIGINS:-http://localhost:5000}"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8070/ready')"]
+      interval: 20s
+      timeout: 5s
+      start_period: 15s
+      retries: 2
 
   substrate-py-workers:
-    deploy:
-      resources:
-        reservations: {}
-        limits:
-          memory: "${WORKER_MEMORY_LIMIT:-2g}"
+    build:
+      context: ../services/substrate-py-workers
+      dockerfile: Dockerfile
+      target: runtime
+    image: substrate-py-workers:cpu-stub-dev
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - substrate-dev-net
+    ports:
+      - "${WORKER_PORT:-8090}:8090"
     environment:
+      PORT: "8090"
+      HOST: "0.0.0.0"
+      WORKER_ID: "py-worker-cpu-stub-dev"
+      WORKER_MAX_CONCURRENCY: "2"
+      SUBSTRATE_PYTHON_WORKER_ENV: "development"
+      SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS: "true"
       SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC: "1"
       SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL: "1"
+      OVIS_OMNI_ENABLED: "0"
+    depends_on:
+      substrate-inference:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8090/ready')"]
+      interval: 20s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    stop_grace_period: 70s

@@ -1,11 +1,15 @@
 {
   "name": "SZL Holdings TS Dev",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:5.2.1-24-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/common-utils:2": {"username": "vscode"}
+    "ghcr.io/devcontainers/features/common-utils:2": { "username": "vscode" }
   },
-  "postCreateCommand": "npm install || pnpm install || true",
+  "postCreateCommand": "bash -lc 'source scripts/activate-pnpm.sh && test \"$(pnpm --version)\" = \"10.26.1\" && pnpm install --frozen-lockfile'",
+  "remoteEnv": {
+    "PNPM_HOME": "/home/vscode/.local/share/pnpm",
+    "PATH": "/home/vscode/.local/share/pnpm:${containerEnv:PATH}"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -22,5 +26,5 @@
     }
   },
   "remoteUser": "vscode",
-  "hostRequirements": {"cpus": 4, "memory": "8gb"}
+  "hostRequirements": { "cpus": 4, "memory": "8gb" }
 }

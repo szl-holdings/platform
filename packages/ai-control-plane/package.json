@@ -10,14 +10,54 @@
   },
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./router": "./src/router.ts",
-    "./eval-selector": "./src/eval-selector.ts",
-    "./fallback": "./src/fallback.ts",
-    "./cost-controller": "./src/cost-controller.ts",
-    "./pii-redactor": "./src/pii-redactor.ts",
-    "./agent-tiers": "./src/agent-tiers.ts",
-    "./policy-engine": "./src/policy-engine.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./router": {
+      "development": "./src/router.ts",
+      "workspace": "./src/router.ts",
+      "types": "./dist/router.d.ts",
+      "import": "./dist/router.js"
+    },
+    "./eval-selector": {
+      "development": "./src/eval-selector.ts",
+      "workspace": "./src/eval-selector.ts",
+      "types": "./dist/eval-selector.d.ts",
+      "import": "./dist/eval-selector.js"
+    },
+    "./fallback": {
+      "development": "./src/fallback.ts",
+      "workspace": "./src/fallback.ts",
+      "types": "./dist/fallback.d.ts",
+      "import": "./dist/fallback.js"
+    },
+    "./cost-controller": {
+      "development": "./src/cost-controller.ts",
+      "workspace": "./src/cost-controller.ts",
+      "types": "./dist/cost-controller.d.ts",
+      "import": "./dist/cost-controller.js"
+    },
+    "./pii-redactor": {
+      "development": "./src/pii-redactor.ts",
+      "workspace": "./src/pii-redactor.ts",
+      "types": "./dist/pii-redactor.d.ts",
+      "import": "./dist/pii-redactor.js"
+    },
+    "./agent-tiers": {
+      "development": "./src/agent-tiers.ts",
+      "workspace": "./src/agent-tiers.ts",
+      "types": "./dist/agent-tiers.d.ts",
+      "import": "./dist/agent-tiers.js"
+    },
+    "./policy-engine": {
+      "development": "./src/policy-engine.ts",
+      "workspace": "./src/policy-engine.ts",
+      "types": "./dist/policy-engine.d.ts",
+      "import": "./dist/policy-engine.js"
+    }
   },
   "dependencies": {
     "pino": "^9"
@@ -28,6 +68,8 @@
   "scripts": {
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
-    "format": "biome format --write ./src"
+    "format": "biome format --write ./src",
+    "build": "tsc --build",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

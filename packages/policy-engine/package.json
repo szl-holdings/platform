@@ -15,28 +15,37 @@
   },
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./evaluator": {
+      "development": "./src/evaluator.ts",
+      "workspace": "./src/evaluator.ts",
       "types": "./dist/evaluator.d.ts",
-      "import": "./src/evaluator.ts"
+      "import": "./dist/evaluator.js"
     },
     "./guardrails": {
+      "development": "./src/guardrails.ts",
+      "workspace": "./src/guardrails.ts",
       "types": "./dist/guardrails.d.ts",
-      "import": "./src/guardrails.ts"
+      "import": "./dist/guardrails.js"
     },
     "./modes": {
+      "development": "./src/modes.ts",
+      "workspace": "./src/modes.ts",
       "types": "./dist/modes.d.ts",
-      "import": "./src/modes.ts"
+      "import": "./dist/modes.js"
     }
   },
   "dependencies": {
-    "@szl-holdings/atlas-core": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

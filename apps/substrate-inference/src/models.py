@@ -9,6 +9,11 @@ class ChatMessage(BaseModel):
 
 
 class ChatCompletionRequest(BaseModel):
+    tenant_id: str | None = Field(
+        None,
+        min_length=1,
+        description="Tenant identity; must match the authenticated X-Tenant-ID binding",
+    )
     model: str = Field(..., description="Model ID to use for inference")
     messages: list[ChatMessage] = Field(..., description="Conversation messages")
     temperature: float = Field(0.7, ge=0.0, le=2.0)
@@ -35,6 +40,8 @@ class ChatCompletionResponse(BaseModel):
     object: str = "chat.completion"
     created: int
     model: str
+    tenant_id: str | None = None
+    model_revision: str | None = None
     choices: list[ChatCompletionChoice]
     usage: CompletionUsage
 
@@ -46,6 +53,7 @@ class ModelInfo(BaseModel):
     context_length: int = 131072
     modalities: list[str] = ["text"]
     parameters: str = ""
+    revision: str | None = None
     loaded: bool = False
     vram_used_mb: float = 0
 
@@ -57,14 +65,22 @@ class ModelListResponse(BaseModel):
 
 class ModelLoadRequest(BaseModel):
     model_id: str = Field(..., description="Model ID to load into GPU memory")
-    cpu_offload_layers: int = Field(0, ge=0, description="Number of layers to offload to CPU")
-    ssd_cache_dir: str | None = Field(None, description="SSD cache directory for KV cache offload")
+    cpu_offload_layers: int = Field(
+        0,
+        ge=0,
+        description="Reserved option; non-zero values are rejected by the checked-in adapter",
+    )
+    ssd_cache_dir: str | None = Field(
+        None,
+        description="Reserved option; SSD KV-cache offload is not implemented",
+    )
 
 
 class ModelLoadResponse(BaseModel):
     status: str
     message: str
     model_id: str
+    model_revision: str | None = None
 
 
 class GpuInfo(BaseModel):
@@ -102,4 +118,4 @@ class HealthResponse(BaseModel):
     avg_latency_ms: float = 0
     uptime: float = 0
     version: str = "1.0.0"
-    engine: str = "oLLM/Substrate"
+    engine: str = "transformers-adapter"

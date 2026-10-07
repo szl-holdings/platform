@@ -6,19 +6,23 @@
   "description": "Alloy Embedding Fabric \u2014 REST API gateway for embed, rerank, hybrid-search, ingest, index ops, and evals.",
   "exports": {
     ".": {
+      "development": "./src/router.ts",
+      "workspace": "./src/router.ts",
       "types": "./dist/router.d.ts",
-      "import": "./src/router.ts"
+      "import": "./dist/router.js"
     },
     "./standalone": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     }
   },
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "node --conditions=workspace --import tsx --watch src/index.ts",
     "start": "node --enable-source-maps dist/index.js",
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit --customConditions workspace",
     "test": "vitest run",
     "test:watch": "vitest",
     "smoke": "tsx ../../scripts/aef-smoke.ts"

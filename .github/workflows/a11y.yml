@@ -33,27 +33,27 @@ jobs:
         app:
           - name: carlota-jo
             filter: "@workspace/carlota-jo"
-            dist: artifacts/carlota-jo/dist
+            dist: artifacts/carlota-jo/dist/public
             port: 4102
           - name: counsel
             filter: "@workspace/counsel"
-            dist: artifacts/counsel/dist
+            dist: artifacts/counsel/dist/public
             port: 4104
           - name: sentra
             filter: "@workspace/sentra"
-            dist: artifacts/sentra/dist
+            dist: artifacts/sentra/dist/public
             port: 4107
           - name: terra
             filter: "@workspace/terra"
-            dist: artifacts/terra/dist
+            dist: artifacts/terra/dist/public
             port: 4108
           - name: vessels
             filter: "@workspace/vessels"
-            dist: artifacts/vessels/dist
+            dist: artifacts/vessels/dist/public
             port: 4109
           - name: a11oy
             filter: "@workspace/a11oy"
-            dist: artifacts/a11oy/dist
+            dist: artifacts/a11oy/dist/public
             port: 4110
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -81,21 +81,64 @@ jobs:
 
       - name: Build ${{ matrix.app.name }}
         run: pnpm --filter ${{ matrix.app.filter }} run build
-
-      - name: Install static file server
-        run: npm install -g serve
+        env:
+          # The isolated static server mounts each artifact at `/`. Override the
+          # production subpath so every emitted asset URL is reachable here.
+          BASE_PATH: /
 
       - name: Serve ${{ matrix.app.name }} (SPA fallback) on port ${{ matrix.app.port }}
         run: |
-          serve ${{ matrix.app.dist }} -l ${{ matrix.app.port }} --single &
+          set -euo pipefail
+          index_file="${{ matrix.app.dist }}/index.html"
+          response_file="/tmp/a11y-${{ matrix.app.name }}-index.html"
+          asset_file="/tmp/a11y-${{ matrix.app.name }}-asset.js"
+          asset_headers="/tmp/a11y-${{ matrix.app.name }}-asset.headers"
+
+          if [[ ! -s "$index_file" ]]; then
+            echo "::error::Missing non-empty Vite app shell: $index_file"
+            exit 1
+          fi
+          if ! grep -Fq '<div id="root"></div>' "$index_file"; then
+            echo "::error::Built index is missing the expected React app shell: $index_file"
+            exit 1
+          fi
+
+          asset_path="$(sed -n 's/.*<script type="module"[^>]*src="\([^"]*\.js\)".*/\1/p' "$index_file" | head -n 1)"
+          if [[ ! "$asset_path" =~ ^/[^[:space:]]+\.js$ ]]; then
+            echo "::error::Built index does not reference a root-served JavaScript entry asset."
+            exit 1
+          fi
+          asset_source_file="${{ matrix.app.dist }}${asset_path}"
+          if [[ ! -s "$asset_source_file" ]]; then
+            echo "::error::Referenced JavaScript entry asset is missing or empty: $asset_source_file"
+            exit 1
+          fi
+
+          pnpm exec serve ${{ matrix.app.dist }} -l ${{ matrix.app.port }} --single &
           echo $! > /tmp/serve.pid
+          ready=false
           for i in $(seq 1 15); do
-            if curl -sf http://localhost:${{ matrix.app.port }}/ > /dev/null 2>&1; then
-              echo "Server ready after ${i}s"
+            if curl --fail --silent --show-error \
+                "http://localhost:${{ matrix.app.port }}/" \
+                --output "$response_file" \
+              && cmp --silent "$index_file" "$response_file" \
+              && curl --fail --silent --show-error \
+                --dump-header "$asset_headers" \
+                "http://localhost:${{ matrix.app.port }}${asset_path}" \
+                --output "$asset_file" \
+              && [[ -s "$asset_file" ]] \
+              && cmp --silent "$asset_source_file" "$asset_file" \
+              && grep -Eiq '^content-type: *(application|text)/(javascript|x-javascript)' "$asset_headers"; then
+              ready=true
+              echo "App shell and JavaScript entry asset ready after ${i}s"
               break
             fi
             sleep 1
           done
+          if [[ "$ready" != true ]]; then
+            echo "::error::Static server did not return the built app shell and JavaScript entry asset."
+            exit 1
+          fi
         shell: bash
 
       - name: Run axe accessibility scan (WCAG 2.1 AA)

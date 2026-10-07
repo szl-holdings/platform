@@ -11,30 +11,54 @@
  *   4. Impact simulation (dry-run)
  *   5. Plan generation (human-readable steps)
  *   6. Diff generation (advisory manifest/PR diff)
- *   7. Evidence attachment (immutable record)
+ *   7. Required evidence persistence
  *   8. Approval routing (Temporal workflow if required)
- *   9. Agent execution (OpenAI Agents SDK)
- *  10. Audit logging (structured NDJSON + OTel)
+ *   9. Required pre-execution audit persistence
+ *  10. Agent execution (OpenAI Agents SDK)
+ *  11. Required final audit persistence
  */
 
-import { randomUUID } from 'crypto';
-import { enforceCapability, CapabilityViolation } from './capabilities/enforce.js';
-import { authenticateCaller, AuthError } from './auth.js';
-import { evaluatePolicy, AuthzError } from './authz.js';
-import { simulateImpact } from './simulation.js';
-import { buildPlan } from './planner.js';
-import { buildDiff } from './differ.js';
-import { attachEvidence } from './evidence.js';
+import { randomUUID } from 'node:crypto';
+import { hashPrompt, runAgent } from './agent-runner.js';
 import { routeApproval } from './approval.js';
-import { runAgent, hashPrompt } from './agent-runner.js';
 import { buildAuditEntry, writeAuditEntry } from './audit.js';
+import { AuthError, authenticateCaller } from './auth.js';
+import { AuthzError, evaluatePolicy } from './authz.js';
+import { buildDiff } from './differ.js';
+import { enforceCapability } from './enforce.js';
+import { attachEvidence } from './evidence.js';
+import { persistEvidenceRecord } from './persistence.js';
+import { buildPlan } from './planner.js';
+import { simulateImpact } from './simulation.js';
 import type {
   AgentActionRequest,
+  AgentExecutionResult,
+  ApprovalOutcome,
+  AuditEntry,
+  CallerIdentity,
   GatewayConfig,
   GatewayResponse,
-  CallerIdentity,
-  AuditEntry,
+  OpaDecision,
+  TargetEnvironment,
 } from './types.js';
+
+const TARGET_ENVIRONMENTS: ReadonlySet<string> = new Set(['development', 'staging', 'production']);
+
+export class RequestValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'RequestValidationError';
+  }
+}
+
+export function requireTargetEnvironment(value: unknown): TargetEnvironment {
+  if (typeof value !== 'string' || !TARGET_ENVIRONMENTS.has(value)) {
+    throw new RequestValidationError(
+      'targetEnvironment is required and must be development, staging, or production',
+    );
+  }
+  return value as TargetEnvironment;
+}
 
 export class AgentGateway {
   constructor(private readonly config: GatewayConfig) {}
@@ -51,12 +75,13 @@ export class AgentGateway {
       model?: string;
       target: string;
       domain: string;
-      targetEnvironment?: AgentActionRequest['targetEnvironment'];
+      targetEnvironment: unknown;
       correlationId?: string;
     },
   ): Promise<GatewayResponse> {
     const startedAt = new Date().toISOString();
     const correlationId = meta.correlationId ?? randomUUID();
+    const targetEnvironment = requireTargetEnvironment(meta.targetEnvironment);
 
     // Placeholder caller for audit entries built before auth completes
     let caller: CallerIdentity | null = null;
@@ -69,7 +94,7 @@ export class AgentGateway {
       validCapability = enforceCapability(rawCapability);
     } catch (err) {
       const auditEntry = buildAuditEntry(
-        this.makeStubRequest(rawCapability, correlationId, meta),
+        this.makeStubRequest(rawCapability, correlationId, { ...meta, targetEnvironment }),
         this.makeAnonymousCaller(),
         {
           status: 'forbidden',
@@ -77,7 +102,8 @@ export class AgentGateway {
           startedAt,
         },
       );
-      writeAuditEntry(auditEntry, this.config.auditLogPath);
+      const persistenceFailure = await this.persistRequiredAudit(auditEntry);
+      if (persistenceFailure) return persistenceFailure;
       return {
         correlationId,
         status: 'forbidden',
@@ -90,10 +116,10 @@ export class AgentGateway {
     // Step 2 — Authentication
     // -----------------------------------------------------------------------
     try {
-      caller = authenticateCaller(authorizationHeader, this.config.jwtSecret);
+      caller = authenticateCaller(authorizationHeader, this.config.jwt);
     } catch (err) {
       const auditEntry = buildAuditEntry(
-        this.makeStubRequest(validCapability, correlationId, meta),
+        this.makeStubRequest(validCapability, correlationId, { ...meta, targetEnvironment }),
         this.makeAnonymousCaller(),
         {
           status: 'auth_failed',
@@ -101,7 +127,8 @@ export class AgentGateway {
           startedAt,
         },
       );
-      writeAuditEntry(auditEntry, this.config.auditLogPath);
+      const persistenceFailure = await this.persistRequiredAudit(auditEntry);
+      if (persistenceFailure) return persistenceFailure;
       return {
         correlationId,
         status: 'auth_failed',
@@ -120,7 +147,7 @@ export class AgentGateway {
       model: typeof meta.model === 'string' ? meta.model : 'gpt-4o',
       promptHash: hashPrompt(promptText),
       target: meta.target,
-      targetEnvironment: meta.targetEnvironment ?? 'development',
+      targetEnvironment,
       domain: meta.domain,
       parameters: params,
       requestedAt: startedAt,
@@ -129,7 +156,7 @@ export class AgentGateway {
     // -----------------------------------------------------------------------
     // Step 3 — OPA authorization
     // -----------------------------------------------------------------------
-    let policyDecision;
+    let policyDecision: OpaDecision;
     try {
       policyDecision = await evaluatePolicy(request, caller, this.config.opaEndpoint);
     } catch (err) {
@@ -138,7 +165,8 @@ export class AgentGateway {
         statusReason: err instanceof AuthzError ? err.message : 'Authorization failed',
         startedAt,
       });
-      writeAuditEntry(auditEntry, this.config.auditLogPath);
+      const persistenceFailure = await this.persistRequiredAudit(auditEntry);
+      if (persistenceFailure) return persistenceFailure;
       return {
         correlationId,
         status: 'authz_denied',
@@ -154,11 +182,26 @@ export class AgentGateway {
     const plan = buildPlan(request, policyDecision);
     const diff = buildDiff(request);
     const evidence = attachEvidence(request, caller, policyDecision, simulation, plan, diff);
+    try {
+      await persistEvidenceRecord(this.config, evidence);
+    } catch (error) {
+      this.logPersistenceFailure(correlationId, 'evidence', error);
+      return {
+        correlationId,
+        status: 'error',
+        message:
+          'Required evidence persistence failed; request blocked before approval or execution.',
+        auditId: 'unpersisted',
+        plan,
+        diff,
+        simulationResult: simulation,
+      };
+    }
 
     // -----------------------------------------------------------------------
     // Step 8 — Approval routing
     // -----------------------------------------------------------------------
-    let approvalOutcome;
+    let approvalOutcome: ApprovalOutcome;
     try {
       approvalOutcome = await routeApproval(
         policyDecision,
@@ -166,6 +209,7 @@ export class AgentGateway {
         request,
         caller,
         this.config.temporalEndpoint,
+        this.config.approvalWorkflow,
         this.config.approvalTimeoutMs,
       );
     } catch (err) {
@@ -177,7 +221,8 @@ export class AgentGateway {
         statusReason: `Approval routing error: ${err instanceof Error ? err.message : String(err)}`,
         startedAt,
       });
-      writeAuditEntry(auditEntry, this.config.auditLogPath);
+      const persistenceFailure = await this.persistRequiredAudit(auditEntry);
+      if (persistenceFailure) return persistenceFailure;
       return {
         correlationId,
         status: 'error',
@@ -201,7 +246,8 @@ export class AgentGateway {
         statusReason: approvalOutcome.rejectedReason ?? `Approval ${approvalOutcome.outcome}`,
         startedAt,
       });
-      writeAuditEntry(auditEntry, this.config.auditLogPath);
+      const persistenceFailure = await this.persistRequiredAudit(auditEntry);
+      if (persistenceFailure) return persistenceFailure;
       return {
         correlationId,
         status: 'approval_denied',
@@ -216,9 +262,25 @@ export class AgentGateway {
     }
 
     // -----------------------------------------------------------------------
-    // Step 9 — Agent execution
+    // Step 9 — Persist authorization before any provider execution
     // -----------------------------------------------------------------------
-    let agentResult;
+    const authorizationAuditEntry = buildAuditEntry(request, caller, {
+      policyDecision,
+      simulationResult: simulation,
+      diff,
+      approvalOutcome,
+      status: 'execution_authorized',
+      statusReason: 'Policy evaluation, evidence persistence, and approval routing completed.',
+      startedAt,
+    });
+    const authorizationPersistenceFailure =
+      await this.persistRequiredAudit(authorizationAuditEntry);
+    if (authorizationPersistenceFailure) return authorizationPersistenceFailure;
+
+    // -----------------------------------------------------------------------
+    // Step 10 — Agent execution
+    // -----------------------------------------------------------------------
+    let agentResult: AgentExecutionResult;
     try {
       agentResult = await runAgent(request, evidence, this.config.openAiApiKey);
     } catch (err) {
@@ -231,7 +293,8 @@ export class AgentGateway {
         statusReason: `Agent execution error: ${err instanceof Error ? err.message : String(err)}`,
         startedAt,
       });
-      writeAuditEntry(auditEntry, this.config.auditLogPath);
+      const persistenceFailure = await this.persistRequiredAudit(auditEntry);
+      if (persistenceFailure) return persistenceFailure;
       return {
         correlationId,
         status: 'error',
@@ -245,7 +308,7 @@ export class AgentGateway {
     }
 
     // -----------------------------------------------------------------------
-    // Step 10 — Final audit entry
+    // Step 11 — Final audit entry
     // -----------------------------------------------------------------------
     const finalAuditEntry = buildAuditEntry(request, caller, {
       policyDecision,
@@ -256,7 +319,8 @@ export class AgentGateway {
       status: 'completed',
       startedAt,
     });
-    writeAuditEntry(finalAuditEntry, this.config.auditLogPath);
+    const finalPersistenceFailure = await this.persistRequiredAudit(finalAuditEntry);
+    if (finalPersistenceFailure) return finalPersistenceFailure;
 
     return {
       correlationId,
@@ -276,10 +340,41 @@ export class AgentGateway {
   // Helpers
   // -------------------------------------------------------------------------
 
+  private logPersistenceFailure(
+    correlationId: string,
+    recordType: 'audit' | 'evidence',
+    error: unknown,
+  ): void {
+    process.stderr.write(
+      `${JSON.stringify({
+        level: 'ERROR',
+        timestamp: new Date().toISOString(),
+        correlationId,
+        message: `Required ${recordType} persistence failed; request failed closed`,
+        error: error instanceof Error ? error.message : String(error),
+      })}\n`,
+    );
+  }
+
+  private async persistRequiredAudit(entry: AuditEntry): Promise<GatewayResponse | null> {
+    try {
+      await writeAuditEntry(entry, this.config);
+      return null;
+    } catch (error) {
+      this.logPersistenceFailure(entry.correlationId, 'audit', error);
+      return {
+        correlationId: entry.correlationId,
+        status: 'error',
+        message: 'Required audit persistence failed; request blocked.',
+        auditId: 'unpersisted',
+      };
+    }
+  }
+
   private makeStubRequest(
     capability: string,
     correlationId: string,
-    meta: { target: string; domain: string; targetEnvironment?: AgentActionRequest['targetEnvironment'] },
+    meta: { target: string; domain: string; targetEnvironment: TargetEnvironment },
   ): AgentActionRequest {
     return {
       correlationId,
@@ -287,7 +382,7 @@ export class AgentGateway {
       model: 'unknown',
       promptHash: '0000000000000000',
       target: meta.target,
-      targetEnvironment: meta.targetEnvironment ?? 'development',
+      targetEnvironment: meta.targetEnvironment,
       domain: meta.domain,
       parameters: {},
       requestedAt: new Date().toISOString(),

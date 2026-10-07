@@ -6,6 +6,16 @@
 **Classification:** Internal / Investor Diligence  
 **Author:** Track 6 audit pass — synthesizes `audit/verification-log.md`, `audit/residual-risk-register.md`, `audit/tests/test-summary.md`, and direct observation.
 
+> **SUPERSEDED CURRENT-STATE NOTICE (2026-10-07):** This report preserves the
+> 2026-04-21 development-workspace observation. It is not current launch,
+> deployment, architecture, route-count, or security authority. Several named
+> artifacts and the formerly large `artifacts/api-server` topology no longer
+> match the tracked tree. Use
+> [`SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md`](./SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md)
+> for the current publication boundary and use the canonical source-of-truth
+> validator only after it reports no drift. Nothing below proves a current live
+> deployment, customer use, or production readiness.
+
 > **Reading key:** All claims below are labeled VERIFIED (executed/observed directly), CODE-CONFIRMED (inspected in source), or DEFERRED/OPEN (not yet validated end-to-end). No claim is unlabeled.
 >
 > **Source-of-truth key notation:** When a metric is cited as `api.route_files: 347`, this refers to the `.count` field of that path in `audit/source-of-truth.json` (i.e., `api.route_files.count: 347`). All numeric citations follow this shorthand notation for readability.
@@ -233,7 +243,7 @@ Stripe billing is `[Unreleased]`. No revenue can be collected until Stripe check
 
 ---
 
-## Honest One-Paragraph Verdict
+## Historical One-Paragraph Verdict (2026-04-21 only)
 
 SZL Holdings has the architecture of a serious enterprise platform, and the post-redesign public web surface matches that posture. The public landing pages are clean, institutional, and honest: all numbers trace to `audit/source-of-truth.json` (906 canonical table definitions, 347 route files, 12 top-level route groups, 165 schema files), AI governance claims are structurally backed by code, and the trust language points to real implementations. An investor doing code-level diligence will find a serious platform with a genuinely implemented governance fabric and a sovereign execution substrate with passing unit tests. An investor trying to click through authenticated product surfaces will hit 502s — because the database is not connected. The gap between current state and a working authenticated demo is a configuration gap, not an architecture gap: provision `DATABASE_URL`, run `pnpm seed`, set `REPL_ID`, and restart the API server. From there, MFA encryption (`MFA_SECRET_ENCRYPTION_KEY`) and Command startup are the next two required steps. Production readiness for enterprise customers additionally requires the schema integrity hardening sprint (RR-01, RR-04, RR-18) and Stripe activation. Each blocker has a documented remediation path.
 
@@ -241,32 +251,27 @@ SZL Holdings has the architecture of a serious enterprise platform, and the post
 
 ## Appendix: Reproducible Verification
 
-All high-confidence numeric claims in this document can be re-derived from the repository without tooling beyond `bash`, `find`, and `grep`. Run from the repo root:
+The current canonical metrics and their documentation bindings can be validated
+with Node.js and Git. Run from the repo root:
 
 ```bash
 bash audit/verify.sh
 ```
 
-`audit/verify.sh` checks the following metrics against `audit/source-of-truth.json`:
-
-All commands below are the canonical commands stored in `audit/source-of-truth.json`. Label paths exactly match source-of-truth.json key paths (e.g., `packages.total_packages.count` not `packages.total.count`).
-
-| Claim | Canonical command (from source-of-truth.json) | Source-of-truth.json key path |
-|-------|-----------------------------------------------|-------------------------------|
-| 347 route files | `find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' \| wc -l` | `api.route_files.count` |
-| 12 top-level route groups | `find artifacts/api-server/src/routes -mindepth 1 -maxdepth 1 -type d \| grep -v '__tests__' \| wc -l` | `api.route_groups_top_level.count` |
-| 123 packages | `echo $(( $(ls packages/ \| wc -l) + $(ls lib/ \| wc -l) ))` | `packages.total_packages.count` |
-| 165 schema files | `find lib/db/src/schema -name '*.ts' \| wc -l` | `track4_db_verification.schema.primary_schema_files.count` |
-| 915 pgTable call sites | `grep -rh 'pgTable(' lib/db/src/schema/ --include='*.ts' \| grep -v '^//' \| wc -l` | `track4_db_verification.schema.pgTable_call_sites.count` |
-| 10 approved screenshots | `find screenshots/approved/ -maxdepth 1 -type f \| wc -l` | `screenshots.approved.count` |
-| 11 RBAC granted roles | Cross-doc verified; see `docs/security-posture.md` RBAC Role Taxonomy | `auth.rbac_roles.count` |
+`audit/verify.sh` is a compatibility entry point for
+`scripts/audit/validate-source-of-truth.js`. The Node.js validator is the sole
+owner of the current metric schema: it derives counts from Git-tracked paths,
+checks both canonical documents, enforces the locked Doctrine representation,
+and runs the overclaim evidence guards. Numeric values elsewhere in this
+2026-04-21 report remain a historical snapshot unless the current validator
+explicitly covers them.
 
 100% Zod validation coverage: verified in `audit/qa/verification-matrix.md` by inspecting import resolution (routes use Zod schemas from `@szl-holdings/contracts/*` packages; initial `21/170` grep-only finding was a false positive that missed imported validators). See `docs/APP_STATUS.md` Known gaps entry for full explanation.
 
 ---
 
 *Document generated: 2026-04-21 — Track 6 (Zero-Gap Sprint)*  
-*Evidence sources: `audit/source-of-truth.json`, `audit/verification-log.md`, `audit/residual-risk-register.md`, `audit/tests/test-summary.md`, live screenshot captures 2026-04-21, `audit/verify.sh` (reproducible metric checks)*
+*Evidence sources: `audit/source-of-truth.json`, `audit/verification-log.md`, `audit/residual-risk-register.md`, `audit/tests/test-summary.md`, live screenshot captures 2026-04-21, `audit/verify.sh` (canonical validator compatibility entry point)*
 
 ---
 

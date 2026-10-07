@@ -20,16 +20,17 @@ This document explains every file and directory under `.github/` so contributors
 
 ```mermaid
 flowchart TD
-  MONO[platform monorepo\npnpm + TypeScript]:::in --> RUNTIME[Ouroboros runtime]
+  MONO[platform monorepo\nTypeScript + Python source]:::in --> RUNTIME[Runtime and service packages]
   MONO --> FORMULAS[Lutar formulas]
   MONO --> ADAPTERS[Dual-witness adapters]
-  RUNTIME --> COV{Covenant Policy\nhuman gate}
-  COV --> PROOF[Cryptographic proof\nof every outcome]
+  RUNTIME --> COV{Policy and approval\ncode paths}
+  COV --> PROOF[Receipt and proof\ncode paths]
   LEAN[(lutar-lean 749/14/163)] -.anchors.-> RUNTIME
   classDef in fill:#0B1F3A,color:#fff,stroke:#00D4FF;
 ```
 
-See also: [product surfaces](https://github.com/szl-holdings/platform/tree/main/artifacts) · [API spec](https://github.com/szl-holdings/platform/tree/main/docs). SLSA L1 honest; Doctrine v11.
+This diagram is a source-topology guide, not a runtime, deployment, theorem, or
+proof-completeness receipt. See also: [product surfaces](https://github.com/szl-holdings/platform/tree/main/artifacts) · [API spec](https://github.com/szl-holdings/platform/tree/main/docs). SLSA L1 honest; Doctrine v11.
 
 ## Quick Reference
 
@@ -51,51 +52,44 @@ See also: [product surfaces](https://github.com/szl-holdings/platform/tree/main/
 
 ## Workflows
 
-### Core CI (required for every PR)
+The current tree contains 47 tracked workflow YAML files. The table below is a
+concise source inventory of the promotion-relevant paths; it is not a hosted-run
+receipt and “required” refers only to the dated live-ruleset observation in the
+Branch Protection Summary.
 
-| Workflow | Trigger | Required Check | Purpose |
-|----------|---------|----------------|---------|
-| `ci.yml` | PR + push to `main` | Individual checks | Clean-clone validation on Linux and Windows, lint, and TypeScript typecheck |
-| `ci.yml` | PR + push to `main`/`master` | `Readiness Gate (smoke:product-mode)` | Product-mode API smoke test surfaced separately for fast PR visibility |
-| `e2e.yml` | PR + push to `main`/`master` | `E2E Gate` | Full Playwright matrix across all artifact surfaces + axe-core a11y |
-| `dependency-review.yml` | PR only | `dependency-review` | OSS vulnerability scan on changed dependencies |
-| `codeql.yml` | PR + push + weekly schedule | `analyze` | GitHub CodeQL static analysis (JavaScript/TypeScript) |
+### Validation and security
 
-### Security
+| Workflow | Source-declared trigger | Gate or scope |
+|----------|-------------------------|---------------|
+| `ci.yml` | PR to `main`/`master`, push to `main`, manual | Clean-clone validation on Linux and Windows, lint, and TypeScript typecheck; this file has no aggregate `CI Gate` or readiness job |
+| `build.yml` | PR/push to `main`/`master`, manual | Frozen install and canonical full-workspace build |
+| `e2e.yml` | PR/push to `main`/`master`, manual | `E2E Gate`; Playwright matrix for A11oy and Carlota Jo, not every artifact |
+| `a11y.yml` | PR/push to `main`/`master`, manual | `A11y Gate`; axe WCAG 2.1 AA checks for six named artifacts |
+| `lighthouse.yml` | PR/push to `main`/`master`, manual | Six-artifact matrix; accessibility and complete execution are enforced, other score categories are advisory |
+| `audit-full.yml` | PR/push to `main`/`master`, manual | `Runtime Audit (audit:full)` with real local smoke targets and a 60-minute timeout |
+| `codeql.yml` | PR/push to `main`, weekly, manual | JavaScript/TypeScript and Python analysis plus exact-PR-merge-ref `severity-gate` |
+| `security.yml` | PR/push to `main`, Mondays 03:00 UTC, manual | pnpm audit/SBOM, Gitleaks, project secret scan, lockfile integrity, license report, and `Security Gate (blocking)` |
+| `trivy.yml` | PR/push to `main`, Mondays 06:00 UTC | Trivy SARIF plus raw, digest-sealed Grype evidence and the fail-closed Grype gate |
+| `repro-check.yml` | PR, Mondays 04:17 UTC, manual | Two clean forced builds of one SHA and complete output-manifest comparison (`repro`) |
+| `lockfile-registry.yml` | PR/push to `main`, manual | Reusable lockfile registry-host check |
+| `dependency-review.yml` | PR to `main` | Review newly introduced vulnerabilities and configured denied licenses |
+| `source-of-truth.yml` | path-filtered PR/push to `main`, daily, manual | Canonical current-tree/documentation validator; scheduled/manual Hugging Face comparison is advisory |
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `security.yml` | PR to `main` + push to `main` + manual + Mondays 03:00 UTC | Dependency/SBOM checks, Gitleaks and project-specific secret scans, lockfile integrity, license report, and the fan-in `Security Gate (blocking)` job |
+### Release and operations
 
-### Build & Quality
+| Workflow | Source-declared trigger | Purpose and boundary |
+|----------|-------------------------|----------------------|
+| `release.yml` | Release created/published, manual | Generates and attests an SBOM; it does not create a release from a push to `main` |
+| `npm-publish.yml` | Published release, version tag, manual | Builds and publishes packages to GitHub Packages |
+| `npm-public-publish.yml` | Explicit manual dispatch | Publishes exact reviewed public tarballs after typed confirmation |
+| `deploy-staging.yml` | Push to `main`/`master` | Best-effort staging trigger; missing credentials skip it and remote API errors are warnings |
+| `post-deploy-smoke.yml` | Deployment workflow completion, manual | Source-declared post-deploy smoke; a configured target and hosted success are separate evidence |
+| `warm-flagships.yml` | Schedule, manual, selected push/PR | Flagship probes and authenticated wake-receipt path; deployment and secret availability are unproved by source |
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `lighthouse.yml` | PR + push | Lighthouse CI across six web artifacts. Accessibility ≥ 90 and complete matrix execution are enforced by the workflow; performance, best-practices, and SEO scores remain advisory. The aggregate check is not currently listed as required branch protection. |
-| `readme-qa.yml` | PR + push | Validates README image paths, badge workflow names, and link integrity |
-| `verify-source-of-truth.yml` | PR + push | Checks canonical doc sources are in sync |
-| `audit-full.yml` | Manual dispatch | Full audit suite (mocks, routes, deps, copy, design) |
-| `commitlint.yml` | PR | Enforces Conventional Commits format |
-| `a11y.yml` | PR + push | Axe-core accessibility checks (advisory) |
-| `build.yml` | PR + push | Explicit per-artifact build validation |
-
-### Release & Deploy
-
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `release.yml` | Push to `main` | Determines semver bump from commit prefixes, creates Git tag, publishes GitHub Release |
-| `deploy-staging.yml` | Push to `main` | Deploys to `staging` environment automatically |
-| `deploy-production.yml` | Published release | Deploys to `production` environment (requires reviewer approval) |
-| `container-publish.yml` | Published release | Builds and publishes Docker images |
-| `npm-publish.yml` | Published release | Publishes public packages to npm |
-
-### Operations
-
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `backup.yml` | Nightly cron | Database backup and remote upload (Azure Blob). Failure triggers the `backup-upload-stalled` runbook in `INCIDENT_RESPONSE.md` |
-| `uptime-monitor.yml` | Scheduled + manual | Checks production endpoints are reachable |
-| `prism-counsel-ci.yml` | PR + push | CI for the legacy PRISM Counsel domain API routes (retained for backward compat) |
+No current workflow named `deploy-production.yml`, `container-publish.yml`,
+`backup.yml`, or `uptime-monitor.yml` exists in this tree. See
+[`docs/operations/ci-overview.md`](../docs/operations/ci-overview.md) for the
+evidence labels and dated ruleset boundary.
 
 ---
 
@@ -116,10 +110,10 @@ Dependabot is configured in `dependabot.yml` with the following schedule and lim
 
 | Ecosystem | Directories | Schedule | PR Limit | Grouping |
 |-----------|------------|----------|----------|---------|
-| `npm` | Root (all pnpm workspaces) | Weekly (Mon 09:00 ET) | 10 | React, Vite, testing, TypeScript, UI, DB, TanStack |
-| `pip` | `workers/substrate-python`, `services/substrate-py-workers`, `services/lyte-metrics-store`, `scripts/media` | Weekly (Mon 09:00 ET) | 3 per dir | None (low volume) |
-| `docker` | `artifacts/api-server`, `artifacts/szl-holdings`, `artifacts/vessels`, `artifacts/terra`, `artifacts/carlota-jo` | Weekly (Mon 09:00 ET) | 3 per dir | None (low volume) |
-| `github-actions` | Root | Weekly (Mon 09:00 ET) | 5 | `actions/*`, `github/*`, CI tooling |
+| `npm` | Root plus configured `apps`, `artifacts`, `lib`, `packages`, `scripts`, `services`, and `workers` globs | Weekly (Mon 08:00 ET) | 10 | All minor/patch updates |
+| `pip` | Root plus configured `apps`, `packages`, `scripts`, `services`, `substrate`, and `workers` globs | Weekly (Mon 08:00 ET) | 5 | All minor/patch updates |
+| `docker` | Configured `apps`, `artifacts`, `services`, and `workers` globs | Weekly (Mon 08:00 ET) | 3 | All minor/patch updates |
+| `github-actions` | Root | Weekly (Mon 08:00 ET) | 5 | All minor/patch updates |
 
 All Dependabot PRs must pass the same required CI checks as any other PR.
 
@@ -129,9 +123,12 @@ All Dependabot PRs must pass the same required CI checks as any other PR.
 
 ## Secret Scanning
 
-Three complementary layers:
+Three complementary layers are intended; only the workflow layers are
+source-confirmed in this checkout:
 
-1. **GitHub-native scanning and push protection:** provider-known patterns are checked by GitHub, including before accepted pushes when push protection matches.
+1. **GitHub-native scanning and push protection:** live enablement was not
+   observed. When enabled, GitHub checks provider-known patterns and can block
+   matching pushes.
 2. **PR-time scan** (`security.yml` → `secret-scan`): Gitleaks scans the PR's base-to-head commit range, then the project-specific scanner checks the current tree. A finding fails the `Security Gate (blocking)` fan-in job.
 3. **Default-branch and scheduled scan** (`security.yml` → `secret-scan`): pushes to `main`, manual dispatches, and the Monday 03:00 UTC schedule scan reachable repository history with Gitleaks and check the current tree with the project-specific scanner.
 
@@ -143,12 +140,19 @@ Config lives in `.gitleaks.toml`. If you need to add an allowlist entry, documen
 
 ## Branch Protection Summary
 
-See `BRANCH_PROTECTION.md` for the full GitHub UI configuration checklist. Required status checks for `main`:
+`BRANCH_PROTECTION.md` is the human-readable companion to the dated,
+authenticated, repository-scoped receipt; neither document proves a check
+conclusion. The 2026-10-06 read observed these required contexts for `main`:
 
-- `CI Gate`
-- `Readiness Gate (smoke:product-mode)`
+- `Runtime Audit (audit:full)`
+- `Security Gate (blocking)`
 - `E2E Gate`
-- `dependency-review`
-- `analyze`
+- `severity-gate`
+- `lockfiles / No lockfile references a Replit-internal registry host`
 
-The `Lighthouse Gate (accessibility enforced)` check is not currently listed as a required branch-protection context. When the workflow runs, only a completed successful matrix passes: accessibility assertions are hard failures and incomplete infrastructure fails closed. Performance, best-practices, and SEO assertions remain advisory warnings.
+That read was repository-scoped. Organization-wide ruleset detail remained
+unavailable, and it does not prove that any check passed for a candidate SHA.
+`severity-gate` was already required in that read. The source-declared Grype
+and reproducibility gates were not in the observed required list. If the live
+ruleset changes, record a fresh authenticated readback before describing either
+of those two additional gates as required.

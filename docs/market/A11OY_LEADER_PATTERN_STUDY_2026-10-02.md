@@ -8,6 +8,14 @@ The study used shallow clones of official public GitHub repositories at the exac
 
 License names below describe the inspected snapshots. They are not a conclusion that every file in a repository has the same terms. Restricted or source-available projects were used only for behavioral research.
 
+Any competitor-referencing comparison row, challenge, score, scenario, trace,
+policy result, approval, or proof record shown in the A11oy interface is a
+hypothetical repository fixture unless it links to a separate exact-head
+execution receipt. The citations below support the research method and design
+requirements only. They are not benchmark inputs or results, and they do not
+establish an installed competitor instance, interoperability, feature parity,
+endorsement, customer use, or production observation.
+
 ## Source snapshots
 
 ### Agent orchestration
@@ -46,7 +54,9 @@ License names below describe the inspected snapshots. They are not a conclusion 
 | [Dapr documentation](https://github.com/dapr/docs/tree/4eb8bf1fcb4c6625107fc2a3f047d946d5a39e98) | `4eb8bf1fcb4c6625107fc2a3f047d946d5a39e98` | Apache-2.0 | [workflow history](https://github.com/dapr/docs/blob/4eb8bf1fcb4c6625107fc2a3f047d946d5a39e98/daprdocs/content/en/developing-applications/building-blocks/workflow/workflow-features-concepts.md#L117-L175), [history propagation](https://github.com/dapr/docs/blob/4eb8bf1fcb4c6625107fc2a3f047d946d5a39e98/daprdocs/content/en/developing-applications/building-blocks/workflow/workflow-history-propagation.md#L235-L266), [history signing](https://github.com/dapr/docs/blob/4eb8bf1fcb4c6625107fc2a3f047d946d5a39e98/daprdocs/content/en/developing-applications/building-blocks/workflow/workflow-history-signing.md#L144-L205) |
 | [Sigstore Cosign](https://github.com/sigstore/cosign/tree/6a83f9a2083343b89afc7431c2dda45fb5bf14e8) | `6a83f9a2083343b89afc7431c2dda45fb5bf14e8` | Apache-2.0 | [identity and digest verification](https://github.com/sigstore/cosign/blob/6a83f9a2083343b89afc7431c2dda45fb5bf14e8/README.md#L84-L133), [portable bundles](https://github.com/sigstore/cosign/blob/6a83f9a2083343b89afc7431c2dda45fb5bf14e8/README.md#L143-L178), [subject binding](https://github.com/sigstore/cosign/blob/6a83f9a2083343b89afc7431c2dda45fb5bf14e8/doc/cosign_verify-blob-attestation.md#L45-L69) |
 | [in-toto](https://github.com/in-toto/in-toto/tree/e352b43ad7cb8915d84c36d791aa61346152a0a3) | `e352b43ad7cb8915d84c36d791aa61346152a0a3` | Apache-2.0 | [layouts and authorized steps](https://github.com/in-toto/in-toto/blob/e352b43ad7cb8915d84c36d791aa61346152a0a3/README.md#L28-L61), [material and product receipts](https://github.com/in-toto/in-toto/blob/e352b43ad7cb8915d84c36d791aa61346152a0a3/README.md#L63-L82), [verification](https://github.com/in-toto/in-toto/blob/e352b43ad7cb8915d84c36d791aa61346152a0a3/README.md#L102-L119) |
-| [SLSA](https://github.com/slsa-framework/slsa/tree/82b296d49e4c8301e7db565f23620ffe89092a0c) | `82b296d49e4c8301e7db565f23620ffe89092a0c` | Community Specification License 1.0 | [attestation model](https://github.com/slsa-framework/slsa/blob/82b296d49e4c8301e7db565f23620ffe89092a0c/spec/attestation-model.md#L101-L145), [provenance fields](https://github.com/slsa-framework/slsa/blob/82b296d49e4c8301e7db565f23620ffe89092a0c/spec/build-provenance.md#L31-L97), [verification policy](https://github.com/slsa-framework/slsa/blob/82b296d49e4c8301e7db565f23620ffe89092a0c/spec/verifying-artifacts.md#L94-L173) |
+| [SLSA](https://github.com/slsa-framework/slsa/tree/82b296d49e4c8301e7db565f23620ffe89092a0c) | `82b296d49e4c8301e7db565f23620ffe89092a0c` | Community Specification License 1.0 | [attestation model](https://github.com/slsa-framework/slsa/blob/82b296d49e4c8301e7db565f23620ffe89092a0c/spec/attestation-model.md#L101-L145), [provenance fields][slsa-provenance-fields], [verification policy](https://github.com/slsa-framework/slsa/blob/82b296d49e4c8301e7db565f23620ffe89092a0c/spec/verifying-artifacts.md#L94-L173) |
+
+[slsa-provenance-fields]: https://github.com/slsa-framework/slsa/blob/82b296d49e4c8301e7db565f23620ffe89092a0c/spec/build-provenance.md#L31-L97
 
 ## A11oy design conclusions from the comparison
 
@@ -63,7 +73,15 @@ The following recommendations are original synthesis from the cited behavior and
 
 ## A11oy application
 
-The first implementation is the Workcell Proof Coverage Inspector on `/a11oy/workcells/:id/replay`. It joins the Workcell fixture to its signal records, PCE contract, and Proof Packet; compares the declared action and trace identifiers; and checks policy and approval references for resolution. No policy or approval registry is supplied by the current route. Every obligation reports `SATISFIED`, `MISMATCH`, or `UNAVAILABLE`; the aggregate is complete only when all obligations are satisfied.
+The repository-retained prototype implementation is the Workcell Proof Coverage
+Inspector formerly mounted on `/a11oy/workcells/:id/replay`. The current public
+candidate router excludes that path behind `PublicationHoldPage`, and its page
+module is absent from the reviewed public bundle. The retained source joins the
+Workcell fixture to its signal records, PCE contract, and Proof Packet; compares
+the declared action and trace identifiers; and checks policy and approval
+references for resolution. No policy or approval registry is supplied by the
+fixture. Every obligation reports `SATISFIED`, `MISMATCH`, or `UNAVAILABLE`; the
+aggregate is complete only when all obligations are satisfied.
 
 The current `wc-001` fixture deliberately remains incomplete:
 

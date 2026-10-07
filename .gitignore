@@ -154,6 +154,15 @@ artifacts/szl-holdings/public/briefs/index.json
 # Local gitleaks binary (installed on-demand for scanning; not committed to source)
 gitleaks
 
+# Ephemeral Grype CI evidence (uploaded as a run artifact, never source truth)
+/grype-results.json
+/grype-results.json.sha256
+/grype-gate-report.md
+
+# Python bytecode/cache artifacts are local execution output, never source.
+__pycache__/
+*.py[cod]
+
 # ── A11oy Doctrine additions (Task #3481) ─────────────────────────────────────
 # Build output directory
 build

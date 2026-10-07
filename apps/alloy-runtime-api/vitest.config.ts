@@ -5,6 +5,7 @@ const ROOT = resolve(__dirname, '../..');
 
 export default defineConfig({
   resolve: {
+    conditions: ['workspace'],
     alias: [
       {
         find: '@szl-holdings/observability',
@@ -12,6 +13,11 @@ export default defineConfig({
       },
       { find: '@szl-holdings/env', replacement: resolve(ROOT, 'packages/env/src/index.ts') },
     ],
+  },
+  server: {
+    deps: {
+      inline: [/^@szl-holdings\//, /^@workspace\//],
+    },
   },
   test: {
     globals: true,

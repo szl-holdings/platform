@@ -508,6 +508,7 @@ export async function HumanApprovalGate(
 
   const request = submitPendingApprovalRequest({
     runId: input.runId,
+    tenantId: ctx.tenantId,
     stepId: input.stepId,
     stepName: input.stepId,
     action: input.action,

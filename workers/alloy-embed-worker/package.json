@@ -6,12 +6,15 @@
   "description": "Alloy Embedding Fabric — TypeScript embed worker with micro-batching, explicit pooling strategies, truncation policy, warm-pool keep-alive, and pluggable EmbeddingBackend interface.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     }
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit --customConditions workspace",
     "test": "vitest run",
     "test:watch": "vitest"
   },

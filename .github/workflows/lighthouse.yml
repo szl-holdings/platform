@@ -73,12 +73,9 @@ jobs:
           # resolves assets. Production serves each app under /<app>/ via BASE_PATH.
           BASE_PATH: /
 
-      - name: Install static file server
-        run: npm install -g serve
-
       - name: Serve ${{ matrix.app.name }} on port ${{ matrix.app.port }}
         run: |
-          serve ${{ matrix.app.dist }} -l ${{ matrix.app.port }} &
+          pnpm exec serve ${{ matrix.app.dist }} -l ${{ matrix.app.port }} &
           sleep 3
         shell: bash
 

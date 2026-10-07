@@ -1,7 +1,23 @@
 import { randomUUID } from 'node:crypto';
-import { type MetadataFilter, HybridSearchRequestSchema, SearchHitSchema } from '@workspace/aef-contracts';
+import {
+  type MetadataFilter,
+  HybridSearchRequestSchema,
+  SearchHitSchema,
+} from '@workspace/aef-contracts';
 import type { PolicyContext } from '@workspace/aef-policy-guard';
-import { type DenseHit, type KeywordHit, applyMetadataFilter, applyPreFusionBoosts, applyProfilePromptTransform, assembleCitations, normalizeQuery, normalizeScores, reciprocalRankFusion, rerankHits, wrapAsBoosted } from '@workspace/aef-retrieval-core';
+import {
+  type DenseHit,
+  type KeywordHit,
+  applyMetadataFilter,
+  applyPreFusionBoosts,
+  applyProfilePromptTransform,
+  assembleCitations,
+  normalizeQuery,
+  normalizeScores,
+  reciprocalRankFusion,
+  rerankHits,
+  wrapAsBoosted,
+} from '@workspace/aef-retrieval-core';
 import type { Request, Response, Router } from 'express';
 import {
   defaultLedgerStore,
@@ -166,7 +182,8 @@ export function registerSearchRoute(router: Router): void {
     stageMs.metadata_filter = Date.now() - stageStart;
     stageStart = Date.now();
 
-    // 10. rerank — normalizes scores to [0,1] then runs CPU cross-encoder second pass when enabled.
+    // 10. rerank — normalizes scores to [0,1] then runs the deterministic
+    // lexical-overlap second pass when enabled. No cross-encoder model is loaded.
     // Score normalization is bundled into this stage per the 13-stage canonical pipeline contract.
     const normalizedHits = normalizeScores(filteredHits);
     const rerankedHits = rerankEnabled
@@ -192,8 +209,7 @@ export function registerSearchRoute(router: Router): void {
         finalScore: citation.score,
       };
       if (citation.denseScore !== undefined) scoreBreakdown.denseScore = citation.denseScore;
-      if (citation.keywordScore !== undefined)
-        scoreBreakdown.keywordScore = citation.keywordScore;
+      if (citation.keywordScore !== undefined) scoreBreakdown.keywordScore = citation.keywordScore;
       if (citation.rerankerScore !== undefined)
         scoreBreakdown.rerankerScore = citation.rerankerScore;
 
@@ -248,8 +264,7 @@ export function registerSearchRoute(router: Router): void {
       const hitShape = {
         chunkId: c.chunkId,
         sourceId: c.sourceId,
-        sourceUri:
-          typeof c.metadata?.sourceUri === 'string' ? c.metadata.sourceUri : undefined,
+        sourceUri: typeof c.metadata?.sourceUri === 'string' ? c.metadata.sourceUri : undefined,
         title: typeof c.metadata?.title === 'string' ? c.metadata.title : undefined,
         page: typeof c.metadata?.page === 'number' ? c.metadata.page : undefined,
         section: typeof c.metadata?.section === 'string' ? c.metadata.section : undefined,

@@ -9,7 +9,7 @@
  * boundary explicitly without spawning a real OPA process.
  */
 
-import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { evaluatePolicy } from '../src/authz.js';
 import type { AgentActionRequest, CallerIdentity } from '../src/types.js';
 
@@ -36,6 +36,7 @@ const CALLER: CallerIdentity = {
 
 const OPA_BODY = JSON.stringify({
   result: {
+    allowed: true,
     required_approvals: 1,
     required_groups: ['platform-team', 'release-managers'],
     deny: [],
@@ -43,9 +44,7 @@ const OPA_BODY = JSON.stringify({
 });
 
 function fetchReturning(headers: Record<string, string>) {
-  return vi.fn().mockResolvedValue(
-    new Response(OPA_BODY, { status: 200, headers }),
-  );
+  return vi.fn().mockResolvedValue(new Response(OPA_BODY, { status: 200, headers }));
 }
 
 const ORIGINAL_FETCH = globalThis.fetch;

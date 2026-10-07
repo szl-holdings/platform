@@ -11,7 +11,7 @@ paths = [ "/alloy-embedding-api/" ]
 localPort = 8766
 
 [services.development]
-run = "pnpm --filter @workspace/alloy-embedding-api run dev"
+run = "env NODE_ENV=development AEF_AUTH_BYPASS=true pnpm --filter @workspace/alloy-embedding-api run dev"
 
 [services.production]
 build = "pnpm --filter @workspace/alloy-embedding-api run build"
@@ -20,5 +20,5 @@ run = "pnpm --filter @workspace/alloy-embedding-api run start"
 [services.env]
 PORT = "8766"
 BASE_PATH = "/alloy-embedding-api"
-AEF_AUTH_BYPASS = "true"
-NODE_ENV = "development"
+AEF_AUTH_BYPASS = "false"
+NODE_ENV = "production"

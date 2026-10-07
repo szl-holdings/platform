@@ -56,9 +56,13 @@ fi
 
 if command -v pnpm >/dev/null 2>&1; then
   PNPM_VER=$(pnpm --version 2>/dev/null)
-  pass "pnpm" "v$PNPM_VER"
+  if [ "$PNPM_VER" = "10.26.1" ]; then
+    pass "pnpm" "v$PNPM_VER (exact version required)"
+  else
+    fail "pnpm" "v$PNPM_VER — requires exactly 10.26.1; run: source scripts/activate-pnpm.sh"
+  fi
 else
-  fail "pnpm" "not found — install with: npm i -g pnpm"
+  fail "pnpm" "not found — run in this shell: source scripts/activate-pnpm.sh"
 fi
 
 # ── 2. Required environment variables ───────────────────────────────────────

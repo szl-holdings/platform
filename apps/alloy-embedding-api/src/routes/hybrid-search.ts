@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { HybridSearchRequestSchema, type EmbeddingExecutionReceipt } from '@workspace/aef-contracts';
+import {
+  type EmbeddingExecutionReceipt,
+  HybridSearchRequestSchema,
+  isDevelopmentOrTestRuntime,
+  RERANK_IMPLEMENTATION_ID,
+  type RerankExecutionReceipt,
+} from '@workspace/aef-contracts';
 import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
 import { PolicyEngine } from '@workspace/aef-policy-guard';
 import {
@@ -11,17 +16,24 @@ import {
 } from '@workspace/aef-retrieval-core';
 import { embedTextsWithReceipt } from '@workspace/alloy-embed-worker';
 import { rerankCandidates } from '@workspace/alloy-rerank-worker';
+import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
+import { evidenceLedgerRuntimeAdmission } from '../evidence-ledger-runtime.js';
 import { logger } from '../middleware/logger.js';
 import { errorBudgetCounter } from '../middleware/prometheus.js';
+import { enforceTenantRequestConsistency } from '../middleware/tenant.js';
 import { getProfile } from '../profiles/default.js';
+import { resolveRerankerConfiguration } from '../rerank-runtime.js';
 import {
   EmbedderConfigurationError,
   getEmbedderSelection,
   getRetrievalStore,
+  RetrievalStoreConfigurationError,
 } from '../retrieval-store.js';
 
 export const hybridSearchRouter: IRouter = Router();
 const policyEngine = new PolicyEngine();
+hybridSearchRouter.use(enforceTenantRequestConsistency as RequestHandler);
+hybridSearchRouter.use(evidenceLedgerRuntimeAdmission as RequestHandler);
 
 hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response) => {
   const parseResult = HybridSearchRequestSchema.safeParse(req.body);
@@ -35,7 +47,7 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
   const traceId = req.traceId;
   const requestedAt = new Date().toISOString();
 
-  let profile;
+  let profile: ReturnType<typeof getProfile>;
   try {
     profile = getProfile(body.profileId ?? req.profileId ?? 'default');
   } catch (error) {
@@ -60,19 +72,58 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
     return;
   }
 
-  const start = Date.now();
-  let embedder;
+  const rerankRequested = body.rerankEnabled || profile.rerankEnabled;
+  if (rerankRequested) {
+    try {
+      const rerankerConfiguration = resolveRerankerConfiguration();
+      if (!rerankerConfiguration.enabled) {
+        res.status(503).json({
+          error: 'Reranking was requested but is explicitly disabled',
+          code: 'RERANKER_DISABLED',
+          traceId,
+        });
+        return;
+      }
+    } catch {
+      res.status(503).json({
+        error: 'Reranker configuration is invalid',
+        code: 'RERANKER_CONFIGURATION_INVALID',
+        traceId,
+      });
+      return;
+    }
+  }
+
+  let retrievalStore: ReturnType<typeof getRetrievalStore>;
   try {
-    embedder = getEmbedderSelection();
+    retrievalStore = getRetrievalStore();
   } catch (error) {
-    if (error instanceof EmbedderConfigurationError) {
-      res.status(503).json({ error: 'Embedding backend is not configured', code: error.code, traceId });
+    if (error instanceof RetrievalStoreConfigurationError) {
+      res.status(503).json({
+        error: 'Durable retrieval storage is not configured',
+        code: error.code,
+        traceId,
+      });
       return;
     }
     throw error;
   }
 
-  let embedResult;
+  const start = Date.now();
+  let embedder: ReturnType<typeof getEmbedderSelection>;
+  try {
+    embedder = getEmbedderSelection();
+  } catch (error) {
+    if (error instanceof EmbedderConfigurationError) {
+      res
+        .status(503)
+        .json({ error: 'Embedding backend is not configured', code: error.code, traceId });
+      return;
+    }
+    throw error;
+  }
+
+  let embedResult: Awaited<ReturnType<typeof embedTextsWithReceipt>>;
   try {
     embedResult = await embedTextsWithReceipt([body.query], {
       backendId: embedder.backendId,
@@ -82,7 +133,10 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
     });
   } catch (error) {
     errorBudgetCounter.inc({ kind: 'embed_error', tenant_id: tenantId });
-    logger.error({ traceId, error: String(error), backendId: embedder.backendId }, 'Query embedding failed');
+    logger.error(
+      { traceId, error: String(error), backendId: embedder.backendId },
+      'Query embedding failed',
+    );
     res.status(502).json({
       error: 'Query embedding failed',
       code: 'EMBEDDING_BACKEND_UNAVAILABLE',
@@ -93,11 +147,13 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
 
   const queryVector = embedResult.vectors[0];
   if (!queryVector) {
-    res.status(502).json({ error: 'Query embedding returned no vector', code: 'EMPTY_EMBEDDING', traceId });
+    res
+      .status(502)
+      .json({ error: 'Query embedding returned no vector', code: 'EMPTY_EMBEDDING', traceId });
     return;
   }
 
-  const { bundle, backend: storeBackend } = getRetrievalStore();
+  const { bundle, backend: storeBackend } = retrievalStore;
   let denseHits: Array<{
     chunkId: string;
     sourceId: string;
@@ -132,7 +188,9 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
   } catch (error) {
     errorBudgetCounter.inc({ kind: 'retrieval_error', tenant_id: tenantId });
     logger.error({ traceId, error: String(error), storeBackend }, 'Hybrid retrieval failed');
-    res.status(502).json({ error: 'Retrieval backend unavailable', code: 'RETRIEVAL_FAILED', traceId });
+    res
+      .status(502)
+      .json({ error: 'Retrieval backend unavailable', code: 'RETRIEVAL_FAILED', traceId });
     return;
   }
 
@@ -144,7 +202,8 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
 
   let finalCitations = citations.slice(0, body.topK);
   let rerankModel: string | undefined;
-  if (body.rerankEnabled || profile.rerankEnabled) {
+  let rerankExecution: RerankExecutionReceipt | undefined;
+  if (rerankRequested && finalCitations.length > 0) {
     try {
       const rerankResult = await rerankCandidates(
         {
@@ -155,33 +214,45 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
             score: citation.score,
           })),
           topK: body.topK,
-          model: 'aef-dev-rerank',
+          model: RERANK_IMPLEMENTATION_ID,
         },
-        { useFallback: false },
+        {
+          fallbackPolicy: isDevelopmentOrTestRuntime(process.env, ['AEF_ENV'])
+            ? 'development-only'
+            : 'never',
+        },
       );
       rerankModel = rerankResult.model;
+      rerankExecution = rerankResult.execution;
       const scoreById = new Map(rerankResult.results.map((result) => [result.id, result.score]));
       finalCitations = finalCitations
         .map((citation) => ({ ...citation, rerankerScore: scoreById.get(citation.chunkId) }))
-        .sort((left, right) =>
-          (right.rerankerScore ?? right.score) - (left.rerankerScore ?? left.score),
+        .sort(
+          (left, right) =>
+            (right.rerankerScore ?? right.score) - (left.rerankerScore ?? left.score),
         );
     } catch (error) {
-      logger.warn({ traceId, error: String(error) }, 'Rerank failed; preserving fusion order');
+      errorBudgetCounter.inc({ kind: 'rerank_error', tenant_id: tenantId });
+      logger.error({ traceId, error: String(error) }, 'Hybrid-search rerank failed');
+      res.status(502).json({
+        error: 'Reranker backend unavailable',
+        code: 'RERANKER_BACKEND_UNAVAILABLE',
+        traceId,
+      });
+      return;
     }
   }
 
-  const execution: EmbeddingExecutionReceipt =
-    embedResult.execution ?? {
-      backendId: embedder.backendId,
-      modelId: embedResult.model,
-      ...(embedder.modelRevision ? { modelRevision: embedder.modelRevision } : {}),
-      ...(embedder.artifactSetDigest ? { artifactSetDigest: embedder.artifactSetDigest } : {}),
-      dimensions: embedResult.dimensions,
-      normalized: true,
-      promotionState: embedder.promotionState,
-      supportedModalities: ['text'],
-    };
+  const execution: EmbeddingExecutionReceipt = embedResult.execution ?? {
+    backendId: embedder.backendId,
+    modelId: embedResult.model,
+    ...(embedder.modelRevision ? { modelRevision: embedder.modelRevision } : {}),
+    ...(embedder.artifactSetDigest ? { artifactSetDigest: embedder.artifactSetDigest } : {}),
+    dimensions: embedResult.dimensions,
+    normalized: true,
+    promotionState: embedder.promotionState,
+    supportedModalities: ['text'],
+  };
   const completedAt = new Date().toISOString();
 
   const evidenceEntries = finalCitations.map((citation, index) => {
@@ -202,6 +273,16 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
       fusedScore: citation.fusedScore,
       boostApplied: citation.boostApplied,
       rerankerScore: citation.rerankerScore,
+      ...(rerankExecution
+        ? {
+            rerankerBackendId: rerankExecution.backendId,
+            rerankerModelId: rerankExecution.modelId,
+            rerankerModelRevision: rerankExecution.modelRevision,
+            rerankerArtifactSetDigest: rerankExecution.artifactSetDigest,
+            rerankerPromotionState: rerankExecution.promotionState,
+            rerankerFallback: rerankExecution.fallback,
+          }
+        : {}),
       finalScore: citation.rerankerScore ?? citation.score,
       policyAllow: true,
       policyReasons: policyDecision.reasons,
@@ -242,7 +323,7 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
       boostApplied: citation.boostApplied,
       selectedRationale: citation.boostApplied
         ? 'Exact-match boost applied'
-        : body.rerankEnabled
+        : rerankRequested
           ? 'Selected by reranker'
           : 'Selected by reciprocal rank fusion',
       evidenceId: evidence.entryId,
@@ -260,6 +341,7 @@ hybridSearchRouter.post('/v1/hybrid-search', (async (req: Request, res: Response
     hits,
     totalCandidates: body.candidatePool,
     rerankModel,
+    rerankExecution,
     processingMs,
     traceId,
     policyReasons: policyDecision.reasons,

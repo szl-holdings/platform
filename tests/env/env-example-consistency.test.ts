@@ -48,29 +48,85 @@ function readExampleActiveKeys(): string[] {
  * list is a deliberate, reviewable act — it cannot happen by accident.
  */
 const SERVICE_LOCAL_ALLOWLIST = new Set<string>([
+  // A11oy Atelier and its loopback-only local bridge/runtime API.
+  'A11OY_ATELIER_XAI_API_KEY',
+  'A11OY_ATELIER_GROK_CLI_PATH',
+  'SZL_GROK_MODEL',
+  'A11OY_ATELIER_API_BASE_URL',
+  'A11OY_ATELIER_TENANT_ID',
+  'VITE_A11OY_ATELIER_TENANT_ID',
+  'A11OY_ATELIER_CONTINUITY_DIR',
+  'A11OY_ATELIER_CONTINUITY_KEY',
+  'A11OY_ATELIER_CONTINUITY_REQUIRED',
+  'ALLOY_API_KEY',
+  'ALLOY_API_TENANT_ID',
+  'SHARED_PROXY_PORT',
+  'SHARED_PROXY_A11OY_PORT',
+  'SHARED_PROXY_API_PORT',
+  'SHARED_PROXY_BIND_HOST',
+  'SHARED_PROXY_LOCAL_API_KEY_BRIDGE',
+  'SHARED_PROXY_LOCAL_TENANT_ID',
   // Externally-deployed embedding/ingestion service (docs/aef/*).
-  'AEF_API_PORT', 'AEF_EMBED_API_KEY', 'AEF_EMBED_BACKEND', 'AEF_EMBED_BATCH_SIZE',
-  'AEF_EMBED_ENDPOINT', 'AEF_EMBED_FLUSH_MS', 'AEF_EMBED_OVERSIZE_TOKENS',
-  'AEF_EMBED_QUEUE_DEPTH', 'AEF_INGEST_CONTROL_PORT', 'AEF_PG_CONNECTION_STRING',
-  'AEF_RANK_MODE', 'AEF_RANK_WORKER_PORT', 'AEF_RATE_LIMIT_RPM', 'AEF_S2S_SECRET',
-  'AEF_STORAGE_ADAPTER', 'AEF_VECTOR_WORKER_PORT',
+  'AEF_API_PORT',
+  'AEF_EMBED_API_KEY',
+  'AEF_EMBED_BACKEND',
+  'AEF_EMBED_BATCH_SIZE',
+  'AEF_EMBED_ENDPOINT',
+  'AEF_EMBED_FLUSH_MS',
+  'AEF_EMBED_OVERSIZE_TOKENS',
+  'AEF_EMBED_QUEUE_DEPTH',
+  'AEF_INGEST_CONTROL_PORT',
+  'AEF_PG_CONNECTION_STRING',
+  'AEF_RANK_MODE',
+  'AEF_RANK_WORKER_PORT',
+  'AEF_RATE_LIMIT_RPM',
+  'AEF_S2S_SECRET',
+  'AEF_STORAGE_ADAPTER',
+  'AEF_VECTOR_WORKER_PORT',
   // Bootstrap / seed (scripts, not the running server).
-  'BOOTSTRAP_ADMIN_EMAIL', 'BOOTSTRAP_ADMIN_PASSWORD', 'BOOTSTRAP_ADMIN_USERNAME',
+  'BOOTSTRAP_ADMIN_EMAIL',
+  'BOOTSTRAP_ADMIN_PASSWORD',
+  'BOOTSTRAP_ADMIN_USERNAME',
   // Provider keys read directly by optional adapters.
-  'AMPLITUDE_API_KEY', 'POSTHOG_API_KEY', 'FAL_KEY', 'GOOGLE_AI_API_KEY',
-  'DEEPSEEK_API_KEY', 'MOONSHOT_API_KEY', 'ZHIPU_API_KEY', 'DASHSCOPE_API_KEY',
-  'BAIDU_API_KEY', 'LINEAR_API_KEY', 'NOTION_TOKEN', 'SENTRY_MCP_TOKEN',
-  'VITE_CF_API_KEY', 'VITE_CF_GATEWAY_URL', 'VITE_CF_TENANT_ID',
-  'CF_API_KEY', 'CF_GATEWAY_URL', 'CF_TENANT_ID',
-  'AZURE_STORAGE_ACCOUNT', 'AZURE_STORAGE_CONTAINER', 'AZURE_STORAGE_PREFIX',
+  'AMPLITUDE_API_KEY',
+  'POSTHOG_API_KEY',
+  'FAL_KEY',
+  'GOOGLE_AI_API_KEY',
+  'DEEPSEEK_API_KEY',
+  'MOONSHOT_API_KEY',
+  'ZHIPU_API_KEY',
+  'DASHSCOPE_API_KEY',
+  'BAIDU_API_KEY',
+  'LINEAR_API_KEY',
+  'NOTION_TOKEN',
+  'SENTRY_MCP_TOKEN',
+  'VITE_CF_API_KEY',
+  'VITE_CF_GATEWAY_URL',
+  'VITE_CF_TENANT_ID',
+  'CF_API_KEY',
+  'CF_GATEWAY_URL',
+  'CF_TENANT_ID',
+  'AZURE_STORAGE_ACCOUNT',
+  'AZURE_STORAGE_CONTAINER',
+  'AZURE_STORAGE_PREFIX',
   'AZURE_STORAGE_SAS_TOKEN',
   // Backup harness.
-  'BACKUP_REMOTE_BACKEND', 'BACKUP_REMOTE_DAILY_RETENTION_DAYS',
-  'BACKUP_REMOTE_LOCAL_DIR', 'BACKUP_REMOTE_WEEKLY_RETENTION_DAYS',
+  'BACKUP_REMOTE_BACKEND',
+  'BACKUP_REMOTE_DAILY_RETENTION_DAYS',
+  'BACKUP_REMOTE_LOCAL_DIR',
+  'BACKUP_REMOTE_WEEKLY_RETENTION_DAYS',
   // Operational audit harness (ops/audit/*.mjs) and eval/drift tooling.
-  'TARGET_URL', 'EXPECTED_TEXT', 'MAX_PAGES', 'STRESS_REQUESTS',
-  'STRESS_CONCURRENCY', 'MAX_P95_MS', 'REPORT_DIR',
-  'CALIBRATION_MODE', 'DRIFT_GUARD', 'EVOLUTION_MODE', 'PROMOTION_MODE',
+  'TARGET_URL',
+  'EXPECTED_TEXT',
+  'MAX_PAGES',
+  'STRESS_REQUESTS',
+  'STRESS_CONCURRENCY',
+  'MAX_P95_MS',
+  'REPORT_DIR',
+  'CALIBRATION_MODE',
+  'DRIFT_GUARD',
+  'EVOLUTION_MODE',
+  'PROMOTION_MODE',
 ]);
 
 /** Legacy product alias that was renamed to ALLOY_* in the schema. Must stay dead. */
@@ -86,16 +142,12 @@ describe('.env.example ↔ schema consistency', () => {
   });
 
   it('contains no legacy CONTINUUM_* aliases (renamed to ALLOY_*)', () => {
-    const offenders = activeKeys.filter((k) =>
-      FORBIDDEN_PREFIXES.some((p) => k.startsWith(p)),
-    );
+    const offenders = activeKeys.filter((k) => FORBIDDEN_PREFIXES.some((p) => k.startsWith(p)));
     expect(offenders).toEqual([]);
   });
 
   it('every active key is schema-validated or on the service-local allowlist', () => {
-    const orphans = activeKeys.filter(
-      (k) => !schemaKeys.has(k) && !SERVICE_LOCAL_ALLOWLIST.has(k),
-    );
+    const orphans = activeKeys.filter((k) => !schemaKeys.has(k) && !SERVICE_LOCAL_ALLOWLIST.has(k));
     expect(orphans).toEqual([]);
   });
 

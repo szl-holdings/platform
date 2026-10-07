@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 #
-# apps/alloy-runtime-api — AEEP Alloy Runtime API
-# unified v1 surface for tasks, memory, and workflow execution.
+# apps/alloy-runtime-api — AEEP Alloy Runtime API development surface.
+# Production execution remains on HOLD until durable backends are wired.
 #
 # BUILD FROM THE MONOREPO ROOT (not this directory):
 #   docker build -f apps/alloy-runtime-api/Dockerfile -t alloy-runtime-api .
@@ -9,34 +9,37 @@
 # Building from the package directory alone fails: this is a pnpm workspace
 # and the package declares workspace:* siblings that only resolve from root.
 #
-# Build-stage images use node:24 because the root engines field requires
-# node>=24 with engine-strict=true (.npmrc); the runtime stage uses the
-# mandated node:22-alpine — see the PR notes for this version discrepancy.
+# All Node stages use the pinned Node 26 image, satisfying the root node>=24
+# engine. Node 26 does not bundle Corepack, so pnpm is installed and verified
+# explicitly.
+
+# ─── Shared pinned package-manager base ───────────────────────────────────────
+FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS pnpm-base
+ARG PNPM_VERSION=10.26.1
+RUN apk add --no-cache libc6-compat \
+    && npm install --global "pnpm@${PNPM_VERSION}" \
+    && test "$(pnpm --version)" = "${PNPM_VERSION}"
+WORKDIR /app
 
 # ─── Stage 1: dependency cache (pnpm fetch from root) ────────────────────────
-FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS deps
-RUN apk add --no-cache libc6-compat
-RUN corepack enable
-WORKDIR /app
+FROM pnpm-base AS deps
 # pnpm fetch only needs the lockfile; it populates the virtual store so the
 # install in the builder stage can run fully offline and stays cache-friendly.
 COPY pnpm-lock.yaml .npmrc ./
+COPY patches/ ./patches/
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm fetch
 
 # ─── Stage 2: builder (install + filtered build) ─────────────────────────────
-FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS builder
-RUN apk add --no-cache libc6-compat
-RUN corepack enable
-WORKDIR /app
+FROM pnpm-base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY ./ ./
 ENV NODE_ENV=production
 # Offline install against the fetched store, then compile only this package
 # and its workspace dependency graph (tsc -p tsconfig.json -> ./dist).
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile --offline --ignore-scripts
-RUN pnpm --filter @workspace/alloy-runtime-api build
+    pnpm install --frozen-lockfile --offline --ignore-scripts --prod=false
+RUN pnpm turbo run build --filter=@workspace/alloy-runtime-api
 # Prune to production dependencies for the runtime stage.
 RUN pnpm --filter @workspace/alloy-runtime-api deploy --prod --legacy /app/deploy
 
@@ -67,21 +70,25 @@ ENV NODE_ENV=production \
     COMMIT_SHA=$COMMIT_SHA \
     BUILD_TIMESTAMP=$BUILD_TIMESTAMP \
     BUILD_VERSION=$BUILD_VERSION
+# ALLOY_API_KEY is intentionally not baked into the image. Inject it through
+# the deployment secret manager and set ALLOY_API_TENANT_ID to the non-secret
+# tenant scope authorized for that credential. Production startup fails before
+# listen when either value is absent or blank.
 # Server binds process.env.PORT, defaulting to 4010 (src/server.ts).
 EXPOSE 4010
 
-# Liveness probe against the real /healthz endpoint (src/health.ts). Uses the
-# bundled node runtime (no curl/wget in the minimal image) and exits non-zero
-# on a non-200 so the orchestrator restarts a wedged container.
+# Docker health follows traffic readiness. It intentionally remains unhealthy
+# in production while the runtime is on HOLD; /healthz is still available as a
+# separate liveness endpoint for orchestrators that distinguish the two.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||4010)+'/healthz',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+  CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||4010)+'/readyz',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
 
 # start script: node --enable-source-maps dist/server.js
 CMD ["node", "--enable-source-maps", "dist/server.js"]
 
 LABEL org.opencontainers.image.source="https://github.com/szl-holdings/platform" \
       org.opencontainers.image.title="@workspace/alloy-runtime-api" \
-      org.opencontainers.image.description="AEEP Alloy Runtime API — unified v1 surface for tasks, memory, and workflow execution." \
+      org.opencontainers.image.description="AEEP Alloy Runtime API development surface; production execution remains on HOLD pending durable qualified backends." \
       org.opencontainers.image.licenses="LicenseRef-SZL-Proprietary" \
       org.opencontainers.image.version="0.1.0" \
       org.opencontainers.image.revision="$COMMIT_SHA" \

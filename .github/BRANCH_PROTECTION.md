@@ -1,177 +1,81 @@
-# Branch Protection & GitHub Settings
+# Branch Protection and GitHub Settings
 
-This is the definitive checklist of GitHub UI settings required to enforce the CI/CD pipeline, protect the default branch, and enable environment-based deployments. All settings are manual steps in the GitHub repository settings UI.
+This document records the observed repository control plane. It is not a
+checklist of settings that might exist. Re-read the GitHub API after every
+ruleset change and update the dated receipt below.
 
----
+## Observed `main` ruleset
 
-## 1. Branch Protection Rules
+Authenticated readback on **2026-10-06** returned active repository ruleset
+[`22286649`](https://github.com/szl-holdings/platform/rules/22286649),
+`Protect main - solo-builder exact-head`, targeting `~DEFAULT_BRANCH`. The
+privacy-safe readback receipt is
+[`audit/evidence/github-platform-ruleset-summary-2026-10-06.json`](../audit/evidence/github-platform-ruleset-summary-2026-10-06.json).
 
-Navigate to **Settings → Branches → Add rule** (or update the existing ruleset) and configure the following for the default branch (`main` / `master`).
-
-### Pull Request Requirements
-
-| Setting | Value |
+| Control | Observed value |
 |---|---|
-| Require a pull request before merging | Enabled |
-| Required approvals | 1 |
-| Dismiss stale pull request approvals when new commits are pushed | Enabled |
-| Require review from Code Owners | Enabled (see `.github/CODEOWNERS`) |
-| Require approval of the most recent reviewable push | Enabled |
-| Require conversation resolution before merging | Enabled |
+| Pull request required | Yes |
+| Required approving reviews | `0` |
+| Dismiss stale reviews on push | No |
+| Code-owner review required | No |
+| Approval of the last reviewable push required | No |
+| Review-thread resolution required | Yes |
+| Extra approval for unattributed changes | Yes |
+| Allowed merge methods | Squash only |
+| Required signed commits | Yes |
+| Branch deletion | Blocked |
+| Non-fast-forward updates | Blocked |
+| Ruleset bypass actors | None |
+| Current caller can bypass | Never |
+| Required checks use strict/up-to-date mode | Yes |
 
-### Required Status Checks
+The observed required status contexts are:
 
-Enable **"Require status checks to pass before merging"** and add the following checks. Require branches to be up to date before merging.
+| Context | GitHub Actions integration |
+|---|---|
+| `Runtime Audit (audit:full)` | `15368` |
+| `Security Gate (blocking)` | `15368` |
+| `E2E Gate` | `15368` |
+| `severity-gate` | `15368` |
+| `lockfiles / No lockfile references a Replit-internal registry host` | Not returned by the API |
 
-| Status Check | Workflow | Description |
+The candidate branch also defines these promotion controls, but they must not
+be described as branch-required until they have passed on the exact candidate
+head and the live ruleset has been updated and read back:
+
+| Candidate context | Workflow | Source-declared behavior |
 |---|---|---|
-| `CI Gate` | `.github/workflows/ci.yml` | Aggregate gate — lint, typecheck, test, build, smoke, proof-chain |
-| `Readiness Gate (smoke:product-mode)` | `.github/workflows/ci.yml` | Product-mode smoke test — surfaces readiness directly on PRs |
-| `E2E Gate` | `.github/workflows/e2e.yml` | Aggregate E2E gate |
-| `dependency-review` | `.github/workflows/dependency-review.yml` | Vulnerability scan on dependency changes |
-| `analyze` | `.github/workflows/codeql.yml` | CodeQL security analysis |
-| `Security Gate (blocking)` | `.github/workflows/security.yml` | Aggregate gate — dependency scan, secret scan, lockfile integrity, license report, **and the api-server `security-tests` vitest suite** |
-| `Security Tests (api-server vitest)` | `.github/workflows/security.yml` | Runs `pnpm --filter @workspace/api-server test` on every push/PR — covers `security-middleware.test.ts`, `security-routes.test.ts`, `security-hardening.test.ts` and the rest of the api-server suite |
+| `Grype filesystem/SCA gate (fail on HIGH/CRITICAL)` | `.github/workflows/trivy.yml` | Raw filesystem/SCA findings block unless an exact, registered, digest-bound, behavior-tested, unexpired local patch is verified |
+| `repro` | `.github/workflows/repro-check.yml` | Two clean forced builds of one candidate SHA must have identical complete output manifests |
 
-> **Tip:** `CI Gate` and `E2E Gate` are aggregate jobs — requiring these two (plus `dependency-review` and `analyze`) gives clean PR feedback while covering all required checks underneath.
->
-> **Decision — surface `Readiness Gate (smoke:product-mode)` as its own required check:** the readiness smoke job is already aggregated inside `CI Gate` (see `.github/workflows/ci.yml` — the `ci-gate` job lists `readiness-gate` in its `needs`). However, we additionally require it as a named status check so reviewers can see at a glance on the PR whether the product-mode smoke test passed without drilling into the `CI Gate` logs. The job name in branch protection must match the workflow job's `name:` exactly: `Readiness Gate (smoke:product-mode)`.
->
-> **Note on Lighthouse:** The `lighthouse.yml` workflow job is named `Lighthouse Gate (accessibility enforced)`. Its matrix and aggregate gate fail closed for accessibility assertion failures and incomplete infrastructure; performance, best-practices, and SEO assertions remain advisory. This checklist does not currently list the Lighthouse gate as a required branch-protection context, so do not represent it as branch-required unless the live ruleset is updated and verified separately.
+Organization-level ruleset details were unavailable to the authenticated
+caller (`403`), so organization-wide inheritance remains **UNKNOWN**. The
+repository readback above does not establish GitHub environment protection,
+repository secret-scanning configuration, secret values, deployment health,
+or organization-wide controls.
 
-### Lighthouse Score Thresholds
+## Change procedure
 
-Configured in `.lighthouserc.json`:
+1. Observe the candidate context passing on the exact pull-request head.
+2. Fetch the complete live ruleset immediately before mutation.
+3. Preserve every condition, rule, integration ID, and bypass setting; append
+   only the exact context that was observed.
+4. Write the complete ruleset update through the GitHub API.
+5. Read it back and compare every field, then retain a sanitized dated receipt
+   under `audit/evidence/`.
+6. Merge only while every required context is successful for the same head.
 
-| Category | Minimum Score | Workflow behavior |
-|---|---|---|
-| Performance | 80 | Advisory warning |
-| Accessibility | 90 | Enforced error |
-| Best Practices | 90 | Advisory warning |
-| SEO | 90 | Advisory warning |
+Never weaken or remove an existing rule merely to make a pull request
+mergeable. Never infer a passing check from workflow source or a local run.
 
-### Additional Branch Protections
+## Merge and deployment boundaries
 
-| Setting | Value |
-|---|---|
-| Require branches to be up to date before merging | Enabled |
-| Do not allow bypassing the above settings | Enabled (applies to admins too) |
-| Allow force pushes | Disabled |
-| Allow deletions | Disabled |
+The live ruleset permits squash merging only. Repository-level merge-button
+preferences, automatic head-branch deletion, GitHub environments, secrets,
+deployment tokens, and secret-scanning settings require independent
+authenticated observations before they are reported as configured.
 
----
-
-## 2. Merge Settings
-
-Navigate to **Settings → General → Pull Requests**:
-
-| Setting | Value |
-|---|---|
-| Allow merge commits | Disabled |
-| Allow squash merging | Enabled |
-| Allow rebase merging | Disabled |
-| Automatically delete head branches | Enabled |
-
----
-
-## 3. Environments
-
-Navigate to **Settings → Environments** and create the following two environments.
-
-### `staging`
-
-| Setting | Value |
-|---|---|
-| Required reviewers | Optional — add for extra gate |
-| Deployment protection rules | Enabled |
-| Secrets | `REPLIT_STAGING_DEPLOY_TOKEN`, `REPLIT_STAGING_APP_ID` |
-
-The `deploy-staging.yml` workflow deploys to this environment automatically on every push to `main`.
-
-### `production`
-
-| Setting | Value |
-|---|---|
-| Required reviewers | Recommended — at least 1 |
-| Deployment protection rules | Enabled |
-| Secrets | `REPLIT_DEPLOY_TOKEN`, `REPLIT_APP_ID` |
-
-The `deploy-production.yml` workflow deploys to this environment on published releases or manual dispatch with confirmation.
-
----
-
-## 4. Secrets
-
-> **Recommended:** Set these secrets as **environment-scoped** secrets under **Settings → Environments → [environment name] → Environment secrets**. Environment secrets are only exposed to workflows running in that specific environment and cannot leak across deployment targets. Setting them at the repository level (Settings → Secrets and variables → Actions) also works but provides weaker access control.
-
-| Secret | Environment | Description |
-|---|---|---|
-| `REPLIT_STAGING_DEPLOY_TOKEN` | `staging` | Replit personal access or deploy token for the staging Repl |
-| `REPLIT_STAGING_APP_ID` | `staging` | Replit app/repl ID for the staging environment |
-| `REPLIT_DEPLOY_TOKEN` | `production` | Replit personal access or deploy token for the production Repl |
-| `REPLIT_APP_ID` | `production` | Replit app/repl ID for the production environment |
-
-For the complete setup walkthrough, see [`docs/github/environment-protection-setup.md`](../docs/github/environment-protection-setup.md).
-
----
-
-## 5. GitHub Repository Secret Scanning
-
-Navigate to **Settings → Code security and analysis** and enable:
-
-| Setting | Value |
-|---|---|
-| Secret scanning | Enabled |
-| Push protection | Enabled — blocks pushes containing known secret patterns before they land |
-| Secret scanning alerts | Notify security contact (configure under Settings → Security → Notifications) |
-
-> **Why:** GitHub's native secret scanning runs continuously on the full commit history and detects secrets from 200+ service providers. Combined with the gitleaks CI gate (`.github/workflows/ci.yml` `secret-scan` job and `.gitleaks.toml`), this provides defence in depth: gitleaks catches leaks before merge; GitHub catches anything that slips through on `main`. Push protection additionally blocks secrets at the point of `git push`.
-
----
-
-## 6. Dependabot
-
-Dependabot is configured in `.github/dependabot.yml` to update four package ecosystems weekly (Monday, 09:00 ET):
-
-| Ecosystem | Directories | PR Limit | Grouping |
-|-----------|------------|----------|---------|
-| `npm` | Root (all pnpm workspaces) | 10 | React, Vite, testing, TypeScript, UI, database, TanStack |
-| `pip` | `workers/substrate-python`, `services/substrate-py-workers`, `services/lyte-metrics-store`, `scripts/media` | 3 per dir | None |
-| `docker` | `artifacts/api-server`, `artifacts/szl-holdings`, `artifacts/vessels`, `artifacts/terra`, `artifacts/carlota-jo` | 3 per dir | None |
-| `github-actions` | Root | 5 | `actions/*`, `github/*`, CI tooling |
-
-To enable **Dependabot auto-merge** for patch-level updates (optional):
-
-1. Navigate to **Settings → Code security and analysis → Dependabot**
-2. Enable "Dependabot security updates" and "Dependabot version updates"
-3. Use a branch protection ruleset or GitHub Action to auto-approve and auto-merge patch PRs after CI passes
-
----
-
-## 7. Release Workflow
-
-Releases are created automatically on every push to `main`:
-
-1. The `release.yml` workflow determines the next semantic version from commit message prefixes
-2. A Git tag is created (`vX.Y.Z`) and a GitHub Release is published
-3. Publishing the release triggers `deploy-production.yml` → production deployment
-
-**Commit message conventions:**
-
-| Prefix | Bump |
-|---|---|
-| `feat!:` or `BREAKING CHANGE:` | Major |
-| `feat:` | Minor |
-| `fix:`, `chore:`, `docs:`, etc. | Patch |
-
-### Staging → Production Promotion Flow
-
-```
-push to main
-    │
-    ├─► deploy-staging.yml  (auto) → staging environment
-    │
-    └─► release.yml (auto) → GitHub Release published
-                                     │
-                                     └─► deploy-production.yml → production environment
-```
+Workflow source declares deployment and release behavior, but source alone is
+not evidence that a deployment ran or that an environment is protected. See
+[`docs/operations/ci-overview.md`](../docs/operations/ci-overview.md) and the
+dated estate audit for the source-versus-live evidence boundary.

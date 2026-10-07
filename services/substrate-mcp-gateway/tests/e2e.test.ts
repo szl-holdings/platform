@@ -24,16 +24,36 @@ import {
   ApprovalGate,
   clearWorkflowRegistry,
   Decide,
+  defaultRunStore,
   defineBudget,
   definePolicy,
   defineWorkflow,
   listWorkflows,
   registerWorkflow,
+  runtimeEventBus,
 } from '@szl/substrate';
 import { clearApprovalInbox } from '@workspace/approvals-inbox';
 import express from 'express';
+import { resolveAuthContext } from '../src/auth.js';
+import {
+  getRevocationSyncReadiness,
+  issueEnterpriseToken,
+  satisfiesEmailVerificationRequirement,
+  syncRevokedSubjectsFromDb,
+} from '../src/enterprise-auth.js';
 import { handleToolCall } from '../src/handlers.js';
-import { createDiscoveryHandler, createHttpTransport } from '../src/transport/http.js';
+import { buildConsciousnessEnvelope, getProofCapabilityStatus } from '../src/nexus-fabric.js';
+import { runWithRequestContext } from '../src/request-context.js';
+import { runEventBus } from '../src/run-events.js';
+import { runCount } from '../src/run-store.js';
+import { getExecutionCapabilityStatus, isProductionRuntime } from '../src/runtime-config.js';
+import {
+  createAuthorizationServerMetadata,
+  createDiscoveryHandler,
+  createHttpTransport,
+  getEnterpriseAccessRequirement,
+  getOAuthClientRegistryStats,
+} from '../src/transport/http.js';
 
 // ─── Test Server Setup ────────────────────────────────────────────────────────
 
@@ -42,12 +62,14 @@ let baseUrl: string;
 
 const TEST_API_KEY = 'test-key-e2e-2026';
 process.env.SUBSTRATE_GATEWAY_API_KEY = TEST_API_KEY;
+process.env.SUBSTRATE_GATEWAY_TENANT_ID = 'substrate-gateway';
 process.env.NODE_ENV = 'test';
 
 before(async () => {
   const app = express();
   app.use('/mcp', createHttpTransport());
   app.get('/.well-known/mcp', createDiscoveryHandler());
+  app.get('/.well-known/oauth-authorization-server', createAuthorizationServerMetadata());
   await new Promise<void>((resolve) => {
     server = app.listen(0, () => {
       const addr = server.address();
@@ -188,6 +210,59 @@ async function readBody<T = unknown>(res: Response): Promise<T | null> {
   return JSON.parse(raw) as T;
 }
 
+async function initializeSession(accessToken: string): Promise<string> {
+  const response = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2025-11-25',
+        capabilities: {},
+        clientInfo: { name: 'tenant-isolation-test', version: '1.0' },
+      },
+    }),
+  });
+  assert.equal(response.status, 200);
+  await readBody(response);
+  const sessionId = response.headers.get('mcp-session-id');
+  assert.ok(sessionId);
+  return sessionId;
+}
+
+async function sessionToolCall(
+  accessToken: string,
+  sessionId: string,
+  name: string,
+  args: Record<string, unknown>,
+): Promise<{ content?: Array<{ type: string; text: string }>; isError?: boolean }> {
+  const response = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'MCP-Session-Id': sessionId,
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'tools/call',
+      params: { name, arguments: args },
+    }),
+  });
+  const payload = await readBody<{
+    result?: { content?: Array<{ type: string; text: string }>; isError?: boolean };
+  }>(response);
+  return payload?.result ?? {};
+}
+
 async function toolCall(
   toolName: string,
   args: Record<string, unknown>,
@@ -252,7 +327,10 @@ test('2. tools/list returns all expected substrate tools (>= 8 base, plus live-r
     assert.ok(names.includes(name), `Missing tool: ${name}`);
   }
   // Registry contributes additional tools from connected internal servers — assert lower bound.
-  assert.ok(names.length >= expected.length, `Expected at least ${expected.length} tools, got ${names.length}`);
+  assert.ok(
+    names.length >= expected.length,
+    `Expected at least ${expected.length} tools, got ${names.length}`,
+  );
 });
 
 test('3. substrate_submit_run submits a dry-run and returns a runId', async () => {
@@ -271,6 +349,76 @@ test('3. substrate_submit_run submits a dry-run and returns a runId', async () =
     ),
     `Unexpected status: ${data.status}`,
   );
+  const storedRun = await defaultRunStore.get(data.runId);
+  assert.equal(
+    storedRun?.tenantId,
+    'substrate-gateway',
+    'HTTP-authenticated tenant context must be bound to the governed run',
+  );
+});
+
+test('3b. production submit fails closed without authenticated tenant context', async () => {
+  const previousNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    const result = await handleToolCall(
+      'substrate_submit_run',
+      { workflowId: DRY_RUN_WORKFLOW_ID, input: {}, mode: 'dry-run' },
+      'direct-test-without-request-context',
+    );
+    assert.equal(result.isError, true);
+    const payload = JSON.parse(result.content[0]?.text ?? '{}') as {
+      details?: { code?: string };
+    };
+    assert.equal(payload.details?.code, 'TENANT_CONTEXT_REQUIRED');
+  } finally {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previousNodeEnv;
+  }
+});
+
+test('3c. worker production marker also requires authenticated tenant context', async () => {
+  const previousWorkerEnv = process.env.SUBSTRATE_PYTHON_WORKER_ENV;
+  process.env.SUBSTRATE_PYTHON_WORKER_ENV = 'production';
+  try {
+    const result = await handleToolCall(
+      'substrate_submit_run',
+      { workflowId: DRY_RUN_WORKFLOW_ID, input: {}, mode: 'dry-run' },
+      'direct-test-without-request-context',
+    );
+    assert.equal(result.isError, true);
+    const payload = JSON.parse(result.content[0]?.text ?? '{}') as {
+      details?: { code?: string };
+    };
+    assert.equal(payload.details?.code, 'TENANT_CONTEXT_REQUIRED');
+  } finally {
+    if (previousWorkerEnv === undefined) delete process.env.SUBSTRATE_PYTHON_WORKER_ENV;
+    else process.env.SUBSTRATE_PYTHON_WORKER_ENV = previousWorkerEnv;
+  }
+});
+
+test('3d. production approval and dynamic mutations fail without authenticated tenant context', async () => {
+  const previousNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    for (const [toolName, args] of [
+      [
+        'substrate_approve',
+        { recommendationId: 'untrusted-stdio-approval', note: 'must not execute' },
+      ],
+      ['unregistered_dynamic_tool', {}],
+    ] as const) {
+      const result = await handleToolCall(toolName, args, 'direct-untrusted-principal');
+      assert.equal(result.isError, true);
+      const payload = JSON.parse(result.content[0]?.text ?? '{}') as {
+        details?: { code?: string };
+      };
+      assert.equal(payload.details?.code, 'TENANT_CONTEXT_REQUIRED');
+    }
+  } finally {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previousNodeEnv;
+  }
 });
 
 test('4. substrate_get_run retrieves submitted run state', async () => {
@@ -317,10 +465,18 @@ test('6. substrate_approve resolves pending run via defaultRuntime.resume()', as
   const submitted = parseResult<{ runId: string; status: string }>(submitResult);
   assert.equal(submitted.status, 'pending-approval', 'Run must pause at gate');
 
+  const spoofedApproval = await toolCall('substrate_approve', {
+    recommendationId: submitted.runId,
+    actor: 'alice@example.com',
+    note: 'Caller-selected identity must be rejected.',
+    domain: 'e2e-test',
+  });
+  assert.equal(spoofedApproval.isError, true, 'Caller-selected approval actor must fail closed');
+  assert.match(spoofedApproval.content?.[0]?.text ?? '', /ACTOR_IDENTITY_MISMATCH/);
+
   // Approve via the gateway — internally calls defaultRuntime.resume()
   const approveResult = await toolCall('substrate_approve', {
     recommendationId: submitted.runId,
-    actor: 'alice@example.com',
     note: 'Approved by test.',
     domain: 'e2e-test',
   });
@@ -331,7 +487,11 @@ test('6. substrate_approve resolves pending run via defaultRuntime.resume()', as
     runStatus: string;
   }>(approveResult);
   assert.equal(approval.verdict, 'approved', 'Verdict must be approved');
-  assert.equal(approval.actor, 'alice@example.com', 'Actor must be preserved');
+  assert.equal(
+    approval.actor,
+    `gateway:${process.env.SUBSTRATE_GATEWAY_TENANT_ID}`,
+    'Approval actor must be derived from the authenticated credential',
+  );
   assert.ok(approval.proofRef, 'proofRef must be set by approvals-inbox');
 
   // The run should now be completed (gate was the only stage)
@@ -379,11 +539,16 @@ test('7. substrate_reject terminates a pending run via defaultRuntime.reject()',
   const rejectResult = await toolCall('substrate_reject', {
     recommendationId: submitted.runId,
     note: 'Risk too high — rejected.',
-    actor: 'compliance@example.com',
     domain: 'e2e-test',
   });
-  const rejection = parseResult<{ verdict: string; note: string; runStatus: string }>(rejectResult);
+  const rejection = parseResult<{
+    verdict: string;
+    actor: string;
+    note: string;
+    runStatus: string;
+  }>(rejectResult);
   assert.equal(rejection.verdict, 'rejected', 'Verdict must be rejected');
+  assert.equal(rejection.actor, `gateway:${process.env.SUBSTRATE_GATEWAY_TENANT_ID}`);
   assert.ok(rejection.note?.includes('Risk too high'), 'Rejection note must be preserved');
   assert.equal(rejection.runStatus, 'failed', 'Run status must be failed after rejection');
 
@@ -466,6 +631,62 @@ test('10. auth: write tool rejects anonymous request when API key is set', async
   } finally {
     process.env.NODE_ENV = savedEnv;
   }
+});
+
+test('10b. enterprise scopes fail closed for unknown, write, and approval tools', async () => {
+  assert.equal(getEnterpriseAccessRequirement('tools/call', { name: 'substrate_get_run' }), 'read');
+  assert.equal(
+    getEnterpriseAccessRequirement('tools/call', { name: 'substrate_submit_run' }),
+    'write',
+  );
+  assert.equal(
+    getEnterpriseAccessRequirement('tools/call', { name: 'unregistered_dynamic_tool' }),
+    'write',
+  );
+  assert.equal(
+    getEnterpriseAccessRequirement('tools/call', { name: 'substrate_approve' }),
+    'approve',
+  );
+
+  const enterpriseToken = await issueEnterpriseToken({
+    valid: true,
+    idpId: 'e2e-idp',
+    issuer: 'https://idp.example.test',
+    subject: 'operator-1',
+    email: 'operator@example.test',
+    displayName: 'E2E Operator',
+    mappedRole: 'viewer',
+    mcpScope: 'mcp:read',
+    tenantId: 'counsel-tenant-e2e',
+  });
+
+  const context = resolveAuthContext({
+    headers: { authorization: `Bearer ${enterpriseToken.accessToken}` },
+  } as never);
+  assert.equal(context.authenticated, true);
+  assert.equal(context.enterprise, true);
+  assert.equal(context.tenantId, 'counsel-tenant-e2e');
+
+  const response = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${enterpriseToken.accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 10,
+      method: 'tools/call',
+      params: {
+        name: 'substrate_submit_run',
+        arguments: { workflowId: DRY_RUN_WORKFLOW_ID, input: {}, mode: 'dry-run' },
+      },
+    }),
+  });
+  assert.equal(response.status, 403, 'mcp:read must not authorize a run submission');
+  const payload = (await response.json()) as { error?: { data?: { reason?: string } } };
+  assert.match(payload.error?.data?.reason ?? '', /Required scope: mcp:write/);
 });
 
 test('11. health endpoint returns service info without auth', async () => {
@@ -901,7 +1122,16 @@ test('17. Session lifecycle: create → use → terminate → 404', async () => 
       Authorization: `Bearer ${TEST_API_KEY}`,
       Accept: 'application/json, text/event-stream',
     },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-11-25', capabilities: {}, clientInfo: { name: 'e2e-test-client', version: '1.0' } } }),
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2025-11-25',
+        capabilities: {},
+        clientInfo: { name: 'e2e-test-client', version: '1.0' },
+      },
+    }),
   });
   assert.equal(initRes.status, 200, 'initialize must return 200');
   const sessionId = initRes.headers.get('mcp-session-id');
@@ -945,6 +1175,301 @@ test('17. Session lifecycle: create → use → terminate → 404', async () => 
   assert.equal(expiredRes.status, 404, 'Request with terminated session must return 404');
 });
 
+test('17b. streamable sessions are bound to the authenticated tenant and principal', async () => {
+  const tenantBToken = await issueEnterpriseToken({
+    valid: true,
+    idpId: 'tenant-b-idp',
+    issuer: 'https://tenant-b.idp.example.test',
+    subject: 'tenant-b-operator',
+    email: 'operator@tenant-b.example.test',
+    displayName: 'Tenant B Operator',
+    mappedRole: 'operator',
+    mcpScope: 'mcp:read mcp:write mcp:approve',
+    tenantId: 'tenant-b',
+  });
+  const tenantASession = await initializeSession(TEST_API_KEY);
+
+  const foreignPost = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${tenantBToken.accessToken}`,
+      'MCP-Session-Id': tenantASession,
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 9, method: 'ping', params: {} }),
+  });
+  assert.equal(foreignPost.status, 404);
+
+  const foreignGet = await fetch(`${baseUrl}/mcp`, {
+    headers: {
+      Authorization: `Bearer ${tenantBToken.accessToken}`,
+      'MCP-Session-Id': tenantASession,
+      Accept: 'text/event-stream',
+    },
+  });
+  assert.equal(foreignGet.status, 404);
+
+  const foreignDelete = await fetch(`${baseUrl}/mcp`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${tenantBToken.accessToken}`,
+      'MCP-Session-Id': tenantASession,
+    },
+  });
+  assert.equal(foreignDelete.status, 404);
+
+  const ownerPing = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      'MCP-Session-Id': tenantASession,
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 10, method: 'ping', params: {} }),
+  });
+  assert.equal(ownerPing.status, 200, 'Foreign DELETE must not terminate the owner session');
+});
+
+test('17c. run, replay, counterfactual, approval, and counters are tenant-isolated', async () => {
+  const tenantBToken = await issueEnterpriseToken({
+    valid: true,
+    idpId: 'tenant-b-operations-idp',
+    issuer: 'https://tenant-b-operations.idp.example.test',
+    subject: 'tenant-b-operator',
+    email: 'operator@tenant-b.example.test',
+    displayName: 'Tenant B Operator',
+    mappedRole: 'operator',
+    mcpScope: 'mcp:read mcp:write mcp:approve',
+    tenantId: 'tenant-b-operations',
+  });
+  const tenantBSession = await initializeSession(tenantBToken.accessToken);
+
+  const tenantARun = parseResult<{ runId: string }>(
+    await toolCall('substrate_submit_run', {
+      workflowId: DRY_RUN_WORKFLOW_ID,
+      input: { tenantIsolation: 'tenant-a' },
+      mode: 'dry-run',
+    }),
+  );
+  const tenantAPending = parseResult<{ runId: string }>(
+    await toolCall('substrate_submit_run', {
+      workflowId: LIVE_GATE_WORKFLOW_ID,
+      input: { tenantIsolation: 'tenant-a-pending' },
+      mode: 'live',
+    }),
+  );
+
+  const foreignGet = await sessionToolCall(
+    tenantBToken.accessToken,
+    tenantBSession,
+    'substrate_get_run',
+    { runId: tenantARun.runId },
+  );
+  const unknownGet = await sessionToolCall(
+    tenantBToken.accessToken,
+    tenantBSession,
+    'substrate_get_run',
+    { runId: '00000000-0000-4000-8000-000000000001' },
+  );
+  assert.equal(foreignGet.isError, true);
+  assert.equal(foreignGet.content?.[0]?.text, unknownGet.content?.[0]?.text);
+
+  for (const [name, args] of [
+    ['substrate_replay', { runId: tenantARun.runId, workflowId: DRY_RUN_WORKFLOW_ID }],
+    ['substrate_counterfactual', { runId: tenantARun.runId, workflowId: DRY_RUN_WORKFLOW_ID }],
+    [
+      'substrate_approve',
+      { recommendationId: tenantAPending.runId, note: 'must not cross tenants' },
+    ],
+    [
+      'substrate_reject',
+      { recommendationId: tenantAPending.runId, note: 'must not cross tenants' },
+    ],
+  ] as const) {
+    const result = await sessionToolCall(tenantBToken.accessToken, tenantBSession, name, args);
+    assert.equal(result.isError, true, `${name} must fail for a foreign tenant object`);
+    const payload = JSON.parse(result.content?.[0]?.text ?? '{}') as {
+      details?: { code?: string };
+    };
+    assert.equal(payload.details?.code, 'NOT_FOUND');
+  }
+
+  const tenantBApprovals = parseResult<{ count: number }>(
+    await sessionToolCall(tenantBToken.accessToken, tenantBSession, 'substrate_list_approvals', {}),
+  );
+  assert.equal(tenantBApprovals.count, 0, 'Tenant B must not see Tenant A approval actions');
+
+  const tenantBRun = parseResult<{ runId: string }>(
+    await sessionToolCall(tenantBToken.accessToken, tenantBSession, 'substrate_submit_run', {
+      workflowId: DRY_RUN_WORKFLOW_ID,
+      input: { tenantIsolation: 'tenant-b' },
+      mode: 'dry-run',
+    }),
+  );
+  const tenantAReadsTenantB = await toolCall('substrate_get_run', { runId: tenantBRun.runId });
+  assert.equal(tenantAReadsTenantB.isError, true);
+  const tenantAError = JSON.parse(tenantAReadsTenantB.content?.[0]?.text ?? '{}') as {
+    details?: { code?: string };
+  };
+  assert.equal(tenantAError.details?.code, 'NOT_FOUND');
+
+  const tenantBWorkflows = parseResult<{
+    workflows: Array<{ id: string; runCount: number }>;
+  }>(
+    await sessionToolCall(tenantBToken.accessToken, tenantBSession, 'substrate_list_workflows', {}),
+  );
+  assert.equal(
+    tenantBWorkflows.workflows.find((workflow) => workflow.id === DRY_RUN_WORKFLOW_ID)?.runCount,
+    1,
+    'Workflow run counters must include only the authenticated tenant',
+  );
+});
+
+test('17d. legacy SSE message wiring works and lifecycle delivery is tenant-filtered', async () => {
+  const tenantBToken = await issueEnterpriseToken({
+    valid: true,
+    idpId: 'tenant-b-sse-idp',
+    issuer: 'https://tenant-b-sse.idp.example.test',
+    subject: 'tenant-b-sse-operator',
+    email: 'operator@tenant-b-sse.example.test',
+    displayName: 'Tenant B SSE Operator',
+    mappedRole: 'operator',
+    mcpScope: 'mcp:read mcp:write mcp:approve',
+    tenantId: 'tenant-b-sse',
+  });
+  const tenantBSession = await initializeSession(tenantBToken.accessToken);
+  const receivedEvents: Array<{ type: string; data: unknown }> = [];
+  let resolveEndpoint: ((endpoint: string) => void) | undefined;
+  let resolveInitialize: (() => void) | undefined;
+  const endpointPromise = new Promise<string>((resolve) => {
+    resolveEndpoint = resolve;
+  });
+  const initializePromise = new Promise<void>((resolve) => {
+    resolveInitialize = resolve;
+  });
+
+  const streamUrl = new URL(`${baseUrl}/mcp/sse`);
+  const streamRequest = http.request(
+    {
+      hostname: streamUrl.hostname,
+      port: Number(streamUrl.port),
+      path: streamUrl.pathname,
+      headers: { Authorization: `Bearer ${TEST_API_KEY}`, Accept: 'text/event-stream' },
+    },
+    (streamResponse) => {
+      let buffer = '';
+      let currentType = '';
+      streamResponse.on('data', (chunk: Buffer) => {
+        buffer += chunk.toString();
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (line.startsWith('event: ')) {
+            currentType = line.slice(7).trim();
+          } else if (line.startsWith('data: ')) {
+            const raw = line.slice(6);
+            if (currentType === 'endpoint') {
+              resolveEndpoint?.(raw);
+              resolveEndpoint = undefined;
+              continue;
+            }
+            try {
+              const data = JSON.parse(raw) as unknown;
+              receivedEvents.push({ type: currentType, data });
+              if (
+                currentType === 'message' &&
+                typeof data === 'object' &&
+                data !== null &&
+                'result' in data
+              ) {
+                resolveInitialize?.();
+                resolveInitialize = undefined;
+              }
+            } catch {
+              // Ignore keepalive or non-JSON extension frames.
+            }
+          }
+        }
+      });
+    },
+  );
+  streamRequest.end();
+
+  try {
+    const endpoint = await Promise.race([
+      endpointPromise,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Legacy SSE endpoint frame timeout')), 3_000),
+      ),
+    ]);
+
+    const foreignMessage = await fetch(`${baseUrl}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${tenantBToken.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'ping', params: {} }),
+    });
+    assert.equal(foreignMessage.status, 404);
+
+    const initializeMessage = await fetch(`${baseUrl}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${TEST_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2024-11-05',
+          capabilities: {},
+          clientInfo: { name: 'legacy-sse-test', version: '1.0' },
+        },
+      }),
+    });
+    assert.equal(initializeMessage.status, 202);
+    await Promise.race([
+      initializePromise,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Legacy SSE MCP response timeout')), 3_000),
+      ),
+    ]);
+
+    const tenantBRun = parseResult<{ runId: string }>(
+      await sessionToolCall(tenantBToken.accessToken, tenantBSession, 'substrate_submit_run', {
+        workflowId: DRY_RUN_WORKFLOW_ID,
+        input: { tenantIsolation: 'tenant-b-sse' },
+        mode: 'dry-run',
+      }),
+    );
+    const tenantARun = parseResult<{ runId: string }>(
+      await toolCall('substrate_submit_run', {
+        workflowId: DRY_RUN_WORKFLOW_ID,
+        input: { tenantIsolation: 'tenant-a-sse' },
+        mode: 'dry-run',
+      }),
+    );
+    await new Promise<void>((resolve) => setTimeout(resolve, 75));
+
+    const deliveredRunIds = receivedEvents
+      .map((event) =>
+        typeof event.data === 'object' && event.data !== null && 'runId' in event.data
+          ? String((event.data as { runId?: unknown }).runId ?? '')
+          : '',
+      )
+      .filter(Boolean);
+    assert.ok(deliveredRunIds.includes(tenantARun.runId));
+    assert.ok(!deliveredRunIds.includes(tenantBRun.runId));
+  } finally {
+    streamRequest.destroy();
+  }
+});
+
 test('18. Extension negotiation round-trip returns server extensions', async () => {
   const initRes = await fetch(`${baseUrl}/mcp`, {
     method: 'POST',
@@ -979,7 +1504,10 @@ test('18. Extension negotiation round-trip returns server extensions', async () 
   assert.equal(body.result.protocolVersion, '2025-11-25');
   assert.ok(body.result.extensions, 'Server must return negotiated extensions');
   assert.ok('szl/governed-autonomy' in body.result.extensions, 'Known extension must be accepted');
-  assert.ok(!('szl/unknown-extension' in body.result.extensions), 'Unknown extension must not be accepted');
+  assert.ok(
+    !('szl/unknown-extension' in body.result.extensions),
+    'Unknown extension must not be accepted',
+  );
 });
 
 test('19. Origin validation rejects requests with disallowed Origin', async () => {
@@ -1081,11 +1609,7 @@ test('22. Notifications 202 Accepted — initialized, cancelled, roots/list_chan
       body: JSON.stringify({ jsonrpc: '2.0', method, ...(params ? { params } : {}) }),
     });
     assert.equal(res.status, 202, `${method} notification must return 202 Accepted`);
-    assert.equal(
-      (await res.text()).trim(),
-      '',
-      `${method} notification must return empty body`,
-    );
+    assert.equal((await res.text()).trim(), '', `${method} notification must return empty body`);
   }
 });
 
@@ -1097,7 +1621,16 @@ test('23. Streamable HTTP GET establishes SSE stream with session', async () => 
       Authorization: `Bearer ${TEST_API_KEY}`,
       Accept: 'application/json, text/event-stream',
     },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-11-25', capabilities: {}, clientInfo: { name: 'e2e-test-client', version: '1.0' } } }),
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2025-11-25',
+        capabilities: {},
+        clientInfo: { name: 'e2e-test-client', version: '1.0' },
+      },
+    }),
   });
   const sessionId = initRes.headers.get('mcp-session-id');
   assert.ok(sessionId, 'Session ID must be present');
@@ -1144,7 +1677,9 @@ test('23. Streamable HTTP GET establishes SSE stream with session', async () => 
         sseRes.on('error', reject);
       },
     );
-    sseReq.on('error', (e) => { if (!resolved) reject(e); });
+    sseReq.on('error', (e) => {
+      if (!resolved) reject(e);
+    });
     sseReq.end();
   });
 
@@ -1161,6 +1696,32 @@ test('23. Streamable HTTP GET establishes SSE stream with session', async () => 
 });
 
 test('24. OAuth 2.1 — dynamic registration + authorization code + token exchange', async () => {
+  const metadataResponse = await fetch(`${baseUrl}/.well-known/oauth-authorization-server`);
+  assert.equal(metadataResponse.status, 200);
+  assert.deepEqual(
+    (
+      (await metadataResponse.json()) as {
+        token_endpoint_auth_methods_supported?: string[];
+      }
+    ).token_endpoint_auth_methods_supported,
+    ['none'],
+  );
+
+  const unsupportedClientAuth = await fetch(`${baseUrl}/mcp/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_API_KEY}` },
+    body: JSON.stringify({
+      client_name: 'unsupported-confidential-client',
+      redirect_uris: ['http://localhost:9999/callback'],
+      token_endpoint_auth_method: 'client_secret_basic',
+    }),
+  });
+  assert.equal(unsupportedClientAuth.status, 400);
+  assert.equal(
+    ((await unsupportedClientAuth.json()) as { error?: string }).error,
+    'invalid_client_metadata',
+  );
+
   const regRes = await fetch(`${baseUrl}/mcp/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_API_KEY}` },
@@ -1170,21 +1731,73 @@ test('24. OAuth 2.1 — dynamic registration + authorization code + token exchan
       grant_types: ['authorization_code'],
       response_types: ['code'],
       scope: 'mcp',
+      token_endpoint_auth_method: 'none',
     }),
   });
   assert.equal(regRes.status, 201, 'Client registration must return 201');
   const client = (await regRes.json()) as {
     client_id: string;
-    client_secret: string;
     redirect_uris: string[];
+    token_endpoint_auth_method: string;
+    client_secret?: string;
   };
   assert.ok(client.client_id, 'client_id must be returned');
-  assert.ok(client.client_secret, 'client_secret must be returned');
+  assert.equal(client.token_endpoint_auth_method, 'none');
+  assert.equal(
+    client.client_secret,
+    undefined,
+    'Public PKCE clients must not receive inert secrets',
+  );
   assert.deepEqual(client.redirect_uris, ['http://localhost:9999/callback']);
 
   const codeVerifier = 'e2e-code-verifier-abcdefghijklmnopqrstuvwxyz01234567890-test';
   const { createHash } = await import('node:crypto');
   const codeChallenge = createHash('sha256').update(codeVerifier).digest('base64url');
+
+  const unsupportedPkce = await fetch(`${baseUrl}/mcp/authorize`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_API_KEY}` },
+    body: JSON.stringify({
+      client_id: client.client_id,
+      redirect_uri: 'http://localhost:9999/callback',
+      response_type: 'code',
+      scope: 'mcp:read',
+      code_challenge: codeVerifier,
+      code_challenge_method: 'plain',
+    }),
+    redirect: 'manual',
+  });
+  assert.equal(unsupportedPkce.status, 400, 'Only S256 PKCE may mint an authorization code');
+
+  const writerToken = await issueEnterpriseToken({
+    valid: true,
+    idpId: 'oauth-writer-idp',
+    issuer: 'https://oauth-writer.idp.example.test',
+    subject: 'oauth-writer',
+    email: 'writer@example.test',
+    displayName: 'OAuth Writer',
+    mappedRole: 'operator',
+    mcpScope: 'mcp:write',
+    tenantId: 'oauth-writer-tenant',
+  });
+  const scopeEscalation = await fetch(`${baseUrl}/mcp/authorize`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${writerToken.accessToken}`,
+    },
+    body: JSON.stringify({
+      client_id: client.client_id,
+      redirect_uri: 'http://localhost:9999/callback',
+      response_type: 'code',
+      scope: 'mcp:admin',
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
+    }),
+    redirect: 'manual',
+  });
+  assert.equal(scopeEscalation.status, 400, 'mcp:write must not mint mcp:admin credentials');
+  assert.equal(((await scopeEscalation.json()) as { error: string }).error, 'invalid_scope');
 
   const authRes = await fetch(`${baseUrl}/mcp/authorize`, {
     method: 'POST',
@@ -1230,6 +1843,20 @@ test('24. OAuth 2.1 — dynamic registration + authorization code + token exchan
   assert.ok(token.access_token, 'access_token must be present');
   assert.equal(token.token_type, 'Bearer');
   assert.ok(token.expires_in > 0, 'expires_in must be positive');
+  assert.equal(token.scope, 'mcp:read');
+
+  const oauthSession = await initializeSession(token.access_token);
+  const oauthPing = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token.access_token}`,
+      'MCP-Session-Id': oauthSession,
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'ping', params: {} }),
+  });
+  assert.equal(oauthPing.status, 200, 'Issued OAuth token must authenticate MCP requests');
 
   const replayRes = await fetch(`${baseUrl}/mcp/token`, {
     method: 'POST',
@@ -1255,4 +1882,651 @@ test('25. Security headers are present on responses', async () => {
   const csp = res.headers.get('content-security-policy');
   assert.ok(csp, 'Content-Security-Policy header must be present');
   assert.ok(csp?.includes("frame-ancestors 'none'"), 'CSP must include frame-ancestors');
+});
+
+test('26. production revocation synchronization is observable and fails readiness closed', async () => {
+  const originalFetch = globalThis.fetch;
+  const originalNodeEnv = process.env.NODE_ENV;
+  const originalToken = process.env.ALLOY_INTERNAL_TOKEN;
+  const originalBase = process.env.MCP_API_SERVER_BASE_URL;
+  process.env.NODE_ENV = 'production';
+  process.env.ALLOY_INTERNAL_TOKEN = 'test-only-revocation-sync-token';
+  process.env.MCP_API_SERVER_BASE_URL = 'https://internal-api.example.test';
+
+  try {
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify({ subjects: [] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    await syncRevokedSubjectsFromDb();
+    assert.deepEqual(
+      {
+        ready: getRevocationSyncReadiness().ready,
+        status: getRevocationSyncReadiness().status,
+      },
+      { ready: true, status: 'ready' },
+    );
+
+    globalThis.fetch = async () => new Response('{}', { status: 503 });
+    await assert.rejects(syncRevokedSubjectsFromDb(), /HTTP 503/);
+    assert.equal(getRevocationSyncReadiness().ready, false);
+    assert.equal(getRevocationSyncReadiness().status, 'failed');
+
+    delete process.env.ALLOY_INTERNAL_TOKEN;
+    await assert.rejects(syncRevokedSubjectsFromDb(), /ALLOY_INTERNAL_TOKEN is required/);
+    assert.equal(getRevocationSyncReadiness().ready, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = originalNodeEnv;
+    if (originalToken === undefined) delete process.env.ALLOY_INTERNAL_TOKEN;
+    else process.env.ALLOY_INTERNAL_TOKEN = originalToken;
+    if (originalBase === undefined) delete process.env.MCP_API_SERVER_BASE_URL;
+    else process.env.MCP_API_SERVER_BASE_URL = originalBase;
+    await syncRevokedSubjectsFromDb();
+  }
+});
+
+test('27. required enterprise email verification rejects absent and non-boolean claims', () => {
+  assert.equal(satisfiesEmailVerificationRequirement(true, undefined), false);
+  assert.equal(satisfiesEmailVerificationRequirement(true, false), false);
+  assert.equal(satisfiesEmailVerificationRequirement(true, 'true'), false);
+  assert.equal(satisfiesEmailVerificationRequirement(true, true), true);
+  assert.equal(satisfiesEmailVerificationRequirement(false, undefined), true);
+});
+
+test('28. tenant writers cannot mutate the gateway-global server registry', async () => {
+  const writerToken = await issueEnterpriseToken({
+    valid: true,
+    idpId: 'global-control-writer-idp',
+    issuer: 'https://global-control-writer.idp.example.test',
+    subject: 'global-control-writer',
+    email: 'writer@global-control.example.test',
+    displayName: 'Global Control Writer',
+    mappedRole: 'operator',
+    mcpScope: 'mcp:read mcp:write',
+    tenantId: 'global-control-writer-tenant',
+  });
+  const writerSession = await initializeSession(writerToken.accessToken);
+
+  const readServerStatus = async (): Promise<string | undefined> => {
+    const result = parseResult<{
+      servers: Array<{ serverId: string; status?: string }>;
+    }>(await toolCall('search_available_servers', { query: 'Counsel Evidence', limit: 10 }));
+    return result.servers.find((serverEntry) => serverEntry.serverId === 'szl-counsel-evidence')
+      ?.status;
+  };
+
+  const beforeStatus = await readServerStatus();
+  assert.ok(beforeStatus, 'Expected the global Counsel server to be registered');
+
+  const response = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${writerToken.accessToken}`,
+      'MCP-Session-Id': writerSession,
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 28,
+      method: 'tools/call',
+      params: {
+        name: 'disable_server',
+        arguments: { serverId: 'szl-counsel-evidence' },
+      },
+    }),
+  });
+  assert.equal(response.status, 403);
+  const denied = (await response.json()) as {
+    error?: { data?: { reason?: string } };
+  };
+  assert.match(denied.error?.data?.reason ?? '', /mcp:admin/);
+  assert.equal(await readServerStatus(), beforeStatus, 'Denied writer call must not mutate state');
+});
+
+test('29. covenant denial occurs before a mutating handler can produce side effects', async () => {
+  const readServerStatus = async (): Promise<string | undefined> => {
+    const result = parseResult<{
+      servers: Array<{ serverId: string; status?: string }>;
+    }>(await toolCall('search_available_servers', { query: 'Counsel Evidence', limit: 10 }));
+    return result.servers.find((serverEntry) => serverEntry.serverId === 'szl-counsel-evidence')
+      ?.status;
+  };
+
+  const beforeStatus = await readServerStatus();
+  const denied = await runWithRequestContext(
+    { actorId: 'anonymous', tenantId: 'unregistered-tenant' },
+    () => handleToolCall('disable_server', { serverId: 'szl-counsel-evidence' }, 'anonymous'),
+  );
+  assert.equal(denied.isError, true);
+  const payload = JSON.parse(denied.content[0]?.text ?? '{}') as {
+    details?: { code?: string };
+  };
+  assert.equal(payload.details?.code, 'COVENANT_DENIED');
+  assert.equal(await readServerStatus(), beforeStatus, 'Covenant deny must precede dispatch');
+});
+
+test('30. governance receipts are tenant-scoped and explicitly unverified', async () => {
+  const tenantToken = await issueEnterpriseToken({
+    valid: true,
+    idpId: 'receipt-tenant-idp',
+    issuer: 'https://receipt-tenant.idp.example.test',
+    subject: 'receipt-reader',
+    email: 'reader@receipt-tenant.example.test',
+    displayName: 'Receipt Reader',
+    mappedRole: 'viewer',
+    mcpScope: 'mcp:read',
+    tenantId: 'receipt-tenant',
+  });
+  const tenantSession = await initializeSession(tenantToken.accessToken);
+  await sessionToolCall(tenantToken.accessToken, tenantSession, 'substrate_list_workflows', {});
+
+  const listResponse = await fetch(`${baseUrl}/mcp/nexus/proofs`, {
+    headers: { Authorization: `Bearer ${tenantToken.accessToken}` },
+  });
+  assert.equal(listResponse.status, 200);
+  const listBody = (await listResponse.json()) as {
+    proofs: Array<{ proofHash: string; tenantId?: string; toolName: string }>;
+    capability: { available: boolean; evidenceState: string };
+  };
+  const receipt = listBody.proofs.find((entry) => entry.toolName === 'substrate_list_workflows');
+  assert.ok(receipt);
+  assert.equal(receipt.tenantId, 'receipt-tenant');
+  assert.equal(listBody.capability.available, false);
+  assert.equal(listBody.capability.evidenceState, 'UNAVAILABLE');
+
+  const unauthenticated = await fetch(`${baseUrl}/mcp/nexus/verify/${receipt.proofHash}`);
+  assert.equal(unauthenticated.status, 401, 'Receipt hashes are not bearer credentials');
+
+  const foreignLookup = await fetch(`${baseUrl}/mcp/nexus/verify/${receipt.proofHash}`, {
+    headers: { Authorization: `Bearer ${TEST_API_KEY}` },
+  });
+  const unknownLookup = await fetch(`${baseUrl}/mcp/nexus/verify/${'0'.repeat(64)}`, {
+    headers: { Authorization: `Bearer ${TEST_API_KEY}` },
+  });
+  assert.equal(foreignLookup.status, 404);
+  assert.equal(unknownLookup.status, 404);
+  const foreignBody = (await foreignLookup.json()) as Record<string, unknown>;
+  const unknownBody = (await unknownLookup.json()) as Record<string, unknown>;
+  for (const key of ['verified', 'recorded', 'evidenceState', 'error', 'message']) {
+    assert.deepEqual(foreignBody[key], unknownBody[key]);
+  }
+
+  const ownerLookup = await fetch(`${baseUrl}/mcp/nexus/verify/${receipt.proofHash}`, {
+    headers: { Authorization: `Bearer ${tenantToken.accessToken}` },
+  });
+  assert.equal(ownerLookup.status, 200);
+  const ownerBody = (await ownerLookup.json()) as {
+    verified: boolean;
+    recorded: boolean;
+    evidenceState: string;
+  };
+  assert.equal(ownerBody.verified, false);
+  assert.equal(ownerBody.recorded, true);
+  assert.equal(ownerBody.evidenceState, 'UNAVAILABLE');
+  assert.equal(getProofCapabilityStatus().cryptographicallyVerified, false);
+});
+
+test('31. production proof verification surface is held unavailable', async () => {
+  const originalFetch = globalThis.fetch;
+  const originalNodeEnv = process.env.NODE_ENV;
+  const originalToken = process.env.ALLOY_INTERNAL_TOKEN;
+  const originalBase = process.env.MCP_API_SERVER_BASE_URL;
+  process.env.NODE_ENV = 'production';
+  process.env.ALLOY_INTERNAL_TOKEN = 'test-only-proof-readiness-token';
+  process.env.MCP_API_SERVER_BASE_URL = 'https://internal-api.example.test';
+
+  try {
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify({ subjects: [] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    await syncRevokedSubjectsFromDb();
+    globalThis.fetch = originalFetch;
+
+    const healthResponse = await fetch(`${baseUrl}/mcp/health`);
+    assert.equal(healthResponse.status, 503);
+    const healthBody = (await healthResponse.json()) as {
+      execution?: { status?: string; mutationAllowed?: boolean };
+    };
+    assert.equal(healthBody.execution?.status, 'held');
+    assert.equal(healthBody.execution?.mutationAllowed, false);
+
+    const response = await fetch(`${baseUrl}/mcp/nexus/verify/${'0'.repeat(64)}`, {
+      headers: { Authorization: `Bearer ${TEST_API_KEY}` },
+    });
+    assert.equal(response.status, 503);
+    assert.equal(
+      ((await response.json()) as { error?: string }).error,
+      'PROOF_VERIFICATION_UNAVAILABLE',
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = originalNodeEnv;
+    if (originalToken === undefined) delete process.env.ALLOY_INTERNAL_TOKEN;
+    else process.env.ALLOY_INTERNAL_TOKEN = originalToken;
+    if (originalBase === undefined) delete process.env.MCP_API_SERVER_BASE_URL;
+    else process.env.MCP_API_SERVER_BASE_URL = originalBase;
+    await syncRevokedSubjectsFromDb();
+  }
+});
+
+test('32. unknown and production response assessments remain unassessed', () => {
+  const unknownAssessment = buildConsciousnessEnvelope({
+    toolName: 'dynamic_vendor_ai_tool',
+    responseText: 'A plausible-looking response is not calibration evidence.',
+    isError: false,
+  });
+  assert.equal(unknownAssessment.assessmentStatus, 'unassessed');
+  assert.equal(unknownAssessment.evidenceState, 'UNAVAILABLE');
+  assert.equal(unknownAssessment.confidence, null);
+  assert.equal(unknownAssessment.isDeterministic, null);
+
+  const originalNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    const productionAssessment = buildConsciousnessEnvelope({
+      toolName: 'substrate_get_run',
+      responseText: '{"status":"completed"}',
+      isError: false,
+    });
+    assert.equal(productionAssessment.assessmentStatus, 'unassessed');
+    assert.equal(productionAssessment.confidence, null);
+    assert.equal(productionAssessment.reasoningQualityScore, null);
+  } finally {
+    if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = originalNodeEnv;
+  }
+});
+
+test('33. production execution HOLD prevents runs, evidence, and mutation dispatch', async () => {
+  const originalNodeEnv = process.env.NODE_ENV;
+  const beforeGatewayRunCount = runCount();
+  const beforeStoredRunIds = (await defaultRunStore.listByWorkflow(DRY_RUN_WORKFLOW_ID, 1_000)).map(
+    (run) => run.runId,
+  );
+  const gatewayEvents: unknown[] = [];
+  const runtimeEvents: unknown[] = [];
+  const unsubscribeGateway = runEventBus.subscribe((event) => gatewayEvents.push(event));
+  const unsubscribeRuntime = runtimeEventBus.subscribe((event) => runtimeEvents.push(event));
+  process.env.NODE_ENV = 'production';
+
+  try {
+    const heldCalls: Array<[string, Record<string, unknown>]> = [
+      [
+        'substrate_submit_run',
+        { workflowId: DRY_RUN_WORKFLOW_ID, input: { productionHold: 'default-live' } },
+      ],
+      [
+        'substrate_submit_run',
+        {
+          workflowId: DRY_RUN_WORKFLOW_ID,
+          input: { productionHold: 'explicit-live' },
+          mode: 'live',
+        },
+      ],
+      ['substrate_replay', { runId: '00000000-0000-4000-8000-000000000000' }],
+      ['substrate_counterfactual', { runId: '00000000-0000-4000-8000-000000000000' }],
+      ['substrate_approve', { recommendationId: 'held-approval' }],
+      ['substrate_reject', { recommendationId: 'held-rejection' }],
+      ['agent_delegate', { targetAgentId: 'sentinel', taskDescription: 'must not dispatch' }],
+      ['dynamic_vendor_mutation', { value: 'must not dispatch' }],
+      ['enable_server', { serverId: 'szl-counsel-evidence' }],
+    ];
+
+    for (const [toolName, args] of heldCalls) {
+      const result = await runWithRequestContext(
+        { actorId: 'enterprise:test:production-operator', tenantId: 'production-tenant' },
+        () => handleToolCall(toolName, args, 'enterprise:test:production-operator'),
+      );
+      assert.equal(result.isError, true, `${toolName} must be held before dispatch`);
+      const payload = JSON.parse(result.content[0]?.text ?? '{}') as {
+        details?: { code?: string };
+      };
+      assert.equal(payload.details?.code, 'PRODUCTION_EXECUTION_HOLD', toolName);
+    }
+
+    assert.deepEqual(getExecutionCapabilityStatus(), {
+      ready: false,
+      mutationAllowed: false,
+      status: 'held',
+      qualifiedAdapters: false,
+      durableRunStore: false,
+      reason:
+        'Production execution is held: only no-op development adapters and an in-process run store are available.',
+    });
+    assert.equal(runCount(), beforeGatewayRunCount, 'No gateway run may be created');
+    assert.deepEqual(
+      (await defaultRunStore.listByWorkflow(DRY_RUN_WORKFLOW_ID, 1_000)).map((run) => run.runId),
+      beforeStoredRunIds,
+      'No journal-backed run snapshot/evidence may be added',
+    );
+    assert.deepEqual(gatewayEvents, [], 'No gateway lifecycle event may be emitted');
+    assert.deepEqual(runtimeEvents, [], 'No substrate runtime event may be emitted');
+  } finally {
+    unsubscribeGateway();
+    unsubscribeRuntime();
+    if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = originalNodeEnv;
+  }
+});
+
+test('34. enterprise revocation invalidates outstanding OAuth codes and bearer access', async () => {
+  const issuer = 'https://revoked-oauth.idp.example.test';
+  const subject = 'revoked-oauth-user';
+  const enterpriseToken = await issueEnterpriseToken({
+    valid: true,
+    idpId: 'revoked-oauth-idp',
+    issuer,
+    subject,
+    email: 'revoked@example.test',
+    displayName: 'Revoked OAuth User',
+    mappedRole: 'operator',
+    mcpScope: 'mcp:read mcp:write',
+    tenantId: 'revoked-oauth-tenant',
+  });
+
+  const registration = await fetch(`${baseUrl}/mcp/register`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${TEST_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_name: 'revocation-code-test',
+      redirect_uris: ['http://localhost:9998/callback'],
+      token_endpoint_auth_method: 'none',
+    }),
+  });
+  assert.equal(registration.status, 201);
+  const clientId = ((await registration.json()) as { client_id: string }).client_id;
+  const verifier = 'revocation-code-verifier-abcdefghijklmnopqrstuvwxyz0123456789';
+  const { createHash } = await import('node:crypto');
+  const challenge = createHash('sha256').update(verifier).digest('base64url');
+  const authorization = await fetch(`${baseUrl}/mcp/authorize`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${enterpriseToken.accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      client_id: clientId,
+      redirect_uri: 'http://localhost:9998/callback',
+      response_type: 'code',
+      scope: 'mcp:read',
+      code_challenge: challenge,
+      code_challenge_method: 'S256',
+    }),
+    redirect: 'manual',
+  });
+  assert.equal(authorization.status, 302);
+  const authorizationCode = new URL(authorization.headers.get('location') ?? '').searchParams.get(
+    'code',
+  );
+  assert.ok(authorizationCode);
+
+  const originalFetch = globalThis.fetch;
+  const originalToken = process.env.ALLOY_INTERNAL_TOKEN;
+  const originalBase = process.env.MCP_API_SERVER_BASE_URL;
+  const originalSecret = process.env.MCP_REVOCATION_WEBHOOK_SECRET;
+  const persistenceBase = 'https://revocation-persistence.example.test';
+  process.env.ALLOY_INTERNAL_TOKEN = 'test-only-revocation-persistence-token';
+  process.env.MCP_API_SERVER_BASE_URL = persistenceBase;
+  process.env.MCP_REVOCATION_WEBHOOK_SECRET = 'test-only-revocation-webhook-secret';
+
+  try {
+    globalThis.fetch = async (input, init) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+      if (url.startsWith(persistenceBase)) {
+        return new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      return originalFetch(input, init);
+    };
+
+    const revocation = await fetch(`${baseUrl}/mcp/revoke`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-revocation-secret': 'test-only-revocation-webhook-secret',
+      },
+      body: JSON.stringify({ issuer, subject, reason: 'e2e revocation' }),
+    });
+    assert.equal(revocation.status, 200);
+
+    const codeExchange = await fetch(`${baseUrl}/mcp/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grant_type: 'authorization_code',
+        code: authorizationCode,
+        redirect_uri: 'http://localhost:9998/callback',
+        client_id: clientId,
+        code_verifier: verifier,
+      }),
+    });
+    assert.equal(codeExchange.status, 400);
+    assert.equal(((await codeExchange.json()) as { error?: string }).error, 'invalid_grant');
+
+    const revokedBearer = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${enterpriseToken.accessToken}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json, text/event-stream',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 34,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2025-11-25',
+          capabilities: {},
+          clientInfo: { name: 'revoked-client', version: '1.0' },
+        },
+      }),
+    });
+    assert.equal(revokedBearer.status, 401);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalToken === undefined) delete process.env.ALLOY_INTERNAL_TOKEN;
+    else process.env.ALLOY_INTERNAL_TOKEN = originalToken;
+    if (originalBase === undefined) delete process.env.MCP_API_SERVER_BASE_URL;
+    else process.env.MCP_API_SERVER_BASE_URL = originalBase;
+    if (originalSecret === undefined) delete process.env.MCP_REVOCATION_WEBHOOK_SECRET;
+    else process.env.MCP_REVOCATION_WEBHOOK_SECRET = originalSecret;
+  }
+});
+
+test('35. every production marker requires revocation sync and disables dev auth bypass', async () => {
+  const markerNames = [
+    'RUNTIME_MODE',
+    'APP_ENV',
+    'SZL_ENV',
+    'SUBSTRATE_PYTHON_WORKER_ENV',
+  ] as const;
+  const savedEnvironment = new Map<string, string | undefined>();
+  for (const name of [
+    'NODE_ENV',
+    ...markerNames,
+    'ALLOY_INTERNAL_TOKEN',
+    'MCP_API_SERVER_BASE_URL',
+    'SUBSTRATE_GATEWAY_API_KEY',
+  ]) {
+    savedEnvironment.set(name, process.env[name]);
+  }
+
+  process.env.NODE_ENV = 'test';
+  delete process.env.ALLOY_INTERNAL_TOKEN;
+  delete process.env.MCP_API_SERVER_BASE_URL;
+  for (const name of markerNames) delete process.env[name];
+
+  try {
+    for (const [markerName, markerValue] of [
+      ['RUNTIME_MODE', 'production'],
+      ['APP_ENV', 'production'],
+      ['SZL_ENV', 'prod'],
+      ['SUBSTRATE_PYTHON_WORKER_ENV', 'production'],
+    ] as const) {
+      process.env[markerName] = markerValue;
+      assert.equal(isProductionRuntime(), true, `${markerName} must activate production mode`);
+
+      const configuredApiKey = process.env.SUBSTRATE_GATEWAY_API_KEY;
+      delete process.env.SUBSTRATE_GATEWAY_API_KEY;
+      const unauthenticated = resolveAuthContext({ headers: {} } as never);
+      assert.equal(
+        unauthenticated.authenticated,
+        false,
+        `${markerName} must disable unauthenticated development mode`,
+      );
+      if (configuredApiKey === undefined) delete process.env.SUBSTRATE_GATEWAY_API_KEY;
+      else process.env.SUBSTRATE_GATEWAY_API_KEY = configuredApiKey;
+
+      await assert.rejects(syncRevokedSubjectsFromDb(), /ALLOY_INTERNAL_TOKEN is required/);
+      assert.equal(getRevocationSyncReadiness().required, true);
+      assert.equal(getRevocationSyncReadiness().ready, false);
+      assert.equal(getRevocationSyncReadiness().status, 'failed');
+
+      const protectedResponse = await fetch(`${baseUrl}/mcp`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${TEST_API_KEY}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 35,
+          method: 'initialize',
+          params: {
+            protocolVersion: '2025-11-25',
+            capabilities: {},
+            clientInfo: { name: 'alternate-marker-test', version: '1.0' },
+          },
+        }),
+      });
+      assert.equal(protectedResponse.status, 503, markerName);
+
+      delete process.env[markerName];
+      await syncRevokedSubjectsFromDb();
+      assert.equal(getRevocationSyncReadiness().ready, true);
+    }
+  } finally {
+    for (const [name, value] of savedEnvironment) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
+});
+
+test('35b. invalid RUNTIME_MODE is startup-fatal', () => {
+  const saved = process.env.RUNTIME_MODE;
+  process.env.RUNTIME_MODE = 'prodution';
+  try {
+    assert.throws(isProductionRuntime, /RUNTIME_MODE must be one of/);
+  } finally {
+    if (saved === undefined) delete process.env.RUNTIME_MODE;
+    else process.env.RUNTIME_MODE = saved;
+  }
+});
+
+test('36. public JSON-RPC names cannot bypass authentication on REST routes', async () => {
+  const apiPrincipal = {
+    actorId: 'gateway:substrate-gateway',
+    tenantId: 'substrate-gateway',
+  };
+  const before = getOAuthClientRegistryStats(apiPrincipal);
+
+  const spoofedRegistration = await fetch(`${baseUrl}/mcp/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      method: 'tools/list',
+      client_name: 'unauthenticated-route-confusion-attempt',
+      redirect_uris: ['http://localhost:9996/callback'],
+      token_endpoint_auth_method: 'none',
+    }),
+  });
+
+  assert.equal(spoofedRegistration.status, 401);
+  assert.deepEqual(
+    getOAuthClientRegistryStats(apiPrincipal),
+    before,
+    'Rejected route-confusion payload must not mutate the OAuth client registry',
+  );
+});
+
+test('37. OAuth client registrations are metadata-bounded, quota-limited, and expiring', async () => {
+  const apiPrincipal = {
+    actorId: 'gateway:substrate-gateway',
+    tenantId: 'substrate-gateway',
+  };
+  const initial = getOAuthClientRegistryStats(apiPrincipal);
+  assert.ok(initial.maxClients > initial.maxClientsPerPrincipal);
+  assert.ok(initial.ttlMs > 0);
+  assert.notEqual(initial.activeForPrincipal, null);
+
+  const oversizedMetadata = await fetch(`${baseUrl}/mcp/register`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${TEST_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_name: 'x'.repeat(129),
+      redirect_uris: ['http://localhost:9996/callback'],
+      token_endpoint_auth_method: 'none',
+    }),
+  });
+  assert.equal(oversizedMetadata.status, 400);
+  assert.equal(
+    getOAuthClientRegistryStats(apiPrincipal).activeForPrincipal,
+    initial.activeForPrincipal,
+  );
+
+  const availableSlots = initial.maxClientsPerPrincipal - (initial.activeForPrincipal ?? 0);
+  for (let index = 0; index < availableSlots; index++) {
+    const registration = await fetch(`${baseUrl}/mcp/register`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${TEST_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_name: `bounded-client-${index}`,
+        redirect_uris: [`http://localhost:${10_000 + index}/callback`],
+        token_endpoint_auth_method: 'none',
+      }),
+    });
+    assert.equal(registration.status, 201, `registration ${index} must fit within the quota`);
+  }
+
+  const atLimit = getOAuthClientRegistryStats(apiPrincipal);
+  assert.equal(atLimit.activeForPrincipal, atLimit.maxClientsPerPrincipal);
+  assert.ok(atLimit.activeClients <= atLimit.maxClients);
+
+  const excessRegistration = await fetch(`${baseUrl}/mcp/register`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${TEST_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_name: 'over-principal-quota',
+      redirect_uris: ['http://localhost:9996/over-quota'],
+      token_endpoint_auth_method: 'none',
+    }),
+  });
+  assert.equal(excessRegistration.status, 429);
+  assert.equal(
+    ((await excessRegistration.json()) as { error?: string }).error,
+    'registration_limit_exceeded',
+  );
+  assert.equal(
+    getOAuthClientRegistryStats(apiPrincipal).activeForPrincipal,
+    atLimit.activeForPrincipal,
+    'Rejected over-quota registration must not mutate the registry',
+  );
+
+  const afterExpiry = getOAuthClientRegistryStats(
+    apiPrincipal,
+    Date.now() + atLimit.ttlMs + 60_000,
+  );
+  assert.equal(afterExpiry.activeForPrincipal, 0, 'Expired registrations must be swept');
+  assert.ok(afterExpiry.activeClients <= atLimit.activeClients - atLimit.maxClientsPerPrincipal);
 });

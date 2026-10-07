@@ -27,6 +27,7 @@ import {
   AtelierContinuityConfigurationError,
   createEncryptedLocalAtelierStateStoreFromEnv,
 } from '../../atelier-continuity-store.js';
+import { isProductionRuntime } from '../../runtime-capabilities.js';
 
 export interface AtelierRouterOptions {
   provider?: AtelierProvider;
@@ -57,7 +58,7 @@ function parseRequiredFlag(value: string | undefined): boolean {
 function resolveStateStore(options: AtelierRouterOptions): AtelierStateStore {
   try {
     const required =
-      process.env.NODE_ENV === 'production' ||
+      isProductionRuntime() ||
       (options.continuityRequired ??
         parseRequiredFlag(process.env.A11OY_ATELIER_CONTINUITY_REQUIRED));
     const stateStore =

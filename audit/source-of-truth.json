@@ -1,10 +1,10 @@
 {
   "meta": {
-    "generated": "2026-09-29",
+    "generated": "2026-10-07",
     "track": "FRONTIER V2 — Wave 1 Truth Lock",
-    "version": "2.1.7",
-    "measurement_base_commit": "f3e0f3ffe7614956d626b40903f50b35080c1614",
-    "note": "Canonical reproducible counts for the integrated Turn Capsule, Grok 4.7 configuration, and protected-main source tree. The listed measurement_base_commit is the inspected protected-main baseline; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-09-29 remain historical snapshots, not current public claims."
+    "version": "2.1.9",
+    "measurement_base_commit": "95d303fe94b0e773b31593426f8172e48bcb9d5f",
+    "note": "Canonical reproducible counts for the integrated Turn Capsule, Grok 4.7 configuration, and inspected source tree. The listed measurement_base_commit introduced the deterministic social-card assets reflected in the artifact-directory count; scripts/audit/validate-source-of-truth.js recomputes current-tree metrics from the checked-out commit. Runtime and database values not refreshed on 2026-09-29 remain historical snapshots, not current public claims."
   },
   "artifacts": {
     "registered": {
@@ -25,16 +25,16 @@
       ]
     },
     "on_disk_unregistered": {
-      "count": 1,
+      "count": 2,
       "command": "Tracked top-level artifact directories minus registered artifact manifests",
-      "computed": "2026-07-25",
-      "list": ["artifacts/api-server"],
-      "note": "api-server is backend infrastructure and is not counted as a customer-facing product vertical."
+      "computed": "2026-10-06",
+      "list": ["artifacts/api-server", "artifacts/szl-holdings"],
+      "note": "api-server is backend infrastructure. szl-holdings currently contains generated social-card assets only. Neither has an artifact manifest or is counted as a customer-facing product vertical."
     },
     "total_on_disk": {
-      "count": 7,
+      "count": 8,
       "command": "Count unique tracked top-level children of artifacts/",
-      "computed": "2026-07-25"
+      "computed": "2026-10-06"
     }
   },
   "packages": {
@@ -103,13 +103,13 @@
   },
   "api": {
     "route_source_files": {
-      "count": 45,
+      "count": 44,
       "command": "Count non-test source files under apps/, services/, and artifacts/api-server/ that contain a detected Express route declaration",
       "computed": "2026-09-26",
       "note": "Derived from declarations rather than /routes/ path names so router.ts, server.ts, and other route-bearing files are included."
     },
     "handler_declarations": {
-      "count": 315,
+      "count": 333,
       "command": "Count non-test get|post|put|patch|delete|use declarations on app/router and named Express Router receivers under apps/, services/, and artifacts/api-server/",
       "computed": "2026-09-26",
       "note": "A static declaration count. It does not prove deployment, reachability, authentication, or HTTP 200 behavior."
@@ -134,7 +134,7 @@
   },
   "env": {
     "declared_vars": {
-      "count": 245,
+      "count": 246,
       "command": "Count .env.example lines matching ^[A-Z_]+=",
       "computed": "2026-09-29"
     }
@@ -194,14 +194,28 @@
     "lambda_uniqueness": "CONJECTURE_1_OPEN_UNCONDITIONAL"
   },
   "github_public_estate": {
+    "inventory_status": "HISTORICAL_SNAPSHOT_SUPERSEDED",
     "observed_at": "2026-07-25T22:03:01Z",
     "public_repositories": 53,
     "archived_public_repositories": 12,
     "active_public_repositories": 41,
     "verification": "gh api --paginate 'orgs/szl-holdings/repos?per_page=100&type=all' filtered by visibility and archived",
+    "current_inventory": {
+      "status": "CURRENT_AUTHENTICATED_METADATA_READ",
+      "observed_at": "2026-10-06T04:33:40Z",
+      "source": "audit/evidence/github-org-metadata-summary-2026-10-06.json",
+      "repositories": 140,
+      "public_repositories": 128,
+      "private_repositories": 12,
+      "active_repositories_all_visibilities": 111,
+      "archived_repositories_all_visibilities": 29,
+      "active_public_repositories": null,
+      "archived_public_repositories": null,
+      "public_lifecycle_breakdown_status": "UNKNOWN"
+    },
     "decision_target": 9,
     "decision_status": "NOT_APPLIED_CONFORMANCE_REQUIRED",
-    "note": "The nine-public-repository target is a future disposition decision, not current state. No repository visibility was changed by this truth lock."
+    "note": "The root-level repository counts are retained only as the historical 2026-07-25 public inventory and are superseded by current_inventory. The current sanitized receipt establishes total/public/private and all-visibility lifecycle aggregates, but not active-public versus archived-public counts. The nine-public-repository target is a future disposition decision, not current state. No repository visibility was changed by this truth lock."
   },
   "track4_db_verification": {
     "status": "HISTORICAL_SNAPSHOT_NOT_CURRENT",

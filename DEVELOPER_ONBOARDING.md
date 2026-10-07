@@ -53,7 +53,8 @@ platform/
 
 ### Prerequisites
 
-- Node 22+ with pnpm
+- Node.js 24 or newer
+- pnpm 10.26.1 exactly; activate it with `source scripts/activate-pnpm.sh`
 - PostgreSQL 16 (or use the Docker Compose)
 - Docker (recommended for first run)
 
@@ -67,8 +68,9 @@ git clone https://github.com/szl-holdings/platform.git && cd platform
 cp .env.example .env.local
 # Edit .env.local — at minimum set DATABASE_URL, HF_TOKEN
 
-# Install all workspace packages
-pnpm install
+# Activate the repository-pinned package manager and install the locked graph
+source scripts/activate-pnpm.sh
+pnpm install --frozen-lockfile
 
 # Build the unified-kernel (required by most services)
 pnpm -F @szl-holdings/unified-kernel build

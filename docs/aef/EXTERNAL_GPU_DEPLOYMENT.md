@@ -1,12 +1,22 @@
-# AEF External GPU Deployment
+# AEF External GPU Deployment (Historical Design Only)
 
-This document covers deploying the AEF embedding workers and reranker on external GPU infrastructure. The compute-heavy embedding and reranking operations are designed to run as separate containerised services that AEF connects to over HTTP.
+> **Status: historical, unvalidated design material.** This is not a deployment
+> runbook, production receipt, benchmark report, or statement of a currently
+> operating service. The repository's production admission gates remain on
+> HOLD until immutable artifacts, durable state/evidence backends, tenant-bound
+> credentials, and qualification receipts are wired and verified.
 
-> **Scope note**: This document covers architecture and configuration only. The actual GPU deployment is executed separately and is outside the scope of the Phase 5 deliverable.
+This document records candidate architecture for running AEF embedding workers
+and a reranker on external GPU infrastructure. Any provider, model, sizing, or
+latency below is a planning option that must be independently qualified before
+promotion.
+
+> **Scope note**: No external GPU deployment or provider validation is evidenced
+> here. Example hostnames, secrets, commands, and controls are illustrative.
 
 ## Architecture
 
-In production, the AEF pipeline connects to three external services:
+A candidate future production topology could connect AEF to three external services:
 
 ```mermaid
 graph LR
@@ -15,7 +25,9 @@ graph LR
     AEF -->|"query / upsert"| VectorIndex["Vector Index\n(Qdrant / Weaviate / Pinecone)"]
 ```
 
-The orchestrator, profile resolver, policy guard, evidence ledger, and citation assembler all run on standard compute (Replit Reserved VM or cloud CPU). Only the embedding and reranking operations require GPU.
+In this candidate topology, control-plane components would run on standard CPU
+compute while embedding and reranking workers could use qualified GPU hosts.
+This division has not been validated as a deployed production architecture.
 
 ## Embedding Worker
 
@@ -43,7 +55,7 @@ Response:
 
 AEF's `@workspace/aef-contracts` package defines the TypeScript types for this contract under the `openai-compat` export.
 
-### Recommended Models
+### Candidate Models (Not Qualified)
 
 | Use Case | Model | Dimensions | Sequence Length |
 |---|---|---|---|
@@ -90,7 +102,7 @@ POST /rerank
 }
 ```
 
-### Recommended Models
+### Candidate Models (Not Qualified)
 
 | Use Case | Model |
 |---|---|
@@ -100,7 +112,9 @@ POST /rerank
 
 ## Vector Index Options
 
-AEF is index-agnostic. The `RetrievalAdapter` interface in `@workspace/aef-retrieval-core` accepts any backend that can return ranked results. Tested backends:
+AEF's `RetrievalAdapter` interface in `@workspace/aef-retrieval-core` can be
+implemented for multiple backend protocols. None of the following options is
+claimed as production-tested by this document:
 
 | Backend | Protocol | Best For |
 |---|---|---|
@@ -109,15 +123,15 @@ AEF is index-agnostic. The `RetrievalAdapter` interface in `@workspace/aef-retri
 | Pinecone | HTTP | Managed, serverless, zero-ops |
 | pgvector | SQL | Postgres-native, easiest to self-host |
 
-## GPU Instance Sizing
+## Candidate GPU Sizing (Unvalidated)
 
 | Workload | Instance Type | Notes |
 |---|---|---|
 | Small corpus (< 100k chunks) | T4 (16 GB) | Sufficient for all six domain profiles |
 | Medium corpus (100k–5M chunks) | A10G (24 GB) | Handles long-context models |
-| Production (5M+ chunks) | A100 (80 GB) | Full precision, batch reranking |
+| Large-corpus planning case (5M+ chunks) | A100 (80 GB) | Candidate full-precision batch reranking |
 
-## Connecting AEF to External Workers
+## Illustrative External-Worker Configuration
 
 Set these environment variables on the API server or orchestrator:
 
@@ -131,14 +145,18 @@ AEF_INDEX_API_KEY=<secret>
 AEF_INDEX_COLLECTION_PREFIX=szl_aef_
 ```
 
-## Security Requirements
+## Candidate Security Requirements
 
 - All communication between AEF components and external GPU workers must use TLS 1.3.
-- API keys are rotated quarterly via the secrets management workflow.
+- A future deployment should define, implement, and evidence credential rotation;
+  this document does not prove that a quarterly workflow exists or has run.
 - GPU workers must run in a private network segment not accessible from the public internet.
 - Logs from GPU workers must not contain embedding vectors or raw query text — log only token counts, latencies, and request IDs.
 
-## Expected Production Latencies
+## Unvalidated Planning Latency Targets
+
+These figures are hypotheses only. They were not produced by a checked-in,
+reproducible benchmark or tied to an admitted model/artifact receipt.
 
 | Operation | GPU (A10G) | Notes |
 |---|---|---|

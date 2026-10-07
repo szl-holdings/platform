@@ -104,7 +104,7 @@ export interface ChunkPlannerOptions {
  * if the package or model cannot be loaded (caller falls back to words).
  */
 export async function loadDefaultChunkTokenizer(
-  modelRef = 'Xenova/all-MiniLM-L6-v2',
+  modelRef = 'Xenova/all-MiniLM-L6-v2@751bff37182d3f1213fa05d7196b954e230abad9',
 ): Promise<ChunkTokenizer | undefined> {
   try {
     const specifier = '@workspace/alloy-vector-worker';

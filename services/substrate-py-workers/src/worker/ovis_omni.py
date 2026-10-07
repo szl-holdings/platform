@@ -23,6 +23,8 @@ import structlog
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from .security import is_production_environment
+
 log = structlog.get_logger(__name__)
 ovis_router = APIRouter(prefix="/ovis", tags=["AEF Ovis multimodal evaluation"])
 
@@ -42,6 +44,18 @@ SUPPORTED_MODALITIES = [
 ]
 CAS_URI_RE = re.compile(r"^cas://sha256/([a-f0-9]{64})$", re.IGNORECASE)
 SHA256_RE = re.compile(r"^[a-f0-9]{64}$", re.IGNORECASE)
+TENANT_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$")
+OVIS_API_KEY_ENV = "OVIS_INTERNAL_API_KEY"
+OVIS_TENANT_ID_ENV = "OVIS_INTERNAL_TENANT_ID"
+
+# The tracked canonical manifest remains the authority for promotion. It is on
+# EVALUATION_HOLD and explicitly forbids production serving. A receipt digest
+# string is only an identifier; this runtime has no parser/verifier that binds
+# a signed receipt to the exact source head, model revision, artifact set, and
+# evaluation suite. No environment variable can promote this capability.
+CANONICAL_MANIFEST_PROMOTION_STATE = "EVALUATION_HOLD"
+CANONICAL_MANIFEST_PRODUCTION_SERVING_ALLOWED = False
+PRODUCTION_RECEIPT_VERIFICATION_IMPLEMENTED = False
 
 # LFS identities read from the exact immutable Hub revision on 2026-09-24.
 EXPECTED_ARTIFACTS: dict[str, tuple[str, int]] = {
@@ -121,7 +135,11 @@ class OvisItem(ApiModel):
 
 class OvisEmbedRequest(ApiModel):
     request_id: str = Field(min_length=1)
-    tenant_id: str = Field(min_length=1)
+    tenant_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$",
+    )
     profile_id: str | None = None
     model_id: str = Field(min_length=1)
     model_revision: str = Field(min_length=1)
@@ -176,7 +194,7 @@ class OvisRuntimeError(RuntimeError):
 
 
 def _is_production() -> bool:
-    return (os.getenv("NODE_ENV") or os.getenv("SZL_ENV") or "").lower() == "production"
+    return is_production_environment()
 
 
 def _promotion_state() -> str:
@@ -193,31 +211,94 @@ def _assert_runtime_gate() -> None:
     state = _promotion_state()
     if state == "REVOKED":
         raise OvisRuntimeError("OVIS_MODEL_REVOKED", "Ovis multimodal model is revoked")
+    if (
+        state == "QUALIFIED"
+        and CANONICAL_MANIFEST_PROMOTION_STATE != "QUALIFIED"
+    ):
+        raise OvisRuntimeError(
+            "OVIS_NOT_QUALIFIED",
+            "Ovis multimodal model is not qualified for production",
+        )
 
     if _is_production():
-        receipt = os.getenv("OVIS_QUALIFICATION_RECEIPT_SHA256", "")
-        if state != "QUALIFIED" or not SHA256_RE.fullmatch(receipt):
+        # OVIS_QUALIFICATION_RECEIPT_SHA256 is deliberately not consulted as
+        # proof. Even a well-formed digest cannot establish what was signed or
+        # whether it is bound to this exact runtime and evaluation evidence.
+        if (
+            CANONICAL_MANIFEST_PROMOTION_STATE != "QUALIFIED"
+            or not CANONICAL_MANIFEST_PRODUCTION_SERVING_ALLOWED
+            or not PRODUCTION_RECEIPT_VERIFICATION_IMPLEMENTED
+        ):
             raise OvisRuntimeError(
                 "OVIS_NOT_QUALIFIED",
                 "Ovis multimodal model is not qualified for production",
             )
-        if os.getenv("OVIS_VERIFY_ARTIFACTS", "1") != "1":
+
+
+def _load_internal_identity() -> tuple[str | None, str | None]:
+    expected = os.getenv(OVIS_API_KEY_ENV, "") or None
+    bound_tenant_id = os.getenv(OVIS_TENANT_ID_ENV, "") or None
+
+    if expected is not None and expected != expected.strip():
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_API_KEY_INVALID",
+            f"{OVIS_API_KEY_ENV} must not contain surrounding whitespace",
+        )
+    if bound_tenant_id is not None:
+        bound_tenant_id = bound_tenant_id.strip()
+        if not TENANT_ID_RE.fullmatch(bound_tenant_id):
             raise OvisRuntimeError(
-                "ARTIFACT_VERIFICATION_REQUIRED",
-                "Production Ovis runtime requires artifact verification",
+                "OVIS_INTERNAL_TENANT_INVALID",
+                f"{OVIS_TENANT_ID_ENV} must contain a valid tenant identity",
             )
 
+    if _is_production():
+        if expected is None:
+            raise OvisRuntimeError(
+                "OVIS_INTERNAL_API_KEY_REQUIRED",
+                f"{OVIS_API_KEY_ENV} is required",
+            )
+        if bound_tenant_id is None:
+            raise OvisRuntimeError(
+                "OVIS_INTERNAL_TENANT_REQUIRED",
+                f"{OVIS_TENANT_ID_ENV} must bind the Ovis credential to one tenant",
+            )
+    elif bound_tenant_id is not None and expected is None:
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_IDENTITY_INCOMPLETE",
+            f"{OVIS_API_KEY_ENV} is required when {OVIS_TENANT_ID_ENV} is configured",
+        )
 
-def _require_internal_auth(request: Request) -> None:
-    expected = os.getenv("OVIS_INTERNAL_API_KEY", "")
-    if _is_production() and not expected:
-        raise HTTPException(status_code=503, detail="OVIS_INTERNAL_API_KEY is required")
-    if not expected:
+    return expected, bound_tenant_id
+
+
+def validate_ovis_configuration() -> None:
+    """Fail startup/readiness when an enabled Ovis boundary is misconfigured."""
+
+    if os.getenv("OVIS_OMNI_ENABLED", "0") != "1":
         return
+    _assert_runtime_gate()
+    _load_internal_identity()
+
+
+def _require_internal_auth(request: Request) -> str | None:
+    try:
+        expected, bound_tenant_id = _load_internal_identity()
+    except OvisRuntimeError as error:
+        raise HTTPException(status_code=503, detail=error.safe_message) from error
+    if expected is None:
+        return bound_tenant_id
     authorization = request.headers.get("authorization", "")
-    supplied = authorization.removeprefix("Bearer ") if authorization.startswith("Bearer ") else ""
-    if not supplied or not hmac.compare_digest(supplied, expected):
+    scheme, separator, supplied = authorization.partition(" ")
+    authenticated = (
+        separator == " "
+        and scheme.lower() == "bearer"
+        and bool(supplied)
+        and hmac.compare_digest(supplied.encode("utf-8"), expected.encode("utf-8"))
+    )
+    if not authenticated:
         raise HTTPException(status_code=401, detail="Unauthorized")
+    return bound_tenant_id
 
 
 def _hash_file(path: Path) -> str:
@@ -535,22 +616,30 @@ def _execution_receipt() -> ExecutionReceipt:
 @ovis_router.get("/health")
 async def ovis_health(request: Request) -> dict[str, Any]:
     _require_internal_auth(request)
-    runtime = get_runtime()
-    gate_error: str | None = None
     try:
         _assert_runtime_gate()
     except OvisRuntimeError as error:
-        gate_error = error.code
+        raise HTTPException(
+            status_code=error.status_code,
+            detail={
+                "status": "blocked",
+                "gateCode": error.code,
+                "loadErrorCode": None,
+                "modelId": MODEL_ID,
+                "modelRevision": MODEL_REVISION,
+                "promotionState": CANONICAL_MANIFEST_PROMOTION_STATE,
+            },
+        ) from error
 
+    runtime = get_runtime()
     loaded = isinstance(runtime, OvisOmniRuntime) and runtime.loaded
     load_error = runtime.load_error_code if isinstance(runtime, OvisOmniRuntime) else None
-    healthy = gate_error is None and load_error is None
-    if not healthy:
+    if load_error is not None:
         raise HTTPException(
             status_code=503,
             detail={
                 "status": "blocked",
-                "gateCode": gate_error,
+                "gateCode": None,
                 "loadErrorCode": load_error,
                 "modelId": MODEL_ID,
                 "modelRevision": MODEL_REVISION,
@@ -570,8 +659,23 @@ async def ovis_health(request: Request) -> dict[str, Any]:
 
 @ovis_router.post("/embed", response_model=OvisEmbedResponse)
 async def ovis_embed(request_body: OvisEmbedRequest, request: Request) -> OvisEmbedResponse:
-    _require_internal_auth(request)
-    _assert_runtime_gate()
+    bound_tenant_id = _require_internal_auth(request)
+
+    if bound_tenant_id is not None and not hmac.compare_digest(
+        request_body.tenant_id.encode("utf-8"), bound_tenant_id.encode("utf-8")
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Authenticated Ovis credential is not authorized for this tenant",
+        )
+
+    try:
+        _assert_runtime_gate()
+    except OvisRuntimeError as error:
+        raise HTTPException(
+            status_code=error.status_code,
+            detail=error.code,
+        ) from error
 
     if request_body.model_id != MODEL_ID or request_body.model_revision != MODEL_REVISION:
         raise HTTPException(status_code=409, detail="MODEL_IDENTITY_NOT_ADMITTED")

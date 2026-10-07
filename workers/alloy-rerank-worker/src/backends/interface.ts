@@ -1,3 +1,5 @@
+import type { RerankExecutionReceipt } from '@workspace/aef-contracts';
+
 export interface RawRerankRequest {
   query: string;
   candidates: Array<{ id: string; text: string; score?: number }>;
@@ -15,12 +17,13 @@ export interface RawRerankResponse {
   results: RawRerankResult[];
   model: string;
   backendLatencyMs?: number;
+  execution: RerankExecutionReceipt;
 }
 
 export interface RerankBackendDescriptor {
   backendId: string;
   displayName: string;
-  kind: 'cross-encoder-http' | 'fallback-deterministic';
+  kind: 'lexical-http' | 'fallback-deterministic';
   supportedModels: string[];
   isFallback: boolean;
 }

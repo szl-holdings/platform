@@ -26,7 +26,7 @@ import {
 import { runtimeEventBus, type SubstrateRuntimeEvent } from '@szl/substrate';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import rateLimit from 'express-rate-limit';
-import { authMiddleware, resolveAuthContext } from '../auth.js';
+import { authMiddleware, type GatewayAuthContext, resolveAuthContext } from '../auth.js';
 import {
   CAPABILITIES,
   SERVER_INFO,
@@ -35,29 +35,78 @@ import {
   SUBSTRATE_TOOLS,
 } from '../descriptor.js';
 import {
-  getEnterpriseToken,
+  type EnterpriseIdpConfig,
   getEnterpriseIdpByIssuer,
+  getRevocationSyncReadiness,
   handleRevocationWebhook,
   issueEnterpriseToken,
   linkOrProvisionUser,
   listEnterpriseIdps,
+  type RevocationWebhookPayload,
   registerEnterpriseIdp,
   unregisterEnterpriseIdp,
-  resolveEnterpriseAuthContext,
   validateIdJag,
-  type EnterpriseIdpConfig,
-  type RevocationWebhookPayload,
 } from '../enterprise-auth.js';
 import { getAvailableTools } from '../handlers.js';
-import { lookupProof, getRecentProofs } from '../nexus-fabric.js';
-import { actorIdToTenantId, runWithRequestContext } from '../request-context.js';
+import {
+  getNexusRuntimeCapabilities,
+  getProofCapabilityStatus,
+  getRecentProofs,
+  lookupProof,
+} from '../nexus-fabric.js';
+import { createGatewayServer } from '../nexus-gateway-server.js';
+import { issueLocalOAuthToken, revokeLocalOAuthTokensForActor } from '../oauth-token-store.js';
+import {
+  actorIdToTenantId,
+  getCurrentTenantId,
+  runWithRequestContext,
+} from '../request-context.js';
 import { type RunLifecycleEvent, runEventBus } from '../run-events.js';
-import { getGatewayServer, createGatewayServer } from '../nexus-gateway-server.js';
+import { getRunTenantId } from '../run-store.js';
+import { getExecutionCapabilityStatus, isProductionRuntime } from '../runtime-config.js';
+import { getEnterpriseAccessRequirement, type ToolAccessRequirement } from '../tool-access.js';
+
+export { getEnterpriseAccessRequirement } from '../tool-access.js';
 
 // ─── Security ─────────────────────────────────────────────────────────────────
 
 function isProd(): boolean {
-  return process.env.NODE_ENV === 'production';
+  return isProductionRuntime();
+}
+
+function enterpriseScopeAllows(scope: string, requirement: ToolAccessRequirement): boolean {
+  const grants = new Set(
+    scope
+      .split(/\s+/)
+      .map((entry) => entry.trim())
+      .filter(Boolean),
+  );
+  if (grants.has('mcp:admin')) return true;
+  if (requirement === 'admin') return false;
+  if (requirement === 'approve') return grants.has('mcp:approve');
+  if (requirement === 'write') return grants.has('mcp:write');
+  return grants.has('mcp:read');
+}
+
+function scopeContainsEveryGrant(scope: string, requestedGrants: readonly string[]): boolean {
+  const grants = new Set(
+    scope
+      .split(/\s+/)
+      .map((entry) => entry.trim())
+      .filter(Boolean),
+  );
+  return grants.has('mcp:admin') || requestedGrants.every((grant) => grants.has(grant));
+}
+
+function requestContextFromAuth(authContext: GatewayAuthContext | undefined): {
+  actorId: string;
+  tenantId: string;
+} {
+  const actorId = authContext?.actorId ?? 'anonymous';
+  return {
+    actorId,
+    tenantId: authContext?.tenantId ?? actorIdToTenantId(actorId),
+  };
 }
 
 function getAllowedOrigins(): Set<string> {
@@ -224,13 +273,14 @@ function negotiateExtensions(clientExtensions: unknown): Record<string, unknown>
 
 interface OAuthClient {
   clientId: string;
-  clientSecret?: string;
+  ownerKey: string;
   redirectUris: string[];
   grantTypes: string[];
   responseTypes: string[];
   clientName?: string;
   scope?: string;
   registeredAt: number;
+  expiresAt: number;
 }
 
 interface AuthorizationCode {
@@ -242,31 +292,192 @@ interface AuthorizationCode {
   codeChallengeMethod: string;
   expiresAt: number;
   used: boolean;
-}
-
-interface OAuthToken {
-  accessToken: string;
-  tokenType: string;
-  expiresIn: number;
-  scope: string;
-  issuedAt: number;
+  actorId: string;
+  tenantId: string;
 }
 
 const oauthClients = new Map<string, OAuthClient>();
 const authCodes = new Map<string, AuthorizationCode>();
-const issuedTokens = new Map<string, OAuthToken>();
 
+const OAUTH_CLIENT_TTL_MS = 24 * 60 * 60 * 1000;
+const MAX_OAUTH_CLIENTS = 512;
+const MAX_OAUTH_CLIENTS_PER_PRINCIPAL = 16;
+const MAX_OAUTH_REDIRECT_URIS = 10;
+const MAX_OAUTH_REDIRECT_URI_LENGTH = 2_048;
+const MAX_OAUTH_CLIENT_NAME_LENGTH = 128;
+const MAX_OAUTH_SCOPE_LENGTH = 512;
+
+interface OAuthClientRegistryPrincipal {
+  actorId: string;
+  tenantId?: string;
+}
+
+function oauthClientOwnerKey(principal: OAuthClientRegistryPrincipal): string {
+  return JSON.stringify([principal.tenantId ?? '', principal.actorId]);
+}
+
+function pruneExpiredOAuthClients(now = Date.now()): void {
+  for (const [clientId, client] of oauthClients) {
+    if (client.expiresAt <= now) oauthClients.delete(clientId);
+  }
+}
+
+function countOAuthClientsForOwner(ownerKey: string): number {
+  let count = 0;
+  for (const client of oauthClients.values()) {
+    if (client.ownerKey === ownerKey) count++;
+  }
+  return count;
+}
+
+function isValidOAuthRedirectUri(value: unknown): value is string {
+  if (
+    typeof value !== 'string' ||
+    value.length === 0 ||
+    value.length > MAX_OAUTH_REDIRECT_URI_LENGTH
+  ) {
+    return false;
+  }
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol.length > 1 && parsed.hash === '' && !parsed.username && !parsed.password;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Bounded registry diagnostics. Supplying `now` also performs the same expiry
+ * sweep used by registration and authorization; this keeps deterministic
+ * expiry behavior directly testable without exposing client metadata.
+ */
+export function getOAuthClientRegistryStats(
+  principal?: OAuthClientRegistryPrincipal,
+  now = Date.now(),
+): {
+  activeClients: number;
+  activeForPrincipal: number | null;
+  maxClients: number;
+  maxClientsPerPrincipal: number;
+  ttlMs: number;
+} {
+  pruneExpiredOAuthClients(now);
+  return {
+    activeClients: oauthClients.size,
+    activeForPrincipal: principal
+      ? countOAuthClientsForOwner(oauthClientOwnerKey(principal))
+      : null,
+    maxClients: MAX_OAUTH_CLIENTS,
+    maxClientsPerPrincipal: MAX_OAUTH_CLIENTS_PER_PRINCIPAL,
+    ttlMs: OAUTH_CLIENT_TTL_MS,
+  };
+}
+
+function revokeAuthorizationCodesForActor(actorId: string): number {
+  let revoked = 0;
+  for (const [code, authCode] of authCodes) {
+    if (authCode.actorId !== actorId) continue;
+    authCodes.delete(code);
+    revoked++;
+  }
+  return revoked;
+}
 function sha256Base64Url(input: string): string {
   return createHash('sha256').update(input).digest('base64url');
 }
 
 // ─── Session Registries (SDK-managed) ────────────────────────────────────────
 
+interface SessionOwner {
+  actorId: string;
+  tenantId: string;
+}
+
+interface OwnedSession<T> extends SessionOwner {
+  transport: T;
+  eventStreams: Set<Response>;
+}
+
 // Legacy SSE transport (MCP 2024-11-05)
-const sseSessions = new Map<string, SSEServerTransport>();
+const sseSessions = new Map<string, OwnedSession<SSEServerTransport>>();
 
 // Streamable HTTP transport (MCP 2025 spec)
-const streamableSessions = new Map<string, StreamableHTTPServerTransport>();
+const streamableSessions = new Map<string, OwnedSession<StreamableHTTPServerTransport>>();
+
+function sessionOwner(req: Request): SessionOwner {
+  const authContext = (req as Request & { authCtx?: GatewayAuthContext }).authCtx;
+  return requestContextFromAuth(authContext);
+}
+
+function isSessionOwner(session: SessionOwner, requestOwner: SessionOwner): boolean {
+  return session.tenantId === requestOwner.tenantId && session.actorId === requestOwner.actorId;
+}
+
+function sendSessionNotFound(res: Response, jsonRpcId?: string | number | null): void {
+  if (jsonRpcId !== undefined) {
+    res.status(404).json({
+      jsonrpc: '2.0',
+      id: jsonRpcId,
+      error: {
+        code: -32001,
+        message: 'Session not found',
+        data: { reason: 'Session terminated, unknown, or unavailable to this principal.' },
+      },
+    });
+    return;
+  }
+  res.status(404).json({ error: 'SESSION_NOT_FOUND', reason: 'Session not found' });
+}
+
+function closeSessionsForActor(actorId: string): void {
+  for (const [sessionId, session] of sseSessions) {
+    if (session.actorId !== actorId) continue;
+    sseSessions.delete(sessionId);
+    void session.transport.close();
+  }
+  for (const [sessionId, session] of streamableSessions) {
+    if (session.actorId !== actorId) continue;
+    streamableSessions.delete(sessionId);
+    for (const response of session.eventStreams) response.end();
+    session.eventStreams.clear();
+    void session.transport.close();
+  }
+}
+
+function eventTenantId(event: { tenantId?: string; runId?: string }): string | undefined {
+  return (
+    event.tenantId ??
+    (event.runId ? getRunTenantId(event.runId) : undefined) ??
+    getCurrentTenantId()
+  );
+}
+
+function subscribeTenantEvents(
+  tenantId: string,
+  writeEvent: (eventName: string, data: unknown) => void,
+): () => void {
+  const unsubscribeRun = runEventBus.subscribe((event: RunLifecycleEvent) => {
+    if (event.type === 'tool_list_changed') {
+      writeEvent(event.type, event);
+      return;
+    }
+    if (eventTenantId(event) !== tenantId) return;
+    writeEvent(event.type, event);
+    if (event.type === 'stage_complete') writeEvent('stage:complete', event);
+    else if (event.type === 'run_started') {
+      writeEvent('run:start', event);
+      writeEvent('stage:start', event);
+    } else if (event.type === 'run_complete') writeEvent('run:complete', event);
+    else if (event.type === 'run_failed') writeEvent('run:failed', event);
+  });
+  const unsubscribeRuntime = runtimeEventBus.subscribe((event: SubstrateRuntimeEvent) => {
+    if (eventTenantId(event) === tenantId) writeEvent(event.type, event);
+  });
+  return () => {
+    unsubscribeRun();
+    unsubscribeRuntime();
+  };
+}
 
 // ─── Streamable GET helper ────────────────────────────────────────────────────
 //
@@ -279,8 +490,9 @@ function handleStreamableGet(req: Request, res: Response): void {
     res.status(400).json({ error: 'Mcp-Session-Id header required' });
     return;
   }
-  if (!streamableSessions.has(sessionId)) {
-    res.status(404).json({ error: `Session '${sessionId}' not found` });
+  const session = streamableSessions.get(sessionId);
+  if (!session || !isSessionOwner(session, sessionOwner(req))) {
+    sendSessionNotFound(res);
     return;
   }
 
@@ -293,6 +505,7 @@ function handleStreamableGet(req: Request, res: Response): void {
   res.setHeader('X-Accel-Buffering', 'no');
   res.setHeader('Mcp-Session-Id', sessionId);
   res.flushHeaders?.();
+  session.eventStreams.add(res);
 
   const writeEvent = (eventName: string, data: unknown): void => {
     try {
@@ -313,23 +526,12 @@ function handleStreamableGet(req: Request, res: Response): void {
     }
   }, 25_000);
 
-  const unsubscribeRun = runEventBus.subscribe((event: RunLifecycleEvent) => {
-    writeEvent(event.type, event);
-    if (event.type === 'stage_complete') writeEvent('stage:complete', event);
-    else if (event.type === 'run_started') {
-      writeEvent('run:start', event);
-      writeEvent('stage:start', event);
-    } else if (event.type === 'run_complete') writeEvent('run:complete', event);
-    else if (event.type === 'run_failed') writeEvent('run:failed', event);
-  });
-  const unsubscribeRuntime = runtimeEventBus.subscribe((event: SubstrateRuntimeEvent) => {
-    writeEvent(event.type, event);
-  });
+  const unsubscribe = subscribeTenantEvents(session.tenantId, writeEvent);
 
   req.on('close', () => {
     clearInterval(keepAlive);
-    unsubscribeRun();
-    unsubscribeRuntime();
+    unsubscribe();
+    session.eventStreams.delete(res);
     try {
       res.end();
     } catch {
@@ -355,7 +557,10 @@ export function createHttpTransport(): express.Router {
       limit: Number(process.env.MCP_GLOBAL_RATE_LIMIT_MAX ?? 600),
       standardHeaders: 'draft-7',
       legacyHeaders: false,
-      message: { error: 'RATE_LIMITED', reason: 'Too many requests from this IP. Retry after the window resets.' },
+      message: {
+        error: 'RATE_LIMITED',
+        reason: 'Too many requests from this IP. Retry after the window resets.',
+      },
     }),
   );
   router.use(corsMiddleware);
@@ -396,8 +601,11 @@ export function createHttpTransport(): express.Router {
   // ── Health ────────────────────────────────────────────────────────────────
   router.get('/health', (_req, res) => {
     const liveTools = getAvailableTools();
-    res.json({
-      status: 'ok',
+    const revocationSync = getRevocationSyncReadiness();
+    const execution = getExecutionCapabilityStatus();
+    const ready = revocationSync.ready && execution.ready;
+    res.status(ready ? 200 : 503).json({
+      status: ready ? 'ok' : 'degraded',
       service: SERVER_INFO.name,
       version: SERVER_INFO.version,
       protocol: SERVER_INFO.protocolVersion,
@@ -408,6 +616,9 @@ export function createHttpTransport(): express.Router {
       promptCount: SUBSTRATE_PROMPTS.length,
       activeSseConnections: sseSessions.size,
       activeStreamableSessions: streamableSessions.size,
+      optionalCapabilities: getNexusRuntimeCapabilities(),
+      revocationSync,
+      execution,
       timestamp: new Date().toISOString(),
     });
   });
@@ -433,14 +644,12 @@ export function createHttpTransport(): express.Router {
   // Clients send messages back via POST /mcp/message?sessionId=<id>.
 
   router.get('/sse', async (req: Request, res: Response) => {
-    const ctx = resolveAuthContext(req);
-    const sessionId = randomUUID();
+    const owner = sessionOwner(req);
+    const transport = new SSEServerTransport('/mcp/message', res);
+    const sessionId = transport.sessionId;
 
-    // Raw SSE headers — independent of the SDK transport so we can emit
-    // substrate run-lifecycle events directly to the wire as `event: <type>`.
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache, no-transform');
-    res.setHeader('Connection', 'keep-alive');
+    // The SDK owns the MCP endpoint/message frames. Additional lifecycle frames
+    // are written to the same stream only after the transport is connected.
     res.setHeader('X-Accel-Buffering', 'no');
     res.setHeader('X-Session-Id', sessionId);
     res.setHeader('Mcp-Session-Id', sessionId);
@@ -451,8 +660,6 @@ export function createHttpTransport(): express.Router {
       res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
-    res.flushHeaders?.();
-
     const writeEvent = (eventName: string, data: unknown): void => {
       try {
         res.write(`event: ${eventName}\n`);
@@ -462,11 +669,34 @@ export function createHttpTransport(): express.Router {
       }
     };
 
-    // Emit a ready frame so clients can confirm the stream is alive.
+    let unsubscribe = (): void => {};
+    let keepAlive: NodeJS.Timeout | undefined;
+    const cleanup = (): void => {
+      if (keepAlive) clearInterval(keepAlive);
+      unsubscribe();
+      sseSessions.delete(sessionId);
+    };
+
+    transport.onclose = cleanup;
+    sseSessions.set(sessionId, { transport, eventStreams: new Set(), ...owner });
+
+    try {
+      const sessionServer = createGatewayServer();
+      await runWithRequestContext(owner, () => sessionServer.connect(transport));
+    } catch {
+      cleanup();
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'SSE_TRANSPORT_FAILED' });
+      } else {
+        res.end();
+      }
+      return;
+    }
+
     writeEvent('$/ready', { sessionId, serverInfo: SERVER_INFO, timestamp: Date.now() });
 
     // Keep-alive ping every 25s to defeat intermediary buffers.
-    const keepAlive = setInterval(() => {
+    keepAlive = setInterval(() => {
       try {
         res.write(`: keepalive ${Date.now()}\n\n`);
       } catch {
@@ -474,46 +704,11 @@ export function createHttpTransport(): express.Router {
       }
     }, 25_000);
 
-    // Bridge substrate run lifecycle events onto the SSE stream.
-    // We emit both the canonical snake_case event name AND a colon-form
-    // alias (`stage:start`, `stage:complete`, `run:complete`) so clients
-    // that follow the MCP 2025 streaming naming convention also work.
-    const unsubscribeRunEvents = runEventBus.subscribe((event: RunLifecycleEvent) => {
-      writeEvent(event.type, event);
-      if (event.type === 'stage_complete') {
-        writeEvent('stage:complete', event);
-      } else if (event.type === 'run_started') {
-        writeEvent('run:start', event);
-        // Surface a synthetic stage:start so multi-stage UIs render progress.
-        writeEvent('stage:start', event);
-      } else if (event.type === 'run_complete') {
-        writeEvent('run:complete', event);
-      } else if (event.type === 'run_failed') {
-        writeEvent('run:failed', event);
-      } else if (event.type === 'tool_list_changed') {
-        void getGatewayServer().notifyListChanged('tools/list_changed');
-      }
-    });
-
-    const unsubscribeRuntimeEvents = runtimeEventBus.subscribe((event: SubstrateRuntimeEvent) => {
-      // The substrate runtime already emits colon-form names
-      // (`stage:start`, `stage:complete`, `run:complete`, ...). Forward verbatim.
-      writeEvent(event.type, event);
-    });
+    unsubscribe = subscribeTenantEvents(owner.tenantId, writeEvent);
 
     req.on('close', () => {
-      clearInterval(keepAlive);
-      unsubscribeRunEvents();
-      unsubscribeRuntimeEvents();
-      sseSessions.delete(sessionId);
-      try {
-        res.end();
-      } catch {
-        /* already ended */
-      }
+      cleanup();
     });
-
-    void ctx; // auth context available for future per-session tenant injection
   });
 
   // ── Legacy SSE message endpoint ───────────────────────────────────────────
@@ -522,23 +717,20 @@ export function createHttpTransport(): express.Router {
 
   router.post('/message', async (req: Request, res: Response) => {
     const sessionId = String(req.query['sessionId'] ?? '');
-    const transport = sseSessions.get(sessionId);
+    const session = sseSessions.get(sessionId);
 
-    if (!transport) {
-      res.status(404).json({
-        jsonrpc: '2.0',
-        error: { code: -32001, message: 'Session not found', data: { sessionId } },
-      });
+    if (!session || !isSessionOwner(session, sessionOwner(req))) {
+      sendSessionNotFound(
+        res,
+        (req.body as { id?: string | number | null } | undefined)?.id ?? null,
+      );
       return;
     }
 
     // Wire per-request tenant context from the authenticated actor so that
     // resource and tool handlers can enforce tenant-scoped signal delivery.
-    const sseAuthCtx = (req as Request & { authCtx?: { actorId: string } }).authCtx;
-    const sseActorId = sseAuthCtx?.actorId ?? 'anonymous';
-    await runWithRequestContext(
-      { actorId: sseActorId, tenantId: actorIdToTenantId(sseActorId) },
-      () => transport.handlePostMessage(req, res, req.body),
+    await runWithRequestContext(session, () =>
+      session.transport.handlePostMessage(req, res, req.body),
     );
   });
 
@@ -549,9 +741,8 @@ export function createHttpTransport(): express.Router {
 
   router.post('/', async (req: Request, res: Response) => {
     // Wire per-request tenant context from the authenticated actor identity.
-    const postAuthCtx = (req as Request & { authCtx?: { actorId: string } }).authCtx;
-    const postActorId = postAuthCtx?.actorId ?? 'anonymous';
-    const reqCtx = { actorId: postActorId, tenantId: actorIdToTenantId(postActorId) };
+    const postAuthCtx = (req as Request & { authCtx?: GatewayAuthContext }).authCtx;
+    const reqCtx = requestContextFromAuth(postAuthCtx);
 
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
 
@@ -562,10 +753,11 @@ export function createHttpTransport(): express.Router {
     const requestedMethod = mcpBody?.method;
     if (requestedMethod) {
       const authCtx = resolveAuthContext(req);
-      if (authCtx.enterprise) {
+      if (authCtx.enterprise || authCtx.oauth) {
         const scope = authCtx.enterpriseScope ?? '';
-        const hasRead = scope.includes('mcp:read') || scope.includes('mcp:admin');
-        if (!hasRead) {
+        const requirement = getEnterpriseAccessRequirement(requestedMethod, mcpBody?.params);
+        if (!enterpriseScopeAllows(scope, requirement)) {
+          const requiredScope = `mcp:${requirement}`;
           res.status(403).json({
             jsonrpc: '2.0',
             id: null,
@@ -573,65 +765,27 @@ export function createHttpTransport(): express.Router {
               code: -32000,
               message: 'FORBIDDEN',
               data: {
-                reason:
-                  'Enterprise token scope does not permit MCP access. Minimum scope required: mcp:read',
+                reason: `Enterprise token scope does not permit this MCP operation. Required scope: ${requiredScope}`,
               },
             },
           });
           return;
         }
-        // Write operations require mcp:write or mcp:admin
-        const isWriteMethod =
-          requestedMethod === 'tools/call' &&
-          typeof mcpBody?.params === 'object' &&
-          mcpBody.params !== null &&
-          typeof (mcpBody.params as Record<string, unknown>).name === 'string' &&
-          /^(alloy_|lyte_|alloy_launch|alloy_decision|alloy_approve|alloy_veto)/.test(
-            (mcpBody.params as Record<string, unknown>).name as string,
-          );
-        if (isWriteMethod) {
-          const hasWrite =
-            scope.includes('mcp:write') ||
-            scope.includes('mcp:approve') ||
-            scope.includes('mcp:admin');
-          if (!hasWrite) {
-            res.status(403).json({
-              jsonrpc: '2.0',
-              id: null,
-              error: {
-                code: -32000,
-                message: 'FORBIDDEN',
-                data: {
-                  reason:
-                    'Enterprise token scope does not permit write/mutate operations. Minimum scope required: mcp:write',
-                },
-              },
-            });
-            return;
-          }
-        }
       }
     }
 
-    if (sessionId && streamableSessions.has(sessionId)) {
-      const transport = streamableSessions.get(sessionId)!;
-      await runWithRequestContext(reqCtx, () => transport.handleRequest(req, res, req.body));
-      return;
-    }
-
-    // If a session id was supplied but it does not correspond to an active
-    // session, the session has been terminated or never existed. Per MCP
-    // Streamable HTTP spec, return 404 so clients can re-initialize.
-    if (sessionId && !streamableSessions.has(sessionId)) {
-      res.status(404).json({
-        jsonrpc: '2.0',
-        id: (req.body as { id?: string | number | null } | undefined)?.id ?? null,
-        error: {
-          code: -32001,
-          message: 'Session not found',
-          data: { sessionId, reason: 'Session terminated or never existed. Re-initialize to obtain a new session.' },
-        },
-      });
+    if (sessionId) {
+      const session = streamableSessions.get(sessionId);
+      if (!session || !isSessionOwner(session, reqCtx)) {
+        sendSessionNotFound(
+          res,
+          (req.body as { id?: string | number | null } | undefined)?.id ?? null,
+        );
+        return;
+      }
+      await runWithRequestContext(session, () =>
+        session.transport.handleRequest(req, res, req.body),
+      );
       return;
     }
 
@@ -643,7 +797,7 @@ export function createHttpTransport(): express.Router {
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       onsessioninitialized: (id: string) => {
-        streamableSessions.set(id, transport);
+        streamableSessions.set(id, { transport, eventStreams: new Set(), ...reqCtx });
       },
     });
 
@@ -674,13 +828,19 @@ export function createHttpTransport(): express.Router {
       // BOTH `params.extensions` (top-level, used by some clients) and the
       // canonical `params.capabilities.extensions`.
       const rawInit = req.body as
-        | { method?: string; params?: { extensions?: unknown; capabilities?: { extensions?: unknown } } }
+        | {
+            method?: string;
+            params?: { extensions?: unknown; capabilities?: { extensions?: unknown } };
+          }
         | undefined;
       const clientExtensions =
         rawInit?.params?.extensions ?? rawInit?.params?.capabilities?.extensions;
       const sdkServer = (sessionServer as unknown as { sdk: { server: unknown } }).sdk.server;
       const serverAny = sdkServer as unknown as {
-        setRequestHandler: (schema: typeof InitializeRequestSchema, handler: (request: unknown) => Promise<Record<string, unknown>>) => void;
+        setRequestHandler: (
+          schema: typeof InitializeRequestSchema,
+          handler: (request: unknown) => Promise<Record<string, unknown>>,
+        ) => void;
         _clientCapabilities?: unknown;
         _clientVersion?: unknown;
         _serverInfo: unknown;
@@ -721,12 +881,12 @@ export function createHttpTransport(): express.Router {
       res.status(400).json({ error: 'Mcp-Session-Id header required' });
       return;
     }
-    const transport = streamableSessions.get(sessionId);
-    if (!transport) {
-      res.status(404).json({ error: `Session '${sessionId}' not found` });
+    const session = streamableSessions.get(sessionId);
+    if (!session || !isSessionOwner(session, sessionOwner(req))) {
+      sendSessionNotFound(res);
       return;
     }
-    await transport.handleRequest(req, res);
+    await runWithRequestContext(session, () => session.transport.handleRequest(req, res));
   });
 
   // ── DELETE /mcp — Streamable session termination ──────────────────────────
@@ -739,15 +899,13 @@ export function createHttpTransport(): express.Router {
         .json({ error: 'INVALID_REQUEST', reason: 'MCP-Session-Id header required for DELETE' });
       return;
     }
-    const transport = streamableSessions.get(sessionId);
-    if (!transport) {
-      res
-        .status(404)
-        .json({ error: 'SESSION_NOT_FOUND', reason: `Session '${sessionId}' not found` });
+    const session = streamableSessions.get(sessionId);
+    if (!session || !isSessionOwner(session, sessionOwner(req))) {
+      sendSessionNotFound(res);
       return;
     }
     streamableSessions.delete(sessionId);
-    void transport.close();
+    void session.transport.close();
     res.status(200).json({ ok: true, sessionId, terminated: true });
   });
 
@@ -775,9 +933,46 @@ export function createHttpTransport(): express.Router {
       return;
     }
 
+    pruneExpiredOAuthClients();
     const client = oauthClients.get(String(client_id));
     if (!client) {
       res.status(400).json({ error: 'invalid_client', error_description: 'Unknown client_id' });
+      return;
+    }
+
+    if (code_challenge_method !== 'S256') {
+      res.status(400).json({
+        error: 'invalid_request',
+        error_description: 'code_challenge_method must be S256',
+      });
+      return;
+    }
+
+    const authorizingPrincipal = resolveAuthContext(req);
+    if (!authorizingPrincipal.authenticated || !authorizingPrincipal.tenantId) {
+      res.status(403).json({
+        error: 'access_denied',
+        error_description: 'An authenticated tenant principal is required',
+      });
+      return;
+    }
+
+    const requestedScope =
+      String(scope ?? 'mcp:read') === 'mcp' ? 'mcp:read' : String(scope ?? 'mcp:read');
+    const requestedGrants = requestedScope.split(/\s+/).filter(Boolean);
+    const supportedGrants = new Set(['mcp:read', 'mcp:write', 'mcp:approve', 'mcp:admin']);
+    if (
+      requestedGrants.length === 0 ||
+      requestedGrants.some((grant) => !supportedGrants.has(grant))
+    ) {
+      res.status(400).json({ error: 'invalid_scope' });
+      return;
+    }
+    if (
+      authorizingPrincipal.enterpriseScope !== undefined &&
+      !scopeContainsEveryGrant(authorizingPrincipal.enterpriseScope, requestedGrants)
+    ) {
+      res.status(400).json({ error: 'invalid_scope' });
       return;
     }
 
@@ -794,11 +989,13 @@ export function createHttpTransport(): express.Router {
       code,
       clientId: String(client_id),
       redirectUri: redirectUriStr,
-      scope: String(scope ?? 'mcp'),
+      scope: requestedScope,
       codeChallenge: String(code_challenge),
-      codeChallengeMethod: String(code_challenge_method ?? 'S256'),
+      codeChallengeMethod: 'S256',
       expiresAt: Date.now() + 5 * 60 * 1000,
       used: false,
+      actorId: authorizingPrincipal.actorId,
+      tenantId: authorizingPrincipal.tenantId,
     };
     authCodes.set(code, authCode);
 
@@ -884,6 +1081,13 @@ export function createHttpTransport(): express.Router {
       return;
     }
 
+    pruneExpiredOAuthClients();
+    const client = oauthClients.get(String(client_id ?? ''));
+    if (!client) {
+      res.status(400).json({ error: 'invalid_client' });
+      return;
+    }
+
     const authCode = authCodes.get(String(code ?? ''));
     if (!authCode || authCode.used || Date.now() > authCode.expiresAt) {
       res.status(400).json({
@@ -903,27 +1107,25 @@ export function createHttpTransport(): express.Router {
       return;
     }
 
-    if (authCode.codeChallengeMethod === 'S256') {
-      const computed = sha256Base64Url(String(code_verifier ?? ''));
-      if (computed !== authCode.codeChallenge) {
-        res
-          .status(400)
-          .json({ error: 'invalid_grant', error_description: 'code_verifier mismatch' });
-        return;
-      }
+    if (authCode.codeChallengeMethod !== 'S256') {
+      res
+        .status(400)
+        .json({ error: 'invalid_grant', error_description: 'Unsupported PKCE method' });
+      return;
+    }
+    const computed = sha256Base64Url(String(code_verifier ?? ''));
+    if (computed !== authCode.codeChallenge) {
+      res.status(400).json({ error: 'invalid_grant', error_description: 'code_verifier mismatch' });
+      return;
     }
 
     authCode.used = true;
 
-    const accessToken = randomBytes(32).toString('base64url');
-    const token: OAuthToken = {
-      accessToken,
-      tokenType: 'Bearer',
-      expiresIn: 3600,
+    const token = issueLocalOAuthToken({
+      actorId: authCode.actorId,
+      tenantId: authCode.tenantId,
       scope: authCode.scope,
-      issuedAt: Date.now(),
-    };
-    issuedTokens.set(accessToken, token);
+    });
 
     res.json({
       access_token: token.accessToken,
@@ -973,15 +1175,31 @@ export function createHttpTransport(): express.Router {
       return;
     }
 
-    const result = await handleRevocationWebhook(
-      {
-        issuer: body.issuer,
-        subject: body.subject,
-        reason: body.reason,
-        revokedBy: body.revokedBy,
-      },
-      req.ip ?? undefined,
-    );
+    let result: { revoked: number };
+    try {
+      result = await handleRevocationWebhook(
+        {
+          issuer: body.issuer,
+          subject: body.subject,
+          reason: body.reason,
+          revokedBy: body.revokedBy,
+        },
+        req.ip ?? undefined,
+      );
+    } catch {
+      res.status(503).json({
+        error: 'revocation_persistence_unavailable',
+        error_description:
+          'Revocation was applied locally but could not be durably synchronized. Retry the request.',
+      });
+      return;
+    } finally {
+      const revokedActor = `enterprise:${body.issuer}:${body.subject}`;
+      revokeAuthorizationCodesForActor(revokedActor);
+      revokeLocalOAuthTokensForActor(revokedActor);
+      closeSessionsForActor(revokedActor);
+      closeSessionsForActor(`oauth:${revokedActor}`);
+    }
 
     res.json({
       ok: true,
@@ -996,7 +1214,7 @@ export function createHttpTransport(): express.Router {
   // to prevent privilege escalation (regular enterprise users must not access IdP config).
   router.get('/enterprise/idps', (req: Request, res: Response) => {
     const ctx = resolveAuthContext(req);
-    if (!ctx.authenticated || ctx.enterprise) {
+    if (!ctx.authenticated || ctx.enterprise || ctx.oauth) {
       res.status(401).json({
         error: 'unauthorized',
         error_description: 'Gateway API key required for admin IdP management',
@@ -1025,7 +1243,7 @@ export function createHttpTransport(): express.Router {
   // Admin endpoint — requires a gateway API key. Enterprise bearer tokens are rejected.
   router.post('/enterprise/idps', (req: Request, res: Response) => {
     const ctx = resolveAuthContext(req);
-    if (!ctx.authenticated || ctx.enterprise) {
+    if (!ctx.authenticated || ctx.enterprise || ctx.oauth) {
       res.status(401).json({
         error: 'unauthorized',
         error_description: 'Gateway API key required for admin IdP management',
@@ -1072,7 +1290,7 @@ export function createHttpTransport(): express.Router {
   // Admin endpoint — requires gateway API key.
   router.delete('/enterprise/idps', (req: Request, res: Response) => {
     const ctx = resolveAuthContext(req);
-    if (!ctx.authenticated || ctx.enterprise) {
+    if (!ctx.authenticated || ctx.enterprise || ctx.oauth) {
       res
         .status(401)
         .json({ error: 'unauthorized', error_description: 'Gateway API key required' });
@@ -1092,24 +1310,111 @@ export function createHttpTransport(): express.Router {
 
   // POST /mcp/register — RFC 7591 dynamic client registration
   router.post('/register', (req: Request, res: Response) => {
-    const body = req.body as Record<string, unknown>;
-    const { client_name, redirect_uris, grant_types, response_types, scope } = body;
+    const registrationPrincipal = (req as Request & { authCtx?: GatewayAuthContext }).authCtx;
+    if (!registrationPrincipal?.authenticated) {
+      res.status(401).json({ error: 'unauthorized' });
+      return;
+    }
 
-    if (!Array.isArray(redirect_uris) || redirect_uris.length === 0) {
+    const body = req.body as Record<string, unknown>;
+    const {
+      client_name,
+      redirect_uris,
+      grant_types,
+      response_types,
+      scope,
+      token_endpoint_auth_method,
+    } = body;
+
+    if (
+      !Array.isArray(redirect_uris) ||
+      redirect_uris.length === 0 ||
+      redirect_uris.length > MAX_OAUTH_REDIRECT_URIS ||
+      !redirect_uris.every(isValidOAuthRedirectUri)
+    ) {
       res.status(400).json({
         error: 'invalid_client_metadata',
-        error_description: 'redirect_uris is required and must be a non-empty array',
+        error_description: `redirect_uris must contain 1-${MAX_OAUTH_REDIRECT_URIS} valid, fragment-free URIs no longer than ${MAX_OAUTH_REDIRECT_URI_LENGTH} characters`,
+      });
+      return;
+    }
+
+    if (
+      grant_types !== undefined &&
+      (!Array.isArray(grant_types) ||
+        grant_types.length !== 1 ||
+        grant_types[0] !== 'authorization_code')
+    ) {
+      res.status(400).json({
+        error: 'invalid_client_metadata',
+        error_description: 'Only grant_types=["authorization_code"] is supported',
+      });
+      return;
+    }
+    if (
+      response_types !== undefined &&
+      (!Array.isArray(response_types) ||
+        response_types.length !== 1 ||
+        response_types[0] !== 'code')
+    ) {
+      res.status(400).json({
+        error: 'invalid_client_metadata',
+        error_description: 'Only response_types=["code"] is supported',
+      });
+      return;
+    }
+    if (
+      client_name !== undefined &&
+      (typeof client_name !== 'string' || client_name.length > MAX_OAUTH_CLIENT_NAME_LENGTH)
+    ) {
+      res.status(400).json({
+        error: 'invalid_client_metadata',
+        error_description: `client_name must be at most ${MAX_OAUTH_CLIENT_NAME_LENGTH} characters`,
+      });
+      return;
+    }
+    if (
+      scope !== undefined &&
+      (typeof scope !== 'string' || scope.length > MAX_OAUTH_SCOPE_LENGTH)
+    ) {
+      res.status(400).json({
+        error: 'invalid_client_metadata',
+        error_description: `scope must be at most ${MAX_OAUTH_SCOPE_LENGTH} characters`,
+      });
+      return;
+    }
+
+    // This endpoint registers OAuth 2.1 public clients protected by S256 PKCE.
+    // Confidential-client authentication is not implemented, so reject rather
+    // than issue inert secrets or advertise unsupported authentication methods.
+    if (token_endpoint_auth_method !== undefined && token_endpoint_auth_method !== 'none') {
+      res.status(400).json({
+        error: 'invalid_client_metadata',
+        error_description: 'Only token_endpoint_auth_method=none is supported',
+      });
+      return;
+    }
+
+    pruneExpiredOAuthClients();
+    const ownerKey = oauthClientOwnerKey(registrationPrincipal);
+    if (
+      oauthClients.size >= MAX_OAUTH_CLIENTS ||
+      countOAuthClientsForOwner(ownerKey) >= MAX_OAUTH_CLIENTS_PER_PRINCIPAL
+    ) {
+      res.status(429).json({
+        error: 'registration_limit_exceeded',
+        error_description: 'Active OAuth client registration limit reached',
       });
       return;
     }
 
     const clientId = randomUUID();
-    const clientSecret = randomBytes(32).toString('base64url');
+    const registeredAt = Date.now();
 
     const client: OAuthClient = {
       clientId,
-      clientSecret,
-      redirectUris: (redirect_uris as string[]).map(String),
+      ownerKey,
+      redirectUris: [...new Set(redirect_uris)],
       grantTypes: Array.isArray(grant_types)
         ? (grant_types as string[]).map(String)
         : ['authorization_code'],
@@ -1118,53 +1423,68 @@ export function createHttpTransport(): express.Router {
         : ['code'],
       clientName: client_name ? String(client_name) : undefined,
       scope: scope ? String(scope) : 'mcp',
-      registeredAt: Date.now(),
+      registeredAt,
+      expiresAt: registeredAt + OAUTH_CLIENT_TTL_MS,
     };
 
     oauthClients.set(clientId, client);
 
     res.status(201).json({
       client_id: client.clientId,
-      client_secret: client.clientSecret,
+      token_endpoint_auth_method: 'none',
       client_name: client.clientName,
       redirect_uris: client.redirectUris,
       grant_types: client.grantTypes,
       response_types: client.responseTypes,
       scope: client.scope,
       client_id_issued_at: Math.floor(client.registeredAt / 1000),
-      client_secret_expires_at: 0,
+      client_id_expires_at: Math.floor(client.expiresAt / 1000),
     });
   });
 
-  // ── PRAXIS Proof Verification Endpoints ────────────────────────────────────────
+  // ── PRAXIS Governance Receipt Endpoints ────────────────────────────────────────
 
-  // GET /mcp/nexus/verify/:hash — verify a PRAXIS proof by its SHA-256 hash
+  // GET /mcp/nexus/verify/:hash — tenant-scoped lookup of an unverified receipt.
   router.get('/nexus/verify/:hash', (req: Request, res: Response) => {
     const hash = String(req.params['hash'] ?? '');
     if (!/^[0-9a-f]{64}$/i.test(hash)) {
       res.status(400).json({
         verified: false,
         error: 'INVALID_HASH_FORMAT',
-        message: 'Proof hash must be a 64-character SHA-256 hex string.',
-        hint: 'Retrieve the proof hash from the x-nexus-proof envelope on any tool response.',
+        message: 'Receipt hash must be a 64-character SHA-256 hex string.',
       });
       return;
     }
 
-    const record = lookupProof(hash);
+    if (isProd()) {
+      res.status(503).json({
+        verified: false,
+        evidenceState: 'UNAVAILABLE',
+        error: 'PROOF_VERIFICATION_UNAVAILABLE',
+        capability: getProofCapabilityStatus(),
+      });
+      return;
+    }
+
+    const authCtx = (req as Request & { authCtx?: GatewayAuthContext }).authCtx;
+    const record = lookupProof(hash, authCtx?.tenantId);
     if (!record) {
       res.status(404).json({
         verified: false,
-        error: 'PROOF_NOT_FOUND',
-        message: `No proof record found for hash '${hash}'.`,
-        hint: 'Proofs are retained for the most recent 2,000 tool calls. Older proofs are evicted from the in-process store.',
+        recorded: false,
+        evidenceState: 'UNAVAILABLE',
+        error: 'RECEIPT_NOT_FOUND',
+        message: 'Governance receipt not found.',
         lookupAttemptedAt: new Date().toISOString(),
       });
       return;
     }
 
     res.json({
-      verified: true,
+      verified: false,
+      recorded: true,
+      evidenceState: 'UNAVAILABLE',
+      capability: getProofCapabilityStatus(),
       proofHash: record.proofHash,
       toolName: record.toolName,
       actor: record.actor,
@@ -1173,21 +1493,23 @@ export function createHttpTransport(): express.Router {
       covenantAllowed: record.covenantAllowed,
       covenantReason: record.covenantReason,
       responseDigest: record.responseDigest,
-      verifiedAt: new Date().toISOString(),
+      lookedUpAt: new Date().toISOString(),
       _nexusNote:
-        'This proof was generated by the PRAXIS Intelligence Fabric and is cryptographically bound to the tool response content. The responseDigest is the SHA-256 hex (first 16 chars) of the full response payload.',
+        'This is tenant-scoped correlation metadata, not a cryptographic verification. The responseDigest is an unkeyed SHA-256 digest of the response payload.',
     });
   });
 
-  // GET /mcp/nexus/proofs — list recent proofs (audit surface for external auditors)
+  // GET /mcp/nexus/proofs — list recent receipts for the authenticated tenant.
   router.get('/nexus/proofs', authMiddleware, (req: Request, res: Response) => {
     const limit = Math.min(100, parseInt(String(req.query['limit'] ?? '20'), 10));
-    const proofs = getRecentProofs(limit);
+    const authCtx = (req as Request & { authCtx?: GatewayAuthContext }).authCtx;
+    const proofs = getRecentProofs(limit, authCtx?.tenantId);
     res.json({
       count: proofs.length,
       limit,
       generatedAt: new Date().toISOString(),
       proofs,
+      capability: getProofCapabilityStatus(),
     });
   });
 
@@ -1223,18 +1545,17 @@ export function createDiscoveryHandler(): express.RequestHandler {
       nexus: {
         version: '1.0',
         discovery: 'enabled',
-        consciousness: 'active',
+        consciousness: 'unavailable',
         description:
-          'PRAXIS Intelligence Fabric — every tool response includes x-nexus-consciousness and x-nexus-proof envelopes',
+          'PRAXIS governance metadata — calibrated response assessment and cryptographic verification are unavailable',
         features: [
-          'consciousness_envelope',
-          'proof_chain',
-          'convergence_intelligence',
-          'prism_bus_bridge',
-          'nuromesh_federation',
-          'evidence_graph',
+          'heuristic_assessment_unvalidated',
+          'governance_receipt_unverified',
+          'convergence_fixtures',
+          'evidence_graph_fixtures',
           'id_jag_enterprise_auth',
         ],
+        optionalCapabilities: getNexusRuntimeCapabilities(),
         resourcePrefixes: [
           'nexus://convergence/',
           'nexus://signals/',
@@ -1243,6 +1564,7 @@ export function createDiscoveryHandler(): express.RequestHandler {
           'nexus://proof/',
         ],
       },
+      execution: getExecutionCapabilityStatus(),
       authMethods: ['bearer_token', 'oauth2_pkce', 'enterprise_idjag'],
       extensions: SERVER_EXTENSIONS,
     });
@@ -1266,7 +1588,7 @@ export function createAuthorizationServerMetadata(): express.RequestHandler {
       token_endpoint: `${issuer}/mcp/token`,
       registration_endpoint: `${issuer}/mcp/register`,
       revocation_endpoint: `${issuer}/mcp/revoke`,
-      token_endpoint_auth_methods_supported: ['none', 'client_secret_basic', 'private_key_jwt'],
+      token_endpoint_auth_methods_supported: ['none'],
       grant_types_supported: ['authorization_code', 'urn:ietf:params:oauth:grant-type:jwt-bearer'],
       response_types_supported: ['code'],
       code_challenge_methods_supported: ['S256'],

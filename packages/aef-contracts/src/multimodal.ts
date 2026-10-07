@@ -1,12 +1,14 @@
 import { z } from 'zod';
-import { TenantIdSchema } from './tenant.js';
 import {
   EmbeddingExecutionReceiptSchema,
   EmbeddingModalitySchema,
   Sha256Schema,
 } from './model-identity.js';
+import { TenantIdSchema } from './tenant.js';
 
-const CasUriSchema = z.string().regex(/^cas:\/\/sha256\/[a-f0-9]{64}$/i, 'expected cas://sha256/<digest>');
+const CasUriSchema = z
+  .string()
+  .regex(/^cas:\/\/sha256\/[a-f0-9]{64}$/i, 'expected cas://sha256/<digest>');
 
 /**
  * External media is admitted by immutable content address only. HTTP(S), file,
