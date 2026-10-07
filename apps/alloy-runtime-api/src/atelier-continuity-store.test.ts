@@ -278,6 +278,52 @@ describe('EncryptedLocalAtelierStateStore', () => {
     expect(retired).toBe(true);
   });
 
+  it('rejects same-inode tampering hidden by restored mtime and hard-link retirement', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const first = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await first.ready();
+
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const original = await readFile(markerPath, 'utf8');
+    const marker = JSON.parse(original) as { verifier: string };
+    const tampered = `${JSON.stringify({
+      ...marker,
+      verifier: `${marker.verifier[0] === '0' ? '1' : '0'}${marker.verifier.slice(1)}`,
+    })}\n`;
+    expect(Buffer.byteLength(tampered)).toBe(Buffer.byteLength(original));
+    const temporaryPath = `${markerPath}.unrelated.tmp`;
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    const fixedTime = new Date('2020-01-01T00:00:00.000Z');
+    await actual.utimes(markerPath, fixedTime, fixedTime);
+    await actual.link(markerPath, temporaryPath);
+    const originalTimes = await actual.stat(markerPath);
+    let changed = false;
+    vi.mocked(open).mockImplementation(async (path, flags, mode) => {
+      const handle = await actual.open(path, flags, mode);
+      if (path === markerPath) {
+        const read = handle.read.bind(handle);
+        vi.spyOn(handle, 'read').mockImplementation(async (...args) => {
+          const result = await read(...args);
+          if (!changed) {
+            changed = true;
+            await new Promise((resolve) => setTimeout(resolve, 20));
+            await actual.writeFile(markerPath, tampered);
+            await actual.utimes(markerPath, originalTimes.atime, originalTimes.mtime);
+            await actual.unlink(temporaryPath);
+          }
+          return result;
+        });
+      }
+      return handle;
+    });
+
+    const second = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await expect(second.ready()).rejects.toThrow('Continuity index authentication failed.');
+    expect(changed).toBe(true);
+    expect(await readFile(markerPath, 'utf8')).toBe(tampered);
+  });
+
   it('persists encrypted full replay state and reopens a verifiable session', async () => {
     const rootDirectory = await tempRoot();
     const masterKey = randomBytes(32);
@@ -603,6 +649,12 @@ describe('EncryptedLocalAtelierStateStore', () => {
     let right!: EncryptedLocalAtelierStateStore;
     try {
       await temporaryOpen;
+      const unpublishedObject = (await filesBelow(join(rootDirectory, 'capsules', 'objects'))).find(
+        (path) => path.endsWith('.json'),
+      );
+      if (!unpublishedObject) throw new Error('expected unpublished encrypted capsule');
+      const staleTime = new Date(Date.now() - 2 * 60 * 60 * 1000);
+      await utimes(unpublishedObject, staleTime, staleTime);
       right = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
       await right.ready();
       expect(
@@ -761,7 +813,7 @@ describe('EncryptedLocalAtelierStateStore', () => {
     ).toMatchObject({ status: 'reserved' });
   });
 
-  it('deletes an authenticated payload orphaned before index publication', async () => {
+  it('retains an orphaned encrypted payload during ordinary startup reconciliation', async () => {
     const rootDirectory = await tempRoot();
     const masterKey = randomBytes(32);
     const store = new EncryptedLocalAtelierStateStore({
@@ -802,12 +854,12 @@ describe('EncryptedLocalAtelierStateStore', () => {
       (await filesBelow(join(rootDirectory, 'capsules', 'objects'))).some((candidate) =>
         candidate.endsWith(`${record.stateCapsuleId}.json`),
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       (await filesBelow(join(rootDirectory, 'capsules', 'tombstones'))).some((candidate) =>
         candidate.endsWith(`${record.stateCapsuleId}.json`),
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(await reopened.getSession('tenant-orphan', 'session-orphan')).toBeNull();
   });
 
