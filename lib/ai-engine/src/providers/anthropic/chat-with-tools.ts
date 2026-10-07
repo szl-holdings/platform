@@ -1,5 +1,6 @@
 import type Anthropic from '@anthropic-ai/sdk';
 import type { ChatInterface, StructuredCompletionResult } from '../../domain-agent-runner.js';
+import { groupToolMessageHistory } from '../../tool-message-history.js';
 
 type AnthropicClient = Pick<Anthropic, 'messages'>;
 
@@ -36,7 +37,7 @@ type ChatMsg = {
 
 function toAnthropicMessages(messages: ChatMsg[]): Anthropic.MessageParam[] {
   const result: Anthropic.MessageParam[] = [];
-  const nonSystem = messages.filter((m) => m.role !== 'system');
+  const nonSystem = groupToolMessageHistory(messages).flat();
   let i = 0;
 
   while (i < nonSystem.length) {
@@ -76,7 +77,7 @@ function toAnthropicMessages(messages: ChatMsg[]): Anthropic.MessageParam[] {
         const tm = nonSystem[j]!;
         toolResultBlocks.push({
           type: 'tool_result',
-          tool_use_id: tm.toolCallId ?? '',
+          tool_use_id: tm.toolCallId!,
           content: tm.content,
         });
         j++;
