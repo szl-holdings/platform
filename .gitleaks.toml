@@ -35,7 +35,8 @@ useDefault = true
     condition = "AND"
     regexTarget = "line"
     paths = ['''^workers/alloy-vector-worker/src/tokenizer\.ts$''']
-    regexes = ['''^const DEFAULT_TOKENIZER_REVISION = '751bff37182d3f1213fa05d7196b954e230abad9';$''']
+    # Gitleaks 8.21.2 includes the preceding newline in finding.Line.
+    regexes = ['''^(?:\r?\n)?const DEFAULT_TOKENIZER_REVISION = '751bff37182d3f1213fa05d7196b954e230abad9';$''']
 
 # ── Global allowlist ──────────────────────────────────────────────────────────
 # Entries here suppress matches across ALL rules.
