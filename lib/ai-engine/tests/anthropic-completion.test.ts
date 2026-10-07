@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   AnthropicChatInterface,
   AnthropicCompletionResponseError,
-} from '../../lib/ai-engine/src/providers/anthropic/chat-with-tools.js';
+} from '../src/providers/anthropic/chat-with-tools.js';
 
 // An injected client must never initialize the configured credential singleton.
-vi.mock('../../lib/ai-engine/src/providers/anthropic/client.js', () => {
+vi.mock('../src/providers/anthropic/client.js', () => {
   throw new Error('Offline tests must not initialize the default provider client.');
 });
 

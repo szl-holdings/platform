@@ -159,9 +159,11 @@ became unavailable; the final read-only connector source readback and Git-blob/A
 binding succeeded instead. No credential-cache transplant or alternate write
 authority was attempted.
 
-Full workspace typecheck and full Anthropic SDK typecheck: UNAVAILABLE, NOT
-QUALIFIED. The shared runtime has no Anthropic SDK installation. Native Node
-type transformation and Vitest execution do not establish SDK type compatibility.
+During the initial local qualification, full workspace typecheck and full
+Anthropic SDK typecheck were UNAVAILABLE, NOT QUALIFIED. The reused local runtime
+has no Anthropic SDK installation. Native Node type transformation and Vitest
+execution do not establish SDK type compatibility. The later hosted compiler
+result below supersedes that local limitation only for its exact published head.
 The source reference and test runtime reused here are bounded local checks, not
 an assertion of current remote-main parity or an external independent witness.
 
@@ -172,8 +174,57 @@ screenshots are N/A. The `.local-*` harness configuration and full-source readba
 are retained local qualification inputs, not release source. Root owns the final
 independent review, current-main/overlap refresh and release authority.
 
-Remote commit/push/PR/merge/deploy/publication by this agent: NOT RUN. Native
-GitHub write authority is currently BLOCKED according to the root release check.
-Artifact status remains Partial. Live provider completion, durable evidence,
-identity binding, exact-head hosted CI and independent runtime witness remain
-unestablished; no earlier provider/capacity gaps are relabeled as closed.
+Remote merge/deploy/provider publication by this repair lane: NOT RUN. The initial
+GitHub authentication blocker was historical; normal intended-account authority
+later recovered and root published the reviewed signed candidate in platform
+PR #903. Artifact status remains Partial. Live provider completion, durable
+evidence, independently pinned signer identity and independent runtime witness
+remain unestablished; no provider/capacity gap is relabeled as closed.
+
+### Hosted compiler readback and package-local contract discovery
+
+MEASURED at exact published head
+`ab7611c4f2f998359317776557acdcd8d13c8ba7`, on base
+`f2f8df6f89056e9104587674ccec0855dd5b177a`:
+
+- Tests run `37646589363` succeeded, including the Atelier provider and API-route
+  suites. Its package-recursive log did not establish direct execution of the
+  root Anthropic contract fixture.
+- Truth-drift run `37646589451` succeeded with the unchanged scanner, metric and
+  allowlist after a minimal harness-count wording correction.
+- CI run `37646589531` succeeded. Actual Typecheck job `112881026177` executed
+  ai-engine `tsc -b tsconfig.json` on cache miss at 15:59:12 UTC. The final workspace
+  task result was 185 successful out of 185. This establishes SDK compile
+  compatibility for that head, not live provider compatibility or release.
+
+The approved coverage follow-up moves the identical Anthropic fixture into
+`lib/ai-engine/tests/anthropic-completion.test.ts`. Root's exact prior-blob
+comparison found only its two relative import paths changed, with every case
+and the default-client initialization trap preserved. The owning package adds
+ordinary Node Vitest discovery and a `test` script. Existing Turbo inputs already
+include `tests/**` and `vitest.config.*`, so fixture/config changes bind the
+package test cache. No dependency, lockfile, Turbo or workflow gate was changed.
+The production provider and Anthropic byte hashes above remain unchanged.
+
+Actual root coverage replay commands:
+
+```powershell
+# From lib/ai-engine; only local worker concurrency is bounded.
+node ..\..\node_modules\vitest\vitest.mjs run --config vitest.config.ts --maxWorkers 1
+# From repository root; aliases still resolve only this checkout's source.
+node node_modules/vitest/vitest.mjs run --config .local-provider-vitest.config.mts --maxWorkers 1
+```
+
+MEASURED local package-discovery result: 10/10 focused cases in one fixture.
+MEASURED local provider-workcell result: 115/115 focused cases in five fixtures.
+These are local harness counts, not the estate-wide `platform_tests` metric,
+which remains UNAVAILABLE. Local tool version was Vitest 4.1.11. Historical
+commands above refer to the fixture's prior root path; the local-only include was
+updated to its new owning-package path for this replay.
+
+This follow-up requires its own signed head and actual exact-head hosted checks.
+The prior head's green results are not new-head admission. PR #903 remains on
+release HOLD: all effective security, severity, runtime-audit, E2E and lockfile
+checks must pass, and PR #887 overlap must be reconciled. Real HIGH/CRITICAL
+dependency findings are not waived by unchanged dependencies or source-local
+success. No merge, paid provider request or live runtime qualification occurred.

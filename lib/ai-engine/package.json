@@ -75,6 +75,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
+    "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc -b tsconfig.json"
   }
 }
