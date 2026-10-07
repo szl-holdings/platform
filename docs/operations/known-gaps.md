@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-03 (rev 31 — promoted public routes and separate runtime boundaries)
+**Last updated:** 2026-10-07 (rev 33 — protected owner deployment and declared evidence boundaries)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -10,27 +10,49 @@ This document is the canonical reference for known security, quality, and compli
 
 ## Current Public Surface Truth
 
-The generated public-surface manifest now distinguishes source-tree product inventory from public
-route evidence. Customer-facing web route records are measured as `REACHABLE` or `REDIRECTED` and
-bound to a named runtime repository and path. Public quantitative claims remain governed by the
-canonical metrics registry and generated [`docs/platform-facts.md`](../platform-facts.md), not by
-historical app directories or marketing copy.
+The generated public-surface manifest distinguishes source-tree product inventory from public
+route evidence. MEASURED: protected A11oy main
+`78d08ceb891e476a0a89d3f687add8c0c96060f5` is GitHub-verified. Its automatic publisher run
+`37655406967` admitted exact main but kept the deployment window closed, so every provider
+publication and post-deploy proof job was skipped. The live build-info endpoint still reports the
+earlier governed deployment `b64f14462413b7f80e00947fe1864122344aae5c` with
+`receipt_minted: false`. Run `37653882494` deployed that exact revision, but its terminal
+readiness-verdict job failed because the immutable probe observed one stale readiness snapshot.
+The live readiness endpoint and shared product origin return HTTP 200; neither response closes that
+recorded verdict failure.
+The Killinchu page exposes exactly one explicit-head declaration marking its effectors `SIMULATED`
+and authorization `UNAVAILABLE`; the command page exposes exactly one declaration marking its
+origin `MODELED` and energy and signer `UNAVAILABLE`. Those declarations, route reachability, and
+source binding do not establish feature completeness, authorization, durable storage, or aggregate
+runtime health. Historical A11oy routes that return HTTP 404 remain explicitly `UNAVAILABLE`.
 
-This closes the zero-manifest tooling gap, not every web gap. The historical `/lyte`, `/aegis`,
-`/vessels`, `/terra`, `/counsel`, `/carlota-jo`, and `/pulse` preview paths currently return HTTP
-404 and remain explicit `UNAVAILABLE` records. The current registry records `/command/` as a
-MEASURED HTTP 200 `REACHABLE` route in `MIXED` mode, bound to A11oy source
-`c215cad6f91d8a6fa547034c5e8b40cfeb9dea20`; its modeled local behavior and blocked authority do
-not establish runtime authorization. `a11oy.net/chat` and `a11oy.net/code` now canonicalize to
-their trailing-slash pages with MEASURED HTTP 200 observations and remain `REDIRECTED`
-`DOCUMENTATION` records bound to A11oy.net source
-`26266110d7006baf7918d7cfbdd81a266c4e6d9f`. They are static proof-registry handoffs, not evidence
-that the separate interactive console or governed run-loop is ready. The independently measured
-`manifest.webmanifest`, `robots.txt`, and `sitemap.xml` files return their expected
-machine-readable content and are recorded as `REACHABLE` metadata; they are not customer-facing
-product surfaces and do not change the routed-product count. A routed page is not an uptime,
-customer, feature-completeness, correctness, deployment-authorization, or production-readiness
-claim; `LIVE`, `MIXED`, and `DOCUMENTATION` modes retain that boundary.
+MEASURED: A11oy.net protected main and its live static source witness report revision
+`f659e9a827df1dcb938eb08f0ca1c667b46cb0b3`. The thesis and metadata are reachable, and the chat
+and code gateways canonicalize to their trailing-slash pages with one exact declaration marking
+execution `UNAVAILABLE`. Cloudflare injects edge content into the served HTML, so the source witness
+is an exact revision binding, not a byte-identity claim. The static witness also labels product
+runtime readiness, uptime, and live DSSE `UNAVAILABLE`; none of these records establishes the
+separate interactive console or governed run-loop.
+
+BLOCKED: the A11oy.net edge-security readback still reports GitHub Pages HTTPS enforcement disabled,
+an origin-certificate `bad_authz` state, no parent DS record for DNSSEC, and missing CSP, COOP, CORP,
+Permissions-Policy, Referrer-Policy, and X-Frame-Options headers. Public Cloudflare TLS answered
+with TLS 1.3 and the route remained reachable, but the provider and registrar settings require
+external authority that was unavailable to this refresh. An HTTP 200 does not close those gaps.
+
+MEASURED: the separate Killinchu Hugging Face runtime returned an exact build-info body for source
+`13477c429f5742cdc718a6294a80d00c7e8dc634` plus deployment-release reference attestation
+`53547813` for manifest SHA-256
+`915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c`. Its readiness body labels
+the canonical receipt ledger `EPHEMERAL`, process-memory scoped, and explicitly not
+production-ready; backend provider persistence remains `UNKNOWN`. These scoped endpoint witnesses
+do not establish durable storage, aggregate health, or authorization.
+
+Public quantitative claims remain governed by the canonical metrics registry and generated
+[`docs/platform-facts.md`](../platform-facts.md), not by historical app directories or marketing
+copy. A routed page is not an uptime, customer, feature-completeness, correctness,
+deployment-authorization, or production-readiness claim; `LIVE`, `MIXED`, `DOCUMENTATION`, and
+`UNAVAILABLE` modes retain that boundary.
 
 The existing `truth-drift` job validates schema, deterministic generated bytes, source ownership,
 expected status and redirect behavior, bounded `robots.txt` and sitemap content, and current live
@@ -41,6 +63,13 @@ gate adds the deliberate seven-day age audit to the same live checks without wea
 the protected PR/main check. An expired observation is remediated by re-observing every approved
 target, updating the registry evidence, regenerating the deterministic artifacts, reviewing the
 diff, and rerunning the freshness gate.
+
+Owner-backed HTML evidence checks parse the structural document and require exactly one
+surface-specific `szl-evidence-boundary` metadata declaration inside the explicit document head,
+alongside the exact title and canonical URL. Missing, duplicate, commented, misplaced, or changed
+declarations fail closed. This establishes only static declaration presence. It does not establish
+rendered visibility, browser layout, screenshot quality, externally loaded CSS behavior, runtime
+readiness, or authorization.
 
 The generated `artifacts/SOURCE_OF_TRUTH.json` timestamp follows the same
 honest-snapshot rule. Pull requests and protected-main pushes still validate

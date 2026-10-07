@@ -77,10 +77,10 @@ const MAX_OBSERVATION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
 const MAX_METADATA_BODY_BYTES = 128 * 1024;
 const JSON_WHITESPACE = new Set([' ', '\t', '\n', '\r']);
-const KILLINCHU_SOURCE_REVISION = 'dee16139923017abd8277a9bd8c143f8d7869630';
+const KILLINCHU_SOURCE_REVISION = '13477c429f5742cdc718a6294a80d00c7e8dc634';
 const KILLINCHU_MANIFEST_SHA256 =
-  '050a62e33e51c297a72e64824e7f719843bf21285277008c730e1adf451c6ebe';
-const KILLINCHU_ATTESTATION_ID = '52400480';
+  '915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c';
+const KILLINCHU_ATTESTATION_ID = '53547813';
 const LIVE_SURFACE_PROBE_CONCURRENCY = 4;
 const LIVE_SURFACE_RETRY_DELAYS_MS = [750, 1_500] as const;
 const TRANSIENT_TRANSPORT_CODES = new Set([
@@ -91,19 +91,6 @@ const TRANSIENT_TRANSPORT_CODES = new Set([
   'UND_ERR_SOCKET',
 ]);
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
-const NON_EVIDENCE_BODY_ELEMENTS = new Set([
-  'iframe',
-  'noembed',
-  'noframes',
-  'noscript',
-  'plaintext',
-  'script',
-  'style',
-  'template',
-  'textarea',
-  'title',
-  'xmp',
-]);
 // A worker owns the whole surface transaction. The approved two-hop redirect path is therefore
 // bounded to 2 * (3 * 15 seconds + 750 ms + 1,500 ms) = 94.5 seconds of slot occupancy.
 
@@ -241,36 +228,31 @@ function approvedTargetFor(surfaceId: string): ApprovedSurfaceTarget | null {
 type PublicWebContract = Readonly<{
   title: string;
   canonicalUrl: string;
-  requiredText: readonly string[];
+  evidenceBoundary: string;
 }>;
 
 const PUBLIC_WEB_CONTRACTS = {
   'a11oy-net-chat-gap': {
     title: 'A11oy Chat Gateway | Governed Product Console',
     canonicalUrl: 'https://a11oy.net/chat/',
-    requiredText: ['This gateway does not execute a prompt.'],
+    evidenceBoundary: 'szl.public-surface-boundary/v1;surface=a11oy-net-chat;execution=UNAVAILABLE',
   },
   'a11oy-net-code-gap': {
     title: 'A11oy Code Gateway | Governed Run-Loop',
     canonicalUrl: 'https://a11oy.net/code/',
-    requiredText: ['this page does not execute code'],
+    evidenceBoundary: 'szl.public-surface-boundary/v1;surface=a11oy-net-code;execution=UNAVAILABLE',
   },
   'killinchu-public-console': {
     title: 'a11oy · Killinchu',
     canonicalUrl: 'https://a-11-oy.com/killinchu',
-    requiredText: ['Effectors stay SIMULATED.', 'no runtime claim made.'],
+    evidenceBoundary:
+      'szl.public-surface-boundary/v1;surface=killinchu-console;effectors=SIMULATED;authorization=UNAVAILABLE',
   },
   'legacy-command-route': {
     title: 'a11oy Command Center',
     canonicalUrl: 'https://a-11-oy.com/command',
-    requiredText: [
-      'Product origin a-11-oy.com',
-      'Proof a11oy.net',
-      'Energy UNAVAILABLE in this browser.',
-      'Signer UNSIGNED-honest',
-      'No secret values',
-      'This surface is MODELED on static origin until the Space runtime signs a write.',
-    ],
+    evidenceBoundary:
+      'szl.public-surface-boundary/v1;surface=a11oy-command;origin=MODELED;energy=UNAVAILABLE;signer=UNAVAILABLE',
   },
 } as const satisfies Record<string, PublicWebContract>;
 
@@ -788,10 +770,20 @@ function hasExactKeys(value: Record<string, unknown>, expected: readonly string[
 function isExactKillinchuBuildInfo(value: unknown): boolean {
   if (!isObject(value)) return false;
   if (
-    !hasExactKeys(value, ['status', 'service', 'build', 'receipt_minted', 'release_receipt']) ||
+    !hasExactKeys(value, [
+      'status',
+      'service',
+      'build',
+      'receipt_minted',
+      'receipt_minted_on_request',
+      'receipt_minted_scope',
+      'release_receipt',
+    ]) ||
     value.status !== 'OBSERVED' ||
     value.service !== 'killinchu' ||
     value.receipt_minted !== true ||
+    value.receipt_minted_on_request !== false ||
+    value.receipt_minted_scope !== 'DEPLOYMENT_RELEASE_REFERENCE' ||
     !isObject(value.build) ||
     !isObject(value.release_receipt)
   ) {
@@ -828,26 +820,108 @@ function isExactKillinchuBuildInfo(value: unknown): boolean {
 
 function isExactKillinchuReadiness(value: unknown): boolean {
   if (!isObject(value)) return false;
-  return (
-    hasExactKeys(value, [
+  if (
+    !hasExactKeys(value, [
       'status',
       'organ',
-      'khipu_backend',
-      'khipu_durable',
-      'khipu_depth',
-      'khipu_chain_ok',
-      'khipu_first_break_seq',
       'doctrine',
+      'ledger',
+      'ledger_role',
+      'backend_store_diagnostics',
+      'receipt_minted',
+    ]) ||
+    value.status !== 'ready' ||
+    value.organ !== 'killinchu' ||
+    value.doctrine !== 'v11' ||
+    value.ledger_role !== 'CANONICAL_RECEIPT_LEDGER' ||
+    value.receipt_minted !== false ||
+    !isObject(value.ledger) ||
+    !isObject(value.backend_store_diagnostics)
+  ) {
+    return false;
+  }
+
+  const ledger = value.ledger;
+  const backend = value.backend_store_diagnostics;
+  if (
+    !hasExactKeys(ledger, [
+      'schema',
+      'durability_state',
+      'requested_mode',
+      'ready',
+      'production_ready',
+      'production_readiness_basis',
+      'readiness_probe',
+      'persistence_scope',
+      'startup_state',
+      'adapter_configured',
+      'adapter_state',
+      'integrity',
+      'replay',
+      'recovery',
+      'reason',
+    ]) ||
+    ledger.schema !== 'szl.killinchu.ledger-readiness/v1' ||
+    ledger.durability_state !== 'EPHEMERAL' ||
+    ledger.requested_mode !== 'EPHEMERAL' ||
+    ledger.ready !== true ||
+    ledger.production_ready !== false ||
+    ledger.production_readiness_basis !== 'NOT_APPLICABLE' ||
+    ledger.readiness_probe !== 'READ_ONLY' ||
+    ledger.persistence_scope !== 'PROCESS_MEMORY' ||
+    ledger.startup_state !== 'READY' ||
+    ledger.adapter_configured !== false ||
+    ledger.adapter_state !== 'NOT_APPLICABLE' ||
+    ledger.reason !== 'ephemeral ledger is available for this process only' ||
+    !isObject(ledger.integrity) ||
+    !isObject(ledger.replay) ||
+    !isObject(ledger.recovery)
+  ) {
+    return false;
+  }
+
+  const integrity = ledger.integrity;
+  const replay = ledger.replay;
+  const recovery = ledger.recovery;
+  const integrityNodes = integrity.nodes;
+  const integrityRoot = integrity.root;
+  return (
+    hasExactKeys(integrity, ['state', 'verified', 'nodes', 'root']) &&
+    integrity.state === 'VERIFIED' &&
+    integrity.verified === true &&
+    Number.isSafeInteger(integrityNodes) &&
+    (integrityNodes as number) >= 0 &&
+    ((integrityNodes === 0 && integrityRoot === null) ||
+      ((integrityNodes as number) > 0 &&
+        typeof integrityRoot === 'string' &&
+        /^[a-f0-9]{64}$/.test(integrityRoot))) &&
+    hasExactKeys(replay, ['state', 'nodes']) &&
+    replay.state === 'NOT_APPLICABLE' &&
+    Number.isSafeInteger(replay.nodes) &&
+    (replay.nodes as number) >= 0 &&
+    hasExactKeys(recovery, ['attempts', 'retry_after_s']) &&
+    Number.isSafeInteger(recovery.attempts) &&
+    (recovery.attempts as number) >= 0 &&
+    typeof recovery.retry_after_s === 'number' &&
+    Number.isFinite(recovery.retry_after_s) &&
+    recovery.retry_after_s >= 0 &&
+    hasExactKeys(backend, [
+      'ledger_role',
+      'backend',
+      'depth',
+      'chain_ok',
+      'first_break_seq',
+      'provider_persistence',
+      'production_ready',
     ]) &&
-    value.status === 'ready' &&
-    value.organ === 'killinchu' &&
-    value.khipu_backend === 'sqlite' &&
-    value.khipu_durable === true &&
-    Number.isSafeInteger(value.khipu_depth) &&
-    (value.khipu_depth as number) >= 0 &&
-    value.khipu_chain_ok === true &&
-    value.khipu_first_break_seq === -1 &&
-    value.doctrine === 'v11'
+    backend.ledger_role === 'BACKEND_HARDENING_DIAGNOSTIC_STORE' &&
+    backend.backend === 'sqlite' &&
+    Number.isSafeInteger(backend.depth) &&
+    (backend.depth as number) >= 0 &&
+    backend.chain_ok === true &&
+    backend.first_break_seq === -1 &&
+    backend.provider_persistence === 'UNKNOWN' &&
+    backend.production_ready === false
   );
 }
 
@@ -889,7 +963,7 @@ type HtmlTextNode = DefaultTreeAdapterMap['textNode'];
 type PublicWebDocument = Readonly<{
   title: string | null;
   canonicalUrls: readonly (string | null)[];
-  staticBodyText: string;
+  evidenceBoundaries: readonly (string | null)[];
 }>;
 
 function isElementNode(node: HtmlNode): node is HtmlElement {
@@ -918,45 +992,10 @@ function findHtmlElements(root: HtmlNode, tagName: string): HtmlElement[] {
   return elements;
 }
 
-function hasInlineHiddenPresentation(element: HtmlElement): boolean {
-  const attributes = new Map(
-    element.attrs.map((attribute) => [attribute.name.toLowerCase(), attribute.value]),
-  );
-  if (attributes.has('hidden')) return true;
-  if (attributes.get('aria-hidden')?.trim().toLowerCase() === 'true') return true;
-
-  const style = attributes.get('style');
-  if (!style) return false;
-  return style.split(';').some((declaration) => {
-    const separator = declaration.indexOf(':');
-    if (separator === -1) return false;
-    const property = declaration.slice(0, separator).trim().toLowerCase();
-    const value = declaration
-      .slice(separator + 1)
-      .replace(/\s*!important\s*$/i, '')
-      .trim()
-      .toLowerCase();
-    return (
-      (property === 'display' && value === 'none') ||
-      (property === 'visibility' && (value === 'hidden' || value === 'collapse')) ||
-      (property === 'content-visibility' && value === 'hidden')
-    );
-  });
-}
-
-function collectHtmlText(node: HtmlNode, excludeInertBodyContent: boolean): string {
+function collectHtmlText(node: HtmlNode): string {
   if (isTextNode(node)) return node.value;
-  if (
-    excludeInertBodyContent &&
-    isElementNode(node) &&
-    (node.namespaceURI !== HTML_NAMESPACE ||
-      NON_EVIDENCE_BODY_ELEMENTS.has(node.tagName) ||
-      hasInlineHiddenPresentation(node))
-  ) {
-    return '';
-  }
   return childNodesOf(node)
-    .map((child) => collectHtmlText(child, excludeInertBodyContent))
+    .map((child) => collectHtmlText(child))
     .join('');
 }
 
@@ -996,7 +1035,7 @@ function parsePublicWebDocument(input: string): PublicWebDocument | null {
   const titles = findHtmlElements(heads[0], 'title');
   const title =
     titles.length === 1 && hasExplicitContainer(titles[0])
-      ? normalizedHtmlText(collectHtmlText(titles[0], false))
+      ? normalizedHtmlText(collectHtmlText(titles[0]))
       : null;
 
   const canonicalUrls = findHtmlElements(heads[0], 'link')
@@ -1012,10 +1051,23 @@ function parsePublicWebDocument(input: string): PublicWebDocument | null {
         element.attrs.find((attribute) => attribute.name.toLowerCase() === 'href')?.value ?? null,
     );
 
+  const evidenceBoundaries = findHtmlElements(heads[0], 'meta')
+    .filter((element) => {
+      const name = element.attrs.find(
+        (attribute) => attribute.name.toLowerCase() === 'name',
+      )?.value;
+      return name?.trim().toLowerCase() === 'szl-evidence-boundary';
+    })
+    .map(
+      (element) =>
+        element.attrs.find((attribute) => attribute.name.toLowerCase() === 'content')?.value ??
+        null,
+    );
+
   return {
     title,
     canonicalUrls,
-    staticBodyText: normalizedHtmlText(collectHtmlText(bodies[0], true)),
+    evidenceBoundaries,
   };
 }
 
@@ -1047,11 +1099,10 @@ async function validatePublicWebResponse(
   }
 
   if (
-    !contract.requiredText.every((requiredText) =>
-      document.staticBodyText.includes(normalizedHtmlText(requiredText)),
-    )
+    document.evidenceBoundaries.length !== 1 ||
+    document.evidenceBoundaries[0] !== contract.evidenceBoundary
   ) {
-    return [`${surfaceId}: WEB body is missing its evidence-boundary marker`];
+    return [`${surfaceId}: WEB head lacks its exact evidence-boundary declaration`];
   }
   return [];
 }

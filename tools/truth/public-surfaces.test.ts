@@ -145,21 +145,34 @@ function webResponse(url: string, body: string, contentType = 'text/html; charse
   return apiResponse(url, body, contentType);
 }
 
+const CHAT_BOUNDARY_META =
+  '<meta name="szl-evidence-boundary" content="szl.public-surface-boundary/v1;surface=a11oy-net-chat;execution=UNAVAILABLE">';
+const CODE_BOUNDARY_META =
+  '<meta name="szl-evidence-boundary" content="szl.public-surface-boundary/v1;surface=a11oy-net-code;execution=UNAVAILABLE">';
+const KILLINCHU_BOUNDARY_META =
+  '<meta name="szl-evidence-boundary" content="szl.public-surface-boundary/v1;surface=killinchu-console;effectors=SIMULATED;authorization=UNAVAILABLE">';
+const COMMAND_BOUNDARY_META =
+  '<meta name="szl-evidence-boundary" content="szl.public-surface-boundary/v1;surface=a11oy-command;origin=MODELED;energy=UNAVAILABLE;signer=UNAVAILABLE">';
+
 const CHAT_GATEWAY_HTML =
   '<!doctype html><html><head><title>A11oy Chat Gateway | Governed Product Console</title>' +
-  '<link rel="canonical" href="https://a11oy.net/chat/"></head>' +
+  '<link rel="canonical" href="https://a11oy.net/chat/">' +
+  `${CHAT_BOUNDARY_META}</head>` +
   '<body>This gateway does not execute a prompt.</body></html>';
 const CODE_GATEWAY_HTML =
   '<!doctype html><html><head><title>A11oy Code Gateway | Governed Run-Loop</title>' +
-  '<link rel="canonical" href="https://a11oy.net/code/"></head>' +
+  '<link rel="canonical" href="https://a11oy.net/code/">' +
+  `${CODE_BOUNDARY_META}</head>` +
   '<body>this page does not execute code</body></html>';
 const KILLINCHU_CONSOLE_HTML =
   '<!doctype html><html><head><title>a11oy · Killinchu</title>' +
-  '<link rel="canonical" href="https://a-11-oy.com/killinchu"></head>' +
+  '<link rel="canonical" href="https://a-11-oy.com/killinchu">' +
+  `${KILLINCHU_BOUNDARY_META}</head>` +
   '<body>Effectors stay SIMULATED. Awaiting observed state; no runtime claim made.</body></html>';
 const COMMAND_CENTER_HTML =
   '<!doctype html><html><head><title>a11oy Command Center</title>' +
-  '<link rel="canonical" href="https://a-11-oy.com/command"></head>' +
+  '<link rel="canonical" href="https://a-11-oy.com/command">' +
+  `${COMMAND_BOUNDARY_META}</head>` +
   '<body>Product origin a-11-oy.com · Proof a11oy.net · Energy UNAVAILABLE in this browser. · ' +
   'Signer UNSIGNED-honest · No secret values · This surface is MODELED on static origin until ' +
   'the Space runtime signs a write.</body></html>';
@@ -169,17 +182,19 @@ const KILLINCHU_BUILD_INFO_BODY = {
   service: 'killinchu',
   build: {
     state: 'OBSERVED',
-    revision: 'dee16139923017abd8277a9bd8c143f8d7869630',
+    revision: '13477c429f5742cdc718a6294a80d00c7e8dc634',
     revision_source: 'env:SZL_GIT_SHA',
   },
   receipt_minted: true,
+  receipt_minted_on_request: false,
+  receipt_minted_scope: 'DEPLOYMENT_RELEASE_REFERENCE',
   release_receipt: {
     state: 'GITHUB_OIDC_ATTESTED',
-    source_revision: 'dee16139923017abd8277a9bd8c143f8d7869630',
+    source_revision: '13477c429f5742cdc718a6294a80d00c7e8dc634',
     subject: 'hf-deploy-manifest.json',
-    subject_sha256: '050a62e33e51c297a72e64824e7f719843bf21285277008c730e1adf451c6ebe',
-    attestation_id: '52400480',
-    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/52400480',
+    subject_sha256: '915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c',
+    attestation_id: '53547813',
+    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/53547813',
     verification:
       'Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu',
   },
@@ -188,18 +203,55 @@ const KILLINCHU_BUILD_INFO_BODY = {
 const KILLINCHU_READINESS_BODY = {
   status: 'ready',
   organ: 'killinchu',
-  khipu_backend: 'sqlite',
-  khipu_durable: true,
-  khipu_depth: 0,
-  khipu_chain_ok: true,
-  khipu_first_break_seq: -1,
   doctrine: 'v11',
+  ledger: {
+    schema: 'szl.killinchu.ledger-readiness/v1',
+    durability_state: 'EPHEMERAL',
+    requested_mode: 'EPHEMERAL',
+    ready: true,
+    production_ready: false,
+    production_readiness_basis: 'NOT_APPLICABLE',
+    readiness_probe: 'READ_ONLY',
+    persistence_scope: 'PROCESS_MEMORY',
+    startup_state: 'READY',
+    adapter_configured: false,
+    adapter_state: 'NOT_APPLICABLE',
+    integrity: { state: 'VERIFIED', verified: true, nodes: 0, root: null },
+    replay: { state: 'NOT_APPLICABLE', nodes: 0 },
+    recovery: { attempts: 0, retry_after_s: 0 },
+    reason: 'ephemeral ledger is available for this process only',
+  },
+  ledger_role: 'CANONICAL_RECEIPT_LEDGER',
+  backend_store_diagnostics: {
+    ledger_role: 'BACKEND_HARDENING_DIAGNOSTIC_STORE',
+    backend: 'sqlite',
+    depth: 0,
+    chain_ok: true,
+    first_break_seq: -1,
+    provider_persistence: 'UNKNOWN',
+    production_ready: false,
+  },
+  receipt_minted: false,
 };
 
 function configuredSurface(id: string): PublicSurface {
   const candidate = CONFIGURED_REGISTRY.surfaces.find((surface) => surface.id === id);
   assert.ok(candidate, `missing configured surface ${id}`);
   return candidate;
+}
+
+function reachableWebContractSurface(id: string): PublicSurface {
+  const candidate = configuredSurface(id);
+  assert.equal(candidate.kind, 'WEB');
+  return {
+    ...candidate,
+    mode: 'MIXED',
+    availability: 'REACHABLE',
+    observation: {
+      ...candidate.observation,
+      status: 200,
+    },
+  };
 }
 
 test('counts only routed customer-facing web surfaces', () => {
@@ -943,20 +995,38 @@ test('validates the exact Killinchu readiness body without freezing dynamic dept
     verifyLivePublicSurfaces(registry([candidate]), async (url) => apiResponse(url, payload));
 
   assert.deepEqual(await verify(KILLINCHU_READINESS_BODY), []);
-  assert.deepEqual(await verify({ ...KILLINCHU_READINESS_BODY, khipu_depth: 7 }), []);
+  const dynamicDepth = structuredClone(KILLINCHU_READINESS_BODY);
+  dynamicDepth.backend_store_diagnostics.depth = 7;
+  dynamicDepth.ledger.integrity.nodes = 1;
+  dynamicDepth.ledger.integrity.root = 'a'.repeat(64) as never;
+  dynamicDepth.ledger.replay.nodes = 1;
+  assert.deepEqual(await verify(dynamicDepth), []);
 
   const missingDoctrine = { ...KILLINCHU_READINESS_BODY } as Record<string, unknown>;
   delete missingDoctrine.doctrine;
+  const unverifiedIntegrity = structuredClone(KILLINCHU_READINESS_BODY);
+  unverifiedIntegrity.ledger.integrity.verified = false;
+  const durableOverclaim = structuredClone(KILLINCHU_READINESS_BODY);
+  durableOverclaim.ledger.production_ready = true;
+  const invalidBackend = structuredClone(KILLINCHU_READINESS_BODY);
+  invalidBackend.backend_store_diagnostics.chain_ok = false;
+  const negativeDepth = structuredClone(KILLINCHU_READINESS_BODY);
+  negativeDepth.backend_store_diagnostics.depth = -1;
+  const unexpectedLedgerField = structuredClone(KILLINCHU_READINESS_BODY) as unknown as {
+    ledger: Record<string, unknown>;
+  };
+  unexpectedLedgerField.ledger.certified = true;
   const contractFailure = [
     'killinchu-readiness-api: API body does not match the exact readiness contract',
   ];
   for (const invalid of [
     missingDoctrine,
     { ...KILLINCHU_READINESS_BODY, unexpected: true },
-    { ...KILLINCHU_READINESS_BODY, khipu_durable: false },
-    { ...KILLINCHU_READINESS_BODY, khipu_chain_ok: false },
-    { ...KILLINCHU_READINESS_BODY, khipu_depth: -1 },
-    { ...KILLINCHU_READINESS_BODY, khipu_first_break_seq: 0 },
+    unverifiedIntegrity,
+    durableOverclaim,
+    invalidBackend,
+    negativeDepth,
+    unexpectedLedgerField,
     { ...KILLINCHU_READINESS_BODY, doctrine: ['v', String(10)].join('') },
   ]) {
     assert.deepEqual(await verify(invalid), contractFailure);
@@ -1019,8 +1089,8 @@ test('rejects duplicate, trailing, and over-depth JSON before API contract valid
 
   const candidate = configuredSurface('killinchu-build-info-api');
   const duplicateBody = JSON.stringify(KILLINCHU_BUILD_INFO_BODY).replace(
-    '"source_revision":"dee16139923017abd8277a9bd8c143f8d7869630"',
-    '"source_revision":"dee16139923017abd8277a9bd8c143f8d7869630","source\\u005frevision":"dee16139923017abd8277a9bd8c143f8d7869630"',
+    '"source_revision":"13477c429f5742cdc718a6294a80d00c7e8dc634"',
+    '"source_revision":"13477c429f5742cdc718a6294a80d00c7e8dc634","source\\u005frevision":"13477c429f5742cdc718a6294a80d00c7e8dc634"',
   );
   const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
     apiResponse(url, duplicateBody),
@@ -1239,8 +1309,8 @@ test('accepts approved A11oy.net redirects and validates owner-backed final page
 
 test('validates owner-backed direct A11oy page bodies', async () => {
   const cases = [
-    [configuredSurface('killinchu-public-console'), KILLINCHU_CONSOLE_HTML],
-    [configuredSurface('legacy-command-route'), COMMAND_CENTER_HTML],
+    [reachableWebContractSurface('killinchu-public-console'), KILLINCHU_CONSOLE_HTML],
+    [reachableWebContractSurface('legacy-command-route'), COMMAND_CENTER_HTML],
   ] as const;
 
   for (const [candidate, body] of cases) {
@@ -1313,7 +1383,7 @@ test('rejects an unapproved A11oy.net gateway redirect target', async () => {
 });
 
 test('rejects identity, canonical, boundary, and content-type drift on owner-backed WEB pages', async () => {
-  const candidate = configuredSurface('killinchu-public-console');
+  const candidate = reachableWebContractSurface('killinchu-public-console');
   const verify = (body: string, contentType = 'text/html; charset=utf-8') =>
     verifyLivePublicSurfaces(registry([candidate]), async (url) =>
       webResponse(url, body, contentType),
@@ -1347,8 +1417,20 @@ test('rejects identity, canonical, boundary, and content-type drift on owner-bac
     ['killinchu-public-console: WEB body has an unexpected canonical URL'],
   );
   assert.deepEqual(
-    await verify(KILLINCHU_CONSOLE_HTML.replace('Effectors stay SIMULATED.', 'Effectors live.')),
-    ['killinchu-public-console: WEB body is missing its evidence-boundary marker'],
+    await verify(KILLINCHU_CONSOLE_HTML.replace('effectors=SIMULATED', 'effectors=DECLARED')),
+    ['killinchu-public-console: WEB head lacks its exact evidence-boundary declaration'],
+  );
+  assert.deepEqual(await verify(KILLINCHU_CONSOLE_HTML.replace(KILLINCHU_BOUNDARY_META, '')), [
+    'killinchu-public-console: WEB head lacks its exact evidence-boundary declaration',
+  ]);
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        KILLINCHU_BOUNDARY_META,
+        `${KILLINCHU_BOUNDARY_META}${KILLINCHU_BOUNDARY_META}`,
+      ),
+    ),
+    ['killinchu-public-console: WEB head lacks its exact evidence-boundary declaration'],
   );
   assert.deepEqual(await verify(KILLINCHU_CONSOLE_HTML, 'application/json'), [
     'killinchu-public-console: expected a text/html response, observed application/json',
@@ -1356,7 +1438,7 @@ test('rejects identity, canonical, boundary, and content-type drift on owner-bac
 });
 
 test('rejects owner-backed WEB evidence that exists only inside HTML comments', async () => {
-  const candidate = configuredSurface('killinchu-public-console');
+  const candidate = reachableWebContractSurface('killinchu-public-console');
   const verify = (body: string) =>
     verifyLivePublicSurfaces(registry([candidate]), async (url) => webResponse(url, body));
 
@@ -1381,11 +1463,11 @@ test('rejects owner-backed WEB evidence that exists only inside HTML comments', 
   assert.deepEqual(
     await verify(
       KILLINCHU_CONSOLE_HTML.replace(
-        'Effectors stay SIMULATED.',
-        '<!-- Effectors stay SIMULATED. -->',
+        KILLINCHU_BOUNDARY_META,
+        `<!-- ${KILLINCHU_BOUNDARY_META} -->`,
       ),
     ),
-    ['killinchu-public-console: WEB body is missing its evidence-boundary marker'],
+    ['killinchu-public-console: WEB head lacks its exact evidence-boundary declaration'],
   );
   assert.deepEqual(
     await verify(KILLINCHU_CONSOLE_HTML.replace('</body>', '<!-- unterminated</body>')),
@@ -1393,8 +1475,8 @@ test('rejects owner-backed WEB evidence that exists only inside HTML comments', 
   );
 });
 
-test('rejects owner-backed WEB evidence from inert document content', async () => {
-  const candidate = configuredSurface('killinchu-public-console');
+test('does not infer the evidence declaration from presentation-dependent body content', async () => {
+  const candidate = reachableWebContractSurface('killinchu-public-console');
   const verify = (body: string) =>
     verifyLivePublicSurfaces(registry([candidate]), async (url) => webResponse(url, body));
   const titleTag = '<title>a11oy · Killinchu</title>';
@@ -1440,7 +1522,7 @@ test('rejects owner-backed WEB evidence from inert document content', async () =
           `${openTag}Effectors stay SIMULATED.${closeTag}`,
         ),
       ),
-      ['killinchu-public-console: WEB body is missing its evidence-boundary marker'],
+      [],
     );
   }
 
@@ -1458,7 +1540,22 @@ test('rejects owner-backed WEB evidence from inert document content', async () =
           `${openTag}Effectors stay SIMULATED.${closeTag}`,
         ),
       ),
-      ['killinchu-public-console: WEB body is missing its evidence-boundary marker'],
+      [],
+    );
+  }
+
+  for (const hiddenMarker of [
+    '<style>.conceal-evidence{display:none}</style><span class="conceal-evidence">Effectors stay SIMULATED.</span>',
+    '<span style="display:/**/none">Effectors stay SIMULATED.</span>',
+    '<span style="--concealed:none;display:var(--concealed)">Effectors stay SIMULATED.</span>',
+    '<span style="opacity:0">Effectors stay SIMULATED.</span>',
+    '<span style="position:absolute;left:-9999px">Effectors stay SIMULATED.</span>',
+    '<span style="font-size:0">Effectors stay SIMULATED.</span>',
+    '<span style="color:transparent">Effectors stay SIMULATED.</span>',
+  ]) {
+    assert.deepEqual(
+      await verify(KILLINCHU_CONSOLE_HTML.replace('Effectors stay SIMULATED.', hiddenMarker)),
+      [],
     );
   }
 
@@ -1466,15 +1563,37 @@ test('rejects owner-backed WEB evidence from inert document content', async () =
     await verify(
       KILLINCHU_CONSOLE_HTML.replace(
         'Effectors stay SIMULATED.',
-        'Effectors remain inactive.',
-      ).replace('</head>', '<meta name="evidence" content="Effectors stay SIMULATED."></head>'),
+        '<style>.conceal-evidence{display:none}</style>' +
+          '<span class="conceal-evidence">Effectors stay </span>' +
+          '<span class="conceal-evidence">SIMULATED.</span>',
+      ),
     ),
-    ['killinchu-public-console: WEB body is missing its evidence-boundary marker'],
+    [],
+  );
+
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        '</head>',
+        '<link rel="stylesheet" href="/assets/conceal-all-evidence.css"></head>',
+      ).replace('<body>', '<body style="display:none">'),
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        KILLINCHU_BOUNDARY_META,
+        '<meta name="evidence" content="Effectors stay SIMULATED.">',
+      ),
+    ),
+    ['killinchu-public-console: WEB head lacks its exact evidence-boundary declaration'],
   );
 });
 
-test('rejects command boundary markers when every marker is inert', async () => {
-  const candidate = configuredSurface('legacy-command-route');
+test('does not treat command body presentation as evidence authority', async () => {
+  const candidate = reachableWebContractSurface('legacy-command-route');
   const verify = (body: string) =>
     verifyLivePublicSurfaces(registry([candidate]), async (url) => webResponse(url, body));
 
@@ -1489,7 +1608,7 @@ test('rejects command boundary markers when every marker is inert', async () => 
           `${closeTag}</body>`,
         ),
       ),
-      ['legacy-command-route: WEB body is missing its evidence-boundary marker'],
+      [],
     );
   }
 });

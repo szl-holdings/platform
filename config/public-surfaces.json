@@ -1,6 +1,6 @@
 {
   "schema": "szl.public-surfaces.registry/v1",
-  "observed_at": "2026-10-03T10:52:13Z",
+  "observed_at": "2026-10-07T16:57:50Z",
   "surfaces": [
     {
       "id": "a11oy-front-door",
@@ -220,7 +220,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/killinchu"
       },
-      "note": "Current A11oy source c215cad6f91d8a6fa547034c5e8b40cfeb9dea20 registers the on-origin route and retains the exact pages/killinchu.html and handler blobs deployed from its direct parent 5f1bf4deb34e799caa544eb55678b057b9c058f9. Fresh product-origin build-info and Series-A status readbacks report that deployed revision; the Series-A record is OBSERVED and terminal with no critical failures, a SIGNED status, and verified storage mount. The page keeps twin runtime state fail-closed; reachability and source binding do not establish Killinchu Hugging Face runtime health or authorization."
+      "note": "MEASURED: the live A11oy origin returned HTTP 200 from deployed source b64f14462413b7f80e00947fe1864122344aae5c and exposed exactly one head declaration marking effectors SIMULATED and authorization UNAVAILABLE. The page keeps twin-runtime state fail-closed; reachability and source binding do not establish Killinchu runtime health or authorization."
     },
     {
       "id": "a11oy-net-thesis",
@@ -260,7 +260,7 @@
         "status": 200,
         "final_url": "https://szlholdings-a11oy.hf.space/api/build-info"
       },
-      "note": "A bounded live JSON read reported status and build state OBSERVED at deployed A11oy source 5f1bf4deb34e799caa544eb55678b057b9c058f9. Current owner main c215cad6f91d8a6fa547034c5e8b40cfeb9dea20 is its direct route-neutral successor; receipt_minted remained false. Exact deployed-source binding is not a receipt, certification, or byte-for-byte deployment attestation."
+      "note": "MEASURED: a bounded live JSON read reported status and build state OBSERVED at deployed A11oy source b64f14462413b7f80e00947fe1864122344aae5c with receipt_minted false. Exact deployed-source binding is not a receipt, certification, or byte-for-byte deployment attestation."
     },
     {
       "id": "a11oy-readiness-api",
@@ -300,7 +300,7 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "A bounded exact JSON body read reported OBSERVED Killinchu source dee16139923017abd8277a9bd8c143f8d7869630, matching current signed main, and GitHub OIDC attestation 52400480 for manifest sha256:050a62e33e51c297a72e64824e7f719843bf21285277008c730e1adf451c6ebe. Publication run 37117261412 completed successfully; the endpoint and receipt still do not assert aggregate health or authorization."
+      "note": "MEASURED: a bounded exact JSON body read reported OBSERVED Killinchu source 13477c429f5742cdc718a6294a80d00c7e8dc634 and GitHub OIDC deployment-release reference attestation 53547813 for manifest sha256:915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c. The endpoint and release reference do not assert aggregate health or authorization."
     },
     {
       "id": "killinchu-readiness-api",
@@ -320,7 +320,7 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/readyz"
       },
-      "note": "A bounded JSON body read reported ready, durable Khipu storage, an intact Khipu chain, and Doctrine v11; this scoped witness does not establish aggregate Killinchu API or alert-channel health."
+      "note": "MEASURED: a bounded exact JSON body read reported ready under Doctrine v11 while labeling the canonical receipt ledger EPHEMERAL, PROCESS_MEMORY scoped, and not production-ready; backend provider persistence is UNKNOWN. This scoped witness does not establish durable storage, aggregate Killinchu health, or authorization."
     },
     {
       "id": "legacy-lyte-route",
@@ -460,7 +460,7 @@
         "status": 200,
         "final_url": "https://a-11-oy.com/command/"
       },
-      "note": "Current A11oy source c215cad6f91d8a6fa547034c5e8b40cfeb9dea20 registers /command and retains the exact pages/command-center.html and handler blobs deployed from its direct parent 5f1bf4deb34e799caa544eb55678b057b9c058f9. The reachable mixed surface labels local modeled behavior and blocked authority explicitly; reachability and source binding are not runtime authorization."
+      "note": "MEASURED: the live A11oy origin returned HTTP 200 from deployed source b64f14462413b7f80e00947fe1864122344aae5c and exposed exactly one head declaration marking origin MODELED and energy and signer UNAVAILABLE. Reachability and source binding are not runtime authorization."
     },
     {
       "id": "legacy-pulse-route",
@@ -500,7 +500,7 @@
         "status": 200,
         "final_url": "https://a11oy.net/chat/"
       },
-      "note": "Current A11oy.net source 26266110d7006baf7918d7cfbdd81a266c4e6d9f owns chat/index.html; its immutable bytes matched the live canonicalized page and the live source witness binds the served static artifact to that exact revision. This is a static proof-registry handoff and does not claim that the separate interactive console is ready."
+      "note": "MEASURED: the live source witness binds this static Pages artifact to GitHub-verified source f659e9a827df1dcb938eb08f0ca1c667b46cb0b3, and the canonicalized page exposes exactly one head declaration marking execution UNAVAILABLE. Cloudflare transforms the edge HTML, so source binding is not a byte-identity claim or evidence that the separate interactive console is ready."
     },
     {
       "id": "a11oy-net-code-gap",
@@ -520,7 +520,7 @@
         "status": 200,
         "final_url": "https://a11oy.net/code/"
       },
-      "note": "Current A11oy.net source 26266110d7006baf7918d7cfbdd81a266c4e6d9f owns code/index.html; its immutable bytes matched the live canonicalized page and the live source witness binds the served static artifact to that exact revision. This is a static proof-registry handoff and does not claim that the separate governed run-loop is ready."
+      "note": "MEASURED: the live source witness binds this static Pages artifact to GitHub-verified source f659e9a827df1dcb938eb08f0ca1c667b46cb0b3, and the canonicalized page exposes exactly one head declaration marking execution UNAVAILABLE. Cloudflare transforms the edge HTML, so source binding is not a byte-identity claim or evidence that the separate governed run-loop is ready."
     },
     {
       "id": "a11oy-net-robots-gap",
@@ -580,7 +580,7 @@
         "status": 200,
         "final_url": "https://a11oy.net/manifest.webmanifest"
       },
-      "note": "Current A11oy.net source 26266110d7006baf7918d7cfbdd81a266c4e6d9f and the live byte-identical manifest declare name 'a11oy Proof Registry' and short_name 'a11oy.net'; the live source witness binds the served static artifact to that exact revision. Reachability and metadata identity do not establish product-runtime readiness."
+      "note": "MEASURED: the reachable manifest declares name 'a11oy Proof Registry' and short_name 'a11oy.net', while the live source witness binds the static Pages artifact to source f659e9a827df1dcb938eb08f0ca1c667b46cb0b3. Reachability, source binding, and metadata identity do not establish product-runtime readiness or byte identity after edge transformation."
     }
   ]
 }
