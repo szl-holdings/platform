@@ -67,7 +67,9 @@ jobs:
           ONNXRUNTIME_NODE_INSTALL: skip
 
       - name: Build ${{ matrix.app.name }}
-        run: pnpm --filter ${{ matrix.app.filter }} run build
+        # Include workspace dependencies whose package exports require compiled dist files.
+        # Preserve BASE_PATH and rebuild rather than restoring a production-base cache.
+        run: pnpm exec turbo run build --filter='${{ matrix.app.filter }}...' --env-mode=loose --force
         env:
           # Build with root base so the standalone `serve` at localhost:<port>/
           # resolves assets. Production serves each app under /<app>/ via BASE_PATH.

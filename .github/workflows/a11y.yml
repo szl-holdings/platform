@@ -80,7 +80,9 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: Build ${{ matrix.app.name }}
-        run: pnpm --filter ${{ matrix.app.filter }} run build
+        # Include workspace dependencies whose package exports require compiled dist files.
+        # Preserve BASE_PATH and rebuild rather than restoring a production-base cache.
+        run: pnpm exec turbo run build --filter='${{ matrix.app.filter }}...' --env-mode=loose --force
         env:
           # The isolated static server mounts each artifact at `/`. Override the
           # production subpath so every emitted asset URL is reachable here.

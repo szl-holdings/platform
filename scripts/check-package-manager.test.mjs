@@ -11,7 +11,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
+import { delimiter, join, relative, sep } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
@@ -23,6 +23,23 @@ import {
 } from './check-package-manager.mjs';
 
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url));
+// Use Git Bash on Windows, rather than a possible WSL bash.exe. Fixtures
+// belong to the Windows checkout and must use that shell's path namespace.
+const gitBash = join(process.env.ProgramFiles ?? 'C:\\Program Files', 'Git/bin/bash.exe');
+const bashExecutable = process.platform === 'win32' && existsSync(gitBash) ? gitBash : 'bash';
+
+function bashPath(path) {
+  if (process.platform !== 'win32') return path;
+  const result = spawnSync(bashExecutable, ['-c', 'cygpath -u "$1"', 'fixture', path], {
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 0, result.stderr || result.error?.message);
+  return result.stdout.trim();
+}
+
+function escapedRegex(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 const NODE_26_PNPM_DOCKERFILES = [
   'apps/alloy-embedding-api/Dockerfile',
@@ -50,7 +67,7 @@ function findSourceDockerfiles(directory = repositoryRoot) {
       continue;
     }
     if (entry.isFile() && entry.name.startsWith('Dockerfile')) {
-      dockerfiles.push(relative(repositoryRoot, join(directory, entry.name)));
+      dockerfiles.push(relative(repositoryRoot, join(directory, entry.name)).split(sep).join('/'));
     }
   }
   return dockerfiles.sort();
@@ -113,15 +130,17 @@ test('activation survives an unusable HOME and failing Corepack under caller set
 
   const env = {
     ...process.env,
-    ACTIVATION_LOG: activationLog,
-    COREPACK_HOME: explicitCorepackHome,
-    HOME: unusableHome,
-    PATH: `${fakeBin}:${process.env.PATH ?? ''}`,
+    ACTIVATION_LOG: bashPath(activationLog),
+    COREPACK_HOME: bashPath(explicitCorepackHome),
+    HOME: bashPath(unusableHome),
+    PATH: `${fakeBin}${delimiter}${process.env.PATH ?? process.env.Path ?? ''}`,
   };
+  // Windows environment keys are case-insensitive; keep one authoritative PATH.
+  if (process.platform === 'win32') delete env.Path;
   delete env.PNPM_HOME;
 
   const result = spawnSync(
-    'bash',
+    bashExecutable,
     [
       '-c',
       [
@@ -138,19 +157,31 @@ test('activation survives an unusable HOME and failing Corepack under caller set
   );
 
   assert.equal(result.status, 0, `stderr:\n${result.stderr}`);
-  assert.match(result.stdout, new RegExp(`^home=${unusableHome}$`, 'm'));
-  assert.match(result.stdout, new RegExp(`^pnpm_home=${expectedPnpmHome}$`, 'm'));
-  assert.match(result.stdout, new RegExp(`^corepack_home=${explicitCorepackHome}$`, 'm'));
-  assert.match(result.stdout, new RegExp(`^pnpm_command=${expectedPnpmHome}/pnpm$`, 'm'));
+  assert.match(result.stdout, new RegExp(`^home=${escapedRegex(bashPath(unusableHome))}$`, 'm'));
+  assert.match(
+    result.stdout,
+    new RegExp(`^pnpm_home=${escapedRegex(bashPath(expectedPnpmHome))}$`, 'm'),
+  );
+  assert.match(
+    result.stdout,
+    new RegExp(`^corepack_home=${escapedRegex(bashPath(explicitCorepackHome))}$`, 'm'),
+  );
+  assert.match(
+    result.stdout,
+    new RegExp(`^pnpm_command=${escapedRegex(bashPath(expectedPnpmHome))}/pnpm$`, 'm'),
+  );
   assert.match(result.stdout, /^pnpm_version=10\.26\.1$/m);
 
   const log = readFileSync(activationLog, 'utf8');
-  assert.match(log, new RegExp(`corepack:enable --install-directory ${expectedPnpmHome}`));
+  assert.match(
+    log,
+    new RegExp(`corepack:enable --install-directory ${escapedRegex(bashPath(expectedPnpmHome))}`),
+  );
   assert.match(log, /corepack:prepare pnpm@10\.26\.1 --activate/);
   assert.match(
     log,
     new RegExp(
-      `npm:install --prefix ${expectedPnpmHome}/\\.npm-bootstrap --no-save --package-lock=false --ignore-scripts --no-audit --no-fund pnpm@10\\.26\\.1`,
+      `npm:install --prefix ${escapedRegex(bashPath(expectedPnpmHome))}/\\.npm-bootstrap --no-save --package-lock=false --ignore-scripts --no-audit --no-fund pnpm@10\\.26\\.1`,
     ),
   );
   assert.equal(existsSync(join(unusableHome, '.local/share/pnpm')), false);
@@ -174,7 +205,7 @@ test('activation prefers explicit writable pnpm and Corepack homes', (t) => {
   ]);
 
   const result = spawnSync(
-    'bash',
+    bashExecutable,
     [
       '-c',
       [
@@ -191,17 +222,23 @@ test('activation prefers explicit writable pnpm and Corepack homes', (t) => {
       encoding: 'utf8',
       env: {
         ...process.env,
-        COREPACK_HOME: explicitCorepackHome,
-        HOME: unusableHome,
-        PNPM_HOME: explicitPnpmHome,
+        COREPACK_HOME: bashPath(explicitCorepackHome),
+        HOME: bashPath(unusableHome),
+        PNPM_HOME: bashPath(explicitPnpmHome),
       },
     },
   );
 
   assert.equal(result.status, 0, `stderr:\n${result.stderr}`);
-  assert.match(result.stdout, new RegExp(`^home=${unusableHome}$`, 'm'));
-  assert.match(result.stdout, new RegExp(`^pnpm_home=${explicitPnpmHome}$`, 'm'));
-  assert.match(result.stdout, new RegExp(`^corepack_home=${explicitCorepackHome}$`, 'm'));
+  assert.match(result.stdout, new RegExp(`^home=${escapedRegex(bashPath(unusableHome))}$`, 'm'));
+  assert.match(
+    result.stdout,
+    new RegExp(`^pnpm_home=${escapedRegex(bashPath(explicitPnpmHome))}$`, 'm'),
+  );
+  assert.match(
+    result.stdout,
+    new RegExp(`^corepack_home=${escapedRegex(bashPath(explicitCorepackHome))}$`, 'm'),
+  );
   assert.match(result.stdout, /^pnpm_version=10\.26\.1$/m);
 });
 

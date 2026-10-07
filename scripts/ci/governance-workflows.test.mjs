@@ -213,6 +213,26 @@ test('aggregate axe gate accepts success as its sole passing result', () => {
   assert.match(shellCaseArm(script, '*'), /exit 1/);
 });
 
+test('browser workflows build the selected app and its compiled workspace dependencies', () => {
+  const workflows = [
+    ['.github/workflows/a11y.yml', 'matrix.app.filter'],
+    ['.github/workflows/e2e.yml', 'matrix.filter'],
+    ['.github/workflows/lighthouse.yml', 'matrix.app.filter'],
+  ];
+  const turbo = JSON.parse(readRepositoryFile('turbo.json'));
+  assert.ok(turbo.tasks.build.dependsOn.includes('^build'));
+  for (const [workflowPath, filter] of workflows) {
+    const workflow = readRepositoryFile(workflowPath);
+    const command = `pnpm exec turbo run build --filter='\${{ ${filter} }}...' --env-mode=loose --force`;
+    assert.equal(
+      workflow.split(command).length - 1,
+      1,
+      `${workflowPath} must build dependencies before the app`,
+    );
+    assert.doesNotMatch(workflow, /pnpm --filter[^\n]+ run build/);
+  }
+});
+
 test('browser workflows serve builds with the exact repository-pinned CLI', () => {
   const packageJson = JSON.parse(readRepositoryFile('package.json'));
   const lockfile = readRepositoryFile('pnpm-lock.yaml');
