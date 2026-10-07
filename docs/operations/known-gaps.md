@@ -153,6 +153,19 @@ identity-to-tenant binding before this route is publicly exposed. Protected
 source merge also does not itself deploy Atelier: a separately witnessed
 hosted build, identity configuration, and functional provider probe remain open.
 
+**2026-10-07 local provider-completion candidate:** The xAI Responses adapter now
+rejects non-completed/unbound responses before returning final text. Shared
+vectors are replayed against the pinned SZL Python parser, including Unicode
+whitespace and code-point-length cases. Injected route checks preserve ambiguous
+reservations and prevent ledger/session writes or a second provider call after
+an invalid response. The separate Anthropic adapter now preserves all supported
+text/system blocks and makes nonfinal plain completions explicit. These are
+MEASURED local mocked/AST checks, not live provider operation. Source publication,
+exact-head hosted CI, complete Anthropic SDK typecheck, deployment, identity,
+durability and independent runtime witness remain open; artifact status remains
+Partial. Commands and scope are recorded in
+`audit/ATELIER_PROVIDER_COMPLETION_REPAIR_20261007.md`.
+
 ---
 
 ## 2026-08-26 Lighthouse Gate Integrity Correction
