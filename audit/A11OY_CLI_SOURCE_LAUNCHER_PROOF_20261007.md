@@ -51,7 +51,7 @@ were NOT MEASURED; no numerical readiness claim is introduced.
 
 MEASURED on Windows with Node `v24.19.0` and PowerShell `7.6.6`:
 
-- `corepack pnpm --dir packages/a11oy-cli test`: exit 0, 27 tests passed,
+- `corepack pnpm --dir packages/a11oy-cli test`: exit 0, 27 CLI-package cases passed,
   0 failed, 0 skipped. This includes the original 12 cases and 15 launcher cases.
   The final run after formatting and PATH-based PowerShell discovery completed
   in 32,354.6136 ms. No timeout or assertion was relaxed.
@@ -110,3 +110,30 @@ The existing `.verification/` directory and outside-repository launcher/evidence
 were preserved. No user terminal setting, shell profile, provider credential,
 model weight or signing configuration was changed. The commit is not a release
 or an independent proof of the broader A11oy platform.
+
+## Exact-head CI wording correction
+
+At `4cc91406c6efd843314f1c7fc5e43c7dc86f88f7`, the unchanged `truth-drift`
+check classified the unqualified test-count phrase in this document as a
+platform-wide claim. The local evidence above is only for the CLI package.
+Follow-up plan: change that phrase to explicitly say CLI-package cases, retain
+the measured count and failure record, run the unchanged claims-drift checker
+and its focused regression suite, and publish a signed documentation-only
+follow-up. Do not change metrics, allowlists, workflows or application bytes.
+
+MEASURED correction results:
+
+- The changed proof document has no findings from the unchanged
+  `claimFailuresForLines` implementation using the committed canonical metrics
+  and no allowlist entries for that focused invocation.
+- `node node_modules/tsx/dist/cli.mjs --test tools/truth/claims-drift.test.ts`:
+  exit 0, all 69 claims-drift regression cases passed, no failures or skips.
+- The first full local checker run exposed that this sparse checkout had not
+  materialized `.truth-allowlist`. The committed file was materialized verbatim;
+  both its local Git object hash and `HEAD:.truth-allowlist` are
+  `8b16d9a31b9487361bb4f48c5d53cd62ec9da3d4`. No entry was added or modified.
+- `node node_modules/tsx/dist/cli.mjs tools/truth/claims-drift.ts`: exit 0 after
+  the scoped wording correction and materialization of that existing input.
+- `git diff --check`: exit 0. Application and launcher bytes are unchanged from
+  the successful CLI-package run above; a documentation-only follow-up does not
+  establish new runtime or deployment evidence.
