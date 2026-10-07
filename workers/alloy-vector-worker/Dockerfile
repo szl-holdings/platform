@@ -39,7 +39,8 @@ ENV NODE_ENV=production
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --offline --ignore-scripts --prod=false
 RUN pnpm --filter @workspace/alloy-vector-worker exec tsc --build --force tsconfig.json
-RUN pnpm --filter @workspace/alloy-vector-worker deploy --prod --legacy /app/deploy
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    node scripts/ci/deploy-production.mjs @workspace/alloy-vector-worker /app/deploy
 
 # ─── Stage 3: runtime (minimal) ──────────────────────────────────────────────
 FROM node:26-bookworm-slim@sha256:662933cf47f013bc8e4beb31a6116448427a82057ba7c42c97e4c5ba766504c2 AS runtime
