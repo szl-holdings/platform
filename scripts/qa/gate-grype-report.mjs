@@ -193,7 +193,11 @@ export function normalizeGrypeReport(
     databaseStatus.schemaVersion,
     'descriptor.db.status.schemaVersion',
   );
-  if (!/^6\.\d+\.\d+$/.test(databaseSchemaVersion)) {
+  // The pinned scanner's SchemaVer.String() emits a `v` prefix; its parser
+  // accepts both forms, and installation compatibility requires model 6.
+  // https://github.com/anchore/grype/blob/v0.118.0/internal/schemaver/schema_ver.go
+  // https://github.com/anchore/grype/blob/v0.118.0/grype/db/v6/installation/curator.go
+  if (!/^v?6\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/.test(databaseSchemaVersion)) {
     evidenceErrors.push(
       `Grype database schema ${databaseSchemaVersion} is not a pinned-scanner v6 schema`,
     );

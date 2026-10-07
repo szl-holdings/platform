@@ -348,6 +348,32 @@ test('fails closed on malformed, cross-version, non-directory, or ignored eviden
   assert.match(wrongTarget.errors.join('\n'), /does not resolve to repository root/);
 });
 
+test('accepts pinned Grype SchemaVer output and rejects incompatible or malformed schemas', () => {
+  for (const schemaVersion of ['v6.1.10', '6.1.10', 'v6.0.0', '6.0.0']) {
+    const descriptor = grypeDescriptor();
+    descriptor.db.status.schemaVersion = schemaVersion;
+    assert.equal(
+      evaluate(grypeReport([], { descriptor }), { schemaVersion: 1, mitigations: [] }).passed,
+      true,
+    );
+  }
+  for (const schemaVersion of [
+    'v5.1.10',
+    'v7.0.0',
+    '6.1',
+    'v6.1.-1',
+    'v6.1.10-extra',
+    'vv6.1.10',
+    'v6.01.10',
+  ]) {
+    const descriptor = grypeDescriptor();
+    descriptor.db.status.schemaVersion = schemaVersion;
+    const result = evaluate(grypeReport([], { descriptor }), { schemaVersion: 1, mitigations: [] });
+    assert.equal(result.passed, false);
+    assert.match(result.errors.join('\n'), /not a pinned-scanner v6 schema/);
+  }
+});
+
 test('fails closed on missing, stale, invalid, or unverified Grype database provenance', () => {
   const staleReport = evaluate(
     grypeReport([], { descriptor: grypeDescriptor({ timestamp: '2026-10-07T08:59:59Z' }) }),
