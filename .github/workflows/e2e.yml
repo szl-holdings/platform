@@ -82,7 +82,9 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: Build ${{ matrix.app }}
-        run: pnpm --filter ${{ matrix.filter }} run build
+        # Include workspace dependencies whose package exports require compiled dist files.
+        # Preserve browser-test environment flags and avoid production-base caches.
+        run: pnpm exec turbo run build --filter='${{ matrix.filter }}...' --env-mode=loose --force
         env:
           BASE_PATH: /
           # Vessels gates its dashboard behind PrivateAppGuard. Enable the app's
