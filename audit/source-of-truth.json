@@ -39,9 +39,9 @@
   },
   "packages": {
     "domain_packages_dir": {
-      "count": 162,
+      "count": 163,
       "command": "Count tracked top-level directories under packages/",
-      "computed": "2026-08-26"
+      "computed": "2026-10-07"
     },
     "shared_lib_packages": {
       "count": 53,
@@ -49,10 +49,10 @@
       "computed": "2026-07-25"
     },
     "total_packages": {
-      "count": 215,
+      "count": 216,
       "command": "packages/ top-level count plus lib/ top-level count",
-      "computed": "2026-08-26",
-      "note": "packages/ (162 directories) + lib/ (53 directories) = 215. packages/proxy-routes.ts is a file and is not counted as a package."
+      "computed": "2026-10-07",
+      "note": "packages/ (163 directories) + lib/ (53 directories) = 216. packages/proxy-routes.ts is a file and is not counted as a package."
     },
     "apps": {
       "count": 11,
