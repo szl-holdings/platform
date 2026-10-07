@@ -54,6 +54,9 @@ const COMMITTED_PAYLOAD_SCHEMA = 'a11oy.atelier.committed-turn-payload.v1' as co
 const INDEX_AUTH_DOMAIN = 'a11oy.atelier.encrypted-local-index-auth.v1';
 const PATH_DOMAIN = 'a11oy.atelier.encrypted-local-path.v1';
 const MAX_INDEX_BYTES = 256 * 1024;
+// A second process may be publishing a capsule or index while startup scans.
+// Reclaim only files old enough that normal local publication cannot own them.
+const UNPUBLISHED_FILE_GRACE_MS = 60 * 60 * 1000;
 const HEX_64 = /^[a-f0-9]{64}$/;
 const STATE_CAPSULE_ID = /^state_[a-f0-9]{64}$/;
 const DIRECTORY_SYNC_UNSUPPORTED = new Set([
@@ -901,8 +904,12 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
                 'Encrypted continuity temporary object is not a regular file.',
               );
             }
-            await unlink(entryPath);
-            removedTemporary = true;
+            if (await this.#isStaleUnpublishedFile(entryPath)) {
+              await unlink(entryPath).catch((error: unknown) => {
+                if (errorCode(error) !== 'ENOENT') throw error;
+              });
+              removedTemporary = true;
+            }
             continue;
           }
           const capsuleId = basename(entry.name, '.json');
@@ -917,7 +924,7 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
               'Encrypted continuity object is stored in the wrong shard.',
             );
           }
-          if (!referenced.has(capsuleId)) {
+          if (!referenced.has(capsuleId) && (await this.#isStaleUnpublishedFile(entryPath))) {
             await this.#transport.delete(capsuleId);
           }
         }
@@ -1094,8 +1101,13 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
             'Continuity index temporary entries must be regular files.',
           );
         }
-        await unlink(join(directory, entry.name));
-        await this.#syncDirectory(directory);
+        const temporaryPath = join(directory, entry.name);
+        if (await this.#isStaleUnpublishedFile(temporaryPath)) {
+          await unlink(temporaryPath).catch((error: unknown) => {
+            if (errorCode(error) !== 'ENOENT') throw error;
+          });
+          await this.#syncDirectory(directory);
+        }
         continue;
       }
       if (!entry.isFile() || entry.isSymbolicLink() || !entry.name.endsWith('.json')) {
@@ -1341,6 +1353,20 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
         'Continuity storage directories must not be symbolic links.',
       );
     }
+  }
+
+  async #isStaleUnpublishedFile(path: string): Promise<boolean> {
+    const metadata = await lstat(path).catch((error: unknown) => {
+      if (errorCode(error) === 'ENOENT') return undefined;
+      throw error;
+    });
+    if (!metadata) return false;
+    if (!metadata.isFile() || metadata.isSymbolicLink()) {
+      throw new AtelierCapsuleIntegrityError(
+        'Unpublished continuity entry must be a regular file.',
+      );
+    }
+    return Date.now() - metadata.mtimeMs >= UNPUBLISHED_FILE_GRACE_MS;
   }
 
   async #directoryEntries(path: string) {
