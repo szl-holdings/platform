@@ -98,10 +98,13 @@ No broad install, container/model pull, paid API call or SDK inference ran.
    execute, not router initialization, imports, tools or network. Full-source
    Git-blob binding and equality with the checked-in excerpt's selected AST pass.
 3. `node node_modules/vitest/vitest.mjs run --config .local-provider-vitest.config.mts`
-   — 115/115 tests in five files passed: Atelier provider/state, Anthropic,
+   — Local provider workcell outcome: 115/115 focused cases passed in five files:
+   Atelier provider/state, Anthropic,
    existing Atelier route and new provider-completion route fixtures. Local-only
    aliases resolve policy-engine, Atelier and evidence-ledger to this checkout's
    source, not to another checkout's built package. No CI threshold was changed.
+   This is a harness-local count, not the estate-wide `platform_tests` metric,
+   which remains UNAVAILABLE.
    Twenty-one invalid route vectors return 502, retain ambiguous reservation,
    write no ledger/staged/committed turn, and replay with 425 without a second
    mocked provider call. One completed vector commits once and replays once.
