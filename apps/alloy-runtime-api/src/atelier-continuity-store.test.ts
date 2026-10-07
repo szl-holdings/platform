@@ -177,6 +177,39 @@ describe('EncryptedLocalAtelierStateStore', () => {
     expect(consumed).toBe(256 * 1024 + 1);
   });
 
+  it('accepts removal of the completed publication hard link during authenticated readback', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const first = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await first.ready();
+
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const temporaryPath = `${markerPath}.publisher.tmp`;
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    await actual.link(markerPath, temporaryPath);
+    let removed = false;
+    vi.mocked(open).mockImplementation(async (path, flags, mode) => {
+      const handle = await actual.open(path, flags, mode);
+      if (path === markerPath) {
+        const read = handle.read.bind(handle);
+        vi.spyOn(handle, 'read').mockImplementation(async (...args) => {
+          const result = await read(...args);
+          if (!removed) {
+            removed = true;
+            await new Promise((resolve) => setTimeout(resolve, 20));
+            await actual.unlink(temporaryPath);
+          }
+          return result;
+        });
+      }
+      return handle;
+    });
+
+    const second = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await expect(second.ready()).resolves.toBeUndefined();
+    expect(removed).toBe(true);
+  });
+
   it('persists encrypted full replay state and reopens a verifiable session', async () => {
     const rootDirectory = await tempRoot();
     const masterKey = randomBytes(32);

@@ -1250,6 +1250,14 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
       }
       const afterRead = await handle.stat();
       const current = await lstat(path).catch(() => undefined);
+      // Atomic publication removes its temporary hard link after the final
+      // path is linked. That 2-to-1 link-count change updates ctime only.
+      const publicationLinkRemoved =
+        opened.nlink === 2 &&
+        afterRead.nlink === 1 &&
+        opened.mode === afterRead.mode &&
+        opened.uid === afterRead.uid &&
+        opened.gid === afterRead.gid;
       if (
         !current?.isFile() ||
         current.isSymbolicLink() ||
@@ -1257,7 +1265,7 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
         current.ino !== afterRead.ino ||
         opened.size !== afterRead.size ||
         opened.mtimeMs !== afterRead.mtimeMs ||
-        opened.ctimeMs !== afterRead.ctimeMs ||
+        (opened.ctimeMs !== afterRead.ctimeMs && !publicationLinkRemoved) ||
         length !== afterRead.size
       ) {
         throw new AtelierCapsuleIntegrityError(
