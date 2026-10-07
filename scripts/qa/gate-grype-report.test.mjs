@@ -295,6 +295,14 @@ test('fails closed on ecosystem, package, version, severity, registration, diges
   }
 });
 
+test('accepts the pinned presenter omission of an empty ignoredMatches slice', () => {
+  const report = grypeReport([]);
+  delete report.ignoredMatches;
+  const result = evaluate(report, { schemaVersion: 1, mitigations: [] });
+  assert.equal(result.passed, true);
+  assert.deepEqual(result.errors, []);
+});
+
 test('fails closed on malformed, cross-version, non-directory, or ignored evidence', () => {
   assert.throws(() => normalizeFixtureReport(null), /JSON object/);
   assert.throws(() => normalizeFixtureReport({}), /matches must be an array/);
@@ -302,6 +310,12 @@ test('fails closed on malformed, cross-version, non-directory, or ignored eviden
     () => normalizeFixtureReport(grypeReport([], { ignoredMatches: undefined })),
     /ignoredMatches must be an array/,
   );
+  for (const ignoredMatches of [null, {}, '', 0, false]) {
+    assert.throws(
+      () => normalizeFixtureReport(grypeReport([], { ignoredMatches })),
+      /ignoredMatches must be an array/,
+    );
+  }
   assert.throws(
     () => normalizeFixtureReport(grypeReport([], { source: { type: 'directory' } })),
     /source\.target/,

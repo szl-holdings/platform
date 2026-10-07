@@ -139,7 +139,12 @@ export function normalizeGrypeReport(
   if (!Array.isArray(value.matches)) throw new Error('Grype report matches must be an array');
   if (!isRecord(value.descriptor)) throw new Error('Grype report descriptor must be an object');
   if (!isRecord(value.source)) throw new Error('Grype report source must be an object');
-  if (!Array.isArray(value.ignoredMatches)) {
+  // Grype v0.118.0 models.Document marks this slice `omitempty`, so the
+  // pinned presenter omits it when no matches were ignored. Explicit malformed
+  // values must still fail closed rather than silently discarding evidence.
+  // https://github.com/anchore/grype/blob/v0.118.0/grype/presenter/models/document.go
+  const ignoredMatches = Object.hasOwn(value, 'ignoredMatches') ? value.ignoredMatches : [];
+  if (!Array.isArray(ignoredMatches)) {
     throw new Error('Grype report ignoredMatches must be an array');
   }
 
@@ -258,7 +263,7 @@ export function normalizeGrypeReport(
     );
   }
 
-  const ignoredCount = value.ignoredMatches.length;
+  const ignoredCount = ignoredMatches.length;
   if (ignoredCount > 0) {
     evidenceErrors.push(
       `${ignoredCount} Grype/VEX ignored match(es) were present; this gate admits no scanner suppression`,
