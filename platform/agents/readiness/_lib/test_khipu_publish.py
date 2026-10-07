@@ -44,10 +44,12 @@ import khipu  # noqa: E402
 
 class _FakeHfApi:
     uploads: list[dict] = []
+    init_tokens: list[str | bool | None] = []
     error: Exception | None = None
 
-    def __init__(self, token: str) -> None:
+    def __init__(self, token: str | bool | None) -> None:
         self.token = token
+        _FakeHfApi.init_tokens.append(token)
 
     def upload_file(self, **kwargs) -> None:
         if _FakeHfApi.error is not None:
@@ -103,6 +105,7 @@ def _fake_nacl() -> tuple[types.ModuleType, types.ModuleType]:
 class EmitFailsClosedTest(unittest.TestCase):
     def setUp(self) -> None:
         _FakeHfApi.uploads = []
+        _FakeHfApi.init_tokens = []
         _FakeHfApi.error = None
         nacl, signing = _fake_nacl()
         patcher = unittest.mock.patch.dict(sys.modules, {
@@ -117,6 +120,16 @@ class EmitFailsClosedTest(unittest.TestCase):
             "HF_TOKEN": "test-token",
             "KHIPU_SIGNING_KEY_B64": base64.b64encode(os.urandom(32)).decode(),
         }
+
+    def _oidc_env(self) -> dict:
+        env = self._signed_env()
+        del env["HF_TOKEN"]
+        env.update({
+            "HF_OIDC_RESOURCE": "datasets/SZLHOLDINGS/readiness-runs",
+            "ACTIONS_ID_TOKEN_REQUEST_URL": "https://example.invalid/oidc",
+            "ACTIONS_ID_TOKEN_REQUEST_TOKEN": base64.b64encode(os.urandom(24)).decode(),
+        })
+        return env
 
     def _emit(self, env: dict) -> tuple[str, dict | None, int | None]:
         out = io.StringIO()
@@ -155,7 +168,59 @@ class EmitFailsClosedTest(unittest.TestCase):
         del env["HF_TOKEN"]
         text, _result, code = self._emit(env)
         self.assertEqual(code, 1)
-        self.assertIn("no HF_TOKEN", text)
+        self.assertIn("no HF_TOKEN or OIDC grant", text)
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_exact_dataset_oidc_publishes_verified_signed_receipt(self) -> None:
+        text, result, code = self._emit(self._oidc_env())
+        self.assertIsNone(code)
+        self.assertTrue(result["receipt"]["signed"])
+        self.assertTrue(result["publish"]["published"])
+        self.assertEqual(_FakeHfApi.init_tokens, [True])
+        self.assertEqual(len(_FakeHfApi.uploads), 1)
+        self.assertNotIn("::error", text)
+
+    def test_oidc_resource_mismatch_fails_before_hub_api(self) -> None:
+        env = self._oidc_env()
+        env["HF_OIDC_RESOURCE"] = "datasets/SZLHOLDINGS/another-dataset"
+        text, _result, code = self._emit(env)
+        self.assertEqual(code, 1)
+        self.assertIn("OIDC dataset mismatch", text)
+        self.assertIn('"path": "(not created)"', text)
+        self.assertEqual(_FakeHfApi.init_tokens, [])
+
+    def test_oidc_cannot_fall_back_to_hf_token(self) -> None:
+        env = self._oidc_env()
+        env["HF_TOKEN"] = "test-token"
+        text, _result, code = self._emit(env)
+        self.assertEqual(code, 1)
+        self.assertIn("ambiguous HF_TOKEN and OIDC credentials", text)
+        self.assertEqual(_FakeHfApi.init_tokens, [])
+
+    def test_oidc_publish_failure_fails_without_token_fallback(self) -> None:
+        _FakeHfApi.error = RuntimeError("synthetic Hub denial")
+        text, _result, code = self._emit(self._oidc_env())
+        self.assertEqual(code, 1)
+        self.assertIn("synthetic Hub denial", text)
+        self.assertEqual(_FakeHfApi.init_tokens, [True])
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_missing_oidc_request_grant_fails_before_hub_api(self) -> None:
+        env = self._oidc_env()
+        del env["ACTIONS_ID_TOKEN_REQUEST_URL"]
+        del env["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]
+        text, _result, code = self._emit(env)
+        self.assertEqual(code, 1)
+        self.assertIn("OIDC request grant unavailable", text)
+        self.assertEqual(_FakeHfApi.init_tokens, [])
+
+    def test_oidc_unsigned_receipt_cannot_invoke_hub_api(self) -> None:
+        env = self._oidc_env()
+        del env["KHIPU_SIGNING_KEY_B64"]
+        text, _result, code = self._emit(env)
+        self.assertEqual(code, 1)
+        self.assertIn("unsigned receipt", text)
+        self.assertEqual(_FakeHfApi.init_tokens, [])
         self.assertEqual(_FakeHfApi.uploads, [])
 
     def test_missing_signing_key_fails_actions_without_upload(self) -> None:
@@ -285,6 +350,12 @@ class FleetWorkflowContractTest(unittest.TestCase):
                 installs = [line for line in text.splitlines() if "pip install" in line]
                 self.assertEqual(len(installs), 1)
                 self.assertRegex(installs[0], rf"(?<![\w-]){re.escape(HUB_PIN)}(?![\w.])")
+
+    def test_observability_oidc_pilot_is_exact_target_and_tokenless(self) -> None:
+        workflow = self.text["readiness-observability"]
+        self.assertIn("id-token: write", workflow)
+        self.assertIn("HF_OIDC_RESOURCE: datasets/SZLHOLDINGS/readiness-runs", workflow)
+        self.assertNotIn("HF_TOKEN:", workflow)
 
     def test_schedules_never_share_a_ten_minute_window(self) -> None:
         slots = []
