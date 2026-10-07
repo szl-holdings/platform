@@ -163,9 +163,9 @@ storage, aggregate service health, authorization, or deployment by this Platform
 
 - `corepack pnpm install --filter . --frozen-lockfile --ignore-scripts` — **MEASURED PASS** after a
   free-space check; only the root verification toolchain was linked from the lockfile.
-- `corepack pnpm surfaces:test` — **MEASURED PASS**; all 41 focused positive and negative cases
+- `corepack pnpm surfaces:test` — **MEASURED PASS**; the focused positive and negative cases
   passed after refreshing only the exact Killinchu evidence fixtures.
-- `corepack pnpm truth:test` — **MEASURED PASS**; all 133 truth and public-surface contract cases
+- `corepack pnpm truth:test` — **MEASURED PASS**; the truth and public-surface contract cases
   passed.
 - `corepack pnpm claims:validate` — **MEASURED PASS**; truth validation, allowlist coverage, and the
   contract suite passed.
@@ -180,7 +180,7 @@ storage, aggregate service health, authorization, or deployment by this Platform
 - `corepack pnpm truth:generate -- --check --verify-remote` — **MEASURED PASS**; the regenerated
   truth snapshot matched its admitted local and remote inputs.
 - `node --test scripts/qa/check-fflate-resolution.test.mjs` — **MEASURED PASS**; the focused positive
-  and negative cases passed 4/4, including blocking workflow wiring.
+  and negative cases passed, including blocking workflow wiring.
 - `node scripts/qa/check-fflate-resolution.mjs` — **MEASURED PASS**; all observed dependency edges
   converged on exact `fflate@0.8.3`.
 - `git diff --exit-code origin/main -- scripts/qa/check-fflate-resolution.mjs
@@ -188,8 +188,8 @@ storage, aggregate service health, authorization, or deployment by this Platform
   the security implementation, exact guard, negative fixtures, and blocking workflow are unchanged
   from current main. `Select-String -LiteralPath pnpm-workspace.yaml -Pattern
   '^\s+fflate:\s+0\.8\.3$'` separately confirmed the exact central override at line 92.
-- `node --test scripts/qa/generate-vuln-report.test.js` — **MEASURED PASS**; all 6 report-parser
-  contract cases passed.
+- `node --test scripts/qa/generate-vuln-report.test.js` — **MEASURED PASS**; the focused
+  report-parser contract cases passed.
 - `corepack pnpm audit --json --audit-level=high` — **BLOCKED** with expected exit `1`: `2` High,
   `0` Critical, `12` Moderate, and `2` Low. The only High findings are `node-forge@1.4.0`
   (`GHSA-86w9-cpqp-85rv`) and `braces@3.0.3` (`GHSA-vfj7-8cjw-p6xm`); the registry reports no
@@ -198,7 +198,7 @@ storage, aggregate service health, authorization, or deployment by this Platform
   tools/truth/public-surfaces.test.ts config/public-surfaces.json artifacts/PUBLIC_SURFACES.json
   artifacts/SOURCE_OF_TRUTH.json audit/PLATFORM_PUBLIC_SURFACE_SUCCESSOR_2026-10-07_PROOF.md
   docs/operations/known-gaps.md pnpm-workspace.yaml` — **MEASURED PASS** with no fixes applied. The
-  two existing literal GitHub-expression test warnings remain warnings, not failures.
+  existing literal GitHub-expression test warnings remain warnings, not failures.
 - `corepack pnpm exec tsc --ignoreConfig --noEmit --strict --skipLibCheck --target ESNext
   --module ESNext --moduleResolution bundler --lib es2022,dom
   tools/truth/public-surfaces.ts` — **MEASURED PASS**.
