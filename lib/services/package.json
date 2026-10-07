@@ -14,8 +14,10 @@
   "type": "module",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     }
   },
   "dependencies": {
@@ -31,6 +33,7 @@
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
     "test": "vitest run --root ../.. lib/services/src/adapters/payload-validation.test.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc --build"
   }
 }

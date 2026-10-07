@@ -20,7 +20,10 @@
     "codegen": "pnpm --filter @szl-holdings/api-spec run codegen",
     "typecheck:libs": "tsc --build",
     "typecheck": "turbo run typecheck",
-    "test": "node scripts/audit/validate-overclaim-ledger.js && node --test scripts/audit/validate-overclaim-ledger.test.js scripts/qa/generate-vuln-report.test.js scripts/ci/lighthouse-workflow.test.mjs scripts/ci/governance-workflows.test.mjs && turbo run test",
+    "test": "node scripts/audit/validate-overclaim-ledger.js && pnpm run test:compiled-runtime && pnpm run test:gateway-security && node --test scripts/audit/validate-overclaim-ledger.test.js scripts/qa/generate-sbom.test.mjs scripts/qa/generate-vuln-report.test.js scripts/qa/gate-grype-report.test.mjs scripts/qa/dependency-patches.test.mjs scripts/qa/third-party-licenses.test.mjs scripts/ci/lighthouse-workflow.test.mjs scripts/ci/governance-workflows.test.mjs scripts/ci/release-security-workflows.test.mjs && turbo run test",
+    "test:compiled-runtime": "node --test scripts/ci/compiled-runtime-packaging.test.mjs",
+    "test:service-runtime": "node --test scripts/ci/service-runtime-packaging.test.mjs scripts/ci/substrate-compose-packaging.test.mjs",
+    "test:gateway-security": "vitest run --config packages/gateway/vitest.config.ts",
     "test:legacy": "pnpm run test:api && pnpm run test:components && pnpm run test:proof-chain && pnpm run test:placeholder-empty-states",
     "test:proof-chain": "node scripts/check-proof-chain.js && vitest run --config vitest.config.ts scripts/check-proof-chain.test.js",
     "test:api": "vitest run --config vitest.config.ts",
@@ -100,7 +103,8 @@
     "qa:verify:skip-e2e": "node scripts/qa/post-merge-verify.js --skip-e2e",
     "security:audit": "pnpm run security:fflate && pnpm run security:sbom && node scripts/qa/generate-vuln-report.js && node scripts/qa/generate-license-report.js",
     "security:audit:fix": "pnpm update --latest",
-    "security:sbom": "node --test scripts/qa/generate-sbom.test.mjs && node scripts/qa/generate-sbom.js",
+    "security:sbom": "node scripts/qa/generate-sbom.js && node --test scripts/qa/generate-sbom.test.mjs",
+    "security:sbom:check": "node --test scripts/qa/generate-sbom.test.mjs",
     "security:vuln": "node scripts/qa/generate-vuln-report.js",
     "security:license": "node scripts/qa/generate-license-report.js",
     "smoke:product-mode": "node scripts/qa/smoke-product-mode.js",
@@ -166,10 +170,12 @@
   "packageManager": "pnpm@10.26.1",
   "engines": {
     "node": ">=24.0.0",
-    "pnpm": ">=10.0.0"
+    "pnpm": "10.26.1"
   },
   "devDependencies": {
     "serve": "14.2.6",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
     "@axe-core/playwright": "^4.11.1",
     "@biomejs/biome": "^2.4.12",
     "@commitlint/cli": "^19.8.1",

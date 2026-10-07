@@ -6,20 +6,22 @@
   "description": "Substrate MCP Gateway \u2014 exposes the Sovereign Execution Substrate over the Model Context Protocol (HTTP+SSE and stdio transports). Pure transport layer; no business logic.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     }
   },
   "scripts": {
-    "start": "tsx src/index.ts",
-    "start:stdio": "tsx src/index.ts --stdio",
+    "start": "node --enable-source-maps dist/index.js",
+    "start:stdio": "node --enable-source-maps dist/index.js --stdio",
     "build": "tsc --build",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/e2e.test.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/ext-apps": "^1.7.0",
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "@szl-holdings/evidence-graph": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
     "@szl/substrate": "workspace:*",

@@ -2,7 +2,8 @@
 /**
  * aef-smoke.ts — AEF Phase 3 smoke test
  *
- * Runs embed → rerank → hybrid-search against the AEF API and exits non-zero on failure.
+ * Exercises the maintained AEF API contract, including a real
+ * ingest → hybrid-search → eval chain, and exits non-zero on failure.
  *
  * Usage:
  *   tsx scripts/aef-smoke.ts
@@ -19,7 +20,7 @@ const headers: Record<string, string> = {
   'x-tenant-id': TENANT_ID,
 };
 
-let _passed = 0;
+let passed = 0;
 let failed = 0;
 
 async function runTest(name: string, fn: () => Promise<void>): Promise<void> {
@@ -27,9 +28,10 @@ async function runTest(name: string, fn: () => Promise<void>): Promise<void> {
   try {
     await fn();
     process.stdout.write('PASS\n');
-    _passed++;
-  } catch (_err) {
-    process.stdout.write(`FAIL\n`);
+    passed++;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stdout.write(`FAIL: ${message}\n`);
     failed++;
   }
 }
@@ -52,11 +54,15 @@ async function get(path: string): Promise<{ status: number; text: string }> {
   return { status: res.status, text };
 }
 
-function assert(condition: boolean, message: string): void {
+function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
 async function main(): Promise<void> {
+  const smokeNonce = `${Date.now()}-${process.pid}`;
+  const smokeSourceId = `smoke-doc-${smokeNonce}`;
+  const smokeSearchTerm = `aefsmoke${Date.now()}`;
+  let ingestedChunkId = '';
 
   await runTest('GET /health returns 200', async () => {
     const { status, text } = await get('/health');
@@ -72,9 +78,8 @@ async function main(): Promise<void> {
     assert(data.openapi?.startsWith('3.'), `Expected OpenAPI 3.x, got ${data.openapi}`);
   });
 
-  let embedRequestId = '';
   await runTest('POST /v1/embed returns vectors', async () => {
-    embedRequestId = `smoke-embed-${Date.now()}`;
+    const embedRequestId = `smoke-embed-${Date.now()}`;
     const { status, json } = await post('/v1/embed', {
       requestId: embedRequestId,
       tenantId: TENANT_ID,
@@ -115,20 +120,74 @@ async function main(): Promise<void> {
     assert(data.results[0]?.rank === 1, `Expected rank=1 for top result`);
   });
 
-  await runTest('POST /v1/hybrid-search returns hits with evidence', async () => {
+  await runTest('POST /v1/ingest indexes a completed workflow', async () => {
+    const { status, json } = await post('/v1/ingest', {
+      requestId: `smoke-ingest-${smokeNonce}`,
+      tenantId: TENANT_ID,
+      documents: [
+        {
+          sourceId: smokeSourceId,
+          profileId: 'default',
+          content: `This indexed document covers maritime law and carries the unique retrieval term ${smokeSearchTerm}.`,
+          contentType: 'text/plain',
+          title: 'AEF smoke retrieval document',
+        },
+      ],
+    });
+    const data = json as {
+      results: Array<{
+        sourceId: string;
+        chunksProduced: number;
+        chunksIndexed: number;
+        runId: string;
+        runStatus: string;
+      }>;
+      totalChunksIndexed: number;
+      runIds: string[];
+      traceId: string;
+    };
+    assert(status === 200, `Expected 200, got ${status}: ${JSON.stringify(json)}`);
+    assert(Array.isArray(data.results) && data.results.length === 1, 'Expected one ingest result');
+    const result = data.results[0];
+    assert(result !== undefined, 'Expected the ingest result to be present');
+    assert(result.sourceId === smokeSourceId, `Expected sourceId=${smokeSourceId}`);
+    assert(
+      result.runStatus === 'completed',
+      `Expected completed workflow, got ${result.runStatus}`,
+    );
+    assert(result.chunksProduced > 0, `Expected chunksProduced > 0, got ${result.chunksProduced}`);
+    assert(
+      result.chunksIndexed === result.chunksProduced,
+      `Expected all produced chunks indexed, got ${result.chunksIndexed}/${result.chunksProduced}`,
+    );
+    assert(
+      data.totalChunksIndexed === result.chunksIndexed,
+      `Expected totalChunksIndexed=${result.chunksIndexed}, got ${data.totalChunksIndexed}`,
+    );
+    assert(
+      data.runIds?.[0] === result.runId,
+      'Expected response runIds to include the workflow run',
+    );
+    assert(typeof data.traceId === 'string', 'Expected traceId string');
+  });
+
+  await runTest('POST /v1/hybrid-search retrieves the ingested chunk with evidence', async () => {
     const { status, json } = await post('/v1/hybrid-search', {
       requestId: `smoke-search-${Date.now()}`,
       tenantId: TENANT_ID,
-      query: 'maritime law',
-      topK: 3,
-      candidatePool: 10,
+      profileId: 'default',
+      query: `${smokeSearchTerm} maritime law`,
+      topK: 10,
+      candidatePool: 100,
       denseWeight: 0.6,
       keywordWeight: 0.4,
+      rerankEnabled: false,
       includeProvenance: true,
     });
     const data = json as {
       hits: Array<{
         chunkId: string;
+        sourceId: string;
         finalScore: number;
         evidenceId: string;
         selectedRationale: string;
@@ -138,29 +197,14 @@ async function main(): Promise<void> {
     assert(status === 200, `Expected 200, got ${status}: ${JSON.stringify(json)}`);
     assert(Array.isArray(data.hits), 'Expected hits array');
     assert(data.hits.length > 0, 'Expected at least one hit');
-    const h = data.hits[0]!;
+    const h = data.hits.find((hit) => hit.sourceId === smokeSourceId);
+    assert(h !== undefined, `Expected a hit for the just-ingested source ${smokeSourceId}`);
     assert(typeof h.chunkId === 'string', 'Expected chunkId string');
+    ingestedChunkId = h.chunkId;
     assert(typeof h.finalScore === 'number', 'Expected finalScore number');
     assert(typeof h.evidenceId === 'string', 'Expected evidenceId string');
     assert(typeof h.selectedRationale === 'string', 'Expected selectedRationale string');
     assert(typeof data.traceId === 'string', 'Expected traceId string');
-  });
-
-  await runTest('POST /v1/ingest returns 202 accepted', async () => {
-    const { status, json } = await post('/v1/ingest', {
-      requestId: `smoke-ingest-${Date.now()}`,
-      tenantId: TENANT_ID,
-      documents: [
-        {
-          sourceId: 'smoke-doc-1',
-          content: 'This is a test document about maritime law.',
-          contentType: 'text/plain',
-        },
-      ],
-    });
-    const data = json as { status: string };
-    assert(status === 202, `Expected 202, got ${status}: ${JSON.stringify(json)}`);
-    assert(data.status === 'queued', `Expected status=queued, got ${data.status}`);
   });
 
   await runTest('POST /v1/index/rebuild returns 202 job queued', async () => {
@@ -183,23 +227,39 @@ async function main(): Promise<void> {
     assert(typeof data.verified === 'boolean', 'Expected verified boolean');
   });
 
-  await runTest('POST /v1/evals/run returns not_configured', async () => {
+  await runTest('POST /v1/evals/run evaluates the ingested chunk', async () => {
+    assert(ingestedChunkId.length > 0, 'Expected hybrid-search to capture an ingested chunk id');
     const { status, json } = await post('/v1/evals/run', {
       requestId: `smoke-evals-${Date.now()}`,
       tenantId: TENANT_ID,
       profileId: 'default',
       datasetId: 'smoke-dataset',
+      topK: 10,
+      metrics: ['recall'],
       queries: [
         {
           queryId: 'q1',
-          query: 'maritime law',
-          relevantChunkIds: ['chunk-1'],
+          query: `${smokeSearchTerm} maritime law`,
+          relevantChunkIds: [ingestedChunkId],
         },
       ],
     });
-    const data = json as { status: string };
+    const data = json as {
+      status: string;
+      queryCount: number;
+      metrics: Array<{ metric: string; value: number; atK: number }>;
+      runId: string;
+      traceId: string;
+    };
     assert(status === 200, `Expected 200, got ${status}: ${JSON.stringify(json)}`);
-    assert(data.status === 'not_configured', `Expected status=not_configured, got ${data.status}`);
+    assert(data.status === 'completed', `Expected status=completed, got ${data.status}`);
+    assert(data.queryCount === 1, `Expected queryCount=1, got ${data.queryCount}`);
+    const recall = data.metrics.find((metric) => metric.metric === 'recall');
+    assert(recall !== undefined, 'Expected a recall metric');
+    assert(recall.value === 1, `Expected recall=1 for the ingested chunk, got ${recall.value}`);
+    assert(recall.atK === 10, `Expected recall atK=10, got ${recall.atK}`);
+    assert(typeof data.runId === 'string', 'Expected runId string');
+    assert(typeof data.traceId === 'string', 'Expected traceId string');
   });
 
   await runTest('POST /v1/openai/embeddings (OpenAI-compat) returns embedding list', async () => {
@@ -215,6 +275,7 @@ async function main(): Promise<void> {
     assert(Array.isArray(data.data[0]?.embedding), 'Expected embedding array');
   });
 
+  process.stdout.write(`\nAEF smoke: ${passed} passed, ${failed} failed\n`);
   if (failed > 0) {
     process.exit(1);
   }

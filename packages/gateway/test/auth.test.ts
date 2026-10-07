@@ -6,8 +6,16 @@
  * invalid signature, expired token.
  */
 
-import { describe, it, expect } from 'vitest';
-import { issueToken, verifyToken, authenticateCaller, extractBearerToken, AuthError } from '../src/auth.js';
+import { generateKeyPairSync, sign } from 'node:crypto';
+import { describe, expect, it } from 'vitest';
+import {
+  AuthError,
+  authenticateCaller,
+  extractBearerToken,
+  issueToken,
+  verifyRs256Token,
+  verifyToken,
+} from '../src/auth.js';
 import type { CallerIdentity } from '../src/types.js';
 
 const TEST_SECRET = 'test-secret-do-not-use-in-prod';
@@ -18,6 +26,35 @@ const BASE_IDENTITY: Omit<CallerIdentity, 'iat' | 'exp'> = {
   groups: ['platform-team'],
   orgId: 'szl-holdings',
 };
+
+const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2_048 });
+const RS256_CONFIG = {
+  algorithm: 'RS256' as const,
+  publicKey: publicKey.export({ type: 'spki', format: 'pem' }).toString(),
+  issuer: 'https://identity.example.test',
+  audience: 'szl-agent-gateway',
+  orgId: 'szl-holdings',
+};
+
+function issueRs256Token(overrides: Record<string, unknown> = {}): string {
+  const now = Math.floor(Date.now() / 1000);
+  const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
+  const payload = Buffer.from(
+    JSON.stringify({
+      ...BASE_IDENTITY,
+      iat: now,
+      nbf: now - 1,
+      exp: now + 3_600,
+      iss: RS256_CONFIG.issuer,
+      aud: RS256_CONFIG.audience,
+      ...overrides,
+    }),
+  ).toString('base64url');
+  const signature = sign('RSA-SHA256', Buffer.from(`${header}.${payload}`), privateKey).toString(
+    'base64url',
+  );
+  return `${header}.${payload}.${signature}`;
+}
 
 // ---------------------------------------------------------------------------
 // Token issuance and verification
@@ -42,16 +79,8 @@ describe('issueToken / verifyToken', () => {
   });
 
   it('rejects an expired token', () => {
-    // TTL of 0 ms means it expires in the same second
-    const token = issueToken(BASE_IDENTITY, TEST_SECRET, 0);
-    // Wait 1100ms to ensure exp < now
-    const pastToken = token.split('.');
-    const header = pastToken[0]!;
-    const payload = JSON.parse(Buffer.from(pastToken[1]! + '==', 'base64').toString('utf8'));
-    payload.exp = Math.floor(Date.now() / 1000) - 60; // expired 60 seconds ago
-    const newPayload = Buffer.from(JSON.stringify(payload)).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-    const badToken = `${header}.${newPayload}.invalidsig`;
-    expect(() => verifyToken(badToken, TEST_SECRET)).toThrow(AuthError);
+    const token = issueToken(BASE_IDENTITY, TEST_SECRET, -60_000);
+    expect(() => verifyToken(token, TEST_SECRET)).toThrow(/expired/);
   });
 
   it('rejects a malformed JWT (only 2 segments)', () => {
@@ -61,12 +90,68 @@ describe('issueToken / verifyToken', () => {
   it('rejects a token with tampered payload', () => {
     const token = issueToken(BASE_IDENTITY, TEST_SECRET);
     const parts = token.split('.');
+    const payloadSegment = parts[1];
+    if (!payloadSegment) throw new Error('test token did not contain a payload');
     // Tamper payload: decode, change role, re-encode
-    const tampered = JSON.parse(Buffer.from(parts[1]! + '==', 'base64').toString('utf8'));
+    const tampered = JSON.parse(Buffer.from(`${payloadSegment}==`, 'base64').toString('utf8'));
     tampered.role = 'admin'; // escalation attempt
-    const tamperedPayload = Buffer.from(JSON.stringify(tampered)).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    const tamperedPayload = Buffer.from(JSON.stringify(tampered))
+      .toString('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
     const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
     expect(() => verifyToken(tamperedToken, TEST_SECRET)).toThrow(AuthError);
+  });
+});
+
+describe('verifyRs256Token', () => {
+  it('verifies native RS256 signatures and strict identity claims', () => {
+    const identity = verifyRs256Token(issueRs256Token(), RS256_CONFIG);
+    expect(identity).toMatchObject(BASE_IDENTITY);
+  });
+
+  it('rejects HS256 algorithm confusion and the wrong RSA key', () => {
+    const hsToken = issueToken(BASE_IDENTITY, TEST_SECRET);
+    expect(() => verifyRs256Token(hsToken, RS256_CONFIG)).toThrow(AuthError);
+
+    const otherKey = generateKeyPairSync('rsa', { modulusLength: 2_048 }).publicKey;
+    expect(() =>
+      verifyRs256Token(issueRs256Token(), {
+        ...RS256_CONFIG,
+        publicKey: otherKey.export({ type: 'spki', format: 'pem' }).toString(),
+      }),
+    ).toThrow(/signature verification failed/);
+  });
+
+  it('rejects issuer, audience, and not-before mismatches', () => {
+    expect(() => verifyRs256Token(issueRs256Token({ iss: 'attacker' }), RS256_CONFIG)).toThrow(
+      /configured issuer/,
+    );
+    expect(() =>
+      verifyRs256Token(issueRs256Token({ aud: ['szl-agent-gateway'] }), RS256_CONFIG),
+    ).toThrow(/configured audience/);
+    expect(() =>
+      verifyRs256Token(
+        issueRs256Token({ nbf: Math.floor(Date.now() / 1000) + 3_600 }),
+        RS256_CONFIG,
+      ),
+    ).toThrow(/not active yet/);
+    expect(() =>
+      verifyRs256Token(issueRs256Token({ orgId: 'different-tenant' }), RS256_CONFIG),
+    ).toThrow(/configured organization/);
+  });
+
+  it('rejects missing or wrongly typed required claims', () => {
+    expect(() =>
+      verifyRs256Token(issueRs256Token({ groups: 'platform-team' }), RS256_CONFIG),
+    ).toThrow(/groups/);
+    expect(() => verifyRs256Token(issueRs256Token({ exp: 'tomorrow' }), RS256_CONFIG)).toThrow(
+      /exp/,
+    );
+    expect(() => verifyRs256Token(issueRs256Token({ role: 'admin' }), RS256_CONFIG)).toThrow(
+      /role/,
+    );
   });
 });
 

@@ -52,6 +52,8 @@ async def test_opportunity_audit_retrieval_hits_live_lyte_metrics_store(monkeypa
         real_async_client_init(self, *args, **kwargs)
 
     monkeypatch.setattr(httpx.AsyncClient, "__init__", patched_init)
+    monkeypatch.setenv("LYTE_METRICS_STORE_ENV", "test")
+    monkeypatch.setenv("LYTE_METRICS_STORE_AUTH_BYPASS", "1")
 
     # ASGITransport accepts any URL; we just need a baseUrl that passes
     # availability checks (localhost → no API key required).
@@ -83,6 +85,7 @@ async def test_opportunity_audit_retrieval_hits_live_lyte_metrics_store(monkeypa
             "query": "latency spike on lyte-api-gateway and SLO drift across the fleet",
         },
         "mode": "live",
+        "tenantId": "tenant-test",
         "runId": "run-e2e-lyte",
         "stageId": "retrieve-lyte-data",
     }

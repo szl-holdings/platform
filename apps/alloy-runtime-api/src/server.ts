@@ -7,7 +7,9 @@
  * OpenTelemetry is initialized before the router is mounted (P1-A / KG009) so
  * every request emits a span via the env-driven OTLP exporter.
  */
+import { isProductionRuntime } from '@workspace/aef-contracts';
 import express, { type Express } from 'express';
+import { assertProductionAuthConfiguration } from './middleware/auth.js';
 import { initApiServerOtel, otelRequestSpanMiddleware, shutdownApiServerOtel } from './otel.js';
 import { createRouter } from './router.js';
 import { shutdownAtelierContinuityPruning } from './routes/v1/atelier.js';
@@ -34,6 +36,7 @@ export async function createApp(): Promise<Express> {
 }
 
 async function main(): Promise<void> {
+  assertProductionAuthConfiguration();
   const app = await createApp();
   const server = app.listen(PORT, () => {});
 
@@ -48,6 +51,6 @@ async function main(): Promise<void> {
 }
 
 // Only start listening when run directly, not when imported by tests.
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' || isProductionRuntime(process.env, ['ALLOY_RUNTIME_ENV'])) {
   void main();
 }

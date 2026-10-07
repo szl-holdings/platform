@@ -1,7 +1,7 @@
-import { randomUUID, createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { type ProofRecord, recordProof } from './nexus-fabric.js';
 import { getCurrentActorId, getCurrentTenantId } from './request-context.js';
 import { emitRunEvent, type RunEventType } from './run-events.js';
-import { recordProof, type ProofRecord } from './nexus-fabric.js';
 
 export type ElicitationMode = 'form' | 'url';
 export type ElicitationStatus = 'pending' | 'accepted' | 'declined' | 'cancelled' | 'expired';
@@ -55,7 +55,9 @@ export interface GovernedElicitationFlow {
   sessionBound: boolean;
   sessionToken: string | null;
   proofHash: string;
+  /** @deprecated No durable proof WAL is available in this release. Always false. */
   proofPersistedToWal: boolean;
+  receiptRecorded: boolean;
   response: Record<string, unknown> | null;
   createdAt: string;
   completedAt: string | null;
@@ -92,7 +94,11 @@ function validateUrlSafety(url: string): string[] {
     if (parsed.username || parsed.password) {
       errors.push('URL must not contain embedded credentials.');
     }
-    if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.hostname === '::1') {
+    if (
+      parsed.hostname === 'localhost' ||
+      parsed.hostname === '127.0.0.1' ||
+      parsed.hostname === '::1'
+    ) {
       errors.push('URL must not target localhost.');
     }
     if (URL_DOMAIN_ALLOWLIST.size > 0) {
@@ -103,7 +109,7 @@ function validateUrlSafety(url: string): string[] {
       if (!isAllowed) {
         errors.push(
           `URL domain '${host}' is not in the approved allowlist. ` +
-          `Allowed: ${Array.from(URL_DOMAIN_ALLOWLIST).join(', ')}.`,
+            `Allowed: ${Array.from(URL_DOMAIN_ALLOWLIST).join(', ')}.`,
         );
       }
     }
@@ -118,7 +124,9 @@ function validateSchemaSubset(schema: ElicitationFormSchema): string[] {
   const allowedTypes = new Set(['string', 'number', 'integer', 'boolean', 'array']);
   for (const [key, prop] of Object.entries(schema.properties)) {
     if (!allowedTypes.has(prop.type)) {
-      errors.push(`Property "${key}" has unsupported type "${prop.type}". Allowed: string, number, integer, boolean, array.`);
+      errors.push(
+        `Property "${key}" has unsupported type "${prop.type}". Allowed: string, number, integer, boolean, array.`,
+      );
     }
     if (prop.type === 'array') {
       if (!prop.items || prop.items.type !== 'string') {
@@ -158,7 +166,9 @@ function validateResponseAgainstSchema(
         const allowed = new Set(prop.items.enum);
         for (const item of val) {
           if (typeof item !== 'string' || !allowed.has(item)) {
-            errors.push(`Field "${key}" contains invalid value "${item}". Allowed: ${prop.items.enum.join(', ')}.`);
+            errors.push(
+              `Field "${key}" contains invalid value "${item}". Allowed: ${prop.items.enum.join(', ')}.`,
+            );
           }
         }
       }
@@ -179,12 +189,14 @@ function validateResponseAgainstSchema(
 function persistElicitationProof(
   flowId: string,
   actor: string,
+  tenantId: string,
   mode: ElicitationMode,
   proofHash: string,
   status: ElicitationStatus,
 ): void {
   const record: ProofRecord = {
     proofHash,
+    tenantId,
     toolName: `elicitation:${mode}`,
     actor,
     issuedAt: new Date().toISOString(),
@@ -209,10 +221,9 @@ export function handleElicitationCreate(
 
   if (mode === 'url') {
     if (!request.url) {
-      throw Object.assign(
-        new Error('URL elicitation requires a url parameter.'),
-        { code: URL_ELICITATION_REQUIRED_ERROR_CODE },
-      );
+      throw Object.assign(new Error('URL elicitation requires a url parameter.'), {
+        code: URL_ELICITATION_REQUIRED_ERROR_CODE,
+      });
     }
     const urlErrors = validateUrlSafety(request.url);
     if (urlErrors.length > 0) {
@@ -238,7 +249,9 @@ export function handleElicitationCreate(
     actor,
     tenantId,
     message: request.message,
-    sessionToken: sessionToken ? createHash('sha256').update(sessionToken).digest('hex').slice(0, 8) : null,
+    sessionToken: sessionToken
+      ? createHash('sha256').update(sessionToken).digest('hex').slice(0, 8)
+      : null,
     timestamp: Date.now(),
   });
 
@@ -261,6 +274,7 @@ export function handleElicitationCreate(
     sessionToken,
     proofHash,
     proofPersistedToWal: false,
+    receiptRecorded: false,
     response: null,
     createdAt: now.toISOString(),
     completedAt: null,
@@ -269,11 +283,12 @@ export function handleElicitationCreate(
 
   activeFlows.set(flowId, flow);
 
-  persistElicitationProof(flowId, actor, mode, proofHash, 'pending');
-  flow.proofPersistedToWal = true;
+  persistElicitationProof(flowId, actor, tenantId, mode, proofHash, 'pending');
+  flow.receiptRecorded = true;
 
   emitRunEvent({
     type: 'elicitation_created' as RunEventType,
+    tenantId,
     runId: flowId,
     actor,
     timestamp: Date.now(),
@@ -301,7 +316,14 @@ export function resolveElicitation(
   if (flow.expiresAt && new Date(flow.expiresAt) < new Date()) {
     flow.status = 'expired';
     flow.completedAt = new Date().toISOString();
-    persistElicitationProof(flowId, flow.actor, flow.mode, flow.proofHash, 'expired');
+    persistElicitationProof(
+      flowId,
+      flow.actor,
+      flow.tenantId,
+      flow.mode,
+      flow.proofHash,
+      'expired',
+    );
     throw new Error(`Elicitation flow ${flowId} has expired.`);
   }
 
@@ -341,16 +363,25 @@ export function resolveElicitation(
 
   flow.completedAt = new Date().toISOString();
 
-  persistElicitationProof(flowId, flow.actor, flow.mode, flow.proofHash, flow.status);
+  persistElicitationProof(
+    flowId,
+    flow.actor,
+    flow.tenantId,
+    flow.mode,
+    flow.proofHash,
+    flow.status,
+  );
 
-  const eventType = result.action === 'accept'
-    ? 'elicitation_accepted'
-    : result.action === 'decline'
-      ? 'elicitation_declined'
-      : 'elicitation_cancelled';
+  const eventType =
+    result.action === 'accept'
+      ? 'elicitation_accepted'
+      : result.action === 'decline'
+        ? 'elicitation_declined'
+        : 'elicitation_cancelled';
 
   emitRunEvent({
     type: eventType as RunEventType,
+    tenantId: flow.tenantId,
     runId: flowId,
     actor: flow.actor,
     timestamp: Date.now(),
@@ -358,6 +389,7 @@ export function resolveElicitation(
 
   emitRunEvent({
     type: 'elicitation_complete' as RunEventType,
+    tenantId: flow.tenantId,
     runId: flowId,
     actor: flow.actor,
     status: flow.status,
@@ -376,16 +408,28 @@ export function getActiveElicitationFlows(): GovernedElicitationFlow[] {
 export function getAllElicitationFlows(limit = 50, tenantId?: string): GovernedElicitationFlow[] {
   const effectiveTenant = tenantId ?? getCurrentTenantId();
   return Array.from(activeFlows.values())
-    .filter((f) => !effectiveTenant || effectiveTenant === 'substrate-gateway' || f.tenantId === effectiveTenant)
+    .filter(
+      (f) =>
+        !effectiveTenant ||
+        effectiveTenant === 'substrate-gateway' ||
+        f.tenantId === effectiveTenant,
+    )
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, limit);
 }
 
-export function getElicitationFlow(flowId: string, tenantId?: string): GovernedElicitationFlow | undefined {
+export function getElicitationFlow(
+  flowId: string,
+  tenantId?: string,
+): GovernedElicitationFlow | undefined {
   const flow = activeFlows.get(flowId);
   if (!flow) return undefined;
   const effectiveTenant = tenantId ?? getCurrentTenantId();
-  if (effectiveTenant && effectiveTenant !== 'substrate-gateway' && flow.tenantId !== effectiveTenant) {
+  if (
+    effectiveTenant &&
+    effectiveTenant !== 'substrate-gateway' &&
+    flow.tenantId !== effectiveTenant
+  ) {
     return undefined;
   }
   return flow;

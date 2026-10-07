@@ -1,42 +1,177 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-05 (rev 33 — kernel mutation authentication hardening)
+**Last updated:** 2026-10-07 (rev 36 — frontier candidate truth and Python delivery boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
 
-> **Freshness boundary for rev 33:** this revision appends local source evidence;
-> it does not re-observe or revalidate any remote repository, deployment, model,
-> dataset, Space, DNS record, certificate, or HTTP route. Unless a later section
-> explicitly identifies a current authorized observation, dated external results
-> below are **RETAINED HISTORY**, not present-tense status. The current estate
-> boundary is **UNKNOWN / HOLD** in the
+> **Freshness boundary for rev 36:** rev 36 adds only candidate local source
+> boundaries recorded below; it does not re-observe any external
+> state. It carries forward the four narrow, dated receipts scoped in rev 34:
+> GitHub repository metadata, the Platform repository ruleset, the Hugging Face
+> public-catalog snapshot, and bounded domain homepage transactions. Each
+> receipt establishes only its recorded transaction at its
+> `observed_at`/`observedAt` time. It does not make
+> any wider repository, deployment, model, dataset, Space, DNS, certificate, or
+> route state fresh. Unless a later section names one of those current receipts,
+> dated external results below are **RETAINED HISTORY**, not present-tense
+> status. Unobserved estate state remains **UNKNOWN / HOLD** under the
 > [2026-10-05 prepublish audit](../../audit/SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md).
+
+> **Current backend-topology boundary:** `artifacts/api-server` is a historical
+> compatibility stub with only a narrow export and a typecheck script. Startable
+> Express implementations currently present in source are
+> `apps/alloy-runtime-api`, `apps/alloy-embedding-api`, and
+> `apps/alloy-ingestion-orchestrator`; additional TypeScript and Python services
+> exist under `services/*`, `workers/*`, and `apps/*`. Source presence does not
+> establish deployment, provider, production authority, or customer-data use.
+> Older dated entries below that name a large `artifacts/api-server` route tree
+> describe their historical source state, not the current stub.
+
+### AEF-INGEST-001 — retry/idempotency remains a production hold
+
+Candidate source now makes the local AEF smoke exercise one real
+ingest → hybrid-search → eval chain. Per-document retrieval indexing attempts
+best-effort compensating deletes for completed writes when a later write fails,
+and a mixed batch returns HTTP 207 with ordered per-document results while
+retaining successful writes.
+These are local in-memory regression results, not a pgvector, deployment, crash
+recovery, or production-runtime witness.
+
+`POST /v1/ingest` still has no durable tenant-scoped reservation or completed-
+request registry keyed by `requestId`, no payload-fingerprint conflict check,
+and no transactional source-replacement rule. A client retry can therefore run
+the workflow again, and repeated ingestion of one source can accumulate chunks
+with newly generated IDs. The gateway's compensating deletes also cannot make
+the separate orchestrator store atomic across an adapter failure or process
+crash. Exactly-once and duplicate-safe ingestion remain **UNAVAILABLE / HOLD**
+for production claims until a durable idempotency record, conflict semantics,
+source replacement, and real-adapter crash/retry tests exist. A process-local
+response cache is not an accepted substitute.
+
+Candidate source now enforces that boundary: production workflow submission,
+ingest, index, eval, and approval-resume routes return HTTP 503 with
+`DURABLE_ORCHESTRATOR_STATE_REQUIRED`; standalone orchestrator readiness reports
+`EVALUATION_HOLD`. Production hybrid retrieval also rejects the in-memory store,
+and aggregate embedding-API readiness remains HTTP 503 while retrieval,
+evidence-ledger, or stateful workflow admission is held. These controls prevent
+silent production admission. They do **not** implement
+the missing durable stores, transactional approval resolution, idempotency, or
+crash recovery, so this gap remains open.
+
+The AEF evidence ledger is likewise not a production authority. Its default
+store is process-local and the optional JSONL adapter is mutable and not
+hash-chained. Production embed, rerank, hybrid-search, and multimodal-embed
+routes now return HTTP 503 with `EVIDENCE_LEDGER_DURABILITY_REQUIRED` before
+inference or evidence-ID minting; `/readyz` exposes the ledger
+`EVALUATION_HOLD`. This closes false admission only. Durable authenticated
+storage, tamper evidence, atomic request completeness, retention enforcement,
+and independent verification remain open.
+
+### FRONTIER-RELEASE-001 — exact candidate identity and generated truth remain HOLD
+
+The 2026-10-07 hardening work is an uncommitted multi-lane working tree based on
+`150b166171cbd339acb287f7f5d37809c21774ee`. It has no immutable release source
+or tree identity yet. A prior local checkpoint passed focused governance,
+security, runtime, and package tests, but later edits make those totals
+historical rather than final-candidate evidence.
+
+The source-of-truth validator failed three drift checks at
+`2026-10-07T11:35:16.688Z`: the registry records 45 API route source files while
+the working tree measures 44, it records 315 API handler declarations while the
+tree measures 332, and it records 245 environment variables while the tree
+measures 246. The local
+vulnerability report was refreshed at `2026-10-07T11:26:02.054Z`; the license
+report at `2026-10-07T11:26:18.409Z` covers 1,726 unique package/version pairs;
+and the current `security/sbom-latest.json` contains 1,989 components with
+SHA-256 `4ddcac69665a80ef9e7ebd53606ceb76c48fbc55b7d72bd09fd9a3b38736f198`.
+These are frozen-manifest, pnpm-only local candidate checkpoints; they do not
+cover Python dependencies, and none is bound to an immutable release commit or
+hosted conclusion. The three deployable Python services still lack resolved,
+hashed locks and Python SBOM, vulnerability, license, and reproducible-image
+evidence. Do not hand-edit generated
+counts or refresh timestamps. Freeze the remaining source candidate, revalidate
+the lock-derived vulnerability report, license report, SBOM, API catalogue, and
+truth registries, and regenerate any artifact whose inputs change. Then run the
+complete typecheck/test/build/runtime suite and bind all receipts to the
+resulting exact commit. Until then, release proof and public operational
+promotion remain **HOLD**.
+
+### PYWORKER-DELIVERY-001 — cross-worker delivery is not duplicate-safe
+
+The Python claim boundary now has candidate bearer authentication, production
+credential-to-tenant binding, header/body tenant consistency, stable HTTP error
+semantics, and production rejection of the development embedding/reranking
+heuristics. Those source improvements do not make the worker topology
+production-ready.
+
+`ClaimLoop` tracks active behavior only inside one process and has no durable,
+shared `(tenantId, runId, stageId)` reservation or completed-result store. A
+worker can accept and finish `POST /claim` while its response is lost; an engine
+or proxy retry against another worker can execute the stage again. Candidate
+source therefore sends the mutating request at most once and disables automatic
+cross-upstream retry in the proxy sketches. Duplicate-safe retry and replay
+remain **UNAVAILABLE / HOLD** until durable idempotency, payload-conflict rules,
+result replay, crash/restart tests, and ambiguous-response tests exist.
+
+`AutoscalingPolicy` currently produces recommendations only. No tracked
+coordinator aggregates `/metrics`, invokes `evaluate()`, or changes replicas,
+and the service exposes only its own worker view. Autoscaling and whole-fleet
+status are **NOT IMPLEMENTED**, not deployment features. In addition, the
+worker/inference/Lyte service dependency files use ranges without a committed
+hashed lock or reproducible image receipt; dependency-backed pytest was not
+available in the restricted onboarding environment. Packaging and deployment
+remain **HOLD**.
+
+### LOCAL-STACK-001 — source remediated; image/runtime proof remains HOLD
+
+Candidate source now limits `ops/local/docker-compose.yml` to four present
+Dockerfiles (`alloy-runtime-api`, `vessels`, `terra`, and `carlota-jo`), uses
+repository-root build contexts, and requires an API key plus tenant identity
+without defaults for the runtime API. `docker compose --env-file .env -f
+ops/local/docker-compose.yml config --quiet` passes when those two required
+values are supplied. This closes the missing-Dockerfile/retired-package source
+defect.
+
+No exact-image build, container startup, health/readiness, dependency, or
+cross-service transaction receipt is bound to the candidate. The stack also
+does not include PostgreSQL and is not a whole-platform topology. Container and
+release evidence therefore remain **UNOBSERVED / HOLD** until the exact
+candidate images build and the bounded runtime checks pass.
 
 ---
 
-## Retained Public Surface Registry Truth — observed 2026-08-11; now expired
+## Current Bounded Public Surface Registry — observed 2026-10-07
 
 The generated public-surface manifest distinguishes source-tree product
-inventory from route evidence. Its 2026-08-11 snapshot recorded customer-facing
-routes as `REACHABLE`, `REDIRECTED`, or `UNAVAILABLE` and bound them to a named
-runtime repository and path. That observation is expired. Current DNS, TLS,
-HTTP status/body, headers, redirects, and route availability are **UNKNOWN**.
+inventory from route evidence. An initial bounded validator run on 2026-10-07
+failed closed on seven differences from the expired 2026-08-11 registry. Review
+of the exact external owners established intentional contracts for the two
+A11oy.net trailing-slash documentation gateways, lowercase webmanifest identity,
+same-origin Killinchu status and Command pages, and the changed Killinchu API
+envelopes. The registry was updated from those reviewed sources rather than by
+loosening response checks.
+
+A subsequent full `surfaces:freshness` run passed all 29 approved targets and is
+bound to `observed_at=2026-10-07T12:31:38.131Z`. Killinchu build identity is pinned
+to full main revision `13477c429f5742cdc718a6294a80d00c7e8dc634` and the exact
+GitHub OIDC attestation subject. Its readiness contract positively requires the
+canonical ledger to be `EPHEMERAL`, `PROCESS_MEMORY`, and
+`production_ready=false`; the separately labeled SQLite diagnostic store cannot
+satisfy durability. Current whole-site DNS, TLS, headers, accessibility,
+continuous availability, and functional behavior remain **UNKNOWN / HOLD**.
 Public quantitative claims remain governed by the canonical metrics registry
 and generated [`docs/platform-facts.md`](../platform-facts.md), not by historical
-app directories, marketing copy, or the expired route snapshot.
+app directories, marketing copy, or route reachability alone.
 
-This closed the zero-manifest tooling gap, not every web gap. At that retained
-observation, `/lyte`, `/aegis`, `/vessels`, `/terra`, `/counsel`,
-`/carlota-jo`, `/command`, `/pulse`, `a11oy.net/chat`, and `a11oy.net/code`
-returned HTTP 404 and were recorded as `UNAVAILABLE`. The same snapshot recorded
-`manifest.webmanifest`, `robots.txt`, and `sitemap.xml` as reachable metadata;
-those are not customer-facing product surfaces and do not change the routed-
-product count. None of these retained results is a current availability claim.
-A routed page is not an uptime, customer, feature-completeness, or correctness
-claim; `LIVE`, `MIXED`, and `DOCUMENTATION` are registry modes, not fresh runtime
-authority.
+This closes the seven known contract mismatches, not every web gap. `/lyte`,
+`/aegis`, `/vessels`, `/terra`, `/counsel`, `/carlota-jo`, and `/pulse` remain
+explicitly `UNAVAILABLE`; `/command/` is now a reachable, honestly `MIXED`,
+modeled browser surface. The A11oy.net manifest, robots file, and sitemap remain
+metadata rather than customer-facing product surfaces. A routed page is not an
+uptime, customer, feature-completeness, or correctness claim; `LIVE`, `MIXED`,
+and `DOCUMENTATION` are evidence modes, not production authority.
 
 Repository source defines a `truth-drift` job that validates schema,
 deterministic generated bytes, source ownership, expected status and redirect
@@ -44,10 +179,10 @@ behavior, bounded `robots.txt` and sitemap content, and HTTP observations when
 the job can execute them. It accepts honest historical snapshot timestamps so
 unrelated changes do not silently relabel them. The workflow source schedules
 `pnpm surfaces:freshness` daily at `06:17 UTC` and exposes a manual
-`require_surface_freshness` input. No current hosted run was observed for rev
-33. An expired observation is remediated only by re-observing every approved
-target, updating the registry evidence, regenerating the deterministic
-artifacts, reviewing the diff, and rerunning the freshness gate.
+`require_surface_freshness` input. No current hosted surface-freshness run is
+recorded by rev 34. An expired observation is remediated only by re-observing
+every approved target, updating the registry evidence, regenerating the
+deterministic artifacts, reviewing the diff, and rerunning the freshness gate.
 
 The generated `artifacts/SOURCE_OF_TRUTH.json` timestamp follows the same
 honest-snapshot rule. Pull requests and protected-main pushes still validate
@@ -429,20 +564,34 @@ receipt. The remaining gaps are:
 - **Database tables, Lean sorry count, Lambda count, Hugging Face collections,
   and receipt-chain depth:** `UNAVAILABLE` pending an authoritative local source
   or authorized live receipt.
-- **Repository consolidation (RETAINED 2026-07-25):** the recorded public
-  organization inventory had `53` repositories, not the historical target of
-  `9`. The current count is **UNKNOWN**. Visibility, archival,
-  deletion, and history changes require explicit founder approval and a tested
-  restoration plan.
-- **Hugging Face estate (RETAINED 2026-07-25):** `15` models, `26` datasets,
-  and `25` spaces were measured from the public API. Newer retained inventories
-  conflict with these counts, and the current catalog is **UNKNOWN**. No private
-  asset was accessed, exported, or deployed by that observation.
-- **Independent review:** the organization currently has no eligible independent
-  collaborator. Do not manufacture or self-approve reviews. Keep required
-  checks, signed commits, linear history, conversation resolution, and exact-head
-  verification; transition to independent review after the first qualified hire
-  without creating a self-deadlock before then.
+- **Repository consolidation:** the retained 2026-07-25 public inventory of
+  `53` repositories is historical and superseded. A cursor-complete,
+  authenticated metadata receipt observed 140 repositories on 2026-10-06,
+  and a cursor-exhaustive read-only aggregate recheck on 2026-10-07 matched:
+  128 public and 12 private, with 111 active and 29 archived across both
+  visibilities. The sanitized receipt does not expose the active-public versus
+  archived-public cross-tab, so that narrower breakdown remains **UNKNOWN**.
+  The target of `9` remains an unapplied disposition decision; visibility,
+  archival, deletion, and history changes require explicit founder approval
+  and a tested restoration plan.
+- **Hugging Face public catalog:** the repository-controlled snapshot at
+  `audit/evidence/huggingface-public-catalog.snapshot.json` records
+  `observedAt=2026-10-07T11:48:26.618Z`, its RFC Link pagination/completeness
+  rule, one page per asset type, and exact IDs for 47 models, 37 datasets, and
+  35 Spaces. For public-catalog counts it supersedes the retained
+  2026-07-25 and 2026-09-29 inventory counts. Collections, private-asset
+  completeness, first-class Kernel inventory, runtime behavior, publication
+  authority, training rights, and readiness remain **UNKNOWN** or
+  `UNAVAILABLE`; the snapshot is not evidence that any asset was exported or
+  deployed.
+- **Independent review:** current collaborator eligibility and reviewer
+  availability were not observed and remain **UNKNOWN**. The authenticated
+  Platform ruleset receipt records zero required approving reviews plus extra
+  approval for unattributed changes; it does not establish staffing. Do not
+  manufacture or self-approve a review. Preserve the observed required checks,
+  signatures, squash-only history, conversation resolution, and exact-head
+  verification, and change review requirements only from current staffing and
+  ruleset evidence.
 - **Standalone KHIPU receipt semantics:** `@szl/verify` can establish the exact
   DSSE payload type, JSON decoding, Ed25519 or ECDSA P-256 signature validity,
   and an externally pinned signer identity. It does not yet validate portable

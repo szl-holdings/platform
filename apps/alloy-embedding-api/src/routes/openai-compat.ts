@@ -1,12 +1,16 @@
 import { randomUUID } from 'node:crypto';
-import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
 import { OpenAIEmbedRequestSchema } from '@workspace/aef-contracts';
 import { embedTextsWithReceipt } from '@workspace/alloy-embed-worker';
+import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
+import { evidenceLedgerRuntimeAdmission } from '../evidence-ledger-runtime.js';
 import { logger } from '../middleware/logger.js';
 import { errorBudgetCounter } from '../middleware/prometheus.js';
+import { enforceTenantRequestConsistency } from '../middleware/tenant.js';
 import { EmbedderConfigurationError, getEmbedderSelection } from '../retrieval-store.js';
 
 export const openaiCompatRouter: IRouter = Router();
+openaiCompatRouter.use(enforceTenantRequestConsistency as RequestHandler);
+openaiCompatRouter.use(evidenceLedgerRuntimeAdmission as RequestHandler);
 
 openaiCompatRouter.post('/v1/openai/embeddings', (async (req: Request, res: Response) => {
   const parseResult = OpenAIEmbedRequestSchema.safeParse(req.body);
@@ -93,7 +97,8 @@ openaiCompatRouter.post('/v1/openai/embeddings', (async (req: Request, res: Resp
     return;
   }
 
-  const totalTokens = result.tokenCounts?.reduce((sum, count) => sum + count, 0) ??
+  const totalTokens =
+    result.tokenCounts?.reduce((sum, count) => sum + count, 0) ??
     texts.reduce((sum, text) => sum + Math.ceil(text.length / 4), 0);
 
   res.status(200).json({

@@ -1,31 +1,27 @@
 #!/usr/bin/env bash
 # =============================================================================
 # tools/local-ci-runner.sh
-# Local CI runner for szl-holdings/platform
+# Local preflight runner for szl-holdings/platform
 #
 # PURPOSE
-#   Executes all CI checks that GitHub Actions would run (minus the two that
-#   require GitHub-hosted infra: CodeQL and szl-zarf-publish) and optionally
-#   reports each check's result back to GitHub via the Checks API.
+#   Executes a useful subset of repository checks with the canonical root
+#   commands. This is developer feedback only: it does not reproduce hosted
+#   workflow isolation, publish GitHub statuses, satisfy branch protection,
+#   or prove that required checks passed for a pushed commit.
 #
 # USAGE
-#   # Dry run — just run locally, no GitHub reporting:
 #   ./tools/local-ci-runner.sh
 #
-#   # Report results to GitHub as check-runs on the current HEAD commit:
-#   GH_REPORT=1 ./tools/local-ci-runner.sh
-#
-#   # Report on a specific SHA (e.g., a PR head):
-#   GH_REPORT=1 HEAD_SHA=<sha> ./tools/local-ci-runner.sh
-#
 # REQUIREMENTS
-#   - node >= 18, pnpm >= 8 on PATH
-#   - gh CLI authenticated (only required when GH_REPORT=1)
+#   - Node >=24; the runner activates exact pnpm 10.26.1
+#   - Gitleaks 8.21.2 on PATH (absence or version drift is blocking)
 #   - Run from the repo root
 #
 # EXIT CODE
-#   0  all blocking checks passed
-#   1  one or more blocking checks failed
+#   0  selected local checks passed and required local tooling was available
+#   1  a selected check failed or required local tooling was unavailable
+#
+# A zero exit code is not a hosted CI result or merge authorization.
 # =============================================================================
 
 set -euo pipefail
@@ -36,9 +32,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-GH_REPORT="${GH_REPORT:-0}"
-HEAD_SHA="${HEAD_SHA:-$(git rev-parse HEAD)}"
-REPO_SLUG="szl-holdings/platform"
+HEAD_SHA="$(git rev-parse HEAD)"
 LOG_DIR="${REPO_ROOT}/.local-ci-logs"
 SUMMARY_FILE="${LOG_DIR}/summary.txt"
 
@@ -61,33 +55,15 @@ sep()   { echo -e "${BOLD}──────────────────
 OVERALL_EXIT=0
 
 # ---------------------------------------------------------------------------
-# gh Checks API reporter
-# ---------------------------------------------------------------------------
-gh_report() {
-  local name="$1" conclusion="$2" summary="$3"
-  [[ "$GH_REPORT" != "1" ]] && return 0
-  gh api "repos/${REPO_SLUG}/check-runs" \
-    -X POST \
-    -H "Accept: application/vnd.github+json" \
-    -f name="local-ci / ${name}" \
-    -f head_sha="${HEAD_SHA}" \
-    -f status="completed" \
-    -f conclusion="${conclusion}" \
-    -f "output[title]=${name} (local runner)" \
-    -f "output[summary]=${summary}" \
-    --silent || warn "gh Checks API report failed for '${name}' (non-fatal)"
-}
-
-# ---------------------------------------------------------------------------
-# run_check <name> <blocking|advisory> <env_overrides> -- <command...>
-#   Runs a check, logs output, records pass/fail, optionally reports to GitHub.
+# run_check <name> <env_overrides> -- <command...>
+#   Runs a selected local check, logs output, and records pass/fail. Every
+#   selected check is blocking for this preflight; hosted CI remains separate.
 # ---------------------------------------------------------------------------
 declare -a RESULTS=()
 
 run_check() {
   local name="$1"
-  local severity="$2"   # blocking | advisory
-  shift 2
+  shift
 
   # Parse optional env overrides (KEY=VALUE pairs before --)
   local -a env_pairs=()
@@ -99,7 +75,7 @@ run_check() {
 
   local log_file="${LOG_DIR}/${name// /-}.log"
   sep
-  log "Running: ${BOLD}${name}${RESET} [${severity}]"
+  log "Running: ${BOLD}${name}${RESET} [local preflight]"
   echo -e "  Command: $*"
 
   local start_ts exit_code=0
@@ -115,22 +91,11 @@ run_check() {
 
   if [[ $exit_code -eq 0 ]]; then
     pass "${name} — ${elapsed}s"
-    RESULTS+=("PASS|${name}|${severity}|${elapsed}s")
-    gh_report "$name" "success" "Passed in ${elapsed}s."
+    RESULTS+=("PASS|${name}|${elapsed}s")
   else
-    local tail_output
-    tail_output=$(tail -40 "$log_file" 2>/dev/null || true)
-
-    if [[ "$severity" == "blocking" ]]; then
-      fail "${name} — ${elapsed}s  ← BLOCKING"
-      RESULTS+=("FAIL|${name}|${severity}|${elapsed}s")
-      OVERALL_EXIT=1
-      gh_report "$name" "failure" "Failed after ${elapsed}s.\n\n\`\`\`\n${tail_output}\n\`\`\`"
-    else
-      warn "${name} — ${elapsed}s  [advisory — non-blocking]"
-      RESULTS+=("WARN|${name}|${severity}|${elapsed}s")
-      gh_report "$name" "neutral" "Advisory check failed after ${elapsed}s (non-blocking).\n\n\`\`\`\n${tail_output}\n\`\`\`"
-    fi
+    fail "${name} — ${elapsed}s  ← LOCAL PREFLIGHT FAILED"
+    RESULTS+=("FAIL|${name}|${elapsed}s")
+    OVERALL_EXIT=1
     echo ""
     echo "  Last 20 lines of log (${log_file}):"
     tail -20 "$log_file" | sed 's/^/    /'
@@ -140,192 +105,158 @@ run_check() {
   echo "${RESULTS[-1]}" >> "$SUMMARY_FILE"
 }
 
+record_unavailable() {
+  local name="$1" reason="$2"
+  warn "${name} — UNAVAILABLE (${reason})"
+  RESULTS+=("UNAVAILABLE|${name}|0s")
+  echo "UNAVAILABLE|${name}|0s" >> "$SUMMARY_FILE"
+  OVERALL_EXIT=1
+}
+
 # ---------------------------------------------------------------------------
 # Pre-flight
 # ---------------------------------------------------------------------------
+command -v node >/dev/null 2>&1 || {
+  echo "[local-ci] Node >=24 is required." >&2
+  exit 1
+}
+NODE_MAJOR=$(node -p 'process.versions.node.split(".")[0]')
+if [[ ! "$NODE_MAJOR" =~ ^[0-9]+$ ]] || (( NODE_MAJOR < 24 )); then
+  echo "[local-ci] Node >=24 is required; found $(node --version)." >&2
+  exit 1
+fi
+# shellcheck source=../scripts/activate-pnpm.sh
+source "$REPO_ROOT/scripts/activate-pnpm.sh"
+if [[ "$(pnpm --version)" != "10.26.1" ]]; then
+  echo "[local-ci] pnpm 10.26.1 is required after activation." >&2
+  exit 1
+fi
+
 sep
-log "Local CI Runner — szl-holdings/platform"
+log "Local preflight — szl-holdings/platform"
 log "HEAD: ${HEAD_SHA}"
 log "Date: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 log "Node: $(node --version 2>/dev/null || echo 'not found')"
 log "pnpm: $(pnpm --version 2>/dev/null || echo 'not found')"
-log "GH report: ${GH_REPORT}"
-if [[ "$GH_REPORT" == "1" ]]; then
-  log "Repo slug: ${REPO_SLUG}"
-fi
+warn "Partial local feedback only; required hosted checks remain authoritative."
 sep
 
-# Ensure pnpm dependencies are installed (offline-first, mirrors CI behaviour)
+# Ensure pnpm dependencies are installed from the committed lockfile.
 log "Installing dependencies (--frozen-lockfile --prefer-offline)..."
-pnpm install --frozen-lockfile --prefer-offline >"${LOG_DIR}/pnpm-install.log" 2>&1 || {
+ONNXRUNTIME_NODE_INSTALL=skip pnpm install --frozen-lockfile --prefer-offline >"${LOG_DIR}/pnpm-install.log" 2>&1 || {
   fail "pnpm install failed — see ${LOG_DIR}/pnpm-install.log"
   exit 1
 }
 pass "pnpm install"
 
 # ---------------------------------------------------------------------------
-# Blocking checks (mirror ci.yml gates)
+# Selected local checks. Use canonical package.json entry points where one is
+# available so this helper does not fork the repository's command contract.
 # ---------------------------------------------------------------------------
 
-# 1. Lint
-run_check "lint" "blocking" -- \
-  pnpm run lint
+# 1. Clean-clone guards
+run_check "clean-clone-guards" -- \
+  pnpm run verify:clean-clone
 
-# 2. Typecheck
-run_check "typecheck" "blocking" -- \
+# 2. CI lint
+run_check "lint-ci" -- \
+  pnpm run lint:ci
+
+# 3. Typecheck
+run_check "typecheck" TURBO_CONCURRENCY=3 -- \
   pnpm run typecheck
 
-# 3. Unit tests
-run_check "test" "blocking" \
+# 4. Tests
+run_check "test" \
   DATABASE_URL=postgres://ci-stub:ci-stub@127.0.0.1:5432/ci-stub \
   NODE_ENV=test \
   -- \
   pnpm run test
 
-# 4. Build all packages
-run_check "build" "blocking" -- \
-  pnpm -r --if-present run build
+# 5. Build
+run_check "build" -- \
+  pnpm run build
 
-# 5. Secret scan (gitleaks — downloaded on-demand if not present)
-if command -v gitleaks &>/dev/null; then
-  run_check "secret-scan" "blocking" -- \
-    gitleaks detect --source . --config .gitleaks.toml --redact --exit-code 1
+# 6. Secret scans. The hosted workflow pins Gitleaks 8.21.2; local absence or
+# version drift is explicit and fails this preflight closed.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  record_unavailable "gitleaks" "8.21.2 is not on PATH"
+elif [[ "$(gitleaks version 2>/dev/null || true)" != "8.21.2" ]]; then
+  record_unavailable "gitleaks" "expected 8.21.2, found $(gitleaks version 2>/dev/null || echo unknown)"
 else
-  warn "gitleaks not found on PATH — secret-scan skipped locally"
-  warn "  Install: https://github.com/gitleaks/gitleaks#installing"
-  RESULTS+=("SKIP|secret-scan|blocking|0s")
-  echo "SKIP|secret-scan|blocking|0s" >> "$SUMMARY_FILE"
+  run_check "gitleaks" -- \
+    gitleaks detect --source . --config .gitleaks.toml --redact --exit-code 1
 fi
-
-# 6. Proof-chain static checks
-run_check "proof-chain-checks" "blocking" -- \
-  bash -c '
-    node scripts/check-proof-chain.js &&
-    pnpm --filter @szl-holdings/policy-engine exec vitest run src/policy-engine.test.ts &&
-    pnpm --filter @szl-holdings/action-engine exec vitest run src/action-engine.test.ts &&
-    pnpm --filter @workspace/trace-graph exec vitest run src/run-trace-e2e.test.ts &&
-    pnpm --filter @szl-holdings/connectors exec vitest run src/connector-normalization.test.ts &&
-    pnpm --filter @szl-holdings/telemetry-standards exec vitest run src/telemetry-coverage.test.ts &&
-    pnpm --filter @szl-holdings/telemetry-standards exec vitest run src/telemetry-e2e.test.ts &&
-    pnpm --filter @workspace/ontology exec vitest run src/recommendation-rendering.test.ts &&
-    pnpm vitest run --config vitest.config.ts scripts/check-proof-chain.test.js
-  '
+run_check "project-secret-scan" -- \
+  node scripts/qa/scan-secrets.js .
 
 # 7. Brand strings
-run_check "brand-strings" "blocking" -- \
-  pnpm brand:strings
+run_check "brand-strings" -- \
+  pnpm run brand:strings
 
 # 8. Env-var coverage
-run_check "env-coverage" "blocking" -- \
-  pnpm check:env-coverage:strict
+run_check "env-coverage" -- \
+  pnpm run check:env-coverage:strict
 
 # 9. Design token drift
-run_check "design-token-drift" "blocking" -- \
-  pnpm exec tsx scripts/check-design-tokens-drift.ts --check --threshold=40
+run_check "design-token-drift" -- \
+  pnpm run tokens:drift:check
 
-# 10. Pin check (all workflow action refs must be SHA-pinned)
-run_check "pin-check" "blocking" -- \
-  bash -c '
-    set -euo pipefail
-    WORKFLOW_DIR=".github/workflows"
-    VIOLATIONS=$(mktemp)
-    for file in "$WORKFLOW_DIR"/*.yml "$WORKFLOW_DIR"/*.yaml; do
-      [ -f "$file" ] || continue
-      while IFS= read -r line; do
-        ref=$(echo "$line" | sed -n '"'"'s/.*uses:[[:space:]]*\([^[:space:]#]*\).*/\1/p'"'"')
-        [ -z "$ref" ] && continue
-        [[ "$ref" == ./* ]] && continue
-        after_at="${ref##*@}"
-        if ! echo "$after_at" | grep -qE "^[0-9a-f]{40}$"; then
-          echo "Unpinned action: $ref in $file" | tee -a "$VIOLATIONS"
-        fi
-      done < <(grep -E "^\s*(-\s+)?uses:\s+\S" "$file" | grep -v "^\s*#")
-    done
-    if [ -s "$VIOLATIONS" ]; then rm -f "$VIOLATIONS"; exit 1; fi
-    rm -f "$VIOLATIONS"
-    echo "All action refs are SHA-pinned."
-  '
+# 10. Docs sync and catalogue checks
+run_check "docs-sync-check" -- \
+  pnpm run docs:sync-check
+run_check "docs-catalogue-check" -- \
+  pnpm run docs:check
+
+# 11. README QA
+run_check "readme-assets" -- \
+  pnpm run readme:check
+run_check "readme-portfolio" -- \
+  pnpm run readme:portfolio:check
+
+# 12. Repository-owned security report generators and blocking audit policy
+run_check "security-audit" -- \
+  pnpm run security:audit
 
 # ---------------------------------------------------------------------------
-# Advisory checks (mirror ci.yml advisory jobs)
-# ---------------------------------------------------------------------------
-
-# 11. Docs sync check
-run_check "docs-sync-check" "advisory" -- \
-  node scripts/docs/check-docs-sync.js
-
-# 12. Docs catalogue check
-run_check "docs-catalogue-check" "advisory" -- \
-  pnpm docs:check
-
-# ---------------------------------------------------------------------------
-# Advisory checks from other workflows
-# ---------------------------------------------------------------------------
-
-# 13. README QA
-run_check "readme-qa" "advisory" -- \
-  bash -c '
-    pnpm readme:check &&
-    pnpm readme:portfolio:check &&
-    node scripts/validate-readme-assets.js --readme profile-readme/README.md
-  '
-
-# 14. Security audit (SBOM + vuln + license — no Snyk token needed locally)
-run_check "security-audit" "advisory" -- \
-  bash -c '
-    node scripts/qa/generate-sbom.js &&
-    node scripts/qa/generate-vuln-report.js &&
-    node scripts/qa/generate-license-report.js
-  '
-
-# ---------------------------------------------------------------------------
-# External / deferred checks (require GitHub-hosted infra)
+# Hosted authority boundary
 # ---------------------------------------------------------------------------
 sep
-warn "The following workflows are DEFERRED — require GitHub-hosted infra:"
-warn "  • codeql.yml         — CodeQL SARIF analysis (github/codeql-action)"
-warn "  • szl-zarf-publish.yml — Zarf/UDS bundle + GHCR push + cosign signing"
-warn "  • deploy-staging.yml — Replit staging deploy (secrets + external API)"
-warn "  • post-deploy-smoke.yml — Production URL smoke (PRODUCTION_BASE_URL secret)"
-warn "  • e2e.yml            — Playwright E2E (Chromium infra intensive)"
-warn "  • a11y.yml           — axe + Playwright (Chromium infra intensive)"
-warn "  • lighthouse.yml     — Lighthouse CI (Chromium infra intensive)"
-warn "  • audit-full.yml     — Full audit harness (superset of above)"
-warn "These will run normally once Actions minutes reset on 2026-06-01,"
-warn "or immediately if the repo is made public (unlimited free minutes)."
+warn "Not executed here: hosted workflow isolation, event/permission behavior,"
+warn "matrix runners, service containers, browser suites, SARIF uploads, artifact"
+warn "uploads, deployments, or any other required GitHub status context."
+warn "Only required hosted checks reported by GitHub for the exact pushed commit"
+warn "can satisfy branch protection. This script never substitutes for them."
 
 # ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 sep
 echo ""
-echo -e "${BOLD}CI Summary — ${HEAD_SHA:0:12}${RESET}"
+echo -e "${BOLD}Local preflight summary — ${HEAD_SHA:0:12}${RESET}"
 echo ""
-printf "%-40s %-12s %-10s %s\n" "CHECK" "RESULT" "SEVERITY" "TIME"
-printf "%-40s %-12s %-10s %s\n" "-----" "------" "--------" "----"
+printf "%-40s %-14s %s\n" "CHECK" "RESULT" "TIME"
+printf "%-40s %-14s %s\n" "-----" "------" "----"
 
-PASS_COUNT=0 FAIL_COUNT=0 WARN_COUNT=0 SKIP_COUNT=0
+PASS_COUNT=0 FAIL_COUNT=0 UNAVAILABLE_COUNT=0
 for r in "${RESULTS[@]}"; do
-  IFS='|' read -r status name severity elapsed <<< "$r"
+  IFS='|' read -r status name elapsed <<< "$r"
   case "$status" in
-    PASS) printf "${GREEN}%-40s %-12s %-10s %s${RESET}\n" "$name" "PASS" "$severity" "$elapsed"; ((PASS_COUNT++)) ;;
-    FAIL) printf "${RED}%-40s %-12s %-10s %s${RESET}\n"   "$name" "FAIL" "$severity" "$elapsed"; ((FAIL_COUNT++)) ;;
-    WARN) printf "${YELLOW}%-40s %-12s %-10s %s${RESET}\n" "$name" "ADVISORY" "$severity" "$elapsed"; ((WARN_COUNT++)) ;;
-    SKIP) printf "${YELLOW}%-40s %-12s %-10s %s${RESET}\n" "$name" "SKIPPED" "$severity" "$elapsed"; ((SKIP_COUNT++)) ;;
+    PASS) printf "${GREEN}%-40s %-14s %s${RESET}\n" "$name" "PASS" "$elapsed"; ((PASS_COUNT += 1)) ;;
+    FAIL) printf "${RED}%-40s %-14s %s${RESET}\n" "$name" "FAIL" "$elapsed"; ((FAIL_COUNT += 1)) ;;
+    UNAVAILABLE) printf "${YELLOW}%-40s %-14s %s${RESET}\n" "$name" "UNAVAILABLE" "$elapsed"; ((UNAVAILABLE_COUNT += 1)) ;;
   esac
 done
 
 echo ""
-echo -e "  Passed: ${GREEN}${PASS_COUNT}${RESET}  Failed: ${RED}${FAIL_COUNT}${RESET}  Advisory/warn: ${YELLOW}${WARN_COUNT}${RESET}  Skipped: ${YELLOW}${SKIP_COUNT}${RESET}"
+echo -e "  Passed: ${GREEN}${PASS_COUNT}${RESET}  Failed: ${RED}${FAIL_COUNT}${RESET}  Unavailable: ${YELLOW}${UNAVAILABLE_COUNT}${RESET}"
 echo ""
 
 if [[ $OVERALL_EXIT -eq 0 ]]; then
-  echo -e "${GREEN}${BOLD}✓ All blocking checks passed.${RESET}"
-  if [[ "$GH_REPORT" == "1" ]]; then
-    echo -e "  GitHub check-runs posted to ${REPO_SLUG}@${HEAD_SHA:0:12}"
-  fi
+  echo -e "${GREEN}${BOLD}✓ Selected local preflight checks passed.${RESET}"
+  echo "  Await required hosted checks on the exact pushed commit before merge."
 else
-  echo -e "${RED}${BOLD}✗ One or more blocking checks FAILED.${RESET}"
+  echo -e "${RED}${BOLD}✗ Local preflight failed or is incomplete.${RESET}"
   echo -e "  Logs in: ${LOG_DIR}/"
   echo -e "  Fix the failures above, then re-run: ${BOLD}./tools/local-ci-runner.sh${RESET}"
 fi

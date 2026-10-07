@@ -35,18 +35,32 @@ const smokeRoutes = read('../../../scripts/qa/smoke-routes.js');
 const rootPackage = JSON.parse(read('../../../package.json'));
 const capturePlan = JSON.parse(read('../../../audit/series-a-screenshot-capture-plan.json'));
 
-test('preserves the protected Series A and Atelier contracts while adding product navigation', () => {
+test('publishes only the reviewed candidate allowlist and holds legacy routes', () => {
   assert.match(app, /<GraphQLProvider>/);
-  assert.match(app, /path=\{`\$\{base\}\/atelier`\} component=\{A11oyAtelier\}/);
-  assert.match(app, /path=\{`\$\{base\}\/start`\} component=\{SeriesAView\}/);
-  assert.match(app, /path=\{`\$\{base\}\/investor-demo`\} component=\{SeriesAView\}/);
-  assert.match(app, /path=\{`\$\{base\}\/series-a`\} component=\{SeriesAView\}/);
-  assert.match(app, /path=\{`\$\{base\}\/product-journey`\} component=\{ProductJourney\}/);
-  for (const route of ['/a11oy/start', '/a11oy/investor-demo', '/a11oy/atelier']) {
-    assert.match(smokeRoutes, new RegExp(route.replaceAll('/', '\\/')));
+  assert.match(app, /CANDIDATE DEMO:/);
+  assert.match(app, /PUBLICATION HOLD · UNREVIEWED ROUTE/);
+  assert.match(app, /<Route component=\{PublicationHoldPage\} \/>/);
+  const reviewedPaths = [...app.matchAll(/\{ path: '([^']+)', label:/g)].map((match) => match[1]);
+  assert.deepEqual(reviewedPaths, [
+    '/',
+    '/agent-viz',
+    '/adversarial',
+    '/frontier',
+    '/verifier',
+    '/security-agents',
+  ]);
+  for (const excludedImport of [
+    'A11oyAtelier',
+    'SeriesAView',
+    'ProductJourney',
+    'DevPlatform',
+    'Compass',
+    'CareEngine',
+  ]) {
+    assert.doesNotMatch(app, new RegExp(`\\b${excludedImport}\\b`));
   }
-  assert.match(smokeRoutes, /\/a11oy\/series-a/);
-  assert.match(smokeRoutes, /\/a11oy\/product-journey/);
+  assert.match(smokeRoutes, /\/a11oy\/start/);
+  assert.match(smokeRoutes, /\/a11oy\/atelier/);
 });
 
 test('provides explicit investor and developer paths without operational overclaims', () => {

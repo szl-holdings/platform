@@ -8,6 +8,8 @@ real, observed behavior of the shipped code path — not mocked stand-ins.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -24,8 +26,8 @@ def test_health_reports_idle_before_load(client):
     r = client.get("/health")
     assert r.status_code == 200
     body = r.json()
-    # No model loaded yet -> idle; engine string reflects STUB mode.
-    assert body["status"] == "idle"
+    # STUB is explicit and never presented as a ready/live engine.
+    assert body["status"] == "development-stub"
     assert "stub" in body["engine"].lower()
     assert body["loaded_models"] == []
 
@@ -44,10 +46,10 @@ def test_list_models_returns_registry(client):
 
 
 def test_load_then_chat_then_health_flips_to_ok(client):
-    # Load a model (no SUBSTRATE_API_KEY set in tests -> management auth open).
+    # The suite enables the explicit test-only auth bypass in conftest.py.
     r = client.post("/v1/models/load", json={"model_id": "llama-3.1-8b-instruct"})
     assert r.status_code == 200
-    assert r.json()["status"] == "loaded"
+    assert r.json()["status"] == "development_stub_registered"
 
     # Loading again is idempotent.
     r = client.post("/v1/models/load", json={"model_id": "llama-3.1-8b-instruct"})
@@ -70,10 +72,10 @@ def test_load_then_chat_then_health_flips_to_ok(client):
     assert body["choices"][0]["finish_reason"] == "stop"
     assert body["usage"]["total_tokens"] >= 0
 
-    # Health now reports the loaded model.
+    # Health retains the STUB truth state even after registering a model id.
     r = client.get("/health")
     body = r.json()
-    assert body["status"] == "ok"
+    assert body["status"] == "development-stub"
     assert "llama-3.1-8b-instruct" in body["loaded_models"]
 
     # Unload cleans up.
@@ -90,6 +92,15 @@ def test_chat_unknown_model_is_404(client):
     assert r.status_code == 404
 
 
+def test_stub_engine_is_never_ready(client):
+    r = client.get("/ready")
+    assert r.status_code == 503
+    assert r.json() == {
+        "ready": False,
+        "reason": "development STUB engine cannot serve live inference",
+    }
+
+
 def test_chat_on_unloaded_model_is_503(client):
     # gemma3-12b is in the registry but not loaded.
     r = client.post(
@@ -102,6 +113,19 @@ def test_chat_on_unloaded_model_is_503(client):
 def test_load_unknown_model_is_404(client):
     r = client.post("/v1/models/load", json={"model_id": "no-such-model"})
     assert r.status_code == 404
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"model_id": "llama-3.1-8b-instruct", "cpu_offload_layers": 1},
+        {"model_id": "llama-3.1-8b-instruct", "ssd_cache_dir": "/tmp/cache"},
+    ],
+)
+def test_unimplemented_offload_options_fail_closed(client, payload):
+    response = client.post("/v1/models/load", json=payload)
+    assert response.status_code == 500
+    assert "not implemented" in response.json()["detail"]
 
 
 def test_streaming_chat_emits_sse_and_done(client):
@@ -133,3 +157,10 @@ def test_request_validation_rejects_bad_temperature(client):
         },
     )
     assert r.status_code == 422
+
+
+def test_container_healthcheck_targets_readiness_not_liveness():
+    dockerfile = (Path(__file__).parents[1] / "Dockerfile").read_text()
+    healthcheck = dockerfile.split("HEALTHCHECK", 1)[1].split("LABEL", 1)[0]
+    assert "/ready" in healthcheck
+    assert "/healthz" not in healthcheck

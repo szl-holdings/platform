@@ -6,40 +6,58 @@
   "description": "Trace Graph — run/agent/tool trace capture and replay. Full-fidelity trace schema, writer API, persistence adapter, and deterministic replay for the SZL Agentic Cognitive Operating Intelligence Platform.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./schema": {
+      "development": "./src/schema.ts",
+      "workspace": "./src/schema.ts",
       "types": "./dist/schema.d.ts",
-      "import": "./src/schema.ts"
+      "import": "./dist/schema.js"
     },
     "./writer": {
+      "development": "./src/writer.ts",
+      "workspace": "./src/writer.ts",
       "types": "./dist/writer.d.ts",
-      "import": "./src/writer.ts"
+      "import": "./dist/writer.js"
     },
     "./store": {
+      "development": "./src/store.ts",
+      "workspace": "./src/store.ts",
       "types": "./dist/store.d.ts",
-      "import": "./src/store.ts"
+      "import": "./dist/store.js"
     },
     "./postgres-store": {
+      "development": "./src/postgres-store.ts",
+      "workspace": "./src/postgres-store.ts",
       "types": "./dist/postgres-store.d.ts",
-      "import": "./src/postgres-store.ts"
+      "import": "./dist/postgres-store.js"
     },
     "./replay": {
+      "development": "./src/replay.ts",
+      "workspace": "./src/replay.ts",
       "types": "./dist/replay.d.ts",
-      "import": "./src/replay.ts"
+      "import": "./dist/replay.js"
     },
     "./queue": {
+      "development": "./src/queue.ts",
+      "workspace": "./src/queue.ts",
       "types": "./dist/queue.d.ts",
-      "import": "./src/queue.ts"
+      "import": "./dist/queue.js"
     },
     "./query": {
+      "development": "./src/query.ts",
+      "workspace": "./src/query.ts",
       "types": "./dist/query.d.ts",
-      "import": "./src/query.ts"
+      "import": "./dist/query.js"
     },
     "./sdk": {
+      "development": "./src/sdk.ts",
+      "workspace": "./src/sdk.ts",
       "types": "./dist/sdk.d.ts",
-      "import": "./src/sdk.ts"
+      "import": "./dist/sdk.js"
     }
   },
   "dependencies": {

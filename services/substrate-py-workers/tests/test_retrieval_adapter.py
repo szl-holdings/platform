@@ -75,6 +75,22 @@ class TestAdapterRegistry:
         ok, reason = mgr.is_available("local")
         assert ok, reason
 
+    def test_production_localhost_adapter_requires_api_key(self, monkeypatch):
+        mgr = RetrieverAdapterManager(adapters=[])
+        mgr.register(RetrieverAdapterConfig(
+            id="local-production",
+            name="Local Production",
+            baseUrl="http://localhost:9999",
+            apiKeyEnvVar="PRODUCTION_LOCAL_KEY",
+        ))
+        monkeypatch.setenv("SUBSTRATE_PYTHON_WORKER_ENV", "production")
+        monkeypatch.delenv("PRODUCTION_LOCAL_KEY", raising=False)
+
+        ok, reason = mgr.is_available("local-production")
+
+        assert ok is False
+        assert reason and "PRODUCTION_LOCAL_KEY" in reason
+
     def test_remote_adapter_requires_api_key(self, monkeypatch):
         mgr = RetrieverAdapterManager(adapters=[])
         mgr.register(RetrieverAdapterConfig(
@@ -188,11 +204,43 @@ class TestNonLiveFallback:
         ))
         assert result["retrieverSource"] == "synthetic"
 
+    @pytest.mark.asyncio
+    async def test_production_cannot_opt_into_synthetic_live_evidence(self, monkeypatch):
+        monkeypatch.setenv("SUBSTRATE_PYTHON_WORKER_ENV", "production")
+        monkeypatch.setenv("SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC", "1")
+
+        with pytest.raises(RuntimeError, match="retrieverAdapterId"):
+            await retrieval_execute(
+                _claim({"query": "audit risk"}, mode="live")
+            )
+
 
 # ─── Stage integration: adapter call path (mocked HTTP) ───────────────────────
 
 
 class TestAdapterCallPath:
+    @pytest.mark.asyncio
+    async def test_production_retrieval_requires_governed_tenant_before_http(
+        self, monkeypatch
+    ):
+        cfg = RetrieverAdapterConfig(
+            id="tenant-required",
+            name="Tenant Required",
+            baseUrl="http://localhost:65535",
+            apiKeyEnvVar="TENANT_REQUIRED_KEY",
+        )
+        mgr = RetrieverAdapterManager(adapters=[cfg])
+        monkeypatch.setenv("SUBSTRATE_PYTHON_WORKER_ENV", "production")
+        monkeypatch.setenv("TENANT_REQUIRED_KEY", "unit-test-retriever-key")
+
+        with pytest.raises(RetrieverAdapterUnavailable, match="governed tenant identity"):
+            await mgr.retrieve(
+                "tenant-required",
+                query="audit",
+                top_k=5,
+                min_relevance_score=0.0,
+            )
+
     @pytest.mark.asyncio
     async def test_adapter_response_is_normalised_and_used(self, monkeypatch):
         adapter_id = "unit-test-adapter"
@@ -207,11 +255,20 @@ class TestAdapterCallPath:
         try:
             captured: dict = {}
 
-            async def fake_retrieve(self, adapter_id_arg, query, top_k, min_relevance_score, filters=None):
+            async def fake_retrieve(
+                self,
+                adapter_id_arg,
+                query,
+                top_k,
+                min_relevance_score,
+                filters=None,
+                tenant_id=None,
+            ):
                 captured["adapter_id"] = adapter_id_arg
                 captured["query"] = query
                 captured["top_k"] = top_k
                 captured["min_relevance_score"] = min_relevance_score
+                captured["tenant_id"] = tenant_id
                 return [
                     {
                         "id": "live-1",
@@ -280,6 +337,7 @@ class TestAdapterCallPath:
             captured["url"] = str(request.url)
             captured["auth"] = request.headers.get("authorization")
             captured["content_type"] = request.headers.get("content-type")
+            captured["tenant_id"] = request.headers.get("x-tenant-id")
             import json as _json
             captured["body"] = _json.loads(request.content.decode())
             return httpx.Response(
@@ -313,6 +371,7 @@ class TestAdapterCallPath:
             top_k=7,
             min_relevance_score=0.4,
             filters={"shard": "a"},
+            tenant_id="tenant-wire",
         )
 
         # Request shape
@@ -320,6 +379,7 @@ class TestAdapterCallPath:
         assert captured["url"] == "https://retriever.example.com/v1/retrieve"
         assert captured["auth"] == "Bearer sk-test-123"
         assert "application/json" in (captured["content_type"] or "")
+        assert captured["tenant_id"] == "tenant-wire"
         assert captured["body"] == {
             "query": "audit risk",
             "topK": 7,

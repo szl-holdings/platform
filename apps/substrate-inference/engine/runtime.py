@@ -1,15 +1,16 @@
 """
 SubstrateRuntime — the core engine bridge between Substrate Inference and oLLM.
 
-When the oLLM library is installed and a CUDA GPU is available, this module uses
-the real inference engine. Otherwise, it operates in STUB mode for development
-and testing without GPU hardware.
+When the checked-in transformer adapter and a GPU backend are available, this
+module can perform live inference. Otherwise, it operates in STUB mode for
+development and testing without GPU hardware.
 """
 from __future__ import annotations
 
 import asyncio
 import enum
 import os
+import re
 import sys
 import time
 from dataclasses import dataclass, field
@@ -28,19 +29,11 @@ class EngineMode(str, enum.Enum):
 @dataclass
 class LoadedModel:
     model_id: str
+    model_revision: str | None = None
     loaded_at: float = field(default_factory=time.monotonic)
     vram_used_mb: float = 0.0
     engine_handle: object | None = None
 
-
-VRAM_ESTIMATES_MB: dict[str, float] = {
-    "llama-3.3-70b-instruct": 8192,
-    "llama-3.1-8b-instruct": 4800,
-    "qwen3-next-80b": 6144,
-    "gemma3-12b": 3200,
-    "gpt-oss-20b": 4400,
-    "voxtral-small-24b": 5100,
-}
 
 MODEL_HF_MAP: dict[str, str] = {
     "llama-3.3-70b-instruct": "meta-llama/Llama-3.3-70B-Instruct",
@@ -50,14 +43,11 @@ MODEL_HF_MAP: dict[str, str] = {
     "gpt-oss-20b": "gpt-oss/GPT-OSS-20B",
     "voxtral-small-24b": "mistralai/Voxtral-Small-24B",
 }
+_IMMUTABLE_REVISION_PATTERN = re.compile(r"^[a-f0-9]{40}$", re.IGNORECASE)
 
 
 def _try_import_ollm():
-    try:
-        import ollm  # type: ignore[import-untyped]
-        return ollm
-    except ImportError:
-        pass
+    """Load only the checked-in adapter, never an ambient package by accident."""
 
     vendor_path = os.path.join(os.path.dirname(__file__), "ollm")
     init_path = os.path.join(vendor_path, "ollm", "__init__.py")
@@ -66,6 +56,18 @@ def _try_import_ollm():
             sys.path.insert(0, vendor_path)
         try:
             import ollm  # type: ignore[import-untyped]
+            module_path = os.path.realpath(getattr(ollm, "__file__", ""))
+            expected_root = os.path.realpath(vendor_path)
+            if os.path.commonpath((expected_root, module_path)) != expected_root:
+                log.error("ollm_untrusted_import_rejected", module_path=module_path)
+                return None
+            if getattr(ollm, "__version__", None) != "0.4.2":
+                log.error(
+                    "ollm_version_mismatch",
+                    expected="0.4.2",
+                    actual=getattr(ollm, "__version__", None),
+                )
+                return None
             return ollm
         except ImportError:
             log.warning("ollm_vendored_import_failed", vendor_path=vendor_path)
@@ -106,18 +108,31 @@ def _detect_engine_mode() -> EngineMode:
 
     ollm_mod = _try_import_ollm()
     if ollm_mod is not None:
-        log.info("engine_mode_live", reason=f"oLLM engine available (backend={backend})")
+        log.info(
+            "engine_mode_live",
+            reason=f"checked-in transformer adapter available (backend={backend})",
+        )
         return EngineMode.LIVE
     else:
-        log.info("engine_mode_stub", reason="ollm package not installed (checked PyPI and vendor path)")
+        log.info("engine_mode_stub", reason="checked-in transformer adapter unavailable")
         return EngineMode.STUB
 
 
 class SubstrateRuntime:
-    def __init__(self, models_dir: str, cache_dir: str, max_concurrent: int = 4):
+    def __init__(
+        self,
+        models_dir: str,
+        cache_dir: str,
+        max_concurrent: int = 4,
+        *,
+        model_revisions: dict[str, str] | None = None,
+        require_immutable_revisions: bool = False,
+    ):
         self.models_dir = models_dir
         self.cache_dir = cache_dir
         self.max_concurrent = max_concurrent
+        self.model_revisions = dict(model_revisions or {})
+        self.require_immutable_revisions = require_immutable_revisions
         self.mode = _detect_engine_mode()
         self._loaded: dict[str, LoadedModel] = {}
         self._request_count = 0
@@ -153,6 +168,12 @@ class SubstrateRuntime:
             return self._loaded[model_id].vram_used_mb
         return 0.0
 
+    def get_revision_for_model(self, model_id: str) -> str | None:
+        entry = self._loaded.get(model_id)
+        if entry is not None:
+            return entry.model_revision
+        return self.model_revisions.get(model_id)
+
     def get_total_vram_used(self) -> float:
         return sum(m.vram_used_mb for m in self._loaded.values())
 
@@ -164,9 +185,29 @@ class SubstrateRuntime:
     ) -> LoadedModel:
         if model_id in self._loaded:
             return self._loaded[model_id]
+        if cpu_offload_layers > 0:
+            raise RuntimeError(
+                "Explicit CPU-layer offload is not implemented by the checked-in adapter"
+            )
+        if ssd_cache_dir is not None:
+            raise RuntimeError(
+                "SSD KV-cache offload is not implemented by the checked-in adapter"
+            )
 
-        vram_est = VRAM_ESTIMATES_MB.get(model_id, 4000)
+        # Only observed allocator use may cross the health/model boundary.
+        vram_used_mb = 0.0
         engine_handle = None
+        model_revision = self.model_revisions.get(model_id)
+        if model_revision is not None and not _IMMUTABLE_REVISION_PATTERN.fullmatch(
+            model_revision
+        ):
+            raise RuntimeError(
+                f"Configured model revision for '{model_id}' is not an immutable commit SHA"
+            )
+        if self.require_immutable_revisions and model_revision is None:
+            raise RuntimeError(
+                f"No immutable model revision is configured for '{model_id}'"
+            )
 
         if self.mode == EngineMode.LIVE:
             try:
@@ -176,22 +217,27 @@ class SubstrateRuntime:
                 engine_handle = ollm.AutoInference.from_pretrained(
                     hf_name,
                     cache_dir=self.models_dir,
-                    ssd_cache_dir=ssd_cache_dir or self.cache_dir,
+                    ssd_cache_dir=ssd_cache_dir,
                     cpu_offload_layers=cpu_offload_layers,
                     torch_dtype="auto",
+                    trust_remote_code=False,
+                    revision=model_revision,
                 )
                 if hasattr(engine_handle, 'vram_used_mb'):
-                    vram_est = engine_handle.vram_used_mb
-                log.info("engine_model_loaded", model_id=model_id, vram_mb=vram_est)
+                    vram_used_mb = engine_handle.vram_used_mb
+                log.info("engine_model_loaded", model_id=model_id, vram_mb=vram_used_mb)
             except Exception as exc:
                 log.error("engine_load_failed", model_id=model_id, error=str(exc))
-                raise RuntimeError(f"Failed to load model '{model_id}' via oLLM: {exc}") from exc
+                raise RuntimeError(
+                    f"Failed to load model '{model_id}' via the checked-in adapter: {exc}"
+                ) from exc
         else:
-            log.info("stub_model_loaded", model_id=model_id, vram_mb=vram_est)
+            log.info("stub_model_registered", model_id=model_id)
 
         entry = LoadedModel(
             model_id=model_id,
-            vram_used_mb=vram_est,
+            model_revision=(model_revision if self.mode == EngineMode.LIVE else None),
+            vram_used_mb=vram_used_mb,
             engine_handle=engine_handle,
         )
         self._loaded[model_id] = entry
@@ -318,8 +364,8 @@ class SubstrateRuntime:
                     prompt_tokens = len(text_content.split())
                     text = (
                         f"[Substrate/{model_id} — STUB MODE] "
-                        f"oLLM engine not available. Install with: pip install ollm\n"
-                        f"Model: {model_id} ({VRAM_ESTIMATES_MB.get(model_id, '?')} MB VRAM)\n"
+                        f"Live GPU transformer adapter is unavailable.\n"
+                        f"Model: {model_id} (no weights or VRAM allocated)\n"
                         f"Input tokens: ~{prompt_tokens}"
                     )
                     completion_tokens = len(text.split())
@@ -358,20 +404,23 @@ class SubstrateRuntime:
                 if self.mode == EngineMode.LIVE and entry.engine_handle is not None:
                     engine_messages = self._build_messages_for_engine(messages)
 
-                    def _stream_sync():
-                        return entry.engine_handle.chat_stream(
-                            messages=engine_messages,
-                            temperature=temperature,
-                            max_new_tokens=max_tokens,
-                            top_p=top_p,
-                            stop=stop,
+                    def _collect_stream_sync():
+                        return list(
+                            entry.engine_handle.chat_stream(
+                                messages=engine_messages,
+                                temperature=temperature,
+                                max_new_tokens=max_tokens,
+                                top_p=top_p,
+                                stop=stop,
+                            )
                         )
 
-                    stream = await asyncio.to_thread(_stream_sync)
-                    token_count = 0
+                    # The compatibility adapter emits a buffered word stream;
+                    # collect it off the event loop so model generation cannot
+                    # stall unrelated HTTP requests.
+                    stream = await asyncio.to_thread(_collect_stream_sync)
                     for chunk in stream:
                         token_text = chunk.get("content", "") if isinstance(chunk, dict) else str(chunk)
-                        token_count += 1
                         yield {
                             "content": token_text,
                             "finish_reason": None,
@@ -384,8 +433,8 @@ class SubstrateRuntime:
                     text_content = self._extract_text_content(messages)
                     stub_response = (
                         f"[Substrate/{model_id} — STUB MODE] "
-                        f"oLLM engine not available. Install with: pip install ollm. "
-                        f"Model: {model_id} ({VRAM_ESTIMATES_MB.get(model_id, '?')} MB VRAM)"
+                        f"Live GPU transformer adapter is unavailable. "
+                        f"Model: {model_id} (no weights or VRAM allocated)"
                     )
                     words = stub_response.split()
                     for i, word in enumerate(words):

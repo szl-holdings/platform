@@ -5,11 +5,12 @@
  * Executes an approved agent action using the OpenAI Agents SDK.
  * The SDK is the runtime; the gateway is the policy, audit, and evidence boundary.
  *
- * In local/test mode (OPENAI_API_KEY=local) returns a deterministic stub response
- * so integration tests run without live API calls.
+ * In explicit local/test stub mode, returns a deterministic UNAVAILABLE result
+ * so integration tests run without live API calls or fabricated evidence.
  */
 
 import { createHash } from 'crypto';
+import { isProductionRuntime } from './runtime-environment.js';
 import type { AgentActionRequest, AgentExecutionResult, EvidenceRecord } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -122,23 +123,8 @@ export function hashPrompt(prompt: string): string {
 // ---------------------------------------------------------------------------
 
 function runLocal(request: AgentActionRequest, evidence: EvidenceRecord): AgentExecutionResult {
-  const stubOutputs: Record<string, string> = {
-    inspect_code: `[STUB] Code inspection complete for '${request.target}'. No issues found in advisory analysis. Evidence: ${evidence.evidenceId}.`,
-    inspect_manifests: `[STUB] Manifest inspection complete for '${request.target}'. All manifests conform to schema. Evidence: ${evidence.evidenceId}.`,
-    analyze_telemetry: `[STUB] Telemetry analysis complete for '${request.target}'. P99 latency within SLO. Evidence: ${evidence.evidenceId}.`,
-    summarize_incidents: `[STUB] Incident summary generated for '${request.target}'. 0 open incidents in scope. Evidence: ${evidence.evidenceId}.`,
-    draft_runbooks: `[STUB] Runbook draft produced for '${request.target}'. Advisory text attached. Evidence: ${evidence.evidenceId}.`,
-    draft_prs: `[STUB] PR draft produced for '${request.target}'. Diff attached to evidence record. Evidence: ${evidence.evidenceId}.`,
-    propose_policy_fixes: `[STUB] Policy fix proposal produced for '${request.domain}'. Rego amendment attached. Evidence: ${evidence.evidenceId}.`,
-    generate_documentation: `[STUB] Documentation draft produced for '${request.target}'. Advisory text attached. Evidence: ${evidence.evidenceId}.`,
-    generate_test_plans: `[STUB] Test plan produced for '${request.target}'. Advisory document attached. Evidence: ${evidence.evidenceId}.`,
-    propose_architecture_diffs: `[STUB] Architecture diff proposed for '${request.target}'. ADR attached to evidence. Evidence: ${evidence.evidenceId}.`,
-  };
-
   return {
-    output:
-      stubOutputs[request.capability] ??
-      `[STUB] Advisory action completed. Evidence: ${evidence.evidenceId}.`,
+    output: `[STUB][UNAVAILABLE] No provider execution or capability analysis was performed for '${request.capability}' on '${request.target}'. This output is test-only and must not be used as operational evidence. Evidence: ${evidence.evidenceId}.`,
     tokenUsage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
     model: 'local-stub',
     finishReason: 'stop',
@@ -205,6 +191,9 @@ export async function runAgent(
       : `Execute capability '${request.capability}' on target '${request.target}' for domain '${request.domain}'.`;
 
   if (apiKey === 'local') {
+    if (isProductionRuntime()) {
+      throw new Error('The local Agent Gateway stub is forbidden in production');
+    }
     return runLocal(request, evidence);
   }
 

@@ -147,7 +147,7 @@ class NimEndpointManager {
     if (!availability.available)
       throw new Error(`NIM endpoint unavailable: ${availability.reason}`);
 
-    const apiKey = process.env[ep.apiKeyEnvVar] ?? 'nim-local';
+    const apiKey = process.env[ep.apiKeyEnvVar]?.trim();
     const start = Date.now();
 
     const body = {
@@ -164,8 +164,8 @@ class NimEndpointManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
           'User-Agent': 'szl-holdings-ai-control-plane/1.0',
+          ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
         },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(60_000),

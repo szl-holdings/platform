@@ -422,6 +422,7 @@ AI_RERANK_TOP_K
 AI_RETRIEVAL_TOP_K
 ALLOW_UNREACHABLE
 ALLOY_API_KEY
+ALLOY_API_TENANT_ID
 ALPHA_VANTAGE_API_KEY
 API_PORT
 API_URL
@@ -520,4 +521,3 @@ AEF_VECTOR_WORKER_PORT
 2. **Template** — parsed active and commented keys from `.env.example`.
 3. **Code** — collected every `process.env.X` and `process.env['X']` reference across `*.ts`, `*.tsx`, `*.js`, `*.mjs` in the tree.
 4. **Reconcile** — computed the set differences above. The schema is authoritative for what is validated; `.env.example` is corrected to match it; genuinely service-local vars are documented, not forced into the central template.
-

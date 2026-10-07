@@ -4,12 +4,7 @@ import { z } from 'zod';
 // aef-contracts but are deliberately local so a standalone package build does
 // not require generated declaration output from another composite project.
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/i, 'expected a SHA-256 digest');
-const PromotionStateSchema = z.enum([
-  'DEVELOPMENT',
-  'EVALUATION_HOLD',
-  'QUALIFIED',
-  'REVOKED',
-]);
+const PromotionStateSchema = z.enum(['DEVELOPMENT', 'EVALUATION_HOLD', 'QUALIFIED', 'REVOKED']);
 
 export const EvidenceEntrySchema = z.object({
   entryId: z.string().min(1),
@@ -29,6 +24,12 @@ export const EvidenceEntrySchema = z.object({
   boostApplied: z.boolean().default(false),
   boostRuleId: z.string().optional(),
   rerankerScore: z.number().optional(),
+  rerankerBackendId: z.string().min(1).optional(),
+  rerankerModelId: z.string().min(1).optional(),
+  rerankerModelRevision: z.string().min(1).optional(),
+  rerankerArtifactSetDigest: Sha256Schema.optional(),
+  rerankerPromotionState: PromotionStateSchema.optional(),
+  rerankerFallback: z.boolean().optional(),
   finalScore: z.number(),
   policyAllow: z.boolean(),
   policyReasons: z.array(z.string()).default([]),

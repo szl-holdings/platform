@@ -13,6 +13,15 @@
     "skipLibCheck": true,
     "composite": true
   },
+  "references": [
+    { "path": "../action-engine" },
+    { "path": "../approvals-inbox" },
+    { "path": "../cognitive-observability" },
+    { "path": "../guardian" },
+    { "path": "../planner" },
+    { "path": "../policy-engine" },
+    { "path": "../trace-graph" }
+  ],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

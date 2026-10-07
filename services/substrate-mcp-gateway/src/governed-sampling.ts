@@ -1,8 +1,8 @@
-import { randomUUID, createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
+import { submitPendingApprovalRequest } from '@workspace/approvals-inbox';
+import { type ProofRecord, recordProof } from './nexus-fabric.js';
 import { getCurrentActorId, getCurrentTenantId } from './request-context.js';
 import { emitRunEvent, type RunEventType } from './run-events.js';
-import { recordProof, type ProofRecord } from './nexus-fabric.js';
-import { submitPendingApprovalRequest } from '@workspace/approvals-inbox';
 
 export interface SamplingModelPreferences {
   hints?: Array<{ name?: string }>;
@@ -44,7 +44,13 @@ export interface GovernedSamplingSession {
   tenantId: string;
   model: string;
   provider: string;
-  status: 'active' | 'completed' | 'policy_blocked' | 'pending_approval' | 'iteration_cap' | 'client_unavailable';
+  status:
+    | 'active'
+    | 'completed'
+    | 'policy_blocked'
+    | 'pending_approval'
+    | 'iteration_cap'
+    | 'client_unavailable';
   iterations: number;
   maxIterations: number;
   totalInputTokens: number;
@@ -57,7 +63,9 @@ export interface GovernedSamplingSession {
     matchedPolicies: string[];
   };
   proofHash: string;
+  /** @deprecated No durable proof WAL is available in this release. Always false. */
   proofPersistedToWal: boolean;
+  receiptRecorded: boolean;
   startedAt: string;
   completedAt: string | null;
 }
@@ -186,7 +194,8 @@ function evaluateCovenantPolicy(
     return {
       allowed: false,
       policyResult: 'deny',
-      reason: `High-risk sampling request held for human approval in Approvals Inbox. ` +
+      reason:
+        `High-risk sampling request held for human approval in Approvals Inbox. ` +
         `Actor '${actor}', model '${model}', ${maxTokens} tokens. ` +
         `Execution blocked until operator grants approval via Approvals Inbox.`,
       matchedPolicies: ['high_risk_escalation', 'approvals_inbox_review'],
@@ -204,6 +213,7 @@ function evaluateCovenantPolicy(
 function persistProofRecord(
   sessionId: string,
   actor: string,
+  tenantId: string,
   model: string,
   proofHash: string,
   inputTokens: number,
@@ -212,12 +222,15 @@ function persistProofRecord(
 ): void {
   const record: ProofRecord = {
     proofHash,
+    tenantId,
     toolName: `sampling:${model}`,
     actor,
     issuedAt: new Date().toISOString(),
     confidence: isError ? 0.1 : 0.85,
     covenantAllowed: !isError,
-    covenantReason: isError ? 'Sampling session failed' : 'Covenant policy approved sampling request',
+    covenantReason: isError
+      ? 'Sampling session failed'
+      : 'Covenant policy approved sampling request',
     responseDigest: createHash('sha256')
       .update(`${sessionId}:${inputTokens}:${outputTokens}`)
       .digest('hex')
@@ -234,12 +247,16 @@ export async function handleSamplingCreate(
   const tenantId = getCurrentTenantId() ?? 'substrate-gateway';
   const { provider, model } = resolveModel(request.modelPreferences);
 
-  const inputText = request.messages
-    .map((m) => m.content.text ?? '')
-    .join('\n');
+  const inputText = request.messages.map((m) => m.content.text ?? '').join('\n');
   const inputTokens = estimateTokens(inputText);
 
-  const covenantResult = evaluateCovenantPolicy(actor, tenantId, model, request.maxTokens, sessionId);
+  const covenantResult = evaluateCovenantPolicy(
+    actor,
+    tenantId,
+    model,
+    request.maxTokens,
+    sessionId,
+  );
 
   const proofHash = computeProofHash({
     sessionId,
@@ -266,6 +283,7 @@ export async function handleSamplingCreate(
     covenantResult,
     proofHash,
     proofPersistedToWal: false,
+    receiptRecorded: false,
     startedAt: new Date().toISOString(),
     completedAt: null,
   };
@@ -277,11 +295,12 @@ export async function handleSamplingCreate(
     session.status = isPendingApproval ? 'pending_approval' : 'policy_blocked';
     session.policyEvaluation = isPendingApproval ? 'human_review' : 'blocked';
     session.completedAt = isPendingApproval ? null : new Date().toISOString();
-    persistProofRecord(sessionId, actor, model, proofHash, inputTokens, 0, true);
-    session.proofPersistedToWal = true;
+    persistProofRecord(sessionId, actor, tenantId, model, proofHash, inputTokens, 0, true);
+    session.receiptRecorded = true;
 
     emitRunEvent({
       type: 'sampling_completed' as RunEventType,
+      tenantId,
       runId: sessionId,
       actor,
       status: session.status,
@@ -292,7 +311,8 @@ export async function handleSamplingCreate(
       role: 'assistant',
       content: {
         type: 'text',
-        text: `[Governed Sampling] Request blocked by Covenant Policy. ` +
+        text:
+          `[Governed Sampling] Request blocked by Covenant Policy. ` +
           `Reason: ${covenantResult.reason} ` +
           `Matched policies: ${covenantResult.matchedPolicies.join(', ')}. ` +
           `Session: ${sessionId}. Proof: ${proofHash}.`,
@@ -304,6 +324,7 @@ export async function handleSamplingCreate(
 
   emitRunEvent({
     type: 'sampling_started' as RunEventType,
+    tenantId,
     runId: sessionId,
     actor,
     timestamp: Date.now(),
@@ -311,13 +332,15 @@ export async function handleSamplingCreate(
 
   if (_samplingBridge) {
     try {
-      const conversationMessages: Array<{ role: 'user' | 'assistant'; content: { type: 'text'; text: string } }> =
-        request.messages
-          .filter((m) => m.content.type === 'text' && m.content.text)
-          .map((m) => ({
-            role: m.role,
-            content: { type: 'text' as const, text: m.content.text! },
-          }));
+      const conversationMessages: Array<{
+        role: 'user' | 'assistant';
+        content: { type: 'text'; text: string };
+      }> = request.messages
+        .filter((m) => m.content.type === 'text' && m.content.text)
+        .map((m) => ({
+          role: m.role,
+          content: { type: 'text' as const, text: m.content.text! },
+        }));
 
       let lastResult: SamplingBridgeResult | null = null;
 
@@ -338,7 +361,11 @@ export async function handleSamplingCreate(
         lastResult = bridgeResult;
 
         const toolCall = bridgeResult.toolUse;
-        if (bridgeResult.stopReason !== 'toolUse' || !_samplingBridge.executeToolCall || !toolCall) {
+        if (
+          bridgeResult.stopReason !== 'toolUse' ||
+          !_samplingBridge.executeToolCall ||
+          !toolCall
+        ) {
           break;
         }
 
@@ -373,11 +400,21 @@ export async function handleSamplingCreate(
         if (iteration === MAX_SAMPLING_ITERATIONS) {
           session.status = 'iteration_cap';
           session.completedAt = new Date().toISOString();
-          persistProofRecord(sessionId, actor, session.model, proofHash, session.totalInputTokens, session.totalOutputTokens, false);
-          session.proofPersistedToWal = true;
+          persistProofRecord(
+            sessionId,
+            actor,
+            session.tenantId,
+            session.model,
+            proofHash,
+            session.totalInputTokens,
+            session.totalOutputTokens,
+            false,
+          );
+          session.receiptRecorded = true;
 
           emitRunEvent({
             type: 'sampling_completed' as RunEventType,
+            tenantId: session.tenantId,
             runId: sessionId,
             actor,
             status: 'iteration_cap',
@@ -396,11 +433,21 @@ export async function handleSamplingCreate(
       session.status = 'completed';
       session.completedAt = new Date().toISOString();
 
-      persistProofRecord(sessionId, actor, session.model, proofHash, session.totalInputTokens, session.totalOutputTokens, false);
-      session.proofPersistedToWal = true;
+      persistProofRecord(
+        sessionId,
+        actor,
+        session.tenantId,
+        session.model,
+        proofHash,
+        session.totalInputTokens,
+        session.totalOutputTokens,
+        false,
+      );
+      session.receiptRecorded = true;
 
       emitRunEvent({
         type: 'sampling_completed' as RunEventType,
+        tenantId: session.tenantId,
         runId: sessionId,
         actor,
         timestamp: Date.now(),
@@ -415,11 +462,21 @@ export async function handleSamplingCreate(
     } catch (e) {
       session.status = 'client_unavailable';
       session.completedAt = new Date().toISOString();
-      persistProofRecord(sessionId, actor, model, proofHash, session.totalInputTokens, 0, true);
-      session.proofPersistedToWal = true;
+      persistProofRecord(
+        sessionId,
+        actor,
+        session.tenantId,
+        model,
+        proofHash,
+        session.totalInputTokens,
+        0,
+        true,
+      );
+      session.receiptRecorded = true;
 
       emitRunEvent({
         type: 'sampling_completed' as RunEventType,
+        tenantId: session.tenantId,
         runId: sessionId,
         actor,
         status: 'client_unavailable',
@@ -433,7 +490,7 @@ export async function handleSamplingCreate(
         `Model ${model} (${provider}) routed via AI Control Plane. ` +
         `Input: ${inputTokens} tokens. Session: ${sessionId}. ` +
         `Covenant: ${covenantResult.policyResult} (${covenantResult.matchedPolicies.join(', ')}). ` +
-        `Proof: ${proofHash} (persisted to WAL).`;
+        `Receipt: ${proofHash} (transient correlation record; unverified).`;
 
       const outputTokens = estimateTokens(responseText);
       session.totalOutputTokens = outputTokens;
@@ -452,7 +509,7 @@ export async function handleSamplingCreate(
     `[Governed Sampling] Model ${model} (${provider}) routed via AI Control Plane. ` +
     `Input: ${inputTokens} tokens. Session: ${sessionId}. ` +
     `Covenant: ${covenantResult.policyResult} (${covenantResult.matchedPolicies.join(', ')}). ` +
-    `Proof: ${proofHash} (persisted to WAL). ` +
+    `Receipt: ${proofHash} (transient correlation record; unverified). ` +
     `No MCP sampling client connected — response is a governed routing receipt. ` +
     `Connect a sampling-capable client (Claude Desktop, Cursor) to receive live LLM completions.`;
 
@@ -461,11 +518,21 @@ export async function handleSamplingCreate(
   session.status = 'completed';
   session.completedAt = new Date().toISOString();
 
-  persistProofRecord(sessionId, actor, model, proofHash, inputTokens, outputTokens, false);
-  session.proofPersistedToWal = true;
+  persistProofRecord(
+    sessionId,
+    actor,
+    session.tenantId,
+    model,
+    proofHash,
+    inputTokens,
+    outputTokens,
+    false,
+  );
+  session.receiptRecorded = true;
 
   emitRunEvent({
     type: 'sampling_completed' as RunEventType,
+    tenantId: session.tenantId,
     runId: sessionId,
     actor,
     timestamp: Date.now(),
@@ -488,16 +555,28 @@ export function getActiveSamplingSessions(): GovernedSamplingSession[] {
 export function getAllSamplingSessions(limit = 50, tenantId?: string): GovernedSamplingSession[] {
   const effectiveTenant = tenantId ?? getCurrentTenantId();
   return Array.from(activeSessions.values())
-    .filter((s) => !effectiveTenant || effectiveTenant === 'substrate-gateway' || s.tenantId === effectiveTenant)
+    .filter(
+      (s) =>
+        !effectiveTenant ||
+        effectiveTenant === 'substrate-gateway' ||
+        s.tenantId === effectiveTenant,
+    )
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
     .slice(0, limit);
 }
 
-export function getSamplingSession(sessionId: string, tenantId?: string): GovernedSamplingSession | undefined {
+export function getSamplingSession(
+  sessionId: string,
+  tenantId?: string,
+): GovernedSamplingSession | undefined {
   const session = activeSessions.get(sessionId);
   if (!session) return undefined;
   const effectiveTenant = tenantId ?? getCurrentTenantId();
-  if (effectiveTenant && effectiveTenant !== 'substrate-gateway' && session.tenantId !== effectiveTenant) {
+  if (
+    effectiveTenant &&
+    effectiveTenant !== 'substrate-gateway' &&
+    session.tenantId !== effectiveTenant
+  ) {
     return undefined;
   }
   return session;

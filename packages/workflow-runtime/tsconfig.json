@@ -1,12 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
-    "lib": ["es2022", "dom"],
-    "paths": {
-      "@szl-holdings/shared-contracts": ["../shared-contracts/src/index.ts"],
-      "@szl-holdings/agent-core": ["../agent-core/src/index.ts"]
-    }
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "composite": true,
+    "lib": ["es2022", "dom"]
   },
-  "include": ["src/**/*.ts", "../shared-contracts/src/**/*.ts", "../agent-core/src/**/*.ts"]
+  "references": [{ "path": "../shared-contracts" }, { "path": "../agent-core" }],
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"]
 }

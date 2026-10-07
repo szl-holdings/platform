@@ -4,6 +4,7 @@ import { bearerAuthMiddleware } from './middleware/auth.js';
 import { rateLimitMiddleware } from './middleware/rate-limit.js';
 import { requestIdMiddleware } from './middleware/request-id.js';
 import { tenantScopingMiddleware } from './middleware/tenant.js';
+import { isFabricProduction, productionCapabilityHoldMiddleware } from './production-readiness.js';
 import { registerDocsRoute } from './routes/docs.js';
 import { registerEmbedRoute } from './routes/embed.js';
 import { registerEvalsRoute } from './routes/evals.js';
@@ -15,7 +16,7 @@ import { registerOpenAICompatRoute } from './routes/openai-compat.js';
 import { registerRerankRoute } from './routes/rerank.js';
 import { registerSearchRoute } from './routes/search.js';
 
-const app = express();
+const app: express.Express = express();
 
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '10mb' }));
@@ -28,8 +29,9 @@ registerDocsRoute(app);
 
 const v1 = express.Router();
 v1.use(bearerAuthMiddleware);
-v1.use(rateLimitMiddleware);
 v1.use(tenantScopingMiddleware);
+v1.use(rateLimitMiddleware);
+v1.use(productionCapabilityHoldMiddleware);
 
 registerEmbedRoute(v1);
 registerRerankRoute(v1);
@@ -41,24 +43,28 @@ registerOpenAICompatRoute(v1);
 
 app.use(v1);
 
-app.use((_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  res.status(500).json({
-    error: 'internal_server_error',
-    message: 'An unexpected error occurred. Check server logs.',
-  });
-});
+app.use(
+  (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    res.status(500).json({
+      error: 'internal_server_error',
+      message: 'An unexpected error occurred. Check server logs.',
+    });
+  },
+);
 
 const PORT = Number(process.env.PORT ?? 4200);
 
-// Seed boot data (smoke/dev tenants) before accepting traffic
-seedBootData()
+// Fixture seeding is development-only. Production never creates synthetic
+// tenant data, even while the service is held out of traffic.
+const bootInitialization = isFabricProduction() ? Promise.resolve() : seedBootData();
+
+bootInitialization
   .then(() => {
-    app.listen(PORT, '0.0.0.0', () => {
-    });
+    app.listen(PORT, '0.0.0.0', () => {});
   })
-  .catch((_err: Error) => {
-    app.listen(PORT, '0.0.0.0', () => {
-    });
+  .catch((err: Error) => {
+    process.stderr.write(`[AEF] boot initialization failed: ${err.message}\n`);
+    process.exitCode = 1;
   });
 
 export default app;

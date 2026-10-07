@@ -8,17 +8,23 @@
 > source-tree and locked-kernel measurements. A value without reproducible
 > evidence is **UNVERIFIED**, not estimated.
 
-**Registry version:** 2.1.7
+**Registry version:** 2.1.9
 
-**Integration baseline inspected:** `platform@f3e0f3ffe7614956d626b40903f50b35080c1614`
+**Integration baseline inspected:** `platform@95d303fe94b0e773b31593426f8172e48bcb9d5f`
 
-**Measured:** 2026-09-29
+**Measured:** 2026-10-07
 
 **Validator:** `node scripts/audit/validate-source-of-truth.js`
 
-The counts describe the integrated Turn Capsule and protected-main source tree
-after the obsolete legacy DCO compatibility workflow was retired. The validator recomputes them
-from whichever commit is checked out.
+The counts describe the integrated Turn Capsule candidate source tree after the
+obsolete legacy DCO compatibility workflow was retired. They do not claim that
+the inspected baseline is already on protected `main`. The validator recomputes
+the current-tree metrics from whichever commit is checked out.
+
+> **Candidate measurement (2026-10-07):** The staged frontier candidate measures
+> 44 route source files, 333 handler declarations, and 246 root example
+> environment variables. Source counts require a passing validator and do not
+> establish hosted availability or production readiness.
 
 ---
 
@@ -27,7 +33,7 @@ from whichever commit is checked out.
 | Metric | Canonical Value | Definition / verification |
 |---|---:|---|
 | Registered artifacts | **6** | Tracked `artifacts/*/(.replit-artifact/)?artifact.toml` files |
-| Artifact directories | **7** | Unique tracked top-level children of `artifacts/` |
+| Artifact directories | **8** | Unique tracked top-level children of `artifacts/`; includes the unregistered, asset-only `szl-holdings` directory |
 | Registered product verticals | **5** | Registered customer-facing domain artifacts; A11oy is counted separately as the orchestration product |
 | Domain packages (`packages/`) | **162** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
 | Shared library packages (`lib/`) | **53** | Tracked top-level library directories |
@@ -38,10 +44,10 @@ from whichever commit is checked out.
 | DB schema files | **197** | Tracked `lib/db/src/schema/**/*.ts` files |
 | DB `pgTable` call sites | **1,067** | Source call sites; not a claim about currently provisioned tables |
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
-| API route source files | **45** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
-| API handler declarations | **315** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
+| API route source files | **44** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
+| API handler declarations | **333** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
 | CI workflows | **47** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
-| Environment variables (in `.env.example`) | **245** | Lines matching `^[A-Z_]+=` |
+| Environment variables (in `.env.example`) | **246** | Lines matching `^[A-Z_]+=` |
 
 These are source-tree measurements. They do not by themselves prove that a
 service is deployed, reachable, authenticated correctly, or returning HTTP 200.
@@ -66,8 +72,9 @@ service is deployed, reachable, authenticated correctly, or returning HTTP 200.
 | Terra | `artifacts/terra` | **REGISTERED** |
 | Vessels | `artifacts/vessels` | **REGISTERED** |
 
-`artifacts/api-server` is tracked backend infrastructure without an artifact
-manifest. It is not counted as a product vertical.
+`artifacts/api-server` is tracked backend infrastructure and
+`artifacts/szl-holdings` currently contains generated social-card assets only.
+Neither has an artifact manifest or is counted as a product vertical.
 
 Registration is a discoverability fact, not a readiness claim. LIVE, MODELED,
 PLANNED, and conformance status require separate evidence.
@@ -107,36 +114,38 @@ locked-proven set. Λ unconditional uniqueness remains **Conjecture 1 — OPEN**
 
 ---
 
-## GitHub Public Estate — Observed State
+## GitHub Estate — Current Metadata Observation
 
-**Observed:** 2026-07-25T22:03:01Z
+**Observed:** 2026-10-06T04:33:40Z
 
-**Method:** authenticated GitHub repository inventory, filtered by current
-visibility and archive state.
+**Method:** authenticated, cursor-complete GitHub repository-metadata read. The
+privacy-preserving receipt is
+[`audit/evidence/github-org-metadata-summary-2026-10-06.json`](audit/evidence/github-org-metadata-summary-2026-10-06.json).
 
 | Metric | Observed Value |
 |---|---:|
-| Public repositories | **53** |
-| Archived public repositories | **12** |
-| Active public repositories | **41** |
-| FRONTIER decision target | **9** |
+| Repositories | **140** |
+| Public | **128** |
+| Private | **12** |
+| Active | **111** |
+| Archived | **29** |
+| Forks | **0** |
+| Default branch `main` | **140** |
 
-The nine-public-repository target is **NOT APPLIED**. It is conditional on
-vertical conformance and a reversible disposition process. This registry does
-not claim that the current estate already matches the target.
+The accepted authority was repository metadata read. These aggregates do not
+establish repository contents, branch protection, rulesets, checks, security
+alerts, packages, deployment, or readiness. Private repository names and raw
+responses are intentionally absent from the committed receipt.
 
-The V2 names `sentra`, `vessels`, and `insurance` as conceptual repository
-targets. Current repository truth differs:
+### Historical July public-only snapshot
 
-- Sentra is a registered product vertical inside `platform`, not a current
-  repository named `sentra`.
-- Vessels is a registered product vertical inside `platform`; `killinchu` is a
-  separate public repository.
-- There is no current public repository named `insurance`; the candidate
-  scoring workload has not been approved for public release.
+The 2026-07-25 observation recorded 53 public repositories: 41 active and 12
+archived. It is retained as history and is superseded for current inventory
+counts by the observation above. Its nine-public-repository FRONTIER target was
+a conditional planning target, not an applied visibility decision.
 
 Repository visibility must not change until aliases, ownership, release tags,
-and conformance evidence are resolved.
+conformance evidence, and a reversible disposition process are resolved.
 
 ---
 

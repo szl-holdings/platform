@@ -26,8 +26,29 @@ export function getRun(runId: string): PipelineRun | undefined {
   return _runs.get(runId);
 }
 
+/**
+ * Resolve a run only when it belongs to the authenticated tenant. Comparing
+ * the tenant after lookup keeps callers from distinguishing an unknown run ID
+ * from a run owned by another tenant.
+ */
+export function getRunForTenant(
+  runId: string,
+  tenantId: string | undefined,
+): PipelineRun | undefined {
+  const run = _runs.get(runId);
+  return run?.tenantId === tenantId ? run : undefined;
+}
+
+export function getRunTenantId(runId: string): string | undefined {
+  return _runs.get(runId)?.tenantId;
+}
+
 export function getAllRuns(): PipelineRun[] {
   return [..._runs.values()];
+}
+
+export function getAllRunsForTenant(tenantId: string | undefined): PipelineRun[] {
+  return [..._runs.values()].filter((run) => run.tenantId === tenantId);
 }
 
 export function runCount(): number {

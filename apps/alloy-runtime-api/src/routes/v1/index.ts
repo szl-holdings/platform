@@ -4,13 +4,15 @@
  * POST /v1/index/rebuild — trigger a full index rebuild across ingestion pipelines
  * GET  /v1/index/verify  — verify index integrity and report shard health
  *
- * In production, these delegate to the alloy-ingestion-orchestrator service.
- * Stubs return the correct response envelopes so callers can code against the
- * contract before the ingestion service is wired.
+ * Development/test stubs preserve the response shape for contract work. The
+ * production orchestrator is not wired in this service release, so both routes
+ * fail closed with HTTP 503/UNAVAILABLE rather than accepting phantom jobs or
+ * reporting synthetic shard health.
  */
 
 import { type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
+import { rejectUnwiredProductionCapability } from '../../runtime-capabilities.js';
 
 const router: IRouter = Router();
 
@@ -26,6 +28,7 @@ router.post('/rebuild', (req: Request, res: Response): void => {
     res.status(400).json({ error: 'Validation failed', issues: parse.error.issues });
     return;
   }
+  if (rejectUnwiredProductionCapability(res, 'index-rebuild')) return;
 
   const { domains, dryRun, force } = parse.data;
   const tenantId = req.tenantCtx?.tenantId ?? 'default';
@@ -45,6 +48,7 @@ router.post('/rebuild', (req: Request, res: Response): void => {
 });
 
 router.get('/verify', (req: Request, res: Response): void => {
+  if (rejectUnwiredProductionCapability(res, 'index-verification')) return;
   const tenantId = req.tenantCtx?.tenantId ?? 'default';
   const jobId = req.query.jobId as string | undefined;
 

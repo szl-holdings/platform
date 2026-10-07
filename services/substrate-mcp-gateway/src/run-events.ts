@@ -25,6 +25,8 @@ export type RunEventType =
 
 export interface RunLifecycleEvent {
   type: RunEventType;
+  /** Authenticated tenant that owns the run/event. Omitted only for global inventory changes. */
+  tenantId?: string;
   runId?: string;
   workflowId?: string;
   workflowName?: string;

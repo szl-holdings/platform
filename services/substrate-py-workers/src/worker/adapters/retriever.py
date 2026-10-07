@@ -23,6 +23,7 @@ The HTTP wire contract for an adapter endpoint is:
 
     POST {baseUrl}{queryPath}
     Authorization: Bearer <api-key>
+    X-Tenant-ID: <governed-tenant-id>
     Content-Type: application/json
 
     Request:
@@ -56,12 +57,16 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from dataclasses import dataclass, field, replace
 from typing import Any
 
 import httpx
 
+from ..security import is_production_environment
+
 logger = logging.getLogger(__name__)
+_TENANT_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$")
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -182,7 +187,7 @@ class RetrieverAdapterManager:
         is_local = base_url.startswith("http://localhost") or base_url.startswith(
             "http://127.0.0.1"
         )
-        if not api_key and not is_local:
+        if not api_key and (not is_local or is_production_environment()):
             return False, f"API key env var '{cfg.apiKeyEnvVar}' not configured"
         return True, None
 
@@ -195,6 +200,7 @@ class RetrieverAdapterManager:
         top_k: int,
         min_relevance_score: float,
         filters: dict[str, Any] | None = None,
+        tenant_id: str | None = None,
     ) -> list[dict[str, Any]]:
         cfg = self._adapters.get(adapter_id)
         if cfg is None:
@@ -207,6 +213,14 @@ class RetrieverAdapterManager:
 
         base_url = self._resolved_base_url(cfg)
         api_key = os.environ.get(cfg.apiKeyEnvVar) or "local-dev"
+        admitted_tenant_id = (tenant_id or "").strip()
+        if admitted_tenant_id and not _TENANT_ID_PATTERN.fullmatch(admitted_tenant_id):
+            raise RetrieverAdapterUnavailable(adapter_id, "invalid governed tenant identity")
+        if is_production_environment() and not admitted_tenant_id:
+            raise RetrieverAdapterUnavailable(
+                adapter_id,
+                "a governed tenant identity is required for production retrieval",
+            )
         url = base_url.rstrip("/") + cfg.queryPath
         body = {
             "query": query,
@@ -218,6 +232,7 @@ class RetrieverAdapterManager:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}",
             "User-Agent": "substrate-py-workers/1.0 retriever-adapter",
+            **({"X-Tenant-ID": admitted_tenant_id} if admitted_tenant_id else {}),
         }
 
         try:

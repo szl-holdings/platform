@@ -2,7 +2,7 @@
  * AEF Ingestion Orchestrator — Router
  *
  * Assembles all routes under the orchestrator prefix:
- *   GET  /v1/health
+ *   GET  /health
  *   POST /v1/runs               — submit a workflow run
  *   GET  /v1/runs               — list runs (with filters)
  *   GET  /v1/runs/:runId        — get run status
@@ -10,11 +10,24 @@
  *   POST /v1/runs/:runId/approve — approve or reject a paused run
  */
 
-import { Router } from 'express';
+import express, { type RequestHandler, Router } from 'express';
 import { createApprovalsRouter } from './routes/approvals.js';
 import { createRunsRouter } from './routes/runs.js';
+import { createOrchestratorRuntimeAdmissionMiddleware } from './runtime-admission.js';
+import { requireTenantContext } from './security.js';
 
-export function createOrchestratorRouter(): Router {
+export interface OrchestratorRouterOptions {
+  /** Authentication middleware supplied by the hosting security boundary. */
+  authenticate: RequestHandler;
+  /** Explicit environment snapshot used for production durability admission. */
+  env?: NodeJS.ProcessEnv;
+}
+
+export function createOrchestratorRouter(options: OrchestratorRouterOptions): Router {
+  if (typeof options?.authenticate !== 'function') {
+    throw new Error('createOrchestratorRouter requires authentication middleware');
+  }
+
   const router = Router();
 
   router.get('/health', (_req, res) => {
@@ -33,8 +46,15 @@ export function createOrchestratorRouter(): Router {
     });
   });
 
-  router.use('/v1/runs', createRunsRouter());
-  router.use('/v1/runs', createApprovalsRouter());
+  router.use(
+    '/v1/runs',
+    options.authenticate,
+    requireTenantContext,
+    createOrchestratorRuntimeAdmissionMiddleware(options.env),
+    express.json({ limit: '10mb' }),
+    createRunsRouter(),
+    createApprovalsRouter(),
+  );
 
   return router;
 }

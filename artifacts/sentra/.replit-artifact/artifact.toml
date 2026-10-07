@@ -18,7 +18,7 @@ kind = "web"
     run = "bash -c 'cd /home/runner/workspace/artifacts/sentra && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
 
     [services.production]
-    build = [ "pnpm", "--filter", "@workspace/sentra", "run", "build" ]
+    build = [ "bash", "-c", "source scripts/activate-pnpm.sh && exec pnpm --filter @workspace/sentra run build" ]
     publicDir = "artifacts/sentra/dist/public"
     serve = "static"
 

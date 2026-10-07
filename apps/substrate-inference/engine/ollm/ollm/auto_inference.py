@@ -1,23 +1,21 @@
 """
 AutoInference — unified entry-point for oLLM model loading and inference.
 
-Implements the core oLLM engine capabilities:
-  - SSD-offloaded KV cache for running large models on constrained VRAM
-  - CPU layer offloading for memory-constrained environments
-  - FlashAttention-2 integration for efficient attention computation
-  - Multimodal support for image and audio content blocks
+This checked-in adapter delegates model loading and generation to Transformers.
+FlashAttention may be selected when installed, and compatible processors may
+handle image/audio inputs. SSD KV-cache offload and explicit CPU-layer offload
+are not implemented by this source and are rejected rather than silently
+ignored.
 
-On a GPU host with CUDA + transformers, ``from_pretrained`` loads the model
-with the specified offload strategy.  On CPU-only hosts, it raises
-``RuntimeError`` so SubstrateRuntime falls back to STUB mode.
+On a GPU host with a supported backend and Transformers, ``from_pretrained``
+loads the model with the standard automatic device map. On CPU-only hosts, it
+raises ``RuntimeError`` so SubstrateRuntime falls back to STUB mode.
 """
 from __future__ import annotations
 
 import base64
 import importlib
 import logging
-import os
-import tempfile
 from typing import Any, Iterator
 
 log = logging.getLogger("ollm.auto_inference")
@@ -28,69 +26,8 @@ def _safe_log(value: Any) -> str:
     return str(value).replace("\r", " ").replace("\n", " ")
 
 
-def _safe_cache_dir(cache_dir: str) -> str:
-    """Resolve + confine a cache directory so an attacker-influenced value cannot
-    escape the allowed cache root via traversal or an absolute path (CWE-22).
-
-    The root defaults to the system temp dir; deployments that place the SSD KV
-    cache on a dedicated mount set ``OLLM_CACHE_ROOT`` to that path.
-    """
-    if not isinstance(cache_dir, str) or not cache_dir.strip():
-        raise ValueError("cache_dir must be a non-empty string")
-    root = os.path.realpath(os.environ.get("OLLM_CACHE_ROOT") or tempfile.gettempdir())
-    candidate = cache_dir if os.path.isabs(cache_dir) else os.path.join(root, cache_dir)
-    resolved = os.path.realpath(candidate)
-    # Confine to the cache root: commonpath of an escaping path differs from root
-    # (and it raises on drive/relative mismatches), so any traversal or absolute
-    # path outside the root is rejected before it can reach a filesystem sink.
-    if os.path.commonpath((root, resolved)) != root:
-        raise ValueError(
-            f"cache_dir {cache_dir!r} escapes the allowed cache root {root!r}; "
-            "set OLLM_CACHE_ROOT to permit a different location"
-        )
-    return resolved
-
-
-class _SSDKVCacheManager:
-    """Manages SSD-backed KV cache storage for large-context inference."""
-
-    def __init__(self, cache_dir: str, max_cache_size_gb: float = 64.0):
-        resolved = _safe_cache_dir(cache_dir)
-        # Re-assert containment in the same scope as the filesystem sink below so
-        # the confinement is a prefix barrier the taint analysis recognizes at
-        # os.makedirs (the guard inside _safe_cache_dir is not visible across its
-        # return; root is an untainted env/temp prefix).
-        root = os.path.realpath(os.environ.get("OLLM_CACHE_ROOT") or tempfile.gettempdir())
-        if not resolved.startswith(root):
-            raise ValueError(
-                f"cache_dir {cache_dir!r} escapes the allowed cache root {root!r}"
-            )
-        self.cache_dir = resolved
-        self.max_cache_size_gb = max_cache_size_gb
-        self._active = False
-
-        os.makedirs(resolved, exist_ok=True)
-        log.info("SSD KV cache initialized at %s (max %.1f GB)", _safe_log(self.cache_dir), max_cache_size_gb)
-        self._active = True
-
-    @property
-    def active(self) -> bool:
-        return self._active
-
-    def get_cache_path(self, model_id: str) -> str:
-        safe_name = model_id.replace("/", "_").replace("\\", "_")
-        # Confine under the untainted cache root (env/temp) with a prefix barrier
-        # the taint analysis recognizes at the os.makedirs sink below (CWE-22).
-        root = os.path.realpath(os.environ.get("OLLM_CACHE_ROOT") or tempfile.gettempdir())
-        path = os.path.realpath(os.path.join(self.cache_dir, f"{safe_name}_kv_cache"))
-        if not path.startswith(root):
-            raise ValueError(f"cache path for {model_id!r} escapes the cache root")
-        os.makedirs(path, exist_ok=True)
-        return path
-
-
 class AutoInference:
-    """oLLM inference engine with SSD KV cache offload and FlashAttention-2."""
+    """Checked-in Transformers inference adapter."""
 
     def __init__(
         self,
@@ -99,8 +36,6 @@ class AutoInference:
         tokenizer: Any = None,
         processor: Any = None,
         vram_used_mb: float = 0.0,
-        ssd_cache: _SSDKVCacheManager | None = None,
-        cpu_offload_layers: int = 0,
         use_flash_attn: bool = False,
     ):
         self.model_id = model_id
@@ -108,8 +43,6 @@ class AutoInference:
         self._tokenizer = tokenizer
         self._processor = processor
         self.vram_used_mb = vram_used_mb
-        self._ssd_cache = ssd_cache
-        self._cpu_offload_layers = cpu_offload_layers
         self._use_flash_attn = use_flash_attn
 
     @classmethod
@@ -121,36 +54,43 @@ class AutoInference:
         ssd_cache_dir: str | None = None,
         cpu_offload_layers: int = 0,
         torch_dtype: str = "auto",
-        trust_remote_code: bool = True,
+        trust_remote_code: bool = False,
+        revision: str | None = None,
     ) -> "AutoInference":
         try:
             torch = importlib.import_module("torch")
         except ImportError as exc:
             raise RuntimeError(
-                "oLLM requires PyTorch. "
+                "The checked-in adapter requires PyTorch. "
                 "Install with: pip install torch"
             ) from exc
 
         gpu_backend = _detect_gpu_backend(torch)
         if gpu_backend is None:
             raise RuntimeError(
-                "oLLM requires a GPU (CUDA, ROCm, or Apple MPS). No GPU backend detected. "
+                "The checked-in adapter requires a GPU (CUDA, ROCm, or Apple MPS). "
+                "No GPU backend was detected. "
                 "For CPU-only development, the SubstrateRuntime will use STUB mode."
+            )
+
+        if ssd_cache_dir is not None:
+            raise RuntimeError(
+                "SSD KV-cache offload is not implemented by the checked-in adapter"
+            )
+        if cpu_offload_layers > 0:
+            raise RuntimeError(
+                "Explicit CPU-layer offload is not implemented by the checked-in adapter"
             )
 
         try:
             transformers = importlib.import_module("transformers")
         except ImportError as exc:
             raise RuntimeError(
-                "oLLM requires the transformers library. "
+                "The checked-in adapter requires the Transformers library. "
                 "Install with: pip install transformers"
             ) from exc
 
         dtype = _resolve_dtype(torch, torch_dtype)
-
-        ssd_cache = None
-        if ssd_cache_dir:
-            ssd_cache = _SSDKVCacheManager(ssd_cache_dir)
 
         use_flash_attn = False
         attn_impl = "sdpa"
@@ -162,33 +102,15 @@ class AutoInference:
         except ImportError:
             log.info("FlashAttention-2 not available, falling back to SDPA")
 
-        device_map = _build_device_map(torch, cpu_offload_layers)
-
         model_kwargs: dict[str, Any] = {
             "cache_dir": cache_dir,
             "torch_dtype": dtype,
-            "device_map": device_map,
+            "device_map": "auto",
             "trust_remote_code": trust_remote_code,
             "attn_implementation": attn_impl,
         }
-
-        if cpu_offload_layers > 0:
-            # Confine under the untainted cache root (env/temp) with a prefix
-            # barrier the taint analysis recognizes at the os.makedirs sink below.
-            offload_root = os.path.realpath(
-                os.environ.get("OLLM_CACHE_ROOT") or tempfile.gettempdir()
-            )
-            offload_base = _safe_cache_dir(ssd_cache_dir) if ssd_cache_dir else offload_root
-            offload_dir = os.path.realpath(os.path.join(offload_base, "cpu_offload"))
-            if not offload_dir.startswith(offload_root):
-                raise ValueError("cpu offload path escapes the cache root")
-            os.makedirs(offload_dir, exist_ok=True)
-            model_kwargs["offload_folder"] = offload_dir
-            log.info(
-                "CPU offloading %d layers to %s",
-                cpu_offload_layers,
-                _safe_log(offload_dir),
-            )
+        if revision is not None:
+            model_kwargs["revision"] = revision
 
         processor = None
         try:
@@ -196,6 +118,7 @@ class AutoInference:
                 model_name_or_path,
                 cache_dir=cache_dir,
                 trust_remote_code=trust_remote_code,
+                revision=revision,
             )
             log.info("Loaded multimodal processor for %s", _safe_log(model_name_or_path))
         except Exception:
@@ -205,6 +128,7 @@ class AutoInference:
             model_name_or_path,
             cache_dir=cache_dir,
             trust_remote_code=trust_remote_code,
+            revision=revision,
         )
 
         model = transformers.AutoModelForCausalLM.from_pretrained(
@@ -219,12 +143,10 @@ class AutoInference:
             vram_used = round((total - mem_info[0]) / 1024 / 1024, 1)
 
         log.info(
-            "Model loaded: %s, VRAM: %.1f MB, flash_attn: %s, cpu_offload: %d layers, ssd_cache: %s",
+            "Model loaded: %s, VRAM: %.1f MB, flash_attn: %s",
             _safe_log(model_name_or_path),
             vram_used,
             use_flash_attn,
-            cpu_offload_layers,
-            bool(ssd_cache),
         )
 
         return cls(
@@ -233,8 +155,6 @@ class AutoInference:
             tokenizer=tokenizer,
             processor=processor,
             vram_used_mb=vram_used,
-            ssd_cache=ssd_cache,
-            cpu_offload_layers=cpu_offload_layers,
             use_flash_attn=use_flash_attn,
         )
 
@@ -430,12 +350,6 @@ def _detect_gpu_backend(torch_mod: Any) -> str | None:
     if hasattr(torch_mod, "is_hip_available") and torch_mod.is_hip_available():
         return "rocm"
     return None
-
-
-def _build_device_map(torch_mod: Any, cpu_offload_layers: int) -> str | dict[str, Any]:
-    if cpu_offload_layers <= 0:
-        return "auto"
-    return "auto"
 
 
 def _resolve_dtype(torch_mod: Any, dtype_str: str) -> Any:

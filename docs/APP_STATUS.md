@@ -1,8 +1,18 @@
 # SZL Holdings — Application Status Register
 
 **Date:** September 24, 2026
-**Status:** Authoritative single source of truth for all artifact GA/beta/internal/archived/concept status
-**Update cadence:** Update after each release or Phase completion
+**Status:** **HISTORICAL / SUPERSEDED — not a current readiness authority**
+**Update cadence:** Retained as a point-in-time register; do not update it as current truth
+
+> **Current-control notice (2026-10-07):** The artifact topology and several
+> deployment, authentication, integration, and GA statements below no longer
+> match the tracked tree and have not been re-observed in a live environment.
+> For current source inventory use [`SOURCE_OF_TRUTH.md`](../SOURCE_OF_TRUTH.md)
+> and `audit/source-of-truth.json` after their validator passes. For publication
+> decisions use the
+> [October estate prepublish audit](../audit/SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md).
+> A source directory, package, route, or historical screenshot does not prove a
+> deployment or GA status. The entries below remain historical context only.
 
 ---
 

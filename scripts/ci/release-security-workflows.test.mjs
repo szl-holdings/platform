@@ -117,12 +117,14 @@ test('CodeQL severity gate reads the exact synthetic PR merge ref', () => {
 
 test('CodeQL runs the release-security contract through the terminating test runner', () => {
   const workflow = readRepositoryFile('.github/workflows/codeql.yml');
+  const packageJson = JSON.parse(readRepositoryFile('package.json'));
   const contract = yamlJobBlock(workflow, 'severity-gate-contract');
 
   assert.match(
     contract,
     /^ {8}run: node --test scripts\/ci\/release-security-workflows\.test\.mjs$/m,
   );
+  assert.match(packageJson.scripts.test, /scripts\/ci\/release-security-workflows\.test\.mjs/);
 });
 
 test('CodeQL alert query exhausts pagination and retains page boundaries', () => {
@@ -237,4 +239,198 @@ test('Trivy and Grype workflow labels describe filesystem/SCA scanning only', ()
   assert.match(workflow, /^ {10}path: "\."$/m);
   assert.doesNotMatch(workflow, /\bcontainer\b/i);
   assert.doesNotMatch(workflow, /\bimage scan(?:ning)?\b/i);
+});
+
+test('Grype gate retains raw evidence and admits only verified local patches', () => {
+  const workflow = readRepositoryFile('.github/workflows/trivy.yml');
+  const branchProtection = readRepositoryFile('.github/BRANCH_PROTECTION.md');
+  const grype = yamlJobBlock(workflow, 'grype-gate');
+  const rawScan = yamlStepBlock(grype, 'Scan repository filesystem with Grype (raw JSON)');
+  const digestCapture = yamlStepBlock(grype, 'Seal raw Grype evidence digest');
+  const verification = yamlStepBlock(grype, 'Verify local patches and gate raw Grype evidence');
+  const evidenceCheck = yamlStepBlock(grype, 'Require nonempty Grype evidence files');
+  const uploadVerification = yamlStepBlock(grype, 'Verify raw Grype evidence digest before upload');
+  const rawEvidence = yamlStepBlock(grype, 'Upload raw Grype evidence');
+  const gateEvidence = yamlStepBlock(grype, 'Upload Grype gate report');
+  const summary = yamlStepBlock(grype, 'Publish Grype gate summary');
+  const script = runScript(verification);
+
+  assert.match(grype, /^ {4}timeout-minutes: 20$/m);
+  assert.match(grype, /^ {8}run: pnpm install --frozen-lockfile --ignore-scripts$/m);
+  assert.match(rawScan, /^ {10}fail-build: false$/m);
+  assert.match(rawScan, /^ {10}output-format: json$/m);
+  assert.match(rawScan, /^ {10}output-file: grype-results\.json$/m);
+  assert.match(rawScan, /^ {10}grype-version: v0\.118\.0$/m);
+  assert.match(rawScan, /^ {10}by-cve: false$/m);
+  assert.match(rawScan, /^ {10}config: \.grype\.yaml$/m);
+  assert.doesNotMatch(grype, /fail-build: true/);
+  const stepNames = [...grype.matchAll(/^ {6}- name: (.+)$/gm)].map((match) => match[1]);
+  const rawScanPosition = stepNames.indexOf('Scan repository filesystem with Grype (raw JSON)');
+  assert.equal(
+    stepNames[rawScanPosition + 1],
+    'Seal raw Grype evidence digest',
+    'raw Grype evidence was not sealed immediately after the scan',
+  );
+  assert.match(digestCapture, /^ {10}test -s grype-results\.json$/m);
+  assert.match(
+    digestCapture,
+    /^ {10}sha256sum grype-results\.json > grype-results\.json\.sha256$/m,
+  );
+
+  const behaviorTests = script.indexOf(
+    'node --test scripts/qa/gate-grype-report.test.mjs scripts/qa/dependency-patches.test.mjs scripts/qa/third-party-licenses.test.mjs scripts/ci/release-security-workflows.test.mjs',
+  );
+  const gateDigestCheck = script.indexOf('sha256sum --check --strict grype-results.json.sha256');
+  const gate = script.indexOf('node scripts/qa/gate-grype-report.mjs');
+  assert.notEqual(behaviorTests, -1, 'missing Grype and dependency-patch behavior tests');
+  assert.ok(gateDigestCheck > behaviorTests, 'raw evidence was not verified after behavior tests');
+  assert.ok(gate > gateDigestCheck, 'raw evidence was not verified immediately before the gate');
+  assert.ok(gate > behaviorTests, 'Grype mitigation gate ran before behavior tests');
+  assert.doesNotMatch(verification, /continue-on-error/);
+
+  assert.match(evidenceCheck, /^ {8}if: always\(\)$/m);
+  assert.match(evidenceCheck, /^ {10}test -s grype-results\.json$/m);
+  assert.match(evidenceCheck, /^ {10}test -s grype-results\.json\.sha256$/m);
+  assert.match(evidenceCheck, /^ {10}test -s grype-gate-report\.md$/m);
+  const uploadVerificationPosition = stepNames.indexOf(
+    'Verify raw Grype evidence digest before upload',
+  );
+  assert.equal(
+    stepNames[uploadVerificationPosition + 1],
+    'Upload raw Grype evidence',
+    'raw evidence was not verified immediately before upload',
+  );
+  assert.match(uploadVerification, /^ {8}id: verify-grype-evidence-upload$/m);
+  assert.match(uploadVerification, /^ {8}if: always\(\)$/m);
+  assert.match(
+    uploadVerification,
+    /^ {8}run: sha256sum --check --strict grype-results\.json\.sha256$/m,
+  );
+  assert.match(
+    rawEvidence,
+    /^ {8}if: always\(\) && steps\.verify-grype-evidence-upload\.outcome == 'success'$/m,
+  );
+  assert.match(rawEvidence, /^ {10}path: \|$/m);
+  assert.match(rawEvidence, /^ {12}grype-results\.json$/m);
+  assert.match(rawEvidence, /^ {12}grype-results\.json\.sha256$/m);
+  assert.match(rawEvidence, /^ {10}if-no-files-found: error$/m);
+  assert.match(gateEvidence, /^ {8}if: always\(\)$/m);
+  assert.match(gateEvidence, /^ {10}path: grype-gate-report\.md$/m);
+  assert.match(gateEvidence, /^ {10}if-no-files-found: error$/m);
+  assert.doesNotMatch(rawEvidence, /grype-gate-report\.md/);
+  assert.doesNotMatch(gateEvidence, /grype-results\.json/);
+  assert.match(summary, /^ {8}if: always\(\)$/m);
+  assert.match(summary, /\$GITHUB_STEP_SUMMARY/);
+
+  const grypeConfigLines = readRepositoryFile('.grype.yaml')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line !== '' && !line.startsWith('#'));
+  assert.deepEqual(grypeConfigLines, ['ignore: []']);
+  assert.match(
+    branchProtection,
+    /^\| `Grype filesystem\/SCA gate \(fail on HIGH\/CRITICAL\)` \| `\.github\/workflows\/trivy\.yml` \| Raw filesystem\/SCA findings block unless an exact, registered, digest-bound, behavior-tested, unexpired local patch is verified \|$/m,
+  );
+});
+
+test('dependency audit behavior-tests local patches before admitting mitigations', () => {
+  const workflow = readRepositoryFile('.github/workflows/security.yml');
+  const dependencyScan = yamlJobBlock(workflow, 'dependency-scan');
+  const install = yamlStepBlock(dependencyScan, 'Install dependencies');
+  const sbomUpload = yamlStepBlock(dependencyScan, 'Upload current-run SBOM artifact');
+  const vulnerabilityUpload = yamlStepBlock(
+    dependencyScan,
+    'Upload current-run vulnerability report artifact',
+  );
+  const preflight = yamlStepBlock(
+    dependencyScan,
+    'Initialize current-run vulnerability failure artifact',
+  );
+  const step = yamlStepBlock(dependencyScan, 'Generate vulnerability report from pnpm audit');
+  const script = runScript(step);
+  const patchTests = script.indexOf(
+    'node --test scripts/qa/generate-vuln-report.test.js scripts/qa/dependency-patches.test.mjs scripts/qa/third-party-licenses.test.mjs',
+  );
+  const audit = script.indexOf('node scripts/qa/generate-vuln-report.js');
+
+  assert.match(dependencyScan, /^ {4}timeout-minutes: 20$/m);
+  assert.match(install, /^ {8}run: pnpm install --frozen-lockfile$/m);
+  assert.match(install, /^ {10}ONNXRUNTIME_NODE_INSTALL: skip$/m);
+  assert.doesNotMatch(install, /--ignore-scripts/);
+  assert.match(preflight, /^ {8}id: vulnerability-preflight$/m);
+  assert.match(preflight, /^ {8}if: always\(\)$/m);
+  assert.match(preflight, /^ {8}run: node scripts\/qa\/write-vuln-preflight-report\.mjs$/m);
+  assert.match(
+    step,
+    /^ {8}if: always\(\) && steps\.vulnerability-preflight\.outcome == 'success'$/m,
+  );
+  assert.notEqual(patchTests, -1, 'missing local dependency-patch behavior tests');
+  assert.ok(audit > patchTests, 'vulnerability admission ran before patch behavior tests');
+  assert.doesNotMatch(step, /continue-on-error/);
+
+  assert.match(sbomUpload, /^ {8}if: always\(\) && steps\.sbom\.outcome == 'success'$/m);
+  assert.match(sbomUpload, /^ {10}path: security\/sbom-latest\.json$/m);
+  assert.match(sbomUpload, /^ {10}if-no-files-found: error$/m);
+  assert.doesNotMatch(sbomUpload, /vuln-report\.md/);
+
+  assert.match(
+    vulnerabilityUpload,
+    /^ {8}if: always\(\) && steps\.vulnerability-preflight\.outcome == 'success'$/m,
+  );
+  assert.match(vulnerabilityUpload, /^ {10}path: security\/vuln-report\.md$/m);
+  assert.match(vulnerabilityUpload, /^ {10}if-no-files-found: error$/m);
+  assert.doesNotMatch(vulnerabilityUpload, /sbom-latest\.json/);
+});
+
+test('license gate replaces stale evidence and blocks denied, unknown, or malformed inventory', () => {
+  const workflow = readRepositoryFile('.github/workflows/security.yml');
+  const licenseJob = yamlJobBlock(workflow, 'license-report');
+  const install = yamlStepBlock(licenseJob, 'Install dependencies');
+  const preflight = yamlStepBlock(licenseJob, 'Initialize current-run license failure artifact');
+  const generation = yamlStepBlock(licenseJob, 'Generate license compliance report');
+  const upload = yamlStepBlock(licenseJob, 'Upload license report artifact');
+  const script = runScript(generation);
+  const negativeContracts = script.indexOf(
+    'node --test scripts/qa/third-party-licenses.test.mjs scripts/ci/release-security-workflows.test.mjs',
+  );
+  const inventory = script.indexOf('node scripts/qa/generate-license-report.js');
+
+  assert.match(licenseJob, /^ {4}timeout-minutes: 20$/m);
+  assert.match(install, /^ {8}run: pnpm install --frozen-lockfile$/m);
+  assert.match(install, /^ {10}ONNXRUNTIME_NODE_INSTALL: skip$/m);
+  assert.doesNotMatch(install, /--ignore-scripts/);
+  assert.match(preflight, /^ {8}id: license-preflight$/m);
+  assert.match(preflight, /^ {8}if: always\(\)$/m);
+  assert.match(preflight, /^ {8}run: node scripts\/qa\/write-license-preflight-report\.mjs$/m);
+  assert.match(
+    generation,
+    /^ {8}if: always\(\) && steps\.license-preflight\.outcome == 'success'$/m,
+  );
+  assert.notEqual(negativeContracts, -1, 'missing license negative contracts');
+  assert.ok(inventory > negativeContracts, 'license inventory ran before its negative contracts');
+  assert.doesNotMatch(generation, /continue-on-error|\|\| true/);
+
+  assert.match(upload, /^ {8}if: always\(\) && steps\.license-preflight\.outcome == 'success'$/m);
+  assert.match(upload, /^ {10}path: security\/license-report\.md$/m);
+  assert.match(upload, /^ {10}if-no-files-found: error$/m);
+  assert.doesNotMatch(upload, /sbom-latest\.json|vuln-report\.md/);
+});
+
+test('required aggregate security gate accepts success as its sole passing result', () => {
+  const workflow = readRepositoryFile('.github/workflows/security.yml');
+  const gate = yamlJobBlock(workflow, 'security-gate');
+  const enforcement = yamlStepBlock(gate, 'Check all security jobs passed');
+  const script = runScript(enforcement);
+
+  assert.match(
+    gate,
+    /^ {4}needs: \[dependency-scan, secret-scan, lockfile-integrity, license-report\]$/m,
+  );
+  assert.match(gate, /^ {4}if: always\(\)$/m);
+  assert.doesNotMatch(gate, /^\s+continue-on-error:/m);
+  for (const job of ['dependency-scan', 'secret-scan', 'lockfile-integrity', 'license-report']) {
+    assert.match(script, new RegExp(`needs\\.${job}\\.result \\}\\}" != "success"`));
+  }
+  assert.match(script, /^\s*exit 1$/m);
+  assert.doesNotMatch(script, /continue-on-error|\|\| true/);
 });

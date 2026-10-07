@@ -44,15 +44,12 @@ curl -X POST "http://localhost:$PORT/v1/evals/run" \
 
 ## Reserved VM — Storage Considerations
 
-The evidence ledger's filesystem JSONL adapter writes to `./data/aef-evidence/`. On Replit Reserved VMs, this path persists across restarts. On Autoscale deployments, it does not — use the in-memory adapter or connect to an external store.
-
-Configure the adapter in the API server environment:
-
-```bash
-AEF_LEDGER_ADAPTER=fs        # use filesystem JSONL (Reserved VM)
-AEF_LEDGER_ADAPTER=memory    # use in-memory (Autoscale / dev)
-AEF_LEDGER_PATH=./data/aef-evidence/
-```
+The package contains a filesystem JSONL class, but the API currently uses the
+process-local default store and does not wire `AEF_LEDGER_ADAPTER` or
+`AEF_LEDGER_PATH`. Even on a persistent Reserved VM, the JSONL class is mutable
+and not hash-chained, so it is not a production audit authority. Use the local
+recorder only for development/test; production evidence-producing routes stay
+on HOLD until a durable, tamper-evident backend is implemented and probed.
 
 ## Replit Secrets for AEF
 

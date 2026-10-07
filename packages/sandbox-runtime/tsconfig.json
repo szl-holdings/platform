@@ -13,6 +13,14 @@
     "skipLibCheck": true,
     "composite": true
   },
+  "references": [
+    { "path": "../agents-core" },
+    { "path": "../cognitive-observability" },
+    { "path": "../guardian" },
+    { "path": "../memory-fabric" },
+    { "path": "../tool-mesh" },
+    { "path": "../trace-graph" }
+  ],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

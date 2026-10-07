@@ -147,7 +147,7 @@ export interface WorkflowDefinition {
 
 export const SubmitRunRequestSchema = z.object({
   workflowId: z.string().min(1),
-  tenantId: z.string().min(1),
+  tenantId: z.string().trim().min(1).max(128),
   profileId: z.string().default('default'),
   input: z.unknown(),
   metadata: z.record(z.unknown()).default({}),
@@ -176,9 +176,11 @@ export interface ListRunsFilter {
 
 // ─── Approval Request/Response ────────────────────────────────────────────────
 
-export const ApprovalDecisionSchema = z.object({
-  decision: z.enum(['approved', 'rejected']),
-  actorId: z.string().optional(),
-  note: z.string().optional(),
-});
+export const ApprovalDecisionSchema = z
+  .object({
+    approvalRequestId: z.string().min(1),
+    decision: z.enum(['approved', 'rejected']),
+    note: z.string().optional(),
+  })
+  .strict();
 export type ApprovalDecision = z.infer<typeof ApprovalDecisionSchema>;

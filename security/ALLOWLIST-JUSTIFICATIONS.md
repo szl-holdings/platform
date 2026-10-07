@@ -141,3 +141,4 @@ Regenerate with `pnpm truth:allowlists`. Review every changed row before merge.
 | scripts/qa/scan-secrets.js | `SKIP_PATHS: pnpm-lock.yaml` | Only the repository-root generated lockfile is excluded. | Repository config review | 2026-07-28 |
 | scripts/qa/scan-secrets.js | `ALLOW_VALUES: AKIAIOSFODNN7EXAMPLE` | Exact public example values from AWS documentation. Future values remain blocking. | Repository config review | 2026-07-28 |
 | scripts/qa/scan-secrets.js | `ALLOW_VALUES: AKIA0000000000EXAMPLE` | Exact public example values from AWS documentation. Future values remain blocking. | Repository config review | 2026-07-28 |
+| scripts/qa/scan-secrets.js | `ALLOW_VALUES: sk-abcdef1234567890abcdef1234567890ab` | Exact synthetic rejection fixture in the Python model-policy tests. | Repository config review | 2026-10-07 |
