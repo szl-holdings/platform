@@ -2,7 +2,7 @@
 
 This directory is a TypeScript candidate/reference implementation of a
 governance gateway core. It is not evidence that a gateway is deployed in
-front of any customer-facing surface.
+front of any customer product surface.
 
 There is currently no package manifest, TypeScript build configuration,
 container image definition, deployment manifest, or published artifact for

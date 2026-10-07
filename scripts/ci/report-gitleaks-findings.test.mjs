@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 import { annotations, safeFindings } from './report-gitleaks-findings.mjs';
 
 test('retains only rule, file, and line without sensitive scanner fields', () => {
@@ -40,4 +41,19 @@ test('rejects malformed metadata without interpreting scanner values', () => {
     assert.throws(() => safeFindings(report));
   }
   assert.deepEqual(safeFindings([]), []);
+});
+
+test('workflow retains scanner failure and publishes only metadata', () => {
+  const workflow = readFileSync(
+    new URL('../../.github/workflows/security.yml', import.meta.url),
+    'utf8',
+  );
+  const section = workflow.split('  secret-scan:')[1].split('  lockfile-integrity:')[0];
+  assert.match(section, /--redact --exit-code 1/);
+  assert.match(section, /scan_args\+=\(--log-opts "\$PR_BASE_SHA\.\.\$PR_HEAD_SHA"\)/);
+  assert.match(section, /scan_args\+=\(--log-opts "\$candidate_base\.\.HEAD"\)/);
+  assert.match(section, /gitleaks "\$\{scan_args\[@\]\}" \|\| scan_status=\$\?/);
+  assert.match(section, /exit "\$scan_status"/);
+  assert.match(section, /path: \$\{\{ runner\.temp \}\}\/gitleaks-findings-metadata\.json/);
+  assert.doesNotMatch(section, /path:.*gitleaks-redacted\.json/);
 });
