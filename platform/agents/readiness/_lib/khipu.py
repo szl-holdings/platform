@@ -165,14 +165,27 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
     """Append the signed receipt to the runs dataset.
 
     Path: receipts/<agent>/<UTC-date>/<UTC-timestamp>.json
-    Uses HF_TOKEN. Returns a small status dict and never raises itself; the
+    Uses HF_TOKEN, or an exact-target GitHub Actions OIDC grant when
+    HF_OIDC_RESOURCE is set. Returns a small status dict and never raises itself; the
     caller (emit -> require_published) turns a failed publish into a failed
     run, because the dashboard and readiness-audit-rift only see receipts that
     reached the dataset.
     """
     token = os.environ.get("HF_TOKEN")
-    if not token:
-        return {"published": False, "reason": "no HF_TOKEN", "path": "(not created)"}
+    oidc_resource = os.environ.get("HF_OIDC_RESOURCE")
+    if oidc_resource:
+        if oidc_resource != f"datasets/{dataset}":
+            return {"published": False, "reason": "OIDC dataset mismatch", "path": "(not created)"}
+        if token:
+            return {"published": False, "reason": "ambiguous HF_TOKEN and OIDC credentials", "path": "(not created)"}
+        if os.environ.get("GITHUB_ACTIONS") != "true" or not all(
+            os.environ.get(name) for name in (
+                "ACTIONS_ID_TOKEN_REQUEST_URL", "ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+            )
+        ):
+            return {"published": False, "reason": "OIDC request grant unavailable", "path": "(not created)"}
+    elif not token:
+        return {"published": False, "reason": "no HF_TOKEN or OIDC grant", "path": "(not created)"}
     signature_error = receipt_signature_error(agent, envelope)
     if signature_error:
         return {"published": False, "reason": signature_error, "path": "(not created)"}
@@ -182,7 +195,9 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
     try:
         from huggingface_hub import HfApi  # type: ignore
 
-        api = HfApi(token=token)
+        # token=True forces the pinned Hub client to exchange OIDC (or fail)
+        # even when implicit-token use is disabled.
+        api = HfApi(token=True if oidc_resource else token)
         api.upload_file(
             path_or_fileobj=json.dumps(envelope, indent=2).encode(),
             path_in_repo=path,

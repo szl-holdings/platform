@@ -60,8 +60,10 @@ SZLHOLDINGS/readiness-runs
 If the signing key is absent or invalid, the envelope is honestly marked
 `signed:false` and is **not uploaded**. A receipt signed by a different key is
 also rejected against the configured fleet signing key — never a fabricated signature (Doctrine
-v11 LOCKED 749/14/163 §2 anti-fake-green). If `HF_TOKEN` is absent or rejected,
-`published:false` is recorded. Inside GitHub Actions either signing or
+v11 LOCKED 749/14/163 §2 anti-fake-green). Publication has a separate
+credential gate: seven jobs still require `HF_TOKEN`, while observability is
+prepared for an exact-target OIDC Trusted Publisher. If its credential is
+absent or rejected, `published:false` is recorded. Inside GitHub Actions either signing or
 publication failure fails the run (`khipu.require_published`); a successful
 run proves transport of a verified signed receipt, not that every runtime
 probe passed. A local run without credentials remains unsigned/unpublished and
@@ -90,7 +92,13 @@ unsigned, unpublished receipt — useful for local dry-runs, not a passing
 GitHub Actions readiness result.
 
 ## Required GitHub configuration
-- **Secrets**: `HF_TOKEN`, `KHIPU_SIGNING_KEY_B64`.
+- **Secrets**: `KHIPU_SIGNING_KEY_B64` for signing; `HF_TOKEN` for the seven
+  readiness jobs that have not migrated to OIDC.
+- **Observability publisher**: a dataset-scoped Hugging Face Trusted Publisher
+  for `szl-holdings/platform` on `main`, workflow filename
+  `readiness-observability.yml`, resource
+  `datasets/SZLHOLDINGS/readiness-runs`. Confirm the provider-side binding
+  before relying on the source configuration.
 - **Variables**: `A11OY_URL`, `AMARU_URL`, `SENTRA_URL`, `KILLINCHU_URL`,
   `ROSIE_URL`, `OTEL_COLLECTOR_URL`.
 
