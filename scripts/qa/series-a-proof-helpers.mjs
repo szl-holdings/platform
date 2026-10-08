@@ -16,6 +16,23 @@ export function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex').toUpperCase();
 }
 
+const LOCAL_CAPTURE_PROVENANCE = Object.freeze({
+  authority: 'LOCAL_NON_AUTHORITATIVE',
+  provider: 'UNKNOWN',
+  workflow_name: null,
+  workflow_ref: null,
+  workflow_path: null,
+  workflow_revision: null,
+  workflow_source_sha: null,
+  workflow_run_id: null,
+  workflow_run_attempt: null,
+  workflow_run_url: null,
+});
+
+export function localCaptureProvenance() {
+  return LOCAL_CAPTURE_PROVENANCE;
+}
+
 export function requireOutputDirectory(
   repositoryRoot,
   requested = process.env.PROOF_OUTPUT_DIR?.trim() || 'artifacts/series-a-screenshot-proof',
