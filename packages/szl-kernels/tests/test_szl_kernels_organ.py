@@ -14,9 +14,8 @@ import tempfile
 import threading
 import time
 import types
-import unittest
+import unittest.mock
 from pathlib import Path
-from unittest import mock
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
@@ -179,7 +178,7 @@ def timestamp_for(epoch: float) -> str:
 class KernelActionTruthfulnessTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary_directory = tempfile.TemporaryDirectory()
-        self.environment = mock.patch.dict(
+        self.environment = unittest.mock.patch.dict(
             os.environ, {"SZL_CODEX_DIR": self.temporary_directory.name}
         )
         self.environment.start()
@@ -255,7 +254,7 @@ class KernelActionTruthfulnessTests(unittest.TestCase):
 class WakeReceiptEndpointTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary_directory = tempfile.TemporaryDirectory()
-        self.environment = mock.patch.dict(
+        self.environment = unittest.mock.patch.dict(
             os.environ,
             {
                 "SZL_CODEX_DIR": self.temporary_directory.name,
@@ -280,7 +279,7 @@ class WakeReceiptEndpointTests(unittest.TestCase):
         self, token: str = TOKEN, admin_token: str | None = None
     ) -> tuple[FakeClient, object]:
         app = FakeApp()
-        with mock.patch.dict(sys.modules, stub_framework_modules()):
+        with unittest.mock.patch.dict(sys.modules, stub_framework_modules()):
             manager = KERNELS.register(
                 app,
                 organ="a11oy",
@@ -347,7 +346,7 @@ class WakeReceiptEndpointTests(unittest.TestCase):
         now = 1_800_000_000.0
         payload = {**valid_payload(), "ts": timestamp_for(now)}
 
-        with mock.patch.object(KERNELS, "_unix_time", return_value=now):
+        with unittest.mock.patch.object(KERNELS, "_unix_time", return_value=now):
             first = client.post(
                 ENDPOINT, json=payload, headers=self.authorization()
             )
@@ -398,7 +397,7 @@ class WakeReceiptEndpointTests(unittest.TestCase):
                 stream_barrier=barrier,
             )
 
-        with mock.patch.object(KERNELS, "_unix_time", return_value=now):
+        with unittest.mock.patch.object(KERNELS, "_unix_time", return_value=now):
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 responses = list(executor.map(send, (first_client, second_client)))
 
@@ -414,7 +413,7 @@ class WakeReceiptEndpointTests(unittest.TestCase):
         client, manager = self.make_client()
         now = 1_800_000_000.0
 
-        with mock.patch.object(KERNELS, "_unix_time", return_value=now):
+        with unittest.mock.patch.object(KERNELS, "_unix_time", return_value=now):
             for delta in (
                 -(KERNELS.WAKE_RECEIPT_MAX_CLOCK_SKEW_SECONDS + 1),
                 KERNELS.WAKE_RECEIPT_MAX_CLOCK_SKEW_SECONDS + 1,
@@ -613,8 +612,8 @@ class WakeReceiptEndpointTests(unittest.TestCase):
 
     def test_start_and_stop_share_header_only_admin_gate(self) -> None:
         client, manager = self.make_client(admin_token=ADMIN_TOKEN)
-        manager.start = mock.Mock(return_value=True)
-        manager.stop = mock.Mock(return_value=True)
+        manager.start = unittest.mock.Mock(return_value=True)
+        manager.stop = unittest.mock.Mock(return_value=True)
 
         for endpoint in (START_ENDPOINT, STOP_ENDPOINT):
             blocked = client.post(
