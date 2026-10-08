@@ -1,5 +1,16 @@
-import { createHash, randomBytes } from 'node:crypto';
-import { mkdtemp, open, readdir, readFile, rm, unlink, utimes, writeFile } from 'node:fs/promises';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import {
+  link,
+  mkdtemp,
+  open,
+  readdir,
+  readFile,
+  rm,
+  unlink,
+  utimes,
+  writeFile,
+} from 'node:fs/promises';
+import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { dirname, join, sep } from 'node:path';
 import type { AtelierAskResponse } from '@szl-holdings/a11oy-atelier';
@@ -12,7 +23,7 @@ import {
 
 vi.mock('node:fs/promises', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs/promises')>();
-  return { ...actual, open: vi.fn(actual.open) };
+  return { ...actual, link: vi.fn(actual.link), open: vi.fn(actual.open) };
 });
 
 const roots: string[] = [];
@@ -65,6 +76,45 @@ async function filesBelow(path: string): Promise<string[]> {
   return files;
 }
 
+async function pauseNextLinkTo(path: string): Promise<{
+  reached: Promise<void>;
+  release: () => void;
+}> {
+  const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+  let signalReached!: () => void;
+  let release!: () => void;
+  const reached = new Promise<void>((resolve) => {
+    signalReached = resolve;
+  });
+  const resumed = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let paused = false;
+  vi.mocked(link).mockImplementation(async (source, destination) => {
+    if (!paused && destination === path) {
+      paused = true;
+      signalReached();
+      await resumed;
+    }
+    return actual.link(source, destination);
+  });
+  return { reached, release };
+}
+
+async function waitForSignal(signal: Promise<void>, name: string): Promise<void> {
+  let timer!: ReturnType<typeof setTimeout>;
+  try {
+    await Promise.race([
+      signal,
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => reject(new Error(`Timed out waiting for ${name}.`)), 5000);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function commitEncryptedTurn(params: {
   store: EncryptedLocalAtelierStateStore;
   tenantId: string;
@@ -99,12 +149,226 @@ async function commitEncryptedTurn(params: {
 
 afterEach(async () => {
   const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+  vi.mocked(link).mockImplementation(actual.link);
   vi.mocked(open).mockImplementation(actual.open);
   vi.restoreAllMocks();
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
 });
 
 describe('EncryptedLocalAtelierStateStore', () => {
+  it('allows matching-key first-start peers to race marker publication', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const publication = await pauseNextLinkTo(markerPath);
+    const writer = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await publication.reached;
+    try {
+      const reader = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+      await expect(reader.ready()).resolves.toBeUndefined();
+    } finally {
+      publication.release();
+    }
+    await expect(writer.ready()).resolves.toBeUndefined();
+    expect((await filesBelow(rootDirectory)).filter((path) => path === markerPath)).toHaveLength(1);
+  });
+
+  it('waits for a same-key marker temp that is still being written', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    let releaseWrite!: () => void;
+    let signalCreated!: () => void;
+    let signalEmptyRead!: () => void;
+    const resumeWrite = new Promise<void>((resolve) => {
+      releaseWrite = resolve;
+    });
+    const created = new Promise<void>((resolve) => {
+      signalCreated = resolve;
+    });
+    const emptyRead = new Promise<void>((resolve) => {
+      signalEmptyRead = resolve;
+    });
+    let held = false;
+    let observedEmpty = false;
+    vi.mocked(open).mockImplementation(async (path, flags, mode) => {
+      const handle = await actual.open(path, flags, mode);
+      if (
+        typeof path === 'string' &&
+        path.startsWith(`${markerPath}.`) &&
+        flags === 'wx' &&
+        !held
+      ) {
+        held = true;
+        signalCreated();
+        await resumeWrite;
+      } else if (
+        typeof path === 'string' &&
+        path.startsWith(`${markerPath}.`) &&
+        typeof flags === 'number'
+      ) {
+        const read = handle.read.bind(handle);
+        vi.spyOn(handle, 'read').mockImplementation(async (...args) => {
+          const result = await read(...args);
+          if (!observedEmpty && result.bytesRead === 0) {
+            observedEmpty = true;
+            signalEmptyRead();
+          }
+          return result;
+        });
+      }
+      return handle;
+    });
+    const writer = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    let reader: EncryptedLocalAtelierStateStore | undefined;
+    try {
+      await waitForSignal(created, 'marker temp creation');
+      reader = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+      await waitForSignal(emptyRead, 'empty marker temp read');
+    } finally {
+      releaseWrite();
+    }
+    await expect(writer.ready()).resolves.toBeUndefined();
+    if (!reader) throw new Error('Reader was not created.');
+    await expect(reader.ready()).resolves.toBeUndefined();
+    expect(observedEmpty).toBe(true);
+  });
+
+  it('accepts final-marker readback when the publisher retires its temp during a peer read', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const publication = await pauseNextLinkTo(markerPath);
+    const writer = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await publication.reached;
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    let signalOpened!: () => void;
+    let releaseRead!: () => void;
+    const opened = new Promise<void>((resolve) => {
+      signalOpened = resolve;
+    });
+    const resumeRead = new Promise<void>((resolve) => {
+      releaseRead = resolve;
+    });
+    let held = false;
+    vi.mocked(open).mockImplementation(async (path, flags, mode) => {
+      const handle = await actual.open(path, flags, mode);
+      if (
+        typeof path === 'string' &&
+        path.startsWith(`${markerPath}.`) &&
+        typeof flags === 'number' &&
+        !held
+      ) {
+        held = true;
+        signalOpened();
+        await resumeRead;
+      }
+      return handle;
+    });
+    const reader = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    try {
+      await waitForSignal(opened, 'marker temp open');
+      publication.release();
+      await expect(writer.ready()).resolves.toBeUndefined();
+    } finally {
+      publication.release();
+      releaseRead();
+    }
+    await expect(reader.ready()).resolves.toBeUndefined();
+  });
+
+  it('rejects a different-key first-start loser after marker publication', async () => {
+    const rootDirectory = await tempRoot();
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const publication = await pauseNextLinkTo(markerPath);
+    const writer = new EncryptedLocalAtelierStateStore({
+      rootDirectory,
+      masterKey: randomBytes(32),
+    });
+    await publication.reached;
+    try {
+      const reader = new EncryptedLocalAtelierStateStore({
+        rootDirectory,
+        masterKey: randomBytes(32),
+      });
+      await expect(reader.ready()).rejects.toMatchObject({ code: 'ATELIER_CAPSULE_INTEGRITY' });
+    } finally {
+      publication.release();
+    }
+    await expect(writer.ready()).resolves.toBeUndefined();
+  });
+
+  it('rejects a stale authenticated marker temp without deleting it', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const publication = await pauseNextLinkTo(markerPath);
+    const writer = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await publication.reached;
+    const temporary = (await readdir(rootDirectory)).find((name) =>
+      name.startsWith('key-check.json.'),
+    );
+    if (!temporary) throw new Error('Marker temp was not created.');
+    const temporaryPath = join(rootDirectory, temporary);
+    const old = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    await utimes(temporaryPath, old, old);
+    try {
+      const reader = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+      await expect(reader.ready()).rejects.toMatchObject({ code: 'ATELIER_CAPSULE_INTEGRITY' });
+      expect(await readFile(temporaryPath, 'utf8')).toContain('authenticationTag');
+    } finally {
+      publication.release();
+    }
+    await expect(writer.ready()).resolves.toBeUndefined();
+  });
+
+  it('rejects a malformed exact-shape marker temp without publishing a marker', async () => {
+    const rootDirectory = await tempRoot();
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const temporaryPath = `${markerPath}.${process.pid}.${randomUUID()}.tmp`;
+    await writeFile(temporaryPath, 'not json');
+    const store = new EncryptedLocalAtelierStateStore({
+      rootDirectory,
+      masterKey: randomBytes(32),
+    });
+    await expect(store.ready()).rejects.toMatchObject({ code: 'ATELIER_CAPSULE_INTEGRITY' });
+    expect((await readdir(rootDirectory)).includes('key-check.json')).toBe(false);
+    expect(await readFile(temporaryPath, 'utf8')).toBe('not json');
+  });
+
+  it('rejects an unexpected root file while the key marker is absent', async () => {
+    const rootDirectory = await tempRoot();
+    await writeFile(join(rootDirectory, 'key-check.json.not-a-publication.tmp'), 'unexpected');
+    const store = new EncryptedLocalAtelierStateStore({
+      rootDirectory,
+      masterKey: randomBytes(32),
+    });
+    await expect(store.ready()).rejects.toMatchObject({ code: 'ATELIER_CAPSULE_INTEGRITY' });
+  });
+
+  it.skipIf(process.platform === 'win32')(
+    'rejects a root socket while the key marker is absent',
+    async () => {
+      const rootDirectory = await tempRoot();
+      const server = createServer();
+      await new Promise<void>((resolve) =>
+        server.listen(join(rootDirectory, 'unexpected.sock'), resolve),
+      );
+      try {
+        const store = new EncryptedLocalAtelierStateStore({
+          rootDirectory,
+          masterKey: randomBytes(32),
+        });
+        await expect(store.ready()).rejects.toMatchObject({ code: 'ATELIER_CAPSULE_INTEGRITY' });
+      } finally {
+        await new Promise<void>((resolve, reject) =>
+          server.close((error) => (error ? reject(error) : resolve())),
+        );
+      }
+    },
+  );
+
   it('rejects authenticated index replacement after opening the original descriptor', async () => {
     const rootDirectory = await tempRoot();
     const masterKey = randomBytes(32);
