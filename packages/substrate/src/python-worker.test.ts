@@ -212,6 +212,31 @@ describe('Python worker HTTP admission', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it.each([
+    [
+      undefined,
+      '[substrate/python-worker] SUBSTRATE_PYTHON_WORKER_API_KEY must be injected before worker dispatch',
+    ],
+    [
+      ` ${TEST_CREDENTIAL} `,
+      '[substrate/python-worker] SUBSTRATE_PYTHON_WORKER_API_KEY must not contain surrounding whitespace',
+    ],
+  ])('configuration failure contains the public setting name without credential bytes', async (credential, diagnostic) => {
+    if (credential === undefined) delete process.env.SUBSTRATE_PYTHON_WORKER_API_KEY;
+    else process.env.SUBSTRATE_PYTHON_WORKER_API_KEY = credential;
+    const fetchMock = vi.spyOn(globalThis, 'fetch');
+    let failure: unknown;
+    try {
+      await new SubstratePythonWorkerChannel().dispatch(dispatchOptions());
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBeInstanceOf(Error);
+    expect((failure as Error).message).toBe(diagnostic);
+    expect((failure as Error).stack).not.toContain(TEST_CREDENTIAL);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('rejects production auth bypass before network access', async () => {
     delete process.env.SUBSTRATE_PYTHON_WORKER_API_KEY;
     process.env.SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS = '1';
