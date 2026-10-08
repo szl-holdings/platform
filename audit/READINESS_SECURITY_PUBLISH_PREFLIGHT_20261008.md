@@ -108,9 +108,10 @@ on branch `fix/readiness/security-publish-preflight-20261008`. Its verified
 source is `339e107e3dad5622c20da8972583670669055930`.
 
 [Native verifier run 37834664007](https://github.com/szl-holdings/platform/actions/runs/37834664007)
-passed for both Python 3.11 and Python 3.12. Each interpreter ran 82 tests with
-real PyNaCl and no skips; the separate stdlib-only step ran 82 tests with 77
-passes and the 5 expected crypto skips. GitHub's synthetic merge source
+passed the complete readiness-library suite for both Python 3.11 and Python
+3.12 with real PyNaCl and no skips. The separate stdlib-only step retained the
+five expected crypto skips; exact suite counts are recorded in the scoped
+local-validation table and linked job logs. GitHub's synthetic merge source
 `a672b59a285faa3eceb4cdf5a36b5080c7f3d1f4` and the candidate shared tree
 `fd15dd9943ffc577393084ce02288a3bf4c23778`. These measured verifier results do
 not assert that all final PR checks or protected-main admission are complete.
