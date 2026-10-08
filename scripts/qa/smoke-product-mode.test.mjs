@@ -23,6 +23,7 @@ async function smoke({
   held = true,
   brokenDependency = false,
   bypass = false,
+  routeSmoke = false,
 } = {}) {
   const server = createServer((req, res) => {
     let status = 200;
@@ -58,6 +59,8 @@ async function smoke({
         checkedAt: new Date().toISOString(),
         dependencies,
       };
+    } else if (routeSmoke) {
+      body = {};
     } else if (req.headers['x-api-key'] !== 'fixture-key') {
       status = 401;
       body = { code: 'INVALID_API_KEY' };
@@ -82,17 +85,25 @@ async function smoke({
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   try {
     return await new Promise((resolve, reject) => {
-      const child = spawn(process.execPath, ['scripts/qa/smoke-product-mode.js'], {
-        env: {
-          ...process.env,
-          API_BASE_URL: `http://127.0.0.1:${server.address().port}`,
-          SMOKE_API_KEY: 'fixture-key',
-          SMOKE_READINESS_POLICY: policy,
-          GITHUB_SHA: 'fixture-sha',
-          GITHUB_STEP_SUMMARY: '',
+      const child = spawn(
+        process.execPath,
+        routeSmoke
+          ? ['scripts/qa/smoke-routes.js', '--api-only']
+          : ['scripts/qa/smoke-product-mode.js'],
+        {
+          env: {
+            ...process.env,
+            API_BASE_URL: `http://127.0.0.1:${server.address().port}`,
+            API_URL: `http://127.0.0.1:${server.address().port}`,
+            BASE_URL: '',
+            SMOKE_API_KEY: 'fixture-key',
+            SMOKE_READINESS_POLICY: policy,
+            GITHUB_SHA: 'fixture-sha',
+            GITHUB_STEP_SUMMARY: '',
+          },
+          stdio: ['ignore', 'pipe', 'pipe'],
         },
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
+      );
       let output = '';
       child.stdout.on('data', (chunk) => {
         output += chunk;
@@ -124,4 +135,12 @@ test('production policy rejects synthetic readiness and authenticated admission 
 test('production HOLD cannot conceal unrelated dependency failures or unknown policy', async () => {
   assert.equal((await smoke({ brokenDependency: true })).code, 1);
   assert.equal((await smoke({ policy: 'accept-anything' })).code, 1);
+});
+
+test('route smoke shares exact policy and rejects unrelated failure or fabricated readiness', async () => {
+  const result = await smoke({ routeSmoke: true });
+  assert.equal(result.code, 0, result.output);
+  assert.equal((await smoke({ routeSmoke: true, brokenDependency: true })).code, 1);
+  assert.equal((await smoke({ routeSmoke: true, held: false })).code, 1);
+  assert.equal((await smoke({ routeSmoke: true, policy: 'ready' })).code, 1);
 });
