@@ -79,7 +79,7 @@ class PublishPreflightTest(unittest.TestCase):
         self.assertEqual(result["dataset"], khipu.HF_DATASET)
         self.assertEqual(result["repo_type"], "dataset")
         self.assertIs(type(result["ready"]), bool)
-        self.assertTrue(set(result) <= {
+        self.assertLessEqual(set(result), {
             "ready", "stage", "code", "message", "dataset", "repo_type", "http_status",
         })
         rendered = json.dumps(result)
@@ -104,8 +104,7 @@ class PublishPreflightTest(unittest.TestCase):
     def test_import_requires_only_stdlib_and_never_loads_hub(self) -> None:
         completed = subprocess.run(
             [sys.executable, "-B", "-S", "-c",
-             "import sys; sys.modules['huggingface_hub'] = None; "
-             "import hf_publish_preflight"],
+             "import sys; sys.modules['huggingface_hub'] = None; import hf_publish_preflight"],
             cwd=LIB, env={}, capture_output=True, text=True, timeout=10,
         )
         self.assertEqual(completed.returncode, 0, completed.stderr)
