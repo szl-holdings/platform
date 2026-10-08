@@ -59,6 +59,9 @@ const MAX_INDEX_BYTES = 256 * 1024;
 const UNPUBLISHED_FILE_GRACE_MS = 60 * 60 * 1000;
 const HEX_64 = /^[a-f0-9]{64}$/;
 const STATE_CAPSULE_ID = /^state_[a-f0-9]{64}$/;
+const KEY_CHECK_TEMP_NAME =
+  /^key-check\.json\.\d+\.[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}\.tmp$/;
+const KEY_CHECK_PUBLICATION_WAIT_MS = 1000;
 const DIRECTORY_SYNC_UNSUPPORTED = new Set([
   'EBADF',
   'EISDIR',
@@ -1416,16 +1419,72 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
     }
   }
 
+  #isTransientMarkerReadError(error: unknown): boolean {
+    return (
+      error instanceof AtelierCapsuleIntegrityError &&
+      (error.message === 'Continuity index failed closed during parsing.' ||
+        error.message === 'Continuity index record is malformed.' ||
+        error.message === 'Continuity index changed during authenticated readback.')
+    );
+  }
+
+  async #verifyFirstStartMarkerTemp(temporaryPath: string, markerPath: string): Promise<void> {
+    const expectedVerifier = this.#pathDigest('key-check', KEY_CHECK_SCHEMA);
+    const deadline = Date.now() + KEY_CHECK_PUBLICATION_WAIT_MS;
+    for (;;) {
+      if (await this.#isStaleUnpublishedFile(temporaryPath)) {
+        throw new AtelierCapsuleIntegrityError('Continuity key marker temp is stale.');
+      }
+      try {
+        const pending = await this.#readAuthenticated(temporaryPath, KEY_CHECK_SCHEMA);
+        if (pending && pending.verifier !== expectedVerifier) {
+          throw new AtelierCapsuleIntegrityError('Continuity key marker temp has wrong verifier.');
+        }
+        return;
+      } catch (error) {
+        if (!this.#isTransientMarkerReadError(error)) throw error;
+        try {
+          const published = await this.#readAuthenticated(markerPath, KEY_CHECK_SCHEMA);
+          if (published) {
+            if (published.verifier !== expectedVerifier) {
+              throw new AtelierCapsuleIntegrityError('Continuity key marker has wrong verifier.');
+            }
+            return;
+          }
+        } catch (markerError) {
+          if (!this.#isTransientMarkerReadError(markerError)) throw markerError;
+        }
+        if (Date.now() >= deadline) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+    }
+  }
+
   async #containsFiles(path: string, markerPath: string): Promise<boolean> {
     for (const entry of await this.#directoryEntries(path)) {
       const candidate = join(path, entry.name);
-      if (candidate === markerPath) continue;
+      if (candidate === markerPath) {
+        if (!entry.isFile() || entry.isSymbolicLink()) {
+          throw new AtelierCapsuleIntegrityError('Continuity key marker is not a regular file.');
+        }
+        continue;
+      }
       if (entry.isSymbolicLink())
         throw new AtelierCapsuleIntegrityError(
           'Continuity storage must not contain symbolic links.',
         );
+      // A first-start peer may be publishing the marker. A matching name is
+      // not enough: authenticate the temp or final marker before continuing.
+      // A partial write gets a bounded wait; foreign keys fail immediately.
+      if (path === dirname(markerPath) && entry.isFile() && KEY_CHECK_TEMP_NAME.test(entry.name)) {
+        await this.#verifyFirstStartMarkerTemp(candidate, markerPath);
+        continue;
+      }
       if (entry.isFile()) return true;
       if (entry.isDirectory() && (await this.#containsFiles(candidate, markerPath))) return true;
+      if (!entry.isDirectory()) {
+        throw new AtelierCapsuleIntegrityError('Continuity storage contains an unexpected entry.');
+      }
     }
     return false;
   }
