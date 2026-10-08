@@ -118,13 +118,41 @@ export function locationDiagnostics(sarif, trackedPaths, coverage = {}) {
 }
 
 export function annotation(diagnostic) {
-  // Escape workflow command delimiters even though the location/ID validators
-  // reject control characters. JSON retains flow order without SARIF messages.
-  const message = JSON.stringify(diagnostic)
-    .replaceAll('%', '%25')
-    .replaceAll('\r', '%0D')
-    .replaceAll('\n', '%0A');
-  return `::warning title=CodeQL location trace::${message}`;
+  // Keep valid JSON below GitHub's annotation truncation limit. Retain the
+  // primary finding and the source/sink of each retained flow; count omissions.
+  const flows = diagnostic.flows.map((flow) =>
+    flow.filter((entry, index) => index === 0 || entry !== flow[index - 1]),
+  );
+  const bounded = {
+    ruleId: diagnostic.ruleId,
+    locations: [...diagnostic.locations],
+    flows,
+    omitted: { sourceLocations: 0, flowLocations: 0, flows: 0 },
+    consecutiveDuplicates: diagnostic.flows.reduce(
+      (sum, flow, index) => sum + flow.length - flows[index].length,
+      0,
+    ),
+  };
+  const encode = () =>
+    JSON.stringify(bounded).replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
+  while (encode().length >= 3400) {
+    const interior = bounded.flows.findLast((flow) => flow.length > 2);
+    if (interior) {
+      interior.splice(interior.length - 2, 1);
+      bounded.omitted.flowLocations++;
+    } else if (bounded.flows.length > 1) {
+      bounded.omitted.flowLocations += bounded.flows.pop().length;
+      bounded.omitted.flows++;
+    } else if (bounded.locations.length > 1) {
+      bounded.locations.pop();
+      bounded.omitted.sourceLocations++;
+    } else {
+      // Validated paths are at most 512 characters, so a primary location and
+      // one flow's source/sink always fit. Unexpected inputs must fail safely.
+      throw new Error('Diagnostic cannot fit annotation');
+    }
+  }
+  return `::notice title=CodeQL location trace::${encode()}`;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -143,7 +171,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
         trackedPaths,
         coverage,
       );
-      console.log(`::warning title=CodeQL diagnostic coverage::${JSON.stringify(coverage)}`);
+      console.log(`::notice title=CodeQL diagnostic coverage::${JSON.stringify(coverage)}`);
       for (const diagnostic of diagnostics) console.log(annotation(diagnostic));
     }
   } catch {

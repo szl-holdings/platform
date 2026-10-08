@@ -347,6 +347,21 @@ function parseWorkerResponse(
   return response as unknown as StageResultMessage | StageErrorMessage;
 }
 
+// Only locally constructed diagnostics may cross the worker boundary. Transport
+// exceptions and remote error messages can contain reflected request credentials.
+class WorkerDispatchDiagnostic extends Error {}
+
+function reflectsCredential(value: unknown, credential: string): boolean {
+  if (typeof value === 'string') return value.includes(credential);
+  if (Array.isArray(value)) return value.some((entry) => reflectsCredential(entry, credential));
+  if (value && typeof value === 'object') {
+    return Object.entries(value).some(
+      ([key, entry]) => key.includes(credential) || reflectsCredential(entry, credential),
+    );
+  }
+  return false;
+}
+
 export class SubstratePythonWorkerChannel implements PythonWorkerChannel {
   private readonly workers = new Map<string, RegisteredWorker>();
   private readonly pendingClaims = new Map<
@@ -435,15 +450,34 @@ export class SubstratePythonWorkerChannel implements PythonWorkerChannel {
         });
 
         if (!response.ok) {
-          const text = await response.text().catch(() => '(no body)');
-          throw new Error(`HTTP ${response.status}: ${text}`);
+          // Remote HTTP bodies are untrusted and never become journal diagnostics.
+          throw new WorkerDispatchDiagnostic(`Worker returned HTTP ${response.status}`);
         }
 
-        const body = parseWorkerResponse(await response.json(), claimMessage);
+        let decoded: unknown;
+        try {
+          decoded = await response.json();
+        } catch {
+          throw new WorkerDispatchDiagnostic('Worker returned invalid JSON');
+        }
+        const credential = headers.Authorization?.slice('Bearer '.length);
+        if (credential && reflectsCredential(decoded, credential)) {
+          // Reject the entire result rather than altering signed evidence bytes.
+          throw new WorkerDispatchDiagnostic(
+            'Worker response reflected an authentication credential',
+          );
+        }
+        let body: StageResultMessage | StageErrorMessage;
+        try {
+          body = parseWorkerResponse(decoded, claimMessage);
+        } catch {
+          throw new WorkerDispatchDiagnostic(
+            'Worker returned an invalid or mismatched protocol response',
+          );
+        }
 
         if (body.type === 'stage.error') {
-          const errMsg = body as StageErrorMessage;
-          throw new Error(`Worker error [${errMsg.errorCode}]: ${errMsg.errorMessage}`);
+          throw new WorkerDispatchDiagnostic('Worker reported a stage error');
         }
 
         clearTimeout(timeout);
@@ -453,9 +487,9 @@ export class SubstratePythonWorkerChannel implements PythonWorkerChannel {
         const reason =
           err instanceof Error && err.name === 'AbortError'
             ? `timed out after ${timeoutMs}ms`
-            : err instanceof Error
+            : err instanceof WorkerDispatchDiagnostic
               ? err.message
-              : String(err);
+              : 'worker transport failed';
 
         throw new Error(
           `[substrate/python-worker] HTTP dispatch outcome is ambiguous for ` +
