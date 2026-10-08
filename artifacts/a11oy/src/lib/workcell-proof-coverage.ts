@@ -515,19 +515,20 @@ export function evaluateWorkcellProofCoverage({
     }
 
     obligations.push(
-      workcell.signals.includes(storedContract.originSignalId)
+      workcell.signals.includes(storedContract.originSignalId) &&
+        workcell.actionBrief.linkedSignalIds.includes(storedContract.originSignalId)
         ? obligation(
             'origin-signal',
             'Origin signal belongs to the Workcell',
             'SATISFIED',
-            'The contract origin is one of the Workcell signal inputs.',
+            'The contract origin is a Workcell signal input linked to this ActionBrief.',
             [storedContract.originSignalId],
           )
         : obligation(
             'origin-signal',
             'Origin signal belongs to the Workcell',
             'MISMATCH',
-            'The contract origin is not declared by this Workcell.',
+            'The contract origin must be declared by this Workcell and linked to this ActionBrief.',
             [storedContract.originSignalId, ...workcell.signals],
           ),
       actionId === workcell.actionBrief.id
@@ -753,14 +754,15 @@ export function evaluateWorkcellProofCoverage({
       );
     } else if (
       proofPacket.kind !== 'action_execution' ||
-      proofPacket.vertical !== workcell.vertical
+      proofPacket.vertical !== workcell.vertical ||
+      proofPacket.payload.actionId !== workcell.actionBrief.id
     ) {
       obligations.push(
         obligation(
           'proof-context',
           'Proof Packet has execution context',
           'MISMATCH',
-          'The Proof Packet must be action-execution evidence for the Workcell vertical.',
+          'The Proof Packet must be action-execution evidence for the Workcell vertical and its payload must name this ActionBrief.',
           [proofPacket.kind, proofPacket.vertical, workcell.vertical],
         ),
       );
@@ -770,7 +772,7 @@ export function evaluateWorkcellProofCoverage({
           'proof-context',
           'Proof Packet has execution context',
           'SATISFIED',
-          'The Proof Packet declares action-execution evidence for the Workcell vertical.',
+          'The Proof Packet declares action-execution evidence for the Workcell vertical and names this ActionBrief in its payload.',
           [proofPacket.kind, proofPacket.vertical],
         ),
       );
@@ -935,6 +937,16 @@ export function evaluateWorkcellProofCoverage({
       workcell.verificationResult.status,
     );
     const terminalChecksumValid = SHA256_REFERENCE.test(workcell.verificationResult.checksum);
+    const terminalTraces = executionTraces.filter(
+      (trace) => trace.id === storedContract.executionTraceId,
+    );
+    const terminalTrace = terminalTraces.length === 1 ? terminalTraces[0] : undefined;
+    const terminalOutcomeAgrees =
+      terminalTrace !== undefined &&
+      (workcell.verificationResult.status === 'passed'
+        ? terminalTrace.finalStatus === 'completed'
+        : workcell.verificationResult.status === 'failed' &&
+          ['failed', 'cancelled'].includes(terminalTrace.finalStatus));
     obligations.push(
       !proofPacket
         ? obligation(
@@ -944,12 +956,12 @@ export function evaluateWorkcellProofCoverage({
             'A unique joined Proof Packet is required before terminal fixture state can be checked.',
             [workcell.verificationResult.status],
           )
-        : terminalStatusRecorded && terminalChecksumValid
+        : terminalStatusRecorded && terminalChecksumValid && terminalOutcomeAgrees
           ? obligation(
               'terminal-state',
               'Terminal fixture state is recorded',
               'SATISFIED',
-              `The fixture records a ${workcell.verificationResult.status} terminal check and a SHA-256-shaped checksum. This is not signature verification.`,
+              `The fixture records a ${workcell.verificationResult.status} terminal check coherent with its execution trace and a SHA-256-shaped checksum. This is not signature verification.`,
               [
                 workcell.verificationResult.status,
                 workcell.verificationResult.checksum,
@@ -960,7 +972,7 @@ export function evaluateWorkcellProofCoverage({
               'terminal-state',
               'Terminal fixture state is recorded',
               'MISMATCH',
-              'The Workcell terminal status or verification checksum is missing or malformed.',
+              'The Workcell terminal status or verification checksum is missing, malformed, or inconsistent with the execution trace outcome. This is not signature verification.',
               [workcell.verificationResult.status, workcell.verificationResult.checksum],
             ),
     );

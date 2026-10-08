@@ -549,3 +549,95 @@ test('requires structured packet integrity and a SHA-256-shaped terminal checksu
     /not signature verification/i,
   );
 });
+
+test('requires the execution trace terminal outcome to agree with Workcell verification', () => {
+  for (const finalStatus of ['completed', 'failed', 'cancelled'] as const) {
+    for (const status of ['passed', 'failed'] as const) {
+      const coverage = evaluateWorkcellProofCoverage({
+        workcell: {
+          ...seedWorkcell,
+          verificationResult: { ...seedWorkcell.verificationResult, status },
+        },
+        signals: [seedSignal],
+        pceContracts: [seedContract],
+        proofPackets: [completePacket],
+        executionTraces: [{ ...completeTrace, finalStatus }],
+        policyEvaluationIds: [seedContract.policyEvaluationId],
+        approvalRecordIds: [seedContract.approvalRecordId as string],
+      });
+      const coherent = finalStatus === 'completed' ? status === 'passed' : status === 'failed';
+      assert.equal(
+        coverage.state,
+        coherent ? 'COMPLETE' : 'INCOMPLETE',
+        `${finalStatus}/${status}`,
+      );
+      assert.equal(
+        coverage.obligations.find((item) => item.id === 'terminal-state')?.status,
+        coherent ? 'SATISFIED' : 'MISMATCH',
+      );
+    }
+  }
+});
+
+test('requires contract origin lineage to be linked to the same ActionBrief', () => {
+  const secondSignal = { ...seedSignal, id: 'sig-second' };
+  const coverage = evaluateWorkcellProofCoverage({
+    workcell: {
+      ...seedWorkcell,
+      signals: [seedSignal.id, secondSignal.id],
+      actionBrief: { ...seedWorkcell.actionBrief, linkedSignalIds: [secondSignal.id] },
+    },
+    signals: [seedSignal, secondSignal],
+    pceContracts: [seedContract],
+    proofPackets: [completePacket],
+    executionTraces: [completeTrace],
+    policyEvaluationIds: [seedContract.policyEvaluationId],
+    approvalRecordIds: [seedContract.approvalRecordId as string],
+  });
+  assert.equal(coverage.state, 'INCOMPLETE');
+  assert.equal(
+    coverage.obligations.find((item) => item.id === 'origin-signal')?.status,
+    'MISMATCH',
+  );
+  assert.equal(
+    coverage.obligations.find((item) => item.id === 'action-context')?.status,
+    'SATISFIED',
+  );
+});
+
+test('requires packet payload action identity even when the outer proof subject matches', () => {
+  for (const entityType of ['workcell', 'action'] as const) {
+    for (const payload of [
+      { actionId: 'act-other' },
+      { unrelated: true },
+      { actionId: '' },
+      { actionId: 123 },
+    ]) {
+      const coverage = evaluateWorkcellProofCoverage({
+        workcell: seedWorkcell,
+        signals: [seedSignal],
+        pceContracts: [seedContract],
+        proofPackets: [
+          {
+            ...completePacket,
+            entityType,
+            entityId: entityType === 'workcell' ? seedWorkcell.id : seedWorkcell.actionBrief.id,
+            payload,
+          },
+        ],
+        executionTraces: [completeTrace],
+        policyEvaluationIds: [seedContract.policyEvaluationId],
+        approvalRecordIds: [seedContract.approvalRecordId as string],
+      });
+      assert.equal(coverage.state, 'INCOMPLETE');
+      assert.equal(
+        coverage.obligations.find((item) => item.id === 'proof-subject')?.status,
+        'SATISFIED',
+      );
+      assert.equal(
+        coverage.obligations.find((item) => item.id === 'proof-context')?.status,
+        'MISMATCH',
+      );
+    }
+  }
+});
