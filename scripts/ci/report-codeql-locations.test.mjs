@@ -137,3 +137,72 @@ test('analyzer preserves uploads and fails if location diagnostics are unavailab
   assert.match(analyze, /Report safe CodeQL source and flow locations\n        if: always\(\)/);
   assert.doesNotMatch(analyze, /continue-on-error|\|\| true/);
 });
+
+test('resolves CodeQL extension rules through rule.toolComponent/index and emits numeric coverage', () => {
+  const sarif = report();
+  const run = sarif.runs[0];
+  run.tool.extensions = [
+    {
+      name: 'codeql/javascript-queries',
+      guid: 'test-component-guid',
+      rules: run.tool.driver.rules,
+    },
+  ];
+  run.tool.driver.rules = [];
+  run.results[0].rule = {
+    id: 'js/password-hash',
+    index: 0,
+    toolComponent: { index: 0, name: 'codeql/javascript-queries' },
+  };
+  const coverage = {};
+  assert.equal(locationDiagnostics(sarif, tracked, coverage)[0].ruleId, 'js/password-hash');
+  assert.deepEqual(coverage, {
+    runs: 1,
+    results: 1,
+    resolvedRules: 1,
+    securityResults: 1,
+    highCriticalResults: 1,
+    sourceLocations: 1,
+    flowLocations: 1,
+  });
+  delete run.results[0].rule.toolComponent.index;
+  assert.equal(locationDiagnostics(sarif, tracked).length, 1);
+  delete run.results[0].rule;
+  assert.equal(locationDiagnostics(sarif, tracked).length, 1);
+});
+
+test('resolves driver index-only rules and rejects unresolved/ambiguous metadata', () => {
+  const indexed = report();
+  delete indexed.runs[0].results[0].ruleId;
+  indexed.runs[0].results[0].ruleIndex = 0;
+  assert.equal(locationDiagnostics(indexed, tracked).length, 1);
+  delete indexed.runs[0].results[0].ruleIndex;
+  indexed.runs[0].results[0].rule = { index: 0 };
+  assert.equal(locationDiagnostics(indexed, tracked).length, 1);
+  const unknown = report({ ruleId: 'js/unknown' });
+  assert.throws(() => locationDiagnostics(unknown, tracked));
+  const duplicated = report();
+  duplicated.runs[0].tool.extensions = [{ rules: duplicated.runs[0].tool.driver.rules }];
+  assert.throws(() => locationDiagnostics(duplicated, tracked));
+  const badIndex = report({ rule: { index: 0, toolComponent: { index: 9 } } });
+  assert.throws(() => locationDiagnostics(badIndex, tracked));
+  const inconsistent = report({ ruleIndex: 1 });
+  assert.throws(() => locationDiagnostics(inconsistent, tracked));
+});
+
+test('security rules with absent or malformed severity cannot silently disappear', () => {
+  for (const severity of [undefined, null, '', 'invalid', 11]) {
+    const sarif = report();
+    sarif.runs[0].tool.driver.rules[0].properties = {
+      tags: ['security'],
+      'security-severity': severity,
+    };
+    assert.throws(() => locationDiagnostics(sarif, tracked));
+  }
+  const quality = report();
+  quality.runs[0].tool.driver.rules[0].properties = { tags: ['maintainability'] };
+  const coverage = {};
+  assert.deepEqual(locationDiagnostics(quality, tracked, coverage), []);
+  assert.equal(coverage.resolvedRules, 1);
+  assert.equal(coverage.securityResults, 0);
+});

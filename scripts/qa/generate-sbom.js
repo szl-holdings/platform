@@ -12,7 +12,6 @@
 import { createHash } from 'node:crypto';
 import {
   closeSync,
-  existsSync,
   constants as fsConstants,
   fstatSync,
   lstatSync,
@@ -217,27 +216,24 @@ function digestRegularPatch(root, relativePath) {
   if (!isPathInside(patchesReal, candidatePath)) {
     throw new Error('patch must remain below the normalized repository patches/ directory');
   }
-  const candidateStat = lstatSync(candidatePath);
-  if (!candidateStat.isFile() || candidateStat.isSymbolicLink()) {
-    throw new Error('patch must be a regular, non-symbolic-link file');
-  }
-  const candidateReal = realpathSync(candidatePath);
-  if (candidateReal !== candidatePath || !isPathInside(patchesReal, candidateReal)) {
-    throw new Error('patch must resolve below patches/ without traversing symbolic links');
-  }
 
   const descriptor = openSync(candidatePath, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
   try {
     const opened = fstatSync(descriptor);
+    const candidateStat = lstatSync(candidatePath);
+    const candidateReal = realpathSync(candidatePath);
     if (
       !opened.isFile() ||
+      !candidateStat.isFile() ||
+      candidateStat.isSymbolicLink() ||
       opened.dev !== candidateStat.dev ||
       opened.ino !== candidateStat.ino ||
-      opened.size !== candidateStat.size ||
-      opened.mtimeMs !== candidateStat.mtimeMs ||
-      opened.ctimeMs !== candidateStat.ctimeMs
+      candidateReal !== candidatePath ||
+      !isPathInside(patchesReal, candidateReal)
     ) {
-      throw new Error('opened patch does not match the verified regular file');
+      throw new Error(
+        'opened patch must match a regular file below patches/ without symbolic links',
+      );
     }
     const bytes = readFileSync(descriptor);
     const after = fstatSync(descriptor);
@@ -312,25 +308,32 @@ function readWorkspaceManifest(root, importer) {
   }
 
   const manifestPath = join(packageRoot, 'package.json');
-  const manifestStat = lstatSync(manifestPath);
-  if (!manifestStat.isFile() || manifestStat.isSymbolicLink()) {
-    throw new Error(
-      `pnpm workspace importer manifest must be a regular file: ${importer}/package.json`,
-    );
-  }
-  if (realpathSync(manifestPath) !== manifestPath) {
-    throw new Error(
-      `pnpm workspace importer manifest must not traverse symbolic links: ${importer}`,
-    );
-  }
-
   const descriptor = openSync(manifestPath, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
   let raw;
   try {
-    if (!fstatSync(descriptor).isFile()) {
-      throw new Error(`opened pnpm workspace manifest is not a regular file: ${importer}`);
+    const opened = fstatSync(descriptor);
+    const manifestStat = lstatSync(manifestPath);
+    if (
+      !opened.isFile() ||
+      !manifestStat.isFile() ||
+      manifestStat.isSymbolicLink() ||
+      opened.dev !== manifestStat.dev ||
+      opened.ino !== manifestStat.ino ||
+      realpathSync(manifestPath) !== manifestPath
+    ) {
+      throw new Error(
+        `opened pnpm workspace manifest must match a regular file without symbolic links: ${importer}`,
+      );
     }
     raw = readFileSync(descriptor, 'utf8');
+    const after = fstatSync(descriptor);
+    if (
+      after.size !== opened.size ||
+      after.mtimeMs !== opened.mtimeMs ||
+      after.ctimeMs !== opened.ctimeMs
+    ) {
+      throw new Error(`pnpm workspace manifest changed while reading: ${importer}`);
+    }
   } finally {
     closeSync(descriptor);
   }
@@ -700,12 +703,37 @@ export function generateSbomArtifacts({
 
   mkdirSync(outputDir, { recursive: true });
   mkdirSync(historyDir, { recursive: true });
-  if (existsSync(historyPath)) {
-    if (readFileSync(historyPath, 'utf8') !== rendered) {
-      throw new Error(`Content-addressed SBOM history collision at ${historyPath}`);
-    }
-  } else {
+  try {
     writeFileSync(historyPath, rendered, { flag: 'wx' });
+  } catch (error) {
+    if (error.code !== 'EEXIST') throw error;
+    const descriptor = openSync(historyPath, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
+    try {
+      const opened = fstatSync(descriptor);
+      const current = lstatSync(historyPath);
+      if (
+        !opened.isFile() ||
+        !current.isFile() ||
+        current.isSymbolicLink() ||
+        opened.dev !== current.dev ||
+        opened.ino !== current.ino ||
+        realpathSync(historyPath) !== resolve(historyPath)
+      ) {
+        throw new Error(`Content-addressed SBOM history must be a regular file: ${historyPath}`);
+      }
+      const existing = readFileSync(descriptor, 'utf8');
+      const after = fstatSync(descriptor);
+      if (
+        existing !== rendered ||
+        after.size !== opened.size ||
+        after.mtimeMs !== opened.mtimeMs ||
+        after.ctimeMs !== opened.ctimeMs
+      ) {
+        throw new Error(`Content-addressed SBOM history collision at ${historyPath}`);
+      }
+    } finally {
+      closeSync(descriptor);
+    }
   }
   writeFileSync(latestPath, rendered);
 

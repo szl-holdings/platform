@@ -7,6 +7,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -690,6 +691,47 @@ test('artifact generation is byte-idempotent and reuses content-addressed histor
     assert.deepEqual(secondHistory, firstHistory);
     assert.equal(readFileSync(first.latestPath, 'utf8'), first.rendered);
     assert.equal(readFileSync(first.historyPath, 'utf8'), first.rendered);
+  } finally {
+    fixture.cleanup();
+  }
+});
+
+test('existing content-addressed history rejects changed bytes', () => {
+  const fixture = patchFixture();
+  try {
+    const { lockfileText, workspaceText } = fixture.render();
+    writeFileSync(path.join(fixture.root, 'pnpm-lock.yaml'), lockfileText);
+    writeFileSync(path.join(fixture.root, 'pnpm-workspace.yaml'), workspaceText);
+    const options = { root: fixture.root, outputDir: path.join(fixture.root, 'security') };
+    const first = generateSbomArtifacts(options);
+    writeFileSync(first.historyPath, '{}\n');
+    assert.throws(() => generateSbomArtifacts(options), /history collision/);
+  } finally {
+    fixture.cleanup();
+  }
+});
+
+test('patch and manifest descriptor reads reject symbolic links', {
+  skip: process.platform === 'win32',
+}, () => {
+  const fixture = patchFixture();
+  try {
+    const { lockfileText, workspaceText } = fixture.render();
+    const entry = fixture.entries[0];
+    const patchPath = path.join(fixture.root, entry.path);
+    const target = path.join(fixture.root, 'target.patch');
+    writeFileSync(target, entry.contents);
+    rmSync(patchPath);
+    symlinkSync(target, patchPath);
+    assert.throws(() => parsePatchMetadata({ root: fixture.root, lockfileText, workspaceText }));
+    rmSync(patchPath);
+    writeFileSync(patchPath, entry.contents);
+    const manifest = path.join(fixture.root, 'package.json');
+    const manifestTarget = path.join(fixture.root, 'target.json');
+    writeFileSync(manifestTarget, readFileSync(manifest));
+    rmSync(manifest);
+    symlinkSync(manifestTarget, manifest);
+    assert.throws(() => parseWorkspacePackages({ root: fixture.root, lockfileText }));
   } finally {
     fixture.cleanup();
   }
