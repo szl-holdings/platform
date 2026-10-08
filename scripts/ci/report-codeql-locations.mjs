@@ -5,9 +5,18 @@ import { fileURLToPath } from 'node:url';
 
 // Diagnostics disclose identifiers and tracked repository locations only. SARIF
 // messages, source snippets, URLs, and artifact contents are never printed.
-export function locationDiagnostics(sarif, trackedPaths) {
+export function locationDiagnostics(sarif, trackedPaths, coverage = {}) {
   if (!sarif || !Array.isArray(sarif.runs)) throw new Error('Invalid SARIF');
   const output = [];
+  Object.assign(coverage, {
+    runs: 0,
+    results: 0,
+    resolvedRules: 0,
+    securityResults: 0,
+    highCriticalResults: 0,
+    sourceLocations: 0,
+    flowLocations: 0,
+  });
   const location = (entry) => {
     const physical = entry?.physicalLocation;
     const uri = physical?.artifactLocation?.uri;
@@ -25,24 +34,84 @@ export function locationDiagnostics(sarif, trackedPaths) {
     return `${uri}:${line}`;
   };
   for (const run of sarif.runs) {
-    if (!Array.isArray(run?.tool?.driver?.rules) || !Array.isArray(run.results)) {
-      throw new Error('Invalid SARIF run');
+    if (!run?.tool?.driver || !Array.isArray(run.results)) throw new Error('Invalid SARIF run');
+    const extensions = run.tool.extensions ?? [];
+    if (!Array.isArray(extensions)) throw new Error('Invalid SARIF extensions');
+    const components = [run.tool.driver, ...extensions];
+    for (const component of components) {
+      if (component.rules !== undefined && !Array.isArray(component.rules))
+        throw new Error('Invalid component rules');
     }
-    const rules = new Map(run.tool.driver.rules.map((rule) => [rule.id, rule]));
+    coverage.runs++;
     for (const result of run.results) {
-      const rule = rules.get(result?.ruleId);
-      const score = Number(rule?.properties?.['security-severity']);
-      if (!Number.isFinite(score) || score < 7) continue;
-      if (typeof result.ruleId !== 'string' || !/^[A-Za-z0-9_/-]{1,160}$/.test(result.ruleId)) {
-        throw new Error('Invalid rule identifier');
+      coverage.results++;
+      const reference = result?.rule;
+      const componentReference = reference?.toolComponent;
+      let component;
+      if (componentReference?.index !== undefined) {
+        if (!Number.isInteger(componentReference.index) || componentReference.index < 0)
+          throw new Error('Invalid component index');
+        component = extensions[componentReference.index];
+        if (
+          !component ||
+          (componentReference.name !== undefined && component.name !== componentReference.name) ||
+          (componentReference.guid !== undefined && component.guid !== componentReference.guid)
+        )
+          throw new Error('Unresolved component');
+      } else if (componentReference) {
+        const matching = components.filter(
+          (entry) =>
+            (componentReference.name === undefined || entry.name === componentReference.name) &&
+            (componentReference.guid === undefined || entry.guid === componentReference.guid),
+        );
+        if (matching.length !== 1) throw new Error('Ambiguous component');
+        component = matching[0];
       }
+      const id = reference?.id ?? result?.ruleId;
+      const index = reference?.index ?? result?.ruleIndex;
+      let rule;
+      if (index !== undefined) {
+        if (!Number.isInteger(index) || index < 0) throw new Error('Invalid rule index');
+        rule = (component ?? run.tool.driver).rules?.[index];
+        if (!rule || (id !== undefined && id !== rule.id))
+          throw new Error('Unresolved indexed rule');
+      } else {
+        const matching = (component ? [component] : components)
+          .flatMap((entry) => entry.rules ?? [])
+          .filter((entry) => entry.id === id);
+        if (matching.length !== 1) throw new Error('Unresolved or ambiguous rule');
+        rule = matching[0];
+      }
+      if (result.ruleId !== undefined && result.ruleId !== rule.id)
+        throw new Error('Inconsistent rule identifier');
+      coverage.resolvedRules++;
+      const severity = rule.properties?.['security-severity'];
+      const security = rule.properties?.tags?.includes('security');
+      if (severity === undefined && !security) continue;
+      const score = Number(severity);
+      if (
+        severity === undefined ||
+        severity === null ||
+        severity === '' ||
+        !Number.isFinite(score) ||
+        score < 0 ||
+        score > 10
+      )
+        throw new Error('Invalid security severity');
+      coverage.securityResults++;
+      if (score < 7) continue;
+      coverage.highCriticalResults++;
+      if (typeof rule.id !== 'string' || !/^[A-Za-z0-9_/-]{1,160}$/.test(rule.id))
+        throw new Error('Invalid rule identifier');
       const locations = (result.locations ?? []).map(location).filter(Boolean);
       const flows = (result.codeFlows ?? []).flatMap((flow) =>
         (flow.threadFlows ?? []).map((thread) =>
           (thread.locations ?? []).map((entry) => location(entry.location)).filter(Boolean),
         ),
       );
-      output.push({ ruleId: result.ruleId, locations, flows });
+      coverage.sourceLocations += locations.length;
+      coverage.flowLocations += flows.reduce((sum, flow) => sum + flow.length, 0);
+      output.push({ ruleId: rule.id, locations, flows });
     }
   }
   return output;
@@ -68,10 +137,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const files = readdirSync(directory).filter((name) => name.endsWith('.sarif'));
     if (files.length === 0) throw new Error('No SARIF files');
     for (const name of files) {
+      const coverage = {};
       const diagnostics = locationDiagnostics(
         JSON.parse(readFileSync(path.join(directory, name), 'utf8')),
         trackedPaths,
+        coverage,
       );
+      console.log(`::warning title=CodeQL diagnostic coverage::${JSON.stringify(coverage)}`);
       for (const diagnostic of diagnostics) console.log(annotation(diagnostic));
     }
   } catch {

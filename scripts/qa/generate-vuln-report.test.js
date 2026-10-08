@@ -529,7 +529,10 @@ test('a mitigation covers only its exact package record for a shared advisory', 
     assert.equal(verdict.unmitigated.length, 1);
     assert.equal(verdict.unmitigated[0][1].module_name, 'another-package');
     const row = renderMitigationRow(fixture.manifest.mitigations[0]);
-    assert.ok(row.includes('https://github.com/advisories/GHSA-86w9-cpqp-85rv'));
+    const target = new URL(/\]\(([^)]+)\)/.exec(row)[1]);
+    assert.equal(target.protocol, 'https:');
+    assert.equal(target.hostname, 'github.com');
+    assert.equal(target.pathname, '/advisories/GHSA-86w9-cpqp-85rv');
     assert.doesNotMatch(row, /legacy:/);
   } finally {
     fixture.cleanup();
