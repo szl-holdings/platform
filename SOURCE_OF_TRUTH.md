@@ -29,10 +29,10 @@ from whichever commit is checked out.
 | Registered artifacts | **6** | Tracked `artifacts/*/(.replit-artifact/)?artifact.toml` files |
 | Artifact directories | **7** | Unique tracked top-level children of `artifacts/` |
 | Registered product verticals | **5** | Registered customer-facing domain artifacts; A11oy is counted separately as the orchestration product |
-| Domain packages (`packages/`) | **163** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
+| Domain packages (`packages/`) | **164** | Tracked top-level package directories, including `vertical-runtime`; excludes root file `packages/proxy-routes.ts` |
 | Shared library packages (`lib/`) | **53** | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | **216** | 163 + 53 |
-| Apps (`apps/`) | **11** | Unique tracked top-level children of `apps/` |
+| Total packages (`packages/` + `lib/`) | **217** | 164 + 53 |
+| Apps (`apps/`) | **12** | Unique tracked top-level children of `apps/`, including `vertical-cells` |
 | Services (`services/`) | **11** | Unique tracked top-level children of `services/` |
 | Workers (`workers/`) | **5** | Unique tracked top-level children of `workers/` |
 | DB schema files | **197** | Tracked `lib/db/src/schema/**/*.ts` files |

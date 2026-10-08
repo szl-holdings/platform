@@ -56,10 +56,10 @@ separately recorded measurement dates.
 | Registered artifacts | 6 | Tracked artifact manifests |
 | Artifact directories | 7 | Tracked top-level `artifacts/` children |
 | Registered product verticals | 5 | Registered domain artifacts; A11oy is separate |
-| Domain packages (`packages/`) | 163 | Tracked top-level package directories |
+| Domain packages (`packages/`) | 164 | Tracked top-level package directories, including `vertical-runtime` |
 | Shared library packages (`lib/`) | 53 | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | 216 | 163 + 53 |
-| Apps (`apps/`) | 11 | Tracked top-level `apps/` children |
+| Total packages (`packages/` + `lib/`) | 217 | 164 + 53 |
+| Apps (`apps/`) | 12 | Tracked top-level `apps/` children, including `vertical-cells` |
 | Services (`services/`) | 11 | Tracked top-level `services/` children |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |
 | DB schema files | 197 | Tracked `lib/db/src/schema/**/*.ts` files |
