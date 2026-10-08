@@ -325,10 +325,18 @@ jobs:
           printf '%s\0' "${dependency_dirs[@]}" > "$SZL_DEPENDENCY_DIRS_MANIFEST"
           chmod 0600 "$SZL_DEPENDENCY_DIRS_MANIFEST"
 
-          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
-            test ! -w "$SZL_CONTROLLER_ROOT/package.json"
-          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
-            test ! -w "$SZL_CANDIDATE_ROOT/package.json"
+          assert_candidate_test() {
+            local failure_message="$1"
+            shift
+            if ! sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- test "$@"; then
+              printf '%s\n' "$failure_message" >&2
+              return 1
+            fi
+          }
+          assert_candidate_test 'candidate controller source write-denial assertion failed' \
+            ! -w "$SZL_CONTROLLER_ROOT/package.json"
+          assert_candidate_test 'candidate source write-denial assertion failed' \
+            ! -w "$SZL_CANDIDATE_ROOT/package.json"
           if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
             test -r "$SZL_EVIDENCE_ROOT"; then
             echo "candidate dependency identity can traverse the evidence root" >&2
@@ -345,14 +353,17 @@ jobs:
               exit 1
             fi
           done
-          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
-            test -x "$SZL_PNPM_EXECUTABLE"
-          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
-            test ! -w "$SZL_PNPM_EXECUTABLE"
-          candidate_writable_pnpm_entry="$(
+          assert_candidate_test 'candidate pnpm execute assertion failed' \
+            -x "$SZL_PNPM_EXECUTABLE"
+          assert_candidate_test 'candidate pnpm executable write-denial assertion failed' \
+            ! -w "$SZL_PNPM_EXECUTABLE"
+          if ! candidate_writable_pnpm_entry="$(
             sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
               find "$SZL_PNPM_ROOT" ! -type l -writable -print -quit
-          )"
+          )"; then
+            echo 'candidate identity cannot inventory admitted pnpm runtime' >&2
+            exit 1
+          fi
           if [[ -n "$candidate_writable_pnpm_entry" ]]; then
             echo "candidate identity can write admitted pnpm runtime: ${candidate_writable_pnpm_entry}" >&2
             exit 1

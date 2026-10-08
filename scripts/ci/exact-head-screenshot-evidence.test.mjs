@@ -47,6 +47,10 @@ const environment = {
 };
 const workflowRunUrl = 'https://github.com/szl-holdings/platform/actions/runs/123456/attempts/2';
 const workcellId = 'exact-head-screenshot-pr-653-run-123456-attempt-2';
+// Only the fixed diagnostic test doubles are portable to an opted-in Git Bash.
+// Real POSIX permission and identity tests still require the Linux runner.
+const diagnosticsBash =
+  process.platform === 'win32' ? process.env.SZL_DIAGNOSTICS_TEST_BASH : '/bin/bash';
 
 function workflowStepRun(workflow, name) {
   const stepMarker = `      - name: ${name}\n`;
@@ -430,6 +434,108 @@ test('pnpm admission Bash binds contained action output and rejects a symlink es
   assert.match(escaped.stderr, /resolved outside its runner-scoped root/);
 });
 
+test('candidate preparation diagnostics preserve the original fail-closed predicates', async () => {
+  const workflow = await readFile(
+    new URL('../../.github/workflows/exact-head-screenshot-evidence.yml', import.meta.url),
+    'utf8',
+  );
+  const run = workflowStepRun(workflow, 'Prepare isolated candidate dependency roots');
+  assert.match(run, /if ! sudo --non-interactive --user "\$SZL_CANDIDATE_USER" -- test "\$@"/);
+  for (const [message, predicate] of [
+    [
+      'candidate controller source write-denial assertion failed',
+      '! -w "$SZL_CONTROLLER_ROOT/package.json"',
+    ],
+    ['candidate source write-denial assertion failed', '! -w "$SZL_CANDIDATE_ROOT/package.json"'],
+    ['candidate pnpm execute assertion failed', '-x "$SZL_PNPM_EXECUTABLE"'],
+    ['candidate pnpm executable write-denial assertion failed', '! -w "$SZL_PNPM_EXECUTABLE"'],
+  ]) {
+    assert.ok(run.includes(`assert_candidate_test '${message}' \\\n  ${predicate}`));
+  }
+  assert.match(run, /if ! candidate_writable_pnpm_entry=/);
+  assert.match(run, /candidate identity cannot inventory admitted pnpm runtime/);
+  assert.match(run, /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/);
+  assert.match(run, /candidate identity can write admitted pnpm runtime:/);
+  assert.doesNotMatch(run, /set -x|continue-on-error|chmod .*777/);
+});
+
+test('candidate preparation Bash reports each rejected isolation assertion without admitting capture', {
+  skip: !diagnosticsBash,
+}, async () => {
+  const workflow = await readFile(
+    new URL('../../.github/workflows/exact-head-screenshot-evidence.yml', import.meta.url),
+    'utf8',
+  );
+  const run = workflowStepRun(workflow, 'Prepare isolated candidate dependency roots');
+  const start = run.indexOf('assert_candidate_test() {');
+  assert.notEqual(start, -1);
+  // Fixed test doubles measure diagnostic control flow, not real OS isolation.
+  const sudoStub = `sudo() {
+    [[ "$1 $2 $3 $4" == '--non-interactive --user fixture --' ]] || return 99
+    shift 4
+    local request="$*"
+    case "$request" in
+      'test ! -w /fixture/controller/package.json'|\
+      'test ! -w /fixture/candidate/package.json'|\
+      'test -x /fixture/pnpm/bin/pnpm'|\
+      'test ! -w /fixture/pnpm/bin/pnpm')
+        [[ "$FAIL_PREDICATE" != "$request" ]]
+        ;;
+      'test -r /fixture/evidence'|'test -w /fixture') return 1 ;;
+      'find /fixture/pnpm ! -type l -writable -print -quit')
+        [[ "$FAIL_PREDICATE" != 'find-failure' ]] || return 1
+        if [[ "$FAIL_PREDICATE" == 'writable-runtime' ]]; then
+          printf '%s\\n' '/fixture/pnpm/writable-entry'
+        fi
+        ;;
+      *) printf 'unexpected fixture command: %s\\n' "$request" >&2; return 99 ;;
+    esac
+  }`;
+  const cases = [
+    ['', null],
+    [
+      'test ! -w /fixture/controller/package.json',
+      'candidate controller source write-denial assertion failed',
+    ],
+    ['test ! -w /fixture/candidate/package.json', 'candidate source write-denial assertion failed'],
+    ['test -x /fixture/pnpm/bin/pnpm', 'candidate pnpm execute assertion failed'],
+    ['test ! -w /fixture/pnpm/bin/pnpm', 'candidate pnpm executable write-denial assertion failed'],
+    ['find-failure', 'candidate identity cannot inventory admitted pnpm runtime'],
+    [
+      'writable-runtime',
+      'candidate identity can write admitted pnpm runtime: /fixture/pnpm/writable-entry',
+    ],
+  ];
+  for (const [failure, diagnostic] of cases) {
+    const result = spawnSync(
+      diagnosticsBash,
+      ['-c', `set -euo pipefail\n${sudoStub}\n${run.slice(start)}\nprintf 'admitted\\n'`],
+      {
+        encoding: 'utf8',
+        env: {
+          ...process.env,
+          FAIL_PREDICATE: failure,
+          SZL_CANDIDATE_USER: 'fixture',
+          SZL_CONTROLLER_ROOT: '/fixture/controller',
+          SZL_CANDIDATE_ROOT: '/fixture/candidate',
+          SZL_EVIDENCE_ROOT: '/fixture/evidence',
+          SZL_PNPM_ROOT: '/fixture/pnpm',
+          SZL_PNPM_EXECUTABLE: '/fixture/pnpm/bin/pnpm',
+        },
+      },
+    );
+    if (diagnostic === null) {
+      assert.equal(result.status, 0, result.stderr || result.stdout);
+      assert.equal(result.stderr, '');
+      assert.equal(result.stdout, 'admitted\n');
+    } else {
+      assert.notEqual(result.status, 0, failure);
+      assert.ok(result.stderr.includes(diagnostic), result.stderr);
+      assert.ok(!result.stdout.includes('admitted'), failure);
+    }
+  }
+});
+
 test('an HTTP-200 SPA not-found surface is rejected', () => {
   assert.throws(
     () =>
@@ -730,10 +836,7 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(workflow, /candidate_pnpm_version/);
   assert.match(workflow, /candidate_node_version/);
   assert.match(workflow, /find "\$resolved_root" ! -type l -perm \/022/);
-  assert.match(
-    workflow,
-    /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/,
-  );
+  assert.match(workflow, /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/);
   assert.match(workflow, /candidate identity can write admitted pnpm runtime/);
   assert.match(workflow, /chmod -R a-w "\$SZL_CANDIDATE_ROOT"/);
   assert.match(workflow, /\$SZL_CANDIDATE_ROOT\/artifacts\/a11oy\/node_modules\/\.vite-temp/);
