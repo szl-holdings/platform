@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AtelierAskRequestSchema } from './contracts.js';
 import {
@@ -26,6 +27,21 @@ afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
 });
+
+function completedResponse(text: string, model = 'grok-4.7') {
+  return {
+    model,
+    status: 'completed',
+    output: [
+      {
+        type: 'message',
+        role: 'assistant',
+        status: 'completed',
+        content: [{ type: 'output_text', text }],
+      },
+    ],
+  };
+}
 
 const provider: AtelierProvider = {
   id: 'xai',
@@ -101,13 +117,46 @@ describe('askAtelier', () => {
 });
 
 describe('XaiResponsesProvider', () => {
+  const vectors = (
+    JSON.parse(
+      readFileSync(
+        new URL('../../../tests/contracts/fixtures/xai-final-output-vectors.json', import.meta.url),
+        'utf8',
+      ),
+    ) as {
+      vectors: Array<{
+        name: string;
+        model: string;
+        document: unknown;
+        expected: { accepted: boolean; text?: string; providerRequestId?: string | null };
+      }>;
+    }
+  ).vectors;
+
+  it.each(vectors)('enforces the shared final-output contract: $name', async (vector) => {
+    const fetchMock = vi.fn(async () => Response.json(vector.document));
+    const client = new XaiResponsesProvider('offline-fixture', fetchMock as typeof fetch);
+    const result = client.generate(
+      AtelierAskRequestSchema.parse({ prompt: 'fixture', model: vector.model }),
+    );
+    if (vector.expected.accepted) {
+      const response = await result;
+      expect(response.text).toBe(vector.expected.text);
+      expect(response.model).toBe(vector.model);
+      expect(response.providerRequestId ?? null).toBe(vector.expected.providerRequestId);
+    } else {
+      await expect(result).rejects.toBeInstanceOf(AtelierProviderResponseError);
+    }
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('uses the fixed endpoint, refuses redirects, and disables provider storage', async () => {
     const fetchMock = vi.fn(
       async (_input: string | URL | Request, _init?: RequestInit) =>
         new Response(
           JSON.stringify({
+            ...completedResponse('provider-ok'),
             id: 'resp_test',
-            output_text: 'provider-ok',
             usage: { input_tokens: 3, output_tokens: 2, total_tokens: 5 },
           }),
           { status: 200, headers: { 'content-type': 'application/json' } },
@@ -145,7 +194,7 @@ describe('XaiResponsesProvider', () => {
     'xhigh',
   ] as const)('preserves the %s reasoning effort in the Grok 4.7 request', async (reasoningEffort) => {
     const fetchMock = vi.fn(async (_input: unknown, _init?: RequestInit) =>
-      Response.json({ output_text: 'provider-ok' }),
+      Response.json(completedResponse('provider-ok')),
     );
     const client = new XaiResponsesProvider('secret-for-test', fetchMock as typeof fetch);
     await client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello', reasoningEffort }));
@@ -162,7 +211,7 @@ describe('XaiResponsesProvider', () => {
   ] as const)('supports the Grok 4.6 rollback through %s', async (environmentVariable) => {
     vi.stubEnv(environmentVariable, 'grok-4.6');
     const fetchMock = vi.fn(async (_input: unknown, _init?: RequestInit) =>
-      Response.json({ output_text: 'rollback-ok' }),
+      Response.json(completedResponse('rollback-ok', 'grok-4.6')),
     );
     const client = new XaiResponsesProvider('secret-for-test', fetchMock as typeof fetch);
     const result = await client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello' }));
@@ -175,7 +224,7 @@ describe('XaiResponsesProvider', () => {
     vi.stubEnv('SZL_GROK_MODEL', 'grok-4.7');
     vi.stubEnv('A11OY_ATELIER_MODEL', 'grok-4.6');
     const fetchMock = vi.fn(async (_input: unknown, _init?: RequestInit) =>
-      Response.json({ output_text: 'estate-ok' }),
+      Response.json(completedResponse('estate-ok')),
     );
     const client = new XaiResponsesProvider('secret-for-test', fetchMock as typeof fetch);
     const result = await client.generate(AtelierAskRequestSchema.parse({ prompt: 'hello' }));
@@ -186,7 +235,7 @@ describe('XaiResponsesProvider', () => {
   it('allows an explicit Grok 4.6 request override ahead of the estate default', async () => {
     vi.stubEnv('SZL_GROK_MODEL', 'grok-4.7');
     const fetchMock = vi.fn(async (_input: unknown, _init?: RequestInit) =>
-      Response.json({ output_text: 'request-rollback-ok' }),
+      Response.json(completedResponse('request-rollback-ok', 'grok-4.6')),
     );
     const client = new XaiResponsesProvider('secret-for-test', fetchMock as typeof fetch);
     const result = await client.generate(
@@ -242,6 +291,8 @@ describe('XaiResponsesProvider', () => {
     const fetchMock = vi.fn(async () =>
       Response.json({
         id: 'resp_47',
+        model: 'grok-4.7',
+        status: 'completed',
         output: [
           {
             type: 'reasoning',
@@ -257,10 +308,11 @@ describe('XaiResponsesProvider', () => {
           {
             type: 'message',
             role: 'assistant',
+            status: 'completed',
             content: [
               { type: 'reasoning_text', text: 'hidden-reasoning' },
               { type: 'output_text', text: 'final answer' },
-              { type: 'output_text', text: { value: 'final detail' } },
+              { type: 'output_text', text: 'final detail' },
             ],
           },
         ],
@@ -365,7 +417,7 @@ describe('automatic Atelier provider selection', () => {
     vi.stubEnv('A11OY_ATELIER_XAI_API_KEY', 'secret-for-test');
     vi.stubEnv('A11OY_ATELIER_GROK_CLI_PATH', process.execPath);
     const fetchMock = vi.fn(async (_input: unknown, _init?: RequestInit) =>
-      Response.json({ output_text: 'request-model-ok' }),
+      Response.json(completedResponse('request-model-ok')),
     );
     vi.stubGlobal('fetch', fetchMock);
     expect(() => resolveProvider('auto')).toThrow(AtelierProviderUnavailableError);

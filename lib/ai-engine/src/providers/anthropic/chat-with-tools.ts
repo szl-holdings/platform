@@ -1,6 +1,25 @@
-import Anthropic from '@anthropic-ai/sdk';
+import type Anthropic from '@anthropic-ai/sdk';
 import type { ChatInterface, StructuredCompletionResult } from '../../domain-agent-runner.js';
-import { anthropic } from './client.js';
+
+type AnthropicClient = Pick<Anthropic, 'messages'>;
+
+function systemPrompt(messages: Array<{ role: string; content: string }>): string {
+  return messages
+    .filter((message) => message.role === 'system')
+    .map((message) => message.content)
+    .join('\n\n');
+}
+
+function textBlocks(content: Anthropic.ContentBlock[]): string {
+  return content
+    .filter((block) => block.type === 'text')
+    .map((block) => block.text)
+    .join('');
+}
+
+export class AnthropicCompletionResponseError extends Error {
+  readonly code = 'ANTHROPIC_COMPLETION_RESPONSE_INVALID';
+}
 
 type OpenAIToolSchema = Array<{
   type: 'function';
@@ -30,7 +49,11 @@ function toAnthropicMessages(messages: ChatMsg[]): Anthropic.MessageParam[] {
       if (m.toolCallId && m.name !== undefined) {
         const toolUseBlocks: Anthropic.ToolUseBlock[] = [];
         let j = i;
-        while (j < nonSystem.length && nonSystem[j]?.role === 'assistant' && nonSystem[j]?.toolCallId) {
+        while (
+          j < nonSystem.length &&
+          nonSystem[j]?.role === 'assistant' &&
+          nonSystem[j]?.toolCallId
+        ) {
           const am = nonSystem[j]!;
           toolUseBlocks.push({
             type: 'tool_use',
@@ -69,19 +92,21 @@ function toAnthropicMessages(messages: ChatMsg[]): Anthropic.MessageParam[] {
 }
 
 export class AnthropicChatInterface implements ChatInterface {
-  private readonly client: typeof anthropic;
+  constructor(private readonly client?: AnthropicClient) {}
 
-  constructor(client: typeof anthropic = anthropic) {
-    this.client = client;
+  private async getClient(): Promise<AnthropicClient> {
+    // Injected offline clients must not initialize the credential-bearing singleton.
+    return this.client ?? (await import('./client.js')).anthropic;
   }
 
   async chatCompletion(
     messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
     options?: { model?: string; maxTokens?: number },
   ): Promise<{ content: string }> {
-    const systemMsg = messages.find((m) => m.role === 'system')?.content;
+    const systemMsg = systemPrompt(messages);
     const chatMsgs = messages.filter((m) => m.role !== 'system');
-    const result = await this.client.messages.create({
+    const client = await this.getClient();
+    const result = await client.messages.create({
       model: options?.model ?? 'claude-sonnet-4-6',
       max_tokens: options?.maxTokens ?? 2048,
       ...(systemMsg ? { system: systemMsg } : {}),
@@ -90,16 +115,21 @@ export class AnthropicChatInterface implements ChatInterface {
         content: m.content,
       })),
     });
-    return { content: result.content[0]?.type === 'text' ? result.content[0].text : '' };
+    const content = textBlocks(result.content);
+    if (!content.trim() || !['end_turn', 'stop_sequence'].includes(result.stop_reason ?? '')) {
+      throw new AnthropicCompletionResponseError('Provider returned no completed text response.');
+    }
+    return { content };
   }
 
   async *streamChatCompletion(
     messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
     options?: { model?: string; maxTokens?: number },
   ): AsyncIterable<string> {
-    const systemMsg = messages.find((m) => m.role === 'system')?.content;
+    const systemMsg = systemPrompt(messages);
     const chatMsgs = messages.filter((m) => m.role !== 'system');
-    const stream = this.client.messages.stream({
+    const client = await this.getClient();
+    const stream = client.messages.stream({
       model: options?.model ?? 'claude-sonnet-4-6',
       max_tokens: options?.maxTokens ?? 2048,
       ...(systemMsg ? { system: systemMsg } : {}),
@@ -123,7 +153,7 @@ export class AnthropicChatInterface implements ChatInterface {
     tools: OpenAIToolSchema,
     options?: { model?: string; maxTokens?: number },
   ): Promise<StructuredCompletionResult> {
-    const systemMsg = messages.find((m) => m.role === 'system')?.content;
+    const systemMsg = systemPrompt(messages);
     const anthropicMessages = toAnthropicMessages(messages);
 
     const anthropicTools: Anthropic.Tool[] = tools.map((t) => ({
@@ -135,7 +165,8 @@ export class AnthropicChatInterface implements ChatInterface {
       },
     }));
 
-    const result = await this.client.messages.create({
+    const client = await this.getClient();
+    const result = await client.messages.create({
       model: options?.model ?? 'claude-sonnet-4-6',
       max_tokens: options?.maxTokens ?? 2048,
       ...(systemMsg ? { system: systemMsg } : {}),
@@ -143,10 +174,7 @@ export class AnthropicChatInterface implements ChatInterface {
       tools: anthropicTools,
     });
 
-    const textContent = result.content
-      .filter((b) => b.type === 'text')
-      .map((b) => (b as Anthropic.TextBlock).text)
-      .join('');
+    const textContent = textBlocks(result.content);
 
     const toolUseBlocks = result.content.filter(
       (b) => b.type === 'tool_use',
