@@ -48,6 +48,12 @@ jobs:
       - name: Install deps
         run: pip install --no-cache-dir huggingface_hub==2.0.0 pynacl
 
+      - name: Verify Hugging Face publishing access
+        timeout-minutes: 2
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python platform/agents/readiness/_lib/hf_publish_preflight.py
+
       - name: Run READINESS-SECURITY
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
