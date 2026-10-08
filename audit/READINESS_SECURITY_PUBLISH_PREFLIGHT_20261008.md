@@ -2,10 +2,12 @@
 
 - Workcell: `readiness-security-publish-20261008`
 - Recorded: 2026-10-08 UTC
+- Recovery checkpoint: `2026-10-08T20:02:14Z`
 - Recorded by: ChatGPT, implementing the founder-maintainer's requested repair
 - Base: `szl-holdings/platform@0dbf3de71e6ef317d9382ea0e4c3b6c188e3e767`
 - Base tree: `36681b27d3b2897b0b230f2dcd0c8ea2669d2124`
-- Evidence level: local source and offline contract tests; no successful publication claimed
+- Evidence level: local and hosted contract tests plus verified branch publication and immutable receipt readback; protected-main adoption and trusted signing remain separate
+- Repair PR: [#914](https://github.com/szl-holdings/platform/pull/914)
 
 ## Objective and plan recorded before edits
 
@@ -46,9 +48,11 @@ its README binds the dataset to the platform readiness fleet. The publisher's
 repository ID and `repo_type="dataset"` are correct. No repository creation or
 destination change is justified by the error.
 
-The supplied CI credential was rejected at publication. Its precise defect
+The original CI credential was rejected at publication. Its precise defect
 (revocation, expiry, scope, or policy/access) has not been established. The
 separate connected Hugging Face session does not validate the Actions secret.
+The recovery recorded below establishes that the effective replacement input
+works; it does not retroactively diagnose the original credential's defect.
 
 ## Patch
 
@@ -97,46 +101,111 @@ preflight endpoint and the publisher's SDK environment default. The explicit
 the exact SDK signatures, lazy import, explicit-token use, safe diagnostics,
 and normal fail-closed workflow gating.
 
+## Hosted validation and verified branch recovery
+
+The candidate was proposed in [PR #914](https://github.com/szl-holdings/platform/pull/914)
+on branch `fix/readiness/security-publish-preflight-20261008`. Its verified
+source is `339e107e3dad5622c20da8972583670669055930`.
+
+[Native verifier run 37834664007](https://github.com/szl-holdings/platform/actions/runs/37834664007)
+passed for both Python 3.11 and Python 3.12. Each interpreter ran 82 tests with
+real PyNaCl and no skips; the separate stdlib-only step ran 82 tests with 77
+passes and the 5 expected crypto skips. GitHub's synthetic merge source
+`a672b59a285faa3eceb4cdf5a36b5080c7f3d1f4` and the candidate shared tree
+`fd15dd9943ffc577393084ce02288a3bf4c23778`. These measured verifier results do
+not assert that all final PR checks or protected-main admission are complete.
+
+### Credential restoration
+
+An existing personal write credential in the standard CLI authentication
+store passed identity, dataset-access and dataset-write checks. It was
+provisioned as the effective repository `HF_TOKEN` using GitHub secret
+administration through standard input. The secret's update metadata is
+`2026-10-08T19:54:58Z`. No new credential or broader authorization grant was
+created, and no token value, credential name, account identity or local
+authentication-store path is recorded in this proof.
+
+This restores the existing explicit-token contract. A later dedicated
+fine-grained credential or approved OIDC migration remains separate work;
+neither is claimed as implemented here.
+
+### Actual workflow and immutable receipt
+
+[Run 37835611657](https://github.com/szl-holdings/platform/actions/runs/37835611657)
+completed successfully at candidate source
+`339e107e3dad5622c20da8972583670669055930`. Its preflight passed and its real
+collector published the receipt. The following records bind the observation:
+
+| Evidence | Measured value |
+| --- | --- |
+| Run / attempt | `37835611657` / `1` |
+| Job | [113511746837](https://github.com/szl-holdings/platform/actions/runs/37835611657/job/113511746837) |
+| Collector interval | `2026-10-08T19:56:12Z` through `2026-10-08T19:59:55Z` |
+| Receipt emission | `2026-10-08T19:59:49Z` |
+| Dataset | `SZLHOLDINGS/readiness-runs` |
+| Receipt path | `receipts/readiness-security/2026-10-08/2026-10-08T19-59-49Z.json` |
+| Immutable Hub revision | `dd18e12051fbf1e6885c13eb1ea92b20940d2bd2` |
+| Downloaded bytes | `62480` |
+| File SHA-256 | `6734dc4a38413a8232198d2e8f22da788e2eaae22a791a2e410478b98485523f` |
+| Canonical payload SHA-256 | `f1a792b99d51609e2e6aed478695c6841785eceb61dde668664ccab56f8f364a` |
+
+The [immutable receipt](https://huggingface.co/datasets/SZLHOLDINGS/readiness-runs/resolve/dd18e12051fbf1e6885c13eb1ea92b20940d2bd2/receipts/readiness-security/2026-10-08/2026-10-08T19-59-49Z.json)
+matched the logged envelope. The SHA-256 of the publisher's exact serialization,
+`json.dumps(logged_envelope, indent=2).encode()`, matched the downloaded bytes.
+Envelope fields, decoded payload canonicalization, payload hash, schema,
+agent and emission time were validated. The receipt schema has no workflow
+run ID or source SHA; the recorded run, log, path and immutable readback provide
+that external association rather than an embedded cryptographic source claim.
+
+The envelope reports `signed:false`, `signatures:[]`, no public key and no
+`signError`. The report contains 128 repositories: 6 `GREEN`, 121 `RED` and
+1 `AMBER`. No row reports `cosign.verified:true`. This is verified publication
+of an authentic unsigned report with its actual findings; it does not establish
+trusted signing, all-green security findings or cryptographically verified
+release signatures.
+
 ## Evidence and admission boundaries
 
 - This preflight emits no receipt, creates no repository and uploads nothing.
   `ready:true` establishes prerequisites only; the actual publisher must still
   succeed. Existing `khipu.require_published` remains enforced.
-- The original and diagnostic runs had no signing key and emitted
+- The original, diagnostic and successful recovery receipts report
   `signed:false`. A valid publishing token alone cannot establish signed or
   trusted evidence. No signing key was created, copied, or fabricated.
 - [PR #879](https://github.com/szl-holdings/platform/pull/879) owns shared
   signing/publication and dashboard changes; [PR #904](https://github.com/szl-holdings/platform/pull/904)
   stacks observability OIDC on it; [PR #882](https://github.com/szl-holdings/platform/pull/882)
   owns security-collector corrections. Their held paths were not edited.
-- Known-gaps update: no existing gap is declared closed; the publishing
-  credential and signing/evidence gaps remain open. No unrelated registry or
-  application-readiness status is changed.
+- The observed authentication/publication failure is resolved for the recorded
+  candidate execution. Protected-main adoption, trusted signing and collector
+  corrections remain separate. No unrelated gap registry or application
+  readiness status is changed.
 - Screenshots/routes: not applicable; no UI or product route changed.
-- Public claims: no production, compliance, signed-success or publication
-  claim is introduced. Synthetic test values are labeled; real provider
+- Public claims: the scoped branch-publication claim is backed by the run and
+  immutable readback above. No production, compliance or signed-success claim
+  is introduced. Synthetic test values are labeled; real provider
   credentials and raw credential-bearing responses are absent from changes.
-- Source will be proposed by a feature branch and draft PR. Protected-main
+- Source is proposed through PR #914. Protected-main
   checks, current-base admission, signed squash, and review-thread requirements
-  remain in force. No force push, bypass, or automatic promotion is requested.
+  remain in force. Promotion must satisfy normal protected admission; no force
+  push or bypass is requested.
 
-## Remaining prerequisite and fresh validation
+## Historical access limits and current follow-up
 
-An authorized operator must provision the effective GitHub Actions `HF_TOKEN`
-with an active credential accepted by Hugging Face and content-write access to
-`SZLHOLDINGS/readiness-runs`, including any applicable organization approval.
-Check scope precedence: a repository secret overrides a same-named organization
-secret. The available connections do not expose GitHub secret administration
-or a dataset-write credential for provisioning this input.
+At the initial proof checkpoint, the available connector operations did not
+expose GitHub secret administration, a dataset-write credential for provisioning,
+or workflow dispatch. Only reruns of the original source were available through
+those operations. Publication was recorded as BLOCKED at that checkpoint,
+pending an effective `HF_TOKEN` and a fresh candidate execution. Those access
+statements are historical: the supported CLI authentication, secret-input and
+dispatch paths subsequently enabled the verified recovery above.
 
-The existing PR-triggered verifier will test the candidate source. Its hosted
-results and the candidate commit identity will be recorded in the PR. A rerun
-of the old run cannot validate the patch. The available GitHub mutations
-support job reruns but not workflow dispatch; use a supported exact-ref manual
-dispatch or the normal schedule after protected admission for live validation.
-
-Restored publication requires a fresh run at the intended source, successful
-preflight and upload, and matching receipt readback at a recorded Hugging Face
-revision. Verify payload digest and actual signing/trust state separately.
-Until then, publication is BLOCKED and the repair is a reviewed source
-candidate, not verified operational recovery.
+At the recovery checkpoint above, branch publication was verified for source
+`339e107e3dad5622c20da8972583670669055930`; protected-main admission and a fresh
+run at the admitted source had not yet completed. Consult
+[PR #914](https://github.com/szl-holdings/platform/pull/914) for the final
+admitted source, default-branch run and receipt readback. Current-base checks,
+required review threads and normal signed-merge requirements remain in force.
+This checkpoint does not claim all final CI was green or that the candidate
+had already been deployed to `main`. Signing and collector improvements remain
+with their existing PRs.

@@ -2,11 +2,16 @@
 
 Workcell: `readiness-security-publish-20261008`.
 
-**Candidate status, 2026-10-08:** this change adds a blocking publishing
-preflight. The candidate has not been deployed or validated by a successful
-fresh publication. Passing offline tests or the preflight does not establish
-that a receipt reached Hugging Face. Record actual validation results in the
-[Workcell proof packet](../../../../audit/READINESS_SECURITY_PUBLISH_PREFLIGHT_20261008.md).
+**Verified branch recovery, 2026-10-08:** [run 37835611657](https://github.com/szl-holdings/platform/actions/runs/37835611657)
+passed the publishing preflight and published a real receipt from source
+`339e107e3dad5622c20da8972583670669055930`. Immutable Hugging Face readback
+matched the exact uploaded envelope and its canonical payload hash. The
+receipt remains honestly unsigned. This recovery checkpoint preceded protected
+`main` adoption. Consult [PR #914](https://github.com/szl-holdings/platform/pull/914)
+for final admission and fresh default-branch validation.
+Passing offline tests or the preflight alone does not establish publication;
+the [Workcell proof packet](../../../../audit/READINESS_SECURITY_PUBLISH_PREFLIGHT_20261008.md)
+records the actual run, receipt, hashes and remaining boundaries.
 
 ## Incident and confirmed destination
 
@@ -38,6 +43,29 @@ The publisher already uses `repo_type="dataset"`. Do not create a replacement
 repository, change the sink, or infer repository deletion from this error.
 [Hugging Face's error reference](https://huggingface.co/docs/huggingface_hub/package_reference/utilities#huggingface_hub.errors.RepositoryNotFoundError)
 documents that missing and inaccessible repositories can share this exception.
+
+## Verified recovery record
+
+The effective repository `HF_TOKEN` was restored using an existing personal
+write credential from the standard CLI authentication store, after identity,
+dataset access and dataset write authorization were validated. The credential
+was supplied to GitHub secret administration through standard input; secret
+metadata records an update at `2026-10-08T19:54:58Z`. No new credential or
+broader permission grant was created. A dedicated fine-grained token or an
+approved OIDC configuration remains a later improvement, not a completed
+part of this repair.
+
+Run `37835611657`, attempt `1`, job `113511746837` completed successfully on
+`fix/readiness/security-publish-preflight-20261008`. The receipt emitted at
+`2026-10-08T19:59:49Z` was retrieved at
+`receipts/readiness-security/2026-10-08/2026-10-08T19-59-49Z.json` from immutable
+dataset revision `dd18e12051fbf1e6885c13eb1ea92b20940d2bd2`. Its 128 repository
+findings contain 6 `GREEN`, 121 `RED` and 1 `AMBER` verdicts. Publication success
+does not turn those findings green or establish release-signature verification.
+The envelope has `signed:false`, an empty signature list, no public key and
+no signing error. Signing and collector changes remain separately owned by
+[PR #879](https://github.com/szl-holdings/platform/pull/879) and
+[PR #882](https://github.com/szl-holdings/platform/pull/882).
 
 ## Blocking preflight
 
@@ -127,7 +155,8 @@ At the SDK level, [HF_TOKEN overrides a saved local login](https://huggingface.c
 Signing and OIDC work is tracked separately in
 [PR #879](https://github.com/szl-holdings/platform/pull/879) and
 [PR #904](https://github.com/szl-holdings/platform/pull/904). This repair retains
-the existing token and signing contract; it does not configure an OIDC trust
+the explicit `HF_TOKEN` contract and signing behavior while restoring the
+effective publishing credential. It does not configure an OIDC trust
 relationship or replace that work.
 
 ## Validate the candidate and actual publication
