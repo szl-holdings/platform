@@ -868,3 +868,39 @@ The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so 
 | /a11oy/proof | [320x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-proof-2026-09-30-1728x1000.png) |
 | /a11oy/resources | [320x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1728x1000.png) |
 | /a11oy/trust | [320x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1728x1000.png) |
+
+### 2026-10-02 cyber evidence presentation (CYBER-EVIDENCE-2026-10-02)
+
+Fifteen Microsoft Edge captures from a Vite build and strict-port preview started by the capture script, five viewports per modified route. The script checked the A11oy build inputs against the declared HEAD, hashed the fresh build, and matched same-origin browser responses observed and completed before each screenshot to built files. A resource arriving during or after a full-page screenshot was not separately awaited for byte verification. Unrelated worktree edits were outside those build inputs. Local installed dependencies were not independently attested. This is local source presentation evidence; it does not establish hosted CI, production operation, a security control, certification, or customer use. Capture times below are UTC on 2026-10-03 (2026-10-02 in New York).
+
+Fields common to **every** row below:
+
+- captured_by: `Codex / local Playwright`
+- capture_environment: `local-exact-head` (Windows); browser `Microsoft Edge 154.0.4258.48`; Node `v24.19.0`; Playwright `1.60.0`
+- source_revision: `7e7962a8c8050057f09d494f02087fe56283a05b`
+- workflow_run_or_command: `$env:SOURCE_REVISION='7e7962a8c8050057f09d494f02087fe56283a05b'; node scripts/qa/capture-cyber-evidence-20261002.mjs`
+- build_command: `node artifacts/a11oy/node_modules/vite/bin/vite.js build --config vite.config.ts`
+- app_start_command: `node artifacts/a11oy/node_modules/vite/bin/vite.js preview --config vite.config.ts --host 127.0.0.1 --port 58771 --strictPort`
+- capture_script_sha256: `6e400564a6e94228e2cdd7e5af8422f372a583d4391ab43509f6bea0ff53fd77`
+- served_build_sha256: `697e470a50c68ca49486dc5c1ed70026627910322a51816cad0a3803bd61deb2` (SHA-256 of the sorted built-file path and digest manifest); served index SHA-256: `1d549cbc5054f6e174d75c1220501fd183838a061c1a61f248e70c319b8e93de`
+- device_scale_factor: `1`; full-page JPEG; capture status: `current`
+- workcell_id: `CYBER-EVIDENCE-2026-10-02`; proof_level: `4 (local public-claim proof packet)`
+- metadata sidecar: [cyber-evidence-screenshots-2026-10-02.json](cyber-evidence-screenshots-2026-10-02.json), including resolved URL, HTTP 200, page title, zero console/page errors, verified response count, bytes, and SHA-256 for each row.
+
+| Filename in `docs/assets/screenshots/current/` | Route | Surface | Capture date (UTC) | Viewport | Artifact SHA-256 |
+|---|---|---|---|---|---|
+| `cyber-resilience-phone-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-03T00:04:06.121Z` | 390 x 844 | `c4e607adf95d1b7f05f6f1523e1f3600bcd4046712b9221607cc250a946aee03` |
+| `cyber-resilience-portrait-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-03T00:04:08.557Z` | 768 x 1024 | `a2c6cbb0c07894dcaf1acab699221c91ad58d8d5993f0bb0319ece9eb624cdc9` |
+| `cyber-resilience-desktop-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-03T00:04:11.466Z` | 1440 x 1100 | `cbba8b431aeac57c5288c9eeddfd82540811edb48c3c061f874d8c0fa35557b0` |
+| `cyber-resilience-full-hd-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-03T00:04:13.235Z` | 1920 x 1080 | `5c836b7dcded4662b529455c19431cd8102cb3fc036dfd15c0473ead44fb0610` |
+| `cyber-resilience-ultrawide-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-03T00:04:14.997Z` | 2560 x 1440 | `707baf34e6ec064938329eceaa5ba5b11b8b89a80db78a9ea91c8b0942f871f1` |
+| `governed-security-agents-phone-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-03T00:04:16.705Z` | 390 x 844 | `880f9858dad21c5dbef7923deaa70a27bafedc113831a19cc4de01ff3ef0b4ac` |
+| `governed-security-agents-portrait-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-03T00:04:18.335Z` | 768 x 1024 | `27464339ee103e9dbb06618aa6cae31369d42b860d8347028a16c35c96bc2eaf` |
+| `governed-security-agents-desktop-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-03T00:04:19.664Z` | 1440 x 1100 | `b169c19cec13a9ace8be17d4734a33df66e501c8fbd040e50b5dc32ec9465a39` |
+| `governed-security-agents-full-hd-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-03T00:04:21.113Z` | 1920 x 1080 | `cbd4f32bc3e6d7142a304ae84e041aaf889bf733c567d95780509c2294dd57f8` |
+| `governed-security-agents-ultrawide-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-03T00:04:22.385Z` | 2560 x 1440 | `8f8f52917736a698a46ded3c2e058e288490c48796ec8df548201341a89e8c36` |
+| `security-compliance-phone-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-03T00:04:23.591Z` | 390 x 844 | `380dac005991e5987ecf1a733c35f3f1758e989b2d08dd035aae79bcebf21876` |
+| `security-compliance-portrait-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-03T00:04:24.968Z` | 768 x 1024 | `5f790b0350753c4ee5ca1e20dceb6e817aa47a3514d5b5d9ca306fc704a341e1` |
+| `security-compliance-desktop-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-03T00:04:26.350Z` | 1440 x 1100 | `936ba644581cb91cea956a145a0e3fec4c57a043db2c819dbf29161c5eb5ffa1` |
+| `security-compliance-full-hd-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-03T00:04:27.817Z` | 1920 x 1080 | `a186295504ca7ec713d326255ef3a7470ca9a9c95eb6c93d5a2080b1085add67` |
+| `security-compliance-ultrawide-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-03T00:04:30.009Z` | 2560 x 1440 | `1c1c12fed1b93e8487f254eb2a2d91caa19e82beb1a2edc6d08edeba6ed81ed0` |

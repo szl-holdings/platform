@@ -1,10 +1,137 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
+**Last updated:** 2026-10-04 (rev 40 — native reader proof; fixture follow-up pending CI)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
+
+---
+
+## 2026-10-02 cyber evidence workcell
+
+**2026-10-04 supplement — MEASURED native reader successor:** published
+`b941de4239f41828bf10e51c0fdf8a2a28ba0b93` passed the complete two-build
+reproducibility run again: 46 uncached tasks per build and 3,455 matching files.
+Typecheck and RuntimeAudit passed. CodeQL's remaining new finding is a fixture
+initialization check/read sequence, addressed by retaining the owned receipt
+returned by the fixture's capture operation. Native mutation controls and all
+production reader/comparison bytes remain intact. Fresh fixture-successor CodeQL
+remains required; the two High dependency findings still block release.
+
+**2026-10-04 supplement — MEASURED native input proof and local JSON read repair:**
+published `07a55f869fdfcdf85e99cc90327982323afc9fd5` passed the complete native
+two-checkout/two-install reproducibility workflow: both uncached builds ran 46
+tasks and produced identical 3,455-file archives. Its synthetic merge has the
+same source tree; the verified artifact and exact identities are retained in
+[`PLATFORM_REPRO_READ_RACE_20261004.md`](../../audit/PLATFORM_REPRO_READ_RACE_20261004.md).
+Native Typecheck also passed on that input. CodeQL then identified an actionable
+JSON check/read race. A native filename-replacement regression reproduced an
+outside read on the old helper. The local successor binds validation and bounded
+reading to one no-follow descriptor, rejects file/path drift, and closes the
+descriptor on all paths; all 37 focused controls pass. Fresh successor CodeQL,
+reproducibility and required CI remain pending. The prior-source proof is not
+relabeled as new-source success. The two High node-forge/braces dependency
+findings and their three native security gate failures remain unwaived; release
+remains blocked.
+
+**2026-10-04 supplement — MEASURED local build-proof repair:** the reproducibility
+workflow now uses RuntimeAudit's narrow ONNX download opt-out while verifying the
+actual bundled CPU runtime, preserves install/build failures, removes stale
+generated outputs and compares real output for every executable build task.
+Genuine regeneration exposed and corrected the missing estate-manifest dependency
+on API codegen. Two complete local builds passed 46 tasks each, but their strict
+comparison correctly failed on Storybook's optional telemetry timestamp. Its
+documented metadata opt-out then passed two scoped native builds with identical
+310-file archives; all 110 retained Storybook files matched their prior bytes.
+The 24 proof controls pass. Full hosted two-checkout/two-install equality at the
+eventual published head remains unmeasured; full local typecheck still meets the
+existing Corepack registry blocker. The original repro timeout and High-severity
+dependency/security failures remain failures. No advisory or gate is waived.
+See [`PLATFORM_REPRO_REPAIR_20261004.md`](../../audit/PLATFORM_REPRO_REPAIR_20261004.md).
+
+**2026-10-04 supplement — MEASURED local NULL-parameter repair:** the existing
+node-forge patch now includes the exact upstream #1157 nonempty primitive
+NULL rejection condition. Six owned-key regressions fail against the prior
+backport and pass after the supplement; the expanded 22-test suite passes
+against actual workspace Expo consumers after a clean frozen install. The
+installed RSA source matches the pinned upstream postimage byte-for-byte.
+An incremental install initially left pristine bytes in a new patch-hash slot;
+the guard rejected that tree and clean installation corrected it. The
+historical receipt is retained and a new provenance receipt binds the changed
+patch. Published advisory ranges, scanner thresholds and release status remain
+unchanged. See
+[`NODE_FORGE_NULL_PARAMETER_20261004.md`](../../audit/NODE_FORGE_NULL_PARAMETER_20261004.md)
+for the native-crypto controls, compatibility checks and remaining hosted/full
+workspace verification limits.
+
+**2026-10-04 update — MEASURED local pristine-control hardening:** the helper
+now fixes the registry URL/hash identity independently of the receipt,
+forbids redirects, bounds compressed/decompressed data, rejects unsafe archive
+paths and member types, and extracts into a private temporary directory without
+an intermediate archive. Its 25 helper regressions and the existing 13 actual
+Expo/cryptography regressions pass locally. Hosted CodeQL/CI for the successor
+remain unmeasured. The dependency gate remains blocked; published node-forge
+and braces advisory ranges have no patched registry version. A supplemental
+owned-key probe also reproduces nonempty ASN.1 NULL acceptance in the existing
+backport; it does not prove unauthorized forgery. See
+[`NODE_FORGE_PRISTINE_CONTROL_20261004.md`](../../audit/NODE_FORGE_PRISTINE_CONTROL_20261004.md)
+for commands, exact scope and the incomplete full-workspace typecheck.
+
+**2026-10-03 update — MEASURED local dependency repair; release BLOCKED:**
+`node-forge@1.4.0` has a provenance-bound pnpm backport of upstream PR #1152.
+An isolated pnpm installation passed 13 RSA and Expo certificate/CSR regressions,
+including original-package acceptance and repaired-package rejection of the
+same malformed nested DigestAlgorithm structures. The package name, version,
+registry integrity and license remain unchanged. The existing security workflow
+now requires the installed-byte guard and a hash-verified pristine control.
+**MEASURED hosted readback:** signed source
+`94f7da7b1e9e9b5f8accd7bdedad88dea10116b5` passed the
+[pristine-control and installed-byte/Expo regression steps](https://github.com/szl-holdings/platform/actions/runs/37102544409/job/111144765531).
+Its strict dependency audit, Grype and Security Gate remain **BLOCKED**. Native
+mobile integration, an external release witness, and hosted CI for a later
+prose successor remain **UNKNOWN**. The published advisory range and all
+security gates remain in force; no release pass is claimed. See
+[`NODE_FORGE_BACKPORT_20261003.md`](../../audit/NODE_FORGE_BACKPORT_20261003.md).
+
+The current A11oy cyber-resilience, governed-security-agent, and security-and-compliance
+pages now label source examples as `DEMO` and missing runtime results as
+`UNAVAILABLE` or `UNVERIFIED`. The readiness-security collector requires an
+observed inventory, exact default-branch head, recent successful workflow
+runs, and a readable security contact. Its release signature check remains
+`UNVERIFIED` because release asset names are not cryptographic verification;
+`GREEN` therefore cannot be reached through that metadata-only path.
+
+The cyber tool-mesh scan, alert escalation, compliance assessment, and
+vulnerability report lack a trusted tenant/target binding and result read-back.
+Their manifests are now disabled at the gateway, and direct handler calls
+reject before database access. They remain blocked until a real adapter and
+scoped evidence contract are supplied. No SIEM/EDR
+integration, containment effect, certification, incident SLA, customer witness,
+or production deployment is established by this workcell. Other A11oy security
+routes can still contain older operational copy; the corrected compliance page
+does not link to those routes as evidence. The six buyer-lane and shared work
+function gates are in
+[`CROSS_LANE_EVIDENCE_REGISTER_20261002.md`](CROSS_LANE_EVIDENCE_REGISTER_20261002.md).
+
+The tool-mesh package TypeScript check also remains blocked by the
+same eight `TS6305` missing referenced declarations observed before and after
+the cyber patch; its passing Vitest suite is not a typecheck substitute.
+
+Local tests, build, and screenshots establish source behavior only. The hosted
+checks at `df984acc8b6fe00dfbc993a81a78d175d2b2b3af` failed: the dependency
+scan, Grype, and Security Gate report the high-severity `node-forge` advisory
+[`GHSA-86w9-cpqp-85rv`](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
+with no patched version published; the unit suite and
+Runtime Audit report a pre-existing cross-process Atelier file race. These
+failures cannot be treated as a release pass. A signed successor
+`658ecb845db75b0f83f2e259c84fcd87d595833a` repairs the local file race;
+its focused Atelier tests and package typecheck passed, and the hosted unit suite
+passed at `7e7962a8c8050057f09d494f02087fe56283a05b`. The high-severity
+dependency gate still fails on that head. Protected merge, provider
+publication, deployed route read-back, and an outside functional witness remain
+separate, unverified gates. The dated proof packet is
+[`CYBER_LANE_EXECUTION_20261002.md`](CYBER_LANE_EXECUTION_20261002.md).
 
 ---
 

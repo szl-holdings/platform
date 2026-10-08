@@ -1,8 +1,7 @@
 name: repro-check
 
-# Reproducible-build verification for the platform monorepo.
-# Builds twice with --no-cache and asserts identical tarball SHA-256.
-# ADDITIVE: new workflow, does not modify existing build pipelines.
+# Compare declared build/codegen output bytes from two clean same-source builds.
+# This is a same-run reproducibility check, not a release or SLSA attestation.
 # Doctrine v11 LOCKED 749/14/163 locked_at c7c0ba17
 
 on:
@@ -13,16 +12,41 @@ on:
     paths:
       - 'package.json'
       - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
+      - 'scripts/ci/repro-*'
+      - 'scripts/ci/verify-onnx-cpu.mjs'
+      - 'packages/storybook/.storybook/main.ts'
       - '.github/workflows/repro-check.yml'
 
 permissions:
   contents: read
 
+concurrency:
+  group: repro-check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   repro:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      # RuntimeAudit and Lighthouse use this same narrow opt-out. CPU binaries
+      # remain in the locked npm package; all approved lifecycle scripts run.
+      ONNXRUNTIME_NODE_INSTALL: skip
+      TURBO_TELEMETRY_DISABLED: '1'
+      DO_NOT_TRACK: '1'
+      # Match RuntimeAudit/build/typecheck's reviewed compiler memory budget.
+      NODE_OPTIONS: --max-old-space-size=6144
+      TZ: UTC
+      LC_ALL: C
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Fresh checkout for A
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          clean: true
+          persist-credentials: false
 
       # The monorepo requires Node >=24 (package.json engines). Without an
       # explicit setup the runner's default Node is used and every
@@ -32,41 +56,61 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with: { node-version: '24', cache: 'pnpm' }
 
-      - name: Build A (no cache)
-        run: |
-          rm -rf node_modules dist || true
-          if [ -f pnpm-lock.yaml ]; then
-            corepack enable
-            pnpm install --frozen-lockfile
-            pnpm run build || echo "no build script"
-          fi
-          # Deterministic tarball: sorted file list, fixed mtime, no gzip timestamp.
-          find dist -type f 2>/dev/null | LC_ALL=C sort > /tmp/filelist_A.txt || true
-          tar --sort=name --mtime='UTC 2020-01-01' --owner=0 --group=0 --numeric-owner \
-              -cf /tmp/build_A.tar -T /tmp/filelist_A.txt 2>/dev/null || tar -cf /tmp/build_A.tar -T /dev/null
-          sha256sum /tmp/build_A.tar | awk '{print $1}' > /tmp/sha_A.txt
-          echo "Build A: $(cat /tmp/sha_A.txt)"
+      - name: Verify proof contracts
+        run: node --test scripts/ci/repro-artifacts.test.mjs
 
-      - name: Build B (no cache)
+      - name: Install A from lockfile
         run: |
-          rm -rf node_modules dist || true
-          if [ -f pnpm-lock.yaml ]; then
-            corepack enable
-            pnpm install --frozen-lockfile
-            pnpm run build || echo "no build script"
-          fi
-          find dist -type f 2>/dev/null | LC_ALL=C sort > /tmp/filelist_B.txt || true
-          tar --sort=name --mtime='UTC 2020-01-01' --owner=0 --group=0 --numeric-owner \
-              -cf /tmp/build_B.tar -T /tmp/filelist_B.txt 2>/dev/null || tar -cf /tmp/build_B.tar -T /dev/null
-          sha256sum /tmp/build_B.tar | awk '{print $1}' > /tmp/sha_B.txt
-          echo "Build B: $(cat /tmp/sha_B.txt)"
+          pnpm install --frozen-lockfile --side-effects-cache=false
+          git diff --exit-code
+
+      - name: Verify bundled CPU runtime A
+        run: node scripts/ci/verify-onnx-cpu.mjs
+
+      - name: Build and capture A
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p "$RUNNER_TEMP/platform-repro"
+          pnpm exec turbo run build --cache=local:,remote: --dry=json > "$RUNNER_TEMP/platform-repro/plan_A.json"
+          node scripts/ci/repro-artifacts.mjs prepare "$RUNNER_TEMP/platform-repro/plan_A.json" > "$RUNNER_TEMP/platform-repro/preparation_A.json"
+          pnpm exec turbo run build --cache=local:,remote: --concurrency=2
+          node scripts/ci/repro-artifacts.mjs capture A "$RUNNER_TEMP/platform-repro/plan_A.json" "$RUNNER_TEMP/platform-repro"
+
+      # checkout's clean/reset removes A's generated files, workspace dependency
+      # links and incremental state. Proof files live outside the checkout.
+      - name: Fresh checkout for B
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          clean: true
+          persist-credentials: false
+
+      - name: Install B from lockfile
+        run: |
+          pnpm install --frozen-lockfile --side-effects-cache=false
+          git diff --exit-code
+
+      - name: Verify bundled CPU runtime B
+        run: node scripts/ci/verify-onnx-cpu.mjs
+
+      - name: Build and capture B
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          pnpm exec turbo run build --cache=local:,remote: --dry=json > "$RUNNER_TEMP/platform-repro/plan_B.json"
+          node scripts/ci/repro-artifacts.mjs prepare "$RUNNER_TEMP/platform-repro/plan_B.json" > "$RUNNER_TEMP/platform-repro/preparation_B.json"
+          pnpm exec turbo run build --cache=local:,remote: --concurrency=2
+          node scripts/ci/repro-artifacts.mjs capture B "$RUNNER_TEMP/platform-repro/plan_B.json" "$RUNNER_TEMP/platform-repro"
 
       - name: Verify reproducibility
-        run: |
-          A=$(cat /tmp/sha_A.txt); B=$(cat /tmp/sha_B.txt)
-          echo "A=$A"; echo "B=$B"
-          if [ "$A" != "$B" ]; then
-            echo "::error::Build is NOT reproducible: $A != $B"
-            exit 1
-          fi
-          echo "Reproducible build verified: $A"
+        run: node scripts/ci/repro-artifacts.mjs compare "$RUNNER_TEMP/platform-repro"
+
+      - name: Preserve available proof metadata
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: reproducibility-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/platform-repro/*.json
+          if-no-files-found: warn
+          retention-days: 14
