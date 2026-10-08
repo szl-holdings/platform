@@ -265,13 +265,13 @@ function workerRequestHeaders(tenantId: string): Record<string, string> {
   const configuredApiKey = process.env[WORKER_API_KEY_ENV];
   if (configuredApiKey !== undefined && configuredApiKey !== configuredApiKey.trim()) {
     throw new Error(
-      `[substrate/python-worker] ${WORKER_API_KEY_ENV} must not contain surrounding whitespace`,
+      '[substrate/python-worker] SUBSTRATE_PYTHON_WORKER_API_KEY must not contain surrounding whitespace',
     );
   }
   const apiKey = configuredApiKey?.trim() ? configuredApiKey : undefined;
   if (!apiKey && !bypassRequested) {
     throw new Error(
-      `[substrate/python-worker] ${WORKER_API_KEY_ENV} must be injected before worker dispatch`,
+      '[substrate/python-worker] SUBSTRATE_PYTHON_WORKER_API_KEY must be injected before worker dispatch',
     );
   }
 
