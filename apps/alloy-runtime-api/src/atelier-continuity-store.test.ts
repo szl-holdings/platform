@@ -131,6 +131,65 @@ afterEach(async () => {
 });
 
 describe('EncryptedLocalAtelierStateStore', () => {
+  it('accepts a live hard-link cleanup during authenticated marker readback', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    await new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready();
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    let intercepted = false;
+    let released = false;
+    vi.mocked(open).mockImplementation(async (filePath, flags, mode) => {
+      const handle = await actual.open(filePath, flags, mode);
+      if (filePath === markerPath && !intercepted) {
+        intercepted = true;
+        const temporaryLink = join(rootDirectory, 'key-check-live-link.tmp');
+        await actual.link(markerPath, temporaryLink);
+        const read = handle.read.bind(handle);
+        vi.spyOn(handle, 'read').mockImplementation(async (...args) => {
+          const result = await read(...args);
+          if (!released) {
+            await actual.unlink(temporaryLink);
+            released = true;
+          }
+          return result;
+        });
+      }
+      return handle;
+    });
+    const reopened = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await expect(reopened.ready()).resolves.toBeUndefined();
+    expect(released).toBe(true);
+  });
+
+  it('rejects unrelated ctime drift during authenticated marker readback', async () => {
+    const rootDirectory = await tempRoot();
+    const masterKey = randomBytes(32);
+    await new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey }).ready();
+    const markerPath = join(rootDirectory, 'key-check.json');
+    const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+    let adjusted = false;
+    vi.mocked(open).mockImplementation(async (filePath, flags, mode) => {
+      const handle = await actual.open(filePath, flags, mode);
+      if (filePath === markerPath && !adjusted) {
+        adjusted = true;
+        const stat = handle.stat.bind(handle);
+        let calls = 0;
+        vi.spyOn(handle, 'stat').mockImplementation(async (...args) => {
+          const result = await stat(...args);
+          if (++calls === 2) Object.assign(result, { ctimeMs: Number(result.ctimeMs) + 1 });
+          return result;
+        });
+      }
+      return handle;
+    });
+    const reopened = new EncryptedLocalAtelierStateStore({ rootDirectory, masterKey });
+    await expect(reopened.ready()).rejects.toMatchObject({
+      code: 'ATELIER_CAPSULE_INTEGRITY',
+    });
+    expect(adjusted).toBe(true);
+  });
+
   it('rejects authenticated index replacement after opening the original descriptor', async () => {
     const rootDirectory = await tempRoot();
     const masterKey = randomBytes(32);

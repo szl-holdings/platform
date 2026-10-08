@@ -1251,14 +1251,27 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
       }
       const afterRead = await handle.stat();
       const current = await lstat(path).catch(() => undefined);
+      // The publisher's expected temporary hard-link cleanup changes ctime
+      // while reducing its link count from two to one. Other metadata changes
+      // still fail closed alongside the inode, bounded-byte, and HMAC checks.
+      const releasedPublicationLink = opened.nlink === 2 && afterRead.nlink === 1;
       if (
         !current?.isFile() ||
         current.isSymbolicLink() ||
         current.dev !== afterRead.dev ||
         current.ino !== afterRead.ino ||
+        current.size !== afterRead.size ||
+        current.mtimeMs !== afterRead.mtimeMs ||
+        current.mode !== afterRead.mode ||
+        current.uid !== afterRead.uid ||
+        current.gid !== afterRead.gid ||
         opened.size !== afterRead.size ||
         opened.mtimeMs !== afterRead.mtimeMs ||
-        opened.ctimeMs !== afterRead.ctimeMs ||
+        opened.mode !== afterRead.mode ||
+        opened.uid !== afterRead.uid ||
+        opened.gid !== afterRead.gid ||
+        (opened.ctimeMs !== afterRead.ctimeMs && !releasedPublicationLink) ||
+        (opened.nlink !== afterRead.nlink && !releasedPublicationLink) ||
         length !== afterRead.size
       ) {
         throw new AtelierCapsuleIntegrityError(
