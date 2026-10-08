@@ -10,11 +10,12 @@ import {
   verifyEmbeddingBackendReadiness,
 } from '../embedding-backend.js';
 import { logger } from '../logger.js';
+import { createGlobalRateLimit } from '../middleware/rate-limit.js';
 import { getRequestId } from '../middleware/request-id.js';
 import { getTenantId } from '../middleware/tenant.js';
 
 export function registerEmbedRoute(router: Router): void {
-  router.post('/v1/embed', async (req: Request, res: Response) => {
+  router.post('/v1/embed', createGlobalRateLimit(), async (req: Request, res: Response) => {
     const parsed = EmbedRequestSchema.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: 'validation_error', issues: parsed.error.issues });

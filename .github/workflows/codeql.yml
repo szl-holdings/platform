@@ -70,7 +70,12 @@ jobs:
         with:
           category: /language:${{ matrix.language }}
           upload: always
+          output: ${{ runner.temp }}/codeql-sarif
           wait-for-processing: true
+
+      - name: Report safe CodeQL source and flow locations
+        if: always()
+        run: node scripts/ci/report-codeql-locations.mjs "${{ runner.temp }}/codeql-sarif"
 
   severity-gate-contract:
     name: severity-gate contract

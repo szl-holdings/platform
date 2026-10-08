@@ -1,6 +1,6 @@
 # Dependency Vulnerability Report
 
-**Generated:** 2026-10-07T11:26:02.054Z
+**Generated:** 2026-10-08T02:18:33.250Z
 **Policy:** unmitigated High/Critical advisories block; exact local patches must be registered, digest-bound, behavior-tested, and unexpired; Moderate/Low remain reported
 **Command:** `pnpm audit --json --audit-level=high`
 **Expected package manager:** `pnpm@10.26.1`

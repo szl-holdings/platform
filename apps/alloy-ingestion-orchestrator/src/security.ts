@@ -6,7 +6,7 @@
  * development and tests may opt into a deliberate authentication bypass.
  */
 
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 import { isDevelopmentOrTestRuntime, isProductionRuntime } from '@workspace/aef-contracts';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
@@ -114,11 +114,12 @@ export function resolveOrchestratorAuthConfiguration(
 }
 
 function credentialsMatch(provided: string, configured: string): boolean {
-  // Hash both inputs first so timingSafeEqual always receives equal-length
-  // buffers and the comparison does not disclose the configured token length.
-  const providedDigest = createHash('sha256').update(provided).digest();
-  const configuredDigest = createHash('sha256').update(configured).digest();
-  return timingSafeEqual(providedDigest, configuredDigest);
+  // These are opaque API tokens, compared directly rather than stored password hashes.
+  const candidateBytes = Buffer.from(provided, 'utf8');
+  const expectedBytes = Buffer.from(configured, 'utf8');
+  return (
+    candidateBytes.length === expectedBytes.length && timingSafeEqual(candidateBytes, expectedBytes)
+  );
 }
 
 function bearerToken(header: string | undefined): string | undefined {

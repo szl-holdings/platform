@@ -862,12 +862,20 @@ try {
               raw: normalizeText(element.getAttribute('href')),
               resolved: element.href,
             }));
+          const isAllowedNavigation = ({ raw, resolved }) => {
+            if (!raw || raw === '#') return false;
+            try {
+              return ['http:', 'https:', 'mailto:', 'tel:'].includes(
+                new URL(resolved, window.location.href).protocol,
+              );
+            } catch {
+              return false;
+            }
+          };
           const invalidLocalLinkChecks = [
             ...new Set(
               localLinkDeclarations
-                .filter(
-                  ({ raw }) => !raw || raw === '#' || raw.toLowerCase().startsWith('javascript:'),
-                )
+                .filter((declaration) => !isAllowedNavigation(declaration))
                 .map(({ raw }) => raw || '[empty href]'),
             ),
           ]
@@ -876,10 +884,10 @@ try {
               href,
               ok: false,
               status: null,
-              error: 'empty, fragment-only, or script-backed navigation target',
+              error: 'empty, fragment-only, or unsupported navigation scheme',
             }));
           const localLinkCandidates = localLinkDeclarations
-            .filter(({ raw }) => raw && raw !== '#' && !raw.toLowerCase().startsWith('javascript:'))
+            .filter(isAllowedNavigation)
             .map(({ resolved }) => resolved)
             .filter((href) => {
               try {

@@ -6,12 +6,14 @@ import {
   createBearerAuthentication,
   resolveAuthConfiguration,
 } from '../middleware/auth.js';
+import { globalRateLimit } from '../middleware/rate-limit.js';
 import { enforceTenantRequestConsistency, tenantScoping } from '../middleware/tenant.js';
 
 const API_KEY = 'aef-auth-test-only-key';
 
 function buildProtectedApp(): Express {
   const app = express();
+  app.use(globalRateLimit);
   app.use(express.json());
   app.use(
     createBearerAuthentication({

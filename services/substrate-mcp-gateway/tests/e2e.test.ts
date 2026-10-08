@@ -689,6 +689,44 @@ test('10b. enterprise scopes fail closed for unknown, write, and approval tools'
   assert.match(payload.error?.data?.reason ?? '', /Required scope: mcp:write/);
 });
 
+test('malformed MCP method cannot skip enterprise scope enforcement', async () => {
+  const token = await issueEnterpriseToken({
+    valid: true,
+    idpId: 'malformed-method-idp',
+    issuer: 'https://idp.example.test',
+    subject: 'method-scope-operator',
+    email: 'operator@example.test',
+    displayName: 'Method Scope Operator',
+    mappedRole: 'operator',
+    mcpScope: 'mcp:write',
+    tenantId: 'method-scope-tenant',
+  });
+  for (const method of [undefined, '', null, false]) {
+    const response = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token.accessToken}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json, text/event-stream',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method }),
+    });
+    assert.equal(response.status, 403);
+  }
+});
+
+test('unsupported OAuth grants never reach a credential issuer', async () => {
+  for (const grantType of [undefined, '', 'client_credentials', false]) {
+    const response = await fetch(`${baseUrl}/mcp/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ grant_type: grantType }),
+    });
+    assert.equal(response.status, 400);
+    assert.equal(((await response.json()) as { error: string }).error, 'unsupported_grant_type');
+  }
+});
+
 test('11. health endpoint returns service info without auth', async () => {
   const res = await fetch(`${baseUrl}/mcp/health`);
   assert.equal(res.status, 200);
@@ -2279,7 +2317,7 @@ test('34. enterprise revocation invalidates outstanding OAuth codes and bearer a
   try {
     globalThis.fetch = async (input, init) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-      if (url.startsWith(persistenceBase)) {
+      if (new URL(url).origin === new URL(persistenceBase).origin) {
         return new Response(JSON.stringify({ ok: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' },

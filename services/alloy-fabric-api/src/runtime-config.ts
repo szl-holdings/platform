@@ -1,3 +1,5 @@
+import { isProductionRuntime } from '@workspace/aef-contracts';
+
 const configuredApiKey =
   process.env.AEF_BEARER_TOKEN?.trim() || process.env.AEF_API_KEY?.trim() || undefined;
 const configuredServiceSecret = process.env.AEF_S2S_SECRET?.trim() || undefined;
@@ -13,4 +15,3 @@ if (isProductionRuntime(process.env, ['AEF_ENV', 'AEF_FABRIC_ENV']) && !configur
 export const FABRIC_API_KEY = configuredApiKey;
 export const FABRIC_SERVICE_SECRET = configuredServiceSecret;
 export const FABRIC_API_TENANT_ID = configuredTenantId;
-import { isProductionRuntime } from '@workspace/aef-contracts';

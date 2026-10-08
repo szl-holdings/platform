@@ -751,11 +751,14 @@ export function createHttpTransport(): express.Router {
     // Require at minimum mcp:read for tool/resource access; return 403 if scope is empty.
     const mcpBody = req.body as { method?: string; params?: Record<string, unknown> } | undefined;
     const requestedMethod = mcpBody?.method;
-    if (requestedMethod) {
+    {
       const authCtx = resolveAuthContext(req);
       if (authCtx.enterprise || authCtx.oauth) {
         const scope = authCtx.enterpriseScope ?? '';
-        const requirement = getEnterpriseAccessRequirement(requestedMethod, mcpBody?.params);
+        const requirement = getEnterpriseAccessRequirement(
+          typeof requestedMethod === 'string' ? requestedMethod : '',
+          mcpBody?.params,
+        );
         if (!enterpriseScopeAllows(scope, requirement)) {
           const requiredScope = `mcp:${requirement}`;
           res.status(403).json({
@@ -1010,6 +1013,13 @@ export function createHttpTransport(): express.Router {
   router.post('/token', async (req: Request, res: Response) => {
     const body = req.body as Record<string, unknown>;
     const { grant_type } = body;
+    if (
+      grant_type !== 'authorization_code' &&
+      grant_type !== 'urn:ietf:params:oauth:grant-type:jwt-bearer'
+    ) {
+      res.status(400).json({ error: 'unsupported_grant_type' });
+      return;
+    }
 
     // ── ID-JAG grant: urn:ietf:params:oauth:grant-type:jwt-bearer ────────────
     if (grant_type === 'urn:ietf:params:oauth:grant-type:jwt-bearer') {

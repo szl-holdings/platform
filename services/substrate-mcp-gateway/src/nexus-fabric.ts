@@ -570,7 +570,6 @@ const SYNTHETIC_CORRELATIONS: ConvergenceCorrelation[] = [
 
 const liveCorrelations: ConvergenceCorrelation[] = [];
 const correlationHistory: ConvergenceCorrelation[] = [];
-const MAX_CORRELATION_HISTORY = 200;
 
 // ── Resource update notification callback ───────────────────────────────────
 // Allows the MCP gateway to receive push events and forward

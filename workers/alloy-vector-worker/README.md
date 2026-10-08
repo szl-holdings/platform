@@ -4,6 +4,11 @@ The production process runs compiled JavaScript and refuses to start without
 `AEF_S2S_SECRET`. Inject that value with the deployment secret manager; it is
 never baked into the image.
 
+Every request passes through a bounded process-wide rate limit before parsing
+or authentication. `AEF_VECTOR_RATE_LIMIT_RPM` sets its positive integer limit
+(default 6000 requests per minute). Rotating client or tenant headers cannot
+reset that bucket; excess requests receive HTTP 429.
+
 `GET /health` and `GET /healthz` are liveness endpoints. `GET /readyz` is the
 traffic-readiness authority. The exact configured reference expected for future
 promotion is

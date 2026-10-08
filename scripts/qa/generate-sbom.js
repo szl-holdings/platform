@@ -228,8 +228,27 @@ function digestRegularPatch(root, relativePath) {
 
   const descriptor = openSync(candidatePath, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
   try {
-    if (!fstatSync(descriptor).isFile()) throw new Error('opened patch is not a regular file');
-    return createHash('sha256').update(readFileSync(descriptor)).digest('hex');
+    const opened = fstatSync(descriptor);
+    if (
+      !opened.isFile() ||
+      opened.dev !== candidateStat.dev ||
+      opened.ino !== candidateStat.ino ||
+      opened.size !== candidateStat.size ||
+      opened.mtimeMs !== candidateStat.mtimeMs ||
+      opened.ctimeMs !== candidateStat.ctimeMs
+    ) {
+      throw new Error('opened patch does not match the verified regular file');
+    }
+    const bytes = readFileSync(descriptor);
+    const after = fstatSync(descriptor);
+    if (
+      after.size !== opened.size ||
+      after.mtimeMs !== opened.mtimeMs ||
+      after.ctimeMs !== opened.ctimeMs
+    ) {
+      throw new Error('patch changed while reading');
+    }
+    return createHash('sha256').update(bytes).digest('hex');
   } finally {
     closeSync(descriptor);
   }

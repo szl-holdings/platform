@@ -1,11 +1,13 @@
 import type { IRouter, Request, Response } from 'express';
 import { getEmbeddingBackend, verifyEmbeddingBackendReadiness } from '../embedding-backend.js';
+import { createGlobalRateLimit } from '../middleware/rate-limit.js';
 import { buildFabricProductionHold, isFabricProduction } from '../production-readiness.js';
 
 const startedAt = new Date().toISOString();
 
 export function registerHealthRoute(router: IRouter): void {
-  router.get('/health', (_req: Request, res: Response) => {
+  const probeRateLimit = createGlobalRateLimit();
+  router.get('/health', probeRateLimit, (_req: Request, res: Response) => {
     res.json({
       status: 'alive',
       service: 'alloy-fabric-api',
@@ -31,12 +33,12 @@ export function registerHealthRoute(router: IRouter): void {
     });
   };
 
-  router.get('/ready', readinessHandler);
+  router.get('/ready', probeRateLimit, readinessHandler);
 
   // Standard Kubernetes probe aliases
-  router.get('/healthz', (_req: Request, res: Response) => {
+  router.get('/healthz', probeRateLimit, (_req: Request, res: Response) => {
     res.status(200).json({ status: 'alive', productionReady: !isFabricProduction() });
   });
 
-  router.get('/readyz', readinessHandler);
+  router.get('/readyz', probeRateLimit, readinessHandler);
 }

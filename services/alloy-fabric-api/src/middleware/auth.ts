@@ -1,11 +1,14 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { FABRIC_API_KEY, FABRIC_API_TENANT_ID, FABRIC_SERVICE_SECRET } from '../runtime-config.js';
 
 function constantTimeTokenEqual(candidate: string, expected: string): boolean {
-  const candidateDigest = createHash('sha256').update(candidate, 'utf8').digest();
-  const expectedDigest = createHash('sha256').update(expected, 'utf8').digest();
-  return timingSafeEqual(candidateDigest, expectedDigest);
+  // These are opaque API tokens, compared directly rather than stored password hashes.
+  const candidateBytes = Buffer.from(candidate, 'utf8');
+  const expectedBytes = Buffer.from(expected, 'utf8');
+  return (
+    candidateBytes.length === expectedBytes.length && timingSafeEqual(candidateBytes, expectedBytes)
+  );
 }
 
 export function bearerAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
