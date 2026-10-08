@@ -12,13 +12,31 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { type ActorContext, EmbedDispatcher, HumanApprovalGate, IndexVerifier, IngestionPlanner, PolicyGuard, RetrievalEvaluator, SchemaMapper } from './actors/index.js';
+import {
+  type ActorContext,
+  EmbedDispatcher,
+  HumanApprovalGate,
+  IndexVerifier,
+  IngestionPlanner,
+  PolicyGuard,
+  RetrievalEvaluator,
+  SchemaMapper,
+} from './actors/index.js';
 import { type AuditEmitter, defaultAuditEmitter } from './audit.js';
-import { type CheckpointStore, createCheckpoint, defaultCheckpointStore } from './checkpoint-store.js';
-import { type RunStore, defaultRunStore } from './run-store.js';
+import {
+  type CheckpointStore,
+  createCheckpoint,
+  defaultCheckpointStore,
+} from './checkpoint-store.js';
+import { defaultRunStore, type RunStore } from './run-store.js';
 import { devChunkStore, devIndexStore, devRawDocumentStore } from './storage/dev.js';
 import type { StorageAdapters } from './storage/interfaces.js';
-import { type StepResult, type WorkflowDefinition, type WorkflowRun, DEFAULT_RETRY_POLICY } from './types.js';
+import {
+  DEFAULT_RETRY_POLICY,
+  type StepResult,
+  type WorkflowDefinition,
+  type WorkflowRun,
+} from './types.js';
 
 // ─── Default Storage ──────────────────────────────────────────────────────────
 

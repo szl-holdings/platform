@@ -2,7 +2,21 @@ import fetch from 'node-fetch';
 import type { Envelope } from './envelope.js';
 
 const API_BASE_URL = process.env.A11OY_API_BASE_URL || 'http://localhost:80';
-const API_KEY = process.env.A11OY_API_KEY || '';
+
+export function buildAuthHeaders({
+  apiToken = process.env.A11OY_API_TOKEN,
+  apiKey = process.env.A11OY_API_KEY,
+}: {
+  apiToken?: string;
+  apiKey?: string;
+} = {}): Record<string, string> {
+  const headers: Record<string, string> = {};
+  const normalizedToken = apiToken?.trim();
+  const normalizedKey = apiKey?.trim();
+  if (normalizedToken) headers.Authorization = `Bearer ${normalizedToken}`;
+  if (normalizedKey) headers['X-API-Key'] = normalizedKey;
+  return headers;
+}
 
 export class A11oyClient {
   private tenant: string;
@@ -17,12 +31,10 @@ export class A11oyClient {
 
   private async request<T>(path: string, options: any = {}): Promise<Envelope<T>> {
     const url = `${API_BASE_URL}${path}`;
-    const bearerToken = process.env.A11OY_API_TOKEN || 'a11oy-demo-cli';
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${bearerToken}`,
-      'X-API-Key': API_KEY,
       'X-Tenant-ID': this.tenant,
+      ...buildAuthHeaders(),
       ...options.headers,
     };
 

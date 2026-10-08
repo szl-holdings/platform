@@ -1,6 +1,7 @@
 import { execFile as execFileCallback } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { constants as fsConstants } from 'node:fs';
+import { access, mkdir, readFile, realpath, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { chromium } from '@playwright/test';
@@ -15,6 +16,7 @@ const captureEnvironment = process.env.CAPTURE_ENVIRONMENT || '';
 const capturedBy = process.env.CAPTURED_BY || '';
 const sourceIdentityUrl = process.env.SOURCE_IDENTITY_URL || '';
 const outputDir = process.env.SCREENSHOT_OUTPUT_DIR || 'screenshot-proof';
+const requestedChromiumPath = process.env.PLAYWRIGHT_CHROMIUM_PATH?.trim() || '';
 const allowedEnvironments = new Set([
   'github-actions',
   'protected-preview',
@@ -43,6 +45,20 @@ if (!allowedEnvironments.has(captureEnvironment)) {
 }
 if (!capturedBy.trim() || capturedBy.length > 200) {
   throw new Error('CAPTURED_BY must name the actual capturing agent or contributor');
+}
+
+let chromiumExecutablePath;
+if (requestedChromiumPath) {
+  if (!path.isAbsolute(requestedChromiumPath)) {
+    throw new Error('PLAYWRIGHT_CHROMIUM_PATH must be an absolute path');
+  }
+  const resolvedChromiumPath = await realpath(requestedChromiumPath);
+  const chromiumStats = await stat(resolvedChromiumPath);
+  if (!chromiumStats.isFile()) {
+    throw new Error('PLAYWRIGHT_CHROMIUM_PATH must resolve to a regular file');
+  }
+  await access(resolvedChromiumPath, fsConstants.X_OK);
+  chromiumExecutablePath = resolvedChromiumPath;
 }
 
 const parsedBaseUrl = new URL(baseUrl);
@@ -504,7 +520,10 @@ for (const rawOrigin of plan.allowed_origins || []) {
 }
 await mkdir(normalizedOutputDir, { recursive: true });
 
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({
+  headless: true,
+  executablePath: chromiumExecutablePath,
+});
 const browserVersion = browser.version();
 const evidence = [];
 const failures = [];
@@ -843,12 +862,20 @@ try {
               raw: normalizeText(element.getAttribute('href')),
               resolved: element.href,
             }));
+          const isAllowedNavigation = ({ raw, resolved }) => {
+            if (!raw || raw === '#') return false;
+            try {
+              return ['http:', 'https:', 'mailto:', 'tel:'].includes(
+                new URL(resolved, window.location.href).protocol,
+              );
+            } catch {
+              return false;
+            }
+          };
           const invalidLocalLinkChecks = [
             ...new Set(
               localLinkDeclarations
-                .filter(
-                  ({ raw }) => !raw || raw === '#' || raw.toLowerCase().startsWith('javascript:'),
-                )
+                .filter((declaration) => !isAllowedNavigation(declaration))
                 .map(({ raw }) => raw || '[empty href]'),
             ),
           ]
@@ -857,10 +884,10 @@ try {
               href,
               ok: false,
               status: null,
-              error: 'empty, fragment-only, or script-backed navigation target',
+              error: 'empty, fragment-only, or unsupported navigation scheme',
             }));
           const localLinkCandidates = localLinkDeclarations
-            .filter(({ raw }) => raw && raw !== '#' && !raw.toLowerCase().startsWith('javascript:'))
+            .filter(isAllowedNavigation)
             .map(({ resolved }) => resolved)
             .filter((href) => {
               try {
@@ -1123,7 +1150,12 @@ const report = {
   capture_environment: captureEnvironment,
   captured_by: capturedBy,
   workflow_run_or_command: runIdentity,
-  browser: { engine: 'chromium', version: browserVersion },
+  browser: {
+    engine: 'chromium',
+    version: browserVersion,
+    executable_source: chromiumExecutablePath ? 'explicit-environment-path' : 'playwright-managed',
+    executable_basename: chromiumExecutablePath ? path.basename(chromiumExecutablePath) : null,
+  },
   allowed_origins: [...allowedOrigins].sort(),
   network_policy: {
     http: 'declared-origins-only',

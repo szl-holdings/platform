@@ -1,3 +1,4 @@
+import { RERANK_IMPLEMENTATION_ID } from '@workspace/aef-contracts';
 import type {
   RawRerankRequest,
   RawRerankResponse,
@@ -27,11 +28,14 @@ export class DeterministicFallbackRerankBackend implements RerankBackend {
     backendId: 'fallback-deterministic',
     displayName: 'Deterministic TF Fallback Reranker',
     kind: 'fallback-deterministic',
-    supportedModels: ['aef-fallback'],
+    supportedModels: [RERANK_IMPLEMENTATION_ID],
     isFallback: true,
   };
 
   async rerank(req: RawRerankRequest): Promise<RawRerankResponse> {
+    if (req.model !== RERANK_IMPLEMENTATION_ID) {
+      throw new Error(`Rerank model '${req.model}' is not admitted`);
+    }
     const start = Date.now();
 
     const scored = req.candidates.map((c) => ({
@@ -55,8 +59,16 @@ export class DeterministicFallbackRerankBackend implements RerankBackend {
 
     return {
       results,
-      model: 'aef-fallback',
+      model: RERANK_IMPLEMENTATION_ID,
       backendLatencyMs: Date.now() - start,
+      execution: {
+        backendId: this.descriptor.backendId,
+        modelId: RERANK_IMPLEMENTATION_ID,
+        modelRevision: 'builtin-term-frequency-v1',
+        promotionState: 'DEVELOPMENT',
+        implementationKind: 'lexical-overlap',
+        fallback: true,
+      },
     };
   }
 

@@ -6,36 +6,52 @@
   "description": "Planner — goal decomposition, model/tool/approval routing, risk-aware sequencing, fallback plan generation, persistent plan graphs.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./planner": {
+      "development": "./src/planner.ts",
+      "workspace": "./src/planner.ts",
       "types": "./dist/planner.d.ts",
-      "import": "./src/planner.ts"
+      "import": "./dist/planner.js"
     },
     "./decomposer": {
+      "development": "./src/decomposer.ts",
+      "workspace": "./src/decomposer.ts",
       "types": "./dist/decomposer.d.ts",
-      "import": "./src/decomposer.ts"
+      "import": "./dist/decomposer.js"
     },
     "./router": {
+      "development": "./src/router.ts",
+      "workspace": "./src/router.ts",
       "types": "./dist/router.d.ts",
-      "import": "./src/router.ts"
+      "import": "./dist/router.js"
     },
     "./risk-estimator": {
+      "development": "./src/risk-estimator.ts",
+      "workspace": "./src/risk-estimator.ts",
       "types": "./dist/risk-estimator.d.ts",
-      "import": "./src/risk-estimator.ts"
+      "import": "./dist/risk-estimator.js"
     },
     "./fallback-generator": {
+      "development": "./src/fallback-generator.ts",
+      "workspace": "./src/fallback-generator.ts",
       "types": "./dist/fallback-generator.d.ts",
-      "import": "./src/fallback-generator.ts"
+      "import": "./dist/fallback-generator.js"
     },
     "./store": {
+      "development": "./src/store.ts",
+      "workspace": "./src/store.ts",
       "types": "./dist/store.d.ts",
-      "import": "./src/store.ts"
+      "import": "./dist/store.js"
     }
   },
   "dependencies": {
@@ -55,6 +71,7 @@
     "format": "biome format --write ./src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build": "tsc --build"
   }
 }

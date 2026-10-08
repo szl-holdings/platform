@@ -40,6 +40,46 @@ jobs:
       - name: Run readiness regression tests without external services
         run: python -m unittest discover -s platform/agents/readiness/_lib -p 'test_*.py'
 
+  python-workers:
+    name: Python worker CPU contracts (Python 3.14)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      PYTHONPATH: ${{ github.workspace }}/services/substrate-py-workers/src
+      PYTHONDONTWRITEBYTECODE: '1'
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Match the worker Dockerfile's Python minor version. Install the base
+      # requirements only; model/GPU extras and OCR system binaries are absent.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: services/substrate-py-workers/requirements.txt
+      - name: Install Python worker test dependencies
+        run: python -m pip install --disable-pip-version-check -r services/substrate-py-workers/requirements.txt
+      - name: Run full Python worker CPU suite and record skips
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pytest services/substrate-py-workers/tests -q -ra \
+            --junitxml=python-worker-tests.xml 2>&1 | tee python-worker-tests.log
+      - name: Upload Python worker test evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: python-worker-tests-${{ github.run_id }}
+          path: |
+            python-worker-tests.xml
+            python-worker-tests.log
+          retention-days: 30
+
   unit:
     name: Unit tests (vitest)
     runs-on: ubuntu-latest

@@ -6,6 +6,14 @@
 **Author:** Track 6 audit pass  
 **Classification:** Internal — referenced by executive summary and investor diligence
 
+> **SUPERSEDED CURRENT-STATE NOTICE (2026-10-07):** This is a historical
+> development-workspace receipt, not current deployment evidence. Its approval,
+> credential, artifact, workflow, endpoint, and provider statements apply only
+> to the recorded 2026-04-21 track. Current deployment topology remains
+> **UNKNOWN / HOLD** under
+> [`SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md`](./SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md)
+> until an exact-source provider transaction and readback are retained.
+
 ---
 
 ## Summary
@@ -14,7 +22,7 @@ No production deployment was executed in this track. Explicit user approval for 
 
 ---
 
-## Current Deployment State
+## Historical Deployment State (observed 2026-04-21)
 
 | Dimension | State | Evidence |
 |-----------|-------|----------|
@@ -127,7 +135,9 @@ Output of `bash audit/verify.sh` captured 2026-04-21 (run from repo root, dev wo
 All asserted metrics match audit/source-of-truth.json
 ```
 
-Re-run at any time with `bash audit/verify.sh` from the repo root to confirm current repo state matches these figures.
+The output above is retained as a point-in-time capture. Re-run `bash audit/verify.sh`
+to execute the canonical current-tree validator; it does not relabel these 2026-04-21
+figures as current.
 
 ---
 

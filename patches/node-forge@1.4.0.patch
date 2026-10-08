@@ -1,0 +1,120 @@
+diff --git a/lib/rsa.js b/lib/rsa.js
+index a4264822b4dcd6dca44ca3e59e410c982eed7183..8a9c488f94cc8b682b27e1198132f5e4eb38a1ca 100644
+--- a/lib/rsa.js
++++ b/lib/rsa.js
+@@ -77,6 +77,8 @@ var _crypto = forge.util.isNodejs ? require('crypto') : null;
+ // shortcut for asn.1 API
+ var asn1 = forge.asn1;
+ 
++var _hasOwnProperty = Object.prototype.hasOwnProperty;
++
+ // shortcut for util API
+ var util = forge.util;
+ 
+@@ -1146,18 +1148,18 @@ pki.setRsaPublicKey = pki.rsa.setPublicKey = function(n, e) {
+     } else if(scheme === undefined) {
+       scheme = 'RSASSA-PKCS1-V1_5';
+     }
+-    if(options === undefined) {
+-      options = {
+-        _parseAllDigestBytes: true,
+-        _skipPaddingChecks: false
+-      };
+-    }
+-    if(!('_parseAllDigestBytes' in options)) {
+-      options._parseAllDigestBytes = true;
+-    }
+-    if(!('_skipPaddingChecks' in options)) {
+-      options._skipPaddingChecks = false;
+-    }
++    // Treat only explicitly supplied testing flags as overrides. Inherited
++    // properties must not weaken verification if an application's object
++    // prototype has been polluted.
++    var suppliedOptions = options || {};
++    options = {
++      _parseAllDigestBytes:
++        _hasOwnProperty.call(suppliedOptions, '_parseAllDigestBytes') ?
++          suppliedOptions._parseAllDigestBytes : true,
++      _skipPaddingChecks:
++        _hasOwnProperty.call(suppliedOptions, '_skipPaddingChecks') ?
++          suppliedOptions._skipPaddingChecks : false
++    };
+ 
+     if(scheme === 'RSASSA-PKCS1-V1_5') {
+       scheme = {
+@@ -1164,15 +1166,25 @@ pki.setRsaPublicKey = pki.rsa.setPublicKey = function(n, e) {
+           // remove padding
+           d = _decodePkcs1_v1_5(d, key, true, undefined, options);
+           // d is ASN.1 BER-encoded DigestInfo
++          var digestInfoBytes = d;
+           var obj = asn1.fromDer(d, {
+             parseAllBytes: options._parseAllDigestBytes
+           });
+ 
+-          // validate DigestInfo structure and element count
+-          var capture = {};
++          // Validate exact DigestInfo and DigestAlgorithm element counts.
++          // asn1.validate ignores extra children, so both levels must be
++          // checked to prevent low-exponent PKCS#1 v1.5 signature forgery
++          // (CVE-2026-85393). A null-prototype capture also prevents inherited
++          // properties from influencing the optional-parameter decision.
++          var capture = Object.create(null);
+           var errors = [];
++          var hasParameters;
+           if(!asn1.validate(obj, digestInfoValidator, capture, errors) ||
+-            obj.value.length !== 2) {
++            obj.value.length !== 2 ||
++            obj.value[0].value.length !==
++              ((hasParameters = _hasOwnProperty.call(
++                capture, 'parameters')) ? 2 : 1) ||
++            (hasParameters && capture.parameters.length !== 0)) {
+             var error = new Error(
+               'ASN.1 object does not contain a valid RSASSA-PKCS1-v1_5 ' +
+               'DigestInfo value.');
+@@ -1198,7 +1210,7 @@ pki.setRsaPublicKey = pki.rsa.setPublicKey = function(n, e) {
+ 
+           // special check for md2 and md5 that NULL parameters exist
+           if(oid === forge.oids.md2 || oid === forge.oids.md5) {
+-            if(!('parameters' in capture)) {
++            if(!hasParameters) {
+               throw new Error(
+                 'ASN.1 object does not contain a valid RSASSA-PKCS1-v1_5 ' +
+                 'DigestInfo value. ' +
+@@ -1207,6 +1219,37 @@ pki.setRsaPublicKey = pki.rsa.setPublicKey = function(n, e) {
+             }
+           }
+ 
++          // RFC 8017 Appendix B.1 requires DER. SHA-family AlgorithmIdentifier
++          // parameters may be either absent or NULL; MD2/MD5 require NULL.
++          // Rebuild the accepted shape from semantic values and compare bytes
++          // so non-minimal lengths and OID encodings cannot be accepted as DER.
++          var digestAlgorithm = asn1.create(
++            asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
++              asn1.create(
++                asn1.Class.UNIVERSAL,
++                asn1.Type.OID,
++                false,
++                asn1.oidToDer(oid).getBytes())
++            ]);
++          if(hasParameters) {
++            digestAlgorithm.value.push(asn1.create(
++              asn1.Class.UNIVERSAL, asn1.Type.NULL, false, ''));
++          }
++          var canonicalDigestInfo = asn1.toDer(asn1.create(
++            asn1.Class.UNIVERSAL, asn1.Type.SEQUENCE, true, [
++              digestAlgorithm,
++              asn1.create(
++                asn1.Class.UNIVERSAL,
++                asn1.Type.OCTETSTRING,
++                false,
++                capture.digest)
++            ])).getBytes();
++          if(digestInfoBytes !== canonicalDigestInfo) {
++            throw new Error(
++              'ASN.1 object does not contain a canonical DER-encoded ' +
++              'RSASSA-PKCS1-v1_5 DigestInfo value.');
++          }
++
+           // compare the given digest to the decrypted one
+           return digest === capture.digest;
+         }

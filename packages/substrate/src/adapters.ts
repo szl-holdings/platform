@@ -344,8 +344,7 @@ const qclawModelAdapter: ModelAdapter = {
     }
 
     const endpointUrl =
-      process.env.QCLAW_ENDPOINT ??
-      `https://api-inference.huggingface.co/models/${QCLAW_MODEL_ID}`;
+      process.env.QCLAW_ENDPOINT ?? `https://api-inference.huggingface.co/models/${QCLAW_MODEL_ID}`;
 
     const systemPart = input.systemPrompt ? `System: ${input.systemPrompt}\n` : '';
     const toolPart =
@@ -394,7 +393,9 @@ const qclawModelAdapter: ModelAdapter = {
       const durationMs = Date.now() - start;
 
       const confidenceMatch = content.match(/confidence[:\s]+([0-9.]+)/i);
-      const confidence = confidenceMatch ? Math.min(1, Math.max(0, parseFloat(confidenceMatch[1]!))) : 0.78;
+      const confidence = confidenceMatch
+        ? Math.min(1, Math.max(0, parseFloat(confidenceMatch[1]!)))
+        : 0.78;
 
       return {
         content,
@@ -428,7 +429,7 @@ modelAdapterRegistry.register(qclawModelAdapter);
  * Called lazily on first use to avoid circular imports.
  */
 export async function wireToolMeshAdapter(): Promise<void> {
-  const { defaultToolRegistry } = await import('@workspace/tool-mesh');
+  const { defaultToolRegistry } = await import('@workspace/tool-mesh/registry');
 
   const toolMeshAdapter: ToolAdapter = {
     id: 'tool-mesh',

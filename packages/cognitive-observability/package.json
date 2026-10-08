@@ -6,20 +6,28 @@
   "description": "Cognitive Observability — telemetry, quality, cost, drift, and value metrics. OpenTelemetry-compatible exporter with the full SZL metric set for the SZL Agentic Cognitive Operating Intelligence Platform.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./metrics": {
+      "development": "./src/metrics.ts",
+      "workspace": "./src/metrics.ts",
       "types": "./dist/metrics.d.ts",
-      "import": "./src/metrics.ts"
+      "import": "./dist/metrics.js"
     },
     "./exporter": {
+      "development": "./src/exporter.ts",
+      "workspace": "./src/exporter.ts",
       "types": "./dist/exporter.d.ts",
-      "import": "./src/exporter.ts"
+      "import": "./dist/exporter.js"
     },
     "./collector": {
+      "development": "./src/collector.ts",
+      "workspace": "./src/collector.ts",
       "types": "./dist/collector.d.ts",
-      "import": "./src/collector.ts"
+      "import": "./dist/collector.js"
     }
   },
   "dependencies": {
@@ -36,6 +44,7 @@
     "format": "biome format --write ./src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build": "tsc --build"
   }
 }

@@ -6,28 +6,40 @@
   "description": "Alloy Embedding Fabric — unified storage adapter interface with working local-filesystem, SQLite, and pgvector implementations, plus interface stubs for Azure AI Search and object storage.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./interfaces": {
+      "development": "./src/interfaces.ts",
+      "workspace": "./src/interfaces.ts",
       "types": "./dist/interfaces.d.ts",
-      "import": "./src/interfaces.ts"
+      "import": "./dist/interfaces.js"
     },
     "./local-fs": {
+      "development": "./src/local-fs.ts",
+      "workspace": "./src/local-fs.ts",
       "types": "./dist/local-fs.d.ts",
-      "import": "./src/local-fs.ts"
+      "import": "./dist/local-fs.js"
     },
     "./sqlite": {
+      "development": "./src/sqlite.ts",
+      "workspace": "./src/sqlite.ts",
       "types": "./dist/sqlite.d.ts",
-      "import": "./src/sqlite.ts"
+      "import": "./dist/sqlite.js"
     },
     "./pgvector": {
+      "development": "./src/pgvector.ts",
+      "workspace": "./src/pgvector.ts",
       "types": "./dist/pgvector.d.ts",
-      "import": "./src/pgvector.ts"
+      "import": "./dist/pgvector.js"
     },
     "./stubs": {
+      "development": "./src/stubs.ts",
+      "workspace": "./src/stubs.ts",
       "types": "./dist/stubs.d.ts",
-      "import": "./src/stubs.ts"
+      "import": "./dist/stubs.js"
     }
   },
   "dependencies": {

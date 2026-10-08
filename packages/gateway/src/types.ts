@@ -21,6 +21,33 @@ export interface CallerIdentity {
   exp: number;
 }
 
+export interface Hs256JwtVerificationConfig {
+  algorithm: 'HS256';
+  secret: string;
+}
+
+export interface Rs256JwtVerificationConfig {
+  algorithm: 'RS256';
+  publicKey: string;
+  issuer: string;
+  audience: string;
+  orgId: string;
+}
+
+export type JwtVerificationConfig = Hs256JwtVerificationConfig | Rs256JwtVerificationConfig;
+
+export interface EvidenceLedgerConfig {
+  endpoint: string;
+  token: string;
+}
+
+export interface ApprovalWorkflowProbeConfig {
+  namespace: string;
+  taskQueue: string;
+  proofEndpoint: string;
+  proofToken: string;
+}
+
 // ---------------------------------------------------------------------------
 // Agent capabilities — allowed and forbidden
 // ---------------------------------------------------------------------------
@@ -74,6 +101,8 @@ export const FORBIDDEN_CAPABILITIES: ReadonlySet<ForbiddenCapability> = new Set(
   'plaintext_secret_access',
 ] satisfies ForbiddenCapability[]);
 
+export type TargetEnvironment = 'development' | 'staging' | 'production';
+
 // ---------------------------------------------------------------------------
 // Agent action request / response
 // ---------------------------------------------------------------------------
@@ -84,7 +113,7 @@ export interface AgentActionRequest {
   model: string;
   promptHash: string;
   target: string;
-  targetEnvironment: 'development' | 'staging' | 'production';
+  targetEnvironment: TargetEnvironment;
   domain: string;
   parameters: Record<string, unknown>;
   requestedAt: string;
@@ -189,7 +218,15 @@ export interface AuditEntry {
   policyDecision: OpaDecision | null;
   approvalOutcome: ApprovalOutcome | null;
   agentResult: AgentExecutionResult | null;
-  status: 'forbidden' | 'auth_failed' | 'authz_denied' | 'approval_pending' | 'approval_denied' | 'completed' | 'error';
+  status:
+    | 'forbidden'
+    | 'auth_failed'
+    | 'authz_denied'
+    | 'approval_pending'
+    | 'approval_denied'
+    | 'execution_authorized'
+    | 'completed'
+    | 'error';
   statusReason?: string;
   startedAt: string;
   completedAt: string;
@@ -210,7 +247,14 @@ export interface AgentExecutionResult {
 
 export interface GatewayResponse {
   correlationId: string;
-  status: 'success' | 'forbidden' | 'auth_failed' | 'authz_denied' | 'approval_pending' | 'approval_denied' | 'error';
+  status:
+    | 'success'
+    | 'forbidden'
+    | 'auth_failed'
+    | 'authz_denied'
+    | 'approval_pending'
+    | 'approval_denied'
+    | 'error';
   message: string;
   auditId: string;
   evidenceId?: string;
@@ -222,10 +266,14 @@ export interface GatewayResponse {
 }
 
 export interface GatewayConfig {
-  jwtSecret: string;
+  jwt: JwtVerificationConfig;
   opaEndpoint: string;
   temporalEndpoint: string;
   openAiApiKey: string;
+  /** Null only for the explicit development/test auto-approval stub. */
+  approvalWorkflow: ApprovalWorkflowProbeConfig | null;
+  /** Null only for the explicitly labelled development/test file sink. */
+  evidenceLedger: EvidenceLedgerConfig | null;
   auditLogPath: string;
   approvalTimeoutMs: number;
 }

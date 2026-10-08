@@ -1,5 +1,7 @@
 # Launch Executive Summary — SZL Holdings
 
+> **HISTORICAL / SUPERSEDED:** This April 2026 planning artifact is not current readiness authority. Use the [October 2026 estate pre-publish audit](../../audit/SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md) for current status and launch decisions.
+
 **Date:** April 2026  
 **Author:** Stephen Lutar, Founder & CEO  
 **Classification:** Internal — Founder, investors, board candidates

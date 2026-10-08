@@ -1,14 +1,21 @@
 import { useState } from 'react';
-import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import {
-  RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, Tooltip, Cell,
+  Bar,
+  BarChart,
+  Cell,
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
 } from 'recharts';
+import { Layout } from '../components/layout';
+import { Card, KpiCard, PageHeader, SectionTitle } from '../components/ui';
 
 const GOLD = '#c9b787';
 const DIM = '#8a8a8a';
-const DEEP = '#0a0a0a';
 
 const DIMENSIONS = [
   'Agentic Execution',
@@ -72,33 +79,44 @@ const CAPABILITY_GAPS = [
     a11oy: 97,
     nearest: 38,
     nearestName: 'Palantir',
-    description: 'Cryptographic audit trail linking every recommendation, approval, and execution in an immutable chain. No competitor offers this natively.',
+    description:
+      'Target design: durably signed evidence should link recommendations, approvals, and executions. This fixture does not benchmark any product or establish that capability.',
   },
   {
     dimension: 'Human-in-the-Loop',
     a11oy: 99,
     nearest: 60,
     nearestName: 'Palantir',
-    description: 'Constitutional mandate: no material action executes without human approval. This is structural, not configurable.',
+    description:
+      'Target design: admitted material actions require authenticated human approval. Deployment evidence is required to establish that gate.',
   },
   {
     dimension: 'Governance & Policy',
     a11oy: 98,
     nearest: 72,
     nearestName: 'Palantir',
-    description: 'Policy gates enforced by a non-bypassable Covenant Layer at every execution boundary. Competitors rely on prompt-level guardrails.',
+    description:
+      'Target design: fail-closed policy gates at admitted execution boundaries. The seeded values do not compare competitor implementations.',
   },
   {
     dimension: 'Outcome Verification',
     a11oy: 96,
     nearest: 42,
     nearestName: 'Palantir',
-    description: 'Automated Verifier Agent confirms every executed action produced the intended outcome with cryptographic evidence.',
+    description:
+      'Target design: a verifier compares intended and observed outcomes and emits durable signed evidence. No such production result is claimed here.',
   },
 ];
 
 const POSITIONING_MATRIX = [
-  { name: 'A11oy', x: 92, y: 96, size: 14, color: '#c9b787', label: 'Governed\nIntelligence Layer' },
+  {
+    name: 'A11oy',
+    x: 92,
+    y: 96,
+    size: 14,
+    color: '#c9b787',
+    label: 'Governed\nIntelligence Layer',
+  },
   { name: 'OpenAI', x: 78, y: 22, size: 10, color: '#4a9eff', label: 'Foundation\nModels' },
   { name: 'Anthropic', x: 72, y: 32, size: 9, color: '#b07d4a', label: 'Safety-first\nModels' },
   { name: 'Microsoft', x: 58, y: 50, size: 11, color: '#5b8dd9', label: 'Productivity\nCopilot' },
@@ -109,7 +127,9 @@ const POSITIONING_MATRIX = [
 function RadarViz({ competitors }: { competitors: typeof COMPETITORS }) {
   const data = DIMENSIONS.map((d, i) => {
     const entry: Record<string, string | number> = { dimension: d };
-    competitors.forEach(c => { entry[c.id] = c.scores[i]; });
+    competitors.forEach((c) => {
+      entry[c.id] = c.scores[i];
+    });
     return entry;
   });
 
@@ -121,7 +141,7 @@ function RadarViz({ competitors }: { competitors: typeof COMPETITORS }) {
           dataKey="dimension"
           tick={{ fill: '#8a8a8a', fontSize: 10, fontFamily: 'ui-monospace, monospace' }}
         />
-        {competitors.map(c => (
+        {competitors.map((c) => (
           <Radar
             key={c.id}
             name={c.name}
@@ -139,14 +159,47 @@ function RadarViz({ competitors }: { competitors: typeof COMPETITORS }) {
 
 function PositioningMatrix() {
   return (
-    <div className="relative w-full" style={{ height: 320, backgroundColor: 'var(--color-a11oy-deep)', borderRadius: 8, border: '1px solid var(--color-a11oy-border)' }}>
+    <div
+      className="relative w-full"
+      style={{
+        height: 320,
+        backgroundColor: 'var(--color-a11oy-deep)',
+        borderRadius: 8,
+        border: '1px solid var(--color-a11oy-border)',
+      }}
+    >
       <div className="absolute inset-0 p-4">
-        <div className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>← Less Governed</div>
-        <div className="absolute right-4 top-4 text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>More Governed →</div>
-        <div className="absolute bottom-4 left-4 text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Model-layer only</div>
-        <div className="absolute bottom-4 right-4 text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Enterprise-grade</div>
-        <div className="absolute top-1/2 left-4 text-xs font-mono -rotate-90 origin-left" style={{ color: 'var(--color-a11oy-text-ghost)', transform: 'rotate(-90deg) translateX(-50%)' }}>Agentic</div>
-        {POSITIONING_MATRIX.map(p => (
+        <div className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+          ← Less Governed
+        </div>
+        <div
+          className="absolute right-4 top-4 text-xs font-mono"
+          style={{ color: 'var(--color-a11oy-text-ghost)' }}
+        >
+          More Governed →
+        </div>
+        <div
+          className="absolute bottom-4 left-4 text-xs font-mono"
+          style={{ color: 'var(--color-a11oy-text-ghost)' }}
+        >
+          Model-layer only
+        </div>
+        <div
+          className="absolute bottom-4 right-4 text-xs font-mono"
+          style={{ color: 'var(--color-a11oy-text-ghost)' }}
+        >
+          Enterprise-grade
+        </div>
+        <div
+          className="absolute top-1/2 left-4 text-xs font-mono -rotate-90 origin-left"
+          style={{
+            color: 'var(--color-a11oy-text-ghost)',
+            transform: 'rotate(-90deg) translateX(-50%)',
+          }}
+        >
+          Agentic
+        </div>
+        {POSITIONING_MATRIX.map((p) => (
           <div
             key={p.name}
             className="absolute flex flex-col items-center"
@@ -170,7 +223,15 @@ function PositioningMatrix() {
             >
               {p.name === 'A11oy' ? '⬡' : '●'}
             </div>
-            <div className="text-center mt-1" style={{ fontSize: 9, color: p.color, whiteSpace: 'nowrap', fontFamily: 'ui-monospace, monospace' }}>
+            <div
+              className="text-center mt-1"
+              style={{
+                fontSize: 9,
+                color: p.color,
+                whiteSpace: 'nowrap',
+                fontFamily: 'ui-monospace, monospace',
+              }}
+            >
               {p.name}
             </div>
           </div>
@@ -180,7 +241,17 @@ function PositioningMatrix() {
   );
 }
 
-function GapBar({ a11oy, nearest, nearestName, color }: { a11oy: number; nearest: number; nearestName: string; color: string }) {
+function GapBar({
+  a11oy,
+  nearest,
+  nearestName,
+  color,
+}: {
+  a11oy: number;
+  nearest: number;
+  nearestName: string;
+  color: string;
+}) {
   const data = [
     { name: 'A11oy', value: a11oy, fill: '#c9b787' },
     { name: nearestName, value: nearest, fill: color },
@@ -191,7 +262,9 @@ function GapBar({ a11oy, nearest, nearestName, color }: { a11oy: number; nearest
         <XAxis type="number" domain={[0, 100]} hide />
         <YAxis type="category" dataKey="name" tick={{ fill: '#8a8a8a', fontSize: 10 }} width={60} />
         <Bar dataKey="value" radius={[0, 3, 3, 0]} barSize={10}>
-          {data.map((d, i) => <Cell key={i} fill={d.fill} fillOpacity={i === 0 ? 1 : 0.5} />)}
+          {data.map((d, i) => (
+            <Cell key={d.name} fill={d.fill} fillOpacity={i === 0 ? 1 : 0.5} />
+          ))}
         </Bar>
       </BarChart>
     </ResponsiveContainer>
@@ -199,98 +272,167 @@ function GapBar({ a11oy, nearest, nearestName, color }: { a11oy: number; nearest
 }
 
 export function FrontierIntelligence() {
-  const [activeCompetitors, setActiveCompetitors] = useState<string[]>(['a11oy', 'openai', 'anthropic', 'palantir']);
+  const [activeCompetitors, setActiveCompetitors] = useState<string[]>([
+    'a11oy',
+    'openai',
+    'anthropic',
+    'palantir',
+  ]);
 
   const toggleComp = (id: string) => {
     if (id === 'a11oy') return;
-    setActiveCompetitors(prev =>
-      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    setActiveCompetitors((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id],
     );
   };
 
-  const visibleCompetitors = COMPETITORS.filter(c => activeCompetitors.includes(c.id));
+  const visibleCompetitors = COMPETITORS.filter((c) => activeCompetitors.includes(c.id));
 
   return (
     <Layout>
       <PageHeader
         label="FRONTIER INTELLIGENCE"
         title="Competitive Positioning Matrix"
-        subtitle="A11oy is not trying to replace the enterprise. A11oy is the governed intelligence layer that lets the enterprise observe, decide, approve, execute, verify, and learn across every operational domain."
-        status="LIVE"
+        subtitle="An illustrative interface populated with hypothetical seed values. It is not a market study, product benchmark, endorsement, or verified comparison of the named organizations."
+        status="DEMO"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <KpiCard label="CAPABILITY LEAD" value="+58pts" sub="vs nearest on proof chains" accent={GOLD} />
-        <KpiCard label="UNIQUE LANE" value="1 of 1" sub="governed agentic execution" accent={GOLD} />
-        <KpiCard label="DIMENSIONS" value="8" sub="capability axes measured" accent={GOLD} />
-        <KpiCard label="COMPETITORS" value="5" sub="mapped and assessed" accent={DIM} />
+        <KpiCard label="BENCHMARK STATUS" value="NONE" sub="seeded UI only" accent={GOLD} />
+        <KpiCard label="PRODUCTION CLAIMS" value="0" sub="evidence required" accent={GOLD} />
+        <KpiCard label="TARGET DIMENSIONS" value="8" sub="illustrative axes" accent={GOLD} />
+        <KpiCard label="NAMED PROFILES" value="5" sub="unverified fixtures" accent={DIM} />
       </div>
 
-      <div className="p-4 rounded-xl mb-8 border" style={{ backgroundColor: 'rgba(201,183,135,0.04)', borderColor: 'rgba(201,183,135,0.2)' }}>
-        <div className="text-sm font-semibold mb-2" style={{ color: GOLD }}>The A11oy Doctrine</div>
+      <div
+        className="p-4 rounded-xl mb-8 border"
+        style={{ backgroundColor: 'rgba(201,183,135,0.04)', borderColor: 'rgba(201,183,135,0.2)' }}
+      >
+        <div className="text-sm font-semibold mb-2" style={{ color: GOLD }}>
+          Candidate Product Thesis
+        </div>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-          "A11oy is the governed intelligence layer that lets the enterprise observe, decide, approve, execute, verify, and learn across every operational domain. No competitor occupies this lane."
+          A11oy is intended to provide a governed layer for observing, deciding, approving,
+          executing, verifying, and learning. That positioning remains a product thesis until
+          independently benchmarked.
         </p>
-        <div className="mt-3 flex flex-wrap gap-3 text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-          {['Agentic execution', 'Proof-carrying governance', 'Business observability', 'Human-in-the-loop', 'Outcome verification'].map(t => (
-            <span key={t} className="px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.15)', color: GOLD }}>{t}</span>
+        <div
+          className="mt-3 flex flex-wrap gap-3 text-xs font-mono"
+          style={{ color: 'var(--color-a11oy-text-ghost)' }}
+        >
+          {[
+            'Agentic execution',
+            'Proof-carrying governance',
+            'Business observability',
+            'Human-in-the-loop',
+            'Outcome verification',
+          ].map((t) => (
+            <span
+              key={t}
+              className="px-2 py-0.5 rounded"
+              style={{
+                backgroundColor: 'rgba(201,183,135,0.08)',
+                border: '1px solid rgba(201,183,135,0.15)',
+                color: GOLD,
+              }}
+            >
+              {t}
+            </span>
           ))}
         </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2">
-          <SectionTitle>8-Dimension Capability Radar</SectionTitle>
+          <SectionTitle>Seeded 8-Dimension UI Scenario</SectionTitle>
           <Card>
             <div className="flex flex-wrap gap-2 mb-4">
-              {COMPETITORS.map(c => (
+              {COMPETITORS.map((c) => (
                 <button
+                  type="button"
                   key={c.id}
                   onClick={() => toggleComp(c.id)}
                   className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-mono transition-all"
                   style={{
-                    backgroundColor: activeCompetitors.includes(c.id) ? `${c.color}18` : 'var(--color-a11oy-muted)',
-                    color: activeCompetitors.includes(c.id) ? c.color : 'var(--color-a11oy-text-ghost)',
-                    border: `1px solid ${activeCompetitors.includes(c.id) ? c.color + '40' : 'var(--color-a11oy-border)'}`,
+                    backgroundColor: activeCompetitors.includes(c.id)
+                      ? `${c.color}18`
+                      : 'var(--color-a11oy-muted)',
+                    color: activeCompetitors.includes(c.id)
+                      ? c.color
+                      : 'var(--color-a11oy-text-ghost)',
+                    border: `1px solid ${activeCompetitors.includes(c.id) ? `${c.color}40` : 'var(--color-a11oy-border)'}`,
                     cursor: c.id === 'a11oy' ? 'default' : 'pointer',
                     opacity: c.id === 'a11oy' ? 1 : undefined,
                   }}
                 >
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: c.color, flexShrink: 0, display: 'inline-block' }} />
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      backgroundColor: c.color,
+                      flexShrink: 0,
+                      display: 'inline-block',
+                    }}
+                  />
                   {c.name}
                 </button>
               ))}
             </div>
             <RadarViz competitors={visibleCompetitors} />
-            <div className="mt-3 text-xs text-center" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-              Scores are analyst assessments based on published capabilities and public documentation. Toggle competitors above.
+            <div
+              className="mt-3 text-xs text-center"
+              style={{ color: 'var(--color-a11oy-text-ghost)' }}
+            >
+              Values are hypothetical UI fixtures, not measurements or conclusions derived from
+              product testing. Toggle profiles above.
             </div>
           </Card>
         </div>
 
         <div className="flex flex-col gap-4">
-          <SectionTitle>Competitor Profiles</SectionTitle>
-          {COMPETITORS.filter(c => c.id !== 'a11oy').map(c => {
+          <SectionTitle>Seeded Profiles</SectionTitle>
+          {COMPETITORS.filter((c) => c.id !== 'a11oy').map((c) => {
             const avg = Math.round(c.scores.reduce((a, b) => a + b, 0) / c.scores.length);
             return (
-              <div
+              <button
+                type="button"
                 key={c.id}
-                className="rounded-lg border p-3 cursor-pointer transition-all"
+                className="w-full rounded-lg border p-3 cursor-pointer text-left transition-all"
                 style={{
-                  backgroundColor: activeCompetitors.includes(c.id) ? `${c.color}08` : 'var(--color-a11oy-card)',
-                  borderColor: activeCompetitors.includes(c.id) ? `${c.color}30` : 'var(--color-a11oy-border)',
+                  backgroundColor: activeCompetitors.includes(c.id)
+                    ? `${c.color}08`
+                    : 'var(--color-a11oy-card)',
+                  borderColor: activeCompetitors.includes(c.id)
+                    ? `${c.color}30`
+                    : 'var(--color-a11oy-border)',
                 }}
                 onClick={() => toggleComp(c.id)}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium" style={{ color: c.color }}>{c.name}</span>
-                  <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>avg {avg}</span>
+                  <span className="text-sm font-medium" style={{ color: c.color }}>
+                    {c.name}
+                  </span>
+                  <span
+                    className="text-xs font-mono"
+                    style={{ color: 'var(--color-a11oy-text-ghost)' }}
+                  >
+                    fixture avg {avg}
+                  </span>
                 </div>
-                <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{c.tagline}</div>
-                <div className="h-1 rounded-full" style={{ backgroundColor: 'var(--color-a11oy-muted)' }}>
-                  <div className="h-1 rounded-full" style={{ width: `${avg}%`, backgroundColor: c.color }} />
+                <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                  {c.tagline}
                 </div>
-              </div>
+                <div
+                  className="h-1 rounded-full"
+                  style={{ backgroundColor: 'var(--color-a11oy-muted)' }}
+                >
+                  <div
+                    className="h-1 rounded-full"
+                    style={{ width: `${avg}%`, backgroundColor: c.color }}
+                  />
+                </div>
+              </button>
             );
           })}
         </div>
@@ -298,28 +440,46 @@ export function FrontierIntelligence() {
 
       <div className="grid lg:grid-cols-2 gap-6 mb-8">
         <div>
-          <SectionTitle>Strategic Positioning Map</SectionTitle>
+          <SectionTitle>Illustrative Positioning Map</SectionTitle>
           <Card style={{ padding: 0, overflow: 'hidden' }}>
             <PositioningMatrix />
-            <div className="p-3 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)', borderTop: '1px solid var(--color-a11oy-border)' }}>
-              X-axis: Governance depth · Y-axis: Agentic execution capability. A11oy occupies the only position combining both.
+            <div
+              className="p-3 text-xs"
+              style={{
+                color: 'var(--color-a11oy-text-ghost)',
+                borderTop: '1px solid var(--color-a11oy-border)',
+              }}
+            >
+              Seeded UI axes only: governance depth and agentic execution. Positions are not
+              measured or independently validated.
             </div>
           </Card>
         </div>
 
         <div>
-          <SectionTitle>Capability Gap Analysis</SectionTitle>
+          <SectionTitle>Target Gap Hypotheses</SectionTitle>
           <div className="flex flex-col gap-3">
-            {CAPABILITY_GAPS.map((gap, i) => {
-              const nearestComp = COMPETITORS.find(c => c.name === gap.nearestName);
+            {CAPABILITY_GAPS.map((gap) => {
+              const nearestComp = COMPETITORS.find((c) => c.name === gap.nearestName);
               return (
-                <Card key={i}>
+                <Card key={gap.dimension}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold" style={{ color: GOLD }}>{gap.dimension}</span>
-                    <span className="text-xs font-mono" style={{ color: GOLD }}>+{gap.a11oy - gap.nearest} pts lead</span>
+                    <span className="text-sm font-semibold" style={{ color: GOLD }}>
+                      {gap.dimension}
+                    </span>
+                    <span className="text-xs font-mono" style={{ color: GOLD }}>
+                      +{gap.a11oy - gap.nearest} fixture pts
+                    </span>
                   </div>
-                  <GapBar a11oy={gap.a11oy} nearest={gap.nearest} nearestName={gap.nearestName} color={nearestComp?.color ?? DIM} />
-                  <p className="text-xs mt-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>{gap.description}</p>
+                  <GapBar
+                    a11oy={gap.a11oy}
+                    nearest={gap.nearest}
+                    nearestName={gap.nearestName}
+                    color={nearestComp?.color ?? DIM}
+                  />
+                  <p className="text-xs mt-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>
+                    {gap.description}
+                  </p>
                 </Card>
               );
             })}
@@ -327,32 +487,81 @@ export function FrontierIntelligence() {
         </div>
       </div>
 
-      <SectionTitle>Full Dimension Scores</SectionTitle>
-      <div className="rounded-lg border overflow-hidden mb-8" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+      <SectionTitle>Seeded Dimension Values</SectionTitle>
+      <div
+        className="rounded-lg border overflow-hidden mb-8"
+        style={{ borderColor: 'var(--color-a11oy-border)' }}
+      >
         <table className="w-full text-xs">
           <thead>
             <tr style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
-              <th className="text-left px-4 py-3 font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 10, letterSpacing: '0.08em' }}>DIMENSION</th>
-              {COMPETITORS.map(c => (
-                <th key={c.id} className="text-center px-3 py-3 font-mono" style={{ color: c.color, fontSize: 10 }}>{c.name.split(' /')[0]}</th>
+              <th
+                className="text-left px-4 py-3 font-mono"
+                style={{
+                  color: 'var(--color-a11oy-text-ghost)',
+                  fontSize: 10,
+                  letterSpacing: '0.08em',
+                }}
+              >
+                DIMENSION
+              </th>
+              {COMPETITORS.map((c) => (
+                <th
+                  key={c.id}
+                  className="text-center px-3 py-3 font-mono"
+                  style={{ color: c.color, fontSize: 10 }}
+                >
+                  {c.name.split(' /')[0]}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {DIMENSIONS.map((dim, di) => (
-              <tr key={dim} style={{ backgroundColor: di % 2 === 0 ? 'var(--color-a11oy-card)' : 'var(--color-a11oy-deep)', borderBottom: '1px solid var(--color-a11oy-border)' }}>
-                <td className="px-4 py-2.5 font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{dim}</td>
-                {COMPETITORS.map(c => {
+              <tr
+                key={dim}
+                style={{
+                  backgroundColor:
+                    di % 2 === 0 ? 'var(--color-a11oy-card)' : 'var(--color-a11oy-deep)',
+                  borderBottom: '1px solid var(--color-a11oy-border)',
+                }}
+              >
+                <td
+                  className="px-4 py-2.5 font-medium"
+                  style={{ color: 'var(--color-a11oy-text)' }}
+                >
+                  {dim}
+                </td>
+                {COMPETITORS.map((c) => {
                   const score = c.scores[di];
                   const isA11oy = c.id === 'a11oy';
                   return (
                     <td key={c.id} className="px-3 py-2.5 text-center">
                       <div className="flex flex-col items-center gap-1">
-                        <span className="font-mono font-semibold" style={{ color: isA11oy ? GOLD : score >= 70 ? 'var(--color-a11oy-text-sub)' : 'var(--color-a11oy-text-ghost)' }}>
+                        <span
+                          className="font-mono font-semibold"
+                          style={{
+                            color: isA11oy
+                              ? GOLD
+                              : score >= 70
+                                ? 'var(--color-a11oy-text-sub)'
+                                : 'var(--color-a11oy-text-ghost)',
+                          }}
+                        >
                           {score}
                         </span>
-                        <div className="w-10 h-1 rounded-full" style={{ backgroundColor: 'var(--color-a11oy-muted)' }}>
-                          <div className="h-1 rounded-full" style={{ width: `${score}%`, backgroundColor: isA11oy ? GOLD : c.color, opacity: isA11oy ? 1 : 0.5 }} />
+                        <div
+                          className="w-10 h-1 rounded-full"
+                          style={{ backgroundColor: 'var(--color-a11oy-muted)' }}
+                        >
+                          <div
+                            className="h-1 rounded-full"
+                            style={{
+                              width: `${score}%`,
+                              backgroundColor: isA11oy ? GOLD : c.color,
+                              opacity: isA11oy ? 1 : 0.5,
+                            }}
+                          />
                         </div>
                       </div>
                     </td>
@@ -360,12 +569,23 @@ export function FrontierIntelligence() {
                 })}
               </tr>
             ))}
-            <tr style={{ backgroundColor: 'rgba(201,183,135,0.06)', borderTop: '2px solid rgba(201,183,135,0.2)' }}>
-              <td className="px-4 py-3 font-mono text-xs font-bold" style={{ color: GOLD }}>AVG SCORE</td>
-              {COMPETITORS.map(c => {
+            <tr
+              style={{
+                backgroundColor: 'rgba(201,183,135,0.06)',
+                borderTop: '2px solid rgba(201,183,135,0.2)',
+              }}
+            >
+              <td className="px-4 py-3 font-mono text-xs font-bold" style={{ color: GOLD }}>
+                AVG SCORE
+              </td>
+              {COMPETITORS.map((c) => {
                 const avg = Math.round(c.scores.reduce((a, b) => a + b, 0) / c.scores.length);
                 return (
-                  <td key={c.id} className="px-3 py-3 text-center font-mono font-bold" style={{ color: c.id === 'a11oy' ? GOLD : 'var(--color-a11oy-text-ghost)' }}>
+                  <td
+                    key={c.id}
+                    className="px-3 py-3 text-center font-mono font-bold"
+                    style={{ color: c.id === 'a11oy' ? GOLD : 'var(--color-a11oy-text-ghost)' }}
+                  >
                     {avg}
                   </td>
                 );
@@ -375,10 +595,21 @@ export function FrontierIntelligence() {
         </table>
       </div>
 
-      <div className="p-4 rounded-xl border" style={{ backgroundColor: 'rgba(201,183,135,0.03)', borderColor: 'rgba(201,183,135,0.15)' }}>
-        <div className="text-xs font-mono uppercase tracking-widest mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>METHODOLOGY NOTE</div>
+      <div
+        className="p-4 rounded-xl border"
+        style={{ backgroundColor: 'rgba(201,183,135,0.03)', borderColor: 'rgba(201,183,135,0.15)' }}
+      >
+        <div
+          className="text-xs font-mono uppercase tracking-widest mb-2"
+          style={{ color: 'var(--color-a11oy-text-ghost)' }}
+        >
+          METHODOLOGY NOTE
+        </div>
         <p className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-          Scores represent capability assessments based on publicly available product documentation, published research, and market analysis. All competitor assessments are A11oy's internal view and are illustrative for demo purposes. Real competitive analysis would require verified product benchmarks.
+          All names, positions, scores, averages, and gaps on this page are hypothetical fixtures
+          used to exercise the interface. They are not factual assessments and were not produced by
+          verified product benchmarks. A publishable comparison requires dated sources, a
+          reproducible methodology, product-owner review, and independent validation.
         </p>
       </div>
     </Layout>

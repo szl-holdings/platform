@@ -13,12 +13,16 @@
   },
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./governed": {
+      "development": "./src/governed-store.ts",
+      "workspace": "./src/governed-store.ts",
       "types": "./dist/governed-store.d.ts",
-      "import": "./src/governed-store.ts"
+      "import": "./dist/governed-store.js"
     }
   },
   "dependencies": {

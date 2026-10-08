@@ -62,39 +62,47 @@ afterEach(() => {
 
 describe('/v1/multimodal/embed', () => {
   it('returns exact-revision vectors and writes immutable model evidence', async () => {
-    globalThis.fetch = vi.fn(async () =>
-      new Response(
-        JSON.stringify({
-          requestId: 'req-mm-1',
-          tenantId: 'tenant-1',
-          modelId: OVIS_OMNI_MODEL_ID,
-          modelRevision: OVIS_OMNI_REVISION,
-          dimensions: 2048,
-          vectors: [
-            {
-              itemId: 'item-1',
-              vector: Array.from({ length: 2048 }, () => 0),
-              inputDigest: 'a'.repeat(64),
-              modalities: ['text'],
-              tokenCount: 4,
-            },
-          ],
-          execution: {
-            backendId: 'ovis-omni-python',
+    globalThis.fetch = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            requestId: 'req-mm-1',
+            tenantId: 'tenant-1',
             modelId: OVIS_OMNI_MODEL_ID,
             modelRevision: OVIS_OMNI_REVISION,
-            artifactSetDigest: OVIS_OMNI_ARTIFACT_SET_DIGEST,
-            processorRevision: OVIS_OMNI_REVISION,
-            runtimeId: 'substrate-py-workers/ovis-omni',
-            runtimeVersion: '1.0.0',
             dimensions: 2048,
-            normalized: true,
-            promotionState: 'EVALUATION_HOLD',
-            supportedModalities: ['text', 'image', 'visual_document', 'audio', 'video', 'interleaved'],
-          },
-        }),
-        { status: 200 },
-      ),
+            vectors: [
+              {
+                itemId: 'item-1',
+                vector: Array.from({ length: 2048 }, () => 0),
+                inputDigest: 'a'.repeat(64),
+                modalities: ['text'],
+                tokenCount: 4,
+              },
+            ],
+            execution: {
+              backendId: 'ovis-omni-python',
+              modelId: OVIS_OMNI_MODEL_ID,
+              modelRevision: OVIS_OMNI_REVISION,
+              artifactSetDigest: OVIS_OMNI_ARTIFACT_SET_DIGEST,
+              processorRevision: OVIS_OMNI_REVISION,
+              runtimeId: 'substrate-py-workers/ovis-omni',
+              runtimeVersion: '1.0.0',
+              dimensions: 2048,
+              normalized: true,
+              promotionState: 'EVALUATION_HOLD',
+              supportedModalities: [
+                'text',
+                'image',
+                'visual_document',
+                'audio',
+                'video',
+                'interleaved',
+              ],
+            },
+          }),
+          { status: 200 },
+        ),
     ) as typeof fetch;
 
     const response = await request(buildApp()).post('/v1/multimodal/embed').send(validRequest());

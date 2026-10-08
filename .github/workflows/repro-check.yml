@@ -1,72 +1,104 @@
 name: repro-check
 
 # Reproducible-build verification for the platform monorepo.
-# Builds twice with --no-cache and asserts identical tarball SHA-256.
-# ADDITIVE: new workflow, does not modify existing build pipelines.
-# Doctrine v11 LOCKED 749/14/163 locked_at c7c0ba17
+# Builds the same candidate in two clean checkouts, then compares the complete
+# path + SHA-256 manifest for every Turbo-declared build-output directory.
 
 on:
   workflow_dispatch:
   schedule:
     - cron: '17 4 * * 1'   # weekly, Monday 04:17 UTC
   pull_request:
-    paths:
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/repro-check.yml'
 
 permissions:
   contents: read
 
+env:
+  CI: true
+  ONNXRUNTIME_NODE_INSTALL: skip
+  TURBO_TELEMETRY_DISABLED: "1"
+
 jobs:
   repro:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Checkout build A
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
 
-      # The monorepo requires Node >=24 (package.json engines). Without an
-      # explicit setup the runner's default Node is used and every
-      # `pnpm install` aborts with ERR_PNPM_UNSUPPORTED_ENGINE before the
-      # build can run. Pin Node 24 to match the rest of the CI matrix.
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with: { node-version: '24', cache: 'pnpm' }
 
-      - name: Build A (no cache)
-        run: |
-          rm -rf node_modules dist || true
-          if [ -f pnpm-lock.yaml ]; then
-            corepack enable
-            pnpm install --frozen-lockfile
-            pnpm run build || echo "no build script"
-          fi
-          # Deterministic tarball: sorted file list, fixed mtime, no gzip timestamp.
-          find dist -type f 2>/dev/null | LC_ALL=C sort > /tmp/filelist_A.txt || true
-          tar --sort=name --mtime='UTC 2020-01-01' --owner=0 --group=0 --numeric-owner \
-              -cf /tmp/build_A.tar -T /tmp/filelist_A.txt 2>/dev/null || tar -cf /tmp/build_A.tar -T /dev/null
-          sha256sum /tmp/build_A.tar | awk '{print $1}' > /tmp/sha_A.txt
-          echo "Build A: $(cat /tmp/sha_A.txt)"
+      - name: Install build A dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Build B (no cache)
-        run: |
-          rm -rf node_modules dist || true
-          if [ -f pnpm-lock.yaml ]; then
-            corepack enable
-            pnpm install --frozen-lockfile
-            pnpm run build || echo "no build script"
-          fi
-          find dist -type f 2>/dev/null | LC_ALL=C sort > /tmp/filelist_B.txt || true
-          tar --sort=name --mtime='UTC 2020-01-01' --owner=0 --group=0 --numeric-owner \
-              -cf /tmp/build_B.tar -T /tmp/filelist_B.txt 2>/dev/null || tar -cf /tmp/build_B.tar -T /dev/null
-          sha256sum /tmp/build_B.tar | awk '{print $1}' > /tmp/sha_B.txt
-          echo "Build B: $(cat /tmp/sha_B.txt)"
+      - name: Build A without Turbo cache reuse
+        run: pnpm exec turbo run build --force
 
-      - name: Verify reproducibility
+      - name: Record complete build A output manifest
+        shell: bash
         run: |
-          A=$(cat /tmp/sha_A.txt); B=$(cat /tmp/sha_B.txt)
-          echo "A=$A"; echo "B=$B"
-          if [ "$A" != "$B" ]; then
-            echo "::error::Build is NOT reproducible: $A != $B"
-            exit 1
-          fi
-          echo "Reproducible build verified: $A"
+          set -euo pipefail
+          find . \
+            \( -path './.git' -o -path '*/.git' -o \
+               -path './node_modules' -o -path '*/node_modules' -o \
+               -path './.turbo' -o -path '*/.turbo' \) -prune -o \
+            -type f \( -path '*/dist/*' -o -path '*/build/*' -o -path '*/.next/*' \) \
+            -print0 \
+            | LC_ALL=C sort -z \
+            | while IFS= read -r -d '' artifact; do sha256sum "$artifact"; done \
+            > /tmp/repro-build-a.sha256
+          test -s /tmp/repro-build-a.sha256
+          echo "Build A output files: $(wc -l < /tmp/repro-build-a.sha256)"
+
+      - name: Checkout build B
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: repro-build-b
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify both checkouts use the candidate SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C repro-build-b rev-parse HEAD)" = "$GITHUB_SHA"
+
+      - name: Install build B dependencies
+        working-directory: repro-build-b
+        run: pnpm install --frozen-lockfile
+
+      - name: Build B without Turbo cache reuse
+        working-directory: repro-build-b
+        run: pnpm exec turbo run build --force
+
+      - name: Record complete build B output manifest
+        working-directory: repro-build-b
+        shell: bash
+        run: |
+          set -euo pipefail
+          find . \
+            \( -path './.git' -o -path '*/.git' -o \
+               -path './node_modules' -o -path '*/node_modules' -o \
+               -path './.turbo' -o -path '*/.turbo' \) -prune -o \
+            -type f \( -path '*/dist/*' -o -path '*/build/*' -o -path '*/.next/*' \) \
+            -print0 \
+            | LC_ALL=C sort -z \
+            | while IFS= read -r -d '' artifact; do sha256sum "$artifact"; done \
+            > /tmp/repro-build-b.sha256
+          test -s /tmp/repro-build-b.sha256
+          echo "Build B output files: $(wc -l < /tmp/repro-build-b.sha256)"
+
+      - name: Verify exact output-path and byte reproducibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          diff --unified=3 /tmp/repro-build-a.sha256 /tmp/repro-build-b.sha256
+          echo "Reproducible build verified across complete nonempty output manifests."

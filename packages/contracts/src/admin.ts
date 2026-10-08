@@ -2,7 +2,7 @@
  * Admin contracts — request/response schemas for admin endpoints.
  */
 import { z } from 'zod';
-import { paginationQuerySchema } from './common';
+import { paginationQuerySchema } from './common.js';
 
 export const userListQuerySchema = z.object({
   ...paginationQuerySchema.shape,

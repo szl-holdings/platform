@@ -19,7 +19,7 @@ kind = "web"
   run = "bash -c 'cd /home/runner/workspace/artifacts/terra && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
 
   [services.production]
-  build = [ "pnpm", "--filter", "@workspace/terra", "run", "build" ]
+  build = [ "bash", "-c", "source scripts/activate-pnpm.sh && exec pnpm --filter @workspace/terra run build" ]
   publicDir = "artifacts/terra/dist/public"
   serve = "static"
 

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ollm"
 version = "0.4.2"
-description = "oLLM — run 80B+ parameter models on consumer GPUs via SSD-offloaded KV cache"
+description = "Checked-in oLLM-compatible Transformers adapter for Substrate inference"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 

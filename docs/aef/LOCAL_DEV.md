@@ -4,16 +4,17 @@ This guide covers running the Alloy Embedding Fabric in a local development envi
 
 ## Prerequisites
 
-- Node.js 20+ (managed by the workspace)
-- pnpm 9+ (workspace package manager)
-- The monorepo installed: `pnpm install` from the workspace root
+- Node.js 24 or newer
+- pnpm 10.26.1 exactly, activated from the workspace root with `source scripts/activate-pnpm.sh`
+- The monorepo installed with `pnpm install --frozen-lockfile` from the workspace root
 
 ## Package Installation
 
 All AEF packages are part of the `@workspace/*` scope and are declared as workspace dependencies. They install automatically when you run `pnpm install`.
 
 ```bash
-pnpm install
+source scripts/activate-pnpm.sh
+pnpm install --frozen-lockfile
 ```
 
 ## Running Tests

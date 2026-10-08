@@ -1,16 +1,20 @@
 import { randomUUID } from 'node:crypto';
-import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { EmbedRequestSchema, type EmbeddingExecutionReceipt } from '@workspace/aef-contracts';
+import { type EmbeddingExecutionReceipt, EmbedRequestSchema } from '@workspace/aef-contracts';
 import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
 import { PolicyEngine } from '@workspace/aef-policy-guard';
 import { embedTextsWithReceipt } from '@workspace/alloy-embed-worker';
+import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
+import { evidenceLedgerRuntimeAdmission } from '../evidence-ledger-runtime.js';
 import { logger } from '../middleware/logger.js';
 import { errorBudgetCounter } from '../middleware/prometheus.js';
+import { enforceTenantRequestConsistency } from '../middleware/tenant.js';
 import { getProfile } from '../profiles/default.js';
 import { EmbedderConfigurationError, getEmbedderSelection } from '../retrieval-store.js';
 
 export const embedRouter: IRouter = Router();
 const policyEngine = new PolicyEngine();
+embedRouter.use(enforceTenantRequestConsistency as RequestHandler);
+embedRouter.use(evidenceLedgerRuntimeAdmission as RequestHandler);
 
 embedRouter.post('/v1/embed', (async (req: Request, res: Response) => {
   const parseResult = EmbedRequestSchema.safeParse(req.body);
@@ -24,7 +28,7 @@ embedRouter.post('/v1/embed', (async (req: Request, res: Response) => {
   const traceId = req.traceId;
   const requestedAt = new Date().toISOString();
 
-  let profile;
+  let profile: ReturnType<typeof getProfile>;
   try {
     profile = getProfile(body.profileId ?? req.profileId ?? 'default');
   } catch (error) {
@@ -49,12 +53,14 @@ embedRouter.post('/v1/embed', (async (req: Request, res: Response) => {
     return;
   }
 
-  let embedder;
+  let embedder: ReturnType<typeof getEmbedderSelection>;
   try {
     embedder = getEmbedderSelection();
   } catch (error) {
     if (error instanceof EmbedderConfigurationError) {
-      res.status(503).json({ error: 'Embedding backend is not configured', code: error.code, traceId });
+      res
+        .status(503)
+        .json({ error: 'Embedding backend is not configured', code: error.code, traceId });
       return;
     }
     throw error;
@@ -80,7 +86,7 @@ embedRouter.post('/v1/embed', (async (req: Request, res: Response) => {
   }
 
   const embedStart = Date.now();
-  let result;
+  let result: Awaited<ReturnType<typeof embedTextsWithReceipt>>;
   try {
     result = await embedTextsWithReceipt(body.texts, {
       backendId: embedder.backendId,
@@ -105,17 +111,16 @@ embedRouter.post('/v1/embed', (async (req: Request, res: Response) => {
   const processingMs = Date.now() - embedStart;
   const completedAt = new Date().toISOString();
   const dimensions = result.vectors[0]?.length ?? result.dimensions;
-  const execution: EmbeddingExecutionReceipt =
-    result.execution ?? {
-      backendId: embedder.backendId,
-      modelId: result.model,
-      ...(embedder.modelRevision ? { modelRevision: embedder.modelRevision } : {}),
-      ...(embedder.artifactSetDigest ? { artifactSetDigest: embedder.artifactSetDigest } : {}),
-      dimensions,
-      normalized: body.normalize,
-      promotionState: embedder.promotionState,
-      supportedModalities: ['text'],
-    };
+  const execution: EmbeddingExecutionReceipt = result.execution ?? {
+    backendId: embedder.backendId,
+    modelId: result.model,
+    ...(embedder.modelRevision ? { modelRevision: embedder.modelRevision } : {}),
+    ...(embedder.artifactSetDigest ? { artifactSetDigest: embedder.artifactSetDigest } : {}),
+    dimensions,
+    normalized: body.normalize,
+    promotionState: embedder.promotionState,
+    supportedModalities: ['text'],
+  };
 
   const evidenceEntries = body.texts.map((_text, index) => {
     const entry = {

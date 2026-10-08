@@ -53,6 +53,8 @@ export interface StageClaimMessage extends PythonWorkerBaseMessage {
   workerId: string;
   runId: string;
   workflowId: string;
+  /** Governed tenant identity. The HTTP X-Tenant-ID header is derived from this field. */
+  tenantId: string;
   stageId: string;
   stageType: string;
   stageConfig: Record<string, unknown>;
@@ -86,7 +88,8 @@ export interface StageResultMessage extends PythonWorkerBaseMessage {
   runId: string;
   stageId: string;
   output: unknown;
-  confidence: number;
+  /** Null means the worker did not emit a measured confidence assessment. */
+  confidence: number | null;
   durationMs: number;
   otelSpanId?: string;
   evidenceIds?: string[];
@@ -102,6 +105,7 @@ export interface StageErrorMessage extends PythonWorkerBaseMessage {
   errorMessage: string;
   retryable: boolean;
   durationMs: number;
+  correlationId?: string;
 }
 
 export type PythonWorkerMessage =
@@ -182,16 +186,183 @@ export interface RegisteredWorker {
 //
 // When SUBSTRATE_PYTHON_WORKER_URL is set, dispatch() makes a real HTTP POST
 // to the configured FastAPI worker endpoint, proving end-to-end federation.
-// If the URL is not configured or the worker is unreachable, the call falls
-// back to the in-process simulation so development environments remain functional.
+// If the URL is not configured, non-live modes may use the in-process
+// simulation. Once a POST is attempted, every transport failure is treated as
+// ambiguous and fails closed; it is never retried or replaced by simulation.
 //
 // The HTTP protocol matches the FastAPI reference worker contract:
-//   POST <SUBSTRATE_PYTHON_WORKER_URL>/execute
+//   POST <SUBSTRATE_PYTHON_WORKER_URL>/claim
 //   Content-Type: application/json
 //   Body: StageClaimMessage
 //   Response: StageResultMessage | StageErrorMessage
 
-class SubstratePythonWorkerChannel implements PythonWorkerChannel {
+const WORKER_API_KEY_ENV = 'SUBSTRATE_PYTHON_WORKER_API_KEY';
+const WORKER_AUTH_BYPASS_ENV = 'SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS';
+const WORKER_ENV_ENV = 'SUBSTRATE_PYTHON_WORKER_ENV';
+const WORKER_TENANT_ID_ENV = 'SUBSTRATE_PYTHON_WORKER_TENANT_ID';
+const RUNTIME_MODE_ENV = 'RUNTIME_MODE';
+const TENANT_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$/;
+const PRODUCTION_ENVIRONMENTS = new Set(['prod', 'production']);
+const ALLOWED_RUNTIME_MODES = new Set(['local-dev', 'internal-preview', 'demo', 'production']);
+const BYPASS_ENVIRONMENTS = new Set([
+  'dev',
+  'development',
+  'local',
+  'local-dev',
+  'test',
+  'testing',
+]);
+
+function declaredRuntimeEnvironments(): string[] {
+  const runtimeMode = process.env[RUNTIME_MODE_ENV]?.trim().toLowerCase();
+  if (runtimeMode && !ALLOWED_RUNTIME_MODES.has(runtimeMode)) {
+    throw new Error(
+      `[substrate/python-worker] ${RUNTIME_MODE_ENV} must be one of: ${[
+        ...ALLOWED_RUNTIME_MODES,
+      ].join(', ')}`,
+    );
+  }
+  return [
+    runtimeMode,
+    process.env[WORKER_ENV_ENV],
+    process.env.APP_ENV,
+    process.env.NODE_ENV,
+    process.env.SZL_ENV,
+  ]
+    .map((value) => value?.trim().toLowerCase())
+    .filter((value): value is string => Boolean(value));
+}
+
+function workerRequestHeaders(tenantId: string): Record<string, string> {
+  const admittedTenantId = tenantId.trim();
+  if (tenantId !== admittedTenantId || !TENANT_ID_PATTERN.test(admittedTenantId)) {
+    throw new Error(
+      '[substrate/python-worker] A valid governed tenantId is required before worker dispatch',
+    );
+  }
+
+  const bypassValue = (process.env[WORKER_AUTH_BYPASS_ENV] ?? '').trim().toLowerCase();
+  if (bypassValue && !['1', 'true', 'yes', '0', 'false', 'no', 'off'].includes(bypassValue)) {
+    throw new Error(
+      `[substrate/python-worker] ${WORKER_AUTH_BYPASS_ENV} must be an explicit boolean value`,
+    );
+  }
+  const bypassRequested = ['1', 'true', 'yes'].includes(bypassValue);
+  const declaredEnvironments = declaredRuntimeEnvironments();
+  const production = declaredEnvironments.some((environment) =>
+    PRODUCTION_ENVIRONMENTS.has(environment),
+  );
+  if (
+    bypassRequested &&
+    (declaredEnvironments.length === 0 ||
+      declaredEnvironments.some((environment) => !BYPASS_ENVIRONMENTS.has(environment)))
+  ) {
+    throw new Error(
+      `[substrate/python-worker] ${WORKER_AUTH_BYPASS_ENV} is permitted only in development or test environments`,
+    );
+  }
+
+  const configuredApiKey = process.env[WORKER_API_KEY_ENV];
+  if (configuredApiKey !== undefined && configuredApiKey !== configuredApiKey.trim()) {
+    throw new Error(
+      '[substrate/python-worker] SUBSTRATE_PYTHON_WORKER_API_KEY must not contain surrounding whitespace',
+    );
+  }
+  const apiKey = configuredApiKey?.trim() ? configuredApiKey : undefined;
+  if (!apiKey && !bypassRequested) {
+    throw new Error(
+      '[substrate/python-worker] SUBSTRATE_PYTHON_WORKER_API_KEY must be injected before worker dispatch',
+    );
+  }
+
+  const configuredTenantId = process.env[WORKER_TENANT_ID_ENV]?.trim();
+  if (configuredTenantId && !TENANT_ID_PATTERN.test(configuredTenantId)) {
+    throw new Error(
+      `[substrate/python-worker] ${WORKER_TENANT_ID_ENV} must contain a valid tenant identity`,
+    );
+  }
+  if (production && !configuredTenantId) {
+    throw new Error(
+      `[substrate/python-worker] ${WORKER_TENANT_ID_ENV} must bind the worker credential to one tenant in production`,
+    );
+  }
+  if (configuredTenantId && configuredTenantId !== admittedTenantId) {
+    throw new Error(
+      '[substrate/python-worker] Governed claim tenant is not authorized for this worker credential',
+    );
+  }
+
+  return {
+    'Content-Type': 'application/json',
+    'X-Protocol-Version': PYTHON_WORKER_PROTOCOL_VERSION,
+    'X-Tenant-ID': admittedTenantId,
+    ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+  };
+}
+
+function parseWorkerResponse(
+  value: unknown,
+  claim: StageClaimMessage,
+): StageResultMessage | StageErrorMessage {
+  if (typeof value !== 'object' || value === null) {
+    throw new Error('Worker returned a non-object response');
+  }
+  const response = value as Record<string, unknown>;
+  if (
+    response.protocolVersion !== PYTHON_WORKER_PROTOCOL_VERSION ||
+    (response.type !== 'stage.result' && response.type !== 'stage.error') ||
+    response.runId !== claim.runId ||
+    response.stageId !== claim.stageId ||
+    typeof response.workerId !== 'string' ||
+    !response.workerId ||
+    typeof response.messageId !== 'string' ||
+    !response.messageId ||
+    typeof response.timestamp !== 'string' ||
+    !response.timestamp ||
+    typeof response.durationMs !== 'number' ||
+    !Number.isInteger(response.durationMs) ||
+    response.durationMs < 0
+  ) {
+    throw new Error('Worker returned an invalid or mismatched protocol response');
+  }
+  if (
+    response.type === 'stage.result' &&
+    response.confidence !== null &&
+    (typeof response.confidence !== 'number' ||
+      !Number.isFinite(response.confidence) ||
+      response.confidence < 0 ||
+      response.confidence > 1)
+  ) {
+    throw new Error('Worker returned an invalid result confidence');
+  }
+  if (
+    response.type === 'stage.error' &&
+    (typeof response.errorCode !== 'string' ||
+      !response.errorCode ||
+      typeof response.errorMessage !== 'string' ||
+      typeof response.retryable !== 'boolean')
+  ) {
+    throw new Error('Worker returned an invalid stage error');
+  }
+  return response as unknown as StageResultMessage | StageErrorMessage;
+}
+
+// Only locally constructed diagnostics may cross the worker boundary. Transport
+// exceptions and remote error messages can contain reflected request credentials.
+class WorkerDispatchDiagnostic extends Error {}
+
+function reflectsCredential(value: unknown, credential: string): boolean {
+  if (typeof value === 'string') return value.includes(credential);
+  if (Array.isArray(value)) return value.some((entry) => reflectsCredential(entry, credential));
+  if (value && typeof value === 'object') {
+    return Object.entries(value).some(
+      ([key, entry]) => key.includes(credential) || reflectsCredential(entry, credential),
+    );
+  }
+  return false;
+}
+
+export class SubstratePythonWorkerChannel implements PythonWorkerChannel {
   private readonly workers = new Map<string, RegisteredWorker>();
   private readonly pendingClaims = new Map<
     string,
@@ -259,67 +430,77 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
 
     // ── Real HTTP dispatch (when FastAPI worker is configured) ──────────────
     // The FastAPI reference worker exposes POST /claim per the wire protocol.
-    // In live mode, HTTP failures propagate (fail closed). In non-live modes
-    // (dry-run, replay, counterfactual), the channel falls back to in-process
-    // simulation so development environments remain functional.
+    // The mutating POST is sent at most once. HTTP redirects are rejected and
+    // every response/transport failure propagates because a lost response can
+    // mean that the worker executed the stage. Cross-worker retry is unsafe
+    // until there is a shared durable reservation and completed-result record.
     if (workerUrl) {
       const claimMessage = makeClaimMessage({ ...opts, workerId: 'substrate-ts-engine' });
+      const headers = workerRequestHeaders(claimMessage.tenantId);
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
       try {
         const response = await fetch(`${workerUrl}/claim`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Protocol-Version': PYTHON_WORKER_PROTOCOL_VERSION,
-          },
+          headers,
           body: JSON.stringify(claimMessage),
           signal: controller.signal,
+          redirect: 'error',
         });
 
-        clearTimeout(timeout);
-
         if (!response.ok) {
-          const text = await response.text().catch(() => '(no body)');
-          throw new Error(`HTTP ${response.status}: ${text}`);
+          // Remote HTTP bodies are untrusted and never become journal diagnostics.
+          throw new WorkerDispatchDiagnostic(`Worker returned HTTP ${response.status}`);
         }
 
-        const body = (await response.json()) as StageResultMessage | StageErrorMessage;
+        let decoded: unknown;
+        try {
+          decoded = await response.json();
+        } catch {
+          throw new WorkerDispatchDiagnostic('Worker returned invalid JSON');
+        }
+        const credential = headers.Authorization?.slice('Bearer '.length);
+        if (credential && reflectsCredential(decoded, credential)) {
+          // Reject the entire result rather than altering signed evidence bytes.
+          throw new WorkerDispatchDiagnostic(
+            'Worker response reflected an authentication credential',
+          );
+        }
+        let body: StageResultMessage | StageErrorMessage;
+        try {
+          body = parseWorkerResponse(decoded, claimMessage);
+        } catch {
+          throw new WorkerDispatchDiagnostic(
+            'Worker returned an invalid or mismatched protocol response',
+          );
+        }
 
         if (body.type === 'stage.error') {
-          const errMsg = body as StageErrorMessage;
-          throw new Error(`Worker error [${errMsg.errorCode}]: ${errMsg.errorMessage}`);
+          throw new WorkerDispatchDiagnostic('Worker reported a stage error');
         }
 
+        clearTimeout(timeout);
         return body as StageResultMessage;
       } catch (err) {
         clearTimeout(timeout);
         const reason =
           err instanceof Error && err.name === 'AbortError'
             ? `timed out after ${timeoutMs}ms`
-            : err instanceof Error
+            : err instanceof WorkerDispatchDiagnostic
               ? err.message
-              : String(err);
+              : 'worker transport failed';
 
-        // In live mode: fail closed — rethrow so the engine marks the stage failed
-        // rather than producing a decision from fabricated simulation data.
-        if (isLive) {
-          throw new Error(
-            `[substrate/python-worker] Live-mode HTTP dispatch to '${workerUrl}/claim' failed ` +
-              `for stage '${opts.stageId}': ${reason}`,
-          );
-        }
-        // fall through to in-process simulation
+        throw new Error(
+          `[substrate/python-worker] HTTP dispatch outcome is ambiguous for ` +
+            `'${workerUrl}/claim' and stage '${opts.stageId}': ${reason}. ` +
+            `The mutating claim was not retried and simulation was not used.`,
+        );
       }
     }
 
     // ── In-process simulation fallback ───────────────────────────────────────
-    // Used in non-live modes when SUBSTRATE_PYTHON_WORKER_URL is not set, or
-    // when the remote worker is unreachable. Logs a debug note.
-    if (!workerUrl) {
-    }
-
+    // Used only in non-live modes when SUBSTRATE_PYTHON_WORKER_URL is not set.
     const claimKey = `${opts.runId}:${opts.stageId}`;
     return new Promise<StageResultMessage>((resolve, reject) => {
       const timer = setTimeout(() => {

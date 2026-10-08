@@ -38,6 +38,11 @@
 import { Router } from 'express';
 import { buildHealthReport, buildReadinessReport } from './health.js';
 import { apiKeyGuard } from './middleware/auth.js';
+import {
+  buildProductionRuntimeHold,
+  isProductionRuntime,
+  productionRuntimeHoldMiddleware,
+} from './runtime-capabilities.js';
 import atelierRouter from './routes/v1/atelier.js';
 import embedRouter from './routes/v1/embed.js';
 import evalsRouter from './routes/v1/evals.js';
@@ -99,6 +104,12 @@ export function createRouter(): Router {
   const router = Router();
 
   router.post('/api/omnia/adoption/beacon', (_req, res) => {
+    if (isProductionRuntime()) {
+      res.setHeader('X-Evidence-State', 'UNAVAILABLE');
+      res.setHeader('Retry-After', '60');
+      res.status(503).json(buildProductionRuntimeHold());
+      return;
+    }
     res.setHeader('X-Evidence-State', 'UNAVAILABLE');
     res.status(204).end();
   });
@@ -107,6 +118,7 @@ export function createRouter(): Router {
     res.status(200).json({
       status: 'ok',
       service: 'alloy-runtime-api',
+      productionReady: !isProductionRuntime(),
       version: '0.2.0',
       timestamp: new Date().toISOString(),
       v1EndpointCount: ALL_V1_ENDPOINTS.length,
@@ -151,22 +163,24 @@ export function createRouter(): Router {
         tenantHeader: 'X-Tenant-Id',
         note: 'All mutation endpoints require a valid API key. Reads are also tenant-scoped.',
       },
+      productionState: isProductionRuntime() ? buildProductionRuntimeHold() : null,
       v1Endpoints: ALL_V1_ENDPOINTS,
       endpointsByGroup: V1_ENDPOINTS,
       platformFacts: '/docs redirects to platform-facts.md for full registry details.',
     });
   });
 
-  router.use('/api/a11oy/v1/atelier', apiKeyGuard, atelierRouter);
-  router.use('/v1/tasks', apiKeyGuard, tasksRouter);
-  router.use('/v1/memory', apiKeyGuard, memoryRouter);
-  router.use('/v1/workflows', apiKeyGuard, workflowsRouter);
-  router.use('/v1/search', apiKeyGuard, searchRouter);
-  router.use('/v1', apiKeyGuard, embedRouter);
-  router.use('/v1/index', apiKeyGuard, indexRouter);
-  router.use('/v1/evals', apiKeyGuard, evalsRouter);
-  router.use('/v1/ouroboros', apiKeyGuard, ouroborosRouter);
-  router.use('/v1/ouroboros', apiKeyGuard, lutarRouter);
+  router.use('/api/a11oy/v1/atelier', apiKeyGuard, productionRuntimeHoldMiddleware, atelierRouter);
+  router.use('/v1', apiKeyGuard, productionRuntimeHoldMiddleware);
+  router.use('/v1/tasks', tasksRouter);
+  router.use('/v1/memory', memoryRouter);
+  router.use('/v1/workflows', workflowsRouter);
+  router.use('/v1/search', searchRouter);
+  router.use('/v1', embedRouter);
+  router.use('/v1/index', indexRouter);
+  router.use('/v1/evals', evalsRouter);
+  router.use('/v1/ouroboros', ouroborosRouter);
+  router.use('/v1/ouroboros', lutarRouter);
 
   return router;
 }

@@ -20,10 +20,10 @@ graph TD
     KeywordAdapter --> Fusion
 
     Fusion --> BoostEngine["Exact-Match Boost Engine"]
-    BoostEngine --> Reranker["Cross-Encoder Reranker\n(optional, per profile)"]
+    BoostEngine --> Reranker["Lexical-Overlap Reranker\n(optional, per profile)"]
     Reranker --> ScoreFilter["Score Filter\n(threshold enforcement)"]
     ScoreFilter --> CitationAssembler["Citation Assembler"]
-    CitationAssembler --> EvidenceLedger["Evidence Ledger\n(append-only)"]
+    CitationAssembler --> EvidenceLedger["Evidence Recorder\n(dev/test only; production HOLD)"]
     EvidenceLedger --> Response["Retrieval Response"]
 
     ProfileResolver -.->|"active profile version"| ModelRegistry["Model Registry\nactive-profile pointer\nrotation / rollback"]
@@ -67,7 +67,7 @@ The boost engine scans each fused result against the profile's boost rule set. A
 
 ### 7. Reranking
 
-When `rerankEnabled` is true in the profile, the top `maxCandidates` results are passed to a cross-encoder reranker. Results falling below `scoreThresholds.rerankDropBelowScore` are suppressed before the final set is assembled. Carlota Jo (private advisory) disables reranking by default due to the small corpus size and high precision requirements.
+When `rerankEnabled` is true in the profile, the top `maxCandidates` results pass through the current deterministic lexical-overlap reranker. No cross-encoder model is loaded in the shipping worker. Results falling below `scoreThresholds.rerankDropBelowScore` are suppressed before the final set is assembled. Carlota Jo (private advisory) disables reranking by default due to the small corpus size and high precision requirements.
 
 ### 8. Score Filtering
 
@@ -79,7 +79,11 @@ The citation assembler attaches provenance metadata to each retained result: chu
 
 ### 10. Evidence Ledger
 
-Before the response is returned to the client, the complete retrieval event is appended to the evidence ledger. The ledger record includes every chunk considered, every score, and every policy decision. This record is immutable.
+In development/test, one mutable process-local record is appended for each
+returned hit before the response is sent. The current record is not the complete
+candidate set, is not durable, and is not immutable or hash-chained. Production
+evidence-producing routes are therefore held until an authoritative ledger is
+implemented and its durability and integrity are probed.
 
 ## Domain Profiles
 

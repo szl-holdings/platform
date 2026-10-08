@@ -78,6 +78,7 @@
       "surface": "a11oy-workcell-replay-detail",
       "route": "/a11oy/workcells/wc-001/replay",
       "expected_heading": "↩ Revenue Friction Remediation",
+      "minimum_screenshot_reveal_elements": 1,
       "viewports": [
         { "width": 320, "height": 900 },
         { "width": 390, "height": 900 },

@@ -15,20 +15,28 @@
   },
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./executor": {
+      "development": "./src/executor.ts",
+      "workspace": "./src/executor.ts",
       "types": "./dist/executor.d.ts",
-      "import": "./src/executor.ts"
+      "import": "./dist/executor.js"
     },
     "./history": {
+      "development": "./src/history.ts",
+      "workspace": "./src/history.ts",
       "types": "./dist/history.d.ts",
-      "import": "./src/history.ts"
+      "import": "./dist/history.js"
     }
   },
   "dependencies": {

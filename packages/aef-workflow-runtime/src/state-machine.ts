@@ -136,9 +136,7 @@ export class WorkflowStateMachine {
         // Extract the inner output for step storage and accumulation so downstream
         // steps can read fields directly from ctx.input without extra nesting.
         const flatOutput: Record<string, unknown> =
-          result.output !== undefined &&
-          typeof result.output === 'object' &&
-          result.output !== null
+          result.output !== undefined && typeof result.output === 'object' && result.output !== null
             ? (result.output as Record<string, unknown>)
             : result;
 
@@ -286,6 +284,7 @@ export class WorkflowStateMachine {
     const now = new Date().toISOString();
     return {
       workflowId: ctx.workflowId,
+      tenantId: ctx.tenantId,
       kind: this.definition.kind,
       currentStepIndex: 0,
       totalSteps: this.definition.steps.length,

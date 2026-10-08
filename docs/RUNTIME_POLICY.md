@@ -1,6 +1,6 @@
 # SZL Holdings — Runtime Version Policy
 
-**Date:** April 16, 2026
+**Date:** October 6, 2026
 **Status:** Authoritative
 **Enforced by:** `.replit` modules, `pnpm-workspace.yaml` catalog, and CI configuration
 
@@ -8,7 +8,11 @@
 
 ## Policy Statement
 
-All environments — development, staging, and production — must run the same major versions of Node.js, pnpm, and PostgreSQL. Version drift between CI and production is a Class-1 operational risk and must be remediated in Phase 2.
+All environments must satisfy the root runtime contract: Node.js 24 or newer,
+pnpm 10.26.1 exactly, the committed lockfile, and PostgreSQL 16 where a database
+is present. CI and interactive development use Node 24; digest-pinned container
+builders use Node 26. That deliberate supported-version matrix is contract-tested
+and must not turn into accidental toolchain drift.
 
 ---
 
@@ -16,14 +20,9 @@ All environments — development, staging, and production — must run the same 
 
 | Runtime | Canonical Version | Pinning Mechanism | Replit Dev | CI / Docker | Gap? |
 |---|---|---|---|---|---|
-| **Node.js** | **22 LTS** | Dockerfiles (`node:22-alpine`); CI (`node-version: '22'`) | v24.x (platform constraint) | v22 ✅ | Note below |
-| **pnpm** | **10.x (10.26.1)** | `package.json` `packageManager` field | 10.26.1 ✅ | 10 ✅ | None |
+| **Node.js** | **>=24** | Root `engines`; Node 24 CI/devcontainer; digest-pinned Node 26 container builders | v24.x | CI 24 / Docker 26 | Deliberate tested matrix |
+| **pnpm** | **10.26.1 exactly** | Root `packageManager` and `engines`, preinstall guard, bootstrap contract | 10.26.1 | 10.26.1 | None |
 | **PostgreSQL** | **16** | `.replit` → `modules = ["postgresql-16"]` | 16 ✅ | Not explicitly set | Monitor |
-| **TypeScript** | **5.x** | `pnpm-workspace.yaml` catalog | 5.x ✅ | 5.x (via build) ✅ | None |
-| **Drizzle ORM** | **0.45.1** | `pnpm-workspace.yaml` catalog | 0.45.1 ✅ | Same ✅ | None |
-| **React** | **19.1.0** | `pnpm-workspace.yaml` catalog | 19.1.0 ✅ | Same ✅ | None |
-| **Vite** | **7.x** | `pnpm-workspace.yaml` catalog | 7.x ✅ | Same ✅ | None |
-| **Zod** | **3.25.76** | `pnpm-workspace.yaml` catalog | 3.25.76 ✅ | Same ✅ | None |
 
 ---
 
@@ -31,45 +30,30 @@ All environments — development, staging, and production — must run the same 
 
 ### Node.js
 
-- **Canonical version:** Node.js 22 LTS (Active LTS as of April 2026)
-- **Mechanism:** Dockerfiles use `node:22-alpine`; CI uses `node-version: '22'`; `engines.node` in root `package.json` enforces `>=22.0.0`
-- **Replit dev environment:** Node 24 (the `.replit` modules field is platform-managed and cannot be changed by agents; Node 24 is backwards-compatible with Node 22)
-- **Policy:** Track Node.js Active LTS. Upgrade when a new Active LTS is released and stable. Never run on Current (odd-numbered) releases in production.
-- **Phase 2 status:** ✅ Complete — all CI workflows and Dockerfiles now use Node 22
+- **Supported contract:** Node.js 24 or newer, enforced by root `engines` and bootstrap checks.
+- **Mechanism:** GitHub/CircleCI and the devcontainer use Node 24; the reviewed Node service Dockerfiles use digest-pinned Node 26 images.
+- **Policy:** Keep CI on an LTS release and production builders on a reviewed, digest-pinned even-numbered release. Validate every supported major; do not infer compatibility from the range alone.
+- **Corepack boundary:** Node 25+ may omit Corepack. `scripts/activate-pnpm.sh` prefers Corepack and otherwise installs the exact pnpm pin into a user-writable toolchain directory through an exact, script-disabled npm bootstrap.
 
 ### pnpm
 
-- **Canonical version:** pnpm 10.x (pinned as `"packageManager": "pnpm@10.26.1"` in root `package.json`)
-- **CI enforcement:** All GitHub Actions `pnpm/action-setup` steps use `version: 10`
-- **Policy:** Stay on major version 10. Minor updates are applied as available.
-- **Phase 2 status:** ✅ Complete — all workflow files updated from pnpm 9 to pnpm 10
+- **Canonical version:** pnpm 10.26.1 exactly, pinned by both `packageManager` and `engines.pnpm`.
+- **Enforcement:** The preinstall guard, bootstrap helper, clean-clone contract, workflows, devcontainer, CircleCI, and Node container builders reject a different effective version.
+- **Policy:** Upgrade only as one reviewed change that updates the root pins, lockfile, bootstrap contract, workflows, containers, and tests together.
 
 ### Package Catalog (Shared Dependency Pinning)
 
-The `pnpm-workspace.yaml` `catalog:` section is the single source of truth for shared package versions across all workspace packages. All packages must reference catalog versions using `catalog:` specifiers rather than specifying their own version ranges.
-
-Key pinned packages and their versions:
-
-```yaml
-catalog:
-  react: 19.1.0
-  react-dom: 19.1.0
-  vite: ^7.3.0
-  drizzle-orm: 0.45.1
-  zod: 3.25.76
-  tailwindcss: ^4.1.14
-  framer-motion: 12.35.1
-  recharts: 2.15.4
-  lucide-react: 0.545.0
-  tsx: 4.21.0
-  '@tanstack/react-query': 5.99.0
-```
+The `pnpm-workspace.yaml` `catalog:` section is the machine-readable source of
+truth for shared package versions. Do not duplicate its moving application
+dependency list in this runtime policy. Workspace packages should use `catalog:`
+specifiers for dependencies governed there.
 
 ### Dependency Peer Handling
 
 - `autoInstallPeers: false` — peer dependencies are managed explicitly
 - `minimumReleaseAge: 1440` — new package versions must be ≥24 hours old before they can be installed
-- Exceptions: `@replit/*` packages and `stripe-replit-sync` have no release age requirement
+- The complete, reviewed exception list is `minimumReleaseAgeExclude` in
+  `pnpm-workspace.yaml`; this document does not maintain a second copy.
 
 ---
 
@@ -105,10 +89,10 @@ catalog:
 
 | Gap | Risk | Status |
 |---|---|---|
-| CI used Node.js 20; canonical is Node.js 22 | High — build failures masked | ✅ Fixed — all CI and Dockerfiles now use Node 22 |
-| CI used pnpm 9; production uses pnpm 10 | Medium — lockfile format differences | ✅ Fixed — all workflow files updated to pnpm 10 |
-| No `engines` field in root `package.json` | Low | ✅ Fixed — `engines: { node: ">=22.0.0", pnpm: ">=10.0.0" }` added |
-| Replit dev env uses Node 24; CI/Docker use Node 22 | Low — version 24 is backwards-compatible | Residual — `.replit` is platform-managed; acceptable gap |
+| CI/runtime package-manager drift | High — implicit installs and lockfile reinterpretation | ✅ Fixed — effective bare pnpm must equal 10.26.1 |
+| Node 25+ does not bundle Corepack | High — bootstrap failure on an allowed Node release | ✅ Fixed — exact, user-writable fallback in `scripts/activate-pnpm.sh` |
+| No root runtime enforcement | High — unsupported builds could proceed | ✅ Fixed — Node >=24 and exact pnpm 10.26.1 are enforced |
+| CI Node 24 and container-builder Node 26 differ | Compatibility risk | Deliberate matrix; both satisfy root engines and remain independently pinned/tested |
 
 ---
 

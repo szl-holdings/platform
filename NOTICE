@@ -12,6 +12,32 @@ trademark license.
 
 Third-party acknowledgements
 ----------------------------
+security/schemas/cyclonedx/: unmodified CycloneDX 1.4 JSON validation schemas
+from CycloneDX/specification commit ccbf7b5781ef534cd62616e3c4221004c7c82a66.
+Copyright OWASP Foundation. Distributed under Apache License 2.0; the exact
+upstream license is retained at security/schemas/cyclonedx/LICENSE. The
+complete upstream tree at that commit contains no NOTICE file.
+
+apps/substrate-inference/engine/ollm/: embedded oLLM inference engine.
+Copyright 2024 oLLM Contributors. Distributed under the MIT License; the
+upstream license notice is retained at apps/substrate-inference/engine/ollm/LICENSE.
+The upstream project name identifies origin only and does not imply endorsement
+of this repository or its integration changes.
+
+patches/node-forge@1.4.0.patch: source-level modifications to node-forge 1.4.0
+(Digital Bazaar, Inc.), distributed under the upstream BSD-3-Clause option.
+
+patches/braces@3.0.3.patch: source-level modifications to braces 3.0.3
+(Copyright 2014-present Jon Schlinkert), distributed under the MIT License.
+
+patches/@storybook__core@8.6.18.patch: source-level modifications to Storybook
+8.6.18 (Copyright 2024 Storybook), distributed under the MIT License.
+
+Exact release identities, modification notices, patch digests, and verbatim
+upstream license texts for all three dependency patches are retained in
+patches/README.md and patches/licenses/. The upstream project names identify
+origin only and do not imply endorsement of the local modifications.
+
 tools/szl_estate_auditor.py: the CLI approach (a single command that
 auto-analyzes a project's structure/health and emits a developer report) is
 inspired by jkdevcode/repo-inspector (https://github.com/jkdevcode/repo-inspector),

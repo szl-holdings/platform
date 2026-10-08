@@ -143,14 +143,19 @@ Download progress is tracked and surfaced via the `/health` endpoint under
 cp .env.substrate.example .env.substrate
 $EDITOR .env.substrate
 
-docker compose -f docker-compose.gpu.yml up
+docker compose --env-file .env.substrate -f docker-compose.gpu.yml up --build
 ```
 
-### No GPU (CPU stub fallback — same API contracts)
+### No GPU (development-only CPU contract stub)
 
 ```bash
-docker compose -f docker-compose.gpu.yml -f docker-compose.cpu-stub.yml up
+docker compose -f docker-compose.cpu-stub.yml up
 ```
+
+This standalone stack does not inherit production credentials or GPU device
+reservations. It exposes the request/response contract for local development,
+but performs no qualified inference: `/healthz` reports process liveness and
+`/ready` deliberately returns `503` while the engine is a CPU stub.
 
 ### Without Docker (Python directly)
 
@@ -258,6 +263,8 @@ pip install torch>=2.5.0 transformers>=4.47.0 accelerate>=1.2.0 safetensors>=0.5
 pip install peft>=0.14.0 bitsandbytes>=0.44.0   # for adapter + quantization support
 pip install flash-attn>=2.7.0                    # optional FlashAttention-2
 pip install ollm                                 # oLLM engine (requires CUDA)
+export SUBSTRATE_INFERENCE_ENV=production
+# Inject SUBSTRATE_API_KEY from the deployment secret manager.
 python -m src.main
 ```
 
@@ -265,9 +272,11 @@ The engine auto-detects GPU availability. When `torch.cuda.is_available()`
 and the `ollm` package are importable, the service operates in **LIVE** mode
 and delegates inference to `ollm.AutoInference`.
 
-On startup, if `SUBSTRATE_DEFAULT_MODEL` is set the model is pre-loaded and
-the cache is warmed before any traffic is served. On shutdown, all models are
-cleanly unloaded and the SSD KV cache is flushed.
+In development, `SUBSTRATE_DEFAULT_MODEL` may be loaded on startup. Production
+autoload and model mutation remain held until a verified, image-bound promotion
+receipt covers the exact model revision, artifact digest, and an observed
+bounded inference. The current release therefore returns `503` from `/ready`
+in production even when a live GPU adapter is present.
 
 ### Smoke Test
 
@@ -279,9 +288,9 @@ cd apps/substrate-inference
 python scripts/smoke_test.py --base-url http://localhost:8070 --api-key $SUBSTRATE_API_KEY
 ```
 
-This tests: health, models list, single completion, streaming completion,
-multimodal inference, and adapter load/unload. STUB mode responses count as
-PASS with a `[STUB]` label.
+This development smoke exercise covers health, model listing, completion,
+streaming, multimodal requests, and adapter load/unload. A STUB response is a
+contract-development result only; it is never readiness or production proof.
 
 ## Environment Variables
 
@@ -293,10 +302,14 @@ PASS with a `[STUB]` label.
 | `SUBSTRATE_CACHE_DIR`         | `~/.substrate/cache`       | SSD cache directory for KV cache offload         |
 | `SUBSTRATE_MAX_CONCURRENT`    | `4`                        | Maximum concurrent inference requests            |
 | `SUBSTRATE_DEFAULT_MODEL`     | (none)                     | Model to auto-load on startup                    |
-| `SUBSTRATE_API_KEY`           | (none)                     | API key protecting model load/unload/adapter endpoints |
+| `SUBSTRATE_API_KEY`           | (required*)                | Secret-backed bearer credential for every `/v1` route |
+| `SUBSTRATE_INFERENCE_ENV`     | (unspecified)              | Runtime environment (`production`, `development`, or `test`) |
+| `SUBSTRATE_INFERENCE_AUTH_BYPASS` | `false`                | Explicit bypass; accepted only in development/test |
 | `SUBSTRATE_ALLOWED_ORIGINS`   | `localhost:5000,8070`      | Comma-separated CORS allowed origins             |
 | `SUBSTRATE_BIND_HOST`         | `127.0.0.1`               | Bind host (set to `0.0.0.0` for network access)  |
-| `VITE_SUBSTRATE_API_KEY`      | (none)                     | API key for Command dashboard (Vite env)         |
+
+\* Required unless the explicit development/test bypass is enabled. Never put
+the server credential in a `VITE_*` variable or browser bundle.
 
 ## AI Control Plane Configuration
 
@@ -343,9 +356,12 @@ The default fallback chain includes:
 
 - **Localhost-only binding** by default (`SUBSTRATE_BIND_HOST=127.0.0.1`).
   Set to `0.0.0.0` only for trusted networks or behind a reverse proxy.
-- **API key authentication** protects model load/unload and adapter endpoints when
-  `SUBSTRATE_API_KEY` is set. Read-only endpoints (`/health`, `/v1/models`,
-  `/v1/adapters`, `/v1/chat/completions`) remain open for inference clients.
+- **API key authentication** protects every `/v1` route. Production startup
+  fails closed when `SUBSTRATE_API_KEY` is missing. Only `/health` and
+  `/healthz` are public for orchestrator probes.
+- **Development/test bypass** is opt-in via
+  `SUBSTRATE_INFERENCE_AUTH_BYPASS=true` and is rejected if any environment
+  marker declares production.
 - **CORS** restricted to localhost origins by default. Configure
   `SUBSTRATE_ALLOWED_ORIGINS` for cross-origin access from other services.
 
@@ -359,6 +375,7 @@ The default fallback chain includes:
 ```bash
 curl -X POST http://localhost:8070/v1/chat/completions \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $SUBSTRATE_API_KEY" \
   -d '{
     "model": "gemma3-12b",
     "messages": [{
@@ -376,6 +393,7 @@ curl -X POST http://localhost:8070/v1/chat/completions \
 ```bash
 curl -X POST http://localhost:8070/v1/chat/completions \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $SUBSTRATE_API_KEY" \
   -d '{
     "model": "voxtral-small-24b",
     "messages": [{
@@ -392,14 +410,15 @@ curl -X POST http://localhost:8070/v1/chat/completions \
 
 | Method | Path                    | Auth     | Description                                     |
 |--------|-------------------------|----------|-------------------------------------------------|
-| POST   | `/v1/chat/completions`  | No       | Chat completion (real streaming SSE)            |
-| GET    | `/v1/models`            | No       | List available models                           |
+| POST   | `/v1/chat/completions`  | API Key  | Chat completion (real streaming SSE)            |
+| GET    | `/v1/models`            | API Key  | List available models                           |
 | POST   | `/v1/models/load`       | API Key  | Hot-load a model into GPU memory (+ quantization) |
 | POST   | `/v1/models/unload`     | API Key  | Unload a model from GPU memory                  |
 | POST   | `/v1/adapters/load`     | API Key  | Load a PEFT/LoRA adapter onto a base model      |
 | POST   | `/v1/adapters/unload`   | API Key  | Unload a PEFT/LoRA adapter                      |
-| GET    | `/v1/adapters`          | No       | List all active adapters                        |
+| GET    | `/v1/adapters`          | API Key  | List all active adapters                        |
 | GET    | `/health`               | No       | GPU stats, inference health, download progress  |
+| GET    | `/healthz`              | No       | Process liveness                                |
 
 ## Health Response Fields
 
@@ -476,7 +495,7 @@ The service continues running for other loaded models.
 ### Engine Modes
 
 - **LIVE**: `torch` + CUDA + `ollm` installed → real GPU inference via `ollm.AutoInference`
-- **STUB**: Missing dependencies → returns labelled stub responses with identical API contracts
+- **STUB**: Missing dependencies → development-only contract responses; `/ready` remains `503`
 
 The Command dashboard at `/infrastructure/substrate` polls the health and
 models endpoints to display real-time GPU status and model state. Load/unload
@@ -485,8 +504,15 @@ buttons call the FastAPI endpoints directly.
 
 ## Security
 
-- **API key** (`SUBSTRATE_API_KEY`) protects `/v1/models/load` and `/unload`.
-  Inference and health endpoints are open to the internal VNet only (NSG).
+- **Tenant-bound inference key** (`SUBSTRATE_API_KEY`) protects inference and
+  read routes; `SUBSTRATE_API_TENANT_ID` binds the credential to the required
+  `X-Tenant-ID` header and request payload.
+- **Separate model-admin key** (`SUBSTRATE_MODEL_ADMIN_API_KEY`) protects model
+  load/unload. Production rejects reuse of the inference credential and keeps
+  those mutations held until promotion evidence is verified.
+- `/healthz` is public liveness. `/ready` is public readiness and currently
+  returns `503` in production because the release lacks a verified promotion
+  receipt and a hashed Python dependency lock/SBOM.
 - **NSG** (`substrate-nsg`) blocks all external inbound traffic. Only the API
   server's egress CIDRs are permitted on the substrate ports (8070, 8090).
 - **Key Vault** stores `SUBSTRATE_API_KEY` as a secret; Container Apps pull it

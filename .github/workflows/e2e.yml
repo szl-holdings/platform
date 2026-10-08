@@ -82,7 +82,9 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: Build ${{ matrix.app }}
-        run: pnpm --filter ${{ matrix.filter }} run build
+        # Include workspace dependencies whose package exports require compiled dist files.
+        # Preserve browser-test environment flags and avoid production-base caches.
+        run: pnpm exec turbo run build --filter='${{ matrix.filter }}...' --env-mode=loose --force
         env:
           BASE_PATH: /
           # Vessels gates its dashboard behind PrivateAppGuard. Enable the app's
@@ -94,18 +96,23 @@ jobs:
 
       - name: Serve ${{ matrix.app }} on port ${{ matrix.port }}
         run: |
-          npm install -g serve
           # -s (single-page application mode) rewrites unmatched routes to
           # index.html. Without it `serve` returns its own 404 page for deep
           # client-side routes (e.g. /deals, /fleet-dashboard), so the SPA never
           # boots and route content never renders — only the `/` smoke tests pass.
-          serve ${{ matrix.dist }} -s -l ${{ matrix.port }} &
+          pnpm exec serve ${{ matrix.dist }} -s -l ${{ matrix.port }} &
           sleep 3
         shell: bash
 
       - name: Run E2E tests for ${{ matrix.app }}
-        run: pnpm exec playwright test tests/e2e/${{ matrix.spec }} --project=chromium --reporter=list
-        if: ${{ hashFiles(format('tests/e2e/{0}', matrix.spec)) != '' }}
+        run: |
+          spec_path="tests/e2e/${{ matrix.spec }}"
+          if [[ ! -s "$spec_path" ]]; then
+            echo "::error::Required E2E specification is missing or empty: $spec_path"
+            exit 1
+          fi
+          pnpm exec playwright test "$spec_path" --project=chromium --reporter=list
+        shell: bash
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:${{ matrix.port }}
@@ -114,10 +121,6 @@ jobs:
           SENTRA_BASE_PATH: /
           COUNSEL_BASE_PATH: /
           A11OY_BASE_PATH: /
-
-      - name: Skip notice (spec missing)
-        if: ${{ hashFiles(format('tests/e2e/{0}', matrix.spec)) == '' }}
-        run: echo "::notice::Spec tests/e2e/${{ matrix.spec }} not present — skipping ${{ matrix.app }} E2E."
 
       - name: Upload HTML report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -11,7 +11,7 @@ router = "application"
 deploymentTarget = "autoscale"
 
 [deployment.postBuild]
-args = ["pnpm", "store", "prune"]
+args = ["bash", "-c", "source scripts/activate-pnpm.sh && exec pnpm store prune"]
 env = { "CI" = "true" }
 
 [workflows]
@@ -33,9 +33,6 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "bash -c 'cd /home/runner/workspace/artifacts/counsel && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [workflows.workflow.metadata]
 outputType = "webview"

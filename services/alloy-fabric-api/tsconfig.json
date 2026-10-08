@@ -2,6 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "composite": true,
     "types": ["node"],
     "noUnusedLocals": false
   },
@@ -13,7 +17,9 @@
     { "path": "../../packages/aef-retrieval-core" },
     { "path": "../../packages/aef-domain-profiles" },
     { "path": "../../packages/aef-storage-adapters" },
-    { "path": "../../packages/aef-workflow-runtime" }
+    { "path": "../../packages/aef-workflow-runtime" },
+    { "path": "../../workers/alloy-rank-worker" },
+    { "path": "../../workers/alloy-vector-worker" }
   ],
   "include": ["src/**/*"]
 }

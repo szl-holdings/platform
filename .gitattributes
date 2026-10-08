@@ -38,3 +38,8 @@
 # Linguist overrides
 *.lean linguist-language=Lean
 docs/ linguist-documentation
+
+# Preserve this byte-exact upstream license's intentional final blank line.
+patches/licenses/node-forge-1.4.0.LICENSE whitespace=-blank-at-eof
+# Unified patch context includes a required leading space on empty lines.
+patches/*.patch whitespace=-blank-at-eol

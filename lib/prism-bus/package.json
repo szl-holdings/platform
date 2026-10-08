@@ -22,13 +22,48 @@
     "test:watch": "vitest"
   },
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./src/index.ts" },
-    "./context": { "types": "./dist/context.d.ts", "import": "./src/context.ts" },
-    "./connectors": { "types": "./dist/connectors.d.ts", "import": "./src/connectors.ts" },
-    "./bus": { "types": "./dist/bus.d.ts", "import": "./src/bus.ts" },
-    "./hooks": { "types": "./dist/hooks.d.ts", "import": "./src/hooks.tsx" },
-    "./provider": { "types": "./dist/provider.d.ts", "import": "./src/provider.tsx" },
-    "./bridge": { "types": "./dist/bridge.d.ts", "import": "./src/bridge.ts" }
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./context": {
+      "development": "./src/context.ts",
+      "workspace": "./src/context.ts",
+      "types": "./dist/context.d.ts",
+      "import": "./dist/context.js"
+    },
+    "./connectors": {
+      "development": "./src/connectors.ts",
+      "workspace": "./src/connectors.ts",
+      "types": "./dist/connectors.d.ts",
+      "import": "./dist/connectors.js"
+    },
+    "./bus": {
+      "development": "./src/bus.ts",
+      "workspace": "./src/bus.ts",
+      "types": "./dist/bus.d.ts",
+      "import": "./dist/bus.js"
+    },
+    "./hooks": {
+      "development": "./src/hooks.tsx",
+      "workspace": "./src/hooks.tsx",
+      "types": "./dist/hooks.d.ts",
+      "import": "./dist/hooks.js"
+    },
+    "./provider": {
+      "development": "./src/provider.tsx",
+      "workspace": "./src/provider.tsx",
+      "types": "./dist/provider.d.ts",
+      "import": "./dist/provider.js"
+    },
+    "./bridge": {
+      "development": "./src/bridge.ts",
+      "workspace": "./src/bridge.ts",
+      "types": "./dist/bridge.d.ts",
+      "import": "./dist/bridge.js"
+    }
   },
   "dependencies": {
     "@szl-holdings/mcp-client": "workspace:*"

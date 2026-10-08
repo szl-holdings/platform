@@ -3,14 +3,40 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "description": "A11oy — autonomous workcell runtime. Wraps workcell-admission decisions through the Ouroboros loop spine with Λ-gate (from MirrorEval axes), Newton fluxions-receipt (tool-risk consistency), and Gauss class-number witness-diversity gate on the operator sequence.",
   "exports": {
-    ".": "./src/index.ts",
-    "./types": "./src/types/index.ts",
-    "./data": "./src/data/index.ts",
-    "./verify": "./src/verify.ts",
-    "./state-native": "./src/state-native/index.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./types": {
+      "development": "./src/types/index.ts",
+      "workspace": "./src/types/index.ts",
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    },
+    "./data": {
+      "development": "./src/data/index.ts",
+      "workspace": "./src/data/index.ts",
+      "types": "./dist/data/index.d.ts",
+      "import": "./dist/data/index.js"
+    },
+    "./verify": {
+      "development": "./src/verify.ts",
+      "workspace": "./src/verify.ts",
+      "types": "./dist/verify.d.ts",
+      "import": "./dist/verify.js"
+    },
+    "./state-native": {
+      "development": "./src/state-native/index.ts",
+      "workspace": "./src/state-native/index.ts",
+      "types": "./dist/state-native/index.d.ts",
+      "import": "./dist/state-native/index.js"
+    }
   },
   "scripts": {
     "build": "tsc",

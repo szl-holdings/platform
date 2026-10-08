@@ -74,7 +74,9 @@ export default defineConfig({
   root: path.resolve(import.meta.dirname),
   build: {
     outDir: path.resolve(import.meta.dirname, 'dist/public'),
-    sourcemap: 'hidden',
+    // The public candidate excludes source maps so dormant fixture source cannot
+    // be recovered from otherwise unreachable legacy modules.
+    sourcemap: false,
     emptyOutDir: true,
     cssCodeSplit: true,
   },

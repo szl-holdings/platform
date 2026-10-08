@@ -8,7 +8,15 @@
 
 import { EventEmitter } from 'node:events';
 import { createHash, createHmac, randomBytes, randomUUID } from 'node:crypto';
-import { type AnyStage, type EvidenceBundle, type ExecutionMode, type PipelineRun, type StageResult, type StageType, EvidenceBundleSchema } from './types.js';
+import {
+  type AnyStage,
+  type EvidenceBundle,
+  type ExecutionMode,
+  type PipelineRun,
+  type StageResult,
+  type StageType,
+  EvidenceBundleSchema,
+} from './types.js';
 
 // ─── Runtime Event Bus ────────────────────────────────────────────────────────
 //
@@ -111,10 +119,7 @@ export function emitStageStart(run: PipelineRun, stage: AnyStage): void {
 // should set SUBSTRATE_SIGNING_KEY (32+ byte hex) for cross-process verification.
 
 const PROCESS_RANDOM_KEY = randomBytes(32).toString('hex');
-const SIGNING_KEY = process.env.SUBSTRATE_SIGNING_KEY ?? PROCESS_RANDOM_KEY;
-
-if (!process.env.SUBSTRATE_SIGNING_KEY) {
-}
+const SIGNING_KEY = process.env.SUBSTRATE_SIGNING_KEY?.trim() || PROCESS_RANDOM_KEY;
 
 /**
  * Compute HMAC-SHA256 signature of a bundleHash.
@@ -310,8 +315,7 @@ export class SubstrateJournal {
 
     // Link into the proof-chain — errors are logged but not fatal so the
     // journal (primary source) is never blocked by an unavailable proof-chain.
-    await this.linkToProofChain(bundle).catch((_err: unknown) => {
-    });
+    await this.linkToProofChain(bundle).catch((_err: unknown) => {});
 
     return bundle;
   }

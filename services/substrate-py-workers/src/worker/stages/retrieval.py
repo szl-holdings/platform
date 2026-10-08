@@ -45,6 +45,7 @@ from worker.adapters.retriever import (
     RetrieverAdapterUnavailable,
     retriever_adapter_manager,
 )
+from worker.security import is_production_environment
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +79,8 @@ def _allow_synthetic_fallback(mode: str) -> bool:
     only if the operator has explicitly opted in via env var (dev only)."""
     if mode in _NON_LIVE_MODES:
         return True
+    if is_production_environment():
+        return False
     return os.environ.get("SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC", "").lower() in (
         "1",
         "true",
@@ -154,6 +157,7 @@ async def execute(claim: dict[str, Any]) -> dict[str, Any]:
                 top_k=topK,
                 min_relevance_score=minScore,
                 filters=filters,
+                tenant_id=claim.get("tenantId"),
             )
         except RetrieverAdapterUnavailable as exc:
             if mode == "live" and not _allow_synthetic_fallback(mode):

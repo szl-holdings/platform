@@ -14,6 +14,7 @@ import {
   OpenAIEmbedResponseSchema,
   ProfileDescriptorSchema,
   RerankRequestSchema,
+  RerankResponseSchema,
   TenantIdentitySchema,
   TenantIdSchema,
 } from './index.js';
@@ -120,8 +121,27 @@ describe('EmbedResponseSchema', () => {
       model: 'aef-embed-v1',
       dimensions: 768,
       vectors: [{ index: 0, text: 'hello world', vector: [0.1, 0.2, 0.3] }],
+      execution: {
+        backendId: 'test-backend',
+        modelId: 'aef-embed-v1',
+        dimensions: 768,
+        normalized: true,
+        promotionState: 'DEVELOPMENT',
+      },
     });
     expect(result.success).toBe(true);
+  });
+
+  it('rejects a response without an execution receipt', () => {
+    expect(
+      EmbedResponseSchema.safeParse({
+        requestId: 'req-1',
+        tenantId: 't-001',
+        model: 'aef-embed-v1',
+        dimensions: 768,
+        vectors: [{ index: 0, text: 'hello world', vector: [0.1, 0.2, 0.3] }],
+      }).success,
+    ).toBe(false);
   });
 });
 
@@ -147,6 +167,68 @@ describe('RerankRequestSchema', () => {
       candidates: [],
     });
     expect(result.success).toBe(false);
+  });
+
+  it('rejects caller model labels that are not the implemented reranker', () => {
+    const result = RerankRequestSchema.safeParse({
+      requestId: 'req-model-spoof',
+      tenantId: 't-001',
+      query: 'query',
+      candidates: [{ id: 'c1', text: 'candidate' }],
+      model: 'BAAI/bge-reranker-v2-m3',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects blank or duplicate candidate identities', () => {
+    for (const candidates of [
+      [{ id: '', text: 'candidate' }],
+      [
+        { id: 'duplicate', text: 'first' },
+        { id: 'duplicate', text: 'second' },
+      ],
+    ]) {
+      expect(
+        RerankRequestSchema.safeParse({
+          requestId: 'req-invalid-candidates',
+          tenantId: 't-001',
+          query: 'query',
+          candidates,
+        }).success,
+      ).toBe(false);
+    }
+  });
+});
+
+describe('RerankResponseSchema', () => {
+  const response = {
+    requestId: 'req-2',
+    tenantId: 't-001',
+    model: 'lexical-overlap-v1',
+    results: [{ id: 'c1', score: 1, rank: 1, text: 'candidate', metadata: {} }],
+    execution: {
+      backendId: 'fallback-deterministic',
+      modelId: 'lexical-overlap-v1',
+      modelRevision: 'builtin-term-frequency-v1',
+      promotionState: 'DEVELOPMENT',
+      implementationKind: 'lexical-overlap',
+      fallback: true,
+    },
+  };
+
+  it('requires a truthful execution receipt', () => {
+    expect(RerankResponseSchema.safeParse(response).success).toBe(true);
+    const { execution: _execution, ...withoutExecution } = response;
+    expect(RerankResponseSchema.safeParse(withoutExecution).success).toBe(false);
+  });
+
+  it('rejects zero-based response ranks', () => {
+    expect(
+      RerankResponseSchema.safeParse({
+        ...response,
+        results: [{ ...response.results[0], rank: 0 }],
+      }).success,
+    ).toBe(false);
   });
 });
 

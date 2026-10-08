@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { TenantIdSchema } from './tenant.js';
 import { EmbeddingExecutionReceiptSchema } from './model-identity.js';
+import { TenantIdSchema } from './tenant.js';
 
 export const EmbedRequestSchema = z.object({
   requestId: z.string().min(1),
@@ -29,7 +29,7 @@ export const EmbedResponseSchema = z.object({
   modelRevision: z.string().optional(),
   dimensions: z.number().int().positive(),
   vectors: z.array(EmbedVectorSchema),
-  execution: EmbeddingExecutionReceiptSchema.optional(),
+  execution: EmbeddingExecutionReceiptSchema,
   processingMs: z.number().nonnegative().optional(),
 });
 export type EmbedResponse = z.infer<typeof EmbedResponseSchema>;

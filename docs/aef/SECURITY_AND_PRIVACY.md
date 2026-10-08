@@ -65,11 +65,18 @@ Hard deletion of expired chunks is a separate process triggered by the retention
 
 ## Evidence Ledger Integrity
 
-The evidence ledger is append-only. Once an entry is written, it cannot be modified or deleted (only the data content of associated chunks may be purged as per the deletion workflow above). The ledger supports the following integrity properties:
+The properties below are production requirements, not current capabilities.
+The checked-in default is an in-memory map and the filesystem adapter is mutable
+JSONL; neither uses sequence numbers, previous-entry hashes, authenticated
+storage, or an integrity verifier. Zero-result requests also do not create a
+record. Production evidence-producing routes return HTTP 503 while this gap is
+open.
 
-- **Immutability** — ledger entries carry a sequence number and a previous-entry hash, forming a tamper-evident chain.
-- **Completeness** — every retrieval operation produces a ledger entry, even if it returns zero results. The ledger record for a zero-result query includes the profile version, the applied filters, and the policy decision.
-- **Non-repudiation** — the ledger can be queried by request ID to produce a complete provenance report for any specific retrieval event.
+A promotable ledger must prove:
+
+- **Immutability** — entries are append-only and hash-linked or protected by an equivalent independently verifiable integrity mechanism.
+- **Completeness** — every admitted retrieval, including zero-result outcomes, has an atomic request-level record.
+- **Non-repudiation** — exports come from an authenticated durable authority and can be verified independently.
 
 ## Security Scanning
 

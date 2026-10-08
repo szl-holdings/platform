@@ -1,5 +1,5 @@
-import { createHash } from "node:crypto";
-import type { OuroborosInput, OuroborosReceipt, Verdict } from "./types.js";
+import { createHash } from 'node:crypto';
+import type { OuroborosInput, OuroborosReceipt, Verdict } from './types.js';
 
 /**
  * Run the Ouroboros closure operator.
@@ -13,20 +13,32 @@ export function run<T>(input: OuroborosInput<T>): OuroborosReceipt<T> {
   trace.push({ iter: 0, hash: lastHash });
 
   if (mechanisms.lambdaGate && !mechanisms.lambdaGate(x)) {
-    return finish("REFUSED_LAMBDA_GATE", x, trace, false, "Λ gate refused input");
+    return finish('REFUSED_LAMBDA_GATE', x, trace, false, 'Λ gate refused input');
   }
   if (mechanisms.fluxionsReceipt && !mechanisms.fluxionsReceipt(x)) {
-    return finish("REFUSED_FLUXIONS_BARE_CLAIM", x, trace, false, "Newton fluxions-receipt: bare claim");
+    return finish(
+      'REFUSED_FLUXIONS_BARE_CLAIM',
+      x,
+      trace,
+      false,
+      'Newton fluxions-receipt: bare claim',
+    );
   }
   // F1-4 errata: renamed bekensteinCheck → dpiCheck (DPI = Data Processing Inequality
   // receipt-chain entropy bound). See ouroboros-thesis/CHANGELOG.md TH6 relabel.
   // Mirrors Lean theorem: Lutar.DPI.dpiAdmit (Lutar/DPI/DPIBound.lean).
   const dpiCheckFn = mechanisms.dpiCheck ?? mechanisms.bekensteinCheck; // deprecated alias
   if (dpiCheckFn && !dpiCheckFn(x)) {
-    return finish("REFUSED_DPI_OVERFLOW", x, trace, false, "DPI receipt-chain entropy bound exceeded");
+    return finish(
+      'REFUSED_DPI_OVERFLOW',
+      x,
+      trace,
+      false,
+      'DPI receipt-chain entropy bound exceeded',
+    );
   }
 
-  let witnessInfo: OuroborosReceipt<T>["witnessDiversity"];
+  let witnessInfo: OuroborosReceipt<T>['witnessDiversity'];
   if (mechanisms.witnessDiversity) {
     const w = mechanisms.witnessDiversity(x);
     const admitted = w.axis >= w.threshold;
@@ -34,12 +46,12 @@ export function run<T>(input: OuroborosInput<T>): OuroborosReceipt<T> {
       axis: w.axis,
       threshold: w.threshold,
       admitted,
-      discriminant: w.discriminant,
-      classNumber: w.classNumber,
+      ...(w.discriminant === undefined ? {} : { discriminant: w.discriminant }),
+      ...(w.classNumber === undefined ? {} : { classNumber: w.classNumber }),
     };
     if (!admitted) {
       const r = finish(
-        "REFUSED_WITNESS_DIVERSITY",
+        'REFUSED_WITNESS_DIVERSITY',
         x,
         trace,
         false,
@@ -51,7 +63,7 @@ export function run<T>(input: OuroborosInput<T>): OuroborosReceipt<T> {
   }
 
   const distHistory: number[] = [];
-  let forecastInfo: OuroborosReceipt<T>["forecast"];
+  let forecastInfo: OuroborosReceipt<T>['forecast'];
 
   for (let i = 1; i <= maxIter; i++) {
     const nextX = transform(x);
@@ -62,10 +74,19 @@ export function run<T>(input: OuroborosInput<T>): OuroborosReceipt<T> {
 
     if (mechanisms.forecast && distHistory.length >= 2) {
       const f = mechanisms.forecast(distHistory);
-      forecastInfo = { predictedResidual: f.predictedResidual, tolerance: f.tolerance, admitted: f.predictedResidual <= f.tolerance };
+      forecastInfo = {
+        predictedResidual: f.predictedResidual,
+        tolerance: f.tolerance,
+        admitted: f.predictedResidual <= f.tolerance,
+      };
       if (f.predictedResidual > f.tolerance) {
-        const r = finish("REFUSED_FORECAST_DIVERGENT", nextX, trace, false,
-          `Gauss-forecast predicts residual ${f.predictedResidual.toFixed(3)} > tol ${f.tolerance}`);
+        const r = finish(
+          'REFUSED_FORECAST_DIVERGENT',
+          nextX,
+          trace,
+          false,
+          `Gauss-forecast predicts residual ${f.predictedResidual.toFixed(3)} > tol ${f.tolerance}`,
+        );
         r.forecast = forecastInfo;
         return r;
       }
@@ -74,23 +95,35 @@ export function run<T>(input: OuroborosInput<T>): OuroborosReceipt<T> {
       if (mechanisms.dualWitness) {
         const dw = mechanisms.dualWitness(nextX);
         if (!dw.match) {
-          const r = finish("REFUSED_DUAL_WITNESS_DIVERGE", nextX, trace, true, "Dual-witness providers diverged");
-          r.forecast = forecastInfo;
-          r.witnessDiversity = witnessInfo;
+          const r = finish(
+            'REFUSED_DUAL_WITNESS_DIVERGE',
+            nextX,
+            trace,
+            true,
+            'Dual-witness providers diverged',
+          );
+          if (forecastInfo) r.forecast = forecastInfo;
+          if (witnessInfo) r.witnessDiversity = witnessInfo;
           return r;
         }
       }
-      const r = finish("ACCEPTED", nextX, trace, true, null);
-      r.forecast = forecastInfo;
-      r.witnessDiversity = witnessInfo;
+      const r = finish('ACCEPTED', nextX, trace, true, null);
+      if (forecastInfo) r.forecast = forecastInfo;
+      if (witnessInfo) r.witnessDiversity = witnessInfo;
       return r;
     }
     x = nextX;
     lastHash = nextHash;
   }
-  const r = finish("MAX_ITER_NO_FIXED_POINT", x, trace, false, `No fixed point in ${maxIter} iterations`);
-  r.forecast = forecastInfo;
-  r.witnessDiversity = witnessInfo;
+  const r = finish(
+    'MAX_ITER_NO_FIXED_POINT',
+    x,
+    trace,
+    false,
+    `No fixed point in ${maxIter} iterations`,
+  );
+  if (forecastInfo) r.forecast = forecastInfo;
+  if (witnessInfo) r.witnessDiversity = witnessInfo;
   return r;
 }
 
@@ -98,7 +131,7 @@ function hammingHex(a: string, b: string): number {
   let d = 0;
   const n = Math.max(a.length, b.length);
   for (let i = 0; i < n; i++) {
-    if ((a[i] ?? "") !== (b[i] ?? "")) d++;
+    if ((a[i] ?? '') !== (b[i] ?? '')) d++;
   }
   return d;
 }
@@ -110,12 +143,12 @@ function finish<T>(
   fixedPoint: boolean,
   refusalReason: string | null,
 ): OuroborosReceipt<T> {
-  const receiptDigest = createHash("sha256").update(JSON.stringify(trace)).digest("hex");
+  const receiptDigest = createHash('sha256').update(JSON.stringify(trace)).digest('hex');
   return {
     verdict,
     iterations: trace.length - 1,
     fixedPoint,
-    finalHash: trace[trace.length - 1].hash,
+    finalHash: trace[trace.length - 1]!.hash,
     finalValue,
     trace,
     refusalReason,
@@ -125,5 +158,5 @@ function finish<T>(
 
 /** Compact summary line for logs. */
 export function summary<T>(r: OuroborosReceipt<T>): string {
-  return `${r.verdict.padEnd(34)} iter=${String(r.iterations).padStart(2)} fp=${r.fixedPoint ? "Y" : "N"} digest=${r.receiptDigest.slice(0, 12)}`;
+  return `${r.verdict.padEnd(34)} iter=${String(r.iterations).padStart(2)} fp=${r.fixedPoint ? 'Y' : 'N'} digest=${r.receiptDigest.slice(0, 12)}`;
 }

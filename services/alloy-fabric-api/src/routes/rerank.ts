@@ -1,5 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { RerankRequestSchema } from '@workspace/aef-contracts';
+import {
+  RERANK_IMPLEMENTATION_ID,
+  type RerankExecutionReceipt,
+  RerankRequestSchema,
+} from '@workspace/aef-contracts';
 import type { PolicyContext } from '@workspace/aef-policy-guard';
 import { type RankCandidate, rankCandidates } from '@workspace/alloy-rank-worker';
 import type { Request, Response, Router } from 'express';
@@ -16,9 +20,8 @@ export function registerRerankRoute(router: Router): void {
       return;
     }
 
-    const { requestId, query, candidates, topK, model } = parsed.data;
+    const { requestId, query, candidates, topK } = parsed.data;
     const tenantId = getTenantId(res);
-    const resolvedModel = model ?? 'aef-rerank-cpu-v1';
     const startMs = Date.now();
     const reqId = requestId || getRequestId(req);
     const requestedAt = new Date().toISOString();
@@ -44,7 +47,7 @@ export function registerRerankRoute(router: Router): void {
       return;
     }
 
-    // Wire through the alloy-rank-worker cross-encoder scorer
+    // Wire through the alloy-rank-worker deterministic lexical-overlap scorer.
     const rankInputs: RankCandidate[] = (
       candidates as Array<{
         id: string;
@@ -59,9 +62,16 @@ export function registerRerankRoute(router: Router): void {
       metadata: c.metadata ?? {},
     }));
 
-    const ranked = rankCandidates(query, rankInputs, topK, 'cross-encoder');
+    const ranked = rankCandidates(query, rankInputs, topK, 'lexical-overlap');
     const completedAt = new Date().toISOString();
     const rerankMs = Date.now() - startMs;
+    const execution: RerankExecutionReceipt = {
+      backendId: `alloy-rank-worker:${RERANK_IMPLEMENTATION_ID}`,
+      modelId: RERANK_IMPLEMENTATION_ID,
+      promotionState: 'DEVELOPMENT',
+      implementationKind: 'lexical-overlap',
+      fallback: false,
+    };
 
     // Ledger write — every rerank operation is governed and auditable
     let ledgerFailures = 0;
@@ -82,7 +92,7 @@ export function registerRerankRoute(router: Router): void {
           redactedFields: policyDecision.redactions,
           requestedAt,
           completedAt,
-          backendId: `alloy-rank-worker:cross-encoder:${resolvedModel}`,
+          backendId: `alloy-rank-worker:${RERANK_IMPLEMENTATION_ID}`,
           stageTimings: { rerank: rerankMs },
           scoreBreakdown: { rerankerScore: result.score, rank: result.rank },
         });
@@ -103,8 +113,8 @@ export function registerRerankRoute(router: Router): void {
     res.json({
       requestId: reqId,
       tenantId,
-      model: resolvedModel,
-      backend: 'alloy-rank-worker:cross-encoder',
+      model: RERANK_IMPLEMENTATION_ID,
+      backend: `alloy-rank-worker:${RERANK_IMPLEMENTATION_ID}`,
       results: ranked.map((r) => ({
         id: r.id,
         text: r.text,
@@ -114,6 +124,7 @@ export function registerRerankRoute(router: Router): void {
         breakdown: r.breakdown,
         metadata: r.metadata,
       })),
+      execution,
       ...(ledgerFailures > 0 ? { ledgerFailures } : {}),
       processingMs: Date.now() - startMs,
     });

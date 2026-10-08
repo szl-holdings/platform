@@ -33,6 +33,7 @@ FROM pnpm-base AS deps
 # pnpm fetch only needs the lockfile (+ .npmrc); it populates the BuildKit-mounted
 # virtual store so the install in the builder stage is cache-friendly.
 COPY pnpm-lock.yaml .npmrc ./
+COPY patches/ ./patches/
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm fetch
 
@@ -47,9 +48,10 @@ ENV NODE_ENV=production \
     CI=true
 # Frozen install against the same BuildKit cache id used by `pnpm fetch`. We do
 # not force --offline because some transitive tarballs are resolved only during
-# install; --frozen-lockfile still prevents graph drift.
+# install; --frozen-lockfile still prevents graph drift. Vite is a
+# devDependency, so --prod=false retains build tooling under NODE_ENV=production.
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm install --frozen-lockfile --ignore-scripts --prod=false
 # Vite emits to artifacts/vessels/dist/public (see vite.config.ts outDir).
 RUN pnpm --filter "@workspace/vessels" run build
 
@@ -82,7 +84,8 @@ server {
     }
 }
 NGINX
-RUN sed -i 's|pid\s*/run/nginx.pid;|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf \
+RUN sed -i 's|^[[:space:]]*pid[[:space:]][^;]*;|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf \
+    && grep -Fqx 'pid /tmp/nginx.pid;' /etc/nginx/nginx.conf \
     && sed -i '/^user /d' /etc/nginx/nginx.conf \
     && chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
     && chmod -R 755 /usr/share/nginx/html
