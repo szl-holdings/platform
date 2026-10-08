@@ -825,6 +825,8 @@ def _remove_expected_files(root: Path, expected: set[str]) -> None:
         try:
             directory.rmdir()
         except OSError:
+            # Directory pruning is best effort; admitted-file deletion errors
+            # above still propagate, and later writes can reuse directories.
             pass
 
 

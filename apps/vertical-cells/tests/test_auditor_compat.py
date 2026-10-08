@@ -6,7 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest import mock
+import unittest.mock as mock
 
 
 APP_ROOT = Path(__file__).resolve().parents[1]
@@ -15,8 +15,9 @@ COMPILER = TOOLS_ROOT / "szl_vertical_cell_compiler_v6.py"
 AUDITOR = TOOLS_ROOT / "szl_estate_vertical_auditor_v6.py"
 sys.path.insert(0, str(TOOLS_ROOT))
 
-from szl_vertical_factory_auditor_v6 import audit  # noqa: E402
 import szl_vertical_factory_auditor_v6 as auditor_module  # noqa: E402
+
+audit = auditor_module.audit
 
 
 def checked_in_profile() -> dict[str, object]:

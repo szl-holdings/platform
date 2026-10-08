@@ -104,6 +104,7 @@ def atomic_write(path: str | Path, content: bytes) -> None:
         try:
             os.unlink(temporary)
         except FileNotFoundError:
+            # The temporary path is already absent; preserve the original failure.
             pass
         raise
 
