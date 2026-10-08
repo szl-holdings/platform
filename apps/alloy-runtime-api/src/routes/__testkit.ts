@@ -6,10 +6,14 @@
  * the same middleware + handler stack a real request hits (minus OTEL, which
  * is covered by otel.test.ts), so the assertions exercise actual handler logic.
  */
+
+import { type IncomingHttpHeaders, request, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { type Server, request } from 'node:http';
 import express, { type IRouter } from 'express';
 import { apiKeyGuard } from '../middleware/auth.js';
+
+// biome-ignore lint/suspicious/noExplicitAny: shared route tests intentionally inspect dynamic JSON bodies.
+type DynamicTestJson = any;
 
 export interface TestClient {
   baseUrl: string;
@@ -18,7 +22,11 @@ export interface TestClient {
     method: string,
     path: string,
     opts?: { body?: unknown; headers?: Record<string, string> },
-  ) => Promise<{ status: number; json: any }>;
+  ) => Promise<{
+    status: number;
+    headers: IncomingHttpHeaders;
+    json: DynamicTestJson;
+  }>;
 }
 
 /** Mount a router at `mountPath` behind apiKeyGuard and start listening. */
@@ -49,7 +57,11 @@ export async function mountRouter(mountPath: string, router: IRouter): Promise<T
           let body = '';
           res.on('data', (c) => (body += c));
           res.on('end', () =>
-            resolve({ status: res.statusCode ?? 0, json: body ? JSON.parse(body) : null }),
+            resolve({
+              status: res.statusCode ?? 0,
+              headers: res.headers,
+              json: body ? JSON.parse(body) : null,
+            }),
           );
         },
       );

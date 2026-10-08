@@ -32,7 +32,7 @@
       "source": "pnpm -r list --depth -1 --json"
     },
     "api_endpoints": {
-      "value": 5065,
+      "value": 5066,
       "label": "MEASURED",
       "source": "OpenAPI 3.1 operations in lib/api-spec/openapi.yaml"
     },

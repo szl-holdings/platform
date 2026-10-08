@@ -6,6 +6,8 @@ import {
   AtelierAskRequestSchema,
   type AtelierAskResponse,
   AtelierPolicyDeniedError,
+  AtelierProofweavePolicyDeniedError,
+  AtelierProofweaveRequestSchema,
   type AtelierProvider,
   AtelierProviderResponseError,
   AtelierProviderUnavailableError,
@@ -15,6 +17,7 @@ import {
   type AtelierStateStore,
   type AtelierTurnReservation,
   askAtelier,
+  compileAtelierProofweave,
   getAtelierProviderHealth,
   InMemoryAtelierStateStore,
   verifyAtelierCapsuleChain,
@@ -214,6 +217,12 @@ export function createAtelierRouter(options: AtelierRouterOptions = {}): IRouter
         namespace: 'a11oy.atelier',
         status: 'continuity-unavailable',
         providers,
+        inference: {
+          configurationState: providers.some((provider) => provider.available)
+            ? 'CONFIGURED_OR_LOCAL_EXECUTABLE_MEASURED'
+            : 'UNAVAILABLE',
+          runtimeEvidenceClass: 'UNKNOWN',
+        },
         capabilities: {
           tools: false,
           search: false,
@@ -228,16 +237,38 @@ export function createAtelierRouter(options: AtelierRouterOptions = {}): IRouter
           evidenceState: 'UNAVAILABLE',
           retentionHours: ATELIER_STATE_RETENTION_HOURS,
         },
+        proofweave: {
+          compiler: { available: true, mode: 'DETERMINISTIC_COMPILE_ONLY' },
+          planExecution: false,
+          planPersistence: 'IN_PROCESS_NOT_STORED',
+          evidenceClass: 'SIMULATED',
+          operationalState: 'DEMO',
+          planExternalWrites: false,
+          providerNativeSubagents: false,
+          providerDurableStorage: false,
+          auditLedger: {
+            appendSideEffect: true,
+            backendState: 'CONFIGURATION_DEPENDENT',
+            durablePersistenceEvidenceClass: 'UNKNOWN',
+            tenantAttributionEvidenceClass: 'DECLARED',
+          },
+        },
         evidenceBoundary:
-          'Health reports redacted provider configuration and continuity metadata only; it does not prove a successful or deployed inference.',
+          'Health reports MEASURED provider configuration and compiler availability plus UNAVAILABLE continuity metadata only; inference runtime evidence remains UNKNOWN. Proofweave is SIMULATED and plan execution is disabled. Compile requests separately dispatch audit metadata to a configuration-dependent EvidenceLedger backend whose durable-persistence evidence is UNKNOWN and tenant attribution is DECLARED by the caller. Health does not prove plan execution, successful or deployed inference, durable persistence, or authenticated human identity.',
       });
       return;
     }
     res.status(200).json({
       product: 'A11oy Atelier',
       namespace: 'a11oy.atelier',
-      status: providers.some((provider) => provider.available) ? 'ready' : 'provider-unavailable',
+      status: 'partial',
       providers,
+      inference: {
+        configurationState: providers.some((provider) => provider.available)
+          ? 'CONFIGURED_OR_LOCAL_EXECUTABLE_MEASURED'
+          : 'UNAVAILABLE',
+        runtimeEvidenceClass: 'UNKNOWN',
+      },
       capabilities: {
         tools: false,
         search: false,
@@ -252,8 +283,97 @@ export function createAtelierRouter(options: AtelierRouterOptions = {}): IRouter
         evidenceState: continuity.evidenceState,
         retentionHours: continuity.retentionHours,
       },
+      proofweave: {
+        compiler: { available: true, mode: 'DETERMINISTIC_COMPILE_ONLY' },
+        planExecution: false,
+        planPersistence: 'IN_PROCESS_NOT_STORED',
+        evidenceClass: 'SIMULATED',
+        operationalState: 'DEMO',
+        planExternalWrites: false,
+        providerNativeSubagents: false,
+        providerDurableStorage: false,
+        auditLedger: {
+          appendSideEffect: true,
+          backendState: 'CONFIGURATION_DEPENDENT',
+          durablePersistenceEvidenceClass: 'UNKNOWN',
+          tenantAttributionEvidenceClass: 'DECLARED',
+        },
+      },
       evidenceBoundary:
-        'Health reports redacted provider configuration and continuity metadata only; it does not prove a successful or deployed inference.',
+        'Health MEASURES provider configuration, local executable presence, and compiler availability only; inference runtime evidence remains UNKNOWN. Proofweave is SIMULATED and plan execution is disabled. Compile requests separately dispatch audit metadata to a configuration-dependent EvidenceLedger backend whose durable-persistence evidence is UNKNOWN and tenant attribution is DECLARED by the caller. Health does not prove plan execution, successful or deployed inference, durable persistence, or authenticated human identity.',
+    });
+  });
+
+  router.post('/proofweave/compile', (req: Request, res: Response): void => {
+    res.setHeader('Cache-Control', 'no-store');
+    let parsed: ReturnType<typeof AtelierProofweaveRequestSchema.parse>;
+    let plan: ReturnType<typeof compileAtelierProofweave>;
+    let tid: string;
+    try {
+      parsed = AtelierProofweaveRequestSchema.parse(req.body);
+      tid = tenantId(req);
+      plan = compileAtelierProofweave(parsed);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({
+          error: 'Validation failed',
+          code: 'ATELIER_VALIDATION',
+          issues: error.issues,
+        });
+        return;
+      }
+      if (error instanceof AtelierProofweavePolicyDeniedError) {
+        res.status(403).json({
+          error: error.message,
+          code: error.code,
+          policyVersion: error.policyVersion,
+          violations: error.deniedCapabilities,
+        });
+        return;
+      }
+      res.status(500).json({
+        error: 'A11oy Atelier Proofweave compilation failed.',
+        code: 'ATELIER_PROOFWEAVE_COMPILE_FAILED',
+      });
+      return;
+    }
+
+    let entry: ReturnType<EvidenceLedger['append']>;
+    try {
+      entry = ledger.append({
+        entityType: 'a11oy.atelier.proofweave.plan',
+        entityId: plan.weaveId,
+        action: 'atelier.proofweave.compile',
+        actor: `tenant:${tid}`,
+        actorRole: 'api-key-client',
+        envelope: {
+          traceId: plan.weaveId,
+          agentRole: 'a11oy.atelier.proofweave',
+          sources: [],
+          toolCalls: [],
+          confidence: 'high',
+          freshness: 'fresh',
+          policyReason: `Proofweave policy ${plan.policy.version} (${plan.policy.digestSha256}) ${plan.policy.decision}; execution ${plan.executionState}; tenant attribution evidence class DECLARED.`,
+        },
+      });
+    } catch {
+      res.status(503).json({
+        error: 'A11oy Atelier Proofweave compiled, but the required audit-ledger append failed.',
+        code: 'ATELIER_PROOFWEAVE_LEDGER_APPEND_FAILED',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      ...plan,
+      tenantId: tid,
+      tenantAttributionEvidenceClass: 'DECLARED',
+      ledger: {
+        entryId: entry.entryId,
+        appendState: 'IN_PROCESS_APPEND_ACCEPTED',
+        backendState: 'CONFIGURATION_DEPENDENT',
+        durablePersistenceEvidenceClass: 'UNKNOWN',
+      },
     });
   });
 
@@ -359,9 +479,11 @@ export function createAtelierRouter(options: AtelierRouterOptions = {}): IRouter
       idempotencyKey = requestIdempotencyKey(req, parsed.idempotencyKey);
     } catch (error) {
       if (error instanceof ZodError) {
-        res
-          .status(400)
-          .json({ error: 'Validation failed', code: 'ATELIER_VALIDATION', issues: error.issues });
+        res.status(400).json({
+          error: 'Validation failed',
+          code: 'ATELIER_VALIDATION',
+          issues: error.issues,
+        });
         return;
       }
       res.status(400).json({

@@ -37,7 +37,7 @@ const provider: AtelierProvider = {
     configured: true,
     available: true,
     localOnly: false,
-    evidenceState: 'OBSERVED',
+    evidenceState: 'MEASURED',
     reason: 'test',
   }),
   generate: vi.fn(async () => ({
@@ -66,7 +66,7 @@ describe('askAtelier', () => {
       provider: 'xai',
       model: 'grok-4.6',
       providerRequestId: 'req_test',
-      evidenceState: 'OBSERVED',
+      evidenceState: 'MEASURED',
       memoryState: 'PENDING_API_COMMIT',
       generatedAt: '2026-08-26T00:00:00.000Z',
     });
