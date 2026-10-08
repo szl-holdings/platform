@@ -96,7 +96,7 @@ Evidence class: MEASURED, local source and SAMPLE execution only.
 
 - Runtime pytest: 76 passed, 62 subtests passed after the final service changes.
 - Factory pytest: 21 passed, including canonical-byte checks for the checked-in
-  contract records. Standard-library unittest passed the original 20 tests;
+  contract records. Standard-library unittest passed the original 20 factory tests;
   the added canonical-byte test also passed independently after formatting.
 - Ruff check and format check: clean, 31 Python files.
 - Full captured-form auditor: PASS with zero issues, zero network calls and
