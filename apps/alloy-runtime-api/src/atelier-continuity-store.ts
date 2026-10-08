@@ -56,6 +56,8 @@ const PATH_DOMAIN = 'a11oy.atelier.encrypted-local-path.v1';
 const MAX_INDEX_BYTES = 256 * 1024;
 const HEX_64 = /^[a-f0-9]{64}$/;
 const STATE_CAPSULE_ID = /^state_[a-f0-9]{64}$/;
+const KEY_CHECK_TEMP_NAME =
+  /^key-check\.json\.\d+\.[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}\.tmp$/;
 const DIRECTORY_SYNC_UNSUPPORTED = new Set([
   'EBADF',
   'EISDIR',
@@ -794,7 +796,11 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
         verifier: this.#pathDigest('key-check', KEY_CHECK_SCHEMA),
       } satisfies Omit<KeyCheckRecord, 'authenticationTag'>;
       await this.#atomicCreate(markerPath, this.#authenticate(base));
-      await this.#readAuthenticated(markerPath, KEY_CHECK_SCHEMA);
+      if (!(await this.#readAuthenticated(markerPath, KEY_CHECK_SCHEMA))) {
+        throw new AtelierCapsuleIntegrityError(
+          'Continuity key marker disappeared after publication.',
+        );
+      }
     }
     await this.#pruneExpiredUnlocked();
     await this.#reconcileOrphans();
@@ -1220,87 +1226,105 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
     path: string,
     schema: string,
   ): Promise<Record<string, unknown> | undefined> {
-    // Open once before inspecting the file. All content and size checks use
-    // this descriptor, not a path that may be replaced between check and use.
+    // Each attempt uses one descriptor for all content and size checks. A
+    // publisher's hard-link release may race the first attempt; retry that
+    // transition once and require a fresh, stable authenticated read.
     const flags =
       fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0) | (fsConstants.O_NONBLOCK ?? 0);
-    const handle = await open(path, flags).catch((error: unknown) => {
-      if (errorCode(error) === 'ENOENT') return undefined;
-      if (errorCode(error) === 'ELOOP') {
-        throw new AtelierCapsuleIntegrityError('Continuity index must not be a symbolic link.');
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const handle = await open(path, flags).catch((error: unknown) => {
+        if (errorCode(error) === 'ENOENT') return undefined;
+        if (errorCode(error) === 'ELOOP') {
+          throw new AtelierCapsuleIntegrityError('Continuity index must not be a symbolic link.');
+        }
+        throw error;
+      });
+      if (!handle) {
+        if (attempt === 0) return undefined;
+        throw new AtelierCapsuleIntegrityError('Continuity index disappeared during readback.');
       }
-      throw error;
-    });
-    if (!handle) return undefined;
-    try {
-      const opened = await handle.stat();
-      if (!opened.isFile() || opened.size > MAX_INDEX_BYTES) {
-        throw new AtelierCapsuleIntegrityError('Continuity index is not a bounded regular file.');
-      }
-      // Bound allocation and bytes consumed even if another writer grows the
-      // open file after stat. The extra byte distinguishes overflow from EOF.
-      const buffer = Buffer.alloc(MAX_INDEX_BYTES + 1);
-      let length = 0;
-      while (length < buffer.length) {
-        const read = await handle.read(buffer, length, buffer.length - length, null);
-        if (read.bytesRead === 0) break;
-        length += read.bytesRead;
-      }
-      if (length > MAX_INDEX_BYTES) {
-        throw new AtelierCapsuleIntegrityError('Continuity index exceeded its read bound.');
-      }
-      const afterRead = await handle.stat();
-      const current = await lstat(path).catch(() => undefined);
-      // The publisher's expected temporary hard-link cleanup changes ctime
-      // while reducing its link count from two to one. Other metadata changes
-      // still fail closed alongside the inode, bounded-byte, and HMAC checks.
-      const releasedPublicationLink = opened.nlink === 2 && afterRead.nlink === 1;
-      if (
-        !current?.isFile() ||
-        current.isSymbolicLink() ||
-        current.dev !== afterRead.dev ||
-        current.ino !== afterRead.ino ||
-        current.size !== afterRead.size ||
-        current.mtimeMs !== afterRead.mtimeMs ||
-        current.mode !== afterRead.mode ||
-        current.uid !== afterRead.uid ||
-        current.gid !== afterRead.gid ||
-        opened.size !== afterRead.size ||
-        opened.mtimeMs !== afterRead.mtimeMs ||
-        opened.mode !== afterRead.mode ||
-        opened.uid !== afterRead.uid ||
-        opened.gid !== afterRead.gid ||
-        (opened.ctimeMs !== afterRead.ctimeMs && !releasedPublicationLink) ||
-        (opened.nlink !== afterRead.nlink && !releasedPublicationLink) ||
-        length !== afterRead.size
-      ) {
-        throw new AtelierCapsuleIntegrityError(
-          'Continuity index changed during authenticated readback.',
-        );
-      }
+      try {
+        const opened = await handle.stat();
+        if (!opened.isFile() || opened.size > MAX_INDEX_BYTES) {
+          throw new AtelierCapsuleIntegrityError('Continuity index is not a bounded regular file.');
+        }
+        // Bound allocation and bytes consumed even if another writer grows
+        // the open file after stat. The extra byte distinguishes overflow.
+        const buffer = Buffer.alloc(MAX_INDEX_BYTES + 1);
+        let length = 0;
+        while (length < buffer.length) {
+          const read = await handle.read(buffer, length, buffer.length - length, null);
+          if (read.bytesRead === 0) break;
+          length += read.bytesRead;
+        }
+        if (length > MAX_INDEX_BYTES) {
+          throw new AtelierCapsuleIntegrityError('Continuity index exceeded its read bound.');
+        }
+        const afterRead = await handle.stat();
+        const current = await lstat(path).catch(() => undefined);
+        if (
+          !current?.isFile() ||
+          current.isSymbolicLink() ||
+          current.dev !== afterRead.dev ||
+          current.ino !== afterRead.ino ||
+          current.size !== afterRead.size ||
+          current.mtimeMs !== afterRead.mtimeMs ||
+          current.mode !== afterRead.mode ||
+          current.uid !== afterRead.uid ||
+          current.gid !== afterRead.gid ||
+          opened.size !== afterRead.size ||
+          opened.mtimeMs !== afterRead.mtimeMs ||
+          opened.mode !== afterRead.mode ||
+          opened.uid !== afterRead.uid ||
+          opened.gid !== afterRead.gid ||
+          length !== afterRead.size
+        ) {
+          throw new AtelierCapsuleIntegrityError(
+            'Continuity index changed during authenticated readback.',
+          );
+        }
+        const stableMetadata =
+          opened.ctimeMs === afterRead.ctimeMs &&
+          afterRead.ctimeMs === current.ctimeMs &&
+          opened.nlink === afterRead.nlink &&
+          afterRead.nlink === current.nlink;
+        if (!stableMetadata) {
+          const releasedPublicationLink =
+            opened.nlink === 2 &&
+            current.nlink === 1 &&
+            (afterRead.nlink === 2 || afterRead.nlink === 1);
+          if (attempt === 0 && releasedPublicationLink) continue;
+          throw new AtelierCapsuleIntegrityError(
+            'Continuity index changed during authenticated readback.',
+          );
+        }
 
-      const value = objectValue(JSON.parse(buffer.subarray(0, length).toString('utf8')));
-      if (
-        value?.schema !== schema ||
-        typeof value.authenticationTag !== 'string' ||
-        !HEX_64.test(value.authenticationTag)
-      ) {
-        throw new AtelierCapsuleIntegrityError('Continuity index record is malformed.');
+        const value = objectValue(JSON.parse(buffer.subarray(0, length).toString('utf8')));
+        if (
+          value?.schema !== schema ||
+          typeof value.authenticationTag !== 'string' ||
+          !HEX_64.test(value.authenticationTag)
+        ) {
+          throw new AtelierCapsuleIntegrityError('Continuity index record is malformed.');
+        }
+        const { authenticationTag, ...record } = value;
+        const expected = createHmac('sha256', this.#masterKey)
+          .update(canonicalJson({ domain: INDEX_AUTH_DOMAIN, record }), 'utf8')
+          .digest('hex');
+        if (!constantTimeEqualHex(authenticationTag, expected)) {
+          throw new AtelierCapsuleIntegrityError('Continuity index authentication failed.');
+        }
+        return value;
+      } catch (error) {
+        if (error instanceof AtelierCapsuleIntegrityError) throw error;
+        throw new AtelierCapsuleIntegrityError('Continuity index failed closed during parsing.');
+      } finally {
+        await handle.close();
       }
-      const { authenticationTag, ...record } = value;
-      const expected = createHmac('sha256', this.#masterKey)
-        .update(canonicalJson({ domain: INDEX_AUTH_DOMAIN, record }), 'utf8')
-        .digest('hex');
-      if (!constantTimeEqualHex(authenticationTag, expected)) {
-        throw new AtelierCapsuleIntegrityError('Continuity index authentication failed.');
-      }
-      return value;
-    } catch (error) {
-      if (error instanceof AtelierCapsuleIntegrityError) throw error;
-      throw new AtelierCapsuleIntegrityError('Continuity index failed closed during parsing.');
-    } finally {
-      await handle.close();
     }
+    throw new AtelierCapsuleIntegrityError(
+      'Continuity index changed during authenticated readback.',
+    );
   }
 
   async #atomicCreate(path: string, record: object): Promise<boolean> {
@@ -1391,11 +1415,20 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
   async #containsFiles(path: string, markerPath: string): Promise<boolean> {
     for (const entry of await this.#directoryEntries(path)) {
       const candidate = join(path, entry.name);
-      if (candidate === markerPath) continue;
+      if (candidate === markerPath) {
+        if (!entry.isFile() || entry.isSymbolicLink()) {
+          throw new AtelierCapsuleIntegrityError('Continuity key marker is not a regular file.');
+        }
+        continue;
+      }
       if (entry.isSymbolicLink())
         throw new AtelierCapsuleIntegrityError(
           'Continuity storage must not contain symbolic links.',
         );
+      // A first-start peer may be publishing the marker. Only its exact
+      // regular-file temporary shape is non-durable; other contents block.
+      if (path === dirname(markerPath) && entry.isFile() && KEY_CHECK_TEMP_NAME.test(entry.name))
+        continue;
       if (entry.isFile()) return true;
       if (entry.isDirectory() && (await this.#containsFiles(candidate, markerPath))) return true;
     }
