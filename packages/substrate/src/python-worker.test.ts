@@ -72,6 +72,84 @@ describe('Python worker HTTP admission', () => {
     expect(JSON.parse(String(init?.body))).toMatchObject({ tenantId: 'tenant-governed' });
   });
 
+  it.each([
+    { output: { nested: [{ credential: TEST_CREDENTIAL }] } },
+    { metadata: { [TEST_CREDENTIAL]: 'reflected key' } },
+    { unexpected: `Bearer ${TEST_CREDENTIAL}` },
+    { type: 'stage.error', errorCode: 'REMOTE_ERROR', errorMessage: TEST_CREDENTIAL },
+  ])('rejects credential-reflecting worker responses without publishing or leaking them', async (reflection) => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(
+        new Response(JSON.stringify({ ...workerResult(), ...reflection }), { status: 200 }),
+      );
+    let failure: unknown;
+    try {
+      await new SubstratePythonWorkerChannel().dispatch(dispatchOptions());
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBeInstanceOf(Error);
+    expect((failure as Error).message).toContain('reflected an authentication credential');
+    expect((failure as Error).stack).not.toContain(TEST_CREDENTIAL);
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    'http-error',
+    'transport-error',
+    'invalid-json',
+    'stage-error',
+  ])('contains arbitrary %s diagnostic text', async (kind) => {
+    const secretDiagnostic = `remote diagnostic ${TEST_CREDENTIAL}`;
+    const fetchMock = vi.spyOn(globalThis, 'fetch');
+    if (kind === 'transport-error') fetchMock.mockRejectedValue(new Error(secretDiagnostic));
+    else if (kind === 'http-error')
+      fetchMock.mockResolvedValue(new Response(secretDiagnostic, { status: 503 }));
+    else if (kind === 'invalid-json')
+      fetchMock.mockResolvedValue(new Response(secretDiagnostic, { status: 200 }));
+    else
+      fetchMock.mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            ...workerResult(),
+            type: 'stage.error',
+            errorCode: 'REMOTE_ERROR',
+            errorMessage: 'arbitrary remote message',
+            retryable: false,
+          }),
+          { status: 200 },
+        ),
+      );
+    let failure: unknown;
+    try {
+      await new SubstratePythonWorkerChannel().dispatch(dispatchOptions());
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBeInstanceOf(Error);
+    expect((failure as Error).message).toContain(
+      'The mutating claim was not retried and simulation was not used',
+    );
+    expect((failure as Error).stack).not.toContain(TEST_CREDENTIAL);
+    expect((failure as Error).stack).not.toContain('arbitrary remote message');
+    if (kind === 'stage-error')
+      expect((failure as Error).message).toContain('Worker reported a stage error');
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it('preserves admitted worker result bytes without redacting signed evidence', async () => {
+    const expected = {
+      ...workerResult(),
+      metadata: { signature: 'signature-proof', bundleHash: 'hash-proof' },
+    };
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify(expected), { status: 200 }),
+    );
+    const result = await new SubstratePythonWorkerChannel().dispatch(dispatchOptions());
+    expect(JSON.stringify(result)).toBe(JSON.stringify(expected));
+  });
+
   it('sends one mutating claim and fails closed on an ambiguous transport outcome', async () => {
     const fetchMock = vi
       .spyOn(globalThis, 'fetch')

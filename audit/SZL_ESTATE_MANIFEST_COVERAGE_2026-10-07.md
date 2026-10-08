@@ -69,7 +69,9 @@ Observed UTC: `2026-10-08T02:32:15.159248+00:00`. These calls were read-only and
 | `/api/collections/{slug}` for every listed collection | 7 × 200; 97 membership entries | Detail items replace truncated listing items; membership is not distinct-asset count |
 | `/api/models?author=SZLHOLDINGS&filter=kernel&full=true&limit=100` | 200; 13 kernel-tag-filtered model repos | No next Link header; tag-filter discovery is narrower than Kernel catalog |
 | `/api/kernels?author=SZLHOLDINGS&limit=100` | 200; 14 public Kernel catalog entries | No next Link header; every returned ID has SZLHOLDINGS namespace |
-| `/api/kernels/{repo_id}` for every catalog entry | 14 × 200; 14 revision SHAs | All 14 names overlap public model catalog; do not add these to 119 as new unique assets |
+| `/api/kernels/{repo_id}` for every catalog entry | 14 × 200; 14 revision SHAs | All 14 names overlap model names; resource type and revisions differ |
+
+The Kernel catalog is a separate API resource type: every captured Kernel revision differs from its same-named model revision. A representative Kernel SHA tree request succeeded under `/api/kernels/` but returned HTTP 404 under `/api/models/`. These are distinct typed resource observations, despite matching names. Separate immutable Kernel trees were inspected as described below.
 
 The Kernel catalog includes `SZLHOLDINGS/szl-maskmod`, which the `filter=kernel` model query omitted. This proves the model-tag filter alone is insufficient coverage. Kernel detail responses omitted `cardData.license` for all 14; `license:*` tags and overlapping model card license fields are recorded separately in the JSON appendix. Those metadata declarations do not establish compatible code/binary rights or successful Kernel builds. Collection IDs are mutable slugs, and `lastUpdated` is a timestamp rather than an immutable Git revision. Collection memberships may change and do not bind their members to release revisions.
 
@@ -80,3 +82,20 @@ The [JSON appendix](SZL_ESTATE_MANIFEST_COVERAGE_2026-10-07.json) retains collec
 Supplemental raw metadata remains local-only at `/tmp/estate-metadata/collections.json`, `/tmp/estate-metadata/kernel-models.json`, and `/tmp/estate-metadata/kernels-endpoint.json`. Public metadata coverage now includes all observed collection and Kernel catalog pages. Private enumeration, signed build provenance, compiled binaries, hardware compatibility, legal rights and runtime correctness remain unqualified.
 
 **Aggregate correction:** initial HF list responses exposed 71 license fields and 72 cards; individual detail responses enriched the final 119-asset inventory to **117 reported license fields and 118 cards**. The coverage summary above uses the final individual detail values.
+
+## Immutable-revision file metadata coverage
+
+The JSON appendix now retains recursive immutable-revision trees for the entire public model/dataset/application catalog and a separate set of Kernel trees. Every RFC Link next page was followed until absent; HTTP, network, schema or pagination-cycle errors would mark that tree incomplete.
+
+| File metadata observation | Result |
+| --- | --- |
+| Catalog pinned trees | 119 complete; no failed or partial trees |
+| Catalog pagination pages | 122 |
+| Catalog file entries | 7,764 |
+| Catalog LFS file entries | 225 |
+| Kernel pinned trees | 14 complete; no failed or partial trees |
+| Kernel pagination pages | 14 |
+| Kernel file entries | 254 |
+| Kernel LFS file entries | None observed |
+
+Each typed resource record retains its revision, observation time, page count, completeness result, file paths, Git object identifiers, byte sizes and LFS metadata where supplied. A SHA-256 digest binds the sorted JSON file-metadata list; it is a metadata digest, not downloaded-content verification. Signals identify standard manifests, likely model-weight filenames, dataset extensions, application entrypoints and native/build files. Signals do not establish working execution, correct packaging, compatible hardware, quality, license rights or absence of sensitive content. No file contents, model weights or binaries were downloaded or executed. Directory entries and absent next-page links are API observations; provider-side undisclosed filtering cannot be independently ruled out. Original inventory timestamps remain unchanged, and each new tree pass has separate start/end timestamps in the appendix.

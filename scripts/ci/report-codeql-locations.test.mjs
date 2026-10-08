@@ -56,7 +56,7 @@ test('emits only rule identifiers and tracked source/flow paths and lines', () =
     },
   ]);
   const output = annotation(diagnostics[0]);
-  assert.match(output, /^::warning title=CodeQL location trace::/);
+  assert.match(output, /^::notice title=CodeQL location trace::/);
   assert.doesNotMatch(output, /secret|injected|snippet|message/);
 });
 
@@ -205,4 +205,61 @@ test('security rules with absent or malformed severity cannot silently disappear
   assert.deepEqual(locationDiagnostics(quality, tracked, coverage), []);
   assert.equal(coverage.resolvedRules, 1);
   assert.equal(coverage.securityResults, 0);
+});
+
+test('long annotations remain parseable JSON and retain primary location and flow source/sink', () => {
+  const source = 'packages/substrate/src/python-worker.ts:265';
+  const sink = 'packages/substrate/src/journal.ts:159';
+  const diagnostic = {
+    ruleId: 'js/password-hash',
+    locations: [
+      sink,
+      ...Array.from({ length: 100 }, (_, i) => `packages/substrate/src/journal.ts:${i + 1}`),
+    ],
+    flows: [
+      [
+        source,
+        source,
+        ...Array.from(
+          { length: 500 },
+          (_, i) => `packages/substrate/src/python-worker.ts:${i + 1}`,
+        ),
+        sink,
+      ],
+      ...Array.from({ length: 30 }, () => [source, sink]),
+    ],
+    message: 'secret-message',
+    snippet: 'secret-snippet',
+  };
+  const output = annotation(diagnostic);
+  assert.ok(output.length < 3500);
+  const decoded = JSON.parse(output.split('::notice title=CodeQL location trace::')[1]);
+  assert.equal(decoded.locations[0], sink);
+  assert.equal(decoded.flows[0][0], source);
+  assert.equal(decoded.flows[0].at(-1), sink);
+  assert.ok(decoded.omitted.flowLocations > 0);
+  assert.equal(decoded.consecutiveDuplicates, 1);
+  assert.doesNotMatch(output, /secret-message|secret-snippet/);
+  assert.equal(
+    decoded.flows.reduce((sum, flow) => sum + flow.length, 0) +
+      decoded.omitted.flowLocations +
+      decoded.consecutiveDuplicates,
+    diagnostic.flows.reduce((sum, flow) => sum + flow.length, 0),
+  );
+  assert.equal(
+    decoded.locations.length + decoded.omitted.sourceLocations,
+    diagnostic.locations.length,
+  );
+  assert.equal(decoded.flows.length + decoded.omitted.flows, diagnostic.flows.length);
+});
+
+test('consecutive duplicate flow locations collapse without discarding distinct locations', () => {
+  const output = annotation({
+    ruleId: 'js/password-hash',
+    locations: ['a.ts:1'],
+    flows: [['a.ts:1', 'a.ts:1', 'b.ts:2', 'b.ts:2', 'a.ts:1']],
+  });
+  const decoded = JSON.parse(output.split('::notice title=CodeQL location trace::')[1]);
+  assert.deepEqual(decoded.flows, [['a.ts:1', 'b.ts:2', 'a.ts:1']]);
+  assert.equal(decoded.consecutiveDuplicates, 2);
 });
