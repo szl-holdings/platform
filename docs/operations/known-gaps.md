@@ -116,6 +116,14 @@ in-process and non-durable. When both continuity directory and key are configure
 the encrypted local adapter can preserve the capsule chain across a restart on
 one host with one runtime process and the same key.
 
+The 2026-10-02 local-filesystem race repair retains unexpired unindexed encrypted
+objects and does not unlink another writer's temporary index or object candidates.
+Expired authenticated orphans are deleted with a durable receipt on a later
+startup or sweep. Temporary candidates abandoned by a crashed process remain an
+offline, exclusive-access cleanup gap, including first-start key-marker
+publication candidates; this source repair does not establish
+safe concurrent multi-process lifecycle coordination or distributed continuity.
+
 That local adapter is not a distributed database and has no distributed lock or
 multi-host coordination. It does not establish production identity, deployment,
 direct xAI Responses API operation, or an independent runtime witness. The
