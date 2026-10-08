@@ -59,6 +59,8 @@ const MAX_INDEX_BYTES = 256 * 1024;
 const UNPUBLISHED_FILE_GRACE_MS = 60 * 60 * 1000;
 const HEX_64 = /^[a-f0-9]{64}$/;
 const STATE_CAPSULE_ID = /^state_[a-f0-9]{64}$/;
+const KEY_CHECK_TEMP_NAME =
+  /^key-check\.json\.\d+\.[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}\.tmp$/;
 const DIRECTORY_SYNC_UNSUPPORTED = new Set([
   'EBADF',
   'EISDIR',
@@ -1419,11 +1421,20 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
   async #containsFiles(path: string, markerPath: string): Promise<boolean> {
     for (const entry of await this.#directoryEntries(path)) {
       const candidate = join(path, entry.name);
-      if (candidate === markerPath) continue;
+      if (candidate === markerPath) {
+        if (!entry.isFile() || entry.isSymbolicLink()) {
+          throw new AtelierCapsuleIntegrityError('Continuity key marker is not a regular file.');
+        }
+        continue;
+      }
       if (entry.isSymbolicLink())
         throw new AtelierCapsuleIntegrityError(
           'Continuity storage must not contain symbolic links.',
         );
+      // A first-start peer may be publishing the marker. Only its exact
+      // regular-file temporary shape is non-durable; other contents block.
+      if (path === dirname(markerPath) && entry.isFile() && KEY_CHECK_TEMP_NAME.test(entry.name))
+        continue;
       if (entry.isFile()) return true;
       if (entry.isDirectory() && (await this.#containsFiles(candidate, markerPath))) return true;
     }
