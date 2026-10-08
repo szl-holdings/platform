@@ -11,6 +11,7 @@
 
 import { appendFileSync } from 'node:fs';
 import { artifactUrl } from '../lib/artifact-ports.js';
+import { EXPECTED_HOLDS, validateRuntimeReadiness } from './runtime-readiness-policy.mjs';
 
 const API_BASE_URL = (
   process.env.API_BASE_URL ??
@@ -24,22 +25,6 @@ const SMOKE_TENANT_ID = `runtime-audit-${process.env.GITHUB_RUN_ID ?? process.pi
 const parsedTimeout = Number.parseInt(process.env.SMOKE_TIMEOUT_MS ?? '10000', 10);
 const TIMEOUT_MS = Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : 10_000;
 const READINESS_POLICY = process.env.SMOKE_READINESS_POLICY ?? 'ready';
-const EXPECTED_HOLDS = [
-  'task-planning-and-execution',
-  'memory-fabric',
-  'workflow-execution',
-  'hybrid-search',
-  'embedding',
-  'reranking',
-  'openai-embedding-compat',
-  'index-rebuild',
-  'index-verification',
-  'evaluation-runner',
-  'atelier',
-  'ouroboros-integrations',
-  'lutar-evaluation',
-];
-const EXPECTED_DEPENDENCIES = ['memory-store', 'run-registry', 'workflow-runtime'];
 
 const checks = [];
 let livenessGitSha = null;
@@ -163,57 +148,7 @@ await runCheck('readiness-policy', async () => {
 await runCheck('dependency-readiness', async () => {
   const { response, body } = await fetchJson('/readyz');
 
-  const held = READINESS_POLICY === 'production-hold';
-  const expectedStatus = held ? 503 : 200;
-  invariant(
-    response.status === expectedStatus,
-    `/readyz returned HTTP ${response.status}, expected ${expectedStatus}`,
-  );
-  invariant(body && typeof body === 'object', '/readyz returned no JSON object');
-  invariant(
-    body.ready === !held,
-    `/readyz ready is ${JSON.stringify(body.ready)}, expected ${!held}`,
-  );
-  invariant(
-    body.service === 'alloy-runtime-api',
-    `/readyz service is ${JSON.stringify(body.service)}, expected "alloy-runtime-api"`,
-  );
-  invariant(isValidDate(body.checkedAt), '/readyz checkedAt is not a valid timestamp');
-  invariant(Array.isArray(body.dependencies), '/readyz dependencies is not an array');
-  invariant(typeof livenessGitSha === 'string', 'liveness build identity was not established');
-  invariant(
-    body.gitSha === livenessGitSha,
-    `/readyz gitSha ${JSON.stringify(body.gitSha)} does not match /healthz ${livenessGitSha}`,
-  );
-
-  const expectedDependencies = held
-    ? [...EXPECTED_DEPENDENCIES, 'production-capability-backends']
-    : EXPECTED_DEPENDENCIES;
-  const dependencyNames = body.dependencies.map((dependency) => dependency?.name);
-  invariant(
-    body.dependencies.length === expectedDependencies.length &&
-      new Set(dependencyNames).size === expectedDependencies.length &&
-      expectedDependencies.every((name) => dependencyNames.includes(name)),
-    `/readyz dependencies are ${JSON.stringify(dependencyNames)}, expected ${JSON.stringify(expectedDependencies)}`,
-  );
-
-  for (const dependency of body.dependencies) {
-    const blocked = held && dependency.name === 'production-capability-backends';
-    invariant(dependency.ready === !blocked, `${dependency.name} readiness must be ${!blocked}`);
-    invariant(
-      Number.isFinite(dependency.latencyMs) && dependency.latencyMs >= 0,
-      `${dependency.name} latencyMs is not a finite nonnegative number`,
-    );
-    const expectedDetail = blocked
-      ? `unwired production capabilities: ${EXPECTED_HOLDS.join(', ')}`
-      : 'ok';
-    invariant(
-      dependency.detail === expectedDetail,
-      `${dependency.name} detail does not match its readiness policy`,
-    );
-  }
-
-  return `HTTP ${expectedStatus}; ready=${!held}; dependencies=${dependencyNames.join(',')}`;
+  return validateRuntimeReadiness(response.status, body, livenessGitSha, READINESS_POLICY);
 });
 
 await runCheck('anonymous-api-key-guard', async () => {
