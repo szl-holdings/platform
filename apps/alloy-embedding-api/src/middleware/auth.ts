@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 import { isDevelopmentOrTestRuntime, isProductionRuntime } from '@workspace/aef-contracts';
 import type { NextFunction, Request, Response } from 'express';
 
@@ -59,9 +59,15 @@ export function bearerAuthenticationError(
   const token = match[1];
   if (!token) return 'Bearer token is empty';
   if (!config.apiKey) return 'Bearer token is invalid';
-  const tokenDigest = createHash('sha256').update(token).digest();
-  const configuredDigest = createHash('sha256').update(config.apiKey).digest();
-  if (!timingSafeEqual(tokenDigest, configuredDigest)) return 'Bearer token is invalid';
+  // Compare opaque API tokens directly; no password digest is persisted.
+  const tokenBytes = Buffer.from(token, 'utf8');
+  const configuredBytes = Buffer.from(config.apiKey, 'utf8');
+  if (
+    tokenBytes.length !== configuredBytes.length ||
+    !timingSafeEqual(tokenBytes, configuredBytes)
+  ) {
+    return 'Bearer token is invalid';
+  }
   return undefined;
 }
 

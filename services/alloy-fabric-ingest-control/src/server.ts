@@ -1,4 +1,4 @@
-import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
+import { randomUUID, timingSafeEqual } from 'node:crypto';
 import {
   EvalRunRequestSchema,
   IndexRebuildRequestSchema,
@@ -38,9 +38,12 @@ if (IS_PRODUCTION && !CREDENTIAL_TENANT_ID) {
 type TenantBoundRequest = express.Request & { credentialTenantId?: string };
 
 function secretsEqual(candidate: string, expected: string): boolean {
-  const candidateDigest = createHash('sha256').update(candidate).digest();
-  const expectedDigest = createHash('sha256').update(expected).digest();
-  return timingSafeEqual(candidateDigest, expectedDigest);
+  // These are opaque API tokens, compared directly rather than stored password hashes.
+  const candidateBytes = Buffer.from(candidate, 'utf8');
+  const expectedBytes = Buffer.from(expected, 'utf8');
+  return (
+    candidateBytes.length === expectedBytes.length && timingSafeEqual(candidateBytes, expectedBytes)
+  );
 }
 
 function authMiddleware(

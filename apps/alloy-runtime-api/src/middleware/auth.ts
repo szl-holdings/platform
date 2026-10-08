@@ -6,7 +6,7 @@
  * Tenant isolation is enforced via the X-Tenant-Id header — all write
  * operations are scoped to the provided tenant.
  */
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { isProductionRuntime } from '../runtime-capabilities.js';
 
@@ -24,9 +24,12 @@ export function assertProductionAuthConfiguration(env: NodeJS.ProcessEnv = proce
 }
 
 function credentialsMatch(provided: string, configured: string): boolean {
-  const providedDigest = createHash('sha256').update(provided).digest();
-  const configuredDigest = createHash('sha256').update(configured).digest();
-  return timingSafeEqual(providedDigest, configuredDigest);
+  // These are opaque API tokens, compared directly rather than stored password hashes.
+  const candidateBytes = Buffer.from(provided, 'utf8');
+  const expectedBytes = Buffer.from(configured, 'utf8');
+  return (
+    candidateBytes.length === expectedBytes.length && timingSafeEqual(candidateBytes, expectedBytes)
+  );
 }
 
 declare global {

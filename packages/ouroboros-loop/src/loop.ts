@@ -57,7 +57,7 @@ export function run<T>(input: OuroborosInput<T>): OuroborosReceipt<T> {
         false,
         `Gauss class-number axis ${w.axis.toFixed(3)} < threshold ${w.threshold.toFixed(3)}`,
       );
-      if (witnessInfo) r.witnessDiversity = witnessInfo;
+      r.witnessDiversity = witnessInfo;
       return r;
     }
   }

@@ -1,6 +1,7 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 import { isProductionRuntime } from '@workspace/aef-contracts';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import {
   createDefaultBackend,
@@ -12,6 +13,17 @@ import { MicroBatcher } from './batcher.js';
 
 const app: express.Express = express();
 app.set('trust proxy', 1);
+// One aggregate bucket keeps limiter memory bounded even for rotating clients.
+app.use(
+  rateLimit({
+    windowMs: 60_000,
+    limit: positiveIntegerEnvironment('AEF_VECTOR_RATE_LIMIT_RPM', 6000),
+    keyGenerator: () => 'process',
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'rate_limit_exceeded' },
+  }),
+);
 app.use(express.json({ limit: '20mb' }));
 
 const BEARER = process.env.AEF_S2S_SECRET?.trim() ?? '';
@@ -31,9 +43,12 @@ function positiveIntegerEnvironment(name: string, fallback: number): number {
 }
 
 function secretsEqual(candidate: string, expected: string): boolean {
-  const candidateDigest = createHash('sha256').update(candidate).digest();
-  const expectedDigest = createHash('sha256').update(expected).digest();
-  return timingSafeEqual(candidateDigest, expectedDigest);
+  // These are opaque API tokens, compared directly rather than stored password hashes.
+  const candidateBytes = Buffer.from(candidate, 'utf8');
+  const expectedBytes = Buffer.from(expected, 'utf8');
+  return (
+    candidateBytes.length === expectedBytes.length && timingSafeEqual(candidateBytes, expectedBytes)
+  );
 }
 
 function authMiddleware(

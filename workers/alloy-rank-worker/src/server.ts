@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 import { isProductionRuntime } from '@workspace/aef-contracts';
 import express from 'express';
 import { z } from 'zod';
@@ -17,9 +17,12 @@ const RankModeSchema = z.enum(['lexical-overlap', 'score-passthrough']);
 const DEFAULT_MODE: RankMode = RankModeSchema.parse(process.env.AEF_RANK_MODE ?? 'lexical-overlap');
 
 function secretsEqual(candidate: string, expected: string): boolean {
-  const candidateDigest = createHash('sha256').update(candidate).digest();
-  const expectedDigest = createHash('sha256').update(expected).digest();
-  return timingSafeEqual(candidateDigest, expectedDigest);
+  // These are opaque API tokens, compared directly rather than stored password hashes.
+  const candidateBytes = Buffer.from(candidate, 'utf8');
+  const expectedBytes = Buffer.from(expected, 'utf8');
+  return (
+    candidateBytes.length === expectedBytes.length && timingSafeEqual(candidateBytes, expectedBytes)
+  );
 }
 
 function authMiddleware(

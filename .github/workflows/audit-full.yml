@@ -170,6 +170,9 @@ jobs:
           CI: 'true'
           NODE_ENV: test
           API_BASE_URL: http://127.0.0.1:8080
+          # This loopback deployment has no qualified production stores or models.
+          # Verify its explicit HOLD response; never attest it as production-ready.
+          SMOKE_READINESS_POLICY: production-hold
           # Matches the per-run credential on the loopback runtime boot step.
           SMOKE_API_KEY: runtime-audit-${{ github.run_id }}-${{ github.run_attempt }}
           # Cap turbo fan-out so the full-repo typecheck (composite tsc builds,

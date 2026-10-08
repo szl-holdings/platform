@@ -21,6 +21,12 @@ the API credential and optional `AEF_S2S_SECRET` are bound to that tenant;
 header/body tenant values that do not match it are rejected before request
 side effects.
 
+Health probes and embedding requests have bounded aggregate limits of 6000
+requests per minute. The tenant limiter uses the resolved authenticated tenant,
+defaults to 60 requests per minute (`AEF_RATE_LIMIT_RPM`), and stores at most
+4096 active tenant windows. Excess traffic or tenant capacity returns HTTP 429;
+expired windows release capacity.
+
 `GET /healthz` is liveness only. Outside production, `GET /readyz` loads the
 configured embedding backend, performs one minimal inference, validates the
 model identity, normalized vector, and dimensions, and returns HTTP 503 until

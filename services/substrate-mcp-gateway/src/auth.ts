@@ -11,7 +11,7 @@
  * development mode). In production the gateway refuses to start without the key.
  */
 
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { getRevocationSyncReadiness, resolveEnterpriseAuthContext } from './enterprise-auth.js';
 import { resolveLocalOAuthToken } from './oauth-token-store.js';
@@ -115,9 +115,12 @@ export function resolveAuthContext(req: Request): GatewayAuthContext {
 }
 
 function constantTimeTokenEqual(candidate: string, expected: string): boolean {
-  const candidateDigest = createHash('sha256').update(candidate, 'utf8').digest();
-  const expectedDigest = createHash('sha256').update(expected, 'utf8').digest();
-  return timingSafeEqual(candidateDigest, expectedDigest);
+  // These are opaque API tokens, compared directly rather than stored password hashes.
+  const candidateBytes = Buffer.from(candidate, 'utf8');
+  const expectedBytes = Buffer.from(expected, 'utf8');
+  return (
+    candidateBytes.length === expectedBytes.length && timingSafeEqual(candidateBytes, expectedBytes)
+  );
 }
 
 /**

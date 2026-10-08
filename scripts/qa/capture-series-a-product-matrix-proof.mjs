@@ -239,6 +239,35 @@ async function rejectSymlinkComponents(absolutePath, label) {
   }
 }
 
+async function readVerifiedRegularFile(absolute, expected, label) {
+  const handle = await open(absolute, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
+  try {
+    const opened = await handle.stat();
+    if (
+      !opened.isFile() ||
+      opened.dev !== expected.dev ||
+      opened.ino !== expected.ino ||
+      opened.size !== expected.size ||
+      opened.mtimeMs !== expected.mtimeMs ||
+      opened.ctimeMs !== expected.ctimeMs
+    ) {
+      throw new Error(`${label} changed before opening`);
+    }
+    const bytes = await handle.readFile();
+    const after = await handle.stat();
+    if (
+      after.size !== opened.size ||
+      after.mtimeMs !== opened.mtimeMs ||
+      after.ctimeMs !== opened.ctimeMs
+    ) {
+      throw new Error(`${label} changed while reading`);
+    }
+    return bytes;
+  } finally {
+    await handle.close();
+  }
+}
+
 async function readTrackedFile(relativePath, label) {
   const absolute = resolveInsideRepository(relativePath, label);
   await rejectSymlinkComponents(absolute, label);
@@ -250,7 +279,7 @@ async function readTrackedFile(relativePath, label) {
   assertRealPathInsideRepository(resolved, label);
   const repositoryPath = path.relative(repositoryRoot, absolute).replaceAll(path.sep, '/');
   git(['ls-files', '--error-unmatch', '--', repositoryPath]);
-  const workingBytes = await readFile(absolute);
+  const workingBytes = await readVerifiedRegularFile(absolute, details, label);
   const committedBytes = gitBuffer(['show', `HEAD:${repositoryPath}`]);
   if (!workingBytes.equals(committedBytes)) {
     throw new Error(`${label} bytes do not match HEAD:${repositoryPath}`);
@@ -296,7 +325,7 @@ async function collectAssetManifest(root) {
       if (details.isDirectory()) {
         await visit(absolute);
       } else if (details.isFile()) {
-        const bytes = await readFile(absolute);
+        const bytes = await readVerifiedRegularFile(absolute, details, 'build asset');
         entries.push({
           path: path.relative(root, absolute).replaceAll(path.sep, '/'),
           bytes: bytes.length,
