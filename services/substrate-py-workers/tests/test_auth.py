@@ -8,7 +8,6 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 import worker.main as worker_main
-from worker.main import app, lifespan
 from worker.security import WorkerSecurityConfigurationError, load_worker_security_config
 from worker.stages import STAGE_REGISTRY
 
@@ -66,7 +65,9 @@ def _headers(*, credential: str | None = TEST_CREDENTIAL, tenant_id: str = TENAN
 @pytest.mark.asyncio
 async def test_claim_rejects_missing_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     _enable_bearer_auth(monkeypatch)
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
         response = await client.post("/claim", json=_claim(), headers=_headers(credential=None))
 
     assert response.status_code == 401
@@ -77,7 +78,9 @@ async def test_claim_rejects_missing_auth(monkeypatch: pytest.MonkeyPatch) -> No
 @pytest.mark.asyncio
 async def test_claim_rejects_wrong_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     _enable_bearer_auth(monkeypatch)
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
         response = await client.post(
             "/claim",
             json=_claim(),
@@ -91,7 +94,9 @@ async def test_claim_rejects_wrong_auth(monkeypatch: pytest.MonkeyPatch) -> None
 @pytest.mark.asyncio
 async def test_claim_rejects_cross_tenant_mismatch(monkeypatch: pytest.MonkeyPatch) -> None:
     _enable_bearer_auth(monkeypatch)
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
         response = await client.post(
             "/claim",
             json=_claim(tenant_id="tenant-payload"),
@@ -111,7 +116,9 @@ async def test_claim_requires_tenant_in_authenticated_payload(
     _enable_bearer_auth(monkeypatch)
     claim = _claim()
     claim.pop("tenantId")
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
         response = await client.post("/claim", json=claim, headers=_headers())
 
     assert response.status_code == 422
@@ -122,7 +129,9 @@ async def test_claim_rejects_tenant_outside_credential_binding(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _enable_bearer_auth(monkeypatch)
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
         response = await client.post(
             "/claim",
             json=_claim(tenant_id="tenant-other"),
@@ -140,7 +149,9 @@ async def test_claim_accepts_matching_bearer_and_tenant(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _enable_bearer_auth(monkeypatch)
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
         response = await client.post("/claim", json=_claim(), headers=_headers())
 
     assert response.status_code == 200
@@ -215,7 +226,9 @@ async def test_every_production_marker_holds_before_claim_or_handler_side_effect
     monkeypatch.setattr(worker_main, "get_claim_loop", observed_claim_loop)
     monkeypatch.setattr(worker_main, "_resolve_stage_handler", observed_resolver)
 
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
         readiness = await client.get("/ready")
         response = await client.post("/claim", json=_claim(), headers=_headers())
 
@@ -264,7 +277,9 @@ async def test_operational_state_routes_require_authentication(
     path: str,
 ) -> None:
     _enable_bearer_auth(monkeypatch)
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
         missing = await client.get(path)
         cross_tenant = await client.get(
             path,
@@ -286,7 +301,7 @@ async def test_production_startup_rejects_missing_secret(
     monkeypatch.delenv(AUTH_BYPASS_ENV, raising=False)
 
     with pytest.raises(RuntimeError, match=API_KEY_ENV):
-        async with lifespan(app):
+        async with worker_main.lifespan(worker_main.app):
             pytest.fail("production lifespan must not start without an injected credential")
 
 
@@ -300,7 +315,7 @@ async def test_production_startup_rejects_development_bypass(
     monkeypatch.delenv(API_KEY_ENV, raising=False)
 
     with pytest.raises(RuntimeError, match="permitted only"):
-        async with lifespan(app):
+        async with worker_main.lifespan(worker_main.app):
             pytest.fail("a development label must not downgrade NODE_ENV=production")
 
 
@@ -313,7 +328,7 @@ async def test_invalid_bypass_value_fails_closed(
     monkeypatch.delenv(API_KEY_ENV, raising=False)
 
     with pytest.raises(RuntimeError, match="explicit boolean"):
-        async with lifespan(app):
+        async with worker_main.lifespan(worker_main.app):
             pytest.fail("an invalid bypass value must not be treated as disabled")
 
 
@@ -327,7 +342,7 @@ async def test_production_startup_rejects_unbound_credential(
     monkeypatch.delenv(AUTH_BYPASS_ENV, raising=False)
 
     with pytest.raises(RuntimeError, match=TENANT_ID_ENV):
-        async with lifespan(app):
+        async with worker_main.lifespan(worker_main.app):
             pytest.fail("production lifespan must not start with an unbound credential")
 
 
@@ -342,7 +357,9 @@ async def test_execution_exception_is_5xx_and_does_not_leak_internals(
         raise RuntimeError(internal_detail)
 
     monkeypatch.setitem(STAGE_REGISTRY, "exploding-test-stage", explode)
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
         response = await client.post(
             "/claim",
             json=_claim(stage_type="exploding-test-stage"),
@@ -366,7 +383,9 @@ async def test_public_probes_do_not_overstate_readiness(
     monkeypatch.delenv(API_KEY_ENV, raising=False)
     monkeypatch.delenv(AUTH_BYPASS_ENV, raising=False)
 
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
         health = await client.get("/health")
         readiness = await client.get("/ready")
 
