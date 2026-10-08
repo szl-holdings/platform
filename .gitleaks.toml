@@ -569,3 +569,18 @@ useDefault = true
       # GitHub Secrets; the string committed to source is the reference itself.
       "\\$\\{\\{\\s*secrets\\.",
     ]
+
+# Historical public tokenizer revision false positive (main push run 37728417920).
+# The exact forty-hex value is a provider-confirmed Hugging Face model commit,
+# not a credential. Keep the exception bound to that historical commit, this
+# file, and the immutable-revision assignment; all other findings remain actionable.
+[[rules]]
+  id = "generic-api-key"
+
+  [[rules.allowlists]]
+    description = "Provider-confirmed public tokenizer model revision in historical commit bff9531"
+    condition = "AND"
+    commits = ["bff95314865f57ad07c8c1dce797cef4bd141865"]
+    paths = ["^workers/alloy-vector-worker/src/tokenizer[.]ts$"]
+    regexTarget = "match"
+    regexes = ["^DEFAULT_TOKENIZER_REVISION = '[0-9a-f]{40}'$"]
