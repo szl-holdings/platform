@@ -1,11 +1,11 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Diagnostics disclose identifiers and tracked repository locations only. SARIF
 // messages, source snippets, URLs, and artifact contents are never printed.
-export function locationDiagnostics(sarif, trackedPaths, coverage = {}) {
+export function locationDiagnostics(sarif, trackedPaths, coverage = {}, includeRuleIds) {
   if (!sarif || !Array.isArray(sarif.runs)) throw new Error('Invalid SARIF');
   const output = [];
   Object.assign(coverage, {
@@ -85,21 +85,23 @@ export function locationDiagnostics(sarif, trackedPaths, coverage = {}) {
       if (result.ruleId !== undefined && result.ruleId !== rule.id)
         throw new Error('Inconsistent rule identifier');
       coverage.resolvedRules++;
+      if (includeRuleIds && !includeRuleIds.has(rule.id)) continue;
       const severity = rule.properties?.['security-severity'];
       const security = rule.properties?.tags?.includes('security');
-      if (severity === undefined && !security) continue;
+      if (severity === undefined && !security && !includeRuleIds) continue;
       const score = Number(severity);
       if (
-        severity === undefined ||
-        severity === null ||
-        severity === '' ||
-        !Number.isFinite(score) ||
-        score < 0 ||
-        score > 10
+        !includeRuleIds &&
+        (severity === undefined ||
+          severity === null ||
+          severity === '' ||
+          !Number.isFinite(score) ||
+          score < 0 ||
+          score > 10)
       )
         throw new Error('Invalid security severity');
       coverage.securityResults++;
-      if (score < 7) continue;
+      if (!includeRuleIds && score < 7) continue;
       coverage.highCriticalResults++;
       if (typeof rule.id !== 'string' || !/^[A-Za-z0-9_/-]{1,160}$/.test(rule.id))
         throw new Error('Invalid rule identifier');
@@ -172,7 +174,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
         coverage,
       );
       console.log(`::notice title=CodeQL diagnostic coverage::${JSON.stringify(coverage)}`);
-      for (const diagnostic of diagnostics) console.log(annotation(diagnostic));
+      for (const diagnostic of diagnostics.slice(0, 7)) console.log(annotation(diagnostic));
+      if (diagnostics.length > 7) {
+        console.log(
+          `::notice title=CodeQL trace annotation omissions::${JSON.stringify({ omittedResults: diagnostics.length - 7 })}`,
+        );
+      }
     }
   } catch {
     // Never echo parse errors or file contents: either could contain secrets.
