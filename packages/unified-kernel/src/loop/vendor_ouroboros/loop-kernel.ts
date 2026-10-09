@@ -26,6 +26,31 @@ const DEFAULT_CONVERGENCE = 1e-3;
 const DEFAULT_EARLY_EXIT_CONSISTENCY = 1.01; // disabled by default
 const DEFAULT_SAFE_EXIT_CONSISTENCY = 0.95;
 
+/**
+ * Step-budget contract.
+ *
+ * Recovered from szl-holdings/ouroboros src/loop-kernel.ts at
+ * 0f030741f567bdf397d33c4d607790af6ed39688. That commit also calls
+ * emitLoopReceipt; this vendor does not. Platform receipt authority stays
+ * where it is.
+ *
+ * - Omitted, null, and undefined use the default of 8.
+ * - A finite number is floored, then clamped to at least 0. Zero runs no
+ *   steps. A negative finite value, including a negative fraction, reports 0.
+ * - NaN, Infinity, and -Infinity fail closed to 8.
+ * - A non-number fails closed to 8 and does not throw. Numeric strings are
+ *   not coerced. A bigint is rejected by the typeof check and is not
+ *   converted to a number.
+ * - An ordinary finite integer is unchanged.
+ * - The trace reports the ceiling the loop actually used.
+ */
+function normalizeStepBudget(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return DEFAULT_MAX_STEPS;
+  }
+  return Math.max(0, Math.floor(value));
+}
+
 function nowMs(): number {
   // perf.now() if available, else Date.now()
   if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
@@ -59,7 +84,7 @@ export async function runLoop<S, O = unknown>(
     config = {},
   } = args;
 
-  const maxSteps = config.maxSteps ?? DEFAULT_MAX_STEPS;
+  const maxSteps = normalizeStepBudget(config.maxSteps);
   const convergenceThreshold = config.convergenceThreshold ?? DEFAULT_CONVERGENCE;
   // earlyExitConsistency: kept as-is (the >1 sentinel disables online exit).
   // We only enforce the lower bound to prevent negative thresholds from

@@ -13,7 +13,12 @@ describe("T02 loop (wired ouroboros v6.3.0)", () => {
   it("is wired to the real ouroboros runtime, not stubbed", () => {
     expect(OUROBOROS_PROVENANCE.package).toBe("@szl-holdings/ouroboros");
     expect(OUROBOROS_PROVENANCE.tag).toBe("v6.3.0");
+    expect(OUROBOROS_PROVENANCE.commit).toBe("d64748cc9ad67296be296c1ef6752ae181413fd7");
     expect(OUROBOROS_PROVENANCE.upstreamTests).toBe(218);
+    expect(OUROBOROS_PROVENANCE.budgetNormalization.commit).toBe(
+      "0f030741f567bdf397d33c4d607790af6ed39688",
+    );
+    expect(OUROBOROS_PROVENANCE.budgetNormalization.excluded).toBe("emitLoopReceipt");
   });
 
   it("a contraction map converges within budget", async () => {
