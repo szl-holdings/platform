@@ -18,6 +18,16 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 ---
 
+## A11oy Atelier
+
+| Document | Description | Last Reviewed |
+|----------|-------------|---------------|
+| [A11OY_ATELIER.md](A11OY_ATELIER.md) | Partial Atelier workbench at `/a11oy/atelier`; configured inference uses `POST /api/a11oy/v1/atelier/ask` or `a11oy-atelier ask` and fails closed without an adapter | 2026-10 |
+| [A11OY_ATELIER_PROOFWEAVE.md](A11OY_ATELIER_PROOFWEAVE.md) | `SIMULATED`, deterministic, compile-only Proofweave plan contract via `POST /api/a11oy/v1/atelier/proofweave/compile` and `a11oy-atelier weave`; no source, provider, tool, or Workcell execution | 2026-10 |
+| [A11OY_ATELIER_LICENSE_BOUNDARY.md](A11OY_ATELIER_LICENSE_BOUNDARY.md) | Dated public-source and license register with `DECLARED` implementer provenance boundaries; not an independent audit or current exhaustive inventory | 2026-10 |
+
+---
+
 ## Architecture
 
 | Document | Description | Last Reviewed |

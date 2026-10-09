@@ -1,0 +1,97 @@
+{
+  "allowed_actions": [
+    "simulate",
+    "classify synthetic observation",
+    "recommend",
+    "deny",
+    "escalate",
+    "record human decision",
+    "replay"
+  ],
+  "buyer": "Defense, critical-infrastructure, public-safety, and high-assurance engineering stakeholders evaluating governed decision controls.",
+  "core_workflows": [
+    "synthetic sensor observation",
+    "track confidence and provenance",
+    "geofence/ROE policy simulation",
+    "recommend/deny/escalate",
+    "human decision",
+    "receipt/replay/incident"
+  ],
+  "data_policy": {
+    "protected": [
+      "none required for public demo"
+    ],
+    "public": [
+      "synthetic tracks",
+      "open non-sensitive geographic fixtures"
+    ],
+    "training_use": "synthetic/open only unless a lawful partner program establishes controls"
+  },
+  "decision_problem": "Given synthetic observations and declared policy, what recommendation, refusal, escalation, or human decision is justified—and can it be replayed?",
+  "display_name": "Killinchu — Safety and Authorization Twin",
+  "formula_bindings": [
+    "F1",
+    "F7",
+    "F11",
+    "F12",
+    "F18",
+    "F19",
+    "F22",
+    "LAMBDA"
+  ],
+  "hf_space_id": "SZLHOLDINGS/killinchu",
+  "human_authority": [
+    "named human operator decides",
+    "policy owner defines simulation",
+    "safety reviewer validates scenarios"
+  ],
+  "leaders": [
+    {
+      "name": "Anduril Lattice",
+      "pattern": "common C2, sensors/effectors integration, open extensibility and operator supervision",
+      "url": "https://www.anduril.com/lattice/command-and-control"
+    },
+    {
+      "name": "Shield AI Hivemind",
+      "pattern": "platform-agnostic autonomy, simulation, rapid integration and validation",
+      "url": "https://shield.ai/"
+    },
+    {
+      "name": "Helsing",
+      "pattern": "edge processing, interoperability, sovereign systems and continuous validated improvement",
+      "url": "https://helsing.ai/"
+    }
+  ],
+  "negative_tests": [
+    "missing provenance denies",
+    "geofence conflict denies",
+    "policy absent blocks",
+    "human approval mandatory",
+    "ephemeral state blocks production readiness",
+    "no external control interface exists"
+  ],
+  "original_szl_design": "Safety and Authorization Twin: public software stops at evidence-bound recommendation, denial or escalation. Physical authority remains outside the public system.",
+  "portfolio_role": "PUBLIC_HIGH_STAKES_REFERENCE",
+  "prohibited_actions": [
+    "weapon command",
+    "target engagement",
+    "autonomous interdiction",
+    "real-world navigation control",
+    "operational targeting data",
+    "physical effector integration in public Space"
+  ],
+  "public_launch": "KEEP_PUBLIC_ONLY_AS_SIMULATED_PROPOSAL_SYSTEM",
+  "schema": "szl.vertical-cell/v1",
+  "space_visibility": "public",
+  "stage": "PUBLIC_SIMULATION_REPAIR",
+  "success_metrics": [
+    "false allow/deny",
+    "abstention/escalation",
+    "operator intervention",
+    "policy consistency",
+    "replay fidelity",
+    "runtime durability",
+    "incident recovery"
+  ],
+  "vertical_id": "killinchu"
+}
