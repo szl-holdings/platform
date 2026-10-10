@@ -12,7 +12,7 @@ The SZL Holdings platform exposes a single centralized API server (`artifacts/ap
 
 | Metric | Value |
 |--------|-------|
-| Total endpoints | 5,065 measured operations in `artifacts/SOURCE_OF_TRUTH.json` |
+| Total endpoints | 5,066 measured operations in `artifacts/SOURCE_OF_TRUTH.json` |
 | Route files | 140+ TypeScript route files in `artifacts/api-server/src/routes/` |
 | Spec format | OpenAPI 3.1 (served at `/api/docs`) |
 | JSON spec | `/api/docs.json` |

@@ -1,0 +1,116 @@
+{
+  "captured_at": "2026-08-28T23:59:00-04:00",
+  "formulas": [
+    {
+      "allowed_runtime_binding": "Receipt/DAG structural identity and deterministic graph checks.",
+      "formula_id": "F1",
+      "grants_authority": false,
+      "name": "Euler-Khipu DAG Identity",
+      "prohibited_claim": "Does not prove source truth, signature validity, business correctness, or legal admissibility.",
+      "proof_class": "LOCKED-PROVEN",
+      "required_binding_evidence": "Exact theorem/source revision; exact runtime implementation and tests; input/domain assumptions; counterexamples/limits; call-site inventory; receipt field; negative test.",
+      "source_url": "https://a-11-oy.com/formulas",
+      "verticals": "all"
+    },
+    {
+      "allowed_runtime_binding": "Deterministic aggregation surrogate under declared inputs.",
+      "formula_id": "F4",
+      "grants_authority": false,
+      "name": "Gauss-Yuyay Aggregation",
+      "prohibited_claim": "Does not prove optimal weighting, calibrated risk, or correct domain decisions.",
+      "proof_class": "LOCKED-PROVEN",
+      "required_binding_evidence": "Exact theorem/source revision; exact runtime implementation and tests; input/domain assumptions; counterexamples/limits; call-site inventory; receipt field; negative test.",
+      "source_url": "https://a-11-oy.com/formulas",
+      "verticals": "lyte,aegis,terra,insurance"
+    },
+    {
+      "allowed_runtime_binding": "Numeric provenance weighting implementation under exact assumptions.",
+      "formula_id": "F7",
+      "grants_authority": false,
+      "name": "Inverse-Square/Zeta Provenance",
+      "prohibited_claim": "Does not prove that a source is true, complete, licensed, fresh, or unbiased.",
+      "proof_class": "LOCKED-PROVEN",
+      "required_binding_evidence": "Exact theorem/source revision; exact runtime implementation and tests; input/domain assumptions; counterexamples/limits; call-site inventory; receipt field; negative test.",
+      "source_url": "https://a-11-oy.com/formulas",
+      "verticals": "all"
+    },
+    {
+      "allowed_runtime_binding": "Monotone narrowing of a defined action/search scope.",
+      "formula_id": "F11",
+      "grants_authority": false,
+      "name": "Frustum A-Shrink Law",
+      "prohibited_claim": "Does not prove that the remaining action is safe or authorized.",
+      "proof_class": "LOCKED-PROVEN",
+      "required_binding_evidence": "Exact theorem/source revision; exact runtime implementation and tests; input/domain assumptions; counterexamples/limits; call-site inventory; receipt field; negative test.",
+      "source_url": "https://a-11-oy.com/formulas",
+      "verticals": "aegis,counsel,insurance,killinchu"
+    },
+    {
+      "allowed_runtime_binding": "Deterministic bounded scheduling surrogate.",
+      "formula_id": "F12",
+      "grants_authority": false,
+      "name": "CRT-Hukulla Schedule",
+      "prohibited_claim": "Does not prove real-world resource feasibility, optimal scheduling, or consent.",
+      "proof_class": "LOCKED-PROVEN",
+      "required_binding_evidence": "Exact theorem/source revision; exact runtime implementation and tests; input/domain assumptions; counterexamples/limits; call-site inventory; receipt field; negative test.",
+      "source_url": "https://a-11-oy.com/formulas",
+      "verticals": "lyte,vessels,terra,killinchu"
+    },
+    {
+      "allowed_runtime_binding": "Bounded description/complexity cap in the proved surrogate.",
+      "formula_id": "F18",
+      "grants_authority": false,
+      "name": "Kolmogorov A-Description Cap",
+      "prohibited_claim": "Does not prove semantic correctness, privacy, or sufficient evidence.",
+      "proof_class": "LOCKED-PROVEN",
+      "required_binding_evidence": "Exact theorem/source revision; exact runtime implementation and tests; input/domain assumptions; counterexamples/limits; call-site inventory; receipt field; negative test.",
+      "source_url": "https://a-11-oy.com/formulas",
+      "verticals": "all"
+    },
+    {
+      "allowed_runtime_binding": "Finite fuel/step bound for the modeled governed loop.",
+      "formula_id": "F19",
+      "grants_authority": false,
+      "name": "Turing-Fuel Halting Safety",
+      "prohibited_claim": "Does not solve general program termination or prove external side effects stop safely.",
+      "proof_class": "LOCKED-PROVEN",
+      "required_binding_evidence": "Exact theorem/source revision; exact runtime implementation and tests; input/domain assumptions; counterexamples/limits; call-site inventory; receipt field; negative test.",
+      "source_url": "https://a-11-oy.com/formulas",
+      "verticals": "all"
+    },
+    {
+      "allowed_runtime_binding": "Deterministic bounded path aggregation in the declared formal object.",
+      "formula_id": "F22",
+      "grants_authority": false,
+      "name": "Feynman-Puriq Path Integral",
+      "prohibited_claim": "Does not prove causal effect, global optimality, or real-world outcome.",
+      "proof_class": "LOCKED-PROVEN",
+      "required_binding_evidence": "Exact theorem/source revision; exact runtime implementation and tests; input/domain assumptions; counterexamples/limits; call-site inventory; receipt field; negative test.",
+      "source_url": "https://a-11-oy.com/formulas",
+      "verticals": "lyte,aegis,vessels,terra,killinchu"
+    },
+    {
+      "allowed_runtime_binding": "Explain uniqueness only under the stated separability hypothesis.",
+      "formula_id": "THEOREM-U",
+      "grants_authority": false,
+      "name": "Conditional Lambda uniqueness",
+      "prohibited_claim": "Unconditional uniqueness remains false as stated/open; never use as universal authority.",
+      "proof_class": "SEMANTIC-VERIFIED",
+      "required_binding_evidence": "Exact theorem/source revision; exact runtime implementation and tests; input/domain assumptions; counterexamples/limits; call-site inventory; receipt field; negative test.",
+      "source_url": "https://a-11-oy.com/trust",
+      "verticals": "all"
+    },
+    {
+      "allowed_runtime_binding": "Advisory multi-axis posture, comparison and escalation signal.",
+      "formula_id": "LAMBDA",
+      "grants_authority": false,
+      "name": "Weighted geometric mean trust posture",
+      "prohibited_claim": "Never grants authorization, never replaces policy or human approval, never rendered as a proved pass/fail oracle.",
+      "proof_class": "CONJECTURE/ADVISORY",
+      "required_binding_evidence": "Exact theorem/source revision; exact runtime implementation and tests; input/domain assumptions; counterexamples/limits; call-site inventory; receipt field; negative test.",
+      "source_url": "https://a-11-oy.com/trust",
+      "verticals": "all"
+    }
+  ],
+  "schema": "szl.formula-binding-registry/v1"
+}

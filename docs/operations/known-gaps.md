@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-09-30 (rev 30 — P0 proof and separate live readiness boundaries)
+**Last updated:** 2026-10-03 (rev 31 — A11oy Atelier Proofweave compile-only boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -171,6 +171,53 @@ within that boundary; production multi-tenant confidentiality requires an
 identity-to-tenant binding before this route is publicly exposed. Protected
 source merge also does not itself deploy Atelier: a separately witnessed
 hosted build, identity configuration, and functional provider probe remain open.
+
+### 2026-10-07 A11oy terminal source-launch boundary
+
+The CLI package now includes `a11oy-atelier.ps1`, a repository-local Windows
+source launcher for an already-installed workspace with PowerShell 7.3+ and
+Node 24+. It does not depend on the generated `dist/atelier-cli.js` bin. This
+addresses source-checkout launch ergonomics only: it does not register a global
+command, edit Windows Terminal or PowerShell profiles, start the API, repair
+provider balance/authentication, or establish successful inference. A11oy's
+Partial status and all provider/deployment/security release gaps remain unchanged.
+See `packages/a11oy-cli/README.md` and
+`audit/A11OY_CLI_SOURCE_LAUNCHER_PROOF_20261007.md` for commands and scoped evidence.
+
+### 2026-10-03 A11oy Atelier Proofweave compile-only boundary
+
+The A11oy Atelier source now includes a deterministic Proofweave compiler,
+runtime-API compile route behind the configured API-key guard, explicit
+typed-claim CLI, health disclosure, and operator UI. Local development can run
+without a configured key. An authenticated local browser flow instead uses the
+explicit loopback shared-proxy bridge, which attaches a server-held key and a
+fixed tenant only to Atelier requests. Tenant attribution remains
+caller-declared rather than an authenticated human identity. The compiler
+produces a hash-addressed `PATTERN -> CUT -> STITCH -> FITTING -> LABEL` plan
+with evidence class `SIMULATED` and the separate lifecycle states `DEMO`,
+`COMPILED_NOT_EXECUTED`, and `IN_PROCESS_NOT_STORED`.
+
+The browser transport is local-development only. Production browser health,
+inference, and compile actions fail closed as `BLOCKED`, with runtime evidence
+`UNKNOWN`, because no authenticated server-side session/BFF currently exists.
+Provider keys remain server-side; exposing an API key through a `VITE_*`
+variable or browser request is not an accepted workaround. The loopback bridge
+is a single-operator development transport, not production browser identity.
+
+This closes the compile-contract and source-wiring gap only. The compiler does
+not fetch declared sources, resolve or prove Git revisions, invoke a model,
+execute tools or Workcells, start subagents, run its automated review, grant
+human approval, or durably store the plan. The route requires an audit-metadata
+append, but the backend is configuration-dependent, durable persistence is
+`UNKNOWN`, and tenant attribution has evidence class `DECLARED`. A
+syntactically valid 40-hex revision is an operator declaration, not proof that
+the revision exists, is reachable from the named repository, or binds fetched
+bytes.
+
+Focused local tests and typechecks establish only behavior in the isolated
+local harness. Exact-head hosted CI, protected merge, deployment, production
+health, durable-ledger witness, and external provider behavior remain separate
+evidence states and must not be inferred from a local pass or HTTP response.
 
 ---
 

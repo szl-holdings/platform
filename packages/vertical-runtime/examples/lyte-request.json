@@ -1,0 +1,21 @@
+{
+  "action": "recommend",
+  "evidence": [
+    {
+      "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "evidence_class": "MODELED",
+      "freshness": "CURRENT",
+      "id": "sample-evidence-1",
+      "limitations": [
+        "SAMPLE_HANDLE_NOT_REAL_EVIDENCE",
+        "FRESHNESS_CALLER_DECLARED"
+      ]
+    }
+  ],
+  "principal": {
+    "authority_claims": [],
+    "id": "sample-operator"
+  },
+  "request_id": "sample-lyte-request-1",
+  "workflow": "scope readiness"
+}
