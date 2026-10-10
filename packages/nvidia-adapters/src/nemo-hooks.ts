@@ -1,4 +1,5 @@
 import { createLogger } from './logger.js';
+import { scoreLocalAdapterCase, type LocalAdapterStrategy } from './token-overlap.js';
 
 const logger = createLogger('nvidia-adapters:nemo');
 
@@ -18,7 +19,7 @@ export interface NemoEvalConfig {
   modelId: string;
   endpointUrl?: string;
   cases: NemoEvalCase[];
-  scoringStrategy: 'keyword_match' | 'semantic_similarity' | 'llm_judge' | 'exact_match';
+  scoringStrategy: LocalAdapterStrategy;
   passThreshold: number;
   tags: string[];
 }
@@ -46,6 +47,7 @@ export interface NemoEvalReport {
   results: NemoEvalRunResult[];
   passedThreshold: boolean;
   recommendation: 'promote' | 'hold' | 'reject';
+  evaluator: 'local-token-adapter';
 }
 
 export interface NemoObservabilityEvent {
@@ -148,6 +150,7 @@ class NemoHooks {
       results,
       passedThreshold,
       recommendation,
+      evaluator: 'local-token-adapter',
     };
 
     this.reports.unshift(report);
@@ -173,7 +176,7 @@ class NemoHooks {
 
     logger.info(
       { suiteId, modelId: suite.modelId, passRate, recommendation },
-      'NeMo eval complete',
+      'local token-overlap eval complete',
     );
     return report;
   }
@@ -218,47 +221,12 @@ class NemoHooks {
     evalCase: NemoEvalCase,
     strategy: NemoEvalConfig['scoringStrategy'],
   ): { passed: boolean; score: number; failureReason?: string } {
-    switch (strategy) {
-      case 'keyword_match': {
-        if (!evalCase.expectedKeywords?.length) return { passed: true, score: 1.0 };
-        const found = evalCase.expectedKeywords.filter((k) =>
-          output.toLowerCase().includes(k.toLowerCase()),
-        );
-        const score = found.length / evalCase.expectedKeywords.length;
-        const missing = evalCase.expectedKeywords.filter(
-          (k) => !output.toLowerCase().includes(k.toLowerCase()),
-        );
-        return {
-          passed: score >= 0.8,
-          score,
-          failureReason: missing.length > 0 ? `Missing: ${missing.join(', ')}` : undefined,
-        };
-      }
-      case 'exact_match': {
-        const passed = output.trim() === (evalCase.expectedOutput ?? '').trim();
-        return {
-          passed,
-          score: passed ? 1.0 : 0.0,
-          failureReason: passed ? undefined : 'Output does not exactly match expected',
-        };
-      }
-      case 'semantic_similarity':
-      case 'llm_judge': {
-        if (!evalCase.expectedOutput) return { passed: true, score: 1.0 };
-        const words = new Set(output.toLowerCase().split(/\s+/));
-        const expectedWords = new Set(evalCase.expectedOutput.toLowerCase().split(/\s+/));
-        const intersection = new Set([...words].filter((w) => expectedWords.has(w)));
-        const union = new Set([...words, ...expectedWords]);
-        const score = union.size > 0 ? intersection.size / union.size : 0;
-        return {
-          passed: score >= 0.4,
-          score,
-          failureReason: score < 0.4 ? 'Low semantic similarity to expected output' : undefined,
-        };
-      }
-      default:
-        return { passed: true, score: 1.0 };
-    }
+    const scored = scoreLocalAdapterCase(output, evalCase, strategy);
+    return {
+      passed: scored.passed,
+      score: scored.score,
+      failureReason: scored.failureReason,
+    };
   }
 }
 
