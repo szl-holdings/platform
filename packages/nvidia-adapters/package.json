@@ -2,7 +2,7 @@
   "name": "@szl-holdings/nvidia-adapters",
   "version": "0.0.0",
   "private": false,
-  "description": "Optional NVIDIA-ready adapters — NIM model endpoints, NeMo evaluation hooks, agent profiling. No GPU dependency required for development.",
+  "description": "Optional local adapters for keyword and token-overlap checks, plus NIM endpoint placeholders and agent profiling. The overlap score is not an NVIDIA evaluation and not an LLM judge. No GPU dependency required for development.",
   "repository": {
     "type": "git",
     "url": "https://github.com/szl-holdings/platform.git",
