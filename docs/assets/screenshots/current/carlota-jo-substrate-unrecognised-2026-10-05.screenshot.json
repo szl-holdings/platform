@@ -1,0 +1,22 @@
+{
+  "sourceCommit": "42e97fbc92447555cd700389006d0986e613e885",
+  "sourceTree": "f329da317191745a95e7ae8498f2541bb634c161",
+  "candidateCommit": "a8a5fd7322854e7f9b18b635ccc0453ca3f71f92",
+  "candidateTree": null,
+  "matchesCandidateTree": null,
+  "route": "/governed-cockpit",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "capturedAt": "2026-10-05T12:24:53.220Z",
+  "scenario": "unrecognised",
+  "fixtureOnly": true,
+  "authority": "HOSTED_SYNTHETIC_UI",
+  "screenshotSha256": "435fd0e1c5c89dbe80e844a2ff0de77ce80e9695f46cc02530a92333325d878e",
+  "sourceHashes": {
+    "artifacts/carlota-jo/src/components/SubstrateWorkflowPanel.tsx": "01eeb857ff75999edf9507657a730c37e6daaf600a08f7f6415ee37332034f52",
+    "artifacts/carlota-jo/src/components/substrate-run-view.ts": "e2721b6eaf422adeb8cbf840e2ac9b68eeb26bc882a69ee85395936b8c2de772",
+    "tests/e2e/carlota-jo.spec.ts": "32ba4c5b4602521d83f3ec79648a02bc70351983a8cac0686ca406310bc77dfb"
+  }
+}

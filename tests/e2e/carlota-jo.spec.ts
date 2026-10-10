@@ -1,7 +1,281 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator, type Page, type Route, type TestInfo } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const CARLOTA_PATH = (process.env.CARLOTA_BASE_PATH ?? '/carlota-jo').replace(/\/$/, '');
+
+async function mountWorkflowPanel(page: Page, responses: Record<string, unknown>[]) {
+  const target = new URL(process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:80');
+  expect(['localhost', '127.0.0.1', '[::1]']).toContain(target.hostname);
+  const requests: Record<string, unknown>[] = [];
+  const queue = [...responses];
+  await page.route('**/*', async (route) => {
+    const url = new URL(route.request().url());
+    if (url.origin !== target.origin) {
+      await route.abort('blockedbyclient');
+    } else if (url.pathname.startsWith('/api/')) {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Unavailable in the synthetic panel test' }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+  await page.route('**/api/control-tower/substrate/run', async (route) => {
+    expect(route.request().method()).toBe('POST');
+    requests.push(route.request().postDataJSON() as Record<string, unknown>);
+    const response = queue.shift();
+    expect(response, 'Each Run must have an intercepted fixture').toBeDefined();
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(response),
+    });
+  });
+  await page.goto(`${CARLOTA_PATH}/governed-cockpit`);
+  const panel = page.locator('div.rounded-lg').filter({
+    has: page.getByText('White-Glove Task Routing', { exact: true }),
+  }).first();
+  await expect(panel).toBeVisible();
+  return { panel, requests };
+}
+
+async function captureWorkflowPanel(
+  panel: Locator,
+  page: Page,
+  testInfo: TestInfo,
+  scenario: string,
+) {
+  const outputDir = join('playwright-report', 'carlota-substrate');
+  mkdirSync(outputDir, { recursive: true });
+  const screenshotPath = join(outputDir, `${scenario}-retry-${testInfo.retry}.png`);
+  const screenshot = await panel.screenshot({ path: screenshotPath });
+  const sourcePaths = [
+    'artifacts/carlota-jo/src/components/SubstrateWorkflowPanel.tsx',
+    'artifacts/carlota-jo/src/components/substrate-run-view.ts',
+    'tests/e2e/carlota-jo.spec.ts',
+  ];
+  execFileSync('git', ['diff', '--exit-code', 'HEAD', '--', ...sourcePaths]);
+  const revision = (args: string[]) => execFileSync('git', args, {
+    encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
+  let candidateCommit: string | null = null;
+  if (process.env.GITHUB_EVENT_PATH) {
+    const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+    candidateCommit = event.pull_request?.head?.sha ?? null;
+  }
+  const sourceCommit = revision(['rev-parse', 'HEAD']);
+  const sourceTree = revision(['rev-parse', 'HEAD^{tree}']);
+  let candidateTree: string | null = null;
+  if (candidateCommit) {
+    try {
+      candidateTree = revision(['rev-parse', `${candidateCommit}^{tree}`]);
+    } catch {
+      // A shallow PR checkout may only contain the synthetic merge commit.
+    }
+  }
+  const metadata = {
+    sourceCommit,
+    sourceTree,
+    candidateCommit,
+    candidateTree,
+    matchesCandidateTree: candidateTree === null ? null : candidateTree === sourceTree,
+    route: new URL(page.url()).pathname,
+    viewport: page.viewportSize(),
+    capturedAt: new Date().toISOString(),
+    scenario,
+    fixtureOnly: true,
+    authority: 'HOSTED_SYNTHETIC_UI',
+    screenshotSha256: createHash('sha256').update(screenshot).digest('hex'),
+    sourceHashes: Object.fromEntries(sourcePaths.map((path) => [
+      path, createHash('sha256').update(readFileSync(path)).digest('hex'),
+    ])),
+  };
+  const metadataPath = screenshotPath.replace(/\.png$/, '.json');
+  writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
+  await testInfo.attach(`substrate-${scenario}`, { path: screenshotPath, contentType: 'image/png' });
+  await testInfo.attach(`substrate-${scenario}-source`, {
+    path: metadataPath, contentType: 'application/json',
+  });
+}
+
+test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
+  for (const mode of ['dry-run', 'live'] as const) {
+    test(`a returned ${mode} running run keeps controls locked`, async ({ page }, testInfo) => {
+      const { panel, requests } = await mountWorkflowPanel(page, [{
+        runId: `fixture-running-${mode}`, status: 'running', mode,
+      }]);
+      await panel.locator('select').selectOption(mode);
+      await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+      await expect(panel.getByText(`fixture-running-${mode}`, { exact: true })).toBeVisible();
+      const runButton = panel.getByRole('button', { name: 'Run on Substrate' });
+      await expect(runButton).toBeDisabled();
+      await expect(panel.locator('select')).toBeDisabled();
+      // Native repeated clicks cannot start another live or demo run while active.
+      await runButton.evaluate((button) => {
+        (button as HTMLButtonElement).click();
+        (button as HTMLButtonElement).click();
+      });
+      expect(requests).toHaveLength(1);
+      expect(requests[0]?.mode).toBe(mode);
+      await captureWorkflowPanel(panel, page, testInfo, `running-${mode}`);
+    });
+
+    test(`${mode} completion without a run identity remains unverified`, async ({ page }, testInfo) => {
+      const { panel } = await mountWorkflowPanel(page, [{
+        status: mode === 'live' ? 'completed' : 'dry-run-complete', mode,
+        ...(mode === 'live' ? { runId: '   ' } : {}),
+      }]);
+      await panel.locator('select').selectOption(mode);
+      await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+      await expect(panel.getByText('STATE UNVERIFIED', { exact: true })).toBeVisible();
+      await expect(panel.getByText(/COMPLETED|DRY-RUN COMPLETE/)).toHaveCount(0);
+      await expect(panel.getByRole('button', { name: 'Run on Substrate' })).toBeEnabled();
+      await captureWorkflowPanel(panel, page, testInfo, `missing-identity-${mode}`);
+    });
+  }
+
+  test('an interrupted submission stays locked until failure then permits an identified retry', async ({ page }) => {
+    const { panel, requests } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-recovered', status: 'completed', mode: 'live',
+    }]);
+    let interrupt!: () => void;
+    const interrupted = new Promise<void>((resolve) => { interrupt = resolve; });
+    let submissions = 0;
+    const interruptRequest = async (route: Route) => {
+      submissions += 1;
+      await interrupted;
+      await route.abort('connectionreset');
+    };
+    await page.route('**/api/control-tower/substrate/run', interruptRequest);
+    await panel.locator('select').selectOption('live');
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    const runningButton = panel.getByRole('button', { name: /^Running/ });
+    await expect(runningButton).toBeDisabled();
+    await expect(panel.locator('select')).toBeDisabled();
+    await runningButton.evaluate((button) => {
+      (button as HTMLButtonElement).click();
+      (button as HTMLButtonElement).click();
+    });
+    await expect.poll(() => submissions).toBe(1);
+    interrupt();
+    await expect(panel.getByText(/FAILED$/, { exact: true })).toBeVisible();
+    await expect(panel.getByRole('button', { name: 'Run on Substrate' })).toBeEnabled();
+    await expect(panel.locator('select')).toBeEnabled();
+    await page.unroute('**/api/control-tower/substrate/run', interruptRequest);
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    await expect(panel.getByText('fixture-recovered', { exact: true })).toBeVisible();
+    expect(requests).toHaveLength(1);
+  });
+
+  test('dry-run confidence escalation remains pending human review', async ({ page }, testInfo) => {
+    const { panel, requests } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-dry-pending',
+      status: 'pending-approval',
+      mode: 'dry-run',
+      stageResults: [{
+        stageId: 'retrieve-client-context', stageType: 'Retrieve',
+        status: 'pending-approval', confidence: 0.2,
+        routingDecision: 'escalated-human', approvalId: 'fixture-approval',
+      }],
+    }]);
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    await expect(panel.getByText('fixture-dry-pending', { exact: true })).toBeVisible();
+    await expect(panel.getByText('DEMO · PENDING APPROVAL', { exact: true })).toBeVisible();
+    await expect(panel.getByText('Not reported', { exact: true })).toBeVisible();
+    await expect(panel.getByText('20%', { exact: true })).toBeVisible();
+    await expect(panel.getByText(/human review is required/)).toBeVisible();
+    await expect(panel.getByText(/paused at approval gate/)).toHaveCount(0);
+    await expect(panel.getByText('✓ COMPLETED', { exact: true })).toHaveCount(0);
+    expect(requests[0]?.mode).toBe('dry-run');
+    await captureWorkflowPanel(panel, page, testInfo, 'dry-run-pending');
+  });
+
+  test('live completion reports missing confidence without SLA or signature claims', async ({
+    page,
+  }, testInfo) => {
+    const { panel } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-live-completed', status: 'completed', mode: 'live', stageResults: [],
+    }]);
+    await panel.locator('select').selectOption('live');
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    await expect(panel.getByText('fixture-live-completed', { exact: true })).toBeVisible();
+    await expect(panel.getByText('✓ COMPLETED', { exact: true })).toBeVisible();
+    await expect(panel.getByText('Not reported', { exact: true })).toBeVisible();
+    await expect(panel.getByText('SLA', { exact: true })).toHaveCount(0);
+    await expect(panel.getByText('evidence-signed', { exact: true })).toHaveCount(0);
+    await expect(panel.getByText(/DRY-RUN/)).toHaveCount(0);
+    await captureWorkflowPanel(panel, page, testInfo, 'live-completed');
+  });
+
+  for (const outcome of [
+    { status: 'failed', label: '✗ FAILED' },
+    { status: 'cancelled', label: 'CANCELLED' },
+    { status: 'unrecognised', label: 'STATE UNVERIFIED' },
+  ]) {
+    test(`HTTP-success ${outcome.status} is not shown as completed`, async ({ page }, testInfo) => {
+      const { panel } = await mountWorkflowPanel(page, [{
+        runId: `fixture-${outcome.status}`,
+        status: outcome.status,
+        mode: 'live',
+        ...(outcome.status === 'failed' ? { error: 'Synthetic verifier failed' } : {}),
+      }]);
+      await panel.locator('select').selectOption('live');
+      await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+      await expect(panel.getByText(`fixture-${outcome.status}`, { exact: true })).toBeVisible();
+      await expect(panel.getByText(outcome.label, { exact: true })).toBeVisible();
+      await expect(panel.getByRole('button', { name: 'Run on Substrate' })).toBeEnabled();
+      await expect(panel.locator('select')).toBeEnabled();
+      await expect(panel.getByText('✓ COMPLETED', { exact: true })).toHaveCount(0);
+      if (outcome.status === 'failed') {
+        await expect(panel.getByText('Synthetic verifier failed', { exact: true })).toBeVisible();
+      }
+      await captureWorkflowPanel(panel, page, testInfo, outcome.status);
+    });
+  }
+
+  test('a mismatched response mode leaves completion unverified', async ({ page }, testInfo) => {
+    const { panel } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-mode-mismatch', status: 'completed', mode: 'live',
+    }]);
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    await expect(panel.getByText('fixture-mode-mismatch', { exact: true })).toBeVisible();
+    await expect(panel.getByText('STATE UNVERIFIED', { exact: true })).toBeVisible();
+    await expect(panel.getByText('✓ COMPLETED', { exact: true })).toHaveCount(0);
+    await captureWorkflowPanel(panel, page, testInfo, 'mode-mismatch');
+  });
+
+  test('repeated Run clears prior data and retains each result mode', async ({ page }, testInfo) => {
+    const { panel, requests } = await mountWorkflowPanel(page, [
+      {
+        runId: 'fixture-first', status: 'dry-run-complete', mode: 'dry-run', finalConfidence: 0.81,
+        stageResults: [{ stageId: 'fixture-old-stage', status: 'completed', confidence: 0.81 }],
+      },
+      { runId: 'fixture-second', status: 'completed', mode: 'live', stageResults: [] },
+    ]);
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    await expect(panel.getByText('fixture-first', { exact: true })).toBeVisible();
+    await expect(panel.getByText('DEMO · DRY-RUN COMPLETE', { exact: true })).toBeVisible();
+    await captureWorkflowPanel(panel, page, testInfo, 'repeated-dry-run');
+    await panel.locator('select').selectOption('live');
+    await expect(panel.getByText(/requested:dry-run/)).toBeVisible();
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    await expect(panel.getByText('fixture-second', { exact: true })).toBeVisible();
+    await expect(panel.getByText('✓ COMPLETED', { exact: true })).toBeVisible();
+    await expect(panel.getByText('Not reported', { exact: true })).toBeVisible();
+    await expect(panel.getByText('fixture-first', { exact: true })).toHaveCount(0);
+    await expect(panel.getByText('fixture-old-stage', { exact: true })).toHaveCount(0);
+    await expect(panel.getByText(/DRY-RUN/)).toHaveCount(0);
+    expect(requests.map((request) => request.mode)).toEqual(['dry-run', 'live']);
+    expect(requests.every((request) => request.workflowId === 'carlota-jo-task-routing')).toBe(true);
+    await captureWorkflowPanel(panel, page, testInfo, 'repeated-live');
+  });
+});
 
 let appAvailable = false;
 test.beforeAll(async ({ browser }) => {
