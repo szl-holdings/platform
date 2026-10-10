@@ -1,0 +1,1022 @@
+{
+  "schema": "szl.screenshot-proof/v1",
+  "state": "VERIFIED",
+  "source_revision": "5341c52477317680991adf958b635d33f3a876b8",
+  "source_identity": {
+    "kind": "git-checkout",
+    "revision": "5341c52477317680991adf958b635d33f3a876b8"
+  },
+  "capture_environment": "local-exact-head",
+  "captured_by": "Codex / PixelProof",
+  "workflow_run_or_command": "corepack pnpm --dir artifacts/a11oy build; corepack pnpm --dir artifacts/a11oy exec vite preview --host 127.0.0.1 --port 4110 --strictPort; SOURCE_REVISION=5341c52477317680991adf958b635d33f3a876b8 SCREENSHOT_PLAN=.verification/a11oy-atelier-proofweave-capture-plan.json SCREENSHOT_BASE_URL=http://127.0.0.1:4110 SCREENSHOT_OUTPUT_DIR=.verification/a11oy-atelier-proofweave-screenshot-proof-5341c52 CAPTURE_ENVIRONMENT=local-exact-head CAPTURED_BY=\"Codex / PixelProof\" node scripts/qa/capture-screenshot-proof.mjs",
+  "browser": {
+    "engine": "chromium",
+    "version": "148.0.7778.96"
+  },
+  "allowed_origins": ["http://127.0.0.1:4110"],
+  "network_policy": {
+    "http": "declared-origins-only",
+    "service_workers": "blocked",
+    "web_sockets": "blocked"
+  },
+  "evidence": [
+    {
+      "filename": "a11oy-atelier-proofweave-2026-10-03-1440x1164.png",
+      "route": "/a11oy/atelier",
+      "url": "http://127.0.0.1:4110/a11oy/atelier",
+      "surface": "a11oy-atelier-proofweave",
+      "response_status": 200,
+      "capture_date": "2026-10-03",
+      "captured_at": "2026-10-03T11:28:05.872Z",
+      "captured_by": "Codex / PixelProof",
+      "capture_environment": "local-exact-head",
+      "source_revision": "5341c52477317680991adf958b635d33f3a876b8",
+      "source_identity": {
+        "kind": "git-checkout",
+        "revision": "5341c52477317680991adf958b635d33f3a876b8"
+      },
+      "workflow_run_or_command": "corepack pnpm --dir artifacts/a11oy build; corepack pnpm --dir artifacts/a11oy exec vite preview --host 127.0.0.1 --port 4110 --strictPort; SOURCE_REVISION=5341c52477317680991adf958b635d33f3a876b8 SCREENSHOT_PLAN=.verification/a11oy-atelier-proofweave-capture-plan.json SCREENSHOT_BASE_URL=http://127.0.0.1:4110 SCREENSHOT_OUTPUT_DIR=.verification/a11oy-atelier-proofweave-screenshot-proof-5341c52 CAPTURE_ENVIRONMENT=local-exact-head CAPTURED_BY=\"Codex / PixelProof\" node scripts/qa/capture-screenshot-proof.mjs",
+      "viewport": {
+        "width": 1440,
+        "height": 1164
+      },
+      "expected_heading": "A11oy Atelier",
+      "minimum_screenshot_reveal_elements": 0,
+      "scroll_reveal": {
+        "marked_elements": 0,
+        "unrevealed_elements": 0,
+        "maximum_scroll_top": 542,
+        "reached_bottom_scroll_top": 542,
+        "final_scroll_top": 0,
+        "sweep_steps": 6
+      },
+      "artifact_sha256": "b222810bcaad94df4f994143d59d8017047f38ffc5498b5cc7a3ea02f7873e75",
+      "console_errors": [],
+      "page_errors": [],
+      "request_failures": [],
+      "bad_responses": [],
+      "undeclared_requests": [],
+      "state": {
+        "title": "A11oy Atelier — Evidence-Bound Intelligence",
+        "readyState": "complete",
+        "screenshotReady": true,
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "horizontalOverflow": false,
+        "overflowingElements": [],
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": [],
+        "interactiveCount": 131,
+        "unnamedInteractiveElements": [],
+        "undersizedInteractiveElements": [],
+        "inlineTextLinkExemptions": [],
+        "localLinkChecks": [
+          {
+            "href": "http://127.0.0.1:4110/a11oy/",
+            "final_url": "http://127.0.0.1:4110/a11oy/",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/a11oy-code",
+            "final_url": "http://127.0.0.1:4110/a11oy/a11oy-code",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/a2a-interop",
+            "final_url": "http://127.0.0.1:4110/a11oy/a2a-interop",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/about",
+            "final_url": "http://127.0.0.1:4110/a11oy/about",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/actions",
+            "final_url": "http://127.0.0.1:4110/a11oy/actions",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/adversarial",
+            "final_url": "http://127.0.0.1:4110/a11oy/adversarial",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/agent-bom",
+            "final_url": "http://127.0.0.1:4110/a11oy/agent-bom",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/agent-identity",
+            "final_url": "http://127.0.0.1:4110/a11oy/agent-identity",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/agent-mesh",
+            "final_url": "http://127.0.0.1:4110/a11oy/agent-mesh",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/agent-viz",
+            "final_url": "http://127.0.0.1:4110/a11oy/agent-viz",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/agent-zero-trust",
+            "final_url": "http://127.0.0.1:4110/a11oy/agent-zero-trust",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/agentic-rag",
+            "final_url": "http://127.0.0.1:4110/a11oy/agentic-rag",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/agents",
+            "final_url": "http://127.0.0.1:4110/a11oy/agents",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/ai-user-turn",
+            "final_url": "http://127.0.0.1:4110/a11oy/ai-user-turn",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/alert-triage",
+            "final_url": "http://127.0.0.1:4110/a11oy/alert-triage",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/alignment-review",
+            "final_url": "http://127.0.0.1:4110/a11oy/alignment-review",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/applications",
+            "final_url": "http://127.0.0.1:4110/a11oy/applications",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/approval-queue",
+            "final_url": "http://127.0.0.1:4110/a11oy/approval-queue",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/architecture",
+            "final_url": "http://127.0.0.1:4110/a11oy/architecture",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/atelier",
+            "final_url": "http://127.0.0.1:4110/a11oy/atelier",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/atelier#main-content",
+            "ok": true,
+            "status": null,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/atlas-shield",
+            "final_url": "http://127.0.0.1:4110/a11oy/atlas-shield",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/behavioral-audit",
+            "final_url": "http://127.0.0.1:4110/a11oy/behavioral-audit",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/boardroom",
+            "final_url": "http://127.0.0.1:4110/a11oy/boardroom",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/brief",
+            "final_url": "http://127.0.0.1:4110/a11oy/brief",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/capability-trajectory",
+            "final_url": "http://127.0.0.1:4110/a11oy/capability-trajectory",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/care",
+            "final_url": "http://127.0.0.1:4110/a11oy/care",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/causal-rca",
+            "final_url": "http://127.0.0.1:4110/a11oy/causal-rca",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/cavd",
+            "final_url": "http://127.0.0.1:4110/a11oy/cavd",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/code-behaviors",
+            "final_url": "http://127.0.0.1:4110/a11oy/code-behaviors",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/command",
+            "final_url": "http://127.0.0.1:4110/a11oy/command",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/compartments",
+            "final_url": "http://127.0.0.1:4110/a11oy/compartments",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/compass",
+            "final_url": "http://127.0.0.1:4110/a11oy/compass",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/connectors",
+            "final_url": "http://127.0.0.1:4110/a11oy/connectors",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/constellation",
+            "final_url": "http://127.0.0.1:4110/a11oy/constellation",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/constitution",
+            "final_url": "http://127.0.0.1:4110/a11oy/constitution",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/constitution-dsl",
+            "final_url": "http://127.0.0.1:4110/a11oy/constitution-dsl",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/control-tower",
+            "final_url": "http://127.0.0.1:4110/a11oy/control-tower",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/convergence",
+            "final_url": "http://127.0.0.1:4110/a11oy/convergence",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/cost-monitoring",
+            "final_url": "http://127.0.0.1:4110/a11oy/cost-monitoring",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/counterfactuals",
+            "final_url": "http://127.0.0.1:4110/a11oy/counterfactuals",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/covenant-lift",
+            "final_url": "http://127.0.0.1:4110/a11oy/covenant-lift",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/cyber-resilience",
+            "final_url": "http://127.0.0.1:4110/a11oy/cyber-resilience",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/defender-credits",
+            "final_url": "http://127.0.0.1:4110/a11oy/defender-credits",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/delegation-chain",
+            "final_url": "http://127.0.0.1:4110/a11oy/delegation-chain",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/doctrine",
+            "final_url": "http://127.0.0.1:4110/a11oy/doctrine",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/evals",
+            "final_url": "http://127.0.0.1:4110/a11oy/evals",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/explainability",
+            "final_url": "http://127.0.0.1:4110/a11oy/explainability",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/fabric",
+            "final_url": "http://127.0.0.1:4110/a11oy/fabric",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/fabric/decisions",
+            "final_url": "http://127.0.0.1:4110/a11oy/fabric/decisions",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/fabric/evidence",
+            "final_url": "http://127.0.0.1:4110/a11oy/fabric/evidence",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/fabric/outcomes",
+            "final_url": "http://127.0.0.1:4110/a11oy/fabric/outcomes",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/fabric/risks",
+            "final_url": "http://127.0.0.1:4110/a11oy/fabric/risks",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/fabric/roadmap",
+            "final_url": "http://127.0.0.1:4110/a11oy/fabric/roadmap",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/fabric/signals",
+            "final_url": "http://127.0.0.1:4110/a11oy/fabric/signals",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/fabric/twins",
+            "final_url": "http://127.0.0.1:4110/a11oy/fabric/twins",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/fabric/verticals",
+            "final_url": "http://127.0.0.1:4110/a11oy/fabric/verticals",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/flexcache",
+            "final_url": "http://127.0.0.1:4110/a11oy/flexcache",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/formal-verification",
+            "final_url": "http://127.0.0.1:4110/a11oy/formal-verification",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/frontier",
+            "final_url": "http://127.0.0.1:4110/a11oy/frontier",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/gard-robustness",
+            "final_url": "http://127.0.0.1:4110/a11oy/gard-robustness",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/glasswing",
+            "final_url": "http://127.0.0.1:4110/a11oy/glasswing",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/glasswing-partners",
+            "final_url": "http://127.0.0.1:4110/a11oy/glasswing-partners",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/governance",
+            "final_url": "http://127.0.0.1:4110/a11oy/governance",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/hatun-spec",
+            "final_url": "http://127.0.0.1:4110/a11oy/hatun-spec",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/intent-router",
+            "final_url": "http://127.0.0.1:4110/a11oy/intent-router",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/investor-demo",
+            "final_url": "http://127.0.0.1:4110/a11oy/investor-demo",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/karpathy-evolution",
+            "final_url": "http://127.0.0.1:4110/a11oy/karpathy-evolution",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/learning",
+            "final_url": "http://127.0.0.1:4110/a11oy/learning",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/mcp-hub",
+            "final_url": "http://127.0.0.1:4110/a11oy/mcp-hub",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/memory",
+            "final_url": "http://127.0.0.1:4110/a11oy/memory",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/model-router",
+            "final_url": "http://127.0.0.1:4110/a11oy/model-router",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/nexus",
+            "final_url": "http://127.0.0.1:4110/a11oy/nexus",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/now",
+            "final_url": "http://127.0.0.1:4110/a11oy/now",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/observability-as-code",
+            "final_url": "http://127.0.0.1:4110/a11oy/observability-as-code",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/ontology",
+            "final_url": "http://127.0.0.1:4110/a11oy/ontology",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/orchestration",
+            "final_url": "http://127.0.0.1:4110/a11oy/orchestration",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/outcomes",
+            "final_url": "http://127.0.0.1:4110/a11oy/outcomes",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/pce",
+            "final_url": "http://127.0.0.1:4110/a11oy/pce",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/pipeline",
+            "final_url": "http://127.0.0.1:4110/a11oy/pipeline",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/planner",
+            "final_url": "http://127.0.0.1:4110/a11oy/planner",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/playbook-engine",
+            "final_url": "http://127.0.0.1:4110/a11oy/playbook-engine",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/precision-ai",
+            "final_url": "http://127.0.0.1:4110/a11oy/precision-ai",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/product-journey",
+            "final_url": "http://127.0.0.1:4110/a11oy/product-journey",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/proof",
+            "final_url": "http://127.0.0.1:4110/a11oy/proof",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/recommendations",
+            "final_url": "http://127.0.0.1:4110/a11oy/recommendations",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/red-team",
+            "final_url": "http://127.0.0.1:4110/a11oy/red-team",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/resilience",
+            "final_url": "http://127.0.0.1:4110/a11oy/resilience",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/resources",
+            "final_url": "http://127.0.0.1:4110/a11oy/resources",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/reward-hacking",
+            "final_url": "http://127.0.0.1:4110/a11oy/reward-hacking",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/right-to-audit",
+            "final_url": "http://127.0.0.1:4110/a11oy/right-to-audit",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/risk-reports",
+            "final_url": "http://127.0.0.1:4110/a11oy/risk-reports",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/robustness-wall",
+            "final_url": "http://127.0.0.1:4110/a11oy/robustness-wall",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/sdk",
+            "final_url": "http://127.0.0.1:4110/a11oy/sdk",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/security-agents",
+            "final_url": "http://127.0.0.1:4110/a11oy/security-agents",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/security-compliance",
+            "final_url": "http://127.0.0.1:4110/a11oy/security-compliance",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/self-healing",
+            "final_url": "http://127.0.0.1:4110/a11oy/self-healing",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/self-optimization",
+            "final_url": "http://127.0.0.1:4110/a11oy/self-optimization",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/signals",
+            "final_url": "http://127.0.0.1:4110/a11oy/signals",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/sim-governance",
+            "final_url": "http://127.0.0.1:4110/a11oy/sim-governance",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/skills",
+            "final_url": "http://127.0.0.1:4110/a11oy/skills",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/snapshot-provenance",
+            "final_url": "http://127.0.0.1:4110/a11oy/snapshot-provenance",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/sovereign",
+            "final_url": "http://127.0.0.1:4110/a11oy/sovereign",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/start",
+            "final_url": "http://127.0.0.1:4110/a11oy/start",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/substrate-compute",
+            "final_url": "http://127.0.0.1:4110/a11oy/substrate-compute",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/supply-chain",
+            "final_url": "http://127.0.0.1:4110/a11oy/supply-chain",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/swarm-orchestrator",
+            "final_url": "http://127.0.0.1:4110/a11oy/swarm-orchestrator",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/synthetic-metrics",
+            "final_url": "http://127.0.0.1:4110/a11oy/synthetic-metrics",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/terminal",
+            "final_url": "http://127.0.0.1:4110/a11oy/terminal",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/tools",
+            "final_url": "http://127.0.0.1:4110/a11oy/tools",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/toto-forecaster",
+            "final_url": "http://127.0.0.1:4110/a11oy/toto-forecaster",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/transparency-report",
+            "final_url": "http://127.0.0.1:4110/a11oy/transparency-report",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/trust",
+            "final_url": "http://127.0.0.1:4110/a11oy/trust",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/trust-exchange",
+            "final_url": "http://127.0.0.1:4110/a11oy/trust-exchange",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/trust-portal",
+            "final_url": "http://127.0.0.1:4110/a11oy/trust-portal",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/twins",
+            "final_url": "http://127.0.0.1:4110/a11oy/twins",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/verifier",
+            "final_url": "http://127.0.0.1:4110/a11oy/verifier",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/verticals",
+            "final_url": "http://127.0.0.1:4110/a11oy/verticals",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/weaponized-intel",
+            "final_url": "http://127.0.0.1:4110/a11oy/weaponized-intel",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/welfare",
+            "final_url": "http://127.0.0.1:4110/a11oy/welfare",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/welfare-playbooks",
+            "final_url": "http://127.0.0.1:4110/a11oy/welfare-playbooks",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/workcells",
+            "final_url": "http://127.0.0.1:4110/a11oy/workcells",
+            "ok": true,
+            "status": 200,
+            "error": null
+          }
+        ],
+        "localLinkFailures": [],
+        "mainCount": 1,
+        "h1Count": 1,
+        "headings": ["A11oy Atelier"],
+        "blockedPlaceholder": null,
+        "busy": 0
+      }
+    },
+    {
+      "filename": "a11oy-atelier-proofweave-2026-10-03-390x900.png",
+      "route": "/a11oy/atelier",
+      "url": "http://127.0.0.1:4110/a11oy/atelier",
+      "surface": "a11oy-atelier-proofweave",
+      "response_status": 200,
+      "capture_date": "2026-10-03",
+      "captured_at": "2026-10-03T11:28:07.979Z",
+      "captured_by": "Codex / PixelProof",
+      "capture_environment": "local-exact-head",
+      "source_revision": "5341c52477317680991adf958b635d33f3a876b8",
+      "source_identity": {
+        "kind": "git-checkout",
+        "revision": "5341c52477317680991adf958b635d33f3a876b8"
+      },
+      "workflow_run_or_command": "corepack pnpm --dir artifacts/a11oy build; corepack pnpm --dir artifacts/a11oy exec vite preview --host 127.0.0.1 --port 4110 --strictPort; SOURCE_REVISION=5341c52477317680991adf958b635d33f3a876b8 SCREENSHOT_PLAN=.verification/a11oy-atelier-proofweave-capture-plan.json SCREENSHOT_BASE_URL=http://127.0.0.1:4110 SCREENSHOT_OUTPUT_DIR=.verification/a11oy-atelier-proofweave-screenshot-proof-5341c52 CAPTURE_ENVIRONMENT=local-exact-head CAPTURED_BY=\"Codex / PixelProof\" node scripts/qa/capture-screenshot-proof.mjs",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "expected_heading": "A11oy Atelier",
+      "minimum_screenshot_reveal_elements": 0,
+      "scroll_reveal": {
+        "marked_elements": 0,
+        "unrevealed_elements": 0,
+        "maximum_scroll_top": 1750,
+        "reached_bottom_scroll_top": 1750,
+        "final_scroll_top": 0,
+        "sweep_steps": 10
+      },
+      "artifact_sha256": "c6431c9c9864643e8dd478f8305245011e889eb60daf0f6c94bf8e6e73839237",
+      "console_errors": [],
+      "page_errors": [],
+      "request_failures": [],
+      "bad_responses": [],
+      "undeclared_requests": [],
+      "state": {
+        "title": "A11oy Atelier — Evidence-Bound Intelligence",
+        "readyState": "complete",
+        "screenshotReady": true,
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "horizontalOverflow": false,
+        "overflowingElements": [],
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": [],
+        "interactiveCount": 11,
+        "unnamedInteractiveElements": [],
+        "undersizedInteractiveElements": [],
+        "inlineTextLinkExemptions": [],
+        "localLinkChecks": [
+          {
+            "href": "http://127.0.0.1:4110/a11oy/",
+            "final_url": "http://127.0.0.1:4110/a11oy/",
+            "ok": true,
+            "status": 200,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/atelier#main-content",
+            "ok": true,
+            "status": null,
+            "error": null
+          },
+          {
+            "href": "http://127.0.0.1:4110/a11oy/start",
+            "final_url": "http://127.0.0.1:4110/a11oy/start",
+            "ok": true,
+            "status": 200,
+            "error": null
+          }
+        ],
+        "localLinkFailures": [],
+        "mainCount": 1,
+        "h1Count": 1,
+        "headings": ["A11oy Atelier"],
+        "blockedPlaceholder": null,
+        "busy": 0
+      }
+    }
+  ],
+  "failures": []
+}

@@ -54,8 +54,14 @@ const COMMITTED_PAYLOAD_SCHEMA = 'a11oy.atelier.committed-turn-payload.v1' as co
 const INDEX_AUTH_DOMAIN = 'a11oy.atelier.encrypted-local-index-auth.v1';
 const PATH_DOMAIN = 'a11oy.atelier.encrypted-local-path.v1';
 const MAX_INDEX_BYTES = 256 * 1024;
+// A second process may be publishing a capsule or index while startup scans.
+// Reclaim only files old enough that normal local publication cannot own them.
+const UNPUBLISHED_FILE_GRACE_MS = 60 * 60 * 1000;
 const HEX_64 = /^[a-f0-9]{64}$/;
 const STATE_CAPSULE_ID = /^state_[a-f0-9]{64}$/;
+const KEY_CHECK_TEMP_NAME =
+  /^key-check\.json\.\d+\.[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}\.tmp$/;
+const KEY_CHECK_PUBLICATION_WAIT_MS = 1000;
 const DIRECTORY_SYNC_UNSUPPORTED = new Set([
   'EBADF',
   'EISDIR',
@@ -224,7 +230,7 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
     persistenceState: 'ENCRYPTED_LOCAL_DURABLE',
     durable: true,
     encryptionState: 'ENCRYPTED_AT_REST',
-    evidenceState: 'OBSERVED',
+    evidenceState: 'MEASURED',
     retentionHours: ATELIER_STATE_RETENTION_HOURS,
     retentionMs: ATELIER_STATE_RETENTION_MS,
   });
@@ -861,13 +867,7 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
 
   async #reconcileOrphans(): Promise<void> {
     await this.#transport.inspect(`state_${'0'.repeat(64)}`);
-    const referenced = new Set<string>();
-    for (const record of await this.#allIndexRecords()) {
-      referenced.add(record.stateCapsuleId);
-      for (const retired of record.retiredStateCapsuleIds) {
-        referenced.add(retired);
-      }
-    }
+    await this.#allIndexRecords();
 
     const objectsRoot = join(this.#rootDirectory, 'capsules', 'objects');
     for (const firstShard of await this.#directoryEntries(objectsRoot)) {
@@ -901,8 +901,12 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
                 'Encrypted continuity temporary object is not a regular file.',
               );
             }
-            await unlink(entryPath);
-            removedTemporary = true;
+            if (await this.#isStaleUnpublishedFile(entryPath)) {
+              await unlink(entryPath).catch((error: unknown) => {
+                if (errorCode(error) !== 'ENOENT') throw error;
+              });
+              removedTemporary = true;
+            }
             continue;
           }
           const capsuleId = basename(entry.name, '.json');
@@ -917,9 +921,9 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
               'Encrypted continuity object is stored in the wrong shard.',
             );
           }
-          if (!referenced.has(capsuleId)) {
-            await this.#transport.delete(capsuleId);
-          }
+          // A different local process can still own a final object while its
+          // index is unpublished. Age and an index snapshot cannot prove an
+          // orphan, so leave final objects for quiescent maintenance.
         }
         if (removedTemporary) await this.#syncDirectory(secondPath);
       }
@@ -1094,8 +1098,13 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
             'Continuity index temporary entries must be regular files.',
           );
         }
-        await unlink(join(directory, entry.name));
-        await this.#syncDirectory(directory);
+        const temporaryPath = join(directory, entry.name);
+        if (await this.#isStaleUnpublishedFile(temporaryPath)) {
+          await unlink(temporaryPath).catch((error: unknown) => {
+            if (errorCode(error) !== 'ENOENT') throw error;
+          });
+          await this.#syncDirectory(directory);
+        }
         continue;
       }
       if (!entry.isFile() || entry.isSymbolicLink() || !entry.name.endsWith('.json')) {
@@ -1206,6 +1215,8 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
   async #readAuthenticated(
     path: string,
     schema: string,
+    retryPublicationLink = true,
+    expectedIdentity?: { readonly dev: number; readonly ino: number },
   ): Promise<Record<string, unknown> | undefined> {
     // Open once before inspecting the file. All content and size checks use
     // this descriptor, not a path that may be replaced between check and use.
@@ -1218,11 +1229,22 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
       }
       throw error;
     });
-    if (!handle) return undefined;
+    if (!handle) {
+      if (expectedIdentity) {
+        throw new AtelierCapsuleIntegrityError('Continuity index disappeared during readback.');
+      }
+      return undefined;
+    }
     try {
       const opened = await handle.stat();
       if (!opened.isFile() || opened.size > MAX_INDEX_BYTES) {
         throw new AtelierCapsuleIntegrityError('Continuity index is not a bounded regular file.');
+      }
+      if (
+        expectedIdentity &&
+        (opened.dev !== expectedIdentity.dev || opened.ino !== expectedIdentity.ino)
+      ) {
+        throw new AtelierCapsuleIntegrityError('Continuity index changed during readback.');
       }
       // Bound allocation and bytes consumed even if another writer grows the
       // open file after stat. The extra byte distinguishes overflow from EOF.
@@ -1238,6 +1260,17 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
       }
       const afterRead = await handle.stat();
       const current = await lstat(path).catch(() => undefined);
+      // Atomic publication can retire its temporary hard link after the
+      // final path is linked. A 2-to-1 link-count change might be that event,
+      // but it does not prove the earlier bytes are still current. Discard
+      // them and authenticate a fresh descriptor before returning.
+      const publicationLinkRemoved =
+        opened.nlink === 2 &&
+        afterRead.nlink === 1 &&
+        opened.mode === afterRead.mode &&
+        opened.uid === afterRead.uid &&
+        opened.gid === afterRead.gid;
+      const ctimeChanged = opened.ctimeMs !== afterRead.ctimeMs;
       if (
         !current?.isFile() ||
         current.isSymbolicLink() ||
@@ -1245,12 +1278,22 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
         current.ino !== afterRead.ino ||
         opened.size !== afterRead.size ||
         opened.mtimeMs !== afterRead.mtimeMs ||
-        opened.ctimeMs !== afterRead.ctimeMs ||
+        (ctimeChanged && (!publicationLinkRemoved || !retryPublicationLink)) ||
         length !== afterRead.size
       ) {
         throw new AtelierCapsuleIntegrityError(
           'Continuity index changed during authenticated readback.',
         );
+      }
+      if (ctimeChanged) {
+        const reread = await this.#readAuthenticated(path, schema, false, {
+          dev: afterRead.dev,
+          ino: afterRead.ino,
+        });
+        if (!reread) {
+          throw new AtelierCapsuleIntegrityError('Continuity index disappeared during readback.');
+        }
+        return reread;
       }
 
       const value = objectValue(JSON.parse(buffer.subarray(0, length).toString('utf8')));
@@ -1343,6 +1386,20 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
     }
   }
 
+  async #isStaleUnpublishedFile(path: string): Promise<boolean> {
+    const metadata = await lstat(path).catch((error: unknown) => {
+      if (errorCode(error) === 'ENOENT') return undefined;
+      throw error;
+    });
+    if (!metadata) return false;
+    if (!metadata.isFile() || metadata.isSymbolicLink()) {
+      throw new AtelierCapsuleIntegrityError(
+        'Unpublished continuity entry must be a regular file.',
+      );
+    }
+    return Date.now() - metadata.mtimeMs >= UNPUBLISHED_FILE_GRACE_MS;
+  }
+
   async #directoryEntries(path: string) {
     return readdir(path, { withFileTypes: true }).catch((error: unknown) => {
       if (errorCode(error) === 'ENOENT') return [];
@@ -1362,16 +1419,72 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
     }
   }
 
+  #isTransientMarkerReadError(error: unknown): boolean {
+    return (
+      error instanceof AtelierCapsuleIntegrityError &&
+      (error.message === 'Continuity index failed closed during parsing.' ||
+        error.message === 'Continuity index record is malformed.' ||
+        error.message === 'Continuity index changed during authenticated readback.')
+    );
+  }
+
+  async #verifyFirstStartMarkerTemp(temporaryPath: string, markerPath: string): Promise<void> {
+    const expectedVerifier = this.#pathDigest('key-check', KEY_CHECK_SCHEMA);
+    const deadline = Date.now() + KEY_CHECK_PUBLICATION_WAIT_MS;
+    for (;;) {
+      if (await this.#isStaleUnpublishedFile(temporaryPath)) {
+        throw new AtelierCapsuleIntegrityError('Continuity key marker temp is stale.');
+      }
+      try {
+        const pending = await this.#readAuthenticated(temporaryPath, KEY_CHECK_SCHEMA);
+        if (pending && pending.verifier !== expectedVerifier) {
+          throw new AtelierCapsuleIntegrityError('Continuity key marker temp has wrong verifier.');
+        }
+        return;
+      } catch (error) {
+        if (!this.#isTransientMarkerReadError(error)) throw error;
+        try {
+          const published = await this.#readAuthenticated(markerPath, KEY_CHECK_SCHEMA);
+          if (published) {
+            if (published.verifier !== expectedVerifier) {
+              throw new AtelierCapsuleIntegrityError('Continuity key marker has wrong verifier.');
+            }
+            return;
+          }
+        } catch (markerError) {
+          if (!this.#isTransientMarkerReadError(markerError)) throw markerError;
+        }
+        if (Date.now() >= deadline) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+    }
+  }
+
   async #containsFiles(path: string, markerPath: string): Promise<boolean> {
     for (const entry of await this.#directoryEntries(path)) {
       const candidate = join(path, entry.name);
-      if (candidate === markerPath) continue;
+      if (candidate === markerPath) {
+        if (!entry.isFile() || entry.isSymbolicLink()) {
+          throw new AtelierCapsuleIntegrityError('Continuity key marker is not a regular file.');
+        }
+        continue;
+      }
       if (entry.isSymbolicLink())
         throw new AtelierCapsuleIntegrityError(
           'Continuity storage must not contain symbolic links.',
         );
+      // A first-start peer may be publishing the marker. A matching name is
+      // not enough: authenticate the temp or final marker before continuing.
+      // A partial write gets a bounded wait; foreign keys fail immediately.
+      if (path === dirname(markerPath) && entry.isFile() && KEY_CHECK_TEMP_NAME.test(entry.name)) {
+        await this.#verifyFirstStartMarkerTemp(candidate, markerPath);
+        continue;
+      }
       if (entry.isFile()) return true;
       if (entry.isDirectory() && (await this.#containsFiles(candidate, markerPath))) return true;
+      if (!entry.isDirectory()) {
+        throw new AtelierCapsuleIntegrityError('Continuity storage contains an unexpected entry.');
+      }
     }
     return false;
   }

@@ -111,3 +111,19 @@ test('root test suite executes the Lighthouse workflow contract regression', () 
 
   assert.match(packageJson.scripts.test, /scripts\/ci\/lighthouse-workflow\.test\.mjs/);
 });
+
+test('axe gate accepts only a successful completed matrix', () => {
+  const workflow = readRepositoryFile('.github/workflows/a11y.yml');
+  const gate = yamlJobBlock(workflow, 'a11y-gate');
+  const enforcement = yamlStepBlock(gate, 'Enforce a11y gate');
+  const script = runScript(enforcement);
+
+  assert.match(gate, /^ {4}needs: a11y-axe$/m);
+  assert.match(gate, /^ {4}if: always\(\)$/m);
+  assert.doesNotMatch(gate, /^\s+continue-on-error:/m);
+  assert.match(script, /^result="\$\{\{ needs\.a11y-axe\.result \}\}"$/m);
+  assert.match(script, /^if \[\[ "\$result" != "success" \]\]; then$/m);
+  assert.match(script, /::error::Axe matrix did not complete successfully: \$result/);
+  assert.match(script, /exit 1/);
+  assert.match(script, /All axe scans passed/);
+});
