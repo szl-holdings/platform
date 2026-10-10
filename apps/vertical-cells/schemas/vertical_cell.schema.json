@@ -1,0 +1,165 @@
+{
+  "$defs": {
+    "nonemptyUniqueStrings": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "$id": "https://schemas.a11oy.net/vertical-cell.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allowed_actions": {
+      "$ref": "#/$defs/nonemptyUniqueStrings"
+    },
+    "buyer": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "core_workflows": {
+      "$ref": "#/$defs/nonemptyUniqueStrings"
+    },
+    "data_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "protected": {
+          "$ref": "#/$defs/nonemptyUniqueStrings"
+        },
+        "public": {
+          "$ref": "#/$defs/nonemptyUniqueStrings"
+        },
+        "training_use": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "protected",
+        "public",
+        "training_use"
+      ],
+      "type": "object"
+    },
+    "decision_problem": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "display_name": {
+      "minLength": 3,
+      "type": "string"
+    },
+    "formula_bindings": {
+      "items": {
+        "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "hf_space_id": {
+      "pattern": "^SZLHOLDINGS/[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$",
+      "type": "string"
+    },
+    "human_authority": {
+      "$ref": "#/$defs/nonemptyUniqueStrings"
+    },
+    "leaders": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "pattern": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "pattern": "^https://",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "pattern",
+          "url"
+        ],
+        "type": "object"
+      },
+      "minItems": 2,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "negative_tests": {
+      "$ref": "#/$defs/nonemptyUniqueStrings"
+    },
+    "original_szl_design": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "portfolio_role": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "prohibited_actions": {
+      "$ref": "#/$defs/nonemptyUniqueStrings"
+    },
+    "public_launch": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema": {
+      "const": "szl.vertical-cell/v1"
+    },
+    "space_visibility": {
+      "enum": [
+        "public",
+        "protected",
+        "private"
+      ]
+    },
+    "stage": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "success_metrics": {
+      "$ref": "#/$defs/nonemptyUniqueStrings"
+    },
+    "vertical_id": {
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "vertical_id",
+    "display_name",
+    "portfolio_role",
+    "stage",
+    "space_visibility",
+    "public_launch",
+    "buyer",
+    "decision_problem",
+    "core_workflows",
+    "leaders",
+    "original_szl_design",
+    "data_policy",
+    "human_authority",
+    "allowed_actions",
+    "prohibited_actions",
+    "formula_bindings",
+    "success_metrics",
+    "negative_tests",
+    "hf_space_id"
+  ],
+  "title": "SZL Vertical Cell",
+  "type": "object"
+}

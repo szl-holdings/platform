@@ -7,6 +7,7 @@ import {
   type AtelierTurnCapsule,
   InMemoryAtelierStateStore,
 } from '@szl-holdings/a11oy-atelier';
+import { EvidenceLedger } from '@szl-holdings/evidence-ledger';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { mountRouter, type TestClient } from '../__testkit.js';
 import {
@@ -26,6 +27,7 @@ const otherTenant = {
 };
 const savedKey = process.env.ALLOY_API_KEY;
 const savedNodeEnv = process.env.NODE_ENV;
+const ledger = new EvidenceLedger();
 let client: TestClient;
 let stateStore: InMemoryAtelierStateStore;
 
@@ -49,10 +51,26 @@ const provider: AtelierProvider = {
     configured: true,
     available: true,
     localOnly: false,
-    evidenceState: 'OBSERVED',
+    evidenceState: 'MEASURED',
     reason: 'test',
   }),
   generate,
+};
+
+const proofweaveRequest = {
+  objective: 'Compile a distinct, evidence-bound research plan without executing it.',
+  claims: [
+    {
+      claimId: 'claim-execution-boundary',
+      statement: 'Compilation performs no provider call, tool execution, or external write.',
+      kind: 'FACT',
+    },
+    {
+      claimId: 'claim-independent-expression',
+      statement: 'The planned result should remain independently expressed in A11oy doctrine.',
+      kind: 'RECOMMENDATION',
+    },
+  ],
 };
 
 beforeAll(async () => {
@@ -61,7 +79,7 @@ beforeAll(async () => {
   stateStore = new InMemoryAtelierStateStore();
   client = await mountRouter(
     '/api/a11oy/v1/atelier',
-    createAtelierRouter({ provider, stateStore }),
+    createAtelierRouter({ provider, ledger, stateStore }),
   );
 });
 
@@ -283,7 +301,7 @@ describe('A11oy Atelier continuity API', () => {
       persistenceState: 'IN_PROCESS_NON_DURABLE',
       durable: false,
       encryptionState: 'NONE',
-      evidenceState: 'OBSERVED',
+      evidenceState: 'MEASURED',
       retentionHours: 24,
     });
     expect(health.json.capabilities.durableStorage).toBe(false);
@@ -304,11 +322,18 @@ describe('A11oy Atelier continuity API', () => {
       expect(unavailable.status).toBe(503);
       expect(unavailable.json).toMatchObject({
         status: 'continuity-unavailable',
+        inference: {
+          runtimeEvidenceClass: 'UNKNOWN',
+        },
         continuity: {
           persistenceState: 'UNAVAILABLE',
           durable: false,
           encryptionState: 'UNAVAILABLE',
           evidenceState: 'UNAVAILABLE',
+        },
+        proofweave: {
+          evidenceClass: 'SIMULATED',
+          planExecution: false,
         },
       });
     } finally {
@@ -505,7 +530,7 @@ describe('A11oy Atelier continuity API', () => {
         persistenceState: 'ENCRYPTED_LOCAL_DURABLE',
         durable: true,
         encryptionState: 'ENCRYPTED_AT_REST',
-        evidenceState: 'OBSERVED',
+        evidenceState: 'MEASURED',
         retentionHours: 24,
         retentionMs: 24 * 60 * 60 * 1_000,
       });
@@ -611,5 +636,218 @@ describe('A11oy Atelier continuity API', () => {
     } finally {
       ambiguousClient.close();
     }
+  });
+});
+
+describe('POST /api/a11oy/v1/atelier/proofweave/compile', () => {
+  it('compiles a deterministic five-stage research plan and appends an in-process ledger entry', async () => {
+    const providerCallsBeforeCompile = generate.mock.calls.length;
+    const first = await client.req('POST', '/api/a11oy/v1/atelier/proofweave/compile', {
+      headers,
+      body: proofweaveRequest,
+    });
+    const second = await client.req('POST', '/api/a11oy/v1/atelier/proofweave/compile', {
+      headers,
+      body: proofweaveRequest,
+    });
+
+    expect(first.status).toBe(200);
+    expect(first.json).toMatchObject({
+      tenantId: 'solo-builder',
+      mode: 'RESEARCH_ONLY',
+      evidenceClass: 'SIMULATED',
+      operationalState: 'DEMO',
+      executionState: 'COMPILED_NOT_EXECUTED',
+      persistenceState: 'IN_PROCESS_NOT_STORED',
+      review: {
+        reviewType: 'AUTOMATED_REVIEW',
+        reviewState: 'NOT_EXECUTED',
+        humanApprovalState: 'UNAVAILABLE',
+      },
+      tenantAttributionEvidenceClass: 'DECLARED',
+      policy: {
+        version: 'a11oy.atelier.proofweave-policy.v1',
+        digestSha256: expect.stringMatching(/^[0-9a-f]{64}$/),
+        decision: 'ALLOW',
+        deniedCapabilities: [],
+      },
+      ledger: {
+        appendState: 'IN_PROCESS_APPEND_ACCEPTED',
+        backendState: 'CONFIGURATION_DEPENDENT',
+        durablePersistenceEvidenceClass: 'UNKNOWN',
+      },
+    });
+    expect(first.json.planSha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(first.json.weaveId).toMatch(/^proofweave_[0-9a-f]{64}$/);
+    expect(first.json.planId).toBe(first.json.weaveId);
+    expect(first.json.stages).toHaveLength(5);
+    expect(first.json.stages.map((stage: { name: string }) => stage.name)).toEqual([
+      'PATTERN',
+      'CUT',
+      'STITCH',
+      'FITTING',
+      'LABEL',
+    ]);
+    expect(
+      first.json.stages.every(
+        (stage: { executionState: string }) => stage.executionState === 'NOT_EXECUTED',
+      ),
+    ).toBe(true);
+    expect(
+      first.json.claims.every(
+        (claim: { evaluationState: string; evidenceState: string }) =>
+          claim.evaluationState === 'NOT_EVALUATED' && claim.evidenceState === 'UNAVAILABLE',
+      ),
+    ).toBe(true);
+    expect(first.json.ledger.entryId).toMatch(/^le_/);
+    expect(first.headers['cache-control']).toBe('no-store');
+    const [ledgerEntry] = ledger.getByEntity('a11oy.atelier.proofweave.plan', first.json.weaveId);
+    expect(ledgerEntry).toMatchObject({
+      actor: 'tenant:solo-builder',
+      actorRole: 'api-key-client',
+      action: 'atelier.proofweave.compile',
+    });
+    expect(ledgerEntry?.envelope.policyReason).toContain(
+      'tenant attribution evidence class DECLARED',
+    );
+    expect(second.status).toBe(200);
+    expect(second.json.weaveId).toBe(first.json.weaveId);
+    expect(second.json.planSha256).toBe(first.json.planSha256);
+    expect(generate.mock.calls.length).toBe(providerCallsBeforeCompile);
+  });
+
+  it('requires the configured API key', async () => {
+    const result = await client.req('POST', '/api/a11oy/v1/atelier/proofweave/compile', {
+      body: proofweaveRequest,
+    });
+
+    expect(result.status).toBe(401);
+    expect(result.json.code).toBe('INVALID_API_KEY');
+  });
+
+  it('rejects unknown request fields through the strict compiler schema', async () => {
+    const result = await client.req('POST', '/api/a11oy/v1/atelier/proofweave/compile', {
+      headers,
+      body: { ...proofweaveRequest, provider: 'any-provider' },
+    });
+
+    expect(result.status).toBe(400);
+    expect(result.json.code).toBe('ATELIER_VALIDATION');
+  });
+
+  it('returns validation errors for malformed locators instead of internal errors', async () => {
+    const result = await client.req('POST', '/api/a11oy/v1/atelier/proofweave/compile', {
+      headers,
+      body: {
+        ...proofweaveRequest,
+        materials: [
+          {
+            materialId: 'bad-url',
+            kind: 'PUBLICATION',
+            locator: 'not-a-url',
+            reuseIntent: 'REFERENCE_ONLY',
+          },
+        ],
+      },
+    });
+
+    expect(result.status).toBe(400);
+    expect(result.json.code).toBe('ATELIER_VALIDATION');
+  });
+
+  it('rejects copyleft code pattern adaptation', async () => {
+    const result = await client.req('POST', '/api/a11oy/v1/atelier/proofweave/compile', {
+      headers,
+      body: {
+        ...proofweaveRequest,
+        materials: [
+          {
+            materialId: 'copyleft-pattern',
+            kind: 'CODE',
+            locator: 'https://example.org/source',
+            revision: '1234567890abcdef1234567890abcdef12345678',
+            license: 'AGPL-3.0-only',
+            reuseIntent: 'ADAPT_PATTERN',
+          },
+        ],
+      },
+    });
+
+    expect(result.status).toBe(400);
+    expect(result.json.code).toBe('ATELIER_VALIDATION');
+  });
+
+  it.each([
+    'externalWrites',
+    'providerNativeSubagents',
+    'providerDurableStorage',
+  ])('fails closed when %s is requested', async (capability) => {
+    const result = await client.req('POST', '/api/a11oy/v1/atelier/proofweave/compile', {
+      headers,
+      body: {
+        ...proofweaveRequest,
+        requestedCapabilities: { [capability]: true },
+      },
+    });
+
+    expect(result.status).toBe(403);
+    expect(result.json).toMatchObject({
+      code: 'ATELIER_PROOFWEAVE_POLICY_DENIED',
+      policyVersion: 'a11oy.atelier.proofweave-policy.v1',
+      violations: [capability],
+    });
+  });
+
+  it('returns a ledger-specific 503 if the required append fails', async () => {
+    const failingLedger = {
+      append: () => {
+        throw new Error('synthetic append failure');
+      },
+    } as unknown as EvidenceLedger;
+    const failingClient = await mountRouter(
+      '/api/a11oy/v1/atelier',
+      createAtelierRouter({ provider, ledger: failingLedger }),
+    );
+    try {
+      const result = await failingClient.req('POST', '/api/a11oy/v1/atelier/proofweave/compile', {
+        headers,
+        body: proofweaveRequest,
+      });
+      expect(result.status).toBe(503);
+      expect(result.json.code).toBe('ATELIER_PROOFWEAVE_LEDGER_APPEND_FAILED');
+    } finally {
+      failingClient.close();
+    }
+  });
+});
+
+describe('GET /api/a11oy/v1/atelier/health', () => {
+  it('discloses the compile-only Proofweave demo boundary', async () => {
+    const result = await client.req('GET', '/api/a11oy/v1/atelier/health', {
+      headers,
+    });
+
+    expect(result.status).toBe(200);
+    expect(result.json.status).toBe('partial');
+    expect(result.json.inference.runtimeEvidenceClass).toBe('UNKNOWN');
+    expect(['CONFIGURED_OR_LOCAL_EXECUTABLE_MEASURED', 'UNAVAILABLE']).toContain(
+      result.json.inference.configurationState,
+    );
+    expect(result.json.proofweave).toEqual({
+      compiler: { available: true, mode: 'DETERMINISTIC_COMPILE_ONLY' },
+      planExecution: false,
+      planPersistence: 'IN_PROCESS_NOT_STORED',
+      evidenceClass: 'SIMULATED',
+      operationalState: 'DEMO',
+      planExternalWrites: false,
+      providerNativeSubagents: false,
+      providerDurableStorage: false,
+      auditLedger: {
+        appendSideEffect: true,
+        backendState: 'CONFIGURATION_DEPENDENT',
+        durablePersistenceEvidenceClass: 'UNKNOWN',
+        tenantAttributionEvidenceClass: 'DECLARED',
+      },
+    });
   });
 });
