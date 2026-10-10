@@ -179,7 +179,7 @@ export class XaiResponsesProvider implements AtelierProvider {
       configured,
       available: configured,
       localOnly: false,
-      evidenceState: configured ? 'OBSERVED' : 'UNAVAILABLE',
+      evidenceState: configured ? 'MEASURED' : 'UNAVAILABLE',
       reason: configured
         ? 'A11OY_ATELIER_XAI_API_KEY is configured; no inference probe was charged.'
         : 'A11OY_ATELIER_XAI_API_KEY is not configured.',
@@ -325,7 +325,7 @@ export class GrokBuildCliProvider implements AtelierProvider {
       configured,
       available,
       localOnly: true,
-      evidenceState: available ? 'OBSERVED' : 'UNAVAILABLE',
+      evidenceState: available ? 'MEASURED' : 'UNAVAILABLE',
       reason: available
         ? 'Configured Grok Build CLI executable exists; OAuth/runtime validity is checked on ask.'
         : configured
