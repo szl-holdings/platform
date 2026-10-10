@@ -1,0 +1,103 @@
+{
+  "allowed_actions": [
+    "read and reconcile",
+    "recommend",
+    "draft",
+    "flag",
+    "simulate",
+    "request approval",
+    "write only after explicit authorized approval"
+  ],
+  "buyer": "Professional services, managed services, consulting, and implementation leaders responsible for scope, margin, staffing, delivery, and revenue.",
+  "core_workflows": [
+    "scope readiness",
+    "SOW and margin approval",
+    "resource and capacity fit",
+    "sales-to-delivery handoff",
+    "delivery variance/change order",
+    "invoice/renewal/outcome closure"
+  ],
+  "data_policy": {
+    "protected": [
+      "customer opportunities",
+      "rates",
+      "margins",
+      "staffing",
+      "contracts"
+    ],
+    "public": [
+      "synthetic services pipeline",
+      "rights-cleared example SOWs"
+    ],
+    "training_use": "opt-in, separately contracted, de-identified and versioned only"
+  },
+  "decision_problem": "Should this opportunity, scope, SOW, staffing plan, handoff, change order, invoice, or renewal advance—and on what evidence and approval?",
+  "display_name": "Lyte Services — Professional Services Margin Assurance",
+  "formula_bindings": [
+    "F1",
+    "F4",
+    "F7",
+    "F12",
+    "F18",
+    "F19",
+    "F22",
+    "LAMBDA"
+  ],
+  "hf_space_id": "SZLHOLDINGS/lyte-services",
+  "human_authority": [
+    "commercial owner approves margin/SOW",
+    "delivery owner accepts handoff",
+    "finance owner approves billing/change-order policy"
+  ],
+  "leaders": [
+    {
+      "name": "ScopeStack",
+      "pattern": "structured discovery, scope, effort and SOW connected to CRM/PSA/MCP",
+      "url": "https://scopestack.io/"
+    },
+    {
+      "name": "Kantata",
+      "pattern": "forecasting, delivery, resourcing, financial context and margin risk",
+      "url": "https://www.kantata.com/"
+    },
+    {
+      "name": "Certinia",
+      "pattern": "sell, staff, deliver, bill and renew on connected customer/financial context",
+      "url": "https://www.certinia.com/"
+    },
+    {
+      "name": "Rocketlane",
+      "pattern": "delivery governance, standardized execution and profitability context",
+      "url": "https://www.rocketlane.com/"
+    }
+  ],
+  "negative_tests": [
+    "missing discovery blocks estimate",
+    "margin below policy escalates",
+    "resource conflict blocks commitment",
+    "scope drift opens proposed change order but cannot send it",
+    "stale source lowers evidence state"
+  ],
+  "original_szl_design": "Scope-to-Margin Decision Twin: overlay existing CRM, scoping, PSA, staffing, project and finance systems; do not replace them.",
+  "portfolio_role": "PRIMARY_COMMERCIAL_VERTICAL",
+  "prohibited_actions": [
+    "unapproved contract acceptance",
+    "unapproved pricing",
+    "automatic staffing commitment",
+    "silent customer-data training"
+  ],
+  "public_launch": "BLOCKED_UNTIL_PILOT_EVIDENCE",
+  "schema": "szl.vertical-cell/v1",
+  "space_visibility": "protected",
+  "stage": "DESIGN_PARTNER_CANDIDATE",
+  "success_metrics": [
+    "scope cycle time",
+    "gross-margin variance",
+    "change-order detection lead time",
+    "handoff completeness",
+    "forecast error",
+    "approval latency",
+    "decision-to-outcome linkage"
+  ],
+  "vertical_id": "lyte-services"
+}
