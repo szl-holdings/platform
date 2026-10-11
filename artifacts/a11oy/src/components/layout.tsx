@@ -600,7 +600,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
                     fontFamily: TOKENS.mono,
                     fontWeight: 500,
                     letterSpacing: '0.16em',
-                    color: TOKENS.textMuted,
+                    color: TOKENS.textDim,
                   }}
                 >
                   {group.label}
