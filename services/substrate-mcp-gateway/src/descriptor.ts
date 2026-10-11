@@ -23,15 +23,38 @@ export const CAPABILITIES = {
   prompts: { listChanged: false },
   logging: {},
   extensions: {
-    'szl/governed-autonomy': { version: '1.0', description: 'Policy-gated approval gates and evidence-chain enforcement' },
-    'szl/counterfactual-replay': { version: '1.0', description: 'Counterfactual run replay for governance audit' },
-    'szl/praxis-consciousness': { version: '1.0', description: 'Every MCP response includes x-nexus-consciousness metacognitive metadata and x-nexus-proof cryptographic envelope' },
-    'szl/praxis-convergence': { version: '1.0', description: 'Cross-domain intelligence convergence engine available as MCP Resources' },
-    'szl/praxis-federation': { version: '1.0', description: 'NuroMesh domain agents discoverable and delegatable via MCP' },
-    'mcp/apps': { version: '1.0', description: 'Interactive HTML micro-dashboards served as ui:// resources with postMessage JSON-RPC' },
+    'szl/governed-autonomy': {
+      version: '1.0',
+      description: 'Policy-gated approval gates and evidence-chain enforcement',
+    },
+    'szl/counterfactual-replay': {
+      version: '1.0',
+      description: 'Counterfactual run replay for governance audit',
+    },
+    'szl/praxis-consciousness': {
+      version: '1.0',
+      description:
+        'The legacy x-nexus-consciousness field is unassessed in production; development heuristics are explicitly unvalidated and unavailable as evidence',
+    },
+    'szl/praxis-convergence': {
+      version: '1.0',
+      description:
+        'Cross-domain fixture resources are available; the live Prism Bus bridge is unavailable in this gateway release',
+    },
+    'szl/praxis-federation': {
+      version: '1.0',
+      description:
+        'External MCP agent delegation is attempted only when an endpoint is configured; the internal ai-engine mesh is unavailable in this gateway release',
+    },
+    'mcp/apps': {
+      version: '1.0',
+      description:
+        'Interactive HTML micro-dashboards served as ui:// resources with postMessage JSON-RPC',
+    },
     'io.modelcontextprotocol/enterprise-managed-authorization': {
       version: '1.0',
-      description: 'Enterprise IdP-governed MCP access via ID-JAG (urn:ietf:params:oauth:grant-type:jwt-bearer). ' +
+      description:
+        'Enterprise IdP-governed MCP access via ID-JAG (urn:ietf:params:oauth:grant-type:jwt-bearer). ' +
         'Employees authenticate once with corporate SSO; IdP-issued JWTs are exchanged for scoped MCP access tokens. ' +
         'Supports centralized revocation, claims-to-RBAC mapping, and full audit trail.',
       tokenEndpoint: '/mcp/token',
@@ -67,7 +90,8 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
   {
     name: 'substrate_submit_run',
     description:
-      'Submit a workflow run to the Sovereign Execution Substrate. ' +
+      'Submit a development/simulation workflow run to the Sovereign Execution Substrate. ' +
+      'Production mutation is held until qualified adapters and a durable run store are deployed. ' +
       'The run is enqueued and started immediately; the response contains the runId ' +
       'for subsequent status polls. All runs flow through the policy compiler, ' +
       'approval engine, and evidence/audit chain. ' +
@@ -87,8 +111,7 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
           type: 'string',
           enum: ['live', 'dry-run'],
           description:
-            "Execution mode. 'live' runs against real adapters; " +
-            "'dry-run' executes the graph but skips side effects. Default: live",
+            "Execution mode. Production rejects both modes while execution is held. In development, 'live' uses simulation/no-op adapters and 'dry-run' skips side effects. Default: live",
         },
         metadata: {
           type: 'object',
@@ -136,6 +159,7 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
     name: 'substrate_replay',
     description:
       'Replay a completed substrate run from its journal. ' +
+      'Production replay is held until qualified adapters and durable storage are deployed. ' +
       'Skips stages already completed in the source run; re-executes subsequent ' +
       'stages with identical inputs to verify determinism. ' +
       'Returns a new PipelineRun with replaySourceRunId set.',
@@ -162,6 +186,7 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
     name: 'substrate_counterfactual',
     description:
       'Run a counterfactual replay of a completed run with model and/or policy substitution. ' +
+      'Production counterfactual execution is currently held. ' +
       'Produces a decision diff showing which stages changed outcome, ' +
       'the final confidence delta, and whether the overall outcome changed. ' +
       'Used for eval harnesses, offline analysis, and governance audit.',
@@ -235,6 +260,7 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
     name: 'substrate_approve',
     description:
       'Approve a pending substrate run at its ApprovalGate. ' +
+      'Production approval mutation is currently held to prevent resuming into simulation adapters. ' +
       'Records the approval in the approvals inbox with full provenance ' +
       '(actor, timestamp, proof ref). The run then resumes execution ' +
       'from the stage after the gate.',
@@ -247,7 +273,8 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
         },
         actor: {
           type: 'string',
-          description: 'Human actor name or system ID performing the approval',
+          description:
+            'Optional compatibility field. When supplied it must exactly match the authenticated principal; the gateway never trusts a caller-selected actor.',
         },
         note: {
           type: 'string',
@@ -267,6 +294,7 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
     name: 'substrate_reject',
     description:
       'Reject a pending substrate run at its ApprovalGate. ' +
+      'Production rejection mutation is currently held with all other mutations. ' +
       'Records the rejection in the approvals inbox. The run is terminated ' +
       "with status 'failed' and the rejection reason is written to the evidence chain.",
     inputSchema: {
@@ -278,7 +306,8 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
         },
         actor: {
           type: 'string',
-          description: 'Human actor name or system ID performing the rejection',
+          description:
+            'Optional compatibility field. When supplied it must exactly match the authenticated principal; the gateway never trusts a caller-selected actor.',
         },
         note: {
           type: 'string',
@@ -340,6 +369,7 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
     name: 'enable_server',
     description:
       'Establish an on-demand connection to an MCP server and surface its tools. ' +
+      'This gateway-global mutation is admin-only and held in production. ' +
       'Lazy — only connects when called. ' +
       'Use search_available_servers to find available server IDs. ' +
       'After a successful connection, call tools/list to discover the newly added tools.',
@@ -360,6 +390,7 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
     name: 'disable_server',
     description:
       'Disconnect from an MCP server and remove its tools from the active set. ' +
+      'This gateway-global mutation is admin-only and held in production. ' +
       'Use when a server is no longer needed for the current task to free context allocation.',
     inputSchema: {
       type: 'object',
@@ -377,11 +408,12 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
   {
     name: 'agent_delegate',
     description:
-      'Delegate a specialized task to a NuroMesh domain agent via the PRAXIS Intelligence Fabric. ' +
-      'Routes the task through the full governance stack: policy check, approval gate (if required), ' +
-      'consciousness assessment, and proof-chain entry. ' +
+      'Attempt to delegate a specialized task to a NuroMesh domain agent through a configured external MCP endpoint. ' +
+      'Production delegation is currently held with all execution/mutation tools. ' +
+      'Returns an explicit unavailable or failed status without claiming dispatch when no usable endpoint exists. ' +
+      'The internal ai-engine mesh is unavailable in this gateway release. ' +
       'Use nexus://agents/registry to discover available agents and their capabilities. ' +
-      'Returns: { taskId, targetAgent, domain, status, response, confidence, latencyMs, proofHash }',
+      'Returns: { taskId, targetAgent, domain, status, response, confidence, latencyMs, proofHash, federationSource }',
     inputSchema: {
       type: 'object',
       properties: {
@@ -426,31 +458,36 @@ export const UI_RESOURCES: McpResourceDescriptor[] = [
   {
     uri: 'ui://szl/data-table',
     name: 'SZL Data Table Explorer',
-    description: 'Interactive data table with sorting, text filtering, pagination, and CSV export. Rendered inline by MCP hosts that support the Apps extension.',
+    description:
+      'Interactive data table with sorting, text filtering, pagination, and CSV export. Rendered inline by MCP hosts that support the Apps extension.',
     mimeType: 'text/html',
   },
   {
     uri: 'ui://szl/chart',
     name: 'SZL Chart Visualizer',
-    description: 'Chart renderer for line, bar, pie, area, scatter, and donut charts. Communicates via postMessage JSON-RPC.',
+    description:
+      'Chart renderer for line, bar, pie, area, scatter, and donut charts. Communicates via postMessage JSON-RPC.',
     mimeType: 'text/html',
   },
   {
     uri: 'ui://szl/approval-form',
     name: 'SZL Approval Workflow Form',
-    description: 'Governed approval/rejection form. Calls substrate_approve or substrate_reject via the MCP tools/call bridge when the operator submits.',
+    description:
+      'Governed approval/rejection form. Calls substrate_approve or substrate_reject via the MCP tools/call bridge when the operator submits.',
     mimeType: 'text/html',
   },
   {
     uri: 'ui://szl/metrics',
     name: 'SZL Metric Dashboard',
-    description: 'KPI card grid with trend indicators, severity coloring, and real-time metric display.',
+    description:
+      'KPI card grid with trend indicators, severity coloring, and real-time metric display.',
     mimeType: 'text/html',
   },
   {
     uri: 'ui://szl/timeline',
     name: 'SZL Timeline / Audit Trail',
-    description: 'Chronological event trail with severity badges, actor attribution, and expandable metadata panels.',
+    description:
+      'Chronological event trail with severity badges, actor attribution, and expandable metadata panels.',
     mimeType: 'text/html',
   },
 ];
@@ -497,18 +534,18 @@ export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
     uri: 'nexus://convergence/active',
     name: 'PRAXIS Active Convergence Correlations',
     description:
-      'Currently live cross-domain intelligence correlations from the PRAXIS Convergence Engine. ' +
+      'Synthetic cross-domain intelligence correlation fixtures for integration and schema validation. ' +
       'Each entry spans multiple domains (maritime, security, real estate, legal) and includes ' +
-      'the compound risk score, contributing signal domains, and recommended actions. ' +
-      'Surfaces compound risk spanning all SZL domains simultaneously for cross-domain threat assessment.',
+      'a compound risk score, contributing signal domains, and recommended actions. ' +
+      'The live Prism Bus bridge is unavailable in this gateway release.',
     mimeType: 'application/json',
   },
   {
     uri: 'nexus://convergence/history',
     name: 'PRAXIS Convergence History',
     description:
-      'Recent convergence events with resolution status. Shows how cross-domain correlations ' +
-      'were detected, escalated, and resolved. Includes resolved and active entries.',
+      'Synthetic convergence history fixtures with resolution status. ' +
+      'The live Prism Bus bridge is unavailable in this gateway release.',
     mimeType: 'application/json',
   },
   {
@@ -525,7 +562,7 @@ export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
     uri: 'nexus://signals/maritime',
     name: 'PRAXIS Maritime Signal Stream',
     description:
-      'Real-time maritime domain intelligence signals from the Prism Bus. ' +
+      'Synthetic maritime domain signal fixtures; not a real-time Prism Bus stream. ' +
       'Each signal includes intake score, entity resolution, policy evaluation result, ' +
       'and recommendation (if above threshold). Respects tenant isolation.',
     mimeType: 'application/json',
@@ -534,7 +571,7 @@ export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
     uri: 'nexus://signals/security',
     name: 'PRAXIS Security Signal Stream',
     description:
-      'Real-time cybersecurity intelligence signals from the Prism Bus. ' +
+      'Synthetic cybersecurity signal fixtures; not a real-time Prism Bus stream. ' +
       'Includes threat triage results, CVE signals, and incident alerts with full pipeline metadata.',
     mimeType: 'application/json',
   },
@@ -542,7 +579,7 @@ export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
     uri: 'nexus://signals/realestate',
     name: 'PRAXIS Real Estate Signal Stream',
     description:
-      'Real-time real estate market signals from the Prism Bus. ' +
+      'Synthetic real estate signal fixtures; not a real-time Prism Bus stream. ' +
       'Includes portfolio anomalies, valuation alerts, and deal pipeline signals.',
     mimeType: 'application/json',
   },
@@ -550,7 +587,7 @@ export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
     uri: 'nexus://signals/legal',
     name: 'PRAXIS Legal Signal Stream',
     description:
-      'Real-time legal and compliance signals from the Prism Bus. ' +
+      'Synthetic legal and compliance signal fixtures; not a real-time Prism Bus stream. ' +
       'Includes regulatory deadlines, Counsel matter alerts, and compliance risks.',
     mimeType: 'application/json',
   },
@@ -558,18 +595,17 @@ export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
     uri: 'nexus://signals/all',
     name: 'PRAXIS Aggregate Signal Stream',
     description:
-      'Aggregate real-time signal stream across all SZL domains (maritime, security, real estate, legal). ' +
-      'The broadest signal surface available over MCP — receive intelligence from all domains simultaneously.',
+      'Aggregate synthetic signal fixtures across SZL domains (maritime, security, real estate, legal). ' +
+      'The live Prism Bus bridge is unavailable in this gateway release.',
     mimeType: 'application/json',
   },
   {
     uri: 'nexus://signals/{domain}/{tenantId}',
     name: 'PRAXIS Tenant-Scoped Signal Channel',
     description:
-      'Per-tenant subscription channel for domain signal updates. ' +
-      'Subscribe to nexus://signals/{domain}/{tenantId} to receive notifications ONLY for your tenant\'s events. ' +
-      'The convergence bridge emits on this URI when a Prism Bus event carries a matching tenantId, ' +
-      'eliminating cross-tenant timing and volume leakage from shared global notification channels.',
+      'Per-tenant domain signal fixture channel. ' +
+      'The live Prism Bus subscription bridge is unavailable in this gateway release; ' +
+      'responses are explicitly marked synthetic.',
     mimeType: 'application/json',
   },
 
@@ -577,10 +613,9 @@ export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
     uri: 'nexus://agents/registry',
     name: 'PRAXIS NuroMesh Agent Registry',
     description:
-      'Discoverable registry of NuroMesh domain agents available for delegation via the agent_delegate tool. ' +
+      'NuroMesh agent catalogue for the agent_delegate tool. ' +
       'Each entry includes canonical agent name, domain specializations, capabilities, ' +
-      'confidence profiles, and supported delegation protocols. ' +
-      'This makes SZL the first MCP deployment with a governed multi-agent mesh discoverable over MCP.',
+      'confidence profiles, supported delegation protocols, and availability derived from configured external routes.',
     mimeType: 'application/json',
   },
 
@@ -608,7 +643,7 @@ export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
     description:
       'Full provenance trace for a specific AI decision, showing every stage from raw signal ' +
       'through enrichment, scoring, recommendation, policy evaluation, and final outcome. ' +
-      'External auditors can use this with a traceId to independently verify any AI decision.',
+      'External auditors can inspect the synthetic trace fixture by traceId; it is not a cryptographic verification record.',
     mimeType: 'application/json',
   },
 ];

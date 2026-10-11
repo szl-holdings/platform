@@ -12,8 +12,8 @@
  *   counterfactual — replay with model/policy substitution; produces diff
  */
 
-import { submitApprovalAction } from '@workspace/approvals-inbox';
 import { randomUUID } from 'node:crypto';
+import { submitApprovalAction } from '@workspace/approvals-inbox';
 import { modelAdapterRegistry, policyAdapterRegistry, toolAdapterRegistry } from './adapters.js';
 import {
   aggregatePipelineConfidence,
@@ -30,16 +30,17 @@ import {
 } from './journal.js';
 import { defaultPythonWorkerChannel } from './python-worker.js';
 import { SubstrateTelemetry } from './telemetry.js';
-import type {
-  AnyStage,
-  CompiledGraph,
-  EvidenceBundle,
-  PipelineRun,
-  RuntimeStartOptions,
-  StageExecutorFn,
-  StageResult,
-  SubstrateHooks,
-  WorkflowDefinition,
+import {
+  type AnyStage,
+  type CompiledGraph,
+  type EvidenceBundle,
+  type PipelineRun,
+  type RuntimeStartOptions,
+  type StageExecutorFn,
+  type StageResult,
+  type SubstrateHooks,
+  TenantIdSchema,
+  type WorkflowDefinition,
 } from './types.js';
 
 // ─── Workflow Registry ────────────────────────────────────────────────────────
@@ -112,10 +113,16 @@ const defaultStageExecutor: StageExecutorFn = async (stage, input, ctx) => {
       // In live mode, dispatch fails closed (throws) if the worker is unreachable —
       // a simulated fallback must never be used for governed live decisions.
       if (stage.runtime === 'python') {
+        if (!ctx.tenantId) {
+          throw new Error(
+            `[substrate/python-worker] Stage '${stage.id}' requires an authenticated tenant context`,
+          );
+        }
         const result = await defaultPythonWorkerChannel.dispatch(
           {
             runId: ctx.runId,
             workflowId: ctx.workflowId,
+            tenantId: ctx.tenantId,
             stageId: stage.id,
             stageType: stage.type,
             stageConfig: {
@@ -133,6 +140,11 @@ const defaultStageExecutor: StageExecutorFn = async (stage, input, ctx) => {
           },
           stage.timeoutMs > 0 ? stage.timeoutMs : 60_000,
         );
+        if (result.confidence === null) {
+          throw new Error(
+            `[substrate/python-worker] Stage '${stage.id}' completed without a measured confidence assessment`,
+          );
+        }
         return { output: result.output, confidence: result.confidence };
       }
       // TypeScript-runtime: use registered retriever adapter
@@ -268,10 +280,15 @@ const defaultStageExecutor: StageExecutorFn = async (stage, input, ctx) => {
         sessionId = session.sessionId;
       }
 
-      const result = await defaultSandboxClient.runAgent(sessionId!, stage.objective, {
-        shellTimeoutMs: stage.shellTimeoutMs,
-        domain: 'substrate',
-      }, tenantId);
+      const result = await defaultSandboxClient.runAgent(
+        sessionId!,
+        stage.objective,
+        {
+          shellTimeoutMs: stage.shellTimeoutMs,
+          domain: 'substrate',
+        },
+        tenantId,
+      );
 
       return {
         output: result,
@@ -322,6 +339,8 @@ export class SubstrateRuntime {
       metadata: {},
       ...options,
     } satisfies Partial<RuntimeStartOptions>;
+    const governedTenantId =
+      opts.tenantId === undefined ? undefined : TenantIdSchema.parse(opts.tenantId);
 
     // Register workflow so resume() can look it up by workflowId
     workflowRegistry.set(workflow.id, workflow);
@@ -351,6 +370,7 @@ export class SubstrateRuntime {
       input,
       startedAt,
       traceId,
+      ...(governedTenantId !== undefined ? { tenantId: governedTenantId } : {}),
       metadata: {
         ...opts.metadata,
         ...(opts.sourceRunId ? { sourceRunId: opts.sourceRunId } : {}),
@@ -765,6 +785,7 @@ export class SubstrateRuntime {
           ...(run.counterfactualModelAdapter !== undefined
             ? { counterfactualModelAdapterId: run.counterfactualModelAdapter }
             : {}),
+          ...(run.tenantId !== undefined ? { tenantId: run.tenantId } : {}),
         };
 
         if (stage.timeoutMs > 0) {

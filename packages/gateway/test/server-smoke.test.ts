@@ -8,19 +8,21 @@
  * is a runnable HTTP service without depending on a workflow runner.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import type { AddressInfo } from 'net';
-import { createServer } from '../src/server.js';
+import type { AddressInfo } from 'node:net';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { issueToken } from '../src/auth.js';
+import { createServer } from '../src/server.js';
 import type { GatewayConfig } from '../src/types.js';
 
 let server: ReturnType<typeof createServer>;
 let baseUrl: string;
 const config: GatewayConfig = {
-  jwtSecret: 'smoke-test-secret-do-not-use',
+  jwt: { algorithm: 'HS256', secret: 'smoke-test-secret-do-not-use' },
   opaEndpoint: 'local',
   temporalEndpoint: 'local',
   openAiApiKey: 'local',
+  approvalWorkflow: null,
+  evidenceLedger: null,
   auditLogPath: '/tmp/agent-gateway-smoke-audit.ndjson',
   approvalTimeoutMs: 5000,
 };
@@ -52,6 +54,27 @@ describe('Agent Gateway HTTP server — deployment smoke test', () => {
     expect(body.status).toBe('ready');
   });
 
+  it('GET /ready fails closed when a live dependency is unreachable', async () => {
+    const degradedServer = createServer({
+      ...config,
+      temporalEndpoint: '127.0.0.1:0',
+    });
+    await new Promise<void>((resolve) => degradedServer.listen(0, '127.0.0.1', resolve));
+    const address = degradedServer.address() as AddressInfo;
+    try {
+      const res = await fetch(`http://127.0.0.1:${address.port}/ready`);
+      expect(res.status).toBe(503);
+      const body = await res.json();
+      expect(body).toMatchObject({
+        status: 'not_ready',
+        mode: 'live',
+        dependencies: { opa: true, temporal: false },
+      });
+    } finally {
+      await new Promise<void>((resolve) => degradedServer.close(() => resolve()));
+    }
+  });
+
   it('GET /v1/capabilities returns allowed and forbidden lists', async () => {
     const res = await fetch(`${baseUrl}/v1/capabilities`);
     expect(res.status).toBe(200);
@@ -73,6 +96,37 @@ describe('Agent Gateway HTTP server — deployment smoke test', () => {
     expect(body.message).toMatch(/Missing required fields/);
   });
 
+  it('POST /v1/agent/action never defaults a missing targetEnvironment', async () => {
+    const res = await fetch(`${baseUrl}/v1/agent/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        capability: 'inspect_code',
+        target: 'api-server',
+        domain: 'vessels',
+      }),
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.message).toMatch(/targetEnvironment/);
+  });
+
+  it('POST /v1/agent/action rejects an unknown targetEnvironment', async () => {
+    const res = await fetch(`${baseUrl}/v1/agent/action`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        capability: 'inspect_code',
+        target: 'api-server',
+        domain: 'vessels',
+        targetEnvironment: 'qa',
+      }),
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.message).toMatch(/development, staging, or production/);
+  });
+
   it('POST /v1/agent/action returns 403 forbidden for direct_prod_change before auth runs', async () => {
     const res = await fetch(`${baseUrl}/v1/agent/action`, {
       method: 'POST',
@@ -81,6 +135,7 @@ describe('Agent Gateway HTTP server — deployment smoke test', () => {
         capability: 'direct_prod_change',
         target: 'prod-db',
         domain: 'vessels',
+        targetEnvironment: 'production',
       }),
     });
     expect(res.status).toBe(403);
@@ -96,6 +151,7 @@ describe('Agent Gateway HTTP server — deployment smoke test', () => {
         capability: 'inspect_code',
         target: 'api-server',
         domain: 'vessels',
+        targetEnvironment: 'development',
       }),
     });
     expect(res.status).toBe(401);
@@ -109,8 +165,9 @@ describe('Agent Gateway HTTP server — deployment smoke test', () => {
         sub: 'eng@szl.io',
         role: 'platform-engineer',
         groups: ['platform-team'],
+        orgId: 'szl-holdings',
       },
-      config.jwtSecret,
+      config.jwt.algorithm === 'HS256' ? config.jwt.secret : '',
     );
     const res = await fetch(`${baseUrl}/v1/agent/action`, {
       method: 'POST',
@@ -149,6 +206,7 @@ describe('Agent Gateway HTTP server — deployment smoke test', () => {
         capability: 'direct_prod_change',
         target: 'db',
         domain: 'vessels',
+        targetEnvironment: 'production',
       }),
     });
     const body = await res.json();

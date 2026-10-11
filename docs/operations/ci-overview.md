@@ -1,68 +1,90 @@
 # CI Overview
 
-Last updated: 2026-04-27. One screen summary of every workflow in `.github/workflows/`.
+Last updated: 2026-10-06.
 
----
+This is a source-derived overview of `.github/workflows/`, not a hosted-run
+receipt. The current tree contains **47** tracked workflow YAML files. A workflow
+being present proves only that the configuration exists at this revision;
+successful execution, secret availability, deployment, and live enforcement
+require separate evidence.
 
-## Workflow Inventory
+## Evidence labels
 
-| Workflow | File | Trigger | Avg duration | Blocking? | Failure means |
-|---|---|---|---|---|---|
-| **CI** | `ci.yml` | PR → main/master, `workflow_dispatch` | 8–15 min | Yes — ci-gate | Lint, type, test, build, integration tests, security, proof-chain, brand, env-coverage, API-spec or design-token checks failed |
-| **Build Check** | `build.yml` | Push → main/master, `workflow_dispatch` | 5–10 min | Advisory | One or more artifact builds broken on main |
-| **E2E Tests** | `e2e.yml` | Push/PR → main/master, `workflow_dispatch` | 15–30 min | Yes — e2e gate | A Playwright test or axe accessibility check failed for one of the 18 matrix apps |
-| **Accessibility Checks** | `a11y.yml` | Push/PR → main/master, `workflow_dispatch` | 15–20 min | Advisory | axe-core WCAG 2.1 AA violations in one of the 11 governed artifacts; does not block merge |
-| **Lighthouse CI** | `lighthouse.yml` | Push/PR → main/master, `workflow_dispatch` | 15–20 min | Accessibility enforced, others advisory | Performance, best-practices, or SEO below threshold; accessibility ≥ 90 is the hard gate |
-| **Runtime Audit** | `audit-full.yml` | Push/PR → main/master, `workflow_dispatch` | Up to 45 min | Advisory | Full audit pipeline (`audit:full:ci`) produced failures; check evidence artifact |
-| **CodeQL Analysis** | `codeql.yml` | Mondays @ 06:00 UTC, `workflow_dispatch` | 10–20 min | Advisory | CodeQL flagged a security finding; review Security tab |
-| **Security Audit & SBOM** | `security.yml` | Mondays @ 03:00 UTC, `workflow_dispatch` | 15–30 min | Yes — security-gate | Dependency scan, secret scan, lockfile integrity, license report, or security unit tests failed |
-| **Secret Scan — PR Gate** | `secret-scan.yml` | PR → main/master | < 5 min | Yes (required status check) | Gitleaks found a potential secret in the PR diff; rotate before merging |
-| **Secret Scan — Scheduled** | `secret-scan-scheduled.yml` | Daily @ 06:17 UTC, push to workflow file | 5–10 min | Advisory — opens issue | Gitleaks found a potential secret in full default-branch history; follow `ops/github/secret-scanning-runbook.md` |
-| **Dependency Review** | `dependency-review.yml` | PR → main/master | < 2 min | Yes | A new dependency introduces a high/critical CVE or a denied license (GPL-3.0, AGPL-3.0) |
-| **Commitlint** | `commitlint.yml` | PR → main/master, `workflow_dispatch` | < 2 min | Advisory | A commit message in the PR does not follow Conventional Commits |
-| **README QA** | `readme-qa.yml` | Push/PR → main/master (paths-filtered), `workflow_dispatch` | 2–5 min | Advisory | README images, badge workflows, portfolio table, or profile README assets are out of sync |
-| **API Spec Drift** | `api-spec-drift.yml` | Push/PR → main/master, `workflow_dispatch` | 2–5 min | Yes | An Express route file is missing from `lib/api-spec/openapi.yaml` or vice versa |
-| **PRAXIS Visual Regression** | `nexus-visual-regression.yml` | PR → main/master, `workflow_dispatch` | 10–20 min | Advisory | Visual diff between current build and baseline screenshots for PRAXIS catalog |
-| **Verify Source-of-Truth** | `verify-source-of-truth.yml` | Push/PR → main/master (paths-filtered), `workflow_dispatch` | < 5 min | Advisory | `audit/verify.sh` detected drift between `audit/source-of-truth.json` and codebase metrics |
-| **Nightly Smoke** | `nightly-smoke.yml` | Daily @ 03:30 UTC, `workflow_dispatch` | 5–10 min | Advisory — Slack alert | DOMAINE diligence lifecycle smoke test failed; posts to Slack if `SLACK_WEBHOOK_URL` is set |
-| **Operational Audit** | `operational-audit.yml` | `workflow_dispatch` only | 5–15 min | N/A | Smoke, URL crawl, or stress test against a target URL failed |
-| **Uptime Monitor** | `uptime-monitor.yml` | Every 5 min, `workflow_dispatch` | < 2 min | N/A — opens issue + Slack | `/api/health/live` returned non-200; opens a GitHub issue and alerts Slack |
-| **Database Backup** | `backup.yml` | Daily @ 02:00 UTC, `workflow_dispatch` | 5–15 min | Advisory | pg_dump or remote upload to Azure Blob failed; check `backup_manifest.json` artifact |
-| **Release** | `release.yml` | Push → main/master, `workflow_dispatch` | 2–5 min | Advisory | Tag/changelog creation failed; may need manual `git push` if the bot commit was blocked |
-| **Deploy — Staging** | `deploy-staging.yml` | Push → main/master | < 2 min | Advisory | `REPLIT_STAGING_DEPLOY_TOKEN` missing or Replit API returned an error |
-| **Deploy — Production** | `deploy-production.yml` | GitHub Release published, `workflow_dispatch` | < 2 min | Advisory | `REPLIT_DEPLOY_TOKEN` missing or Replit API returned an error |
-| **Container Publish** | `container-publish.yml` | GitHub Release published, push `v*.*.*` tag, `workflow_dispatch` | 15–30 min | Advisory | Docker build or push to GHCR failed for one of the 6 services |
-| **npm Publish** | `npm-publish.yml` | GitHub Release published, push `v*.*.*` tag, `workflow_dispatch` | 10–20 min | Advisory | One or more `@szl-holdings/*` packages failed to publish to GitHub Packages |
+- **Source-declared** — parsed from the workflow YAML in this checkout.
+- **Live-required (observed)** — returned by an authenticated read of the
+  Platform repository ruleset on 2026-10-06.
+- **Hosted result** — a conclusion for one exact GitHub Actions run and SHA. No
+  hosted result is inferred in this document.
 
----
+## Promotion-relevant workflows
 
-## Required Secrets
+| Workflow | Source-declared triggers | Gate or job | Live-required at observation? | Scope |
+|---|---|---|---|---|
+| `ci.yml` | PR to `main`/`master`, push to `main`, manual | Clean clone (Linux/Windows), Lint, Typecheck | No | Clone invariants and static checks; there is no `CI Gate` or readiness job in this file |
+| `build.yml` | PR/push to `main`/`master`, manual | `Build All Artifacts` | No | Frozen install and canonical full-workspace build |
+| `e2e.yml` | PR/push to `main`/`master`, manual | `E2E Gate` | **Yes** | Playwright matrix for A11oy and Carlota Jo; not every repository surface |
+| `a11y.yml` | PR/push to `main`/`master`, manual | `A11y Gate` | No | axe WCAG 2.1 AA matrix across six named artifacts |
+| `lighthouse.yml` | PR/push to `main`/`master`, manual | `Lighthouse Gate (accessibility enforced)` | No | Six-artifact matrix; accessibility is enforced, other categories are advisory |
+| `audit-full.yml` | PR/push to `main`/`master`, manual | `Runtime Audit (audit:full)` | **Yes** | Full audit pipeline with real local smoke targets; 60-minute timeout |
+| `codeql.yml` | PR/push to `main`, weekly, manual | `severity-gate` | **Yes** | JavaScript/TypeScript and Python analysis; exact synthetic PR-merge-ref High/Critical gate |
+| `security.yml` | PR/push to `main`, Mondays 03:00 UTC, manual | `Security Gate (blocking)` | **Yes** | pnpm audit, SBOM, Gitleaks, project secret scan, lockfile integrity, and license report |
+| `trivy.yml` | PR/push to `main`, Mondays 06:00 UTC | `Grype filesystem/SCA gate (fail on HIGH/CRITICAL)` | No | Trivy SARIF plus raw, digest-sealed Grype evidence and fail-closed local-patch admission |
+| `repro-check.yml` | PR, Mondays 04:17 UTC, manual | `repro` | No | Two clean, forced builds of one candidate SHA with complete path-and-byte manifest comparison |
+| `lockfile-registry.yml` | PR/push to `main`, manual | reusable `lockfiles` check | **Yes** | Rejects Replit-internal registry references in lockfiles |
+| `dependency-review.yml` | PR to `main` | `Review dependency changes` | No | Blocks newly introduced High/Critical dependencies and configured denied licenses when run |
+| `source-of-truth.yml` | path-filtered PR/push to `main`, daily, manual | canonical validator | No | Current-tree metrics and documentation; scheduled/manual Hugging Face comparison is advisory |
 
-| Secret | Used by | Owner action needed |
-|---|---|---|
-| `INTEGRATION_TEST_TOKEN` | `ci.yml` (integration tests), `nightly-smoke.yml` | Rotate when compromised; see `ops/github/secret-scanning-runbook.md` |
-| `SLACK_WEBHOOK_URL` | `uptime-monitor.yml`, `nightly-smoke.yml` | Set in repo Secrets to enable Slack alerts |
-| `DATABASE_URL` | `backup.yml` | Production DB URL; must be set for backup to run |
-| `AZURE_STORAGE_*` | `backup.yml` | Azure Blob credentials; without these, backups are artifact-only (7-day retention) |
-| `REPLIT_STAGING_DEPLOY_TOKEN` / `REPLIT_STAGING_APP_ID` | `deploy-staging.yml` | Set in the `staging` environment to enable automated staging deploys |
-| `REPLIT_DEPLOY_TOKEN` / `REPLIT_APP_ID` | `deploy-production.yml` | Set in the `production` environment to enable automated production deploys |
+“No” means the context was not in the dated live-required list. It does not
+mean the workflow is disabled or unimportant.
 
----
+## Dated live ruleset observation
 
-## Owner-Action Items (not changeable by PR)
+An authenticated 2026-10-06 read of Platform ruleset `Protect main -
+solo-builder exact-head` (repository ruleset ID `22286649`) observed these five
+required contexts. The sanitized configuration receipt is
+[`audit/evidence/github-platform-ruleset-summary-2026-10-06.json`](../../audit/evidence/github-platform-ruleset-summary-2026-10-06.json):
 
-- **Branch protection**: `secret-scan.yml` (`gitleaks-pr`) should be registered as a required status check in branch protection settings (Settings → Branches → Require status checks).
-- **GitHub Team plan**: Deployment approval gates on the `production` environment require GitHub Team or higher. Currently unenforced.
-- **Uptime monitor frequency**: The `*/5 * * * *` cron in `uptime-monitor.yml` is the GitHub Actions minimum interval; no further reduction is possible without an external uptime service.
-- **GHCR org packages**: Container images publish to `ghcr.io/szl-holdings/*` — requires the `szl-holdings` org to have GHCR enabled and the repo to have `packages: write` permission granted.
+- `Runtime Audit (audit:full)`
+- `Security Gate (blocking)`
+- `E2E Gate`
+- `severity-gate`
+- `lockfiles / No lockfile references a Replit-internal registry host`
 
----
+The ruleset required a pull request and conversation resolution, with zero
+approving reviews configured and no approval of the last reviewable push. It
+allowed squash merge only and prohibited deletion and non-fast-forward updates;
+no bypass actor was configured. This is a repository-scoped, dated observation,
+not an organization-wide claim. Organization-ruleset detail remained
+unavailable to the caller, and any later ruleset mutation requires a fresh
+readback before this list is represented as current.
 
-## Caching Strategy
+## Release and deployment boundary
 
-| Cache | Scope | Key |
-|---|---|---|
-| pnpm store | All Node.js jobs | Built into `actions/setup-node` via `cache: 'pnpm'` |
-| `node_modules` | All Node.js jobs (secondary) | `${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}` |
-| Playwright browsers | e2e.yml, a11y.yml, nexus-visual-regression.yml | `playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}` |
-| Docker layer cache | container-publish.yml | GitHub Actions cache backend, scoped per service |
+- `release.yml` runs on created/published releases or manual dispatch and
+  produces SBOM/provenance attestations. It does not create a release from a
+  push to `main`.
+- `npm-publish.yml` publishes to GitHub Packages on a published release,
+  version tag, or manual dispatch. `npm-public-publish.yml` is a separately
+  confirmed manual public-publication path.
+- `deploy-staging.yml` is a best-effort staging trigger on pushes to
+  `main`/`master`; missing credentials skip it and remote API errors are
+  warnings. It is not production-deployment evidence.
+- No current workflow named `deploy-production.yml` or
+  `container-publish.yml` exists in this tree.
+
+## Credential boundary
+
+Workflow source references credentials including GitHub, npm, Hugging Face,
+staging deployment, signing, observability, wake-receipt, and notification
+secrets. Source references do not establish that any value is configured,
+valid, scoped correctly, or available to a pull request. Verify repository and
+environment bindings without placing secret values in documentation.
+
+## Caching observed in source
+
+| Cache | Workflows |
+|---|---|
+| pnpm store via `actions/setup-node` | Selected Node workflows, including CI, build, tests, audit, security, and reproducibility |
+| Playwright Chromium | `e2e.yml`, `a11y.yml`, and `post-deploy-smoke.yml` |
+
+No general `node_modules` cache is declared in the current workflows.

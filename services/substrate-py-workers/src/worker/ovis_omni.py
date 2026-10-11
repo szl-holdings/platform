@@ -14,7 +14,9 @@ import json
 import math
 import os
 import re
+import stat
 import threading
+from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Annotated, Any, Literal, Protocol, Union
 
@@ -22,6 +24,8 @@ import anyio
 import structlog
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from .security import is_production_environment
 
 log = structlog.get_logger(__name__)
 ovis_router = APIRouter(prefix="/ovis", tags=["AEF Ovis multimodal evaluation"])
@@ -31,7 +35,15 @@ MODEL_REVISION = "08547b8479edc10edc9878597438ebd076f74dff"
 ARTIFACT_SET_DIGEST = "4ea7bf104aaf758eb648ea5f954b0aa19575f4e28d286f59103dfe223f4b4926"
 NATIVE_DIMENSIONS = 2048
 RUNTIME_ID = "substrate-py-workers/ovis-omni"
-RUNTIME_VERSION = "1.0.0"
+RUNTIME_VERSION = "1.0.2"
+ACCELERATE_VERSION = "1.15.0"
+TRANSFORMERS_VERSION = "5.19.0"
+TORCH_VERSION = "2.14.0"
+QWEN_OMNI_UTILS_VERSION = "0.0.9"
+MAX_INTERNAL_API_KEY_BYTES = 16 * 1024
+MAX_METADATA_BYTES = 64 * 1024
+MAX_MODEL_SNAPSHOT_ENTRIES = 4096
+MAX_MODEL_SNAPSHOT_DEPTH = 16
 SUPPORTED_MODALITIES = [
     "text",
     "image",
@@ -42,6 +54,19 @@ SUPPORTED_MODALITIES = [
 ]
 CAS_URI_RE = re.compile(r"^cas://sha256/([a-f0-9]{64})$", re.IGNORECASE)
 SHA256_RE = re.compile(r"^[a-f0-9]{64}$", re.IGNORECASE)
+TENANT_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$")
+OVIS_API_KEY_ENV = "OVIS_INTERNAL_API_KEY"
+OVIS_API_KEY_FILE_ENV = "OVIS_INTERNAL_API_KEY_FILE"
+OVIS_TENANT_ID_ENV = "OVIS_INTERNAL_TENANT_ID"
+
+# The tracked canonical manifest remains the authority for promotion. It is on
+# EVALUATION_HOLD and explicitly forbids production serving. A receipt digest
+# string is only an identifier; this runtime has no parser/verifier that binds
+# a signed receipt to the exact source head, model revision, artifact set, and
+# evaluation suite. No environment variable can promote this capability.
+CANONICAL_MANIFEST_PROMOTION_STATE = "EVALUATION_HOLD"
+CANONICAL_MANIFEST_PRODUCTION_SERVING_ALLOWED = False
+PRODUCTION_RECEIPT_VERIFICATION_IMPLEMENTED = False
 
 # LFS identities read from the exact immutable Hub revision on 2026-09-24.
 EXPECTED_ARTIFACTS: dict[str, tuple[str, int]] = {
@@ -78,10 +103,10 @@ class ApiModel(BaseModel):
 
 
 class OvisAsset(ApiModel):
-    asset_id: str = Field(min_length=1)
-    uri: str
+    asset_id: str = Field(min_length=1, max_length=256)
+    uri: str = Field(max_length=256)
     sha256: str
-    media_type: str = Field(min_length=1)
+    media_type: str = Field(min_length=1, max_length=128)
     byte_length: int = Field(ge=0)
     modality: Literal["image", "visual_document", "audio", "video"]
 
@@ -102,7 +127,7 @@ class OvisAsset(ApiModel):
 
 class TextSegment(ApiModel):
     kind: Literal["text"]
-    text: str = Field(min_length=1)
+    text: str = Field(min_length=1, max_length=1_000_000)
 
 
 class AssetSegment(ApiModel):
@@ -114,21 +139,41 @@ Segment = Annotated[Union[TextSegment, AssetSegment], Field(discriminator="kind"
 
 
 class OvisItem(ApiModel):
-    item_id: str = Field(min_length=1)
+    item_id: str = Field(min_length=1, max_length=256)
     instruction: str = Field(min_length=1, max_length=4096)
     segments: list[Segment] = Field(min_length=1, max_length=32)
 
 
 class OvisEmbedRequest(ApiModel):
-    request_id: str = Field(min_length=1)
-    tenant_id: str = Field(min_length=1)
-    profile_id: str | None = None
-    model_id: str = Field(min_length=1)
-    model_revision: str = Field(min_length=1)
+    request_id: str = Field(min_length=1, max_length=256)
+    tenant_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$",
+    )
+    profile_id: str | None = Field(default=None, max_length=256)
+    model_id: str = Field(min_length=1, max_length=256)
+    model_revision: str = Field(min_length=1, max_length=128)
     dimensions: Literal[2048, 1024, 512, 256, 128] = NATIVE_DIMENSIONS
     normalize: Literal[True] = True
     items: list[OvisItem] = Field(min_length=1, max_length=32)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("metadata")
+    @classmethod
+    def validate_metadata_size(cls, value: dict[str, Any]) -> dict[str, Any]:
+        try:
+            encoded = json.dumps(
+                value,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+            ).encode("utf-8")
+        except (TypeError, ValueError) as error:
+            raise ValueError("metadata must be JSON serializable") from error
+        if len(encoded) > MAX_METADATA_BYTES:
+            raise ValueError("metadata exceeds the admitted size")
+        return value
 
 
 class OvisVector(ApiModel):
@@ -176,7 +221,7 @@ class OvisRuntimeError(RuntimeError):
 
 
 def _is_production() -> bool:
-    return (os.getenv("NODE_ENV") or os.getenv("SZL_ENV") or "").lower() == "production"
+    return is_production_environment()
 
 
 def _promotion_state() -> str:
@@ -190,34 +235,195 @@ def _assert_runtime_gate() -> None:
     if os.getenv("OVIS_OMNI_ENABLED", "0") != "1":
         raise OvisRuntimeError("OVIS_RUNTIME_DISABLED", "Ovis multimodal runtime is disabled")
 
+    if os.getenv("OVIS_MAX_CONCURRENCY", "1") != "1":
+        raise OvisRuntimeError(
+            "OVIS_CONCURRENCY_NOT_ADMITTED",
+            "Ovis evaluation concurrency must remain one",
+        )
+
     state = _promotion_state()
     if state == "REVOKED":
         raise OvisRuntimeError("OVIS_MODEL_REVOKED", "Ovis multimodal model is revoked")
+    if (
+        state == "QUALIFIED"
+        and CANONICAL_MANIFEST_PROMOTION_STATE != "QUALIFIED"
+    ):
+        raise OvisRuntimeError(
+            "OVIS_NOT_QUALIFIED",
+            "Ovis multimodal model is not qualified for production",
+        )
 
     if _is_production():
-        receipt = os.getenv("OVIS_QUALIFICATION_RECEIPT_SHA256", "")
-        if state != "QUALIFIED" or not SHA256_RE.fullmatch(receipt):
+        # OVIS_QUALIFICATION_RECEIPT_SHA256 is deliberately not consulted as
+        # proof. Even a well-formed digest cannot establish what was signed or
+        # whether it is bound to this exact runtime and evaluation evidence.
+        if (
+            CANONICAL_MANIFEST_PROMOTION_STATE != "QUALIFIED"
+            or not CANONICAL_MANIFEST_PRODUCTION_SERVING_ALLOWED
+            or not PRODUCTION_RECEIPT_VERIFICATION_IMPLEMENTED
+        ):
             raise OvisRuntimeError(
                 "OVIS_NOT_QUALIFIED",
                 "Ovis multimodal model is not qualified for production",
             )
-        if os.getenv("OVIS_VERIFY_ARTIFACTS", "1") != "1":
+
+
+def _read_internal_api_key_file(file_value: str) -> str:
+    secret_path = Path(file_value)
+    flags = os.O_RDONLY
+    flags |= getattr(os, "O_CLOEXEC", 0)
+    flags |= getattr(os, "O_NONBLOCK", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    descriptor: int | None = None
+    try:
+        # Kubernetes uses symlinks for directory-mounted Secret keys. The
+        # evaluation manifest therefore mounts this key with ``subPath`` so
+        # the process can reject link traversal and open one regular file.
+        if secret_path.is_symlink():
+            raise OSError("secret path is not a regular file")
+        descriptor = os.open(secret_path, flags)
+        file_stat = os.fstat(descriptor)
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise OSError("secret path is not a regular file")
+        if file_stat.st_size > MAX_INTERNAL_API_KEY_BYTES:
+            raise OSError("secret file exceeds the admitted size")
+        with os.fdopen(descriptor, "rb", closefd=False) as handle:
+            payload = handle.read(MAX_INTERNAL_API_KEY_BYTES + 1)
+        if len(payload) > MAX_INTERNAL_API_KEY_BYTES:
+            raise OSError("secret file exceeds the admitted size")
+        secret = payload.decode("utf-8").rstrip("\r\n")
+    except (OSError, UnicodeError, ValueError) as error:
+        log.error("ovis_internal_api_key_file_rejected", error_type=type(error).__name__)
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_API_KEY_FILE_INVALID",
+            f"{OVIS_API_KEY_FILE_ENV} is unavailable",
+        ) from error
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+    if not secret:
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_API_KEY_FILE_EMPTY",
+            f"{OVIS_API_KEY_FILE_ENV} is empty",
+        )
+    if secret != secret.strip():
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_API_KEY_FILE_INVALID",
+            f"{OVIS_API_KEY_FILE_ENV} must not contain surrounding whitespace",
+        )
+    return secret
+
+
+def _internal_api_key() -> str | None:
+    direct = os.getenv(OVIS_API_KEY_ENV, "") or None
+    file_value = os.getenv(OVIS_API_KEY_FILE_ENV, "") or None
+    if direct is not None and file_value is not None:
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_API_KEY_AMBIGUOUS",
+            f"Configure only one of {OVIS_API_KEY_ENV} and {OVIS_API_KEY_FILE_ENV}",
+        )
+    if direct is not None:
+        if direct != direct.strip():
             raise OvisRuntimeError(
-                "ARTIFACT_VERIFICATION_REQUIRED",
-                "Production Ovis runtime requires artifact verification",
+                "OVIS_INTERNAL_API_KEY_INVALID",
+                f"{OVIS_API_KEY_ENV} must not contain surrounding whitespace",
+            )
+        return direct
+    if file_value is not None:
+        return _read_internal_api_key_file(file_value)
+    return None
+
+
+def _load_internal_identity() -> tuple[str | None, str | None]:
+    expected = _internal_api_key()
+    bound_tenant_id = os.getenv(OVIS_TENANT_ID_ENV, "") or None
+
+    if bound_tenant_id is not None:
+        bound_tenant_id = bound_tenant_id.strip()
+        if not TENANT_ID_RE.fullmatch(bound_tenant_id):
+            raise OvisRuntimeError(
+                "OVIS_INTERNAL_TENANT_INVALID",
+                f"{OVIS_TENANT_ID_ENV} must contain a valid tenant identity",
+            )
+
+    if _is_production():
+        if expected is None:
+            raise OvisRuntimeError(
+                "OVIS_INTERNAL_API_KEY_REQUIRED",
+                f"{OVIS_API_KEY_ENV} or {OVIS_API_KEY_FILE_ENV} is required",
+            )
+        if bound_tenant_id is None:
+            raise OvisRuntimeError(
+                "OVIS_INTERNAL_TENANT_REQUIRED",
+                f"{OVIS_TENANT_ID_ENV} must bind the Ovis credential to one tenant",
+            )
+    elif bound_tenant_id is not None and expected is None:
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_IDENTITY_INCOMPLETE",
+            f"An Ovis API key is required when {OVIS_TENANT_ID_ENV} is configured",
+        )
+
+    return expected, bound_tenant_id
+
+
+def _assert_dependency_versions() -> None:
+    """Fail closed when the evaluation process differs from the admitted stack."""
+
+    expected_versions = {
+        "accelerate": ACCELERATE_VERSION,
+        "transformers": TRANSFORMERS_VERSION,
+        "torch": TORCH_VERSION,
+        "qwen-omni-utils": QWEN_OMNI_UTILS_VERSION,
+    }
+    for distribution, expected in expected_versions.items():
+        try:
+            actual = importlib_metadata.version(distribution)
+        except importlib_metadata.PackageNotFoundError as error:
+            raise OvisRuntimeError(
+                "OVIS_DEPENDENCY_MISSING",
+                "An admitted Ovis runtime dependency is not installed",
+            ) from error
+        if actual != expected:
+            log.error(
+                "ovis_dependency_version_mismatch",
+                distribution=distribution,
+                expected=expected,
+                actual=actual,
+            )
+            raise OvisRuntimeError(
+                "OVIS_DEPENDENCY_VERSION_MISMATCH",
+                "The installed Ovis runtime dependencies do not match the admitted versions",
             )
 
 
-def _require_internal_auth(request: Request) -> None:
-    expected = os.getenv("OVIS_INTERNAL_API_KEY", "")
-    if _is_production() and not expected:
-        raise HTTPException(status_code=503, detail="OVIS_INTERNAL_API_KEY is required")
-    if not expected:
+def validate_ovis_configuration() -> None:
+    """Fail startup/readiness when an enabled Ovis boundary is misconfigured."""
+
+    if os.getenv("OVIS_OMNI_ENABLED", "0") != "1":
         return
+    _assert_runtime_gate()
+    _assert_dependency_versions()
+    _load_internal_identity()
+
+
+def _require_internal_auth(request: Request) -> str | None:
+    try:
+        expected, bound_tenant_id = _load_internal_identity()
+    except OvisRuntimeError as error:
+        raise HTTPException(status_code=503, detail=error.safe_message) from error
+    if expected is None:
+        return bound_tenant_id
     authorization = request.headers.get("authorization", "")
-    supplied = authorization.removeprefix("Bearer ") if authorization.startswith("Bearer ") else ""
-    if not supplied or not hmac.compare_digest(supplied, expected):
+    scheme, separator, supplied = authorization.partition(" ")
+    authenticated = (
+        separator == " "
+        and scheme.lower() == "bearer"
+        and bool(supplied)
+        and hmac.compare_digest(supplied.encode("utf-8"), expected.encode("utf-8"))
+    )
+    if not authenticated:
         raise HTTPException(status_code=401, detail="Unauthorized")
+    return bound_tenant_id
 
 
 def _hash_file(path: Path) -> str:
@@ -228,25 +434,134 @@ def _hash_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _assert_flat_snapshot_tree(snapshot_root: Path) -> None:
+    entry_count = 0
+
+    def raise_walk_error(error: OSError) -> None:
+        raise OvisRuntimeError(
+            "MODEL_SNAPSHOT_UNREADABLE",
+            "The configured model snapshot tree is unreadable",
+        ) from error
+
+    for current_root, directories, files in os.walk(
+        snapshot_root,
+        topdown=True,
+        onerror=raise_walk_error,
+        followlinks=False,
+    ):
+        relative_root = Path(current_root).relative_to(snapshot_root)
+        if len(relative_root.parts) > MAX_MODEL_SNAPSHOT_DEPTH:
+            raise OvisRuntimeError(
+                "MODEL_SNAPSHOT_DEPTH_EXCEEDED",
+                "The configured model snapshot tree is too deep",
+            )
+        for name in [*directories, *files]:
+            entry_count += 1
+            if entry_count > MAX_MODEL_SNAPSHOT_ENTRIES:
+                raise OvisRuntimeError(
+                    "MODEL_SNAPSHOT_ENTRY_LIMIT_EXCEEDED",
+                    "The configured model snapshot tree has too many entries",
+                )
+            entry = Path(current_root) / name
+            try:
+                entry_stat = entry.lstat()
+            except OSError as error:
+                raise OvisRuntimeError(
+                    "MODEL_SNAPSHOT_UNREADABLE",
+                    "The configured model snapshot tree is unreadable",
+                ) from error
+            if stat.S_ISLNK(entry_stat.st_mode):
+                raise OvisRuntimeError(
+                    "MODEL_SNAPSHOT_SYMLINK_REJECTED",
+                    "The configured model snapshot tree contains a symlink",
+                )
+            if not (stat.S_ISREG(entry_stat.st_mode) or stat.S_ISDIR(entry_stat.st_mode)):
+                raise OvisRuntimeError(
+                    "MODEL_SNAPSHOT_SPECIAL_FILE_REJECTED",
+                    "The configured model snapshot tree contains a special file",
+                )
+
+
 def _verify_snapshot(snapshot_root: Path) -> None:
+    if snapshot_root.is_symlink() or not snapshot_root.is_dir():
+        raise OvisRuntimeError(
+            "MODEL_SNAPSHOT_ROOT_INVALID",
+            "The configured model snapshot root is not a regular directory",
+        )
+    resolved_root = snapshot_root.resolve(strict=True)
+    _assert_flat_snapshot_tree(resolved_root)
     for relative_path, (expected_digest, expected_size) in EXPECTED_ARTIFACTS.items():
         path = snapshot_root / relative_path
-        if not path.is_file() or path.is_symlink():
+        current = snapshot_root
+        for component in Path(relative_path).parts:
+            current = current / component
+            if current.is_symlink():
+                raise OvisRuntimeError(
+                    "MODEL_ARTIFACT_SYMLINK_REJECTED",
+                    f"Required model artifact uses a symlink: {relative_path}",
+                )
+        if not path.is_file():
             raise OvisRuntimeError(
                 "MODEL_ARTIFACT_MISSING",
                 f"Required model artifact is missing: {relative_path}",
             )
-        stat = path.stat()
-        if stat.st_size != expected_size:
+        resolved_path = path.resolve(strict=True)
+        if resolved_root not in resolved_path.parents:
+            raise OvisRuntimeError(
+                "MODEL_ARTIFACT_PATH_ESCAPE",
+                f"Required model artifact escaped the snapshot: {relative_path}",
+            )
+        artifact_stat = resolved_path.stat()
+        if artifact_stat.st_size != expected_size:
             raise OvisRuntimeError(
                 "MODEL_ARTIFACT_SIZE_MISMATCH",
                 f"Model artifact size mismatch: {relative_path}",
             )
-        if _hash_file(path) != expected_digest:
+        if _hash_file(resolved_path) != expected_digest:
             raise OvisRuntimeError(
                 "MODEL_ARTIFACT_DIGEST_MISMATCH",
                 f"Model artifact digest mismatch: {relative_path}",
             )
+
+
+def _resolve_model_snapshot(snapshot_download: Any) -> Path:
+    configured_root = os.getenv("OVIS_MODEL_SNAPSHOT_ROOT", "")
+    if configured_root:
+        configured_path = Path(configured_root).expanduser()
+        if configured_path.is_symlink():
+            raise OvisRuntimeError(
+                "MODEL_SNAPSHOT_ROOT_INVALID",
+                "The configured model snapshot root may not be a symlink",
+            )
+        try:
+            resolved_path = configured_path.resolve(strict=True)
+        except (OSError, RuntimeError) as error:
+            raise OvisRuntimeError(
+                "MODEL_SNAPSHOT_ROOT_INVALID",
+                "The configured model snapshot root is unavailable",
+            ) from error
+        if not resolved_path.is_dir():
+            raise OvisRuntimeError(
+                "MODEL_SNAPSHOT_ROOT_INVALID",
+                "The configured model snapshot root is not a directory",
+            )
+        return resolved_path
+
+    if os.getenv("OVIS_VERIFY_ARTIFACTS", "1") == "1":
+        raise OvisRuntimeError(
+            "MODEL_SNAPSHOT_ROOT_REQUIRED",
+            "Artifact verification requires an explicit flattened model snapshot root",
+        )
+
+    return Path(
+        snapshot_download(
+            repo_id=MODEL_ID,
+            revision=MODEL_REVISION,
+            allow_patterns=["model/*"],
+            token=os.getenv("HF_TOKEN") or None,
+            local_files_only=os.getenv("OVIS_LOCAL_FILES_ONLY", "0") == "1",
+        )
+    ).resolve(strict=True)
 
 
 def _resolve_asset(asset: OvisAsset) -> Path:
@@ -309,6 +624,7 @@ def _item_modalities(item: OvisItem) -> list[str]:
 class OvisOmniRuntime:
     def __init__(self) -> None:
         self._lock = threading.Lock()
+        self._inference_lock = threading.Lock()
         self._processor: Any | None = None
         self._model: Any | None = None
         self._torch: Any | None = None
@@ -332,20 +648,13 @@ class OvisOmniRuntime:
                 return
             _assert_runtime_gate()
             try:
+                _assert_dependency_versions()
                 import torch
                 from huggingface_hub import snapshot_download
                 from qwen_omni_utils import process_mm_info
                 from transformers import AutoProcessor, Qwen2_5OmniForConditionalGeneration
 
-                snapshot_path = Path(
-                    snapshot_download(
-                        repo_id=MODEL_ID,
-                        revision=MODEL_REVISION,
-                        allow_patterns=["model/*"],
-                        token=os.getenv("HF_TOKEN") or None,
-                        local_files_only=os.getenv("OVIS_LOCAL_FILES_ONLY", "0") == "1",
-                    )
-                ).resolve(strict=True)
+                snapshot_path = _resolve_model_snapshot(snapshot_download)
                 if os.getenv("OVIS_VERIFY_ARTIFACTS", "1") == "1":
                     _verify_snapshot(snapshot_path)
 
@@ -500,11 +809,13 @@ class OvisOmniRuntime:
         )
 
     def embed_items(self, items: list[OvisItem]) -> list[OvisVector]:
-        return [self._embed_one(item) for item in items]
+        with self._inference_lock:
+            return [self._embed_one(item) for item in items]
 
 
 _runtime: RuntimeProtocol | None = None
 _runtime_lock = threading.Lock()
+_inference_limiter = anyio.CapacityLimiter(1)
 
 
 def get_runtime() -> RuntimeProtocol:
@@ -535,43 +846,75 @@ def _execution_receipt() -> ExecutionReceipt:
 @ovis_router.get("/health")
 async def ovis_health(request: Request) -> dict[str, Any]:
     _require_internal_auth(request)
-    runtime = get_runtime()
-    gate_error: str | None = None
+    promotion_state: str | None = None
     try:
+        promotion_state = _promotion_state()
         _assert_runtime_gate()
+        _assert_dependency_versions()
     except OvisRuntimeError as error:
-        gate_error = error.code
+        raise HTTPException(
+            status_code=error.status_code,
+            detail={
+                "status": "blocked",
+                "gateCode": error.code,
+                "loadErrorCode": None,
+                "modelId": MODEL_ID,
+                "modelRevision": MODEL_REVISION,
+                "promotionState": (
+                    CANONICAL_MANIFEST_PROMOTION_STATE
+                    if error.code == "OVIS_NOT_QUALIFIED"
+                    else promotion_state
+                ),
+            },
+        ) from error
 
+    runtime = get_runtime()
     loaded = isinstance(runtime, OvisOmniRuntime) and runtime.loaded
     load_error = runtime.load_error_code if isinstance(runtime, OvisOmniRuntime) else None
-    healthy = gate_error is None and load_error is None
-    if not healthy:
+    if load_error is not None:
         raise HTTPException(
             status_code=503,
             detail={
                 "status": "blocked",
-                "gateCode": gate_error,
+                "gateCode": None,
                 "loadErrorCode": load_error,
                 "modelId": MODEL_ID,
                 "modelRevision": MODEL_REVISION,
-                "promotionState": _promotion_state(),
+                "promotionState": promotion_state,
             },
         )
+    assert promotion_state is not None
     return {
         "status": "ready" if loaded else "cold",
         "loaded": loaded,
         "modelId": MODEL_ID,
         "modelRevision": MODEL_REVISION,
         "artifactSetDigest": ARTIFACT_SET_DIGEST,
-        "promotionState": _promotion_state(),
+        "promotionState": promotion_state,
         "artifactVerificationRequired": os.getenv("OVIS_VERIFY_ARTIFACTS", "1") == "1",
     }
 
 
 @ovis_router.post("/embed", response_model=OvisEmbedResponse)
 async def ovis_embed(request_body: OvisEmbedRequest, request: Request) -> OvisEmbedResponse:
-    _require_internal_auth(request)
-    _assert_runtime_gate()
+    bound_tenant_id = _require_internal_auth(request)
+
+    if bound_tenant_id is not None and not hmac.compare_digest(
+        request_body.tenant_id.encode("utf-8"), bound_tenant_id.encode("utf-8")
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Authenticated Ovis credential is not authorized for this tenant",
+        )
+
+    try:
+        _assert_runtime_gate()
+    except OvisRuntimeError as error:
+        log.warning("ovis_embed_rejected", code=error.code, request_id=request_body.request_id)
+        raise HTTPException(
+            status_code=error.status_code,
+            detail=error.code,
+        ) from error
 
     if request_body.model_id != MODEL_ID or request_body.model_revision != MODEL_REVISION:
         raise HTTPException(status_code=409, detail="MODEL_IDENTITY_NOT_ADMITTED")
@@ -579,11 +922,18 @@ async def ovis_embed(request_body: OvisEmbedRequest, request: Request) -> OvisEm
         raise HTTPException(status_code=409, detail="PROJECTION_ASSET_NOT_ADMITTED")
 
     try:
-        vectors = await anyio.to_thread.run_sync(
-            get_runtime().embed_items,
-            request_body.items,
-            abandon_on_cancel=True,
-        )
+        _inference_limiter.acquire_nowait()
+    except anyio.WouldBlock as error:
+        raise HTTPException(status_code=429, detail="OVIS_INFERENCE_BUSY") from error
+
+    try:
+        try:
+            vectors = await anyio.to_thread.run_sync(
+                get_runtime().embed_items,
+                request_body.items,
+            )
+        finally:
+            _inference_limiter.release()
     except OvisRuntimeError as error:
         log.warning("ovis_embed_rejected", code=error.code, request_id=request_body.request_id)
         raise HTTPException(status_code=error.status_code, detail=error.code) from error
