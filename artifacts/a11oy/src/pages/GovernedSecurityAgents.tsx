@@ -23,7 +23,7 @@ const SEC_WORKFLOWS: SecurityWorkflow[] = [
   {
     id: 'sec-detection',
     name: 'Detection Engineering Agent',
-    intent: 'Proposed workflow for drafting detection rules and testing them with synthetic data.',
+    intent: 'Proposed workflow for drafting detection rules and testing them with synthetic data; no SIEM or EDR deployment occurs.',
     capabilities: ['rule drafting', 'synthetic validation', 'coverage analysis', 'review queue'],
     proposedGate: 'A reviewer would approve any rule deployment.',
   },

@@ -7,11 +7,6 @@ const config: StorybookConfig = {
     name: '@storybook/react-vite',
     options: {},
   },
-  core: {
-    // Optional telemetry metadata includes wall-clock timestamps and is not
-    // needed to render the static stories. Keep the actual build deterministic.
-    disableProjectJson: true,
-  },
   docs: {
     autodocs: 'tag',
   },

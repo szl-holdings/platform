@@ -185,9 +185,13 @@ Commands actually run using Node `v24.19.0`:
   that tar does not support `--quoting-style=escape`; no check was relaxed.
 - From the owning `apps/alloy-runtime-api` working directory, direct cached
   Vitest `4.1.11` executed `run --config vitest.config.ts
-  src/atelier-continuity-store.test.ts --maxWorkers 1`: exit 0,
-  **27 passed, 1 skipped, 28 total**. The initial repository-root invocation
-  found no tests and exited 1; it is not counted as passing.
+  src/atelier-continuity-store.test.ts --maxWorkers 1`. The
+  [source-scoped local observation record](PLATFORM_PR882_CONTINUITY_LOCAL_OBSERVATIONS_20261011.json)
+  preserves the earlier successful run and the fresh failed replay on this
+  published source. Neither observation is a platform-wide aggregate or hosted
+  CI result. The initial repository-root invocation found no cases and exited
+  unsuccessfully; it is not counted as passing. Canonical `platform_tests`
+  remains **UNAVAILABLE**.
 - Direct TypeScript `6.0.3` ran `-p lib/mobile-shared/tsconfig.json --noEmit`:
   exit 1, unresolved installed Expo/mobile module declarations and consequent
   implicit-any diagnostics. A completed native mobile typecheck is **BLOCKED**
