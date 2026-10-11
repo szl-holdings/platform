@@ -67,3 +67,40 @@ describe('POST /v1/openai/embeddings', () => {
     expect(res.json.data[2].index).toBe(2);
   });
 });
+
+describe('production capability admission', () => {
+  it.each([
+    ['/v1/embed', { texts: ['hello'] }, 'embedding'],
+    ['/v1/rerank', { query: 'q', passages: ['a'] }, 'reranking'],
+    ['/v1/openai/embeddings', { input: 'hello' }, 'openai-embedding-compat'],
+  ])('fails closed for %s instead of returning a successful stub', async (path, body, capability) => {
+    const previous = process.env.NODE_ENV;
+    const previousKey = process.env.ALLOY_API_KEY;
+    const previousTenant = process.env.ALLOY_API_TENANT_ID;
+    process.env.NODE_ENV = 'production';
+    process.env.ALLOY_API_KEY = 'production-route-test-key';
+    process.env.ALLOY_API_TENANT_ID = 'production-route-test-tenant';
+    try {
+      const res = await client.req('POST', path, {
+        body,
+        headers: { 'x-api-key': 'production-route-test-key' },
+      });
+      expect(res.status).toBe(503);
+      expect(res.json).toMatchObject({
+        status: 'UNAVAILABLE',
+        code: 'CAPABILITY_UNAVAILABLE',
+        capability,
+        evidenceState: 'UNAVAILABLE',
+      });
+      expect(JSON.stringify(res.json)).not.toContain('embeddings');
+      expect(JSON.stringify(res.json)).not.toContain('reranked');
+    } finally {
+      if (previous === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previous;
+      if (previousKey === undefined) delete process.env.ALLOY_API_KEY;
+      else process.env.ALLOY_API_KEY = previousKey;
+      if (previousTenant === undefined) delete process.env.ALLOY_API_TENANT_ID;
+      else process.env.ALLOY_API_TENANT_ID = previousTenant;
+    }
+  });
+});

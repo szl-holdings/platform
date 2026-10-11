@@ -15,12 +15,16 @@ on:
       - .github/scripts/warm_flagships.py
       - .github/scripts/test_warm_flagships.py
       - .github/workflows/warm-flagships.yml
+      - packages/szl-kernels/deploy/szl_kernels_organ.py
+      - packages/szl-kernels/tests/test_szl_kernels_organ.py
   pull_request:
     branches: [main]
     paths:
       - .github/scripts/warm_flagships.py
       - .github/scripts/test_warm_flagships.py
       - .github/workflows/warm-flagships.yml
+      - packages/szl-kernels/deploy/szl_kernels_organ.py
+      - packages/szl-kernels/tests/test_szl_kernels_organ.py
 
 permissions:
   contents: read
@@ -52,8 +56,13 @@ jobs:
       - name: Compile and test the complete incident lifecycle
         run: |
           set -euo pipefail
-          python -m py_compile .github/scripts/warm_flagships.py .github/scripts/test_warm_flagships.py
+          python -m py_compile \
+            .github/scripts/warm_flagships.py \
+            .github/scripts/test_warm_flagships.py \
+            packages/szl-kernels/deploy/szl_kernels_organ.py \
+            packages/szl-kernels/tests/test_szl_kernels_organ.py
           python .github/scripts/test_warm_flagships.py
+          python packages/szl-kernels/tests/test_szl_kernels_organ.py
           git diff --check
 
   probe-pull-request:
@@ -188,12 +197,64 @@ jobs:
       contents: read
     steps:
       - name: POST bounded wake receipt
+        env:
+          SZL_WAKE_RECEIPT_TOKEN: ${{ secrets.SZL_WAKE_RECEIPT_TOKEN }}
         run: |
-          set +e
-          curl -sS -X POST --max-time 25 \
+          set -euo pipefail
+          if [ -z "${SZL_WAKE_RECEIPT_TOKEN:-}" ]; then
+            echo "::error::SZL_WAKE_RECEIPT_TOKEN is not configured; refusing to send an unauthenticated wake receipt"
+            exit 1
+          fi
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          payload = {
+              "source": "github-actions/warm-flagships",
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "run": os.environ["GITHUB_RUN_ID"],
+              "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "sha": os.environ["GITHUB_SHA"],
+              "event": os.environ["GITHUB_EVENT_NAME"],
+              "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+          }
+          Path("/tmp/wake-receipt.json").write_text(
+              json.dumps(payload, separators=(",", ":")), encoding="utf-8"
+          )
+          PY
+          http_code="$(curl -sS --fail-with-body --request POST --max-time 25 --max-filesize 4096 \
             "https://szlholdings-a11oy.hf.space/api/a11oy/v3/kernels/wake-receipt" \
             -H "content-type: application/json" \
-            -d "{\"source\":\"github-actions/warm-flagships\",\"run\":\"${GITHUB_RUN_ID}\",\"ts\":\"$(date -u +%FT%TZ)\"}" \
-            -o /tmp/wake \
-            -w "wake-receipt -> %{http_code}\n"
-          head -c 500 /tmp/wake || true
+            -H "authorization: Bearer ${SZL_WAKE_RECEIPT_TOKEN}" \
+            --data-binary @/tmp/wake-receipt.json \
+            -o /tmp/wake-receipt-response.json \
+            -w "%{http_code}")"
+          echo "wake-receipt -> ${http_code}"
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          try:
+              response = json.loads(
+                  Path("/tmp/wake-receipt-response.json").read_text(encoding="utf-8")
+              )
+          except (OSError, UnicodeError, json.JSONDecodeError) as error:
+              raise SystemExit("wake-receipt response was not bounded JSON") from error
+          if (
+              not isinstance(response, dict)
+              or response.get("ok") is not True
+              or not isinstance(response.get("replay"), bool)
+              or not re.fullmatch(r"ce_[0-9a-f]{20}", response.get("entry_id", ""))
+              or not re.fullmatch(
+                  r"sha256:[0-9a-f]{64}", response.get("codex_head", "")
+              )
+              or not re.fullmatch(
+                  r"sha256:[0-9a-f]{64}", response.get("entry_hash", "")
+              )
+          ):
+              raise SystemExit("wake-receipt response contract failed")
+          print("wake-receipt response contract -> PASS")
+          PY

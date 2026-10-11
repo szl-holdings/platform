@@ -1,10 +1,11 @@
 """
-Concurrent load test: N=3 workers handling concurrent runs without duplicate execution.
+Single-process concurrency tests for one Python worker.
 
 Tests:
-1. N=3 concurrent claims to a single worker complete without duplicate execution.
-2. The claim loop's optimistic locking prevents duplicate execution of the same
-   (runId, stageId) pair even when issued concurrently.
+1. Three concurrent unique claims to a single worker complete.
+2. The process-local claim loop rejects the same (runId, stageId) only while
+   that claim remains active in the same process. This is not durable or
+   cross-worker idempotency.
 3. When a worker is at capacity, additional claims receive 503 WORKER_UNAVAILABLE.
 4. After claims complete, the worker returns to available state.
 5. Graceful drain: SIGTERM-equivalent drain stops new claims while existing
@@ -22,6 +23,8 @@ from httpx import AsyncClient, ASGITransport
 
 from worker.main import app
 from worker.claim_loop import ClaimLoop
+
+AUTH_HEADERS = {"X-Tenant-ID": "tenant-test"}
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -41,6 +44,7 @@ def _make_claim(
         "workerId": "test-engine",
         "runId": run_id or f"run-{uuid.uuid4().hex[:8]}",
         "workflowId": "wf-concurrent-test",
+        "tenantId": "tenant-test",
         "stageId": stage_id or f"stage-{uuid.uuid4().hex[:8]}",
         "stageType": stage_type,
         "stageConfig": {"stageKind": stage_type},
@@ -52,7 +56,7 @@ def _make_claim(
     }
 
 
-# ─── N=3 concurrent execution without duplicate ───────────────────────────────
+# ─── Three concurrent claims in one process ──────────────────────────────────
 
 @pytest.mark.asyncio
 async def test_three_concurrent_claims_all_succeed():
@@ -61,7 +65,7 @@ async def test_three_concurrent_claims_all_succeed():
         claims = [_make_claim("retrieval", mode="dry-run") for _ in range(3)]
 
         async def post_claim(claim: dict) -> dict:
-            resp = await client.post("/claim", json=claim)
+            resp = await client.post("/claim", json=claim, headers=AUTH_HEADERS)
             return resp.json()
 
         results = await asyncio.gather(*[post_claim(c) for c in claims])
@@ -78,10 +82,10 @@ async def test_three_concurrent_claims_all_succeed():
 
 
 @pytest.mark.asyncio
-async def test_no_duplicate_execution_for_same_stage():
+async def test_active_duplicate_is_rejected_in_one_process():
     """
-    Two concurrent claims for the SAME (runId, stageId) must not both execute.
-    The second claim should be rejected (the stage is already claimed).
+    Two concurrent claims for the same key cannot both be active in one loop.
+    Releasing the key permits another claim; no durable completion record exists.
     """
     run_id = f"run-dup-{uuid.uuid4().hex[:8]}"
     stage_id = "stage-dup-1"
@@ -154,7 +158,7 @@ async def test_all_four_stage_types_concurrent():
         ]
 
         async def post_claim(claim: dict) -> dict:
-            resp = await client.post("/claim", json=claim)
+            resp = await client.post("/claim", json=claim, headers=AUTH_HEADERS)
             return resp.json()
 
         results = await asyncio.gather(*[post_claim(c) for c in claims])
@@ -170,10 +174,7 @@ async def test_health_endpoint_available():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         resp = await client.get("/health")
     assert resp.status_code == 200
-    body = resp.json()
-    assert body["status"] == "ok"
-    assert "activeClaims" in body
-    assert "maxConcurrency" in body
+    assert resp.json() == {"status": "ok"}
 
 
 @pytest.mark.asyncio
@@ -187,7 +188,7 @@ async def test_ready_endpoint_available():
 @pytest.mark.asyncio
 async def test_workers_endpoint_lists_stages():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        resp = await client.get("/workers")
+        resp = await client.get("/workers", headers=AUTH_HEADERS)
     assert resp.status_code == 200
     body = resp.json()
     assert "workers" in body

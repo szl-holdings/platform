@@ -2,6 +2,7 @@ import { createDefaultProfileRegistry } from '@workspace/aef-domain-profiles';
 import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
 import { PolicyEngine, TenantBoundaryEnforcer } from '@workspace/aef-policy-guard';
 import { InMemoryStorageBundle } from '@workspace/aef-storage-adapters';
+import { FABRIC_API_TENANT_ID } from './runtime-config.js';
 
 export const profileRegistry = createDefaultProfileRegistry();
 
@@ -15,10 +16,10 @@ const BOOT_TENANTS: Set<string> = new Set([
   'szl-smoke-test',
   'szl-dev',
   'smoke-test-tenant',
+  ...(FABRIC_API_TENANT_ID ? [FABRIC_API_TENANT_ID] : []),
   ...(process.env.AEF_SMOKE_TENANT ? [process.env.AEF_SMOKE_TENANT] : []),
   ...(process.env.AEF_BOOT_TENANTS
-    ? process.env.AEF_BOOT_TENANTS
-        .split(',')
+    ? process.env.AEF_BOOT_TENANTS.split(',')
         .map((t) => t.trim())
         .filter(Boolean)
     : []),
@@ -110,11 +111,10 @@ export async function seedBootData(): Promise<void> {
           metadata: { ...metadata },
           updatedAt: now,
         });
-      } catch {
-        // Seed failures are non-fatal — log and continue
-        process.stderr.write(
-          `[AEF] boot seed failed chunkId=${doc.chunkId} tenantId=${tenantId}\n`,
-        );
+      } catch (error) {
+        throw new Error(`boot seed failed chunkId=${doc.chunkId} tenantId=${tenantId}`, {
+          cause: error,
+        });
       }
     }
   }

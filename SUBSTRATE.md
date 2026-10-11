@@ -40,6 +40,8 @@ curl -X POST http://localhost:8070/v1/models/load \
 ```bash
 cd apps/substrate-inference
 pip install -r requirements.txt
+SUBSTRATE_INFERENCE_ENV=development \
+SUBSTRATE_INFERENCE_AUTH_BYPASS=true \
 python -m src.main
 ```
 
@@ -53,6 +55,8 @@ and testing the Command dashboard and AI Control Plane without GPU hardware.
 cd apps/substrate-inference
 pip install -r requirements.txt
 pip install ollm                    # oLLM engine (requires CUDA)
+export SUBSTRATE_INFERENCE_ENV=production
+# Inject SUBSTRATE_API_KEY from the deployment secret manager.
 python -m src.main
 ```
 
@@ -70,10 +74,14 @@ and delegates inference to `ollm.AutoInference`.
 | `SUBSTRATE_CACHE_DIR`         | `~/.substrate/cache`       | SSD cache directory for KV cache offload         |
 | `SUBSTRATE_MAX_CONCURRENT`    | `4`                        | Maximum concurrent inference requests            |
 | `SUBSTRATE_DEFAULT_MODEL`     | (none)                     | Model to auto-load on startup                    |
-| `SUBSTRATE_API_KEY`           | (none)                     | API key protecting model load/unload endpoints   |
+| `SUBSTRATE_API_KEY`           | (required*)                | Secret-backed bearer credential for every `/v1` route |
+| `SUBSTRATE_INFERENCE_ENV`     | (unspecified)              | Runtime environment (`production`, `development`, or `test`) |
+| `SUBSTRATE_INFERENCE_AUTH_BYPASS` | `false`                | Explicit bypass; accepted only in development/test |
 | `SUBSTRATE_ALLOWED_ORIGINS`   | `localhost:5000,8070`      | Comma-separated CORS allowed origins             |
 | `SUBSTRATE_BIND_HOST`         | `127.0.0.1`               | Bind host (set to `0.0.0.0` for network access)  |
-| `VITE_SUBSTRATE_API_KEY`      | (none)                     | API key for Command dashboard (Vite env)         |
+
+\* Required unless the explicit development/test bypass is enabled. Never put
+the server credential in a `VITE_*` variable or browser bundle.
 
 ## AI Control Plane Configuration
 
@@ -120,9 +128,12 @@ The default fallback chain includes:
 
 - **Localhost-only binding** by default (`SUBSTRATE_BIND_HOST=127.0.0.1`).
   Set to `0.0.0.0` only for trusted networks or behind a reverse proxy.
-- **API key authentication** protects model load/unload endpoints when
-  `SUBSTRATE_API_KEY` is set. Read-only endpoints (`/health`, `/v1/models`,
-  `/v1/chat/completions`) remain open for inference clients.
+- **API key authentication** protects every `/v1` route. Production startup
+  fails closed when `SUBSTRATE_API_KEY` is missing. Only `/health` and
+  `/healthz` are public for orchestrator probes.
+- **Development/test bypass** is opt-in via
+  `SUBSTRATE_INFERENCE_AUTH_BYPASS=true` and is rejected if any environment
+  marker declares production.
 - **CORS** restricted to localhost origins by default. Configure
   `SUBSTRATE_ALLOWED_ORIGINS` for cross-origin access from other services.
 
@@ -136,6 +147,7 @@ The default fallback chain includes:
 ```bash
 curl -X POST http://localhost:8070/v1/chat/completions \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $SUBSTRATE_API_KEY" \
   -d '{
     "model": "gemma3-12b",
     "messages": [{
@@ -153,6 +165,7 @@ curl -X POST http://localhost:8070/v1/chat/completions \
 ```bash
 curl -X POST http://localhost:8070/v1/chat/completions \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $SUBSTRATE_API_KEY" \
   -d '{
     "model": "voxtral-small-24b",
     "messages": [{
@@ -169,11 +182,12 @@ curl -X POST http://localhost:8070/v1/chat/completions \
 
 | Method | Path                    | Auth     | Description                        |
 |--------|-------------------------|----------|------------------------------------|
-| POST   | `/v1/chat/completions`  | No       | Chat completion (streaming SSE)    |
-| GET    | `/v1/models`            | No       | List available models              |
+| POST   | `/v1/chat/completions`  | API Key  | Chat completion (streaming SSE)    |
+| GET    | `/v1/models`            | API Key  | List available models              |
 | POST   | `/v1/models/load`       | API Key  | Hot-load a model into GPU memory   |
 | POST   | `/v1/models/unload`     | API Key  | Unload a model from GPU memory     |
 | GET    | `/health`               | No       | GPU/VRAM status and service health |
+| GET    | `/healthz`              | No       | Process liveness                    |
 
 ## Architecture
 

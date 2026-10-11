@@ -17,6 +17,10 @@ licenses. Each is listed below with its license and attribution, as required.
   `src/loop/vendor_ouroboros/` for offline boot and re-exported by `src/loop/`.
   Licensed under Apache License 2.0.
   © Stephen P. Lutar Jr. / SZL Holdings.
+  Step-budget normalization was recovered from that repository's
+  `src/loop-kernel.ts` at `0f030741f567bdf397d33c4d607790af6ed39688`.
+  The `emitLoopReceipt` sink in that commit was not vendored. This tree is
+  not a byte-for-byte copy of either commit.
 
 - **codex-kernel v1.0.2** (recovered from tag `v1.0.2-codex-kernel`). The four
   governance contracts in `src/codex/contracts.ts` (`computeTraceIdentity`,

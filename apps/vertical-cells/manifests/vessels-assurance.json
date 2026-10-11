@@ -1,0 +1,96 @@
+{
+  "allowed_actions": [
+    "screen",
+    "reconcile",
+    "simulate",
+    "recommend",
+    "draft committee memo",
+    "request approval",
+    "record decision"
+  ],
+  "buyer": "Charterers, operators, commodity traders, compliance teams, insurers, and maritime risk leaders.",
+  "core_workflows": [
+    "vessel/counterparty screening",
+    "voyage and fixture context",
+    "deceptive behavior/AIS-gap review",
+    "P&L and schedule variance",
+    "sanctions escalation",
+    "committee decision and audit"
+  ],
+  "data_policy": {
+    "protected": [
+      "licensed AIS",
+      "contracts",
+      "P&L",
+      "counterparties",
+      "ownership intelligence"
+    ],
+    "public": [
+      "synthetic voyage scenarios",
+      "public sanctions examples where license permits"
+    ],
+    "training_use": "only within data licenses and partner contracts"
+  },
+  "decision_problem": "Should a vessel, counterparty, voyage, fixture, port call, route, or commercial exception advance given operational, sanctions, ownership, P&L, emissions, and evidence context?",
+  "display_name": "Vessels Assurance — Maritime Sanctions and Voyage Decision Assurance",
+  "formula_bindings": [
+    "F1",
+    "F7",
+    "F12",
+    "F18",
+    "F19",
+    "F22",
+    "LAMBDA"
+  ],
+  "hf_space_id": "SZLHOLDINGS/vessels-assurance",
+  "human_authority": [
+    "maritime analyst validates",
+    "compliance owner decides sanctions disposition",
+    "commercial owner approves fixture/voyage decision"
+  ],
+  "leaders": [
+    {
+      "name": "Veson",
+      "pattern": "IMOS system-of-record context, voyage workflows, P&L and permission-aware contextual AI",
+      "url": "https://veson.com/platform/"
+    },
+    {
+      "name": "Pole Star Global",
+      "pattern": "sanctions, ownership, deceptive behavior, multi-source verification and audit reports",
+      "url": "https://www.polestarglobal.com/deep-blue-intelligence/"
+    },
+    {
+      "name": "Kpler MarineTraffic",
+      "pattern": "AIS, voyage, ownership, cargo and compliance context",
+      "url": "https://www.kpler.com/product/maritime/ship-tracking"
+    }
+  ],
+  "negative_tests": [
+    "AIS conflict stays unresolved",
+    "ownership gap escalates",
+    "license absent blocks data",
+    "sanctions match requires analyst",
+    "commercial action cannot execute from Space"
+  ],
+  "original_szl_design": "Voyage Decision Assurance overlay: ingest licensed maritime and enterprise records, generate evidence-bound recommendations, and preserve analyst/committee authority.",
+  "portfolio_role": "PARTNER_GATED_SPECIALTY",
+  "prohibited_actions": [
+    "navigation control",
+    "vessel command",
+    "unlicensed data redistribution",
+    "automatic sanctions conclusion without reviewer"
+  ],
+  "public_launch": "BLOCKED_UNTIL_LICENSED_DATA_AND_MARITIME_PARTNER",
+  "schema": "szl.vertical-cell/v1",
+  "space_visibility": "private",
+  "stage": "PARTNER_AND_DATA_GATE",
+  "success_metrics": [
+    "screening time",
+    "false positive/negative review",
+    "decision audit completeness",
+    "P&L variance detection",
+    "analyst time",
+    "policy consistency"
+  ],
+  "vertical_id": "vessels-assurance"
+}

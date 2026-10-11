@@ -2,14 +2,16 @@
  * loop/ — T02 Ouroboros: bounded, receipt-closed agent loop.
  *
  * WIRED (REAL), NOT STUBBED. This module is wired to the real Ouroboros runtime
- * package @szl-holdings/ouroboros (git tag v6.3.0, SHA d64748cc, 218/218 tests
- * passing — verified live during build). In the platform monorepo the kernel
+ * package @szl-holdings/ouroboros (git tag v6.3.0, SHA d64748cc). The
+ * historical upstream suite count recorded for that pin is 218. This change
+ * did not rerun that suite. In the platform monorepo the kernel
  * resolves `@szl-holdings/ouroboros` as a workspace:* dependency. To keep the
- * unified-kernel bootable standalone (outside the monorepo), the canonical
- * runLoop kernel source from that tag is vendored under ./vendor_ouroboros/ and
- * re-exported here. The vendored copy is byte-for-byte the upstream kernel; the
- * 218 upstream tests are the proof — we import and re-assert at kernel boot
- * rather than re-implement.
+ * unified-kernel bootable standalone (outside the monorepo), the v6.3.0
+ * runLoop kernel is vendored under ./vendor_ouroboros/ and re-exported here.
+ * It is no longer a byte-for-byte copy of that tag: maxSteps normalization
+ * was recovered from ouroboros src/loop-kernel.ts at 0f030741f567. The donor
+ * emitLoopReceipt sink was not imported. The historical 218 upstream tests
+ * belong to the v6.3.0 pin; they are not a byte identity claim.
  *
  * Formal layer: Lutar/Thesis/TH_V18_01_AgentLoopTerminates.lean —
  * th_v18_01_terminates (∃ n, iterate agentStep n s₀ = .Done) and
@@ -18,22 +20,29 @@
  * Runtime contract: ouroboros-runtime-contract.v4.json (max_steps 12).
  */
 
-import { runLoop } from "./vendor_ouroboros/loop-kernel.ts";
-import type { LoopTrace } from "./vendor_ouroboros/types.ts";
+import { runLoop } from './vendor_ouroboros/loop-kernel.ts';
+import type { LoopTrace } from './vendor_ouroboros/types.ts';
 
-export { runLoop } from "./vendor_ouroboros/loop-kernel.ts";
-export type { LoopTrace, LoopConfig, LoopStep, ExitReason } from "./vendor_ouroboros/types.ts";
+export { runLoop } from './vendor_ouroboros/loop-kernel.ts';
+export type { LoopTrace, LoopConfig, LoopStep, ExitReason } from './vendor_ouroboros/types.ts';
 
 /** Runtime-contract v4 max step budget. */
 export const RUNTIME_CONTRACT_V4_MAX_STEPS = 12;
 
 /** Provenance of the wired Ouroboros runtime. */
 export const OUROBOROS_PROVENANCE = {
-  package: "@szl-holdings/ouroboros",
-  tag: "v6.3.0",
-  commit: "d64748cc9ad67296be296c1ef6752ae181413fd7",
+  package: '@szl-holdings/ouroboros',
+  tag: 'v6.3.0',
+  commit: 'd64748cc9ad67296be296c1ef6752ae181413fd7',
   upstreamTests: 218,
-  note: "vendored kernel; workspace:* dep in the monorepo",
+  note: 'v6.3.0 vendor base plus a later maxSteps normalization; donor receipt sink excluded',
+  budgetNormalization: {
+    source: 'szl-holdings/ouroboros',
+    path: 'src/loop-kernel.ts',
+    commit: '0f030741f567bdf397d33c4d607790af6ed39688',
+    recovered: 'finite integer nonnegative maxSteps',
+    excluded: 'emitLoopReceipt',
+  },
 } as const;
 
 /**
@@ -42,7 +51,10 @@ export const OUROBOROS_PROVENANCE = {
  */
 export async function step<S>(
   initialState: S,
-  stepFn: (s: S, i: number) => Promise<{ state: S; output?: number }> | { state: S; output?: number },
+  stepFn: (
+    s: S,
+    i: number,
+  ) => Promise<{ state: S; output?: number }> | { state: S; output?: number },
   delta: (a: S, b: S) => number,
   maxSteps = RUNTIME_CONTRACT_V4_MAX_STEPS,
 ): Promise<LoopTrace<S, number>> {
@@ -50,7 +62,7 @@ export async function step<S>(
     initialState,
     step: async (s, i) => stepFn(s, i),
     delta,
-    config: { maxSteps, convergenceThreshold: 1e-3, label: "unified-kernel.loop" },
+    config: { maxSteps, convergenceThreshold: 1e-3, label: 'unified-kernel.loop' },
   });
 }
 
@@ -71,7 +83,7 @@ export async function terminates(maxSteps = RUNTIME_CONTRACT_V4_MAX_STEPS): Prom
     maxSteps,
   );
   return {
-    halted: trace.exitReason !== "budgetExhausted" || trace.steps.length <= maxSteps,
+    halted: trace.exitReason !== 'budgetExhausted' || trace.steps.length <= maxSteps,
     steps: trace.steps.length,
     exitReason: trace.exitReason,
   };

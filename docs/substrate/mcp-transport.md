@@ -1,8 +1,8 @@
 # Substrate MCP Transport
 
-**Version:** 1.0 · **Date:** April 2026  
-**Service:** `services/substrate-mcp-gateway`  
-**Protocol:** [Model Context Protocol 2024-11-05](https://spec.modelcontextprotocol.io/)
+**Version:** 1.1 · **Date:** 2026-10-07
+**Service:** `services/substrate-mcp-gateway`
+**Protocol:** MCP Streamable HTTP 2025-11-25 plus legacy SSE 2024-11-05
 
 **Related:** [sdk.md](./sdk.md) · [architecture.md](../architecture/architecture.md) · [MCP_GATEWAY_STRATEGY.md](../architecture/mcp-gateway-strategy.md)
 
@@ -10,9 +10,14 @@
 
 ## Overview
 
-The Substrate MCP Gateway exposes the Sovereign Execution Substrate to any MCP-compatible client — Claude Desktop, GPT-4 with function calling, partner agents, internal apps that don't share the monorepo, and future agent gateway integrations.
-
-The gateway is a **pure transport layer**. No business logic lives here. Policy evaluation, approval gating, and evidence-chain writes happen inside the `@szl/substrate` runtime. Every MCP call flows through the same policy compiler, approval engine, and audit chain as in-process calls — there is no policy bypass via the wire protocol.
+The Substrate MCP Gateway exposes the governed Substrate runtime through MCP.
+It is not a pure byte-forwarding layer: it owns transport authentication,
+enterprise scope checks, credential-bound tenant propagation, session handling,
+tool/resource registration, optional external federation, and explicitly
+labelled synthetic Nexus fixtures. Substrate run, replay, counterfactual, and
+approval tools call the `@szl/substrate` runtime; inventory, schema, fixture,
+registry, and dynamic-tool paths have narrower contracts and must not be
+described as traversing every Substrate policy stage.
 
 ---
 
@@ -20,12 +25,12 @@ The gateway is a **pure transport layer**. No business logic lives here. Policy 
 
 | Endpoint | Method | Auth | Description |
 |----------|--------|------|-------------|
-| `POST /mcp` | POST | Required (write tools) | JSON-RPC 2.0 message endpoint |
-| `GET /mcp/sse` | GET | Optional | Server-Sent Events stream |
+| `POST /mcp` | POST | Required except `tools/list` and `ping` | JSON-RPC 2.0 message endpoint |
+| `GET /mcp/sse` | GET | Required | Legacy Server-Sent Events stream |
 | `GET /mcp/health` | GET | Public | Health + capabilities |
-| `GET /mcp/tools` | GET | Public | Tool inventory with schemas |
-| `GET /mcp/resources` | GET | Public | Resource inventory |
-| `GET /mcp/prompts` | GET | Public | Prompt template inventory |
+| `GET /mcp/tools` | GET | Required | Tool inventory with schemas |
+| `GET /mcp/resources` | GET | Required | Resource inventory |
+| `GET /mcp/prompts` | GET | Required | Prompt template inventory |
 
 ---
 
@@ -55,8 +60,6 @@ Authorization: Bearer <SUBSTRATE_GATEWAY_API_KEY>
   }
 }
 ```
-
-**Batch requests:** Send an array of JSON-RPC objects. Max 20 per batch.
 
 **SSE stream:**
 
@@ -95,22 +98,28 @@ The stdio transport:
 - Writes responses to stdout
 - Uses stderr exclusively for diagnostic logs
 
+Production mutations also require an authenticated tenant context. The
+HTTP transport derives it from the authenticated request. The current stdio
+transport has no equivalent authenticated tenant carrier, so production
+run submission, replay, approval/rejection, registry mutation, delegation, and
+dynamic tool calls over stdio fail closed with
+`TENANT_CONTEXT_REQUIRED`. Treat production stdio mutation support as a HOLD
+until an authenticated, credential-bound tenant transport is implemented;
+read-only operations are unaffected.
+
 ---
 
 ## Tool Inventory
 
-All 8 tools are defined in `services/substrate-mcp-gateway/src/descriptor.ts` with full Zod-validated JSON Schemas.
+The descriptor currently defines 12 static tools; connected servers can add a
+dynamic tool surface. Unknown/dynamic tools are classified as write operations
+by default at the enterprise authorization boundary.
 
-| Tool | Description | Policy Bypass? |
-|------|-------------|---------------|
-| `substrate_submit_run` | Submit a workflow run (live or dry-run) | Never |
-| `substrate_get_run` | Poll run state by ID | N/A (read-only) |
-| `substrate_replay` | Replay a completed run from journal | Never |
-| `substrate_counterfactual` | Counterfactual replay with model/policy substitution | Never |
-| `substrate_list_approvals` | List approvals inbox entries | N/A (read-only) |
-| `substrate_approve` | Approve a pending ApprovalGate | Never |
-| `substrate_reject` | Reject a pending ApprovalGate | Never |
-| `substrate_list_workflows` | List registered workflows | N/A (read-only) |
+| Tool group | Access requirement | Runtime boundary |
+|------------|--------------------|------------------|
+| `substrate_get_run`, `substrate_list_approvals`, `substrate_list_workflows`, `search_available_servers` | `mcp:read` | Read-only gateway/runtime views |
+| `substrate_approve`, `substrate_reject` | `mcp:approve` | Authenticated actor is authoritative; caller-selected actor labels are rejected |
+| Run submission, replay, counterfactual, server enable/disable, delegation, unknown/dynamic tools | `mcp:write` | Tenant context required in production; execution depends on the named backend |
 
 ### Example: Submit a run
 
@@ -162,25 +171,36 @@ Response:
 
 ### Authentication
 
-The gateway accepts:
+The HTTP gateway accepts:
 
 1. **Bearer token** — `Authorization: Bearer <SUBSTRATE_GATEWAY_API_KEY>`  
-   Required for all write operations.
-2. **No auth** — Only for public read-only endpoints: `/mcp/health`, `tools/list`, `resources/list`, `prompts/list`, `initialize`, `ping`.
+   Required for protected HTTP routes. The credential is bound to
+   `SUBSTRATE_GATEWAY_TENANT_ID`.
+2. **Enterprise bearer token** — issued by the ID-JAG exchange and bound to the
+   token's tenant, role, and exact space-delimited MCP scopes.
+3. **No auth** — limited to the root/health endpoints, hash-gated proof lookup,
+   token/revocation entrypoints with their own credentials, and JSON-RPC
+   `tools/list`/`ping`.
 
-Set `SUBSTRATE_GATEWAY_API_KEY` in production. If unset in development, all requests are accepted with a warning. If unset in production (`NODE_ENV=production`), write requests are rejected.
+Production startup fails before listen unless the gateway API key, gateway
+tenant, and 64-hex signing key are all non-blank and valid. Development without
+an API key remains an explicit local-only bypass.
 
 ### Authorization
 
-Write tools route all calls through the substrate's existing policy compiler and approval engine. There is no role-level RBAC at the gateway layer — policy enforcement happens inside the substrate runtime. The `actor` field on `substrate_approve` / `substrate_reject` is written verbatim into the proof entry for auditability.
+Enterprise tokens are enforced at the gateway with `mcp:read`, `mcp:write`,
+`mcp:approve`, or `mcp:admin`. Approval/rejection records use the authenticated
+principal; a supplied compatibility `actor` field must match that principal.
+Run tools then apply the runtime's policy/approval behavior. Dynamic external
+tools have their own downstream enforcement boundary and are not evidence of a
+Substrate policy evaluation.
 
 ### Rate Limits
 
 | Caller Type | Limit |
 |-------------|-------|
 | Unauthenticated | Schema discovery endpoints only |
-| Authenticated | Governed by the substrate runtime's own resource limits |
-| Batch | Max 20 requests per batch |
+| Authenticated | IP/global and gateway request limits, plus downstream/runtime limits |
 
 ---
 
@@ -202,19 +222,24 @@ Tool-level errors are returned inside the MCP tool result with `isError: true` a
 
 ---
 
-## Policy and Audit Guarantee
+## Policy and Audit Boundary
 
-The gateway enforces the following invariant:
-
-> All MCP calls flow through the same policy compiler, approval engine, and evidence/audit chain as in-process calls. There is no policy bypass via the wire protocol.
-
-This is implemented by calling `defaultRuntime.start()` (and related substrate primitives) directly from the tool handlers. The gateway never calls internal substrate functions that bypass policy evaluation.
+Substrate run, replay, counterfactual, and approval handlers call the tracked
+runtime primitives and emit gateway proof metadata. This statement does not
+extend to schema reads, synthetic resources, registry discovery, or externally
+federated tools. The current gateway proof WAL defaults to local `/tmp`; set
+`PRAXIS_PROOF_WAL_PATH` to a persistent mounted path when restart retention is
+required. A configured signing key makes Substrate evidence signatures stable
+across processes; it does not by itself make local storage durable.
 
 ---
 
-## Sentra MCP Traffic Gateway Integration
+## Sentra MCP Traffic Gateway Integration Target
 
-The Substrate MCP gateway is registered in the Sentra Cyber Resilience platform's MCP server catalog. Sentra applies its allow/deny rules and telemetry to all traffic flowing through the substrate endpoint, matching the behavior applied to every other MCP server in the mesh.
+The repository contains a target configuration shape for a future Sentra
+catalog registration. This local source is not a deployment receipt and does
+not establish that a live Sentra instance currently routes, filters, or records
+gateway traffic.
 
 To register the substrate endpoint in Sentra's mesh, add to your Sentra MCP server configuration:
 
@@ -234,10 +259,10 @@ mcpServers:
 
 ```bash
 # HTTP + SSE (default)
-PORT=3700 SUBSTRATE_GATEWAY_API_KEY=<key> tsx services/substrate-mcp-gateway/src/index.ts
+PORT=3700 SUBSTRATE_GATEWAY_API_KEY=<key> SUBSTRATE_GATEWAY_TENANT_ID=<tenant> SUBSTRATE_SIGNING_KEY=<64-hex-key> tsx services/substrate-mcp-gateway/src/index.ts
 
 # stdio (for MCP host integration)
-SUBSTRATE_GATEWAY_API_KEY=<key> tsx services/substrate-mcp-gateway/src/index.ts --stdio
+SUBSTRATE_GATEWAY_API_KEY=<key> SUBSTRATE_GATEWAY_TENANT_ID=<tenant> SUBSTRATE_SIGNING_KEY=<64-hex-key> tsx services/substrate-mcp-gateway/src/index.ts --stdio
 ```
 
 ---
@@ -246,11 +271,16 @@ SUBSTRATE_GATEWAY_API_KEY=<key> tsx services/substrate-mcp-gateway/src/index.ts 
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `SUBSTRATE_GATEWAY_API_KEY` | Yes (prod) | Bearer token for write operations |
-| `SUBSTRATE_SIGNING_KEY` | Recommended | 32-byte hex key for HMAC-signed evidence bundles |
+| `SUBSTRATE_GATEWAY_API_KEY` | Yes (prod) | Bearer credential for protected HTTP operations |
+| `SUBSTRATE_GATEWAY_TENANT_ID` | Yes (prod) | Non-secret tenant scope bound to the gateway API credential |
+| `SUBSTRATE_PYTHON_WORKER_URL` | For Python stages | Internal Python worker endpoint |
+| `SUBSTRATE_PYTHON_WORKER_API_KEY` | For Python stages | Bearer credential injected into the gateway/authority and worker; no default |
+| `SUBSTRATE_PYTHON_WORKER_TENANT_ID` | Yes in prod for Python stages | Single tenant bound to the worker bearer credential; must match authenticated run context |
+| `SUBSTRATE_SIGNING_KEY` | Yes (prod) | Exactly 64 hexadecimal characters (32 bytes) for restart-verifiable HMAC-signed evidence bundles |
+| `PRAXIS_PROOF_WAL_PATH` | For durable gateway proof lookup | Persistent JSONL path; default `/tmp` is local and ephemeral |
 | `PORT` | No | HTTP listen port (default: 3700) |
 | `NODE_ENV` | No | `production` enables strict auth enforcement |
 
 ---
 
-*Last updated: 2026-04-20. Source: `services/substrate-mcp-gateway/`.*
+*Last updated: 2026-10-07. Source boundary: local candidate under `services/substrate-mcp-gateway/`; no hosted deployment is implied.*
