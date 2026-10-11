@@ -49,6 +49,7 @@ mean.
 | [`A11OY_KERNEL_MUTATION_HARDENING_PROOF_2026-10-05.md`](./A11OY_KERNEL_MUTATION_HARDENING_PROOF_2026-10-05.md) | Kernel mutation authentication hardening proof packet | Fail-closed Bearer gates, bounded wake receipts, atomic idempotency, and explicit hosted-state limits |
 | [`SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md`](./SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md) | GitHub, Hugging Face, domain, and stack prepublication audit | Separates bounded current observations, retained/local evidence, unknowns, and promotion gates |
 | [`A11OY_FRONTIER_RELEASE_HARDENING_PROOF_2026-10-06.md`](./A11OY_FRONTIER_RELEASE_HARDENING_PROOF_2026-10-06.md) | Frontier candidate proof packet | Records current validation evidence and explicit exact-head, generated-truth, Python delivery, hosted-check, cloud-publication, and deployment holds |
+| [`MIGRATION_AUTHORITY_HARDENING_PROOF_2026-10-11.md`](./MIGRATION_AUTHORITY_HARDENING_PROOF_2026-10-11.md) | Migration authority hardening proof packet | Read-only preflight, fail-closed checksum drift, qualified tracker status, tests, and preserved production HOLD |
 
 ---
 
