@@ -149,14 +149,15 @@ const response = await client.embeddings.create({
 | `AEF_S2S_SECRET` | all services | Service-to-service bearer token. |
 | `AEF_EMBED_BACKEND` | alloy-vector-worker | `local-cpu` (default), `external-http`, `future-gpu`, `future-azure`. |
 | `AEF_EMBED_ENDPOINT` | alloy-vector-worker | Endpoint for `external-http` backend. |
-| `AEF_RANK_MODE` | alloy-rank-worker | `cross-encoder` (default) or `fallback-inversion`. |
+| `AEF_RANK_MODE` | alloy-rank-worker | `lexical-overlap` (default) or `score-passthrough`; no cross-encoder model is loaded. |
 | `AEF_RATE_LIMIT_RPM` | alloy-fabric-api | Requests per minute per tenant (default: 60). |
 
 ---
 
 ## Evidence and Audit Trail
 
-Every search response with `includeProvenance: true` creates an evidence entry in the AEF ledger containing:
+In development/test, each returned hit from a search with
+`includeProvenance: true` creates a process-local evidence record containing:
 
 - `entryId` — unique identifier for this retrieval event
 - `requestId` — correlates to the originating request
@@ -168,4 +169,6 @@ Every search response with `includeProvenance: true` creates an evidence entry i
 - `redactedFields` — any fields that were redacted before returning
 - `requestedAt` / `completedAt` — timestamps for latency attribution
 
-This satisfies audit requirements for all six SZL Holdings verticals.
+This validates the response contract only. It does not satisfy production audit
+requirements; production evidence-producing routes remain on HOLD pending a
+durable, tamper-evident ledger.

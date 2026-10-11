@@ -23,6 +23,8 @@ metadata:
     app.kubernetes.io/component: evaluation
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: ovis-evaluation-worker
@@ -55,12 +57,25 @@ spec:
           env:
             - name: PORT
               value: "8090"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: RUNTIME_MODE
+              value: internal-preview
             - name: WORKER_ID
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
             - name: WORKER_MAX_CONCURRENCY
-              value: "1"
+              value: "0"
+            - name: SUBSTRATE_PYTHON_WORKER_API_KEY_FILE
+              value: /run/secrets/ovis/internal-api-key
+            - name: SUBSTRATE_PYTHON_WORKER_TENANT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: ovis-evaluation-runtime
+                  key: tenant-id
+            - name: AEF_DEVELOPMENT_ENDPOINTS_ENABLED
+              value: "0"
             - name: OVIS_OMNI_ENABLED
               value: "1"
             - name: OVIS_MAX_CONCURRENCY
@@ -73,6 +88,11 @@ spec:
               value: "1"
             - name: OVIS_INTERNAL_API_KEY_FILE
               value: /run/secrets/ovis/internal-api-key
+            - name: OVIS_INTERNAL_TENANT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: ovis-evaluation-runtime
+                  key: tenant-id
             - name: OVIS_ASSET_ROOT
               value: /var/lib/szl/cas
             - name: OVIS_MODEL_SNAPSHOT_ROOT

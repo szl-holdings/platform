@@ -1,8 +1,15 @@
 # Local Bootstrap Guide
 
 **Platform:** SZL Holdings Monorepo  
-**Updated:** 2026-04-21  
+**Updated:** 2026-10-07
 **Audience:** Engineers, contributors, QA
+
+> **Source boundary:** This is a local-development guide, not deployment proof.
+> Package names, required variables, and listener ports are service-specific.
+> The historical `@workspace/api-server` and `@workspace/szl-holdings` start
+> commands are no longer valid in the tracked tree; current runnable HTTP
+> implementations live under `apps/*`, and current browser packages are listed
+> below.
 
 ---
 
@@ -11,13 +18,19 @@
 | Tool | Required Version | Install |
 |------|-----------------|---------|
 | Node.js | ≥24.0.0 (24.x LTS recommended) | [nodejs.org](https://nodejs.org) or `nvm install 24` |
-| pnpm | ≥10.0.0 | `npm install -g pnpm@10` |
+| pnpm | 10.26.1 exactly | Corepack using the root `packageManager` pin |
 | PostgreSQL | 16 | System package or Docker |
 | Git | Any | System package |
 
-The required versions are enforced by the root `package.json` `engines` field (`node >=24.0.0`, `pnpm >=10.0.0`). pnpm will warn and may refuse to install if versions are lower.
+The required versions are enforced by the root `package.json` `engines` field
+(`node >=24.0.0`, exact `pnpm 10.26.1`) and the preinstall guard. The activation
+helper prefers Corepack and uses an exact, script-disabled npm bootstrap only
+when Corepack is absent; other pnpm versions fail closed. A cache miss needs
+access to `registry.npmjs.org`, while a preseeded Corepack cache works offline.
 
-On Replit, all prerequisites are pre-installed via `replit.nix` and the `nodejs-24` / `postgresql-16` modules. Skip manual installation.
+`.replit` and `replit.nix` declare Node 24 and PostgreSQL 16 targets. Verify the
+effective versions in any provider environment; source configuration does not
+prove that a module was installed or a database was provisioned.
 
 ---
 
@@ -28,8 +41,14 @@ On Replit, all prerequisites are pre-installed via `replit.nix` and the `nodejs-
 git clone https://github.com/szl-holdings/platform.git
 cd platform
 
-# Install all workspace dependencies (frozen lockfile for reproducibility)
-pnpm install --frozen-lockfile
+# Put the repository-managed exact shim ahead of any system fallback. The
+# helper uses Corepack when available and a pinned npm bootstrap on Node 25+.
+source scripts/activate-pnpm.sh
+test "$(pnpm --version)" = "10.26.1"
+
+# Install all workspace dependencies (frozen lockfile for reproducibility).
+# CPU binaries are already packaged; skip the optional CUDA/NuGet download.
+ONNXRUNTIME_NODE_INSTALL=skip pnpm install --frozen-lockfile
 ```
 
 **Expected output:** `Done in Xs` with no `ERR_PNPM_*` errors. A `node_modules/.pnpm` directory is created at the workspace root; each artifact gets its own `node_modules` with symlinks.
@@ -47,20 +66,26 @@ openssl rand -hex 32   # → use as SESSION_SECRET
 openssl rand -hex 32   # → use as OAUTH_STATE_SECRET
 ```
 
-Edit `.env` and set **at minimum** these variables (see `.env.example` for full list with classifications):
+Edit `.env` only for the services you intend to run. There is no safe
+whole-estate “minimum” set: each service's `.env.example`, startup validation,
+and README are authoritative for its boundary. A database-backed path commonly
+needs:
 
 ```bash
 # Required-local: must be set for any local run
 DATABASE_URL=postgresql://user:password@localhost:5432/szlholdings
 SESSION_SECRET=<generated above>
 
-# Optional: leave blank to use mock/demo mode for AI features
+# Provider values are package-specific; a blank value is not a universal mock switch
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
 GEMINI_API_KEY=
 ```
 
-**On Replit:** Environment variables are set via Replit Secrets (Settings → Secrets). The `DATABASE_URL` for the Replit-managed PostgreSQL database is injected automatically when you enable the PostgreSQL module. Do not store secrets in `.env` on Replit.
+**Managed providers:** Bind secret values through the provider's secret vault.
+Do not assume `DATABASE_URL` or any other value is injected until the runtime
+configuration reports the binding ready and the service verifies it. Never
+commit `.env`.
 
 ---
 
@@ -70,11 +95,13 @@ GEMINI_API_KEY=
 # Run migrations (creates all tables)
 pnpm migrate
 
-# Seed demo data (required for first run)
+# Seed the canonical demo data only when that database-backed workflow needs it
 pnpm seed:demo
 ```
 
-Both commands exit 0 on success and print a clear error on failure. If `DATABASE_URL` is not set, `pnpm migrate` will fail immediately with a connection error — fix the URL and re-run.
+Both commands are database mutations. Run them only against an explicitly
+selected development database and inspect any failure; do not infer
+idempotency or production safety from a local exit code.
 
 **To verify the migration applied (optional, requires psql):**
 ```bash
@@ -88,7 +115,8 @@ Do not health-check the API server yet — it has not started. Health verificati
 
 ## Step 4: Start Core Artifacts
 
-The platform runs as a collection of Vite dev servers behind a shared proxy. Start artifacts in this sequence:
+The repository contains browser artifacts plus independent services/workers.
+There is no single required startup sequence for every task.
 
 ### Option A: Start all artifacts (parallel)
 
@@ -96,59 +124,65 @@ The platform runs as a collection of Vite dev servers behind a shared proxy. Sta
 pnpm dev
 ```
 
-This runs `pnpm -r --if-present run dev` across the workspace. All artifacts with a `dev` script start concurrently.
+This runs `pnpm -r --if-present run dev` across the workspace. Packages with
+required credentials or dependencies can fail independently; this command is a
+fan-out convenience, not a healthy-platform assertion.
 
 ### Option B: Start specific artifacts (recommended for development)
 
-Start in order — API server must be healthy before frontends:
+Start only the packages needed for the task:
 
 ```bash
-# Terminal 1: API Server (required for all frontends)
-pnpm --filter @workspace/api-server dev
-
-# Terminal 2: SZL Holdings (main dashboard, Lyte embedded)
-pnpm --filter @workspace/szl-holdings dev
-
-# Terminal 3: Any other artifact you're working on
+# Browser artifacts
+pnpm --filter @workspace/a11oy dev
+pnpm --filter @workspace/carlota-jo dev
 pnpm --filter @workspace/counsel dev
 pnpm --filter @workspace/terra dev
 pnpm --filter @workspace/vessels dev
-# etc.
+
+# Independent TypeScript HTTP services (configure each service first)
+pnpm --filter @workspace/alloy-runtime-api dev
+pnpm --filter @workspace/alloy-embedding-api dev
+pnpm --filter @workspace/alloy-ingestion-orchestrator dev
 ```
 
-### Option C: Docker Compose (API + core web apps)
+### Bounded local Docker Compose stack
 
 ```bash
-# Requires Docker Desktop
-cp .env.example .env   # fill in DATABASE_URL etc.
-docker-compose -f ops/local/docker-compose.yml up --build
+# Add the required fail-closed runtime identity to the untracked .env file:
+ALLOY_API_KEY=<local-secret>
+ALLOY_API_TENANT_ID=<local-tenant-id>
 
-# Services start on:
-#   API:          http://localhost:3000
-#   SZL Holdings: http://localhost:4000
-#   Vessels:      http://localhost:4002
-#   Terra:        http://localhost:4003
-#   Aegis:        http://localhost:4004
-#   Carlota Jo:   http://localhost:4005
+docker compose --env-file .env -f ops/local/docker-compose.yml config --quiet
+docker compose --env-file .env -f ops/local/docker-compose.yml up --build
 ```
 
-Note: `ops/local/docker-compose.yml` does not include sentra, counsel, pulse, lyte, command, or mockup-sandbox. Start those separately if needed.
+`ops/local/docker-compose.yml` is a bounded convenience stack containing only
+tracked deployable Dockerfiles: `alloy-runtime-api`, `vessels`, `terra`, and
+`carlota-jo`. It does not include PostgreSQL or represent the whole platform.
+Its configuration currently validates with Docker Compose when the required
+API key and tenant are supplied. That source/configuration check does not prove
+that images build, processes become ready, downstream dependencies work, or
+the same images are deployed anywhere. Record those observations separately
+before using this stack as release or deployment evidence.
 
 ---
 
 ## Step 5: Verify Health
 
 ```bash
-# API health check
-curl http://localhost:8080/api/health
-# Expected: { "status": "ok", "services": { "database": { "status": "ok" }, ... } }
-
 # Quick route smoke test
 pnpm qa:routes
 
 # Full site QA (routes + links + trust + meta + empty states)
 pnpm qa:site
 ```
+
+For a service listener, use the health/readiness paths and port documented by
+that package and inspect the response semantics; do not substitute one service's
+`/health` response for whole-platform readiness. A successful liveness response
+does not prove credentials, tenants, models, databases, or downstream adapters
+are ready.
 
 ---
 
@@ -165,28 +199,18 @@ DATABASE_URL=postgresql://... pnpm test:integration
 pnpm test:components
 
 # E2E tests (requires built artifacts + Playwright)
-pnpm --filter @workspace/szl-holdings run build
+pnpm --filter @workspace/a11oy run build
 pnpm test:e2e
 ```
 
 ---
 
-## Artifact URLs (Local Dev)
+## Local URLs
 
-Each artifact runs on its own port in local dev:
-
-| Artifact | Local URL | Notes |
-|----------|-----------|-------|
-| SZL Holdings | `http://localhost:5173` | Default Vite port |
-| API Server | `http://localhost:8080` | Express; health at `/api/health` |
-| Lyte | `http://localhost:9090` | Configured in `.replit` |
-| Counsel | Via proxy | Sub-path |
-| Terra | Via proxy | Sub-path |
-| Vessels | Via proxy | Sub-path |
-| Mockup Sandbox | `http://localhost:21130` | Internal tooling |
-
-**On Replit:** All artifacts are proxied through the Replit gateway. Access them at:  
-`https://<your-repl>.<username>.repl.co/<artifact-path>/`
+Vite and service ports are selected by each package configuration and may move
+when a port is occupied. Use the URL printed by the process. `.replit` and
+artifact TOML files declare provider routing targets, but they do not prove a
+gateway is active or that any public URL is reachable.
 
 ---
 
@@ -205,7 +229,8 @@ Workspace symlinks may be broken. Run `pnpm install --frozen-lockfile` to re-cre
 Another process is using the port. Find it: `lsof -i :<port>` and kill it: `kill -9 <pid>`.
 
 ### `pnpm migrate` fails with "relation already exists"
-The migration has already been applied. This is safe — Drizzle `db:push` is idempotent for existing schemas.
+Stop and inspect the selected database and schema history. Do not assume the
+error is safe or that `db:push` is idempotent across every schema change.
 
 ---
 
@@ -257,4 +282,8 @@ DATABASE_URL=postgresql://...     # [required-local]
 SESSION_SECRET=<hex-32>           # [required-local]
 ```
 
-Everything else is optional for local development — services fall back to mock/demo mode automatically.
+Do not apply one fallback rule to the whole repository. Several services now
+fail closed without explicit authentication, tenant, signing, model, or backend
+configuration, especially in production mode. Follow each package's startup
+contract and use an explicit development/test-only bypass only where that
+package documents and enforces one.

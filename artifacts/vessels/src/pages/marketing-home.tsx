@@ -1,7 +1,7 @@
 import { AnimatedCounter } from '@szl-holdings/shared-ui/animated-counter';
 import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
 import { NewsletterSubscribe } from '@szl-holdings/shared-ui/newsletter-subscribe';
-import { motion as m, } from 'framer-motion';
+import { motion as m } from 'framer-motion';
 import {
   Activity,
   AlertTriangle,
@@ -132,12 +132,7 @@ function OceanCanvas() {
       window.removeEventListener('resize', resize);
     };
   }, []);
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-    />
-  );
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />;
 }
 
 function LiveFleetPanel() {
@@ -194,29 +189,29 @@ function LiveFleetPanel() {
         <div className="px-5 py-3 border-b border-white/[0.05] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
-            <span className="text-[11px] font-medium text-[#5e5e5e] tracking-wide uppercase">
+            <span className="text-[11px] font-medium text-[#8a8a8a] tracking-wide uppercase">
               Live Fleet — 214 Vessels Tracked
             </span>
           </div>
-          <span className="text-[10px] text-[#5e5e5e] font-mono">Updated 12s ago</span>
+          <span className="text-[10px] text-[#8a8a8a] font-mono">Updated 12s ago</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-white/[0.04]">
-                <th className="px-5 py-2.5 text-[10px] font-semibold text-[#5e5e5e] tracking-wider uppercase">
+                <th className="px-5 py-2.5 text-[10px] font-semibold text-[#8a8a8a] tracking-wider uppercase">
                   Vessel
                 </th>
-                <th className="px-4 py-2.5 text-[10px] font-semibold text-[#5e5e5e] tracking-wider uppercase hidden sm:table-cell">
+                <th className="px-4 py-2.5 text-[10px] font-semibold text-[#8a8a8a] tracking-wider uppercase hidden sm:table-cell">
                   Route
                 </th>
-                <th className="px-4 py-2.5 text-[10px] font-semibold text-[#5e5e5e] tracking-wider uppercase">
+                <th className="px-4 py-2.5 text-[10px] font-semibold text-[#8a8a8a] tracking-wider uppercase">
                   Status
                 </th>
-                <th className="px-4 py-2.5 text-[10px] font-semibold text-[#5e5e5e] tracking-wider uppercase hidden md:table-cell">
+                <th className="px-4 py-2.5 text-[10px] font-semibold text-[#8a8a8a] tracking-wider uppercase hidden md:table-cell">
                   ETA
                 </th>
-                <th className="px-4 py-2.5 text-[10px] font-semibold text-[#5e5e5e] tracking-wider uppercase hidden lg:table-cell">
+                <th className="px-4 py-2.5 text-[10px] font-semibold text-[#8a8a8a] tracking-wider uppercase hidden lg:table-cell">
                   Risk
                 </th>
               </tr>
@@ -232,7 +227,7 @@ function LiveFleetPanel() {
                 >
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-[11px] text-[#5e5e5e] font-mono">{r.flag}</span>
+                      <span className="text-[11px] text-[#8a8a8a] font-mono">{r.flag}</span>
                       <span className="text-[13px] font-medium text-[#f5f5f5]">{r.vessel}</span>
                     </div>
                   </td>
@@ -245,7 +240,7 @@ function LiveFleetPanel() {
                         r.status === 'underway'
                           ? 'text-[#8a8a8a]'
                           : r.status === 'at port'
-                            ? 'text-[#5e5e5e]'
+                            ? 'text-[#8a8a8a]'
                             : 'text-[#c9b787]'
                       }`}
                     >
@@ -383,10 +378,7 @@ export default function MarketingHomePage() {
               transition={{ duration: 0.7, delay: 0.1 }}
               className="text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.2rem] font-bold leading-[1.08] tracking-tight mb-5"
             >
-              Fleet operations.{' '}
-              <span className="text-[#c9b787]">
-                Decided faster.
-              </span>
+              Fleet operations. <span className="text-[#c9b787]">Decided faster.</span>
             </m.h1>
 
             <m.p
@@ -441,7 +433,7 @@ export default function MarketingHomePage() {
               <p className="text-2xl sm:text-3xl font-bold text-[#f5f5f5] mb-0.5 font-mono tracking-tight">
                 <AnimatedCounter value={k.value} suffix={k.suffix} />
               </p>
-              <p className="text-[11px] text-[#5e5e5e] tracking-wide">{k.label}</p>
+              <p className="text-[11px] text-[#8a8a8a] tracking-wide">{k.label}</p>
             </m.div>
           ))}
         </div>
@@ -484,7 +476,7 @@ export default function MarketingHomePage() {
                   <div className="w-10 h-10 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center group-hover:border-[#c9b787]/20 transition-colors">
                     <c.icon className="w-[18px] h-[18px] text-[#c9b787]" />
                   </div>
-                  <span className="text-[9px] font-semibold text-[#5e5e5e] tracking-[0.1em] uppercase mt-1">
+                  <span className="text-[9px] font-semibold text-[#8a8a8a] tracking-[0.1em] uppercase mt-1">
                     {c.tag}
                   </span>
                 </div>
@@ -541,7 +533,7 @@ export default function MarketingHomePage() {
                   {u.metrics.map((m) => (
                     <span
                       key={m}
-                      className="text-[10px] text-[#5e5e5e] border border-white/[0.05] px-2.5 py-1 font-medium"
+                      className="text-[10px] text-[#8a8a8a] border border-white/[0.05] px-2.5 py-1 font-medium"
                     >
                       {m}
                     </span>
@@ -556,11 +548,7 @@ export default function MarketingHomePage() {
       <section className="py-20 sm:py-28 border-t border-white/[0.04] bg-[#0a0a0a]/50">
         <div className="max-w-6xl mx-auto px-5 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-start">
-            <m.div
-              initial={{ y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
+            <m.div initial={{ y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-px bg-[#c9b787]/40" />
                 <span className="text-[11px] font-semibold text-[#c9b787] tracking-[0.12em] uppercase">
@@ -609,7 +597,9 @@ export default function MarketingHomePage() {
                       <item.icon className="w-3.5 h-3.5 text-[#c9b787]" />
                     </div>
                     <div>
-                      <p className="text-[13px] font-semibold text-[#f5f5f5] mb-0.5">{item.label}</p>
+                      <p className="text-[13px] font-semibold text-[#f5f5f5] mb-0.5">
+                        {item.label}
+                      </p>
                       <p className="text-[12px] text-[#8a8a8a] leading-relaxed">{item.desc}</p>
                     </div>
                   </m.div>
@@ -625,7 +615,7 @@ export default function MarketingHomePage() {
               className="border border-white/[0.05] bg-[#111111]/60 p-6 sm:p-8"
             >
               <div className="flex items-center justify-between mb-6">
-                <span className="text-[11px] font-semibold text-[#5e5e5e] tracking-[0.1em] uppercase">
+                <span className="text-[11px] font-semibold text-[#8a8a8a] tracking-[0.1em] uppercase">
                   Fleet Snapshot · Simulated
                 </span>
                 <div className="flex items-center gap-1.5">
@@ -730,16 +720,9 @@ export default function MarketingHomePage() {
 
       <section className="py-20 sm:py-24 border-t border-white/[0.04]">
         <div className="max-w-3xl mx-auto px-5 sm:px-6 text-center">
-          <m.div
-            initial={{ y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <m.div initial={{ y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <h2 className="text-3xl sm:text-4xl font-bold text-[#f5f5f5] mb-4 tracking-tight">
-              See Vessels{' '}
-              <span className="bg-gradient-to-r text-[#c9b787]">
-                in action.
-              </span>
+              See Vessels <span className="bg-gradient-to-r text-[#c9b787]">in action.</span>
             </h2>
             <p className="text-[#8a8a8a] text-[14px] mb-8 max-w-md mx-auto leading-relaxed">
               A private walkthrough tailored to your fleet, routes, and operational priorities.
@@ -752,7 +735,7 @@ export default function MarketingHomePage() {
               </a>
               <button
                 onClick={() => setDemoOpen(true)}
-                className="px-6 py-3.5 text-[13px] text-[#5e5e5e] hover:text-[#8a8a8a] transition-colors font-medium"
+                className="px-6 py-3.5 text-[13px] text-[#8a8a8a] hover:text-[#e0e0e0] transition-colors font-medium"
               >
                 Request a private demo <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
               </button>
@@ -763,11 +746,7 @@ export default function MarketingHomePage() {
 
       <section className="py-20 sm:py-24 border-t border-white/[0.04] bg-[#0a0a0a]">
         <div className="max-w-2xl mx-auto px-5 sm:px-6">
-          <m.div
-            initial={{ y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <m.div initial={{ y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <NewsletterSubscribe
               utmSource="vessels"
               variant="inline"
@@ -780,14 +759,41 @@ export default function MarketingHomePage() {
 
       <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
         <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
-          <p style={{ fontSize: 10, fontFamily: 'var(--font-mono, monospace)', letterSpacing: '0.25em', color: '#5e5e5e', marginBottom: 20, textTransform: 'uppercase' as const }}>
+          <p
+            style={{
+              fontSize: 10,
+              fontFamily: 'var(--font-mono, monospace)',
+              letterSpacing: '0.25em',
+              color: '#8a8a8a',
+              marginBottom: 20,
+              textTransform: 'uppercase' as const,
+            }}
+          >
             Part of the SZL Holdings ecosystem
           </p>
-          <p style={{ fontSize: 22, fontWeight: 600, color: '#f5f5f5', marginBottom: 14, fontFamily: 'var(--font-display, system-ui)' }}>
+          <p
+            style={{
+              fontSize: 22,
+              fontWeight: 600,
+              color: '#f5f5f5',
+              marginBottom: 14,
+              fontFamily: 'var(--font-display, system-ui)',
+            }}
+          >
             Orchestrated by <span style={{ color: '#c9b787' }}>a11oy</span>
           </p>
-          <p style={{ fontSize: 13, color: '#8a8a8a', lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
-            Every decision in Vessels follows the same governed path — Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The same attribution. The same governance.
+          <p
+            style={{
+              fontSize: 13,
+              color: '#8a8a8a',
+              lineHeight: 1.8,
+              maxWidth: 520,
+              margin: '0 auto',
+            }}
+          >
+            Every decision in Vessels follows the same governed path — Signal, Context,
+            Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The
+            same attribution. The same governance.
           </p>
         </div>
       </section>

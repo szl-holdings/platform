@@ -25,6 +25,8 @@ import structlog
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from .security import is_production_environment
+
 log = structlog.get_logger(__name__)
 ovis_router = APIRouter(prefix="/ovis", tags=["AEF Ovis multimodal evaluation"])
 
@@ -39,6 +41,7 @@ TRANSFORMERS_VERSION = "5.3.0"
 TORCH_VERSION = "2.14.0"
 QWEN_OMNI_UTILS_VERSION = "0.0.9"
 MAX_INTERNAL_API_KEY_BYTES = 16 * 1024
+MAX_METADATA_BYTES = 64 * 1024
 MAX_MODEL_SNAPSHOT_ENTRIES = 4096
 MAX_MODEL_SNAPSHOT_DEPTH = 16
 SUPPORTED_MODALITIES = [
@@ -51,6 +54,19 @@ SUPPORTED_MODALITIES = [
 ]
 CAS_URI_RE = re.compile(r"^cas://sha256/([a-f0-9]{64})$", re.IGNORECASE)
 SHA256_RE = re.compile(r"^[a-f0-9]{64}$", re.IGNORECASE)
+TENANT_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$")
+OVIS_API_KEY_ENV = "OVIS_INTERNAL_API_KEY"
+OVIS_API_KEY_FILE_ENV = "OVIS_INTERNAL_API_KEY_FILE"
+OVIS_TENANT_ID_ENV = "OVIS_INTERNAL_TENANT_ID"
+
+# The tracked canonical manifest remains the authority for promotion. It is on
+# EVALUATION_HOLD and explicitly forbids production serving. A receipt digest
+# string is only an identifier; this runtime has no parser/verifier that binds
+# a signed receipt to the exact source head, model revision, artifact set, and
+# evaluation suite. No environment variable can promote this capability.
+CANONICAL_MANIFEST_PROMOTION_STATE = "EVALUATION_HOLD"
+CANONICAL_MANIFEST_PRODUCTION_SERVING_ALLOWED = False
+PRODUCTION_RECEIPT_VERIFICATION_IMPLEMENTED = False
 
 # LFS identities read from the exact immutable Hub revision on 2026-09-24.
 EXPECTED_ARTIFACTS: dict[str, tuple[str, int]] = {
@@ -87,10 +103,10 @@ class ApiModel(BaseModel):
 
 
 class OvisAsset(ApiModel):
-    asset_id: str = Field(min_length=1)
-    uri: str
+    asset_id: str = Field(min_length=1, max_length=256)
+    uri: str = Field(max_length=256)
     sha256: str
-    media_type: str = Field(min_length=1)
+    media_type: str = Field(min_length=1, max_length=128)
     byte_length: int = Field(ge=0)
     modality: Literal["image", "visual_document", "audio", "video"]
 
@@ -111,7 +127,7 @@ class OvisAsset(ApiModel):
 
 class TextSegment(ApiModel):
     kind: Literal["text"]
-    text: str = Field(min_length=1)
+    text: str = Field(min_length=1, max_length=1_000_000)
 
 
 class AssetSegment(ApiModel):
@@ -123,21 +139,41 @@ Segment = Annotated[Union[TextSegment, AssetSegment], Field(discriminator="kind"
 
 
 class OvisItem(ApiModel):
-    item_id: str = Field(min_length=1)
+    item_id: str = Field(min_length=1, max_length=256)
     instruction: str = Field(min_length=1, max_length=4096)
     segments: list[Segment] = Field(min_length=1, max_length=32)
 
 
 class OvisEmbedRequest(ApiModel):
-    request_id: str = Field(min_length=1)
-    tenant_id: str = Field(min_length=1)
-    profile_id: str | None = None
-    model_id: str = Field(min_length=1)
-    model_revision: str = Field(min_length=1)
+    request_id: str = Field(min_length=1, max_length=256)
+    tenant_id: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$",
+    )
+    profile_id: str | None = Field(default=None, max_length=256)
+    model_id: str = Field(min_length=1, max_length=256)
+    model_revision: str = Field(min_length=1, max_length=128)
     dimensions: Literal[2048, 1024, 512, 256, 128] = NATIVE_DIMENSIONS
     normalize: Literal[True] = True
     items: list[OvisItem] = Field(min_length=1, max_length=32)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("metadata")
+    @classmethod
+    def validate_metadata_size(cls, value: dict[str, Any]) -> dict[str, Any]:
+        try:
+            encoded = json.dumps(
+                value,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+            ).encode("utf-8")
+        except (TypeError, ValueError) as error:
+            raise ValueError("metadata must be JSON serializable") from error
+        if len(encoded) > MAX_METADATA_BYTES:
+            raise ValueError("metadata exceeds the admitted size")
+        return value
 
 
 class OvisVector(ApiModel):
@@ -185,7 +221,7 @@ class OvisRuntimeError(RuntimeError):
 
 
 def _is_production() -> bool:
-    return (os.getenv("NODE_ENV") or os.getenv("SZL_ENV") or "").lower() == "production"
+    return is_production_environment()
 
 
 def _promotion_state() -> str:
@@ -208,30 +244,126 @@ def _assert_runtime_gate() -> None:
     state = _promotion_state()
     if state == "REVOKED":
         raise OvisRuntimeError("OVIS_MODEL_REVOKED", "Ovis multimodal model is revoked")
-
-    receipt = os.getenv("OVIS_QUALIFICATION_RECEIPT_SHA256", "")
-    if state == "QUALIFIED" and not SHA256_RE.fullmatch(receipt):
+    if (
+        state == "QUALIFIED"
+        and CANONICAL_MANIFEST_PROMOTION_STATE != "QUALIFIED"
+    ):
         raise OvisRuntimeError(
             "OVIS_NOT_QUALIFIED",
-            "Qualified Ovis state requires a qualification receipt",
-        )
-    if state == "QUALIFIED" and os.getenv("OVIS_VERIFY_ARTIFACTS", "1") != "1":
-        raise OvisRuntimeError(
-            "ARTIFACT_VERIFICATION_REQUIRED",
-            "Qualified Ovis state requires artifact verification",
+            "Ovis multimodal model is not qualified for production",
         )
 
     if _is_production():
-        if state != "QUALIFIED" or not SHA256_RE.fullmatch(receipt):
+        # OVIS_QUALIFICATION_RECEIPT_SHA256 is deliberately not consulted as
+        # proof. Even a well-formed digest cannot establish what was signed or
+        # whether it is bound to this exact runtime and evaluation evidence.
+        if (
+            CANONICAL_MANIFEST_PROMOTION_STATE != "QUALIFIED"
+            or not CANONICAL_MANIFEST_PRODUCTION_SERVING_ALLOWED
+            or not PRODUCTION_RECEIPT_VERIFICATION_IMPLEMENTED
+        ):
             raise OvisRuntimeError(
                 "OVIS_NOT_QUALIFIED",
                 "Ovis multimodal model is not qualified for production",
             )
-        if os.getenv("OVIS_VERIFY_ARTIFACTS", "1") != "1":
+
+
+def _read_internal_api_key_file(file_value: str) -> str:
+    secret_path = Path(file_value)
+    flags = os.O_RDONLY
+    flags |= getattr(os, "O_CLOEXEC", 0)
+    flags |= getattr(os, "O_NONBLOCK", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    descriptor: int | None = None
+    try:
+        # Kubernetes uses symlinks for directory-mounted Secret keys. The
+        # evaluation manifest therefore mounts this key with ``subPath`` so
+        # the process can reject link traversal and open one regular file.
+        if secret_path.is_symlink():
+            raise OSError("secret path is not a regular file")
+        descriptor = os.open(secret_path, flags)
+        file_stat = os.fstat(descriptor)
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise OSError("secret path is not a regular file")
+        if file_stat.st_size > MAX_INTERNAL_API_KEY_BYTES:
+            raise OSError("secret file exceeds the admitted size")
+        with os.fdopen(descriptor, "rb", closefd=False) as handle:
+            payload = handle.read(MAX_INTERNAL_API_KEY_BYTES + 1)
+        if len(payload) > MAX_INTERNAL_API_KEY_BYTES:
+            raise OSError("secret file exceeds the admitted size")
+        secret = payload.decode("utf-8").rstrip("\r\n")
+    except (OSError, UnicodeError, ValueError) as error:
+        log.error("ovis_internal_api_key_file_rejected", error_type=type(error).__name__)
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_API_KEY_FILE_INVALID",
+            f"{OVIS_API_KEY_FILE_ENV} is unavailable",
+        ) from error
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+    if not secret:
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_API_KEY_FILE_EMPTY",
+            f"{OVIS_API_KEY_FILE_ENV} is empty",
+        )
+    if secret != secret.strip():
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_API_KEY_FILE_INVALID",
+            f"{OVIS_API_KEY_FILE_ENV} must not contain surrounding whitespace",
+        )
+    return secret
+
+
+def _internal_api_key() -> str | None:
+    direct = os.getenv(OVIS_API_KEY_ENV, "") or None
+    file_value = os.getenv(OVIS_API_KEY_FILE_ENV, "") or None
+    if direct is not None and file_value is not None:
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_API_KEY_AMBIGUOUS",
+            f"Configure only one of {OVIS_API_KEY_ENV} and {OVIS_API_KEY_FILE_ENV}",
+        )
+    if direct is not None:
+        if direct != direct.strip():
             raise OvisRuntimeError(
-                "ARTIFACT_VERIFICATION_REQUIRED",
-                "Production Ovis runtime requires artifact verification",
+                "OVIS_INTERNAL_API_KEY_INVALID",
+                f"{OVIS_API_KEY_ENV} must not contain surrounding whitespace",
             )
+        return direct
+    if file_value is not None:
+        return _read_internal_api_key_file(file_value)
+    return None
+
+
+def _load_internal_identity() -> tuple[str | None, str | None]:
+    expected = _internal_api_key()
+    bound_tenant_id = os.getenv(OVIS_TENANT_ID_ENV, "") or None
+
+    if bound_tenant_id is not None:
+        bound_tenant_id = bound_tenant_id.strip()
+        if not TENANT_ID_RE.fullmatch(bound_tenant_id):
+            raise OvisRuntimeError(
+                "OVIS_INTERNAL_TENANT_INVALID",
+                f"{OVIS_TENANT_ID_ENV} must contain a valid tenant identity",
+            )
+
+    if _is_production():
+        if expected is None:
+            raise OvisRuntimeError(
+                "OVIS_INTERNAL_API_KEY_REQUIRED",
+                f"{OVIS_API_KEY_ENV} or {OVIS_API_KEY_FILE_ENV} is required",
+            )
+        if bound_tenant_id is None:
+            raise OvisRuntimeError(
+                "OVIS_INTERNAL_TENANT_REQUIRED",
+                f"{OVIS_TENANT_ID_ENV} must bind the Ovis credential to one tenant",
+            )
+    elif bound_tenant_id is not None and expected is None:
+        raise OvisRuntimeError(
+            "OVIS_INTERNAL_IDENTITY_INCOMPLETE",
+            f"An Ovis API key is required when {OVIS_TENANT_ID_ENV} is configured",
+        )
+
+    return expected, bound_tenant_id
 
 
 def _assert_dependency_versions() -> None:
@@ -264,70 +396,34 @@ def _assert_dependency_versions() -> None:
             )
 
 
-def _internal_api_key() -> str:
-    direct = os.getenv("OVIS_INTERNAL_API_KEY", "")
-    file_value = os.getenv("OVIS_INTERNAL_API_KEY_FILE", "")
-    if direct and file_value:
-        raise HTTPException(
-            status_code=503,
-            detail="Configure only one Ovis internal API key source",
-        )
-    if not file_value:
-        return direct
+def validate_ovis_configuration() -> None:
+    """Fail startup/readiness when an enabled Ovis boundary is misconfigured."""
 
-    secret_path = Path(file_value)
-    flags = os.O_RDONLY
-    flags |= getattr(os, "O_CLOEXEC", 0)
-    flags |= getattr(os, "O_NONBLOCK", 0)
-    flags |= getattr(os, "O_NOFOLLOW", 0)
-    descriptor: int | None = None
-    try:
-        # Kubernetes uses symlinks for directory-mounted Secret keys. The
-        # evaluation manifest therefore mounts this key with ``subPath`` so
-        # the process can reject link traversal and open one regular file.
-        if secret_path.is_symlink():
-            raise OSError("secret path is not a regular file")
-        descriptor = os.open(secret_path, flags)
-        file_stat = os.fstat(descriptor)
-        if not stat.S_ISREG(file_stat.st_mode):
-            raise OSError("secret path is not a regular file")
-        if file_stat.st_size > MAX_INTERNAL_API_KEY_BYTES:
-            raise OSError("secret file exceeds the admitted size")
-        with os.fdopen(descriptor, "rb", closefd=False) as handle:
-            payload = handle.read(MAX_INTERNAL_API_KEY_BYTES + 1)
-        if len(payload) > MAX_INTERNAL_API_KEY_BYTES:
-            raise OSError("secret file exceeds the admitted size")
-        secret = payload.decode("utf-8").strip()
-    except (OSError, UnicodeError) as error:
-        log.error("ovis_internal_api_key_file_rejected", error_type=type(error).__name__)
-        raise HTTPException(
-            status_code=503,
-            detail="OVIS_INTERNAL_API_KEY_FILE is unavailable",
-        ) from error
-    finally:
-        if descriptor is not None:
-            os.close(descriptor)
-    if not secret:
-        raise HTTPException(
-            status_code=503,
-            detail="OVIS_INTERNAL_API_KEY_FILE is empty",
-        )
-    return secret
-
-
-def _require_internal_auth(request: Request) -> None:
-    expected = _internal_api_key()
-    if _is_production() and not expected:
-        raise HTTPException(
-            status_code=503,
-            detail="OVIS_INTERNAL_API_KEY or OVIS_INTERNAL_API_KEY_FILE is required",
-        )
-    if not expected:
+    if os.getenv("OVIS_OMNI_ENABLED", "0") != "1":
         return
+    _assert_runtime_gate()
+    _assert_dependency_versions()
+    _load_internal_identity()
+
+
+def _require_internal_auth(request: Request) -> str | None:
+    try:
+        expected, bound_tenant_id = _load_internal_identity()
+    except OvisRuntimeError as error:
+        raise HTTPException(status_code=503, detail=error.safe_message) from error
+    if expected is None:
+        return bound_tenant_id
     authorization = request.headers.get("authorization", "")
-    supplied = authorization.removeprefix("Bearer ") if authorization.startswith("Bearer ") else ""
-    if not supplied or not hmac.compare_digest(supplied, expected):
+    scheme, separator, supplied = authorization.partition(" ")
+    authenticated = (
+        separator == " "
+        and scheme.lower() == "bearer"
+        and bool(supplied)
+        and hmac.compare_digest(supplied.encode("utf-8"), expected.encode("utf-8"))
+    )
+    if not authenticated:
         raise HTTPException(status_code=401, detail="Unauthorized")
+    return bound_tenant_id
 
 
 def _hash_file(path: Path) -> str:
@@ -750,28 +846,37 @@ def _execution_receipt() -> ExecutionReceipt:
 @ovis_router.get("/health")
 async def ovis_health(request: Request) -> dict[str, Any]:
     _require_internal_auth(request)
-    runtime = get_runtime()
-    gate_error: str | None = None
     promotion_state: str | None = None
     try:
         promotion_state = _promotion_state()
-    except OvisRuntimeError:
-        pass
-    try:
         _assert_runtime_gate()
         _assert_dependency_versions()
     except OvisRuntimeError as error:
-        gate_error = error.code
+        raise HTTPException(
+            status_code=error.status_code,
+            detail={
+                "status": "blocked",
+                "gateCode": error.code,
+                "loadErrorCode": None,
+                "modelId": MODEL_ID,
+                "modelRevision": MODEL_REVISION,
+                "promotionState": (
+                    CANONICAL_MANIFEST_PROMOTION_STATE
+                    if error.code == "OVIS_NOT_QUALIFIED"
+                    else promotion_state
+                ),
+            },
+        ) from error
 
+    runtime = get_runtime()
     loaded = isinstance(runtime, OvisOmniRuntime) and runtime.loaded
     load_error = runtime.load_error_code if isinstance(runtime, OvisOmniRuntime) else None
-    healthy = gate_error is None and load_error is None
-    if not healthy:
+    if load_error is not None:
         raise HTTPException(
             status_code=503,
             detail={
                 "status": "blocked",
-                "gateCode": gate_error,
+                "gateCode": None,
                 "loadErrorCode": load_error,
                 "modelId": MODEL_ID,
                 "modelRevision": MODEL_REVISION,
@@ -792,12 +897,24 @@ async def ovis_health(request: Request) -> dict[str, Any]:
 
 @ovis_router.post("/embed", response_model=OvisEmbedResponse)
 async def ovis_embed(request_body: OvisEmbedRequest, request: Request) -> OvisEmbedResponse:
-    _require_internal_auth(request)
+    bound_tenant_id = _require_internal_auth(request)
+
+    if bound_tenant_id is not None and not hmac.compare_digest(
+        request_body.tenant_id.encode("utf-8"), bound_tenant_id.encode("utf-8")
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Authenticated Ovis credential is not authorized for this tenant",
+        )
+
     try:
         _assert_runtime_gate()
     except OvisRuntimeError as error:
         log.warning("ovis_embed_rejected", code=error.code, request_id=request_body.request_id)
-        raise HTTPException(status_code=error.status_code, detail=error.code) from error
+        raise HTTPException(
+            status_code=error.status_code,
+            detail=error.code,
+        ) from error
 
     if request_body.model_id != MODEL_ID or request_body.model_revision != MODEL_REVISION:
         raise HTTPException(status_code=409, detail="MODEL_IDENTITY_NOT_ADMITTED")

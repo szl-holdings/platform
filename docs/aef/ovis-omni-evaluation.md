@@ -97,18 +97,25 @@ uv sync --project services/substrate-py-workers --locked --no-dev --extra ovis
 Required evaluation variables:
 
 ```text
+RUNTIME_MODE=internal-preview
+WORKER_MAX_CONCURRENCY=0
+SUBSTRATE_PYTHON_WORKER_API_KEY_FILE=/run/secrets/ovis/internal-api-key
+SUBSTRATE_PYTHON_WORKER_TENANT_ID=<governed-tenant-id>
+AEF_DEVELOPMENT_ENDPOINTS_ENABLED=0
 OVIS_OMNI_ENABLED=1
 OVIS_MAX_CONCURRENCY=1
 OVIS_PROMOTION_STATE=EVALUATION_HOLD
 OVIS_ASSET_ROOT=/var/lib/szl/cas
 OVIS_MODEL_SNAPSHOT_ROOT=/var/lib/szl/ovis-snapshot
 OVIS_VERIFY_ARTIFACTS=1
-OVIS_INTERNAL_API_KEY=<secret>
+OVIS_INTERNAL_API_KEY_FILE=/run/secrets/ovis/internal-api-key
+OVIS_INTERNAL_TENANT_ID=<governed-tenant-id>
 ```
 
-The isolated deployment lanes use `OVIS_INTERNAL_API_KEY_FILE` so the key can
-be mounted from a container or Kubernetes secret without placing it in the
-image or manifest.
+The isolated deployment lanes mount one key file for both the shared worker
+boundary and Ovis, and bind both to the same operator-supplied tenant. Configure
+the direct key variables only outside these templates, and never configure a
+direct and file-backed key together.
 
 With artifact verification enabled, `OVIS_MODEL_SNAPSHOT_ROOT` is mandatory
 and must point at a flattened regular-file snapshot. A normal Hugging Face
@@ -123,7 +130,9 @@ the four exact-pinned runtime distribution versions. HTTP 200 with status `cold`
 means only that this configuration admission passed. It does not load the
 model, verify the flattened snapshot, exercise a GPU, or establish model
 readiness. Direct embedding requests are serialized by a process-local lock;
-the admitted evaluation concurrency is exactly one.
+the admitted evaluation concurrency is exactly one. The worker rejects Ovis
+credentials before JSON parsing and limits each Ovis body to 10 MiB; request
+strings and metadata have additional schema bounds.
 
 Compose also requires UID/GID `1001`, a read-only root filesystem, dropped
 capabilities, `no-new-privileges`, and a bounded writable `/tmp`. A future
@@ -138,19 +147,18 @@ OVIS_EMBED_PATH=/aef/ovis/embed
 OVIS_HEALTH_PATH=/aef/ovis/health
 ```
 
-Production Ovis health and embedding requests additionally require all of the
-following and fail closed otherwise:
+Production serving is intentionally unavailable while the canonical manifest
+is `EVALUATION_HOLD` with `productionServingAllowed=false`. Setting
+`OVIS_PROMOTION_STATE=QUALIFIED` or supplying any 64-hex value in
+`OVIS_QUALIFICATION_RECEIPT_SHA256` does not promote the runtime; a digest
+string does not prove what receipt was signed. The production embed and health
+routes return `503` before acquiring or loading the model runtime.
 
-```text
-OVIS_PROMOTION_STATE=QUALIFIED
-OVIS_QUALIFICATION_RECEIPT_SHA256=<64-hex Forge receipt digest>
-OVIS_VERIFY_ARTIFACTS=1
-OVIS_INTERNAL_API_KEY_FILE=/run/secrets/ovis/internal-api-key
-```
-
-The current qualification receipt gate validates only the presence and
-64-hex shape of the configured digest. It does not yet retrieve or verify an
-owned Forge receipt, so production qualification remains blocked.
+Lifting this HOLD requires a reviewed canonical-manifest change and a runtime
+receipt verifier that parses authenticated receipt content and binds it to the
+exact protected source head, `MODEL_ID`, `MODEL_REVISION`, artifact-set digest,
+processor/dependency identities, evaluation suite and results, and the serving
+configuration. That verifier is not implemented in this source.
 
 ## Media admission
 

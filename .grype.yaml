@@ -1,8 +1,9 @@
 # .grype.yaml — strict Grype scanner configuration for szl-holdings/platform.
 #
 # High and Critical findings are release blockers. This repository does not
-# suppress advisories in Grype; dependencies must be upgraded, replaced, or
-# removed. Doctrine v11 remains LOCKED, Lambda remains Conjecture 1, and no
-# certification claim is implied.
+# suppress advisories in Grype. The separate report gate may admit only an
+# exact, registered, digest-bound, behavior-tested, unexpired local patch while
+# retaining the raw finding. Doctrine v11 remains LOCKED, Lambda remains
+# Conjecture 1, and no certification claim is implied.
 
 ignore: []

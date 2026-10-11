@@ -11,6 +11,8 @@ import tomllib
 from pathlib import Path
 
 from worker import ovis_omni
+from worker.main import app as worker_app
+from worker.ovis_boundary import OvisBoundaryMiddleware
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
@@ -89,6 +91,22 @@ def test_candidate_remains_evaluation_only() -> None:
     assert governance["productionServingAllowed"] is False
     assert governance["fallbackAllowed"] is False
     assert governance["highStakesAutonomyAllowed"] is False
+    assert (
+        governance["promotionState"]
+        == ovis_omni.CANONICAL_MANIFEST_PROMOTION_STATE
+    )
+    assert (
+        governance["productionServingAllowed"]
+        is ovis_omni.CANONICAL_MANIFEST_PRODUCTION_SERVING_ALLOWED
+    )
+    assert ovis_omni.PRODUCTION_RECEIPT_VERIFICATION_IMPLEMENTED is False
+
+
+def test_worker_installs_early_ovis_boundary_middleware() -> None:
+    assert any(
+        middleware.cls is OvisBoundaryMiddleware
+        for middleware in worker_app.user_middleware
+    )
 
 
 def test_ovis_deployment_lanes_require_digest_and_hold() -> None:
@@ -98,6 +116,16 @@ def test_ovis_deployment_lanes_require_digest_and_hold() -> None:
     assert 'image: "__OVIS_EVAL_IMAGE__"' in compose
     assert 'OVIS_PROMOTION_STATE: "EVALUATION_HOLD"' in compose
     assert 'OVIS_MAX_CONCURRENCY: "1"' in compose
+    assert 'WORKER_MAX_CONCURRENCY: "0"' in compose
+    assert 'RUNTIME_MODE: "internal-preview"' in compose
+    assert 'AEF_DEVELOPMENT_ENDPOINTS_ENABLED: "0"' in compose
+    assert (
+        'SUBSTRATE_PYTHON_WORKER_API_KEY_FILE: "/run/secrets/ovis-internal-api-key"'
+        in compose
+    )
+    assert 'OVIS_INTERNAL_API_KEY_FILE: "/run/secrets/ovis-internal-api-key"' in compose
+    assert compose.count("${OVIS_EVAL_TENANT_ID:?") == 2
+    assert "SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS" not in compose
     assert 'user: "1001:1001"' in compose
     assert "read_only: true" in compose
     assert "- ALL" in compose
@@ -182,6 +210,15 @@ def test_kubernetes_pod_identity_secret_and_snapshot_mounts_are_restricted() -> 
     assert "subPath: internal-api-key" in kubernetes
     assert "automountServiceAccountToken: false" in kubernetes
     assert '- name: OVIS_MAX_CONCURRENCY\n              value: "1"' in kubernetes
+    assert '- name: WORKER_MAX_CONCURRENCY\n              value: "0"' in kubernetes
+    assert "strategy:\n    type: Recreate" in kubernetes
+    assert '- name: AEF_DEVELOPMENT_ENDPOINTS_ENABLED\n              value: "0"' in kubernetes
+    assert "name: SUBSTRATE_PYTHON_WORKER_API_KEY_FILE" in kubernetes
+    assert "name: OVIS_INTERNAL_API_KEY_FILE" in kubernetes
+    assert kubernetes.count("name: ovis-evaluation-runtime") == 2
+    assert "secretName: ovis-evaluation-runtime" in kubernetes
+    assert kubernetes.count("key: tenant-id") == 2
+    assert "SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS" not in kubernetes
     assert "claimName: ovis-model-snapshot" in kubernetes
     assert "kind: NetworkPolicy" in kubernetes
     assert "egress: []" in kubernetes

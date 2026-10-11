@@ -1,6 +1,10 @@
 # SEO & Indexing Plan
 
-Last updated: 2026-04-16
+Last updated: 2026-10-06
+
+> The assessment below originated in April. On 2026-10-06 the canonical
+> generator produced and the pre-push freshness gate byte-verified all 13
+> declared cards in `artifacts/szl-holdings/public/og/`.
 
 ## Current State Assessment
 
@@ -32,7 +36,7 @@ Last updated: 2026-04-16
 | Image alt text audit | Medium | Verify all `<img>` tags have descriptive alt |
 | Heading hierarchy audit (H1-H6) | Medium | Each page should have exactly one H1 |
 | Core Web Vitals (LCP, CLS, INP) | High | Already tracked via Web Vitals RUM |
-| Page-specific OG images | Medium | `/og/` directory should have per-product images |
+| Page-specific OG images | Closed for the 13 declared routes | Keep `scripts/generate_og_cards.py` and the pre-push byte-freshness gate authoritative; extend both when adding a route |
 
 ---
 
@@ -87,19 +91,27 @@ Current `public/robots.txt` correctly blocks:
 
 ## OG Image Strategy
 
-**Current**: Single OG image at `/opengraph.jpg` and `/og/og-home.jpg`.
+**Current**: The deterministic generator owns 13 route-specific 1200×630 JPEG
+cards. `python3 scripts/generate_og_cards.py --check` compares every committed
+byte with a fresh render and fails on missing or stale output.
 
-**Target**: Per-product OG images:
+**Generated set**:
 
 | Page | Image Path | Status |
 |------|-----------|--------|
 | Homepage | `/og/og-home.jpg` | Present |
-| Lyte | `/og/og-lyte.jpg` | Needed |
-| Alloy | `/og/og-alloy.jpg` | Needed |
-| Vessels | `/og/og-vessels.jpg` | Needed |
-| Terra | `/og/og-terra.jpg` | Needed |
-| Aegis | `/og/og-aegis.jpg` | Needed |
-| Trust Center | `/og/og-trust.jpg` | Needed |
+| Platform | `/og/og-platform.jpg` | Present |
+| Lyte | `/og/og-lyte.jpg` | Present |
+| Alloy | `/og/og-alloy.jpg` | Present |
+| Solutions | `/og/og-solutions.jpg` | Present |
+| Vessels | `/og/og-vessels.jpg` | Present |
+| Terra | `/og/og-terra.jpg` | Present |
+| Aegis | `/og/og-aegis.jpg` | Present |
+| PRISM Counsel | `/og/og-prism-counsel.jpg` | Present |
+| Pricing | `/og/og-pricing.jpg` | Present |
+| Contact | `/og/og-contact.jpg` | Present |
+| Design Partners | `/og/og-design-partners.jpg` | Present |
+| How It Works | `/og/og-how-it-works.jpg` | Present |
 
 OG images: 1200×630px, on-brand dark background with product name and tagline.
 

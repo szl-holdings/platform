@@ -150,7 +150,10 @@ class CompilerValidationTests(unittest.TestCase):
                     compute_tree_sha256(linked)
             finally:
                 if created:
-                    linked.rmdir()
+                    if os.name == "nt":
+                        linked.rmdir()
+                    else:
+                        linked.unlink()
 
     def test_stale_output_file_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

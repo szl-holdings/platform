@@ -60,7 +60,7 @@
     "dependencyLock": {
       "format": "uv",
       "path": "services/substrate-py-workers/uv.lock",
-      "sha256": "d29d5034e93b223a3c62a63ce324ae74fcfa7bb828300be45b6bbf5a9f3a1b14"
+      "sha256": "8ea6299600ee02b636dfe6daf955273fdd9c9170df5454c4afcdb7058c4b9f7a"
     },
     "remoteMediaAllowed": false,
     "inputTransport": "cas://sha256/<digest>",

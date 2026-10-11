@@ -3947,13 +3947,13 @@
       "package_name": "@szl-holdings/shared-contracts",
       "inputs": ["packages/shared-contracts/package.json", "packages/shared-contracts/src"],
       "file_count": 9,
-      "bytes": 47529,
-      "tree_sha256": "ac5dde34c6df9e17350427f272cbb04ebd0aea5401811c6c007cec10f3d0a8c5",
+      "bytes": 47846,
+      "tree_sha256": "c3f0ed91e4171e69add655cd37dc71000eaaaa903d229de0fa0846335ce65ad1",
       "files": [
         {
           "path": "packages/shared-contracts/package.json",
-          "bytes": 471,
-          "sha256": "55e4e90b11c10ac837a242ffb90c25d48fdc0e423fb93f885024bd4b2cb20d42"
+          "bytes": 788,
+          "sha256": "f510340c4a92927be5e73eb4b925d5904c48ea225646677b8cc477b20d9e2c83"
         },
         {
           "path": "packages/shared-contracts/src/agent-roles.ts",
@@ -4013,5 +4013,5 @@
       "claims that hash closure proves registry publication or deployment"
     ]
   },
-  "release_id": "sha256:858b209c12216967068a083a1b357d218a93dad2354da48ea0cb10c71b4b8dcf"
+  "release_id": "sha256:5589af8dcb6442d07d5d9927e19e679b4fb826ef1ddbadc8b33781bb7350032c"
 }

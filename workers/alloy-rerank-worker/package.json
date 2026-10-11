@@ -3,15 +3,18 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Alloy Embedding Fabric — TypeScript rerank worker with cross-encoder execution path, deterministic lightweight fallback, and pluggable RerankBackend interface.",
+  "description": "Alloy Embedding Fabric — lexical-overlap HTTP reranker with explicit development fallback policy and execution receipts.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     }
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit --customConditions workspace",
     "test": "vitest run",
     "test:watch": "vitest"
   },

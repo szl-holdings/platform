@@ -6,15 +6,22 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
+from starlette.requests import Request
 
 from worker import ovis_omni
 from worker.aef_endpoints import aef_router
+from worker.ovis_boundary import OvisBoundaryMiddleware
 
 
 class FakeRuntime:
+    def __init__(self) -> None:
+        self.embed_calls = 0
+
     def embed_items(self, items: list[ovis_omni.OvisItem]) -> list[ovis_omni.OvisVector]:
+        self.embed_calls += 1
         return [
             ovis_omni.OvisVector(
                 item_id=item.item_id,
@@ -34,6 +41,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("NODE_ENV", "test")
     monkeypatch.delenv("OVIS_INTERNAL_API_KEY", raising=False)
     monkeypatch.delenv("OVIS_INTERNAL_API_KEY_FILE", raising=False)
+    monkeypatch.delenv("OVIS_INTERNAL_TENANT_ID", raising=False)
     monkeypatch.setattr(ovis_omni, "_runtime", FakeRuntime())
     app = FastAPI()
     app.include_router(aef_router)
@@ -88,6 +96,92 @@ def test_embed_route_maps_runtime_gate_failure(
     assert response.json()["detail"] == "OVIS_RUNTIME_DISABLED"
 
 
+def test_ovis_boundary_authenticates_before_json_parsing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OVIS_INTERNAL_API_KEY", "evaluation-secret")
+    monkeypatch.delenv("OVIS_INTERNAL_API_KEY_FILE", raising=False)
+    app = FastAPI()
+    app.include_router(aef_router)
+    app.add_middleware(OvisBoundaryMiddleware, max_body_bytes=128)
+
+    with TestClient(app) as boundary_client:
+        response = boundary_client.post(
+            "/aef/ovis/embed",
+            content=b"this is deliberately invalid json",
+            headers={"Content-Type": "application/json"},
+        )
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Unauthorized"}
+
+
+def test_ovis_boundary_rejects_oversized_body_before_parsing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OVIS_INTERNAL_API_KEY", "evaluation-secret")
+    monkeypatch.delenv("OVIS_INTERNAL_API_KEY_FILE", raising=False)
+    app = FastAPI()
+    app.include_router(aef_router)
+    app.add_middleware(OvisBoundaryMiddleware, max_body_bytes=128)
+
+    with TestClient(app) as boundary_client:
+        response = boundary_client.post(
+            "/aef/ovis/embed",
+            content=b"x" * 129,
+            headers={
+                "Authorization": "Bearer evaluation-secret",
+                "Content-Type": "application/json",
+            },
+        )
+
+    assert response.status_code == 413
+    assert response.json() == {
+        "detail": "Ovis request body exceeds the admitted size"
+    }
+
+
+@pytest.mark.asyncio
+async def test_ovis_boundary_limits_streamed_body_without_content_length(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OVIS_INTERNAL_API_KEY", "evaluation-secret")
+    monkeypatch.delenv("OVIS_INTERNAL_API_KEY_FILE", raising=False)
+    app = FastAPI()
+    app.include_router(aef_router)
+    app.add_middleware(OvisBoundaryMiddleware, max_body_bytes=128)
+
+    async def body_chunks():
+        yield b"x" * 65
+        yield b"y" * 64
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as boundary_client:
+        response = await boundary_client.post(
+            "/aef/ovis/embed",
+            content=body_chunks(),
+            headers={
+                "Authorization": "Bearer evaluation-secret",
+                "Content-Type": "application/json",
+            },
+        )
+
+    assert response.status_code == 413
+    assert response.json() == {
+        "detail": "Ovis request body exceeds the admitted size"
+    }
+
+
+def test_ovis_request_rejects_oversized_metadata(client: TestClient) -> None:
+    request = _request()
+    request["metadata"] = {"payload": "x" * ovis_omni.MAX_METADATA_BYTES}
+
+    response = client.post("/aef/ovis/embed", json=request)
+
+    assert response.status_code == 422
+
+
 def test_production_gate_requires_qualification_receipt(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("OVIS_OMNI_ENABLED", "1")
     monkeypatch.setenv("NODE_ENV", "production")
@@ -111,7 +205,7 @@ def test_evaluation_gate_rejects_parallel_inference_configuration(
     assert caught.value.code == "OVIS_CONCURRENCY_NOT_ADMITTED"
 
 
-def test_nonproduction_qualified_state_still_requires_receipt(
+def test_canonical_hold_cannot_be_bypassed_by_receipt_environment(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("OVIS_OMNI_ENABLED", "1")
@@ -129,7 +223,7 @@ def test_nonproduction_qualified_state_still_requires_receipt(
     monkeypatch.setenv("OVIS_VERIFY_ARTIFACTS", "0")
     with pytest.raises(ovis_omni.OvisRuntimeError) as caught:
         ovis_omni._assert_runtime_gate()
-    assert caught.value.code == "ARTIFACT_VERIFICATION_REQUIRED"
+    assert caught.value.code == "OVIS_NOT_QUALIFIED"
 
 
 def test_dependency_version_drift_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -229,10 +323,10 @@ def test_internal_auth_rejects_secret_file_symlink(
     monkeypatch.delenv("OVIS_INTERNAL_API_KEY", raising=False)
     monkeypatch.setenv("OVIS_INTERNAL_API_KEY_FILE", str(secret_link))
 
-    with pytest.raises(ovis_omni.HTTPException) as caught:
+    with pytest.raises(ovis_omni.OvisRuntimeError) as caught:
         ovis_omni._internal_api_key()
 
-    assert caught.value.status_code == 503
+    assert caught.value.code == "OVIS_INTERNAL_API_KEY_FILE_INVALID"
 
 
 def test_internal_auth_rejects_oversized_secret_file(
@@ -244,10 +338,125 @@ def test_internal_auth_rejects_oversized_secret_file(
     monkeypatch.delenv("OVIS_INTERNAL_API_KEY", raising=False)
     monkeypatch.setenv("OVIS_INTERNAL_API_KEY_FILE", str(secret_path))
 
-    with pytest.raises(ovis_omni.HTTPException) as caught:
+    with pytest.raises(ovis_omni.OvisRuntimeError) as caught:
         ovis_omni._internal_api_key()
 
+    assert caught.value.code == "OVIS_INTERNAL_API_KEY_FILE_INVALID"
+
+
+def test_worker_environment_production_marker_enforces_all_ovis_gates(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OVIS_OMNI_ENABLED", "1")
+    monkeypatch.setenv("SUBSTRATE_PYTHON_WORKER_ENV", "production")
+    monkeypatch.setenv("OVIS_PROMOTION_STATE", "EVALUATION_HOLD")
+    for name in (
+        "NODE_ENV",
+        "APP_ENV",
+        "SZL_ENV",
+        "OVIS_QUALIFICATION_RECEIPT_SHA256",
+        "OVIS_INTERNAL_API_KEY",
+        "OVIS_INTERNAL_API_KEY_FILE",
+        "OVIS_INTERNAL_TENANT_ID",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+    with pytest.raises(ovis_omni.OvisRuntimeError, match="not qualified") as caught:
+        ovis_omni._assert_runtime_gate()
+    assert caught.value.code == "OVIS_NOT_QUALIFIED"
+
+    request = Request({"type": "http", "headers": []})
+    with pytest.raises(HTTPException) as auth_error:
+        ovis_omni._require_internal_auth(request)
+    assert auth_error.value.status_code == 503
+    assert auth_error.value.detail == (
+        "OVIS_INTERNAL_API_KEY or OVIS_INTERNAL_API_KEY_FILE is required"
+    )
+
+
+def test_production_ovis_credential_is_bound_to_request_tenant(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OVIS_OMNI_ENABLED", "1")
+    monkeypatch.setenv("SUBSTRATE_PYTHON_WORKER_ENV", "production")
+    monkeypatch.setenv("OVIS_PROMOTION_STATE", "QUALIFIED")
+    monkeypatch.setenv("OVIS_QUALIFICATION_RECEIPT_SHA256", "a" * 64)
+    monkeypatch.setenv("OVIS_VERIFY_ARTIFACTS", "1")
+    monkeypatch.setenv("OVIS_INTERNAL_API_KEY", "production-ovis-test-credential")
+    monkeypatch.delenv("OVIS_INTERNAL_API_KEY_FILE", raising=False)
+    monkeypatch.setenv("OVIS_INTERNAL_TENANT_ID", "tenant-bound")
+    monkeypatch.setattr(ovis_omni, "_runtime", FakeRuntime())
+
+    app = FastAPI()
+    app.include_router(aef_router)
+    with TestClient(app) as production_client:
+        response = production_client.post(
+            "/aef/ovis/embed",
+            headers={"Authorization": "Bearer production-ovis-test-credential"},
+            json={**_request(), "tenantId": "tenant-other"},
+        )
+
+    assert response.status_code == 403
+    assert response.json() == {
+        "detail": "Authenticated Ovis credential is not authorized for this tenant"
+    }
+
+
+def test_fake_qualification_digest_holds_before_runtime(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OVIS_OMNI_ENABLED", "1")
+    monkeypatch.setenv("SUBSTRATE_PYTHON_WORKER_ENV", "production")
+    monkeypatch.setenv("OVIS_PROMOTION_STATE", "QUALIFIED")
+    monkeypatch.setenv("OVIS_QUALIFICATION_RECEIPT_SHA256", "a" * 64)
+    monkeypatch.setenv("OVIS_VERIFY_ARTIFACTS", "1")
+    monkeypatch.setenv("OVIS_INTERNAL_API_KEY", "production-ovis-test-credential")
+    monkeypatch.delenv("OVIS_INTERNAL_API_KEY_FILE", raising=False)
+    monkeypatch.setenv("OVIS_INTERNAL_TENANT_ID", "tenant-1")
+    fake_runtime = FakeRuntime()
+    runtime_lookups = 0
+
+    def observed_runtime() -> FakeRuntime:
+        nonlocal runtime_lookups
+        runtime_lookups += 1
+        return fake_runtime
+
+    monkeypatch.setattr(ovis_omni, "get_runtime", observed_runtime)
+
+    app = FastAPI()
+    app.include_router(aef_router)
+    with TestClient(app) as production_client:
+        response = production_client.post(
+            "/aef/ovis/embed",
+            headers={"Authorization": "Bearer production-ovis-test-credential"},
+            json=_request(),
+        )
+
+    assert response.status_code == 503
+    assert response.json() == {"detail": "OVIS_NOT_QUALIFIED"}
+    assert runtime_lookups == 0
+    assert fake_runtime.embed_calls == 0
+
+
+def test_production_ovis_requires_server_side_tenant_binding(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("SUBSTRATE_PYTHON_WORKER_ENV", "production")
+    monkeypatch.setenv("OVIS_INTERNAL_API_KEY", "production-ovis-test-credential")
+    monkeypatch.delenv("OVIS_INTERNAL_API_KEY_FILE", raising=False)
+    monkeypatch.delenv("OVIS_INTERNAL_TENANT_ID", raising=False)
+    request = Request(
+        {
+            "type": "http",
+            "headers": [(b"authorization", b"Bearer production-ovis-test-credential")],
+        }
+    )
+
+    with pytest.raises(HTTPException) as caught:
+        ovis_omni._require_internal_auth(request)
+
     assert caught.value.status_code == 503
+    assert "OVIS_INTERNAL_TENANT_ID" in str(caught.value.detail)
 
 
 def test_cas_resolution_verifies_path_size_and_digest(
