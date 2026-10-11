@@ -37,7 +37,7 @@ There is no text-hash fallback, no model alias, no mutable Hub `main`, no remote
 
 ## Dependency and image boundary
 
-The admitted runtime stack binds Accelerate `1.15.0`, Transformers `5.3.0`,
+The admitted runtime stack binds Accelerate `1.15.0`, Transformers `5.19.0`,
 Torch `2.14.0`, and Qwen Omni Utils `0.0.9` across the candidate manifest,
 Python package metadata, and runtime source. The process and authenticated
 Ovis health endpoint check those installed distribution versions before the
@@ -81,7 +81,7 @@ image build. Image publication remains blocked until an owned build produces
 an immutable digest and the supported hardware lane verifies it. Model
 promotion additionally requires the qualification evidence below.
 
-The Ovis execution receipt reports runtime version `1.0.1` for this hardening
+The Ovis execution receipt reports runtime version `1.0.2` for this hardening
 contract. It still does not carry the container digest or dependency-lock
 digest, so the receipt alone cannot identify an exact deployed build.
 

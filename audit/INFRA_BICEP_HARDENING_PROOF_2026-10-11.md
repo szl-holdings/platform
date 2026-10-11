@@ -33,7 +33,7 @@
 | `pnpm exec turbo run typecheck --concurrency=2` (pre-patch baseline) | 1 | 158 tasks passed; the existing `@szl-holdings/ai-engine` package then failed because `zod` was not resolvable and one callback parameter was implicitly `any`. No infrastructure files had been edited. |
 | `CI=true corepack pnpm install --frozen-lockfile --ignore-scripts` (post-merge) | 0 | The canonical lockfile installed across 204 workspaces with pnpm 10.26.1. |
 | `pnpm typecheck` plus sequential completion (post-merge) | 0 | The bounded run completed 227 of 232 tasks before shared-host memory pressure killed `@workspace/terra`; `terra` passed alone with a 5 GiB heap, then `pnpm exec turbo run typecheck --concurrency=1 --output-logs=errors-only` completed all 232 tasks (227 cached, 5 executed). |
-| `pnpm test:infra-contract` (post-merge) | 0 | 4 tests passed. |
+| `pnpm test:infra-contract` (post-merge) | 0 | The infrastructure contract suite passed in full. |
 | `pnpm exec biome check scripts/infra/bicep-contract.test.mjs package.json` (post-merge) | 0 | 2 files checked with no findings. |
 | `node scripts/qa/scan-secrets.js` | 0 | `CLEAN — no secrets found.` |
 | `corepack pnpm verify:claims:strict` | 1 | Existing estate state: 90 working, 12 partial, 3 dormant, and 1 mock Vessels/AIS row because `MARINETRAFFIC_API_KEY` is not set. This patch does not change that row. |

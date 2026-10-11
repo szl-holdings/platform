@@ -38,7 +38,7 @@
 | `pnpm typecheck` (baseline, default concurrency) | 137 | Runner killed the large `@szl-holdings/db` declaration build after 102 successful tasks; no TypeScript diagnostic preceded the memory kill. |
 | `corepack pnpm --filter @szl-holdings/db test` | 0 | 6/6 migration-authority tests passed. |
 | `corepack pnpm --filter @szl-holdings/db-migrations test` | 0 | 6/6 status tests passed. |
-| `turbo run test --filter=@szl-holdings/db --filter=@szl-holdings/db-migrations --concurrency=2` | 0 | 2/2 package test tasks passed through the repository task graph; 12/12 tests passed. |
+| `turbo run test --filter=@szl-holdings/db --filter=@szl-holdings/db-migrations --concurrency=2` | 0 | Both package test tasks and every focused case passed through the repository task graph. |
 | `corepack pnpm --filter @szl-holdings/db typecheck` | 0 | Database package declaration build passed. |
 | `corepack pnpm --filter @szl-holdings/db-migrations typecheck` | 0 | Migration-status package typecheck passed. |
 | `biome check` on five changed JavaScript/TypeScript files | 0 | Formatting, lint, and import ordering passed after applying safe formatter output. |
@@ -46,7 +46,7 @@
 | Changed-file credential-pattern scan | 1 | Expected `rg` no-match status; no credential pattern found. |
 | `PATH=<pinned-pnpm-10-wrapper> CI=true npm_config_manage_package_manager_versions=false turbo run typecheck --concurrency=2` | 0 | 185/185 repository typecheck/build tasks passed in 12m46s. |
 | `CI=true corepack pnpm install --frozen-lockfile --ignore-scripts --offline` after merging protected main | 0 | Frozen install completed for all 204 workspaces using the repository-pinned pnpm 10.26.1. |
-| Direct focused tests after merging protected main | 0 | 12/12 tests passed across `@szl-holdings/db` and `@szl-holdings/db-migrations`. |
+| Direct focused tests after merging protected main | 0 | Every focused case passed across `@szl-holdings/db` and `@szl-holdings/db-migrations`. |
 | `turbo run test --filter=@szl-holdings/db --filter=@szl-holdings/db-migrations --concurrency=2` after merging protected main | 0 | 4/4 uncached package and dependency-build tasks passed; 12/12 focused tests passed. |
 | `turbo run typecheck --concurrency=2` after merging protected main | 0 | 232/232 repository typecheck/build tasks passed in 11m46s. |
 

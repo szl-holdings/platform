@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-11 (rev 40 — candidate, migration, and Ovis evaluation boundaries)
+**Last updated:** 2026-10-11 (rev 41 — candidate, migration, and Ovis security boundaries)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -240,13 +240,17 @@ not an accepted remediation.
 
 The Ovis candidate remains `EVALUATION_HOLD`. Its manifest, Python optional
 dependencies, and runtime source now agree on Accelerate `1.15.0`, Transformers
-`5.3.0`, Torch `2.14.0`, and Qwen Omni Utils `0.0.9`; runtime health and loading
+`5.19.0`, Torch `2.14.0`, and Qwen Omni Utils `0.0.9`; runtime health and loading
 fail closed on version drift. A service-local `uv.lock` records the complete
 cross-platform Python resolution and the manifest binds its SHA-256. Lock
 resolution and static CPU-side contracts do not establish that the GPU
 dependencies install or run on a supported CUDA host. The OSV vulnerability
 audit remains unresolved because the current network policy blocks
-`api.osv.dev`.
+`api.osv.dev`. GitHub dependency review and Trivy rejected the earlier
+Transformers `5.3.0` lock for three HIGH advisories. The candidate now uses
+`5.19.0`, which is outside every affected range in GitHub's reviewed
+Transformers advisories observed on 2026-10-11. This bounded remediation is not
+a claim that the complete Python graph is vulnerability-free.
 
 The general Compose and Kubernetes worker examples explicitly disable Ovis.
 Separate evaluation adapters require a renderer-validated digest-addressed
@@ -259,7 +263,7 @@ image digest, hardware execution receipt, or model qualification receipt is
 admitted in this repository yet. Those remain release blockers; authenticated
 health with status `cold` and the deployment adapters are configuration
 contracts rather than evidence of a live or qualified model. Runtime receipts
-identify this contract as `1.0.1` but do not carry an image or dependency-lock
+identify this contract as `1.0.2` but do not carry an image or dependency-lock
 digest. The canonical HOLD cannot be lifted by a receipt-digest environment
 value; an authenticated receipt parser and verifier is not implemented.
 Kubernetes currently treats the admitted `cold` response as Ready and defers

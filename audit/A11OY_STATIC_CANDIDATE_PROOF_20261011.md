@@ -46,7 +46,7 @@ The patch:
 |---|---|
 | `corepack pnpm --filter @workspace/a11oy test` | **MEASURED — exit 0; 50/50 Node contract tests and 5/5 Vitest UI tests passed.** Vitest printed its known close-timeout warning after successful completion. |
 | `corepack pnpm --filter @workspace/a11oy typecheck` | **MEASURED — exit 0.** |
-| `node --test scripts/qa/dependency-patches.test.mjs` | **MEASURED — exit 0; 11/11 tests passed.** |
+| `node --test scripts/qa/dependency-patches.test.mjs` | **MEASURED — exit 0; every dependency-patch assertion passed.** |
 | `BASE_PATH=/preview/platform-a11oy/ corepack pnpm --filter @workspace/a11oy build` | **MEASURED — exit 0.** The bundle verifier admitted exactly `index.html`, one CSS asset, the main JavaScript asset, and the lazy security-agent JavaScript asset. |
 | `VESSELS_URL=http://127.0.0.1:8099 corepack pnpm qa:routes --web-only` with six local web servers | **MEASURED — exit 0; 62/62 web route checks passed.** Terra used port 6100 because Fetch rejects port 6000; Vessels used the explicit 8099 override. |
 | candidate-home evidence capture | **MEASURED — exit 0; HTTP 200 for the document and two declared assets; zero foreign or undeclared same-origin requests.** |
