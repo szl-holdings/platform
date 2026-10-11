@@ -52,7 +52,10 @@ export async function ensureSandboxToolsRegistered(): Promise<void> {
 
   _registrationPromise = (async () => {
     try {
-      const { defaultGateway, defaultToolRegistry } = await import('@workspace/tool-mesh');
+      const [{ defaultGateway }, { defaultToolRegistry }] = await Promise.all([
+        import('@workspace/tool-mesh/gateway'),
+        import('@workspace/tool-mesh/registry'),
+      ]);
       const { registerSandboxTools } = await import('./tool-registrations.js');
       registerSandboxTools(defaultGateway, defaultToolRegistry);
       _registered = true;

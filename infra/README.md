@@ -1,6 +1,8 @@
 # SZL Holdings — Azure Infrastructure
 
-This directory contains Bicep templates to provision the full production-hardened Azure stack for SZL Holdings, following cloud-champion standards (NVIDIA/AWS/Google style).
+This directory contains Bicep templates for the intended Azure stack for SZL Holdings.
+
+> **Production HOLD:** source-contract tests verify local module resolution and immutable API image plumbing. The templates have not been compiled with the Azure CLI/Bicep CLI in the current evidence environment, deployed to Azure, or qualified with production traffic. Do not treat source validation as deployment evidence.
 
 ## Architecture
 
@@ -62,39 +64,59 @@ All data-plane services (PostgreSQL, Key Vault, Storage) are accessed via **Priv
 
 ## Quick Start
 
-### 1. Deploy Infrastructure
+### 1. Build, Push, and Resolve the Image Digest
+
+```bash
+# Use the exact source revision as a traceable build label. Azure deployment is
+# pinned to the registry digest resolved after the push, not to this label.
+API_IMAGE_REPOSITORY="szlholdingsacr.azurecr.io/szlholdings-api"
+API_BUILD_LABEL="$(git rev-parse HEAD)"
+
+docker build -t "${API_IMAGE_REPOSITORY}:${API_BUILD_LABEL}" .
+az acr login --name szlholdingsacr
+docker push "${API_IMAGE_REPOSITORY}:${API_BUILD_LABEL}"
+
+API_IMAGE_DIGEST="$(az acr manifest show-metadata \
+  --registry szlholdingsacr \
+  --name "szlholdings-api:${API_BUILD_LABEL}" \
+  --query digest \
+  --output tsv)"
+
+if ! printf '%s' "${API_IMAGE_DIGEST}" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+  echo "ACR did not return a valid sha256 digest" >&2
+  exit 1
+fi
+```
+
+### 2. Deploy Infrastructure
 
 ```bash
 az deployment group create \
   --resource-group szlholdings-rg \
   --template-file infra/main.bicep \
   --parameters infra/parameters.json \
-  --parameters pgAdminLogin=<YOUR_PG_LOGIN> pgAdminPassword=<YOUR_PG_PASSWORD>
+  --parameters \
+    pgAdminLogin=<YOUR_PG_LOGIN> \
+    pgAdminPassword=<YOUR_PG_PASSWORD> \
+    apiImageDigest="${API_IMAGE_DIGEST}"
 ```
 
 > **Note:** The first deploy with VNet enabled takes ~15 minutes for PostgreSQL provisioning.
 
-### 2. Build and Push Container Image
+### 3. Update the Container App
 
 ```bash
-# Build the container image (non-root, hardened)
-docker build -t szlholdingsacr.azurecr.io/szlholdings-api:latest .
-
-# Log in to ACR
-az acr login --name szlholdingsacr
-
-# Push
-docker push szlholdingsacr.azurecr.io/szlholdings-api:latest
-```
-
-### 3. Update Container App
-
-```bash
-az containerapp update \
-  --name szlholdings-api \
+az deployment group create \
   --resource-group szlholdings-rg \
-  --image szlholdingsacr.azurecr.io/szlholdings-api:latest
+  --template-file infra/main.bicep \
+  --parameters infra/parameters.json \
+  --parameters \
+    pgAdminLogin=<YOUR_PG_LOGIN> \
+    pgAdminPassword=<YOUR_PG_PASSWORD> \
+    apiImageDigest="${API_IMAGE_DIGEST}"
 ```
+
+Resolve `API_IMAGE_DIGEST` again after every image push. Reapplying the Bicep deployment preserves the digest-bound image contract.
 
 ### 4. Run Database Migrations
 
@@ -116,7 +138,7 @@ DATABASE_URL=$DATABASE_URL pnpm --filter @workspace/db run db:push
 | `pgAdminLogin` | PostgreSQL admin username | (required) |
 | `pgAdminPassword` | PostgreSQL admin password | (required) |
 | `customDomain` | Custom domain for Front Door | `szlholdings.com` |
-| `apiImageTag` | Container image tag | `latest` |
+| `apiImageDigest` | Immutable OCI digest in `sha256:<64 lowercase hex>` form | Required; no default |
 | `acrLoginServer` | ACR login server | `szlholdingsacr.azurecr.io` |
 | `redisSku` | Redis Cache SKU | `Standard` |
 | `pgSkuTier` | PostgreSQL SKU tier | `GeneralPurpose` |

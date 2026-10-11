@@ -7,21 +7,23 @@
  * production-targeted `inspect_code` request through the gateway and
  * asserts that the policy decision is honored end-to-end.
  *
- * The test is skipped automatically when the `opa` binary is not on PATH
- * or at OPA_BIN. CI/CD installs OPA explicitly. Locally:
+ * The pinned source/checksum contract is mandatory on every run. A real OPA
+ * process is an additional integration check when an authenticated binary is
+ * present on PATH or at OPA_BIN. Locally:
  *
  *   curl -sL -o /tmp/opa https://openpolicyagent.org/downloads/v0.69.0/opa_linux_amd64_static
  *   chmod +x /tmp/opa && OPA_BIN=/tmp/opa pnpm test
  */
 
-import { spawn, type ChildProcessWithoutNullStreams } from 'child_process';
+import { createHash } from 'node:crypto';
+import { type ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { existsSync, mkdtempSync, readFileSync, statSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { AgentGateway } from '../src/gateway.js';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { issueToken } from '../src/auth.js';
-import type { GatewayConfig, CallerIdentity, AuditEntry } from '../src/types.js';
+import { AgentGateway } from '../src/gateway.js';
+import type { AuditEntry, CallerIdentity, GatewayConfig } from '../src/types.js';
 
 // ---------------------------------------------------------------------------
 // OPA discovery
@@ -43,8 +45,10 @@ function findOpaBinary(): string | null {
 }
 
 const OPA_BINARY = findOpaBinary();
-const POLICY_DIR = resolve(__dirname, '../../policy');
+const POLICY_DIR = resolve(__dirname, '../../../policy');
 const POLICY_BUNDLE = resolve(POLICY_DIR, 'approval/approval-requirements.rego');
+const POLICY_CHECKSUM = resolve(POLICY_DIR, 'approval/approval-requirements.sha256');
+const EXPECTED_POLICY_SHA256 = '0d48db558f2bc99186168ad34f87218666e31ab0dfc4d65ea10869975383c485';
 
 // ---------------------------------------------------------------------------
 // Test fixtures
@@ -120,7 +124,34 @@ async function stopOpa(handle: OpaHandle | null): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Tests — skipped when OPA binary is unavailable
+// Mandatory deterministic bundle contract. This cannot skip: a missing or
+// modified policy fails CI even when the optional native OPA binary is absent.
+// ---------------------------------------------------------------------------
+
+describe('Agent Gateway — mandatory OPA bundle contract', () => {
+  it('requires the reviewed decision bundle and exact pinned digest', () => {
+    const source = readFileSync(POLICY_BUNDLE);
+    const actualDigest = createHash('sha256').update(source).digest('hex');
+    expect(actualDigest).toBe(EXPECTED_POLICY_SHA256);
+    expect(readFileSync(POLICY_CHECKSUM, 'utf8')).toBe(
+      `${EXPECTED_POLICY_SHA256}  approval-requirements.rego\n`,
+    );
+  });
+
+  it('pins the exact remote decision document and fail-closed output fields', () => {
+    const source = readFileSync(POLICY_BUNDLE, 'utf8');
+    expect(source).toMatch(/^package szl\.approval$/m);
+    expect(source).toContain('decision := {');
+    expect(source).toContain('"allowed": allowed');
+    expect(source).toContain('"required_approvals": required_approvals');
+    expect(source).toContain('"required_groups": required_groups');
+    expect(source).toContain('"deny": deny');
+    expect(source).toContain('allowed := count(invalid_reasons) == 0');
+  });
+});
+
+// Supplemental native OPA integration — skipped when no authenticated binary
+// is installed. The non-optional contract above still runs in that case.
 // ---------------------------------------------------------------------------
 
 const describeIfOpa = OPA_BINARY ? describe : describe.skip;
@@ -144,20 +175,24 @@ describeIfOpa('AgentGateway — live OPA integration', () => {
   function readAuditEntries(): AuditEntry[] {
     if (!existsSync(auditLogPath)) return [];
     const lines = readFileSync(auditLogPath, 'utf-8').trim().split('\n').filter(Boolean);
-    return lines.map((l) => JSON.parse(l) as AuditEntry);
+    return lines
+      .map((line) => JSON.parse(line) as { kind: string; payload: AuditEntry })
+      .filter((record) => record.kind === 'audit')
+      .map((record) => record.payload);
   }
 
   it('gates a production-targeted inspect_code request through the live OPA bundle', async () => {
     if (!opa) throw new Error('OPA not started');
 
     const config: GatewayConfig = {
-      jwtSecret: TEST_SECRET,
+      jwt: { algorithm: 'HS256', secret: TEST_SECRET },
       opaEndpoint: opa.endpoint,
-      // Local-mode approval auto-approves so the workflow short-circuits without
-      // requiring a Temporal cluster — the Temporal round trip is exercised by
-      // platform/temporal/tests/agent-gateway-temporal-e2e.test.ts.
+      // Local-mode approval auto-approves for this OPA-only integration. Live
+      // startup remains held unless the separate workflow proof contract passes.
       temporalEndpoint: 'local',
       openAiApiKey: 'local',
+      approvalWorkflow: null,
+      evidenceLedger: null,
       auditLogPath,
       approvalTimeoutMs: 5_000,
     };
@@ -194,7 +229,8 @@ describeIfOpa('AgentGateway — live OPA integration', () => {
     // `evaluatedAt` came from OPA's HTTP Date header, not the gateway's clock.
     // It must be >= the OPA process start time and within a sensible window.
     expect(policy?.evaluatedAt).toBeDefined();
-    const evaluatedMs = new Date(policy!.evaluatedAt).getTime();
+    if (!policy) throw new Error('completed audit entry omitted policyDecision');
+    const evaluatedMs = new Date(policy.evaluatedAt).getTime();
     expect(evaluatedMs).toBeGreaterThanOrEqual(opaStartTime - 1_000);
     expect(evaluatedMs).toBeLessThanOrEqual(Date.now() + 1_000);
   });
@@ -203,10 +239,12 @@ describeIfOpa('AgentGateway — live OPA integration', () => {
     if (!opa) throw new Error('OPA not started');
 
     const config: GatewayConfig = {
-      jwtSecret: TEST_SECRET,
+      jwt: { algorithm: 'HS256', secret: TEST_SECRET },
       opaEndpoint: opa.endpoint,
       temporalEndpoint: 'local',
       openAiApiKey: 'local',
+      approvalWorkflow: null,
+      evidenceLedger: null,
       auditLogPath,
       approvalTimeoutMs: 5_000,
     };
@@ -225,10 +263,12 @@ describeIfOpa('AgentGateway — live OPA integration', () => {
 
   it('fails closed when OPA is unreachable', async () => {
     const config: GatewayConfig = {
-      jwtSecret: TEST_SECRET,
+      jwt: { algorithm: 'HS256', secret: TEST_SECRET },
       opaEndpoint: 'http://127.0.0.1:1', // intentionally invalid
       temporalEndpoint: 'local',
       openAiApiKey: 'local',
+      approvalWorkflow: null,
+      evidenceLedger: null,
       auditLogPath,
       approvalTimeoutMs: 5_000,
     };
@@ -244,7 +284,6 @@ describeIfOpa('AgentGateway — live OPA integration', () => {
     expect(response.status).toBe('authz_denied');
     expect(response.message.toLowerCase()).toContain('opa');
   });
-
 });
 
 // When OPA is unavailable, surface a single explanatory test so the run output

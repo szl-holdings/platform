@@ -41,6 +41,14 @@ class StageClaimMessage(BaseMessage):
     workerId: str
     runId: str
     workflowId: str
+    # The governed tenant is present in both the authenticated header and the
+    # signed/recorded claim body. POST /claim rejects a missing or mismatched
+    # identity before acquiring an execution slot.
+    tenantId: str = Field(
+        min_length=1,
+        max_length=128,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$",
+    )
     stageId: str
     stageType: str
     stageConfig: dict[str, Any] = Field(default_factory=dict)
@@ -66,7 +74,9 @@ class StageResultMessage(BaseMessage):
     runId: str
     stageId: str
     output: Any
-    confidence: float = Field(ge=0.0, le=1.0)
+    # None means the handler did not emit a measured confidence. The worker
+    # must not manufacture a high score merely because execution completed.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     durationMs: int = Field(ge=0)
     otelSpanId: str | None = None
     evidenceIds: list[str] = Field(default_factory=list)
@@ -82,6 +92,7 @@ class StageErrorMessage(BaseMessage):
     errorMessage: str
     retryable: bool
     durationMs: int = Field(ge=0)
+    correlationId: str | None = None
 
 
 # ─── Worker lifecycle messages ────────────────────────────────────────────────
@@ -128,3 +139,6 @@ class HealthResponse(BaseModel):
 class ReadinessResponse(BaseModel):
     ready: bool
     reason: str | None = None
+    role: Literal["stage-execution-worker"] = "stage-execution-worker"
+    authority: Literal["typescript-substrate"] = "typescript-substrate"
+    dependencyStatus: Literal["not-asserted"] = "not-asserted"

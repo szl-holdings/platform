@@ -26,7 +26,11 @@ test('keyword and exact strategies reject a missing reference', () => {
 });
 
 test('declared references still score as keyword, exact, or token overlap', () => {
-  const keywords = scoreLocalAdapterCase('Alpha beta', { expectedKeywords: ['alpha'] }, 'keyword_match');
+  const keywords = scoreLocalAdapterCase(
+    'Alpha beta',
+    { expectedKeywords: ['alpha'] },
+    'keyword_match',
+  );
   assert.equal(keywords.passed, true);
   assert.equal(keywords.method, 'keyword_match');
 
@@ -34,12 +38,20 @@ test('declared references still score as keyword, exact, or token overlap', () =
   assert.equal(exact.passed, true);
   assert.equal(exact.score, 1);
 
-  const overlap = scoreLocalAdapterCase('beta alpha', { expectedOutput: 'alpha beta' }, 'token_jaccard');
+  const overlap = scoreLocalAdapterCase(
+    'beta alpha',
+    { expectedOutput: 'alpha beta' },
+    'token_jaccard',
+  );
   assert.equal(overlap.method, 'token_jaccard');
   assert.equal(overlap.score, 1);
   assert.equal(overlap.passed, true);
 
-  const low = scoreLocalAdapterCase('unrelated', { expectedOutput: 'alpha beta gamma' }, 'token_jaccard');
+  const low = scoreLocalAdapterCase(
+    'unrelated',
+    { expectedOutput: 'alpha beta gamma' },
+    'token_jaccard',
+  );
   assert.equal(low.passed, false);
   assert.match(low.failureReason ?? '', /Token overlap/);
 });
