@@ -9,7 +9,7 @@ import playwrightPackage from '@playwright/test/package.json' with { type: 'json
 
 const url = process.argv[2] ?? 'http://127.0.0.1:4111/preview/platform-a11oy/';
 const outputPath = path.resolve(
-  process.argv[3] ?? 'docs/assets/screenshots/current/2026-10-11-a11oy-candidate-home.png',
+  process.argv[3] ?? 'docs/assets/screenshots/current/a11oy-candidate-home-2026-10-11.png',
 );
 const metadataPath = outputPath.replace(/\.png$/i, '.metadata.json');
 const origin = new URL(url).origin;
