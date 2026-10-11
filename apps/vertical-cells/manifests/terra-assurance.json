@@ -1,0 +1,102 @@
+{
+  "allowed_actions": [
+    "abstract",
+    "reconcile",
+    "model scenario",
+    "draft memo",
+    "flag risk",
+    "request approval",
+    "record outcome"
+  ],
+  "buyer": "CRE owners, asset managers, acquisition teams, leasing leaders, lenders, and investment committees.",
+  "core_workflows": [
+    "parcel/ownership identity",
+    "lease abstraction and obligations",
+    "deal pipeline",
+    "asset and market risk",
+    "scenario/valuation",
+    "committee memo and approval"
+  ],
+  "data_policy": {
+    "protected": [
+      "leases",
+      "rent rolls",
+      "valuations",
+      "debt",
+      "tenant and ownership data"
+    ],
+    "public": [
+      "synthetic properties and leases",
+      "open municipal data with terms"
+    ],
+    "training_use": "rights-cleared and customer-approved only"
+  },
+  "decision_problem": "Should a property, lease, renewal, acquisition, disposition, capital plan, or committee recommendation advance on cited property, ownership, lease, market, and financial evidence?",
+  "display_name": "Terra Assurance — Commercial Real Estate Deal and Asset Decision Assurance",
+  "formula_bindings": [
+    "F1",
+    "F4",
+    "F7",
+    "F12",
+    "F18",
+    "F19",
+    "F22",
+    "LAMBDA"
+  ],
+  "hf_space_id": "SZLHOLDINGS/terra-assurance",
+  "human_authority": [
+    "analyst validates source",
+    "asset/investment committee approves",
+    "legal/finance validates obligations and model"
+  ],
+  "leaders": [
+    {
+      "name": "VTS",
+      "pattern": "leasing, asset management, first-party signals, cited lease intelligence and workflow",
+      "url": "https://www.vts.com/ai"
+    },
+    {
+      "name": "Cherre",
+      "pattern": "universal data model, knowledge graph, connected internal/external data and model choice",
+      "url": "https://cherre.com/products/agent-studio/"
+    },
+    {
+      "name": "Reonomy",
+      "pattern": "property and beneficial ownership intelligence",
+      "url": "https://www.reonomy.com/solutions/web-application/"
+    },
+    {
+      "name": "Altus ARGUS",
+      "pattern": "purpose-built financial models, valuation analytics and grounded conversational workflow",
+      "url": "https://www.altusgroup.com/solutions/argus-intelligence/argus-assist/"
+    }
+  ],
+  "negative_tests": [
+    "parcel identity conflict blocks",
+    "missing amendment lowers completeness",
+    "valuation assumptions exposed",
+    "ownership uncertainty escalates",
+    "no transaction execution"
+  ],
+  "original_szl_design": "Parcel-to-Committee Decision Twin: citations and uncertainty remain attached from source document/property identity through scenario, approval and realized asset outcome.",
+  "portfolio_role": "PRIVATE_INCUBATOR",
+  "prohibited_actions": [
+    "automatic transaction commitment",
+    "unlicensed owner/contact redistribution",
+    "investment advice claim",
+    "silent valuation overwrite"
+  ],
+  "public_launch": "BLOCKED_UNTIL_DATA_RIGHTS_AND_DESIGN_PARTNER",
+  "schema": "szl.vertical-cell/v1",
+  "space_visibility": "private",
+  "stage": "DISCOVERY",
+  "success_metrics": [
+    "diligence cycle time",
+    "citation coverage",
+    "lease-obligation recall",
+    "scenario reproducibility",
+    "committee correction rate",
+    "decision/outcome linkage"
+  ],
+  "vertical_id": "terra-assurance"
+}

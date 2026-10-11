@@ -70,7 +70,7 @@ export async function askAtelier(params: {
       responseSha256: sha256(result.text),
       policyEffect: policy.result.effect === 'audit_only' ? 'audit_only' : 'allow',
       policyEvaluationId: policy.evaluationId,
-      evidenceState: 'OBSERVED',
+      evidenceState: 'MEASURED',
       ledgerEntryId: null,
       ledgerState: 'PENDING_API_APPEND',
       memoryState: 'PENDING_API_COMMIT',

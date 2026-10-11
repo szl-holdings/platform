@@ -191,8 +191,9 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
             commit_message=f"{agent} receipt {ts}",
         )
         return {"published": True, "path": path, "dataset": dataset}
-    except Exception as exc:
-        return {"published": False, "reason": f"{type(exc).__name__}: {exc}", "path": path}
+    except Exception:
+        # Public receipts and Actions annotations must not echo provider bodies.
+        return {"published": False, "reason": "receipt upload failed", "path": path}
 
 
 def envelope_emitted_date(envelope: dict) -> str:

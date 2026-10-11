@@ -26,7 +26,8 @@ sorries). Author: **Yachay <yachay@szlholdings.dev>**.
 ### Schedule (UTC)
 - **Hourly**: reliability `0 * * * *`, security `20 * * * *`, observability `40 * * * *`.
 - **Daily**: operability `30 3`, compliance `10 4`, docs `30 4`, dr `10 5`.
-- **Daily, after the others** (`10 6`): audit-rift — so it always sees fresh peer receipts.
+- **Daily, after the others** (`10 6`): audit-rift reads the latest available peer
+  receipts. Schedule order does not establish freshness; no receipt-age gate is enforced.
 - All eight share one per-asset lock, `hf-write/dataset/SZLHOLDINGS/readiness-runs`.
   GitHub cancels a pending run only when a third run joins the group, so start
   times are kept at least 10 minutes apart (`_lib/test_khipu_publish.py` enforces this).

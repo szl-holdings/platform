@@ -8,6 +8,10 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts"
+    },
+    "./proofweave-verifier": {
+      "types": "./src/proofweave-verifier.ts",
+      "import": "./src/proofweave-verifier.ts"
     }
   },
   "scripts": {

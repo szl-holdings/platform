@@ -39,9 +39,10 @@
   },
   "packages": {
     "domain_packages_dir": {
-      "count": 162,
+      "count": 164,
       "command": "Count tracked top-level directories under packages/",
-      "computed": "2026-08-26"
+      "computed": "2026-10-08",
+      "note": "Measured from PR #910 head bd99f5669db4d83f62a717802a959f882f760027; includes packages/vertical-runtime. This is a source-directory count, not runtime qualification."
     },
     "shared_lib_packages": {
       "count": 53,
@@ -49,15 +50,16 @@
       "computed": "2026-07-25"
     },
     "total_packages": {
-      "count": 215,
+      "count": 217,
       "command": "packages/ top-level count plus lib/ top-level count",
-      "computed": "2026-08-26",
-      "note": "packages/ (162 directories) + lib/ (53 directories) = 215. packages/proxy-routes.ts is a file and is not counted as a package."
+      "computed": "2026-10-08",
+      "note": "packages/ (164 directories) + lib/ (53 directories) = 217 on PR #910 head bd99f5669db4d83f62a717802a959f882f760027. packages/proxy-routes.ts is a file and is not counted as a package."
     },
     "apps": {
-      "count": 11,
+      "count": 12,
       "command": "Count unique tracked top-level children of apps/",
-      "computed": "2026-07-25"
+      "computed": "2026-10-08",
+      "note": "Measured from PR #910 head bd99f5669db4d83f62a717802a959f882f760027; includes apps/vertical-cells. This is a source-directory count, not deployment evidence."
     },
     "services": {
       "count": 11,
@@ -109,7 +111,7 @@
       "note": "Derived from declarations rather than /routes/ path names so router.ts, server.ts, and other route-bearing files are included."
     },
     "handler_declarations": {
-      "count": 315,
+      "count": 316,
       "command": "Count non-test get|post|put|patch|delete|use declarations on app/router and named Express Router receivers under apps/, services/, and artifacts/api-server/",
       "computed": "2026-09-26",
       "note": "A static declaration count. It does not prove deployment, reachability, authentication, or HTTP 200 behavior."

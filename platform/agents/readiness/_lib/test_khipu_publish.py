@@ -147,8 +147,17 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn('"published": false', text)
         self.assertIn("::error title=readiness publish failed::readiness-test receipt", text)
-        self.assertIn("RuntimeError: Bad request", text)
+        self.assertIn("receipt upload failed", text)
         self.assertLess(text.index('"receipt"'), text.index("::error"))
+
+    def test_provider_error_text_is_not_exposed_in_receipt_or_annotation(self) -> None:
+        sentinel = "synthetic-private-provider-body\n::error::synthetic-untrusted-command"
+        _FakeHfApi.error = RuntimeError("test-token: " + sentinel)
+        text, _result, code = self._emit(self._signed_env())
+        self.assertEqual(code, 1)
+        self.assertIn("receipt upload failed", text)
+        for sensitive in ("test-token", "synthetic-private-provider-body", "synthetic-untrusted-command"):
+            self.assertNotIn(sensitive, text)
 
     def test_missing_token_fails_the_run_in_actions(self) -> None:
         env = self._signed_env()

@@ -16,6 +16,10 @@
 
 import { z } from 'zod';
 
+// Expo replaces the literal references below at bundle time. The shared package
+// keeps Expo and Node optional, so declare only the shape used by this module.
+declare const process: { env: Record<string, string | undefined> };
+
 const emptyToUndefined = (v: unknown) => (typeof v === 'string' && v.trim() === '' ? undefined : v);
 
 const domainInner = z
