@@ -14,9 +14,6 @@ packages:
 
 autoInstallPeers: false
 
-patchedDependencies:
-  node-forge@1.4.0: patches/node-forge@1.4.0.patch
-
 catalog:
   '@tailwindcss/vite': ^4.3.0
   '@tanstack/react-query': 5.100.14
@@ -91,6 +88,7 @@ overrides:
   path-to-regexp: 8.4.2
   'serve-handler>path-to-regexp': 3.3.0
   brace-expansion: 5.0.12
+  braces: link:packages/braces-safe
   fflate: 0.8.3
   vite: 8.0.16
   'form-data@2': 2.5.6
@@ -115,8 +113,8 @@ overrides:
   image-size: link:packages/image-size-safe
   shell-quote: 1.11.0
   proxy-addr: 2.0.8
-  source-map-js: 1.2.2
   compression: 1.8.2
+  source-map-js: 1.2.2
   '@modelcontextprotocol/sdk': 1.31.0
   'tsx>esbuild': 0.28.1
   'vite>esbuild': 0.28.1

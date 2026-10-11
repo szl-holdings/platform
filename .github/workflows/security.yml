@@ -44,13 +44,15 @@ jobs:
           node --test scripts/qa/check-fflate-resolution.test.mjs
           pnpm run security:fflate
 
-      - name: Prepare hash-verified pristine node-forge regression control
+      - name: Verify archived pristine-control helper (not installed signing compatibility)
         run: |
           node --test scripts/qa/prepare-node-forge-pristine.test.mjs
-          node scripts/qa/prepare-node-forge-pristine.mjs
 
-      - name: Verify installed node-forge backport and Expo signing compatibility
-        run: node --test scripts/qa/check-node-forge-backport.test.mjs
+      - name: Verify actual retired signing graph and maintained braces backport
+        run: |
+          node --test scripts/qa/check-retired-signing-graph.test.mjs
+          node scripts/qa/check-retired-signing-graph.mjs
+          node --test packages/braces-safe/test/security.test.cjs
 
       - name: Run dependency vulnerability scan and generate SBOM
         id: sbom
