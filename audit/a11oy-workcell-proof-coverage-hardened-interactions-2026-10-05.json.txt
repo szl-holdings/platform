@@ -1,0 +1,2811 @@
+{
+  "schema": "szl.a11oy-product-interactions/v2",
+  "state": "PASS",
+  "browser": "151.0.7922.173",
+  "served_identity": {
+    "state": "VERIFIED",
+    "identity_path": "/a11oy/__source-identity.json",
+    "source_revision": "b758bcfbc177236876c524e27cb2e765c87e00d7",
+    "source_tree_sha": "ec9eb4859a3d4d97eb11f062a8cc3b52c42b0461",
+    "build_manifest_sha256": "de43cc7533f856653fc4bb9de54843973465e9c418b6803e424d15cc1ea7d500",
+    "index_html_sha256": "554868ec088a9883d993c8b06451b5a8f7a81b5cea9aaf3c8c0fb8a6e15897c1",
+    "proof_nonce": "1e7b5fb4e67aaa6aa89f98d0575f1e9afee7076e7dd33f0a52095f5edc02602b"
+  },
+  "proof_coverage": {
+    "route": "/a11oy/workcells/wc-001/replay",
+    "workcell_id": "wc-001",
+    "expectations": {
+      "baseline": {
+        "state": "INCOMPLETE",
+        "satisfied": 8,
+        "total": 17,
+        "activeChallenges": [],
+        "statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        },
+        "details": {
+          "trace-binding": "The trace IDs agree, but no ExecutionTrace record resolves in the supplied registry.",
+          "proof-integrity": "The packet has a SHA-256-shaped reference, payload, unique witnesses, and parseable issue time. This is not signature verification.",
+          "terminal-state": "The Workcell terminal status or verification checksum is missing or malformed."
+        }
+      },
+      "remove-proof-reference": {
+        "state": "INCOMPLETE",
+        "satisfied": 6,
+        "total": 17,
+        "activeChallenges": [
+          "Remove proof reference"
+        ],
+        "statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        },
+        "details": {
+          "proof-reference": "The inspected contract has no Proof Packet reference."
+        }
+      },
+      "substitute-action-id": {
+        "state": "INCOMPLETE",
+        "satisfied": 7,
+        "total": 17,
+        "activeChallenges": [
+          "Substitute action ID"
+        ],
+        "statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        },
+        "details": {
+          "action-binding": "The contract action does not match the Workcell ActionBrief."
+        }
+      },
+      "omit-approval-reference": {
+        "state": "INCOMPLETE",
+        "satisfied": 8,
+        "total": 17,
+        "activeChallenges": [
+          "Omit approval reference"
+        ],
+        "statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        },
+        "details": {
+          "approval-binding": "This approval-required Workcell has no approval-record reference in the inspected contract.",
+          "proof-approval-binding": "The inspected contract has no approval-record reference to compare with the Proof Packet."
+        }
+      },
+      "combined": {
+        "state": "INCOMPLETE",
+        "satisfied": 5,
+        "total": 17,
+        "activeChallenges": [
+          "Remove proof reference",
+          "Substitute action ID",
+          "Omit approval reference"
+        ],
+        "statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        },
+        "details": {
+          "action-binding": "The contract action does not match the Workcell ActionBrief.",
+          "approval-binding": "This approval-required Workcell has no approval-record reference in the inspected contract.",
+          "proof-reference": "The inspected contract has no Proof Packet reference.",
+          "proof-approval-binding": "The inspected contract has no approval-record reference to compare with the Proof Packet."
+        }
+      }
+    },
+    "observations": [
+      {
+        "width": 320,
+        "scenario": "baseline",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "8/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 8 of 17 obligations satisfied. No active challenges.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 320,
+        "scenario": "remove-proof-reference",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "6/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 6 of 17 obligations satisfied. Active challenges: Remove proof reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        }
+      },
+      {
+        "width": 320,
+        "scenario": "substitute-action-id",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "7/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 7 of 17 obligations satisfied. Active challenges: Substitute action ID.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 320,
+        "scenario": "omit-approval-reference",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "8/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 8 of 17 obligations satisfied. Active challenges: Omit approval reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 320,
+        "scenario": "combined",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "5/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 5 of 17 obligations satisfied. Active challenges: Remove proof reference, Substitute action ID, Omit approval reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        }
+      },
+      {
+        "width": 390,
+        "scenario": "baseline",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "8/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 8 of 17 obligations satisfied. No active challenges.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 390,
+        "scenario": "remove-proof-reference",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "6/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 6 of 17 obligations satisfied. Active challenges: Remove proof reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        }
+      },
+      {
+        "width": 390,
+        "scenario": "substitute-action-id",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "7/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 7 of 17 obligations satisfied. Active challenges: Substitute action ID.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 390,
+        "scenario": "omit-approval-reference",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "8/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 8 of 17 obligations satisfied. Active challenges: Omit approval reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 390,
+        "scenario": "combined",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "5/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 5 of 17 obligations satisfied. Active challenges: Remove proof reference, Substitute action ID, Omit approval reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        }
+      },
+      {
+        "width": 768,
+        "scenario": "baseline",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "8/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 8 of 17 obligations satisfied. No active challenges.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 768,
+        "scenario": "remove-proof-reference",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "6/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 6 of 17 obligations satisfied. Active challenges: Remove proof reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        }
+      },
+      {
+        "width": 768,
+        "scenario": "substitute-action-id",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "7/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 7 of 17 obligations satisfied. Active challenges: Substitute action ID.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 768,
+        "scenario": "omit-approval-reference",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "8/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 8 of 17 obligations satisfied. Active challenges: Omit approval reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 768,
+        "scenario": "combined",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "5/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 5 of 17 obligations satisfied. Active challenges: Remove proof reference, Substitute action ID, Omit approval reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        }
+      },
+      {
+        "width": 1366,
+        "scenario": "baseline",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "8/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 8 of 17 obligations satisfied. No active challenges.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 1366,
+        "scenario": "remove-proof-reference",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "6/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 6 of 17 obligations satisfied. Active challenges: Remove proof reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        }
+      },
+      {
+        "width": 1366,
+        "scenario": "substitute-action-id",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "7/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 7 of 17 obligations satisfied. Active challenges: Substitute action ID.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 1366,
+        "scenario": "omit-approval-reference",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "8/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 8 of 17 obligations satisfied. Active challenges: Omit approval reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 1366,
+        "scenario": "combined",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "5/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 5 of 17 obligations satisfied. Active challenges: Remove proof reference, Substitute action ID, Omit approval reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        }
+      },
+      {
+        "width": 1728,
+        "scenario": "baseline",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "8/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 8 of 17 obligations satisfied. No active challenges.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 1728,
+        "scenario": "remove-proof-reference",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "6/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 6 of 17 obligations satisfied. Active challenges: Remove proof reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        }
+      },
+      {
+        "width": 1728,
+        "scenario": "substitute-action-id",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "7/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 7 of 17 obligations satisfied. Active challenges: Substitute action ID.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 1728,
+        "scenario": "omit-approval-reference",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "8/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 8 of 17 obligations satisfied. Active challenges: Omit approval reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "SATISFIED",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "SATISFIED",
+          "proof-subject": "MISMATCH",
+          "proof-context": "MISMATCH",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "SATISFIED",
+          "terminal-state": "MISMATCH"
+        }
+      },
+      {
+        "width": 1728,
+        "scenario": "combined",
+        "aggregate_state": "INCOMPLETE",
+        "aggregate_summary": "5/17 obligations satisfied",
+        "live_message": "INCOMPLETE. 5 of 17 obligations satisfied. Active challenges: Remove proof reference, Substitute action ID, Omit approval reference.",
+        "obligation_statuses": {
+          "signal-records": "UNAVAILABLE",
+          "contract-record": "SATISFIED",
+          "action-context": "SATISFIED",
+          "evaluation-lineage": "SATISFIED",
+          "contract-integrity": "SATISFIED",
+          "origin-signal": "SATISFIED",
+          "action-binding": "MISMATCH",
+          "trace-binding": "UNAVAILABLE",
+          "policy-evaluation": "UNAVAILABLE",
+          "approval-binding": "UNAVAILABLE",
+          "proof-reference": "UNAVAILABLE",
+          "proof-subject": "UNAVAILABLE",
+          "proof-context": "UNAVAILABLE",
+          "proof-policy-binding": "UNAVAILABLE",
+          "proof-approval-binding": "UNAVAILABLE",
+          "proof-integrity": "UNAVAILABLE",
+          "terminal-state": "UNAVAILABLE"
+        }
+      }
+    ]
+  },
+  "records": [
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/start",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/product-journey",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/series-a",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/investor-demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/workcells",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/workcells/wc-001",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/workcells/wc-001/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/architecture",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/fabric",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/governance",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/proof",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/resources",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "initial-route:/a11oy/trust",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "mobile-drawer-open",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "mobile-drawer-close-button",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "mobile-drawer-backdrop-close",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "mobile-drawer-resize-restoration",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "mobile-drawer-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-running",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-completed",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-idle",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-paused",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-error",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcells-filter-vertical",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "workcell-detail-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "replay-complete-after-pause-resume",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "replay-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-coverage:remove-proof-reference",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-coverage:substitute-action-id",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-coverage:omit-approval-reference",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-coverage:combined",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-coverage-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-replay-final",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-diff",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "proof-chain",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "demo-complete",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 320,
+      "state": "demo-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/start",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/product-journey",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/series-a",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/investor-demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/workcells",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/workcells/wc-001",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/workcells/wc-001/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/architecture",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/fabric",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/governance",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/proof",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/resources",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "initial-route:/a11oy/trust",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "mobile-drawer-open",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "mobile-drawer-close-button",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "mobile-drawer-backdrop-close",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "mobile-drawer-resize-restoration",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "mobile-drawer-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-running",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-completed",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-idle",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-paused",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-error",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcells-filter-vertical",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "workcell-detail-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "replay-complete-after-pause-resume",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "replay-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-coverage:remove-proof-reference",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-coverage:substitute-action-id",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-coverage:omit-approval-reference",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-coverage:combined",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-coverage-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-replay-final",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-diff",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "proof-chain",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "demo-complete",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 390,
+      "state": "demo-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/start",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/product-journey",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/series-a",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/investor-demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/workcells",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/workcells/wc-001",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/workcells/wc-001/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/architecture",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/fabric",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/governance",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/proof",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/resources",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "initial-route:/a11oy/trust",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-running",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-completed",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-idle",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-paused",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-error",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcells-filter-vertical",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "workcell-detail-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "replay-complete-after-pause-resume",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "replay-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-coverage:remove-proof-reference",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-coverage:substitute-action-id",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-coverage:omit-approval-reference",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-coverage:combined",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-coverage-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-replay-final",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-diff",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "proof-chain",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "demo-complete",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 768,
+      "state": "demo-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/start",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/product-journey",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/series-a",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/investor-demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/workcells",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/workcells/wc-001",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/workcells/wc-001/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/architecture",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/fabric",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/governance",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/proof",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/resources",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "initial-route:/a11oy/trust",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-running",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-completed",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-idle",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-paused",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-error",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcells-filter-vertical",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "workcell-detail-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "replay-complete-after-pause-resume",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "replay-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-coverage:remove-proof-reference",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-coverage:substitute-action-id",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-coverage:omit-approval-reference",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-coverage:combined",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-coverage-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-replay-final",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-diff",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "proof-chain",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "demo-complete",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1366,
+      "state": "demo-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/start",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/product-journey",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/series-a",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/investor-demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/workcells",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/workcells/wc-001",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/workcells/wc-001/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/replay",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/demo",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/architecture",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/fabric",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/governance",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/proof",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/resources",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "initial-route:/a11oy/trust",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-running",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-completed",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-idle",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-paused",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-error",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcells-filter-vertical",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "workcell-detail-navigation",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "replay-complete-after-pause-resume",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "replay-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-coverage:remove-proof-reference",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-coverage:substitute-action-id",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-coverage:omit-approval-reference",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-coverage:combined",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-coverage-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-replay-final",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-diff",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "proof-chain",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "demo-complete",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    },
+    {
+      "width": 1728,
+      "state": "demo-reset",
+      "result": "PASS",
+      "layout": {
+        "viewportOverflowingElements": [],
+        "clippedElements": [],
+        "horizontallyOverflowingContainers": [],
+        "textOverflowingElements": []
+      }
+    }
+  ],
+  "non_claim": "Local deterministic fixture interactions only; no external execution or hosted authority."
+}

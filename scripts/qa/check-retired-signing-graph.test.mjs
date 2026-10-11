@@ -27,7 +27,7 @@ function fixture() {
       { path: 'lib/mobile-shared/package.json', value: { name: '@workspace/mobile-shared' } },
       {
         path: 'packages/braces-safe/package.json',
-        value: { name: '@szl-holdings/braces-safe', private: true },
+        value: { name: '@szl-holdings/braces-safe', version: '0.2.0', private: true },
       },
     ],
   };
@@ -213,6 +213,15 @@ test('rejects wrong or nonprivate local braces package identity', () => {
   }, /canonical.*closure/);
   blocked((f) => {
     f.manifests[2].value.private = false;
+  }, /canonical.*closure/);
+});
+
+test('rejects an absent or superseded maintained braces package version', () => {
+  blocked((f) => {
+    delete f.manifests[2].value.version;
+  }, /canonical.*closure/);
+  blocked((f) => {
+    f.manifests[2].value.version = '0.1.0';
   }, /canonical.*closure/);
 });
 

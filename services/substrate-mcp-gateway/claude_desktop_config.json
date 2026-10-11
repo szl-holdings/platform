@@ -10,14 +10,18 @@
     "and timelines) as sandboxed in-chat applications.",
     "",
     "Environment variables:",
-    "  SUBSTRATE_GATEWAY_API_KEY  — optional Bearer token for write operations",
-    "  SUBSTRATE_SIGNING_KEY      — optional 32-byte hex HMAC key for evidence bundles",
+    "  SUBSTRATE_GATEWAY_API_KEY  — required and non-blank in production",
+    "  SUBSTRATE_SIGNING_KEY      — required in production; exactly 64 hex characters (32 bytes)",
     "  NODE_ENV                   — set to 'production' for strict auth enforcement"
   ],
   "mcpServers": {
     "szl-substrate": {
       "command": "npx",
-      "args": ["tsx", "/path/to/szl-platform/services/substrate-mcp-gateway/src/index.ts", "--stdio"],
+      "args": [
+        "tsx",
+        "/path/to/szl-platform/services/substrate-mcp-gateway/src/index.ts",
+        "--stdio"
+      ],
       "env": {
         "NODE_ENV": "development"
       }

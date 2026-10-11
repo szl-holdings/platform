@@ -16,7 +16,17 @@ export const SECURE_OVERRIDES = Object.freeze({
   undici: '>=6.28.1 <7',
   '@grpc/grpc-js': '>=1.14.5',
   'adm-zip': '>=0.6.1',
-  dompurify: '>=3.4.16',
+  dompurify: '3.4.16',
+  'fast-copy': '4.1.2',
+  'postcss-selector-parser': '7.1.6',
+  '@opentelemetry/instrumentation-cassandra-driver': '0.66.0',
+  '@opentelemetry/instrumentation-knex': '0.65.0',
+  '@opentelemetry/instrumentation-mongoose': '0.67.0',
+  '@opentelemetry/instrumentation-mysql2': '0.67.0',
+  '@opentelemetry/instrumentation-mysql': '0.67.0',
+  '@opentelemetry/instrumentation-oracledb': '0.46.0',
+  '@opentelemetry/instrumentation-pg': '0.73.0',
+  '@opentelemetry/instrumentation-tedious': '0.40.0',
   '@opentelemetry/core': '>=2.8.0',
   tar: '7.5.21',
 });
@@ -222,6 +232,7 @@ export function validateRetiredSigningGraph({ workspaceText, lockText, manifests
     !parsed.has('package.json') ||
     !parsed.has('lib/mobile-shared/package.json') ||
     braces?.name !== '@szl-holdings/braces-safe' ||
+    braces.version !== '0.2.0' ||
     braces.private !== true
   ) {
     throw new Error('canonical root/mobile/braces-safe manifest closure is missing');

@@ -1,11 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
-    "types": ["node"],
-    "paths": {
-      "@szl-holdings/policy-engine": ["../policy-engine/src/index.ts"]
-    }
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "composite": true,
+    "types": ["node"]
   },
-  "include": ["src/**/*.ts", "../policy-engine/src/**/*.ts"]
+  "references": [{ "path": "../policy-engine" }],
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"]
 }

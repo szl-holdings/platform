@@ -92,9 +92,13 @@ ok "DATABASE_URL present"
 
 # Check pnpm
 if ! command -v pnpm &>/dev/null; then
-  fail "pnpm not found. Run: npm install -g pnpm"
+  fail "pnpm not found. Run in this shell: source scripts/activate-pnpm.sh"
 fi
-ok "pnpm $(pnpm --version)"
+PNPM_VERSION=$(pnpm --version)
+if [[ "$PNPM_VERSION" != "10.26.1" ]]; then
+  fail "pnpm 10.26.1 is required; found ${PNPM_VERSION}. Run in this shell: source scripts/activate-pnpm.sh"
+fi
+ok "pnpm $PNPM_VERSION"
 
 # Check node_modules
 if [[ ! -d "$ROOT_DIR/node_modules" ]]; then

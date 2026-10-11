@@ -130,3 +130,82 @@ for ordinary history integration only; it is **not current-main qualification**.
 Those new-main bytes must be normally merged, the retirement contract adapted
 to their exact policies, and the focused/native/hosted checks repeated before
 publication or protected admission. No current-main control is waived here.
+
+## Current-main integration plan — 2026-10-11
+
+Root signed the preserved interim tree as local commit
+`b42901d5c7cbef391d488a117eefc275b52fa9c8`. A missing promisor object initially
+blocked the next ordinary merge; a temporary process-scoped alternate object
+directory pointing to the canonical sibling PR #903 checkout allowed root's
+ordinary `5f9d0959` merge to reach seven real conflicts. This writer owns only
+the PR #882 checkout again. The sibling is read-only and no remote is written.
+
+Resolve the seven conflict paths explicitly: keep current-main workspace/lock
+policies and historical node-forge patch; keep the PR's honest non-production
+security design page; retain both screenshot histories and both gap registers;
+select the exact current-main reproducibility workflow. That workflow retains
+two isolated checkouts, 90-minute timeout, forced builds, complete nonempty
+output manifests, and no PR path filter. Historical per-task capture helpers and
+their prior proofs remain source, not active current-main orchestration proof.
+
+Adapt only the retirement validator/test to exact current-main DOMPurify,
+fast-copy, selector-parser and eight OTel driver policies and the private
+braces-safe `0.2.0` identity. Preserve every newer scanner/report/artifact/secret/
+license/admission control. Re-run focused source and native functional suites,
+record actual failures or missing tools, freeze the tree, then hand immutable
+review/signing/publication ownership back to root. No claim of hosted CI,
+deployment, effect authority, current screenshots, or external witness is made.
+
+## Current-main local result — 2026-10-11
+
+All seven content conflicts were resolved under the plan above. Current-main
+`repro-check.yml`, workspace and lock, braces-safe `0.2.0` source/metadata, and
+historical node-forge patch are byte-identical to `5f9d0959`. Security workflow
+comparison against that immutable main contains only the two added mandatory
+validation steps (ten lines); no scanner, report, artifact, secret, license, or
+aggregate-gate body changed. Both screenshot histories are retained as dated
+evidence, not reattributed to this candidate. The security design page retains
+the PR's honest non-production text and no fabricated action/score/proof feeds.
+
+Commands actually run using Node `v24.19.0`:
+
+- `node --test scripts/qa/check-retired-signing-graph.test.mjs`: exit 0,
+  **204/204** controls; zero failures or skips. All earlier 143 controls remain;
+  current-main pin groups and braces version identity add 61 controls.
+- `node scripts/qa/check-retired-signing-graph.mjs`: exit 0, **207** tracked
+  manifests, twenty protected families with conformant actual nodes;
+  undici/tar remain policy-only. Scanner and installed-compatibility fields
+  remain `NOT_RUN` rather than inferred passing.
+- `node --test packages/braces-safe/test/*.test.cjs`: exit 0,
+  **8/8** complete current package controls. This is bounded functional coverage,
+  not an exhaustive advisory or consumer-compatibility certification.
+- With existing Git-distributed GNU tar `1.35` prepended to this process's PATH,
+  `node --test scripts/qa/prepare-node-forge-pristine.test.mjs`: exit 0,
+  **25/25** controls. The earlier default Windows tar run failed 19 of 25 because
+  that tar does not support `--quoting-style=escape`; no check was relaxed.
+- From the owning `apps/alloy-runtime-api` working directory, direct cached
+  Vitest `4.1.11` executed `run --config vitest.config.ts
+  src/atelier-continuity-store.test.ts --maxWorkers 1`: exit 0,
+  **27 passed, 1 skipped, 28 total**. The initial repository-root invocation
+  found no tests and exited 1; it is not counted as passing.
+- Direct TypeScript `6.0.3` ran `-p lib/mobile-shared/tsconfig.json --noEmit`:
+  exit 1, unresolved installed Expo/mobile module declarations and consequent
+  implicit-any diagnostics. A completed native mobile typecheck is **BLOCKED**
+  by this incomplete local dependency closure, not silently marked passing.
+- `git diff --cached --check 5f9d0959114a269fe86e0cedab8f92ae4591a81e`:
+  exit 0. Sparse-index conflict paths were explicitly staged with `--sparse`;
+  no sparse expansion, reset, forced push, or history rewrite occurred.
+
+One missing old-HEAD blob for `.circleci/config.yml` was separately retrieved
+through the canonical GitHub Git-blob API and inserted with native
+`git hash-object -w --stdin`. Its 9,356 bytes reproduced exact Git SHA
+`8167c1671b31cf52ffe5b823110085d838d6bf6b` before and after insertion.
+This restores identical historical object content, not invented source or CI.
+The temporary process alternate still points only to the sibling's canonical
+Git object directory; the sibling source/index was not edited.
+
+Frozen-source independent agent review, complete frozen installation, full
+workspace typecheck/build/repro, hosted exact-head CI, signed publication,
+protected merge, provider publication, deployment, current browser proof, and
+external runtime witness remain separate gates. Root owns signing and all
+remote writes after immutable handback.

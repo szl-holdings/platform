@@ -13,11 +13,36 @@
   },
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./runtime": "./src/runtime.ts",
-    "./sandbox": "./src/sandbox.ts",
-    "./evidence": "./src/evidence.ts",
-    "./timeline": "./src/timeline.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./runtime": {
+      "development": "./src/runtime.ts",
+      "workspace": "./src/runtime.ts",
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.js"
+    },
+    "./sandbox": {
+      "development": "./src/sandbox.ts",
+      "workspace": "./src/sandbox.ts",
+      "types": "./dist/sandbox.d.ts",
+      "import": "./dist/sandbox.js"
+    },
+    "./evidence": {
+      "development": "./src/evidence.ts",
+      "workspace": "./src/evidence.ts",
+      "types": "./dist/evidence.d.ts",
+      "import": "./dist/evidence.js"
+    },
+    "./timeline": {
+      "development": "./src/timeline.ts",
+      "workspace": "./src/timeline.ts",
+      "types": "./dist/timeline.d.ts",
+      "import": "./dist/timeline.js"
+    }
   },
   "dependencies": {
     "@szl-holdings/db": "workspace:*",
@@ -37,6 +62,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc --build"
   }
 }

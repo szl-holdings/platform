@@ -15,6 +15,12 @@ const config: StorybookConfig = {
   docs: {
     autodocs: 'tag',
   },
+  // project.json is optional telemetry metadata whose generatedAt field uses
+  // wall-clock time. Omitting it keeps clean Storybook builds byte-identical.
+  core: {
+    disableProjectJson: true,
+    disableTelemetry: true,
+  },
 };
 
 export default config;

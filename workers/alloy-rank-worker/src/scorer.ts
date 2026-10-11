@@ -1,4 +1,4 @@
-export type RankMode = 'cross-encoder' | 'fallback-inversion';
+export type RankMode = 'lexical-overlap' | 'score-passthrough';
 
 export interface RankCandidate {
   id: string;
@@ -29,7 +29,7 @@ function tokenize(s: string): string[] {
     .filter((t) => t.length > 0);
 }
 
-function crossEncoderScore(
+function lexicalOverlapScore(
   query: string,
   text: string,
 ): {
@@ -56,7 +56,7 @@ function crossEncoderScore(
   return { score: Math.min(1, score), hits, total, lengthPenalty };
 }
 
-function fallbackInversionScore(candidate: RankCandidate): number {
+function scorePassthrough(candidate: RankCandidate): number {
   const s = candidate.score;
   if (s === undefined || s === null) return 0.5;
   return Math.min(1, Math.max(0, s));
@@ -69,8 +69,8 @@ export function rankCandidates(
   mode: RankMode,
 ): RankedResult[] {
   const scored = candidates.map((c): Omit<RankedResult, 'rank'> => {
-    if (mode === 'cross-encoder') {
-      const { score, hits, total, lengthPenalty } = crossEncoderScore(query, c.text);
+    if (mode === 'lexical-overlap') {
+      const { score, hits, total, lengthPenalty } = lexicalOverlapScore(query, c.text);
       return {
         id: c.id,
         text: c.text,
@@ -85,7 +85,7 @@ export function rankCandidates(
         metadata: c.metadata ?? {},
       };
     } else {
-      const raw = fallbackInversionScore(c);
+      const raw = scorePassthrough(c);
       return {
         id: c.id,
         text: c.text,

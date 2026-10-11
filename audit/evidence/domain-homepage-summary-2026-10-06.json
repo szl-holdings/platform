@@ -1,0 +1,49 @@
+{
+  "schema": "szl.domain-homepage-summary.v1",
+  "observed_at_utc": "2026-10-06T04:37:35Z",
+  "authority": "CURRENT_PUBLIC_READ_ONLY_HTTPS",
+  "tls_verification": "curl default certificate verification succeeded",
+  "mutation_performed": false,
+  "observations": [
+    {
+      "url": "https://a-11-oy.com/",
+      "status": 503,
+      "content_type": "text/html; charset=utf-8",
+      "content_length": 49,
+      "body_sha256": "d967395a643b7f7acfaebbc6f70620868ea62bf2ea3a23562a2ed4a52e48ff5d",
+      "body_exact": "Your space is in error, check its status on hf.co",
+      "canonical_link": "https://huggingface.co/spaces/SZLHOLDINGS/a11oy",
+      "strict_transport_security": "max-age=63072000; includeSubDomains",
+      "x_content_type_options": "nosniff",
+      "response_headers_sha256": "b8e5bafddb4db0a846d76c9bffc97c4ed46f5a6a0b5bbd24ae70b72607d319a3"
+    },
+    {
+      "url": "https://www.a-11-oy.com/",
+      "status": 301,
+      "location": "https://a-11-oy.com/",
+      "strict_transport_security": "max-age=63072000; includeSubDomains",
+      "x_content_type_options": "nosniff",
+      "response_headers_sha256": "942555d560cb03f4b9aa12749773b3f5d369798a0f0b87ee46068cd063b97fbd"
+    },
+    {
+      "url": "https://a11oy.net/",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "content_length": 120651,
+      "body_sha256": "86048e6b4f57742f1ca0bc64e2e5518227534808e320472fc49bdd62ac70b2ac",
+      "title": "a11oy Proof Registry | SZL Holdings",
+      "strict_transport_security": "max-age=63072000; includeSubDomains",
+      "x_content_type_options": "nosniff",
+      "response_headers_sha256": "4be76a10b59b9ecf4cefad517cbc3ea7f0f97f0cc15d3c485957a7daa3c1e160"
+    },
+    {
+      "url": "https://www.a11oy.net/",
+      "status": 301,
+      "location": "https://a11oy.net/",
+      "strict_transport_security": "max-age=63072000; includeSubDomains",
+      "x_content_type_options": "nosniff",
+      "response_headers_sha256": "4092c620b327a120b80888e769c82a393ac355322fecbe375555e6ac7c54d54d"
+    }
+  ],
+  "claim_boundary": "Homepage and www redirect observations only; no whole-route, DNS/CAA, certificate-expiry, browser-functionality, API-correctness, or deployment-source claim."
+}
