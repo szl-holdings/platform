@@ -347,10 +347,12 @@ envelopes. The registry was updated from those reviewed sources rather than by
 loosening response checks.
 
 A subsequent full `surfaces:freshness` run passed all 29 approved targets and is
-bound to `observed_at=2026-10-07T12:31:38.131Z`. Killinchu build identity is pinned
-to full main revision `13477c429f5742cdc718a6294a80d00c7e8dc634` and the exact
-GitHub OIDC attestation subject. Its readiness contract positively requires the
-canonical ledger to be `EPHEMERAL`, `PROCESS_MEMORY`, and
+bound to `observed_at=2026-10-07T12:31:38.131Z`. A separate bounded Killinchu
+read on 2026-10-11 pins its build identity to main revision
+`32760a15fcecfe50211654713d7e4e6a86d947fa` and a verified GitHub OIDC
+attestation for the exact deployment manifest. That single-surface refresh does
+not advance the registry-wide observation timestamp. Its readiness contract
+positively requires the canonical ledger to be `EPHEMERAL`, `PROCESS_MEMORY`, and
 `production_ready=false`; the separately labeled SQLite diagnostic store cannot
 satisfy durability. Current whole-site DNS, TLS, headers, accessibility,
 continuous availability, and functional behavior remain **UNKNOWN / HOLD**.
