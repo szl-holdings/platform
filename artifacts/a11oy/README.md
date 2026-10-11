@@ -5,19 +5,22 @@ flows. The default Series-A route separates deterministic demonstration
 behavior from authenticated operational evidence and fails closed when a
 required runtime source is absent.
 
-## Current entry points
+## Current public candidate
 
-- `/a11oy/start` — the canonical investor and developer view.
-- `/a11oy/investor-demo` — compatibility route for the same truth-qualified
-  Series-A surface.
-- `/a11oy/series-a` — an additional alias for that unchanged Series-A surface.
-- `/a11oy/product-journey` — investor and developer navigation through the
-  explicitly qualified demo, Workcells, architecture, governance, and proof views.
-- `/a11oy/atelier` — the separate Atelier workbench for configured inference,
-  Turn Capsule continuity, and compile-only Proofweave plans.
+- `/a11oy/` — a static, source-bound candidate home with explicit evidence
+  limits.
+- `/a11oy/security-agents` — one deterministic security-workflow fixture. It
+  performs no incident response, external action, model call, or API request.
 
-The Series-A journey is self-contained. It does not link to legacy seeded
-surfaces as evidence of live operations.
+Every other browser route renders a publication hold. The public entry point
+does not instantiate the retained GraphQL client or Omnia network provider, and
+the production build rejects same-origin API strings and excluded route chunks.
+The build base can be set to a separate preview prefix with `BASE_PATH`; that
+changes URLs only and does not establish deployment or runtime readiness.
+
+Legacy Series-A, Atelier, and other prototype source remains in the repository
+for isolated development and review. Those modules are not public-candidate
+entry points and are not evidence of live operations.
 
 ## Atelier and Proofweave
 
@@ -40,7 +43,7 @@ lifecycle states `DEMO / COMPILED_NOT_EXECUTED / IN_PROCESS_NOT_STORED`. Its
 audit-metadata append is configuration-dependent, and durable-persistence
 evidence remains `UNKNOWN`.
 
-The browser surface is intentionally local-development only. An authenticated
+The retained Atelier browser source is intentionally local-development only. An authenticated
 local flow uses the explicit loopback shared-proxy bridge, which keeps the API
 key server-side and attaches it only to Atelier requests. A production browser
 build does not call Atelier health, inference, or Proofweave compile routes
@@ -80,8 +83,8 @@ pnpm --filter @workspace/a11oy dev
 ```
 
 The local route is normally served beneath `/a11oy/`. No API server is required
-to inspect the fail-closed Series-A surface. A successful local start or HTTP
-response is not deployment evidence.
+to inspect the static candidate home or fixture. A successful local start or
+HTTP response is not deployment evidence.
 
 The Workcell registry separates workflow progress from operational availability.
 Its 20 records remain deterministic `DEMO` fixtures. Replay controls operate only
@@ -91,11 +94,15 @@ do not authorize or execute Workcells.
 ## Verify the source contract
 
 ```bash
-pnpm --filter @workspace/a11oy test:series-a
+pnpm --filter @workspace/a11oy test
 pnpm --filter @workspace/a11oy typecheck
 pnpm --filter @workspace/a11oy build
 pnpm --filter @workspace/a11oy test:product-layout
 ```
+
+`build` runs a compiled-output contract after Vite. It rejects runtime GraphQL
+and Omnia API strings, excluded route chunks, the retired social card, named
+competitor scoring, and the unsupported metrics removed from the candidate.
 
 Browser regressions require the repository Playwright Chromium installation.
 `test:product-interactions` accepts a loopback-only `A11OY_URL`. For source-bound
@@ -112,9 +119,9 @@ separate evidence gates.
 
 ## Product boundary
 
-The current source includes a six-buyer `Observe → Gate → Act → Prove` demo,
-an inline developer path, a typed receipt shape, and fail-closed Omnia network
-configuration. It does not claim:
+The public candidate includes a static evidence-boundary home and one local
+security-workflow fixture. It has no runtime network provider or action path. It
+does not claim:
 
 - production deployment or external connector parity;
 - customer use, revenue, retention, or independently observed outcomes;

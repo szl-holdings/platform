@@ -7,11 +7,21 @@ import path from 'node:path';
 import { chromium } from '@playwright/test';
 import playwrightPackage from '@playwright/test/package.json' with { type: 'json' };
 
-const url = process.argv[2] ?? 'http://127.0.0.1:4111/';
-const outputPath = path.resolve(process.argv[3] ?? 'audit/evidence/a11oy-home-wcag-2026-10-07.png');
+const url = process.argv[2] ?? 'http://127.0.0.1:4111/preview/platform-a11oy/';
+const outputPath = path.resolve(
+  process.argv[3] ?? 'docs/assets/screenshots/current/2026-10-11-a11oy-candidate-home.png',
+);
 const metadataPath = outputPath.replace(/\.png$/i, '.metadata.json');
 const origin = new URL(url).origin;
+const requestedPath = new URL(url).pathname;
+const candidateBasePath = process.env.A11OY_CANDIDATE_BASE_PATH ?? '/preview/platform-a11oy/';
+if (!candidateBasePath.startsWith('/') || !candidateBasePath.endsWith('/')) {
+  throw new Error('A11OY_CANDIDATE_BASE_PATH must be an absolute path ending in /');
+}
 const blockedRequests = [];
+const unexpectedSameOriginRequests = [];
+const observedRequests = [];
+const observedResponses = [];
 
 function command(command, args) {
   return execFileSync(command, args, { encoding: 'utf8' }).trim();
@@ -36,10 +46,29 @@ try {
     serviceWorkers: 'block',
   });
   await context.route('**/*', async (route) => {
-    const requestUrl = route.request().url();
-    const protocol = new URL(requestUrl).protocol;
-    if ((protocol === 'http:' || protocol === 'https:') && new URL(requestUrl).origin !== origin) {
+    const request = route.request();
+    const requestUrl = request.url();
+    const parsed = new URL(requestUrl);
+    const protocol = parsed.protocol;
+    if (protocol !== 'http:' && protocol !== 'https:') {
+      await route.continue();
+      return;
+    }
+    observedRequests.push({
+      method: request.method(),
+      resource_type: request.resourceType(),
+      url: requestUrl,
+    });
+    if (parsed.origin !== origin) {
       blockedRequests.push(requestUrl);
+      await route.abort('blockedbyclient');
+      return;
+    }
+    const allowedPath =
+      parsed.pathname === requestedPath ||
+      parsed.pathname.startsWith(`${candidateBasePath}assets/`);
+    if (request.method() !== 'GET' || !allowedPath) {
+      unexpectedSameOriginRequests.push({ method: request.method(), url: requestUrl });
       await route.abort('blockedbyclient');
       return;
     }
@@ -47,11 +76,18 @@ try {
   });
 
   const page = await context.newPage();
+  page.on('response', (response) => {
+    const responseUrl = response.url();
+    if (new URL(responseUrl).origin === origin) {
+      observedResponses.push({ status: response.status(), url: responseUrl });
+    }
+  });
   const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30_000 });
   if (!response || response.status() >= 400) {
     throw new Error(`candidate route returned ${response?.status() ?? 'no response'}`);
   }
   await page.locator("[data-testid='candidate-boundary']").waitFor({ state: 'visible' });
+  await page.waitForFunction(() => document.body.dataset.screenshotReady === 'true');
   await page.evaluate(async () => document.fonts.ready);
 
   // Exercise every viewport long enough for once-only reveal transitions to
@@ -87,6 +123,20 @@ try {
   );
   if (hiddenContent.length > 0) {
     throw new Error(`candidate capture contains hidden sections: ${JSON.stringify(hiddenContent)}`);
+  }
+  if (blockedRequests.length > 0) {
+    throw new Error(
+      `candidate attempted foreign requests: ${JSON.stringify([...new Set(blockedRequests)].sort())}`,
+    );
+  }
+  if (unexpectedSameOriginRequests.length > 0) {
+    throw new Error(
+      `candidate attempted an undeclared same-origin request: ${JSON.stringify(unexpectedSameOriginRequests)}`,
+    );
+  }
+  const failedResponses = observedResponses.filter(({ status }) => status >= 400);
+  if (failedResponses.length > 0) {
+    throw new Error(`candidate received failed responses: ${JSON.stringify(failedResponses)}`);
   }
   await page.addStyleTag({
     content: '*, *::before, *::after { animation: none !important; transition: none !important; }',
@@ -124,7 +174,11 @@ try {
       executable_path: executablePath,
     },
     network: {
-      foreign_requests_blocked: [...new Set(blockedRequests)].sort(),
+      policy: 'GET requested route plus same-origin candidate assets only',
+      observed_requests: observedRequests,
+      observed_responses: observedResponses,
+      foreign_requests: [],
+      undeclared_same_origin_requests: [],
     },
   };
   await writeFile(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');

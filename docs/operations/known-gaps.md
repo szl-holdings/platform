@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-11 (rev 37 — integrated frontier candidate boundaries)
+**Last updated:** 2026-10-11 (rev 38 — public-candidate network and claim boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -28,6 +28,23 @@ This document is the canonical reference for known security, quality, and compli
 > establish deployment, provider, production authority, or customer-data use.
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
+
+### A11OY-PUBLIC-CANDIDATE-001 — hosted promotion remains HOLD
+
+Candidate source now admits only a static boundary home and one deterministic
+security-workflow fixture. The public entry point no longer instantiates the
+GraphQL or Omnia network providers, excluded client routes are absent from the
+compiled bundle, and a build-time contract rejects same-origin API strings,
+unsupported metrics, named competitor scoring, and the retired social card.
+Every other client route renders a publication hold.
+
+These controls establish only local source and build behavior. They do not
+establish a protected merge, deployment, production operation, customer use,
+live connectors, certification, performance, revenue, or durable signed proof.
+Hosted promotion remains **HOLD** until the protected source revision is built
+with its final preview base, bound to a per-file manifest, admitted by the
+separate Python owner, and verified at the hosted preview without a network
+request or any change to the live root and API routes.
 
 ### AEF-INGEST-001 — retry/idempotency remains a production hold
 

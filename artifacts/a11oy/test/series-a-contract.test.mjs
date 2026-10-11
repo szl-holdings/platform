@@ -173,8 +173,8 @@ test('resolves the local FlexCache source entrypoints used by the production bun
   assert.match(viteConfig, /lib\/flexcache\/src\/index\.ts/);
 });
 
-test('fails closed when the Omnia network endpoints are absent', () => {
-  assert.match(main, /networkState: 'UNAVAILABLE'/);
+test('omits the Omnia network provider from the public candidate', () => {
+  assert.doesNotMatch(main, /OmniaShellProvider|networkState|\/api\//);
   assert.match(omniaProvider, /config\.networkState === 'UNAVAILABLE'/);
 });
 

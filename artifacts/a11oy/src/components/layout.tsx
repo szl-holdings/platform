@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
+import { REVIEWED_PUBLIC_ROUTES } from '../candidateRoutes';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 
@@ -230,18 +231,8 @@ const _LEGACY_NAV_GROUPS = [
 
 const NAV_GROUPS = [
   {
-    label: 'CANDIDATE',
-    items: [{ href: '/', label: 'Home' }],
-  },
-  {
-    label: 'REVIEWED FIXTURES',
-    items: [
-      { href: '/agent-viz', label: 'Agent visualization' },
-      { href: '/adversarial', label: 'Governance stress test' },
-      { href: '/frontier', label: 'Positioning UI' },
-      { href: '/verifier', label: 'Verification workflow' },
-      { href: '/security-agents', label: 'Security-agent workflow' },
-    ],
+    label: 'REVIEWED CANDIDATE',
+    items: REVIEWED_PUBLIC_ROUTES.map((route) => ({ href: route.path, label: route.label })),
   },
 ] as const;
 

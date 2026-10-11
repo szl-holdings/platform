@@ -22,7 +22,7 @@ const SEC_AGENTS: SecurityAgent[] = [
   {
     id: 'sec-triage',
     name: 'Alert Triage Agent',
-    role: 'Autonomous alert investigation — prioritizes, investigates, and renders verdicts on security alerts with full evidence trail.',
+    role: 'Proposed alert-investigation workflow — prioritizes seeded alerts and renders fixture verdicts with an illustrative evidence trail.',
     status: 'investigating',
     model: 'illustrative model label',
     trustScore: 985,
@@ -71,7 +71,7 @@ const SEC_AGENTS: SecurityAgent[] = [
   {
     id: 'sec-detection',
     name: 'Detection Engineering Agent',
-    role: 'Auto-generates detection rules from threat intelligence, validates with synthetic data, and deploys to SIEM/EDR.',
+    role: 'Proposed detection-engineering workflow — drafts fixture rules from seeded intelligence and evaluates them against synthetic data; no SIEM or EDR deployment occurs.',
     status: 'active',
     model: 'illustrative model label',
     trustScore: 960,

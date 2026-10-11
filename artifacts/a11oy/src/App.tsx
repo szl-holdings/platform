@@ -1,25 +1,13 @@
 import { lazy, Suspense } from 'react';
 import { Route, Switch, useLocation } from 'wouter';
-import { GraphQLProvider } from './graphql';
+import { REVIEWED_PUBLIC_ROUTES, routeHref } from './candidateRoutes';
+import { PublicCandidateHome } from './pages/PublicCandidateHome';
 
 function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
 }
 
 const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, ''));
-
-const REVIEWED_PUBLIC_ROUTES = [
-  { path: '/', label: 'A11oy candidate home' },
-  { path: '/agent-viz', label: 'Agent visualization fixture' },
-  { path: '/adversarial', label: 'Governance stress-test fixture' },
-  { path: '/frontier', label: 'Positioning UI fixture' },
-  { path: '/verifier', label: 'Verification workflow fixture' },
-  { path: '/security-agents', label: 'Security-agent workflow fixture' },
-] as const;
-
-function routeHref(path: string) {
-  return path === '/' ? `${base}/` || '/' : `${base}${path}`;
-}
 
 function Loader() {
   return (
@@ -44,25 +32,20 @@ function CandidateBoundaryBanner() {
       data-testid="candidate-boundary"
       aria-label="Publication evidence boundary"
       style={{
-        position: 'fixed',
-        right: 12,
-        bottom: 12,
-        left: 12,
+        position: 'relative',
         zIndex: 1000,
         padding: '0.65rem 1rem',
-        border: '1px solid rgba(201,183,135,0.55)',
-        borderRadius: 8,
+        borderBottom: '1px solid rgba(201,183,135,0.55)',
         background: 'rgba(16,16,16,0.96)',
         color: '#f5f5f5',
-        boxShadow: '0 8px 28px rgba(0,0,0,0.35)',
         fontSize: '0.75rem',
         lineHeight: 1.5,
         textAlign: 'center',
       }}
     >
-      <strong style={{ color: '#d9c58f' }}>CANDIDATE DEMO:</strong> repository fixtures and target
-      contracts only. No page establishes production operation, certification, external attestation,
-      or durable signed proof without separately linked exact-head evidence.
+      <strong style={{ color: '#d9c58f' }}>CANDIDATE DEMO:</strong> deterministic repository
+      fixtures only. No page establishes production operation, certification, external attestation,
+      or durable signed proof.
     </aside>
   );
 }
@@ -91,9 +74,9 @@ function PublicationHoldPage() {
         </div>
         <h1 className="mb-4 text-3xl font-semibold">Evidence review required before publication</h1>
         <p className="mb-4 leading-7" style={{ color: '#b8b8b8' }}>
-          This route is intentionally excluded from the public candidate bundle. Its legacy content
-          has not completed claim-by-claim source review and may contain seeded customer, security,
-          compliance, or operational scenarios that must not be presented as facts.
+          This route is excluded from the public candidate. Its legacy content has not completed
+          claim-by-claim source review and may contain seeded customer, security, compliance, or
+          operational scenarios that must not be presented as facts.
         </p>
         <dl className="mb-7 grid gap-2 text-sm">
           <div className="flex flex-wrap gap-2">
@@ -119,7 +102,7 @@ function PublicationHoldPage() {
           {REVIEWED_PUBLIC_ROUTES.map((route) => (
             <a
               key={route.path}
-              href={routeHref(route.path)}
+              href={routeHref(base, route.path)}
               className="rounded-lg px-3 py-2 text-sm transition-colors"
               style={{
                 color: '#f5f5f5',
@@ -136,25 +119,6 @@ function PublicationHoldPage() {
   );
 }
 
-const HomePage = lazy(() =>
-  import('./pages/HomePage').then((module) => ({ default: module.HomePage })),
-);
-const AgentViz = lazy(() =>
-  import('./pages/AgentViz').then((module) => ({ default: module.AgentViz })),
-);
-const AdversarialResilience = lazy(() =>
-  import('./pages/AdversarialResilience').then((module) => ({
-    default: module.AdversarialResilience,
-  })),
-);
-const FrontierIntelligence = lazy(() =>
-  import('./pages/FrontierIntelligence').then((module) => ({
-    default: module.FrontierIntelligence,
-  })),
-);
-const VerifierAgent = lazy(() =>
-  import('./pages/VerifierAgent').then((module) => ({ default: module.VerifierAgent })),
-);
 const GovernedSecurityAgents = lazy(() =>
   import('./pages/GovernedSecurityAgents').then((module) => ({
     default: module.GovernedSecurityAgents,
@@ -163,20 +127,16 @@ const GovernedSecurityAgents = lazy(() =>
 
 export default function App() {
   return (
-    <GraphQLProvider>
+    <>
       <CandidateBoundaryBanner />
       <Suspense fallback={<Loader />}>
         <Switch>
-          <Route path={`${base}/`} component={HomePage} />
-          {base ? <Route path={base} component={HomePage} /> : null}
-          <Route path={`${base}/agent-viz`} component={AgentViz} />
-          <Route path={`${base}/adversarial`} component={AdversarialResilience} />
-          <Route path={`${base}/frontier`} component={FrontierIntelligence} />
-          <Route path={`${base}/verifier`} component={VerifierAgent} />
+          <Route path={`${base}/`} component={PublicCandidateHome} />
+          {base ? <Route path={base} component={PublicCandidateHome} /> : null}
           <Route path={`${base}/security-agents`} component={GovernedSecurityAgents} />
           <Route component={PublicationHoldPage} />
         </Switch>
       </Suspense>
-    </GraphQLProvider>
+    </>
   );
 }

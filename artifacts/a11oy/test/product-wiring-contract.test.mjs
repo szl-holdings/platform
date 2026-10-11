@@ -5,6 +5,9 @@ import { test } from 'node:test';
 const read = (relativePath) => readFileSync(new URL(relativePath, import.meta.url), 'utf8');
 
 const app = read('../src/App.tsx');
+const main = read('../src/main.tsx');
+const candidateRoutes = read('../src/candidateRoutes.ts');
+const candidateHome = read('../src/pages/PublicCandidateHome.tsx');
 const layout = read('../src/components/layout.tsx');
 const ui = read('../src/components/ui.tsx');
 const indexHtml = read('../index.html');
@@ -36,20 +39,22 @@ const rootPackage = JSON.parse(read('../../../package.json'));
 const capturePlan = JSON.parse(read('../../../audit/series-a-screenshot-capture-plan.json'));
 
 test('publishes only the reviewed candidate allowlist and holds legacy routes', () => {
-  assert.match(app, /<GraphQLProvider>/);
+  assert.doesNotMatch(app, /GraphQLProvider|useAlloyDashboard|solutionsData|blueprint/);
+  assert.doesNotMatch(main, /GraphQLProvider|OmniaShellProvider|\/api\//);
+  assert.doesNotMatch(candidateHome, /fetch\s*\(|WebSocket|EventSource|\/api\//);
   assert.match(app, /CANDIDATE DEMO:/);
   assert.match(app, /PUBLICATION HOLD · UNREVIEWED ROUTE/);
   assert.match(app, /<Route component=\{PublicationHoldPage\} \/>/);
-  const reviewedPaths = [...app.matchAll(/\{ path: '([^']+)', label:/g)].map((match) => match[1]);
-  assert.deepEqual(reviewedPaths, [
-    '/',
-    '/agent-viz',
-    '/adversarial',
-    '/frontier',
-    '/verifier',
-    '/security-agents',
-  ]);
+  const reviewedPaths = [...candidateRoutes.matchAll(/\{ path: '([^']+)', label:/g)].map(
+    (match) => match[1],
+  );
+  assert.deepEqual(reviewedPaths, ['/', '/security-agents']);
   for (const excludedImport of [
+    'AgentViz',
+    'AdversarialResilience',
+    'FrontierIntelligence',
+    'HomePage',
+    'VerifierAgent',
     'A11oyAtelier',
     'SeriesAView',
     'ProductJourney',
