@@ -5,11 +5,14 @@ from __future__ import annotations
 import os
 import re
 import secrets
+import stat
 from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
 
 
 API_KEY_ENV = "SUBSTRATE_PYTHON_WORKER_API_KEY"
+API_KEY_FILE_ENV = "SUBSTRATE_PYTHON_WORKER_API_KEY_FILE"
 AUTH_BYPASS_ENV = "SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS"
 WORKER_ENV_ENV = "SUBSTRATE_PYTHON_WORKER_ENV"
 TENANT_ID_ENV = "SUBSTRATE_PYTHON_WORKER_TENANT_ID"
@@ -25,6 +28,7 @@ _PRODUCTION_ENVIRONMENTS = frozenset({"prod", "production"})
 _ALLOWED_RUNTIME_MODES = frozenset(
     {"local-dev", "internal-preview", "demo", "production"}
 )
+_MAX_API_KEY_BYTES = 16 * 1024
 
 
 class WorkerSecurityConfigurationError(RuntimeError):
@@ -106,6 +110,46 @@ def is_production_environment(environ: Mapping[str, str] | None = None) -> bool:
     )
 
 
+def _read_api_key_file(file_value: str) -> str:
+    """Read one bounded regular-file credential without following symlinks."""
+
+    secret_path = Path(file_value)
+    flags = os.O_RDONLY
+    flags |= getattr(os, "O_CLOEXEC", 0)
+    flags |= getattr(os, "O_NONBLOCK", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    descriptor: int | None = None
+    try:
+        if secret_path.is_symlink():
+            raise OSError("credential path is not a regular file")
+        descriptor = os.open(secret_path, flags)
+        file_stat = os.fstat(descriptor)
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise OSError("credential path is not a regular file")
+        if file_stat.st_size > _MAX_API_KEY_BYTES:
+            raise OSError("credential file exceeds the admitted size")
+        with os.fdopen(descriptor, "rb", closefd=False) as handle:
+            payload = handle.read(_MAX_API_KEY_BYTES + 1)
+        if len(payload) > _MAX_API_KEY_BYTES:
+            raise OSError("credential file exceeds the admitted size")
+        api_key = payload.decode("utf-8").rstrip("\r\n")
+    except (OSError, UnicodeError, ValueError) as error:
+        raise WorkerSecurityConfigurationError(
+            f"{API_KEY_FILE_ENV} is unavailable or invalid"
+        ) from error
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+
+    if not api_key:
+        raise WorkerSecurityConfigurationError(f"{API_KEY_FILE_ENV} must not be empty")
+    if api_key != api_key.strip():
+        raise WorkerSecurityConfigurationError(
+            f"{API_KEY_FILE_ENV} must not contain surrounding whitespace"
+        )
+    return api_key
+
+
 def load_worker_security_config(
     environ: Mapping[str, str] | None = None,
 ) -> WorkerSecurityConfig:
@@ -126,6 +170,7 @@ def load_worker_security_config(
         environment = "development"
     bypass_enabled = _parse_bypass(source.get(AUTH_BYPASS_ENV))
     api_key = source.get(API_KEY_ENV)
+    api_key_file = source.get(API_KEY_FILE_ENV)
     configured_tenant_id = source.get(TENANT_ID_ENV)
 
     if bypass_enabled and (
@@ -138,15 +183,27 @@ def load_worker_security_config(
 
     if api_key is not None and not api_key.strip():
         api_key = None
+    if api_key_file is not None and not api_key_file.strip():
+        api_key_file = None
+    if api_key is not None and api_key_file is not None:
+        raise WorkerSecurityConfigurationError(
+            f"Configure only one of {API_KEY_ENV} and {API_KEY_FILE_ENV}"
+        )
     if api_key is not None and api_key != api_key.strip():
         raise WorkerSecurityConfigurationError(
             f"{API_KEY_ENV} must not contain surrounding whitespace"
         )
+    if api_key_file is not None:
+        if api_key_file != api_key_file.strip():
+            raise WorkerSecurityConfigurationError(
+                f"{API_KEY_FILE_ENV} must not contain surrounding whitespace"
+            )
+        api_key = _read_api_key_file(api_key_file)
 
     if api_key is None and not bypass_enabled:
         raise WorkerSecurityConfigurationError(
-            f"{API_KEY_ENV} must be injected, or {AUTH_BYPASS_ENV}=1 must be "
-            "set explicitly in development/test"
+            f"{API_KEY_ENV} or {API_KEY_FILE_ENV} must be injected, or "
+            f"{AUTH_BYPASS_ENV}=1 must be set explicitly in development/test"
         )
 
     if configured_tenant_id is not None and not configured_tenant_id.strip():

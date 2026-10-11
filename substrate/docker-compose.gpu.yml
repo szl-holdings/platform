@@ -124,6 +124,9 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-}"
       SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC: "${SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC:-0}"
       SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL: "${SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL:-0}"
+      # The general worker image is not an admitted Ovis evaluation image.
+      # Render docker-compose.ovis-evaluation.yml.template for that isolated lane.
+      OVIS_OMNI_ENABLED: "0"
     deploy:
       resources:
         reservations:

@@ -46,7 +46,7 @@ the current-tree metrics from whichever commit is checked out.
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
 | API route source files | **44** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
 | API handler declarations | **334** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
-| CI workflows | **47** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
+| CI workflows | **48** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, public npm release paths, the frontier receipt-chain gate, and locked Ovis CPU contracts; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | **246** | Lines matching `^[A-Z_]+=` |
 
 These are source-tree measurements. They do not by themselves prove that a

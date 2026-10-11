@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 # Production startup rejects the same switch.
 os.environ.setdefault("SUBSTRATE_PYTHON_WORKER_ENV", "test")
 os.environ.setdefault("SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS", "1")
+os.environ.setdefault("AEF_DEVELOPMENT_ENDPOINTS_ENABLED", "1")
 
 import pytest
 from fastapi.testclient import TestClient

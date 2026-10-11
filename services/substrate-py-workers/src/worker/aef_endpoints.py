@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+import os
 from typing import Any, Literal
 
 import structlog
@@ -30,6 +31,7 @@ AEF_EMBED_DIM = 384
 AEF_DEV_MODEL = "aef-dev-hash"
 AEF_FALLBACK_RERANK_MODEL = "lexical-overlap-v1"
 AEF_FALLBACK_RERANK_REVISION = "builtin-lexical-overlap-v1"
+AEF_DEVELOPMENT_ENDPOINTS_ENABLED_ENV = "AEF_DEVELOPMENT_ENDPOINTS_ENABLED"
 
 
 def _authenticate_aef_request(request: Request) -> str:
@@ -59,6 +61,11 @@ def _authenticate_aef_request(request: Request) -> str:
 def _require_development_backend(requested_model: str, expected_model: str) -> None:
     """Reject false model identity and any use of dev heuristics in production."""
 
+    if os.getenv(AEF_DEVELOPMENT_ENDPOINTS_ENABLED_ENV, "0") != "1":
+        raise HTTPException(
+            status_code=503,
+            detail="The deterministic AEF development backend is disabled",
+        )
     if is_production_environment():
         raise HTTPException(
             status_code=503,

@@ -49,6 +49,9 @@ mean.
 | [`A11OY_KERNEL_MUTATION_HARDENING_PROOF_2026-10-05.md`](./A11OY_KERNEL_MUTATION_HARDENING_PROOF_2026-10-05.md) | Kernel mutation authentication hardening proof packet | Fail-closed Bearer gates, bounded wake receipts, atomic idempotency, and explicit hosted-state limits |
 | [`SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md`](./SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md) | GitHub, Hugging Face, domain, and stack prepublication audit | Separates bounded current observations, retained/local evidence, unknowns, and promotion gates |
 | [`A11OY_FRONTIER_RELEASE_HARDENING_PROOF_2026-10-06.md`](./A11OY_FRONTIER_RELEASE_HARDENING_PROOF_2026-10-06.md) | Frontier candidate proof packet | Records current validation evidence and explicit exact-head, generated-truth, Python delivery, hosted-check, cloud-publication, and deployment holds |
+| [`MIGRATION_AUTHORITY_HARDENING_PROOF_2026-10-11.md`](./MIGRATION_AUTHORITY_HARDENING_PROOF_2026-10-11.md) | Migration authority hardening proof packet | Read-only preflight, fail-closed checksum drift, qualified tracker status, tests, and preserved production HOLD |
+| [`OVIS_EVALUATION_HARDENING_INTEGRATION_PROOF_20261011.md`](./OVIS_EVALUATION_HARDENING_INTEGRATION_PROOF_20261011.md) | Integrated Ovis evaluation hardening proof | Locked evaluation contract, isolated deployment adapters, exact merged-tree checks, and preserved qualification HOLD |
+| [`OVIS_EVALUATION_SECURITY_REFRESH_20261011.md`](./OVIS_EVALUATION_SECURITY_REFRESH_20261011.md) | Ovis dependency security refresh proof | CI-triggered Transformers advisory response, refreshed lock identity, compatibility checks, and residual audit boundary |
 
 ---
 
@@ -79,7 +82,7 @@ separately recorded measurement dates.
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
 | API route source files | 44 | Non-test files with detected Express route declarations across current runtime roots |
 | API handler declarations | 334 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
-| CI workflows | 47 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
+| CI workflows | 48 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, public npm release paths, the frontier receipt-chain gate, and locked Ovis CPU contracts; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | 246 | Lines matching `^[A-Z_]+=` |
 
 ---
