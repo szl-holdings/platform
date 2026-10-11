@@ -1,8 +1,8 @@
 {
   "name": "@szl-holdings/braces-safe",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Private SZL derivative of braces 3.0.3 with bounded AST depth and parent-cycle rejection.",
+  "description": "Private SZL derivative of braces 3.0.3 with bounded, cycle-safe, stateful-input-safe AST traversal.",
   "license": "MIT",
   "author": "SZL Holdings; derived from braces by Jon Schlinkert and contributors",
   "homepage": "https://github.com/szl-holdings/platform",
@@ -30,10 +30,14 @@
   "szlSecurityBackport": {
     "upstreamPackage": "braces@3.0.3",
     "upstreamRepository": "micromatch/braces",
-    "upstreamFixReview": "micromatch/braces#72",
-    "importedSourceRepository": "FSDevelop/braces",
-    "sourceCommit": "28d440b5dd449dbf1fe6f3506cf94ecca4d02660",
-    "sourceTree": "0ffbc33a63a6f2365865e69b4217683268067847",
+    "upstreamIssue": "micromatch/braces#70",
+    "historicalV01FixReview": "micromatch/braces#72",
+    "upstreamIntegrity": "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==",
+    "historicalV01SourceRepository": "FSDevelop/braces",
+    "historicalV01SourceCommit": "28d440b5dd449dbf1fe6f3506cf94ecca4d02660",
+    "historicalV01SourceTree": "0ffbc33a63a6f2365865e69b4217683268067847",
+    "localHardeningPatch": "patches/braces@3.0.3.patch",
+    "localHardeningPatchSha256": "c056b5c1123a999cfcaa5ad56c70e69a1120e186c410ee091a1f86e941411cf9",
     "advisory": "GHSA-vfj7-8cjw-p6xm",
     "cve": "CVE-2026-93687"
   }

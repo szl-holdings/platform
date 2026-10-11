@@ -5,13 +5,14 @@
  * POST /v1/rerank        — cross-encoder reranking of candidate passages
  * POST /v1/openai/embeddings — OpenAI-compatible embedding endpoint (compat shim)
  *
- * In production, these delegate to the retrieval-core EmbeddingBackend registry.
- * Stubs return the correct response envelope so callers can be coded against
- * the contract immediately.
+ * Development/test stubs preserve the response shape for contract work. In
+ * production every unwired capability fails closed with HTTP 503/UNAVAILABLE;
+ * it never returns empty vectors or zero scores as successful inference.
  */
 
 import { type Request, type Response, type IRouter, Router } from 'express';
 import { z } from 'zod';
+import { rejectUnwiredProductionCapability } from '../../runtime-capabilities.js';
 
 const router: IRouter = Router();
 
@@ -40,6 +41,7 @@ router.post('/embed', (req: Request, res: Response): void => {
     res.status(400).json({ error: 'Validation failed', issues: parse.error.issues });
     return;
   }
+  if (rejectUnwiredProductionCapability(res, 'embedding')) return;
 
   const { texts, model, backend } = parse.data;
   const tenantId = req.tenantCtx?.tenantId ?? 'default';
@@ -59,6 +61,7 @@ router.post('/rerank', (req: Request, res: Response): void => {
     res.status(400).json({ error: 'Validation failed', issues: parse.error.issues });
     return;
   }
+  if (rejectUnwiredProductionCapability(res, 'reranking')) return;
 
   const { query, passages, topN, model } = parse.data;
   const tenantId = req.tenantCtx?.tenantId ?? 'default';
@@ -79,6 +82,7 @@ router.post('/openai/embeddings', (req: Request, res: Response): void => {
     res.status(400).json({ error: 'Validation failed', issues: parse.error.issues });
     return;
   }
+  if (rejectUnwiredProductionCapability(res, 'openai-embedding-compat')) return;
 
   const { input, model } = parse.data;
   const texts = Array.isArray(input) ? input : [input];

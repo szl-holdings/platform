@@ -45,6 +45,10 @@
 | `git diff --check` | 0 | No whitespace errors. |
 | Changed-file credential-pattern scan | 1 | Expected `rg` no-match status; no credential pattern found. |
 | `PATH=<pinned-pnpm-10-wrapper> CI=true npm_config_manage_package_manager_versions=false turbo run typecheck --concurrency=2` | 0 | 185/185 repository typecheck/build tasks passed in 12m46s. |
+| `CI=true corepack pnpm install --frozen-lockfile --ignore-scripts --offline` after merging protected main | 0 | Frozen install completed for all 204 workspaces using the repository-pinned pnpm 10.26.1. |
+| Direct focused tests after merging protected main | 0 | 12/12 tests passed across `@szl-holdings/db` and `@szl-holdings/db-migrations`. |
+| `turbo run test --filter=@szl-holdings/db --filter=@szl-holdings/db-migrations --concurrency=2` after merging protected main | 0 | 4/4 uncached package and dependency-build tasks passed; 12/12 focused tests passed. |
+| `turbo run typecheck --concurrency=2` after merging protected main | 0 | 232/232 repository typecheck/build tasks passed in 11m46s. |
 
 Two superseded post-edit harness attempts exited 1 before source validation: one forwarded `--concurrency` to every package command, and one let the nested Evidence Doctrine package request uncached pnpm 11.9.0 during a DNS outage. The final command pins the repository package manager, disables nested package-manager replacement, and passes the complete task graph.
 
@@ -55,4 +59,4 @@ Two superseded post-edit harness attempts exited 1 before source validation: one
 - Dry-run tests prove an absent tracker performs one `SELECT` and a present tracker performs only `SELECT` statements.
 - Status tests prove tracker absence is a returned state while connection/permission failures reject.
 - No route or UI surface changed, so route QA and screenshot proof do not apply.
-- Base source during implementation was `952439b96efe5eccaf9474d831edb4dd46343d15`; the topic will merge the final protected main from PR #899 before integration.
+- Base source during implementation was `952439b96efe5eccaf9474d831edb4dd46343d15`. The topic merged final protected main `690959d29c6d26f0f3f4a42ef91fd442067c186e` with normal history before final integration validation; only the audit index and known-gaps register required conflict resolution.

@@ -8,6 +8,14 @@
     "composite": true,
     "types": ["node"]
   },
+  "references": [
+    { "path": "../../lib/proof-chain" },
+    { "path": "../approvals-inbox" },
+    { "path": "../cognitive-observability" },
+    { "path": "../policy-engine" },
+    { "path": "../sandbox-runtime" },
+    { "path": "../tool-mesh" }
+  ],
   "include": ["src/**/*"],
   "exclude": ["src/**/*.test.ts"]
 }

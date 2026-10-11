@@ -12,20 +12,42 @@ import express from 'express';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createRouter } from './router.js';
 import { buildHealthReport, buildReadinessReport, runReadinessProbes } from './health.js';
+import { getMemoryStore, runStore } from './store.js';
 
 let server: Server;
 let baseUrl: string;
 
 function httpGet(path: string): Promise<{ status: number; json: any }> {
+  return httpJson('GET', path);
+}
+
+function httpJson(
+  method: string,
+  path: string,
+  headers: Record<string, string> = {},
+  body?: unknown,
+): Promise<{ status: number; json: any }> {
   return new Promise((resolve, reject) => {
-    const req = request(`${baseUrl}${path}`, { method: 'GET' }, (res) => {
-      let body = '';
-      res.on('data', (c) => (body += c));
-      res.on('end', () =>
-        resolve({ status: res.statusCode ?? 0, json: body ? JSON.parse(body) : null }),
-      );
-    });
+    const serialized = body === undefined ? undefined : JSON.stringify(body);
+    const req = request(
+      `${baseUrl}${path}`,
+      {
+        method,
+        headers: {
+          ...headers,
+          ...(serialized ? { 'content-type': 'application/json' } : {}),
+        },
+      },
+      (res) => {
+        let body = '';
+        res.on('data', (c) => (body += c));
+        res.on('end', () =>
+          resolve({ status: res.statusCode ?? 0, json: body ? JSON.parse(body) : null }),
+        );
+      },
+    );
     req.on('error', reject);
+    if (serialized) req.write(serialized);
     req.end();
   });
 }
@@ -118,12 +140,116 @@ describe('GET /readyz (readiness)', () => {
   });
 
   it('probes leave no residual state in their disposable tenant', () => {
-    // Running probes twice must not accumulate entries: the probe tenant is
-    // evicted/deleted each run, so a second run still reports ready with the
-    // same probe set (no leakage, idempotent).
+    const healthTenant = '__healthz_probe__';
+    const store = getMemoryStore(healthTenant);
+    store.clear();
     const first = runReadinessProbes();
     const second = runReadinessProbes();
     expect(first.map((p) => p.name)).toEqual(second.map((p) => p.name));
     expect(second.every((p) => p.ready)).toBe(true);
+    expect(store.keys('working')).toEqual([]);
+    expect(runStore.list(healthTenant)).toEqual([]);
+  });
+
+  it('cleans the disposable memory key when read-back throws', () => {
+    const healthTenant = '__healthz_probe__';
+    const store = getMemoryStore(healthTenant);
+    store.clear();
+    const originalGet = store.get.bind(store);
+    store.get = (() => {
+      throw new Error('forced read failure');
+    }) as typeof store.get;
+    try {
+      const probes = runReadinessProbes();
+      expect(probes).toContainEqual(
+        expect.objectContaining({ name: 'memory-store', ready: false }),
+      );
+      expect(store.keys('working')).toEqual([]);
+    } finally {
+      store.get = originalGet;
+    }
+  });
+
+  it('fails production readiness while advertised inference and index backends are unwired', () => {
+    const previous = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      const report = buildReadinessReport();
+      expect(report.ready).toBe(false);
+      expect(report.dependencies).toContainEqual(
+        expect.objectContaining({ name: 'production-capability-backends', ready: false }),
+      );
+    } finally {
+      if (previous === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previous;
+    }
+  });
+});
+
+describe('production route HOLD', () => {
+  it('blocks every authenticated process-local route before IDs or mutations are created', async () => {
+    const saved = {
+      NODE_ENV: process.env.NODE_ENV,
+      ALLOY_API_KEY: process.env.ALLOY_API_KEY,
+      ALLOY_API_TENANT_ID: process.env.ALLOY_API_TENANT_ID,
+    };
+    process.env.NODE_ENV = 'production';
+    process.env.ALLOY_API_KEY = 'runtime-test-secret';
+    process.env.ALLOY_API_TENANT_ID = 'runtime-test-tenant';
+    const authHeaders = {
+      'x-api-key': 'runtime-test-secret',
+      'x-tenant-id': 'runtime-test-tenant',
+    };
+    try {
+      for (const [method, path] of [
+        ['POST', '/v1/tasks/plan'],
+        ['POST', '/v1/memory/write'],
+        ['GET', '/v1/workflows'],
+        ['POST', '/v1/search/hybrid'],
+        ['POST', '/v1/embed'],
+        ['POST', '/v1/index/rebuild'],
+        ['POST', '/v1/evals/run'],
+        ['GET', '/v1/ouroboros/sentra/anchor-state'],
+        ['GET', '/api/a11oy/v1/atelier/health'],
+      ]) {
+        const response = await httpJson(
+          method,
+          path,
+          authHeaders,
+          method === 'POST' ? {} : undefined,
+        );
+        expect(response.status, `${method} ${path}`).toBe(503);
+        expect(response.json.code).toBe('PRODUCTION_CAPABILITY_UNAVAILABLE');
+        expect(response.json.evidenceState).toBe('UNAVAILABLE');
+        for (const fabricatedField of [
+          'runId',
+          'workflowId',
+          'memoryId',
+          'evalRunId',
+          'results',
+          'hits',
+        ]) {
+          expect(response.json).not.toHaveProperty(fabricatedField);
+        }
+      }
+
+      const crossTenant = await httpJson(
+        'POST',
+        '/v1/memory/write',
+        { 'x-api-key': 'runtime-test-secret', 'x-tenant-id': 'different-tenant' },
+        {},
+      );
+      expect(crossTenant.status).toBe(403);
+      expect(crossTenant.json.code).toBe('TENANT_SCOPE_MISMATCH');
+
+      const beacon = await httpJson('POST', '/api/omnia/adoption/beacon');
+      expect(beacon.status).toBe(503);
+      expect(beacon.json.code).toBe('PRODUCTION_CAPABILITY_UNAVAILABLE');
+    } finally {
+      for (const [key, value] of Object.entries(saved)) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+    }
   });
 });

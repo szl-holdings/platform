@@ -6,52 +6,76 @@
   "description": "Alloy Embedding Fabric — typed Zod schemas and TypeScript contracts for all AEF API shapes: embed, rerank, hybrid-search, ingest, index operations, evals, evidence objects, tenant identity, profile descriptors, backend descriptors, and event payloads.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./tenant": {
+      "development": "./src/tenant.ts",
+      "workspace": "./src/tenant.ts",
       "types": "./dist/tenant.d.ts",
-      "import": "./src/tenant.ts"
+      "import": "./dist/tenant.js"
     },
     "./embed": {
+      "development": "./src/embed.ts",
+      "workspace": "./src/embed.ts",
       "types": "./dist/embed.d.ts",
-      "import": "./src/embed.ts"
+      "import": "./dist/embed.js"
     },
     "./rerank": {
+      "development": "./src/rerank.ts",
+      "workspace": "./src/rerank.ts",
       "types": "./dist/rerank.d.ts",
-      "import": "./src/rerank.ts"
+      "import": "./dist/rerank.js"
     },
     "./search": {
+      "development": "./src/search.ts",
+      "workspace": "./src/search.ts",
       "types": "./dist/search.d.ts",
-      "import": "./src/search.ts"
+      "import": "./dist/search.js"
     },
     "./ingest": {
+      "development": "./src/ingest.ts",
+      "workspace": "./src/ingest.ts",
       "types": "./dist/ingest.d.ts",
-      "import": "./src/ingest.ts"
+      "import": "./dist/ingest.js"
     },
     "./index-ops": {
+      "development": "./src/index-ops.ts",
+      "workspace": "./src/index-ops.ts",
       "types": "./dist/index-ops.d.ts",
-      "import": "./src/index-ops.ts"
+      "import": "./dist/index-ops.js"
     },
     "./evals": {
+      "development": "./src/evals.ts",
+      "workspace": "./src/evals.ts",
       "types": "./dist/evals.d.ts",
-      "import": "./src/evals.ts"
+      "import": "./dist/evals.js"
     },
     "./openai-compat": {
+      "development": "./src/openai-compat.ts",
+      "workspace": "./src/openai-compat.ts",
       "types": "./dist/openai-compat.d.ts",
-      "import": "./src/openai-compat.ts"
+      "import": "./dist/openai-compat.js"
     },
     "./evidence": {
+      "development": "./src/evidence.ts",
+      "workspace": "./src/evidence.ts",
       "types": "./dist/evidence.d.ts",
-      "import": "./src/evidence.ts"
+      "import": "./dist/evidence.js"
     },
     "./events": {
+      "development": "./src/events.ts",
+      "workspace": "./src/events.ts",
       "types": "./dist/events.d.ts",
-      "import": "./src/events.ts"
+      "import": "./dist/events.js"
     },
     "./backends": {
+      "development": "./src/backends.ts",
+      "workspace": "./src/backends.ts",
       "types": "./dist/backends.d.ts",
-      "import": "./src/backends.ts"
+      "import": "./dist/backends.js"
     }
   },
   "dependencies": {

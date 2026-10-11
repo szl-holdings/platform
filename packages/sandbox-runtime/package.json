@@ -6,44 +6,64 @@
   "description": "Sandbox Runtime — governed Unix-local execution environments following the OpenAI sandbox architecture. Every operation flows through Guardian, Policy Engine, and Tool Mesh for full audit coverage.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./session": {
+      "development": "./src/session.ts",
+      "workspace": "./src/session.ts",
       "types": "./dist/session.d.ts",
-      "import": "./src/session.ts"
+      "import": "./dist/session.js"
     },
     "./agent": {
+      "development": "./src/agent.ts",
+      "workspace": "./src/agent.ts",
       "types": "./dist/agent.d.ts",
-      "import": "./src/agent.ts"
+      "import": "./dist/agent.js"
     },
     "./client": {
+      "development": "./src/client.ts",
+      "workspace": "./src/client.ts",
       "types": "./dist/client.d.ts",
-      "import": "./src/client.ts"
+      "import": "./dist/client.js"
     },
     "./capabilities/shell": {
+      "development": "./src/capabilities/shell.ts",
+      "workspace": "./src/capabilities/shell.ts",
       "types": "./dist/capabilities/shell.d.ts",
-      "import": "./src/capabilities/shell.ts"
+      "import": "./dist/capabilities/shell.js"
     },
     "./capabilities/filesystem": {
+      "development": "./src/capabilities/filesystem.ts",
+      "workspace": "./src/capabilities/filesystem.ts",
       "types": "./dist/capabilities/filesystem.d.ts",
-      "import": "./src/capabilities/filesystem.ts"
+      "import": "./dist/capabilities/filesystem.js"
     },
     "./capabilities/memory": {
+      "development": "./src/capabilities/memory.ts",
+      "workspace": "./src/capabilities/memory.ts",
       "types": "./dist/capabilities/memory.d.ts",
-      "import": "./src/capabilities/memory.ts"
+      "import": "./dist/capabilities/memory.js"
     },
     "./tool-registrations": {
+      "development": "./src/tool-registrations.ts",
+      "workspace": "./src/tool-registrations.ts",
       "types": "./dist/tool-registrations.d.ts",
-      "import": "./src/tool-registrations.ts"
+      "import": "./dist/tool-registrations.js"
     },
     "./init": {
+      "development": "./src/init.ts",
+      "workspace": "./src/init.ts",
       "types": "./dist/init.d.ts",
-      "import": "./src/init.ts"
+      "import": "./dist/init.js"
     }
   },
   "dependencies": {
@@ -65,6 +85,7 @@
     "format": "biome format --write ./src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build": "tsc --build"
   }
 }

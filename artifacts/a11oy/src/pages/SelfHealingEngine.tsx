@@ -26,40 +26,112 @@ interface RemediationEvent {
 
 const WORKFLOWS: HealingWorkflow[] = [
   {
-    id: 'hw-1', name: 'Pod Crash Loop Recovery', trigger: 'container.restart_count > 3 within 5m',
-    phase: 'idle', status: 'active', lastRun: Date.now() - 1200000, executionCount: 47,
-    mttrReduction: 89, autoResolved: 42, totalIncidents: 47,
-    actions: ['Capture pod logs', 'Analyze OOMKilled vs CrashBackoff', 'Scale memory limits', 'Restart deployment'],
+    id: 'hw-1',
+    name: 'Pod Crash Loop Recovery',
+    trigger: 'container.restart_count > 3 within 5m',
+    phase: 'idle',
+    status: 'active',
+    lastRun: Date.now() - 1200000,
+    executionCount: 47,
+    mttrReduction: 89,
+    autoResolved: 42,
+    totalIncidents: 47,
+    actions: [
+      'Capture pod logs',
+      'Analyze OOMKilled vs CrashBackoff',
+      'Scale memory limits',
+      'Restart deployment',
+    ],
   },
   {
-    id: 'hw-2', name: 'High Latency Auto-Scale', trigger: 'http.request.duration_p99 > 500ms for 3m',
-    phase: 'sense', status: 'executing', lastRun: Date.now() - 60000, executionCount: 23,
-    mttrReduction: 76, autoResolved: 19, totalIncidents: 23,
-    actions: ['Validate latency spike pattern', 'Check HPA status', 'Scale replicas +2', 'Verify latency drop'],
+    id: 'hw-2',
+    name: 'High Latency Auto-Scale',
+    trigger: 'http.request.duration_p99 > 500ms for 3m',
+    phase: 'sense',
+    status: 'executing',
+    lastRun: Date.now() - 60000,
+    executionCount: 23,
+    mttrReduction: 76,
+    autoResolved: 19,
+    totalIncidents: 23,
+    actions: [
+      'Validate latency spike pattern',
+      'Check HPA status',
+      'Scale replicas +2',
+      'Verify latency drop',
+    ],
   },
   {
-    id: 'hw-3', name: 'DB Connection Pool Exhaustion', trigger: 'pg.connections.active / pg.connections.max > 0.9',
-    phase: 'idle', status: 'active', lastRun: Date.now() - 3600000, executionCount: 12,
-    mttrReduction: 94, autoResolved: 11, totalIncidents: 12,
-    actions: ['Kill idle connections', 'Increase pool max', 'Alert if > 95%', 'Failover to read replica'],
+    id: 'hw-3',
+    name: 'DB Connection Pool Exhaustion',
+    trigger: 'pg.connections.active / pg.connections.max > 0.9',
+    phase: 'idle',
+    status: 'active',
+    lastRun: Date.now() - 3600000,
+    executionCount: 12,
+    mttrReduction: 94,
+    autoResolved: 11,
+    totalIncidents: 12,
+    actions: [
+      'Kill idle connections',
+      'Increase pool max',
+      'Alert if > 95%',
+      'Failover to read replica',
+    ],
   },
   {
-    id: 'hw-4', name: 'Certificate Expiry Prevention', trigger: 'tls.cert.days_remaining < 14',
-    phase: 'idle', status: 'active', lastRun: Date.now() - 86400000, executionCount: 8,
-    mttrReduction: 100, autoResolved: 8, totalIncidents: 8,
-    actions: ['Request cert renewal via ACME', 'Validate new cert', 'Deploy to ingress', 'Verify TLS handshake'],
+    id: 'hw-4',
+    name: 'Certificate Expiry Prevention',
+    trigger: 'tls.cert.days_remaining < 14',
+    phase: 'idle',
+    status: 'active',
+    lastRun: Date.now() - 86400000,
+    executionCount: 8,
+    mttrReduction: 100,
+    autoResolved: 8,
+    totalIncidents: 8,
+    actions: [
+      'Request cert renewal via ACME',
+      'Validate new cert',
+      'Deploy to ingress',
+      'Verify TLS handshake',
+    ],
   },
   {
-    id: 'hw-5', name: 'Kafka Consumer Lag Recovery', trigger: 'kafka.consumer.lag > 10000 for 5m',
-    phase: 'think', status: 'executing', lastRun: Date.now() - 30000, executionCount: 31,
-    mttrReduction: 82, autoResolved: 26, totalIncidents: 31,
-    actions: ['Assess consumer group health', 'Reset offsets if stuck', 'Scale consumer instances', 'Verify lag decrease'],
+    id: 'hw-5',
+    name: 'Kafka Consumer Lag Recovery',
+    trigger: 'kafka.consumer.lag > 10000 for 5m',
+    phase: 'think',
+    status: 'executing',
+    lastRun: Date.now() - 30000,
+    executionCount: 31,
+    mttrReduction: 82,
+    autoResolved: 26,
+    totalIncidents: 31,
+    actions: [
+      'Assess consumer group health',
+      'Reset offsets if stuck',
+      'Scale consumer instances',
+      'Verify lag decrease',
+    ],
   },
   {
-    id: 'hw-6', name: 'Disk Space Critical', trigger: 'disk.used_percent > 90',
-    phase: 'idle', status: 'active', lastRun: Date.now() - 7200000, executionCount: 19,
-    mttrReduction: 71, autoResolved: 14, totalIncidents: 19,
-    actions: ['Clean old logs/tmp files', 'Archive cold data to S3', 'Expand volume if EBS', 'Alert if still > 85%'],
+    id: 'hw-6',
+    name: 'Disk Space Critical',
+    trigger: 'disk.used_percent > 90',
+    phase: 'idle',
+    status: 'active',
+    lastRun: Date.now() - 7200000,
+    executionCount: 19,
+    mttrReduction: 71,
+    autoResolved: 14,
+    totalIncidents: 19,
+    actions: [
+      'Clean old logs/tmp files',
+      'Archive cold data to S3',
+      'Expand volume if EBS',
+      'Alert if still > 85%',
+    ],
   },
 ];
 
@@ -84,11 +156,22 @@ function generateEvents(): RemediationEvent[] {
       'Fixture step: restart failed consumers, scale to 6 instances',
       'Fixture outcome: lag shown as cleared',
       'TLS certificate for api.szl.com expires in 12 days',
-      'Requesting renewal via Let\'s Encrypt ACME protocol',
+      "Requesting renewal via Let's Encrypt ACME protocol",
       'New certificate deployed to ingress controller',
       'TLS handshake verified on all endpoints',
     ][i],
-    outcome: (['success', 'success', 'pending', 'success', 'success', 'failed', 'success', 'success'] as const)[i % 8],
+    outcome: (
+      [
+        'success',
+        'success',
+        'pending',
+        'success',
+        'success',
+        'failed',
+        'success',
+        'success',
+      ] as const
+    )[i % 8],
     durationMs: 100 + i * 250,
   }));
 }
@@ -101,7 +184,13 @@ function PhasePill({ phase }: { phase: string }) {
     verify: 'bg-green-500/10 text-green-400 border-green-500/20',
     idle: 'bg-white/5 text-white/30 border-white/10',
   };
-  return <span className={`inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono rounded border uppercase ${colors[phase] || colors.idle}`}>{phase}</span>;
+  return (
+    <span
+      className={`inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono rounded border uppercase ${colors[phase] || colors.idle}`}
+    >
+      {phase}
+    </span>
+  );
 }
 
 export function SelfHealingEngine() {
@@ -112,7 +201,7 @@ export function SelfHealingEngine() {
     setEvents(generateEvents());
     const iv = setInterval(() => {
       setEvents(generateEvents());
-      setTick(t => t + 1);
+      setTick((t) => t + 1);
     }, 10000);
     return () => clearInterval(iv);
   }, []);
@@ -120,16 +209,18 @@ export function SelfHealingEngine() {
   const totalAutoResolved = WORKFLOWS.reduce((s, w) => s + w.autoResolved, 0);
   const totalIncidents = WORKFLOWS.reduce((s, w) => s + w.totalIncidents, 0);
   const avgMttr = Math.round(WORKFLOWS.reduce((s, w) => s + w.mttrReduction, 0) / WORKFLOWS.length);
-  const activeExecutions = WORKFLOWS.filter(w => w.status === 'executing').length;
+  const activeExecutions = WORKFLOWS.filter((w) => w.status === 'executing').length;
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
       <div>
-        <p className="text-xs font-mono uppercase tracking-[0.2em] text-[#f5f5f5]/40 mb-1">A11OY · AUTOMATION · SELF-HEALING</p>
+        <p className="text-xs font-mono uppercase tracking-[0.2em] text-[#f5f5f5]/40 mb-1">
+          A11OY · AUTOMATION · SELF-HEALING
+        </p>
         <h1 className="text-2xl font-bold tracking-tight text-[#f5f5f5]">Self-Healing Engine</h1>
         <p className="text-sm text-[#f5f5f5]/50 mt-1 max-w-3xl">
-          Simulated fixture. The workflows, MTTR figures, and event feed below are generated
-          in the browser. This page makes no repair call and reads no telemetry.
+          Simulated fixture. The workflows, MTTR figures, and event feed below are generated in the
+          browser. This page makes no repair call and reads no telemetry.
         </p>
       </div>
 
@@ -166,34 +257,59 @@ export function SelfHealingEngine() {
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: 'Auto-Resolved', value: `${totalAutoResolved}/${totalIncidents}`, color: '#4ade80' },
-          { label: 'Resolution Rate', value: `${Math.round((totalAutoResolved / totalIncidents) * 100)}%`, color: '#06b6d4' },
+          {
+            label: 'Auto-Resolved',
+            value: `${totalAutoResolved}/${totalIncidents}`,
+            color: '#4ade80',
+          },
+          {
+            label: 'Resolution Rate',
+            value: `${Math.round((totalAutoResolved / totalIncidents) * 100)}%`,
+            color: '#06b6d4',
+          },
           { label: 'Fixture MTTR drop', value: `${avgMttr}%`, color: '#a78bfa' },
           { label: 'Active Workflows', value: WORKFLOWS.length, color: '#c9b787' },
-          { label: 'Executing Now', value: activeExecutions, color: activeExecutions > 0 ? '#fb923c' : '#4ade80' },
-        ].map(kpi => (
-          <div key={kpi.label} className="bg-[#0a0a0f] border border-white/[0.06] rounded-lg p-3 space-y-1">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-white/30">{kpi.label}</p>
-            <p className="text-xl font-mono font-bold" style={{ color: kpi.color }}>{kpi.value}</p>
+          {
+            label: 'Executing Now',
+            value: activeExecutions,
+            color: activeExecutions > 0 ? '#fb923c' : '#4ade80',
+          },
+        ].map((kpi) => (
+          <div
+            key={kpi.label}
+            className="bg-[#0a0a0f] border border-white/[0.06] rounded-lg p-3 space-y-1"
+          >
+            <p className="text-[10px] font-mono uppercase tracking-widest text-white/30">
+              {kpi.label}
+            </p>
+            <p className="text-xl font-mono font-bold" style={{ color: kpi.color }}>
+              {kpi.value}
+            </p>
           </div>
         ))}
       </div>
 
       <div className="bg-[#0a0a0f] border border-white/[0.06] rounded-lg overflow-hidden">
         <div className="p-5 border-b border-white/[0.06]">
-          <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-white/70">Healing Workflows</h2>
+          <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-white/70">
+            Healing Workflows
+          </h2>
         </div>
         <div className="divide-y divide-white/[0.03]">
-          {WORKFLOWS.map(w => (
+          {WORKFLOWS.map((w) => (
             <div key={w.id} className="px-5 py-3 hover:bg-white/[0.02] transition-colors">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${w.status === 'executing' ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`} />
+                  <div
+                    className={`w-2 h-2 rounded-full flex-shrink-0 ${w.status === 'executing' ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}
+                  />
                   <h3 className="text-xs font-mono font-bold text-white/80">{w.name}</h3>
                   <PhasePill phase={w.phase} />
                 </div>
                 <div className="flex items-center gap-4 text-[10px] font-mono text-white/30">
-                  <span>{w.autoResolved}/{w.totalIncidents} resolved</span>
+                  <span>
+                    {w.autoResolved}/{w.totalIncidents} resolved
+                  </span>
                   <span className="text-green-400">fixture {w.mttrReduction}% MTTR</span>
                 </div>
               </div>
@@ -202,7 +318,10 @@ export function SelfHealingEngine() {
               </div>
               <div className="ml-5 mt-1 flex flex-wrap gap-1">
                 {w.actions.map((a, i) => (
-                  <span key={i} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/[0.03] text-white/30 border border-white/[0.04]">
+                  <span
+                    key={i}
+                    className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/[0.03] text-white/30 border border-white/[0.04]"
+                  >
                     {i + 1}. {a}
                   </span>
                 ))}
@@ -214,7 +333,9 @@ export function SelfHealingEngine() {
 
       <div className="bg-[#0a0a0f] border border-white/[0.06] rounded-lg overflow-hidden">
         <div className="p-5 border-b border-white/[0.06] flex items-center justify-between">
-          <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-white/70">Simulated event feed</h2>
+          <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-white/70">
+            Simulated event feed
+          </h2>
           <span className="text-[10px] font-mono text-white/30">tick {tick} · live</span>
         </div>
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
@@ -223,24 +344,44 @@ export function SelfHealingEngine() {
               <tr className="border-b border-white/[0.06] text-white/30">
                 <th className="text-left px-5 py-2 font-medium uppercase tracking-wider">Time</th>
                 <th className="text-left px-3 py-2 font-medium uppercase tracking-wider">Phase</th>
-                <th className="text-left px-3 py-2 font-medium uppercase tracking-wider">Workflow</th>
+                <th className="text-left px-3 py-2 font-medium uppercase tracking-wider">
+                  Workflow
+                </th>
                 <th className="text-left px-3 py-2 font-medium uppercase tracking-wider">Event</th>
-                <th className="text-right px-3 py-2 font-medium uppercase tracking-wider">Duration</th>
-                <th className="text-right px-5 py-2 font-medium uppercase tracking-wider">Result</th>
+                <th className="text-right px-3 py-2 font-medium uppercase tracking-wider">
+                  Duration
+                </th>
+                <th className="text-right px-5 py-2 font-medium uppercase tracking-wider">
+                  Result
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.03]">
-              {events.map(e => (
+              {events.map((e) => (
                 <tr key={e.id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="px-5 py-2 text-white/40 whitespace-nowrap">
-                    {new Date(e.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    {new Date(e.timestamp).toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                    })}
                   </td>
-                  <td className="px-3 py-2"><PhasePill phase={e.phase} /></td>
+                  <td className="px-3 py-2">
+                    <PhasePill phase={e.phase} />
+                  </td>
                   <td className="px-3 py-2 text-[#c9b787] whitespace-nowrap">{e.workflow}</td>
                   <td className="px-3 py-2 text-white/50 max-w-xs truncate">{e.description}</td>
                   <td className="px-3 py-2 text-right text-white/40">{e.durationMs}ms</td>
                   <td className="px-5 py-2 text-right">
-                    <span className={e.outcome === 'success' ? 'text-green-400' : e.outcome === 'failed' ? 'text-red-400' : 'text-yellow-400'}>
+                    <span
+                      className={
+                        e.outcome === 'success'
+                          ? 'text-green-400'
+                          : e.outcome === 'failed'
+                            ? 'text-red-400'
+                            : 'text-yellow-400'
+                      }
+                    >
                       {e.outcome}
                     </span>
                   </td>

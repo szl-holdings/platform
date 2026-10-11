@@ -30,6 +30,11 @@ export interface EmbeddingBackend {
   isAvailable(): Promise<boolean>;
 }
 
+export const DEFAULT_LOCAL_CPU_MODEL_ID = 'Xenova/all-MiniLM-L6-v2' as const;
+export const DEFAULT_LOCAL_CPU_MODEL_REVISION = '751bff37182d3f1213fa05d7196b954e230abad9' as const;
+export const DEFAULT_LOCAL_CPU_DIMENSIONS = 384 as const;
+const IMMUTABLE_HF_REVISION = /^[0-9a-f]{40}$/i;
+
 function cosineNormalize(v: number[]): number[] {
   const norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1;
   return v.map((x) => x / norm);
@@ -94,24 +99,47 @@ export class LocalCpuBackend implements EmbeddingBackend {
   readonly modelRef: string;
   readonly dimensions: number;
   private readonly hfModelId: string;
+  private readonly revision: string;
   private readonly quantized: boolean;
   private readonly cacheDir: string | undefined;
+  private readonly allowRemoteModels: boolean;
   private extractorPromise: Promise<unknown> | null = null;
 
   constructor(
     opts: {
-      modelRef?: string;
       dimensions?: number;
       hfModelId?: string;
+      revision?: string;
       quantized?: boolean;
       cacheDir?: string;
+      allowRemoteModels?: boolean;
     } = {},
   ) {
-    this.hfModelId = opts.hfModelId ?? 'Xenova/all-MiniLM-L6-v2';
-    this.modelRef = opts.modelRef ?? this.hfModelId;
-    this.dimensions = opts.dimensions ?? 384;
+    if ('modelRef' in opts) {
+      throw new Error(
+        'LocalCpuBackend: modelRef is server-derived from the Hugging Face model ID and immutable revision',
+      );
+    }
+    this.hfModelId = opts.hfModelId ?? DEFAULT_LOCAL_CPU_MODEL_ID;
+    const revision =
+      opts.revision ??
+      (this.hfModelId === DEFAULT_LOCAL_CPU_MODEL_ID
+        ? DEFAULT_LOCAL_CPU_MODEL_REVISION
+        : undefined);
+    if (!revision) {
+      throw new Error(
+        'LocalCpuBackend: a 40-hex immutable revision is required for a custom Hugging Face model',
+      );
+    }
+    if (!IMMUTABLE_HF_REVISION.test(revision)) {
+      throw new Error('LocalCpuBackend: Hugging Face model revision must be a 40-hex commit SHA');
+    }
+    this.revision = revision.toLowerCase();
+    this.modelRef = `${this.hfModelId}@${this.revision}`;
+    this.dimensions = opts.dimensions ?? DEFAULT_LOCAL_CPU_DIMENSIONS;
     this.quantized = opts.quantized ?? true;
     this.cacheDir = opts.cacheDir;
+    this.allowRemoteModels = opts.allowRemoteModels ?? true;
   }
 
   async isAvailable(): Promise<boolean> {
@@ -138,20 +166,26 @@ export class LocalCpuBackend implements EmbeddingBackend {
           env.cacheDir = cacheDir;
         }
         env.allowLocalModels = true;
-        env.allowRemoteModels = true;
+        env.allowRemoteModels = this.allowRemoteModels;
         const pipeline = (
           tf as { pipeline: (task: string, model: string, opts?: unknown) => Promise<unknown> }
         ).pipeline;
         return pipeline('feature-extraction', this.hfModelId, {
           dtype: this.quantized ? 'q8' : 'fp32',
+          revision: this.revision,
         });
       })();
     }
-    const extractor = (await this.extractorPromise) as unknown as (
-      texts: string[],
-      opts: { pooling: 'mean'; normalize: boolean },
-    ) => Promise<{ data: Float32Array; dims: number[] }>;
-    return extractor;
+    try {
+      const extractor = (await this.extractorPromise) as unknown as (
+        texts: string[],
+        opts: { pooling: 'mean'; normalize: boolean },
+      ) => Promise<{ data: Float32Array; dims: number[] }>;
+      return extractor;
+    } catch (error) {
+      this.extractorPromise = null;
+      throw error;
+    }
   }
 
   async embed(inputs: EmbedInput[]): Promise<EmbedOutput[]> {
@@ -291,12 +325,25 @@ export function createDefaultBackend(): EmbeddingBackend {
     const endpoint = process.env.AEF_EMBED_ENDPOINT ?? '';
     const apiKey = process.env.AEF_EMBED_API_KEY ?? '';
     if (!endpoint) throw new Error('AEF_EMBED_ENDPOINT is required for external-http backend');
-    return new ExternalHttpBackend({ endpoint, apiKey });
+    if (!apiKey) throw new Error('AEF_EMBED_API_KEY is required for external-http backend');
+    return new ExternalHttpBackend({
+      endpoint,
+      apiKey,
+      ...(process.env.AEF_EMBED_MODEL_REF
+        ? { modelRef: process.env.AEF_EMBED_MODEL_REF.trim() }
+        : {}),
+    });
   }
 
   if (backendEnv === 'future-gpu') return new FutureGpuBackend();
   if (backendEnv === 'future-azure') return new FutureAzureBackend();
   if (backendEnv === 'deterministic-cpu') return new DeterministicCpuBackend();
 
-  return new LocalCpuBackend();
+  const allowRemoteModels = process.env.AEF_HF_ALLOW_REMOTE_MODELS !== 'false';
+  return new LocalCpuBackend({
+    ...(process.env.AEF_HF_MODEL_ID ? { hfModelId: process.env.AEF_HF_MODEL_ID } : {}),
+    ...(process.env.AEF_HF_MODEL_REVISION ? { revision: process.env.AEF_HF_MODEL_REVISION } : {}),
+    ...(process.env.AEF_HF_CACHE_DIR ? { cacheDir: process.env.AEF_HF_CACHE_DIR } : {}),
+    allowRemoteModels,
+  });
 }

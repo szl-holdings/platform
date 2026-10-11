@@ -9,6 +9,11 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+# Authentication may be bypassed only through this explicit test-only switch.
+# Production startup rejects the same switch.
+os.environ.setdefault("SUBSTRATE_PYTHON_WORKER_ENV", "test")
+os.environ.setdefault("SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS", "1")
+
 import pytest
 from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
@@ -44,6 +49,7 @@ def make_claim(
         "workerId": "test-engine",
         "runId": run_id,
         "workflowId": "wf-test",
+        "tenantId": "tenant-test",
         "stageId": stage_id,
         "stageType": stage_type,
         "stageConfig": config or {"stageKind": stage_type},
