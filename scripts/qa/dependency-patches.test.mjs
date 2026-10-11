@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { lstatSync, readFileSync } from 'node:fs';
+import {
+  closeSync,
+  constants as fsConstants,
+  fstatSync,
+  lstatSync,
+  openSync,
+  readFileSync,
+} from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import test from 'node:test';
@@ -67,13 +74,28 @@ test('hardened braces fork binds its exact source provenance', () => {
   );
   assert.equal(metadata.localHardeningPatch, 'patches/braces@3.0.3.patch');
   const patchPath = path.join(ROOT, metadata.localHardeningPatch);
-  const stat = lstatSync(patchPath);
-  assert.ok(stat.isFile());
-  assert.equal(stat.isSymbolicLink(), false);
-  assert.equal(
-    createHash('sha256').update(readFileSync(patchPath)).digest('hex'),
-    metadata.localHardeningPatchSha256,
-  );
+  const descriptor = openSync(patchPath, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
+  try {
+    const opened = fstatSync(descriptor);
+    const pathStat = lstatSync(patchPath);
+    assert.ok(opened.isFile());
+    assert.ok(pathStat.isFile());
+    assert.equal(pathStat.isSymbolicLink(), false);
+    assert.equal(opened.dev, pathStat.dev);
+    assert.equal(opened.ino, pathStat.ino);
+
+    const bytes = readFileSync(descriptor);
+    const after = fstatSync(descriptor);
+    assert.equal(after.size, opened.size);
+    assert.equal(after.mtimeMs, opened.mtimeMs);
+    assert.equal(after.ctimeMs, opened.ctimeMs);
+    assert.equal(
+      createHash('sha256').update(bytes).digest('hex'),
+      metadata.localHardeningPatchSha256,
+    );
+  } finally {
+    closeSync(descriptor);
+  }
 });
 
 test('hardened braces rejects excessive recursive AST nesting', () => {
