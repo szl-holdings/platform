@@ -19,7 +19,7 @@
   },
   "scripts": {
     "generate": "drizzle-kit generate --config ./drizzle.config.ts",
-    "migrate": "node ./scripts/backfill-migrations.mjs && drizzle-kit migrate --config ./drizzle.config.ts && node ./scripts/apply-manual-migrations.mjs",
+    "migrate": "DRY_RUN=1 node ./scripts/apply-manual-migrations.mjs && drizzle-kit migrate --config ./drizzle.config.ts && node ./scripts/apply-manual-migrations.mjs",
     "migrate:backfill": "node ./scripts/backfill-migrations.mjs",
     "migrate:apply": "drizzle-kit migrate --config ./drizzle.config.ts",
     "migrate:manual": "node ./scripts/apply-manual-migrations.mjs",
@@ -27,6 +27,7 @@
     "push": "drizzle-kit push --config ./drizzle.config.ts",
     "push-force": "drizzle-kit push --force --config ./drizzle.config.ts",
     "push-non-interactive": "node ./scripts/non-interactive-migrate.mjs",
+    "test": "node --test ./scripts/*.test.mjs",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",

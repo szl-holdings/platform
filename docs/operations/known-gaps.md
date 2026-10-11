@@ -1,10 +1,33 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-03 (rev 31 — A11oy Atelier Proofweave compile-only boundary)
+**Last updated:** 2026-10-11 (rev 32 — migration authority fail-closed boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
+
+---
+
+## 2026-10-11 Migration Authority Boundary
+
+The normal database migration command no longer seeds
+`drizzle.__drizzle_migrations` from the current source-tree journal before
+applying SQL. A read-only manual-migration preflight runs before either
+migration set can apply; checksum drift blocks the command, and dry-run tracker
+inspection does not create database objects. Migration status queries use the
+schema-qualified trackers, report an absent tracker as an explicit state, and
+propagate connection, permission, and query failures.
+
+Production migration reconciliation remains on **HOLD**. Historical use of
+`drizzle-kit push`, journal gaps and duplicate prefixes, separately tracked
+manual SQL, and the unresolved simulation/evaluation schema history mean the
+repository cannot prove a safe legacy baseline from source alone. The explicit
+`migrate:backfill` recovery command is retained for an operator-verified
+database and backup, but it is excluded from deploy and CI. Closing this hold
+requires a fixed baseline decision, a complete inventory of live tracker and
+schema state, and clean plus legacy-upgrade verification against disposable
+PostgreSQL instances. No orphan migration or schema reconciliation is attempted
+by this bounded patch.
 
 ---
 
