@@ -146,7 +146,7 @@ const KILLINCHU_BUILD_INFO_BODY = {
   service: 'killinchu',
   build: {
     state: 'OBSERVED',
-    revision: '13477c429f5742cdc718a6294a80d00c7e8dc634',
+    revision: '32760a15fcecfe50211654713d7e4e6a86d947fa',
     revision_source: 'env:SZL_GIT_SHA',
   },
   receipt_minted: true,
@@ -154,11 +154,11 @@ const KILLINCHU_BUILD_INFO_BODY = {
   receipt_minted_scope: 'DEPLOYMENT_RELEASE_REFERENCE',
   release_receipt: {
     state: 'GITHUB_OIDC_ATTESTED',
-    source_revision: '13477c429f5742cdc718a6294a80d00c7e8dc634',
+    source_revision: '32760a15fcecfe50211654713d7e4e6a86d947fa',
     subject: 'hf-deploy-manifest.json',
-    subject_sha256: '915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c',
-    attestation_id: '53547813',
-    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/53547813',
+    subject_sha256: 'e03e46480aa33c0edc4260969c8d04f9fbb18ffc980eabc4e571090cb639a91c',
+    attestation_id: '54763629',
+    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/54763629',
     verification:
       'Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu',
   },
@@ -909,6 +909,20 @@ test('validates the exact Killinchu build-info source-binding body', async () =>
   delete (missingAttestation.release_receipt as Record<string, unknown>).attestation_id;
   const mismatchedSource = structuredClone(KILLINCHU_BUILD_INFO_BODY);
   mismatchedSource.build.revision = '0'.repeat(40);
+  const staleSource = structuredClone(KILLINCHU_BUILD_INFO_BODY);
+  staleSource.build.revision = '13477c429f5742cdc718a6294a80d00c7e8dc634';
+  staleSource.release_receipt.source_revision = staleSource.build.revision;
+  staleSource.release_receipt.subject_sha256 =
+    '915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c';
+  staleSource.release_receipt.attestation_id = '53547813';
+  staleSource.release_receipt.attestation_url =
+    'https://github.com/szl-holdings/killinchu/attestations/53547813';
+  const forgedManifest = structuredClone(KILLINCHU_BUILD_INFO_BODY);
+  forgedManifest.release_receipt.subject_sha256 = '0'.repeat(64);
+  const forgedAttestation = structuredClone(KILLINCHU_BUILD_INFO_BODY);
+  forgedAttestation.release_receipt.attestation_id = '0';
+  forgedAttestation.release_receipt.attestation_url =
+    'https://github.com/szl-holdings/killinchu/attestations/0';
   const claimsRequestMinting = {
     ...KILLINCHU_BUILD_INFO_BODY,
     receipt_minted_on_request: true,
@@ -926,6 +940,9 @@ test('validates the exact Killinchu build-info source-binding body', async () =>
   for (const invalid of [
     missingAttestation,
     mismatchedSource,
+    staleSource,
+    forgedManifest,
+    forgedAttestation,
     claimsRequestMinting,
     mismatchedReceiptScope,
     unexpectedField,
@@ -1079,8 +1096,8 @@ test('rejects duplicate, trailing, and over-depth JSON before API contract valid
 
   const candidate = configuredSurface('killinchu-build-info-api');
   const duplicateBody = JSON.stringify(KILLINCHU_BUILD_INFO_BODY).replace(
-    '"source_revision":"13477c429f5742cdc718a6294a80d00c7e8dc634"',
-    '"source_revision":"13477c429f5742cdc718a6294a80d00c7e8dc634","source\\u005frevision":"13477c429f5742cdc718a6294a80d00c7e8dc634"',
+    '"source_revision":"32760a15fcecfe50211654713d7e4e6a86d947fa"',
+    '"source_revision":"32760a15fcecfe50211654713d7e4e6a86d947fa","source\\u005frevision":"32760a15fcecfe50211654713d7e4e6a86d947fa"',
   );
   const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
     apiResponse(url, duplicateBody),

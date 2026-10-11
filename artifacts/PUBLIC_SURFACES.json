@@ -397,7 +397,7 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "A bounded JSON body read reported OBSERVED source 13477c429f5742cdc718a6294a80d00c7e8dc634, matching Killinchu main. GitHub's attestation API and signed in-toto statement corroborated OIDC attestation 53547813 for hf-deploy-manifest.json sha256:915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c, repository szl-holdings/killinchu, workflow hf-sync.yml, ref main, and that source revision. The manifest bytes and full Fulcio/Rekor chain were not independently reverified here, and this endpoint does not establish HF runtime byte parity."
+      "note": "A bounded 2026-10-11 JSON body read reported OBSERVED source 32760a15fcecfe50211654713d7e4e6a86d947fa, matching Killinchu main. The downloaded hf-deploy-manifest.json from hf-sync run 38124775327 hashed to sha256:e03e46480aa33c0edc4260969c8d04f9fbb18ffc980eabc4e571090cb639a91c. gh attestation verify succeeded for that file and verified the signed in-toto subject, repository szl-holdings/killinchu, workflow hf-sync.yml, ref main, and source revision. The live API advertises attestation ID 54763629. This source and manifest binding does not establish HF runtime byte parity or aggregate Killinchu readiness."
     },
     {
       "id": "killinchu-public-console",
