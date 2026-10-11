@@ -137,8 +137,9 @@ jobs:
           echo "Accessibility gate — WCAG 2.1 AA (wcag2a, wcag2aa, wcag21a, wcag21aa)"
           echo "Tool: @axe-core/playwright — 6 CI-scanned web artifacts."
           echo "See audit/a11y/findings.md for the findings register."
-          if [[ "${{ needs.a11y-axe.result }}" == "failure" ]]; then
-            echo "::error::One or more axe scans failed — zero critical/serious violations required."
+          result="${{ needs.a11y-axe.result }}"
+          if [[ "$result" != "success" ]]; then
+            echo "::error::Axe matrix did not complete successfully: $result. Inspect the per-app scan and infrastructure results."
             exit 1
           fi
           echo "All axe scans passed."

@@ -53,6 +53,7 @@ const V1_ENDPOINTS = {
   shellCompatibility: ['POST /api/omnia/adoption/beacon'],
   atelier: [
     'POST /api/a11oy/v1/atelier/ask',
+    'POST /api/a11oy/v1/atelier/proofweave/compile',
     'GET /api/a11oy/v1/atelier/health',
     'GET /api/a11oy/v1/atelier/sessions/:sessionId',
     'GET /api/a11oy/v1/atelier/sessions/:sessionId/verify',

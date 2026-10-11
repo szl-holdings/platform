@@ -258,7 +258,7 @@ export interface AtelierStatePersistenceMetadata {
   readonly persistenceState: AtelierStatePersistenceState;
   readonly durable: boolean;
   readonly encryptionState: 'NONE' | 'ENCRYPTED_AT_REST' | 'UNAVAILABLE';
-  readonly evidenceState: 'OBSERVED' | 'UNAVAILABLE';
+  readonly evidenceState: 'MEASURED' | 'UNAVAILABLE';
   readonly retentionHours: number;
   readonly retentionMs: number;
 }
@@ -791,7 +791,7 @@ export class InMemoryAtelierStateStore implements AtelierStateStore {
     persistenceState: ATELIER_IN_PROCESS_PERSISTENCE_STATE,
     durable: false,
     encryptionState: 'NONE',
-    evidenceState: 'OBSERVED',
+    evidenceState: 'MEASURED',
     retentionHours: ATELIER_STATE_RETENTION_HOURS,
     retentionMs: ATELIER_STATE_RETENTION_MS,
   });

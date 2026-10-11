@@ -25,15 +25,15 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   if (Platform.OS === 'web') return null;
   if (!Device.isDevice) return null;
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
+  const hasGrantedStatus = (permission: object): boolean =>
+    'status' in permission && permission.status === 'granted';
+  let granted = hasGrantedStatus(await Notifications.getPermissionsAsync());
 
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
+  if (!granted) {
+    granted = hasGrantedStatus(await Notifications.requestPermissionsAsync());
   }
 
-  if (finalStatus !== 'granted') {
+  if (!granted) {
     return null;
   }
 

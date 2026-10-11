@@ -1,0 +1,14 @@
+{
+  "aliases": {
+    "aegis": "aegis-assurance",
+    "counsel": "counsel-assurance",
+    "insurance": "insurance-assurance",
+    "killinchu": "killinchu",
+    "lyte": "lyte-services",
+    "terra": "terra-assurance",
+    "vessels": "vessels-assurance"
+  },
+  "captured_at": "2026-08-28T23:59:00-04:00",
+  "global_scope": "all",
+  "schema": "szl.formula-vertical-aliases/v1"
+}

@@ -13,9 +13,45 @@ required runtime source is absent.
 - `/a11oy/series-a` — an additional alias for that unchanged Series-A surface.
 - `/a11oy/product-journey` — investor and developer navigation through the
   explicitly qualified demo, Workcells, architecture, governance, and proof views.
+- `/a11oy/atelier` — the separate Atelier workbench for configured inference,
+  Turn Capsule continuity, and compile-only Proofweave plans.
 
 The Series-A journey is self-contained. It does not link to legacy seeded
 surfaces as evidence of live operations.
+
+## Atelier and Proofweave
+
+The Atelier workbench uses two runtime API surfaces with different evidence
+boundaries:
+
+- `POST /api/a11oy/v1/atelier/ask` requests an answer only through a configured,
+  allowlisted provider adapter and fails closed when no adapter is available.
+  It uses tenant/session-scoped idempotency and commits a bounded Turn Capsule;
+  the default store remains process-local, while the optional encrypted adapter
+  is limited to restart continuity on one host and one runtime process.
+- `POST /api/a11oy/v1/atelier/proofweave/compile` validates and returns a
+  deterministic, hash-addressed research plan. It does not fetch sources, call
+  a model, run tools or Workcells, approve claims, or store the plan durably.
+
+The companion CLI exposes `a11oy-atelier ask` and `a11oy-atelier weave`; a weave
+request requires at least one explicit typed `--claim KIND:statement`. A
+successful compile carries evidence class `SIMULATED` plus the separate
+lifecycle states `DEMO / COMPILED_NOT_EXECUTED / IN_PROCESS_NOT_STORED`. Its
+audit-metadata append is configuration-dependent, and durable-persistence
+evidence remains `UNKNOWN`.
+
+The browser surface is intentionally local-development only. An authenticated
+local flow uses the explicit loopback shared-proxy bridge, which keeps the API
+key server-side and attaches it only to Atelier requests. A production browser
+build does not call Atelier health, inference, or Proofweave compile routes
+until A11oy has an authenticated server-side session or backend-for-frontend
+(BFF); it fails closed as `BLOCKED` with runtime evidence `UNKNOWN`. No
+`VITE_*` provider-key path is supported.
+
+See [A11oy Atelier](../../docs/A11OY_ATELIER.md),
+[Proofweave](../../docs/A11OY_ATELIER_PROOFWEAVE.md), and the
+[dated public-source and license boundary](../../docs/A11OY_ATELIER_LICENSE_BOUNDARY.md),
+which is an implementer record with evidence class `DECLARED`.
 
 ## Evidence states
 

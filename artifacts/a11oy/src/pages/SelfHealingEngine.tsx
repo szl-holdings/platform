@@ -67,29 +67,29 @@ function generateEvents(): RemediationEvent[] {
   const now = Date.now();
   return Array.from({ length: 16 }, (_, i) => ({
     id: `re-${i}`,
-    timestamp: now - i * 45000 - Math.floor(Math.random() * 10000),
+    timestamp: now - i * 45000,
     workflow: WORKFLOWS[i % WORKFLOWS.length].name,
     phase: (['sense', 'think', 'act', 'verify'] as const)[i % 4],
     description: [
       'Detected anomalous restart pattern in prod namespace',
       'Analyzing root cause: OOMKilled on checkout-service-7b4',
-      'Executing: kubectl scale deployment checkout --replicas=5',
-      'Verified: restart count stabilized to 0 over 5m window',
+      'Fixture step: kubectl scale deployment checkout --replicas=5',
+      'Fixture outcome: restart count shown as stabilized',
       'Latency spike detected: p99 jumped from 120ms to 780ms',
       'Causal model indicates: upstream DB connection saturation',
-      'Executing: HPA scale-up + connection pool increase',
-      'Verified: p99 returned to 145ms within 90 seconds',
+      'Fixture step: HPA scale-up + connection pool increase',
+      'Fixture outcome: p99 shown as returned to 145ms',
       'Consumer lag rising: 14,200 messages behind',
       'Root cause: consumer instance OOMKilled, only 2/4 healthy',
-      'Executing: restart failed consumers, scale to 6 instances',
-      'Verified: lag cleared within 4 minutes',
+      'Fixture step: restart failed consumers, scale to 6 instances',
+      'Fixture outcome: lag shown as cleared',
       'TLS certificate for api.szl.com expires in 12 days',
       'Requesting renewal via Let\'s Encrypt ACME protocol',
       'New certificate deployed to ingress controller',
       'TLS handshake verified on all endpoints',
     ][i],
     outcome: (['success', 'success', 'pending', 'success', 'success', 'failed', 'success', 'success'] as const)[i % 8],
-    durationMs: Math.floor(100 + Math.random() * 5000),
+    durationMs: 100 + i * 250,
   }));
 }
 
@@ -128,9 +128,8 @@ export function SelfHealingEngine() {
         <p className="text-xs font-mono uppercase tracking-[0.2em] text-[#f5f5f5]/40 mb-1">A11OY · AUTOMATION · SELF-HEALING</p>
         <h1 className="text-2xl font-bold tracking-tight text-[#f5f5f5]">Self-Healing Engine</h1>
         <p className="text-sm text-[#f5f5f5]/50 mt-1 max-w-3xl">
-          Closed-loop remediation inspired by Elastic's Sense → Think → Act architecture.
-          Detects anomalies, reasons about root causes using causal models, executes safe
-          automated fixes, and verifies resolution — all without human intervention.
+          Simulated fixture. The workflows, MTTR figures, and event feed below are generated
+          in the browser. This page makes no repair call and reads no telemetry.
         </p>
       </div>
 
@@ -169,7 +168,7 @@ export function SelfHealingEngine() {
         {[
           { label: 'Auto-Resolved', value: `${totalAutoResolved}/${totalIncidents}`, color: '#4ade80' },
           { label: 'Resolution Rate', value: `${Math.round((totalAutoResolved / totalIncidents) * 100)}%`, color: '#06b6d4' },
-          { label: 'Avg MTTR Drop', value: `${avgMttr}%`, color: '#a78bfa' },
+          { label: 'Fixture MTTR drop', value: `${avgMttr}%`, color: '#a78bfa' },
           { label: 'Active Workflows', value: WORKFLOWS.length, color: '#c9b787' },
           { label: 'Executing Now', value: activeExecutions, color: activeExecutions > 0 ? '#fb923c' : '#4ade80' },
         ].map(kpi => (
@@ -195,7 +194,7 @@ export function SelfHealingEngine() {
                 </div>
                 <div className="flex items-center gap-4 text-[10px] font-mono text-white/30">
                   <span>{w.autoResolved}/{w.totalIncidents} resolved</span>
-                  <span className="text-green-400">↓{w.mttrReduction}% MTTR</span>
+                  <span className="text-green-400">fixture {w.mttrReduction}% MTTR</span>
                 </div>
               </div>
               <div className="ml-5 text-[10px] font-mono text-white/25">
@@ -215,7 +214,7 @@ export function SelfHealingEngine() {
 
       <div className="bg-[#0a0a0f] border border-white/[0.06] rounded-lg overflow-hidden">
         <div className="p-5 border-b border-white/[0.06] flex items-center justify-between">
-          <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-white/70">Remediation Event Feed</h2>
+          <h2 className="text-sm font-mono font-semibold uppercase tracking-wider text-white/70">Simulated event feed</h2>
           <span className="text-[10px] font-mono text-white/30">tick {tick} · live</span>
         </div>
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
