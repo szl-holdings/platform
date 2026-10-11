@@ -18,6 +18,11 @@ test('only the exact public tokenizer revision assignment is exempted from gener
   const linePattern = rule.match(/regexes = \['''(.*?)'''\]/)?.[1];
   assert.ok(pathPattern);
   assert.ok(linePattern);
+  assert.doesNotMatch(
+    linePattern,
+    /\(\?:/,
+    'Gitleaks uses Go RE2, which rejects non-capturing groups',
+  );
   const permittedPath = new RegExp(pathPattern);
   const permittedLine = new RegExp(linePattern);
   const source = readFileSync(
