@@ -1,0 +1,73 @@
+{
+  "schema": "szl.a11oy-candidate-screenshot/v1",
+  "evidence_status": "LOCAL_NON_AUTHORITATIVE",
+  "claim_boundary": "Candidate UI fixture only; this capture is not production, deployment, certification, or signed-proof evidence.",
+  "captured_at": "2026-10-11T06:28:55.475Z",
+  "route": "http://127.0.0.1:4111/preview/platform-a11oy/security-agents",
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "full_page": true
+  },
+  "screenshot": {
+    "path": "docs/assets/screenshots/current/a11oy-candidate-security-agents-2026-10-11.png",
+    "bytes": 172642,
+    "sha256": "396eab9e22009ad81212c7f207a3240978164f83e5cef80d6eb5e5e7b699e421"
+  },
+  "build": {
+    "index_html_sha256": "2096b8fecd0b318824bc9ca0a9967e576d770480eae396257a63578ae1bc4773",
+    "source_head": "97e62630b5fb48a69b9a96907611b37620b9aa05",
+    "working_tree_clean": true
+  },
+  "runtime": {
+    "node": "v24.19.0",
+    "playwright": "1.60.0",
+    "chromium": "151.0.7922.173",
+    "executable_path": "/usr/bin/chromium"
+  },
+  "network": {
+    "policy": "GET requested route plus same-origin candidate assets only",
+    "observed_requests": [
+      {
+        "method": "GET",
+        "resource_type": "document",
+        "url": "http://127.0.0.1:4111/preview/platform-a11oy/security-agents"
+      },
+      {
+        "method": "GET",
+        "resource_type": "script",
+        "url": "http://127.0.0.1:4111/preview/platform-a11oy/assets/index-Cuo27aFU.js"
+      },
+      {
+        "method": "GET",
+        "resource_type": "stylesheet",
+        "url": "http://127.0.0.1:4111/preview/platform-a11oy/assets/index-CL6F4e2M.css"
+      },
+      {
+        "method": "GET",
+        "resource_type": "script",
+        "url": "http://127.0.0.1:4111/preview/platform-a11oy/assets/GovernedSecurityAgents-DoK12lCX.js"
+      }
+    ],
+    "observed_responses": [
+      {
+        "status": 200,
+        "url": "http://127.0.0.1:4111/preview/platform-a11oy/security-agents"
+      },
+      {
+        "status": 200,
+        "url": "http://127.0.0.1:4111/preview/platform-a11oy/assets/index-CL6F4e2M.css"
+      },
+      {
+        "status": 200,
+        "url": "http://127.0.0.1:4111/preview/platform-a11oy/assets/index-Cuo27aFU.js"
+      },
+      {
+        "status": 200,
+        "url": "http://127.0.0.1:4111/preview/platform-a11oy/assets/GovernedSecurityAgents-DoK12lCX.js"
+      }
+    ],
+    "foreign_requests": [],
+    "undeclared_same_origin_requests": []
+  }
+}
