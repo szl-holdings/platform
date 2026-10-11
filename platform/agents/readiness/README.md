@@ -26,7 +26,8 @@ sorries). Author: **Yachay <yachay@szlholdings.dev>**.
 ### Schedule (UTC)
 - **Hourly**: reliability `0 * * * *`, security `20 * * * *`, observability `40 * * * *`.
 - **Daily**: operability `30 3`, compliance `10 4`, docs `30 4`, dr `10 5`.
-- **Daily, after the others** (`10 6`): audit-rift — so it always sees fresh peer receipts.
+- **Daily, after the others** (`10 6`): audit-rift reads the latest available peer
+  receipts. Schedule order does not establish freshness; no receipt-age gate is enforced.
 - All eight share one per-asset lock, `hf-write/dataset/SZLHOLDINGS/readiness-runs`.
   GitHub cancels a pending run only when a third run joins the group, so start
   times are kept at least 10 minutes apart (`_lib/test_khipu_publish.py` enforces this).
@@ -57,18 +58,24 @@ SZLHOLDINGS/readiness-runs
   dr-dumps/<flagship>/<ts>.ndjson      (READINESS-DR backups)
 ```
 
-If the signing key or `HF_TOKEN` is absent, the envelope is honestly marked
-`signed:false` / `published:false` — **never a fabricated signature** (Doctrine v11 LOCKED 749/14/163
-§2 anti-fake-green, preserved under v11).
-Inside GitHub Actions a receipt (or DR dump) that did not reach the dataset also
-fails the run (`khipu.require_published`), so a green run always has its receipt
-on the Hub; a local run without `HF_TOKEN` only prints a warning.
+If the signing key is absent or invalid, the envelope is honestly marked
+`signed:false` and is **not uploaded**. A receipt signed by a different key is
+also rejected against the configured fleet signing key — never a fabricated signature (Doctrine
+v11 LOCKED 749/14/163 §2 anti-fake-green). If `HF_TOKEN` is absent or rejected,
+`published:false` is recorded. Inside GitHub Actions either signing or
+publication failure fails the run (`khipu.require_published`); a successful
+run proves transport of a verified signed receipt, not that every runtime
+probe passed. A local run without credentials remains unsigned/unpublished and
+prints a warning.
 
 ## Dashboard
 `dashboard.html` is a static, read-only viewer. It lists the latest receipt for
-each agent from `SZLHOLDINGS/readiness-runs` and renders a green/amber/red matrix.
-Open it directly, or host it on the docs site. No build step, no secrets — it
-only reads public dataset files.
+each agent from `SZLHOLDINGS/readiness-runs`. Because no trusted public signer
+key is pinned in the browser, it marks fetched verdicts and signing claims
+`UNVERIFIED` even if the receipt asserts GREEN and `signed:true`. The audit-rift
+agent separately verifies peer receipts against its configured fleet key.
+Open the dashboard directly, or host it on the docs site. No build step or
+browser secret is needed; it only reads public dataset files.
 
 ## Running locally
 ```bash
@@ -79,8 +86,9 @@ export A11OY_URL=... AMARU_URL=... SENTRA_URL=... KILLINCHU_URL=... ROSIE_URL=..
 export OTEL_COLLECTOR_URL=...        # for observability
 python platform/agents/readiness/readiness-reliability/executor.py
 ```
-With no env set, each agent still runs and emits an honest `SKIPPED` / unsigned
-receipt — useful for CI dry-runs.
+With no env set, each agent still runs and emits an honest `SKIPPED` /
+unsigned, unpublished receipt — useful for local dry-runs, not a passing
+GitHub Actions readiness result.
 
 ## Required GitHub configuration
 - **Secrets**: `HF_TOKEN`, `KHIPU_SIGNING_KEY_B64`.

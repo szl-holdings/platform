@@ -29,7 +29,6 @@ import json
 import os
 import subprocess
 import sys
-import urllib.request
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "_lib"))
 import khipu  # noqa: E402
@@ -67,20 +66,15 @@ def latest_peer_receipt(agent: str) -> dict | None:
         return {"error": f"{type(exc).__name__}: {exc}"}
 
 
-def reverify_signature(env: dict) -> bool | None:
+def reverify_signature(agent: str, env: dict) -> bool | None:
+    """Authenticate a peer against the configured fleet key, not its own key claim."""
     if not isinstance(env, dict):
         return False
     if env.get("signed") is not True or not env.get("signatures"):
         return None
-    try:
-        from nacl.signing import VerifyKey
-        vk = VerifyKey(base64.b64decode(env["publicKeyB64"], validate=True))
-        payload = base64.b64decode(env["payload"], validate=True)
-        sig = base64.b64decode(env["signatures"][0]["sig"], validate=True)
-        vk.verify(payload, sig)
-        return True
-    except Exception:
-        return False
+    if not os.environ.get("KHIPU_SIGNING_KEY_B64"):
+        return None
+    return khipu.receipt_signature_error(agent, env) is None
 
 
 def audit_peer(agent: str) -> dict:
@@ -89,7 +83,7 @@ def audit_peer(agent: str) -> dict:
         return {"agent": agent, "status": "NO-RECEIPT"}
     if "error" in rec:
         return {"agent": agent, "status": "FETCH-ERROR", "detail": rec["error"]}
-    sig_ok = reverify_signature(rec["envelope"])
+    sig_ok = reverify_signature(agent, rec["envelope"])
     finding = {"agent": agent, "receipt_file": rec["file"], "signature_reverified": sig_ok}
     if sig_ok is False:
         return {**finding, "status": "FLAGGED", "reason": "invalid receipt signature"}

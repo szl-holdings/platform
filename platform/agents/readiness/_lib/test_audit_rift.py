@@ -9,6 +9,7 @@ from __future__ import annotations
 import base64
 import importlib.util
 import json
+import os
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -191,18 +192,42 @@ class MetaVerdictTest(unittest.TestCase):
 
 @unittest.skipUnless(SigningKey is not None, "PyNaCl is not installed before the fleet dependency step")
 class Ed25519VerificationTest(unittest.TestCase):
-    def signed_receipt(self, payload: dict) -> dict:
-        body = {"payload": payload}
-        raw = json.dumps(body).encode()
-        key = SigningKey.generate()
-        envelope = {"signed": True, "publicKeyB64": base64.b64encode(bytes(key.verify_key)).decode(),
-                    "payload": base64.b64encode(raw).decode(),
-                    "signatures": [{"sig": base64.b64encode(key.sign(raw).signature).decode()}]}
+    def setUp(self) -> None:
+        self.fleet_key = SigningKey.generate()
+        key_env = {"KHIPU_SIGNING_KEY_B64": base64.b64encode(bytes(self.fleet_key)).decode()}
+        patcher = patch.dict(os.environ, key_env)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def signed_receipt(self, payload: dict, agent: str = "readiness-docs",
+                       signer: SigningKey | None = None) -> dict:
+        key = signer or self.fleet_key
+        with patch.dict(os.environ, {"KHIPU_SIGNING_KEY_B64": base64.b64encode(bytes(key)).decode()}):
+            envelope = audit.khipu.sign_khipu_receipt(agent, payload)
+        body = json.loads(base64.b64decode(envelope["payload"]))
         return {"file": "synthetic-signed-receipt.json", "envelope": envelope, "body": body}
 
     def test_valid_ed25519_signature_is_reverified(self) -> None:
         rec = self.signed_receipt({})
-        self.assertIs(audit.reverify_signature(rec["envelope"]), True)
+        self.assertIs(audit.reverify_signature("readiness-docs", rec["envelope"]), True)
+
+    def test_foreign_self_signed_receipt_is_not_fleet_authenticated(self) -> None:
+        rec = self.signed_receipt({}, signer=SigningKey.generate())
+        self.assertIs(audit.reverify_signature("readiness-docs", rec["envelope"]), False)
+
+    def test_missing_fleet_key_is_unverified(self) -> None:
+        rec = self.signed_receipt({})
+        with patch.dict(os.environ, {"KHIPU_SIGNING_KEY_B64": ""}):
+            self.assertIsNone(audit.reverify_signature("readiness-docs", rec["envelope"]))
+
+    def test_wrong_agent_identity_is_not_authenticated(self) -> None:
+        rec = self.signed_receipt({})
+        self.assertIs(audit.reverify_signature("readiness-security", rec["envelope"]), False)
+
+    def test_mismatched_payload_digest_is_not_authenticated(self) -> None:
+        rec = self.signed_receipt({})
+        rec["envelope"]["payloadSha256"] = "0" * 64
+        self.assertIs(audit.reverify_signature("readiness-docs", rec["envelope"]), False)
 
     def test_tampered_payload_cannot_claim_a_verified_signature(self) -> None:
         rec = self.signed_receipt({})
@@ -217,12 +242,12 @@ class Ed25519VerificationTest(unittest.TestCase):
     def test_signed_boolean_does_not_replace_signature_verification(self) -> None:
         rec = self.signed_receipt({})
         rec["envelope"]["signatures"][0]["sig"] = base64.b64encode(bytes(64)).decode()
-        self.assertIs(audit.reverify_signature(rec["envelope"]), False)
+        self.assertIs(audit.reverify_signature("readiness-docs", rec["envelope"]), False)
 
     def test_malformed_base64_is_rejected(self) -> None:
         rec = self.signed_receipt({})
         rec["envelope"]["payload"] += "!"
-        self.assertIs(audit.reverify_signature(rec["envelope"]), False)
+        self.assertIs(audit.reverify_signature("readiness-docs", rec["envelope"]), False)
 
     def test_signed_receipt_still_requires_an_independent_claim_recheck(self) -> None:
         rec = self.signed_receipt({"repos": [{"repo": "szl-holdings/platform",
