@@ -1,0 +1,62 @@
+{
+  "schema": "szl.github-org-metadata-summary.v1",
+  "organization": "szl-holdings",
+  "observed_at_utc": "2026-10-06T04:33:40Z",
+  "authority": "CURRENT_AUTHENTICATED_METADATA_READ",
+  "mutation_performed": false,
+  "requests": [
+    {
+      "url": "https://api.github.com/orgs/szl-holdings/repos?per_page=100&page=1",
+      "status": 200,
+      "response_date": "2026-10-06T04:33:23Z",
+      "records": 100,
+      "etag": "411c4a29a19991a2fdb176f90e9af5e5c73d35067c683eff0feb992c0befdab5",
+      "body_sha256": "ef076f9403e7a3c69058e04995f1b3ff23ae422502cb9fd02a1df0cbc3604778",
+      "next": "https://api.github.com/organizations/273360816/repos?per_page=100&page=2"
+    },
+    {
+      "url": "https://api.github.com/organizations/273360816/repos?per_page=100&page=2",
+      "status": 200,
+      "response_date": "2026-10-06T04:33:40Z",
+      "records": 40,
+      "etag": "4bac59836cf469b62d925f47e8fac4a63ed95f02cda2c09e04a09754a09d9de4",
+      "body_sha256": "af82faba356e3cfbe99befe2d83e4020cb4cc7e1e11ac2b5dce9f4d866e748e7",
+      "next": null
+    }
+  ],
+  "cursor_complete": true,
+  "summary": {
+    "repositories": 140,
+    "unique_full_names": 140,
+    "public": 128,
+    "private": 12,
+    "active": 111,
+    "archived": 29,
+    "forks": 0,
+    "default_branches": {
+      "main": 140
+    },
+    "primary_languages": {
+      "Python": 105,
+      "TypeScript": 12,
+      "JavaScript": 8,
+      "HTML": 6,
+      "CSS": 2,
+      "Shell": 2,
+      "TeX": 2,
+      "Lean": 1,
+      "null": 2
+    }
+  },
+  "authentication_boundary": {
+    "accepted_github_permissions": "metadata=read",
+    "oauth_scopes_header": "blank",
+    "settings_rulesets_checks_security_alert_authority_established": false
+  },
+  "privacy_boundary": {
+    "raw_responses_committed": false,
+    "private_repository_names_committed": false,
+    "canonical_reduced_inventory_sha256": "a1d65c0b53eeba686c7a8a0c200a8414f28c3b33a97c89c138ae860e6779fb96",
+    "note": "Raw and reduced inventories included private metadata and were withheld from this repository-controlled receipt."
+  }
+}

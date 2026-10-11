@@ -37,7 +37,10 @@ export interface SubstrateCompletionRequest {
   maxTokens?: number;
   topP?: number;
   stream?: boolean;
-  tools?: Array<{ type: string; function: { name: string; description?: string; parameters?: Record<string, unknown> } }>;
+  tools?: Array<{
+    type: string;
+    function: { name: string; description?: string; parameters?: Record<string, unknown> };
+  }>;
   responseFormat?: { type: 'json_object' } | { type: 'text' };
 }
 
@@ -110,9 +113,29 @@ function mapHealthResponse(raw: SubstrateHealthApiResponse): SubstrateHealthStat
 }
 
 const DEFAULT_SUBSTRATE_URL = 'http://localhost:8070/v1';
+const INTERNAL_API_KEY_ENV = 'SUBSTRATE_API_KEY';
 
 function resolveBaseUrl(): string {
   return process.env.SUBSTRATE_INFERENCE_URL ?? DEFAULT_SUBSTRATE_URL;
+}
+
+function resolveInternalApiKey(): string | undefined {
+  const apiKey =
+    typeof process !== 'undefined' ? process.env?.[INTERNAL_API_KEY_ENV]?.trim() : undefined;
+  return apiKey || undefined;
+}
+
+function inferenceHeaders(apiKey: string | undefined): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'User-Agent': 'szl-holdings-substrate-adapters/1.0',
+  };
+  if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+  return headers;
+}
+
+function redactInternalApiKey(value: string, apiKey: string | undefined): string {
+  return apiKey ? value.replaceAll(apiKey, '[REDACTED]') : value;
 }
 
 const PREDEFINED_SUBSTRATE_ENDPOINTS: SubstrateEndpointConfig[] = SUBSTRATE_MODEL_CATALOG.map(
@@ -167,9 +190,7 @@ class SubstrateEndpointManager {
     if (filters.tags?.length)
       results = results.filter((e) => filters.tags?.some((t) => e.tags.includes(t)));
     if (filters.modalities?.length)
-      results = results.filter((e) =>
-        filters.modalities?.some((m) => e.modalities.includes(m)),
-      );
+      results = results.filter((e) => filters.modalities?.some((m) => e.modalities.includes(m)));
     return results;
   }
 
@@ -232,20 +253,18 @@ class SubstrateEndpointManager {
     };
     if (req.tools?.length) body.tools = req.tools;
     if (req.responseFormat) body.response_format = req.responseFormat;
+    const apiKey = resolveInternalApiKey();
 
     try {
       const response = await fetch(`${ep.baseUrl}/chat/completions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'szl-holdings-substrate-adapters/1.0',
-        },
+        headers: inferenceHeaders(apiKey),
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(300_000),
       });
 
       if (!response.ok) {
-        const errText = await response.text();
+        const errText = redactInternalApiKey(await response.text(), apiKey);
         throw new Error(`Substrate API error ${response.status}: ${errText.slice(0, 300)}`);
       }
 
@@ -280,32 +299,26 @@ class SubstrateEndpointManager {
       };
     } catch (err) {
       const latencyMs = Date.now() - start;
-      logger.error(
-        { endpointId: req.endpointId, error: String(err), latencyMs },
-        'Substrate completion failed',
-      );
+      const error = redactInternalApiKey(String(err), apiKey);
+      logger.error({ endpointId: req.endpointId, error, latencyMs }, 'Substrate completion failed');
+      if (error !== String(err)) throw new Error(error);
       throw err;
     }
   }
 
   async loadModel(modelId: string): Promise<{ success: boolean; message: string }> {
     const baseUrl = resolveBaseUrl().replace(/\/v1\/?$/, '');
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'User-Agent': 'szl-holdings-substrate-adapters/1.0',
-    };
-    const apiKey = typeof process !== 'undefined' ? process.env?.SUBSTRATE_API_KEY : undefined;
-    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+    const apiKey = resolveInternalApiKey();
     try {
       const response = await fetch(`${baseUrl}/v1/models/load`, {
         method: 'POST',
-        headers,
+        headers: inferenceHeaders(apiKey),
         body: JSON.stringify({ model_id: modelId }),
         signal: AbortSignal.timeout(600_000),
       });
 
       if (!response.ok) {
-        const errText = await response.text();
+        const errText = redactInternalApiKey(await response.text(), apiKey);
         return { success: false, message: `Load failed: ${errText.slice(0, 300)}` };
       }
 
@@ -313,35 +326,30 @@ class SubstrateEndpointManager {
       logger.info({ modelId, status: result.status }, 'Model load requested');
       return { success: true, message: result.message ?? 'Model loading' };
     } catch (err) {
-      return { success: false, message: String(err) };
+      return { success: false, message: redactInternalApiKey(String(err), apiKey) };
     }
   }
 
   async unloadModel(modelId: string): Promise<{ success: boolean; message: string }> {
     const baseUrl = resolveBaseUrl().replace(/\/v1\/?$/, '');
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'User-Agent': 'szl-holdings-substrate-adapters/1.0',
-    };
-    const apiKey = typeof process !== 'undefined' ? process.env?.SUBSTRATE_API_KEY : undefined;
-    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+    const apiKey = resolveInternalApiKey();
     try {
       const response = await fetch(`${baseUrl}/v1/models/unload`, {
         method: 'POST',
-        headers,
+        headers: inferenceHeaders(apiKey),
         body: JSON.stringify({ model_id: modelId }),
         signal: AbortSignal.timeout(30_000),
       });
 
       if (!response.ok) {
-        const errText = await response.text();
+        const errText = redactInternalApiKey(await response.text(), apiKey);
         return { success: false, message: `Unload failed: ${errText.slice(0, 300)}` };
       }
 
       logger.info({ modelId }, 'Model unloaded');
       return { success: true, message: 'Model unloaded' };
     } catch (err) {
-      return { success: false, message: String(err) };
+      return { success: false, message: redactInternalApiKey(String(err), apiKey) };
     }
   }
 }

@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 
 import { execFileSync, spawn } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
+import { constants as fsConstants } from 'node:fs';
 import {
   lstat,
   mkdir,
   mkdtemp,
+  open,
   readdir,
   readFile,
   realpath,
   rm,
-  stat,
   writeFile,
 } from 'node:fs/promises';
 import { createServer } from 'node:http';
@@ -35,6 +36,7 @@ const outputDirectory =
 const MIN_CANONICAL_CAPTURE_TIMEOUT_MS = 10 * 60 * 1_000;
 const MAX_CANONICAL_CAPTURE_TIMEOUT_MS = 90 * 60 * 1_000;
 const CANONICAL_CAPTURE_TIMEOUT_PER_CASE_MS = 75 * 1_000;
+const SOURCE_IDENTITY_PATH = '/a11oy/__source-identity.json';
 
 function terminateChildTree(child) {
   if (!child.pid || child.exitCode !== null) return;
@@ -237,6 +239,35 @@ async function rejectSymlinkComponents(absolutePath, label) {
   }
 }
 
+async function readVerifiedRegularFile(absolute, expected, label) {
+  const handle = await open(absolute, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
+  try {
+    const opened = await handle.stat();
+    if (
+      !opened.isFile() ||
+      opened.dev !== expected.dev ||
+      opened.ino !== expected.ino ||
+      opened.size !== expected.size ||
+      opened.mtimeMs !== expected.mtimeMs ||
+      opened.ctimeMs !== expected.ctimeMs
+    ) {
+      throw new Error(`${label} changed before opening`);
+    }
+    const bytes = await handle.readFile();
+    const after = await handle.stat();
+    if (
+      after.size !== opened.size ||
+      after.mtimeMs !== opened.mtimeMs ||
+      after.ctimeMs !== opened.ctimeMs
+    ) {
+      throw new Error(`${label} changed while reading`);
+    }
+    return bytes;
+  } finally {
+    await handle.close();
+  }
+}
+
 async function readTrackedFile(relativePath, label) {
   const absolute = resolveInsideRepository(relativePath, label);
   await rejectSymlinkComponents(absolute, label);
@@ -248,7 +279,7 @@ async function readTrackedFile(relativePath, label) {
   assertRealPathInsideRepository(resolved, label);
   const repositoryPath = path.relative(repositoryRoot, absolute).replaceAll(path.sep, '/');
   git(['ls-files', '--error-unmatch', '--', repositoryPath]);
-  const workingBytes = await readFile(absolute);
+  const workingBytes = await readVerifiedRegularFile(absolute, details, label);
   const committedBytes = gitBuffer(['show', `HEAD:${repositoryPath}`]);
   if (!workingBytes.equals(committedBytes)) {
     throw new Error(`${label} bytes do not match HEAD:${repositoryPath}`);
@@ -294,7 +325,7 @@ async function collectAssetManifest(root) {
       if (details.isDirectory()) {
         await visit(absolute);
       } else if (details.isFile()) {
-        const bytes = await readFile(absolute);
+        const bytes = await readVerifiedRegularFile(absolute, details, 'build asset');
         entries.push({
           path: path.relative(root, absolute).replaceAll(path.sep, '/'),
           bytes: bytes.length,
@@ -326,8 +357,28 @@ const contentTypes = new Map([
   ['.woff2', 'font/woff2'],
 ]);
 
-async function startExactBuildServer(buildRoot) {
+async function startExactBuildServer(buildRoot, assetManifest, servedIdentity) {
   const resolvedBuildRoot = path.resolve(buildRoot);
+  const assetByPath = new Map(assetManifest.map((entry) => [entry.path, entry]));
+  const identityDocument = {
+    schema: 'szl.a11oy-served-build-identity/v1',
+    source_revision: servedIdentity.sourceRevision,
+    source_tree_sha: servedIdentity.sourceTreeSha,
+    build_manifest_sha256: servedIdentity.buildManifestSha256,
+    index_html_sha256: servedIdentity.indexHtmlSha256,
+    base_path: '/a11oy/',
+    proof_nonce: servedIdentity.proofNonce,
+  };
+  const identityBytes = Buffer.from(`${JSON.stringify(identityDocument)}\n`, 'utf8');
+  const identityHeaders = {
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    'X-SZL-Build-Manifest-SHA256': servedIdentity.buildManifestSha256,
+    'X-SZL-Proof-Nonce': servedIdentity.proofNonce,
+    'X-SZL-Source-SHA': servedIdentity.sourceRevision,
+    'X-SZL-Source-Tree-SHA': servedIdentity.sourceTreeSha,
+  };
+  let expectedHost = null;
   const server = createServer(async (request, response) => {
     try {
       if (!['GET', 'HEAD'].includes(request.method || '')) {
@@ -335,8 +386,23 @@ async function startExactBuildServer(buildRoot) {
         response.end();
         return;
       }
+      if (!expectedHost || request.headers.host !== expectedHost) {
+        response.writeHead(400);
+        response.end();
+        return;
+      }
       const requestUrl = new URL(request.url || '/', 'http://127.0.0.1');
       const decodedPath = decodeURIComponent(requestUrl.pathname);
+      if (decodedPath === SOURCE_IDENTITY_PATH) {
+        response.writeHead(200, {
+          ...identityHeaders,
+          'Content-Length': String(identityBytes.length),
+          'Content-Type': 'application/json; charset=utf-8',
+        });
+        if (request.method === 'HEAD') response.end();
+        else response.end(identityBytes);
+        return;
+      }
       if (
         !(decodedPath === '/a11oy' || decodedPath.startsWith('/a11oy/')) ||
         decodedPath.includes('\\')
@@ -354,25 +420,40 @@ async function startExactBuildServer(buildRoot) {
         response.end();
         return;
       }
-      let details;
+      let bytes;
       try {
-        details = await stat(candidate);
+        const handle = await open(candidate, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));
+        try {
+          const details = await handle.stat();
+          if (!details.isFile()) {
+            response.writeHead(404);
+            response.end();
+            return;
+          }
+          bytes = await handle.readFile();
+        } finally {
+          await handle.close();
+        }
       } catch {
         response.writeHead(404);
         response.end();
         return;
       }
-      if (!details.isFile()) {
-        response.writeHead(404);
-        response.end();
+      const manifestEntry = assetByPath.get(relativePath);
+      if (
+        !manifestEntry ||
+        manifestEntry.bytes !== bytes.length ||
+        manifestEntry.sha256 !== sha256(bytes)
+      ) {
+        response.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+        response.end('served asset no longer matches the verified build manifest');
         return;
       }
-      const bytes = await readFile(candidate);
       response.writeHead(200, {
-        'Cache-Control': 'no-store',
+        ...identityHeaders,
         'Content-Length': String(bytes.length),
         'Content-Type': contentTypes.get(path.extname(candidate)) || 'application/octet-stream',
-        'X-Content-Type-Options': 'nosniff',
+        'X-SZL-Served-Asset-SHA256': manifestEntry.sha256,
       });
       if (request.method === 'HEAD') response.end();
       else response.end(bytes);
@@ -387,8 +468,13 @@ async function startExactBuildServer(buildRoot) {
     server.listen(0, '127.0.0.1', resolve);
   });
   const address = server.address();
-  if (!address || typeof address === 'string') throw new Error('failed to bind loopback preview');
-  return { server, origin: `http://127.0.0.1:${address.port}` };
+  if (!address || typeof address === 'string' || address.address !== '127.0.0.1') {
+    server.close();
+    throw new Error('failed to bind an ephemeral IPv4 loopback preview');
+  }
+  expectedHost = `127.0.0.1:${address.port}`;
+  const origin = `http://${expectedHost}`;
+  return { server, origin, identityUrl: `${origin}${SOURCE_IDENTITY_PATH}` };
 }
 
 async function closeServer(server) {
@@ -564,9 +650,23 @@ try {
   const servedAssets = await collectAssetManifest(buildRoot);
   const assetManifestBytes = Buffer.from(`${JSON.stringify(servedAssets)}\n`, 'utf8');
   const servedAssetManifestSha256 = sha256(assetManifestBytes);
-  preview = await startExactBuildServer(buildRoot);
+  const indexHtml = servedAssets.find((entry) => entry.path === 'index.html');
+  if (!indexHtml) throw new Error('verified build manifest has no index.html entry');
+  const servedIdentity = {
+    sourceRevision,
+    sourceTreeSha,
+    buildManifestSha256: servedAssetManifestSha256,
+    indexHtmlSha256: indexHtml.sha256,
+    proofNonce: randomBytes(32).toString('hex'),
+  };
+  preview = await startExactBuildServer(buildRoot, servedAssets, servedIdentity);
 
-  const interactions = await verifyProductInteractions(preview.origin);
+  const interactions = await verifyProductInteractions(preview.origin, {
+    expectedServedIdentity: servedIdentity,
+  });
+  if (interactions.served_identity?.state !== 'VERIFIED') {
+    throw new Error('product interactions did not verify the served source/build identity');
+  }
   const interactionBytes = Buffer.from(`${JSON.stringify(interactions, null, 2)}\n`, 'utf8');
   await writeFile(path.join(absoluteOutputDirectory, 'interactions.json'), interactionBytes);
 
@@ -726,6 +826,12 @@ try {
       kind: 'in-process-loopback-static-server',
       ownership: 'capture-series-a-product-matrix-proof.mjs',
       base_path: '/a11oy/',
+      identity_path: SOURCE_IDENTITY_PATH,
+      source_revision: sourceRevision,
+      source_tree_sha: sourceTreeSha,
+      build_manifest_sha256: servedAssetManifestSha256,
+      index_html_sha256: indexHtml.sha256,
+      proof_nonce_sha256: sha256(Buffer.from(servedIdentity.proofNonce, 'utf8')),
       cache_policy: 'no-store',
       allowed_origins: [preview.origin],
     },
@@ -740,6 +846,7 @@ try {
       sha256: sha256(interactionBytes),
       checked_states: interactions.records.length,
       state: interactions.state,
+      served_identity_state: interactions.served_identity.state,
     },
     non_claims: [
       'This binds presentation evidence to a clean build and an immutable served-asset manifest for the recorded source revision.',

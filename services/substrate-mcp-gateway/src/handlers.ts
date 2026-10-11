@@ -27,18 +27,17 @@ import {
   submitApprovalAction,
 } from '@workspace/approvals-inbox';
 import { globalCollector } from '@workspace/cognitive-observability';
-import {
-  defaultGateway,
-  defaultToolRegistry,
-  McpServerRegistry,
-  ToolManifestSchema,
-  type ToolManifest,
-} from '@workspace/tool-mesh';
+import { defaultGateway } from '@workspace/tool-mesh/gateway';
+import { type ToolManifest, ToolManifestSchema } from '@workspace/tool-mesh/manifest';
+import { defaultToolRegistry } from '@workspace/tool-mesh/registry';
+import { McpServerRegistry } from '@workspace/tool-mesh/server-registry';
 import { z } from 'zod';
 import { type McpToolDescriptor, SUBSTRATE_TOOLS } from './descriptor.js';
+import { getMcpApp } from './mcp-apps/apps.js';
 import {
   buildPRAXISEnvelopes,
   delegateToAgent,
+  evaluateCovenant,
   getActiveCorrelations,
   getAgentRegistry,
   getCorrelationById,
@@ -46,20 +45,23 @@ import {
   getEvidenceGraph,
   getEvidenceRecommendations,
   getEvidenceTrace,
+  getNexusRuntimeCapabilities,
+  getProofCapabilityStatus,
+  getRecentProofs,
   getSignalsForDomain,
   lookupProof,
-  getRecentProofs,
-  startConvergenceBridge,
   type PRAXISSignalDomain,
+  startConvergenceBridge,
 } from './nexus-fabric.js';
-import { getMcpApp } from './mcp-apps/apps.js';
-import { emitRunEvent, emitToolListChanged } from './run-events.js';
 import { getCurrentTenantId } from './request-context.js';
-import { getAllRuns, getRun, storeRun, updateRun } from './run-store.js';
+import { emitRunEvent, emitToolListChanged } from './run-events.js';
+import { getAllRunsForTenant, getRunForTenant, storeRun, updateRun } from './run-store.js';
+import { getExecutionCapabilityStatus, isProductionRuntime } from './runtime-config.js';
+import { getToolAccessRequirement } from './tool-access.js';
 
-// ─── Start PRAXIS Convergence Bridge ──────────────────────────────────────────
-// Subscribe to Prism Bus cross-domain correlation events and buffer them
-// for the nexus://convergence/* MCP resources.
+// ─── Record PRAXIS Convergence capability state ───────────────────────────────
+// This release intentionally reports the live bridge unavailable and serves
+// explicitly labelled synthetic resources.
 startConvergenceBridge();
 
 // ─── Per-server dynamic tool cache ────────────────────────────────────────────
@@ -88,7 +90,11 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
         description: 'Search legal matter evidence packages and contract analysis results.',
         domainTags: ['legal', 'documents'],
         policyTier: 'operator-assisted',
-        inputSchema: { type: 'object', properties: { query: { type: 'string' }, matterId: { type: 'string' } }, required: ['query'] },
+        inputSchema: {
+          type: 'object',
+          properties: { query: { type: 'string' }, matterId: { type: 'string' } },
+          required: ['query'],
+        },
       }),
       ToolManifestSchema.parse({
         id: 'counsel_analyze_contract',
@@ -96,7 +102,11 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
         description: 'Analyze a contract document for regulatory compliance and risk clauses.',
         domainTags: ['legal', 'documents'],
         policyTier: 'operator-assisted',
-        inputSchema: { type: 'object', properties: { contractText: { type: 'string' }, jurisdiction: { type: 'string' } }, required: ['contractText'] },
+        inputSchema: {
+          type: 'object',
+          properties: { contractText: { type: 'string' }, jurisdiction: { type: 'string' } },
+          required: ['contractText'],
+        },
       }),
     ],
   },
@@ -109,7 +119,11 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
         domainTags: ['finance', 'analytics'],
         policyTier: 'internal-workflow',
         timeoutMs: 15000,
-        inputSchema: { type: 'object', properties: { portfolioId: { type: 'string' }, period: { type: 'string' } }, required: ['portfolioId'] },
+        inputSchema: {
+          type: 'object',
+          properties: { portfolioId: { type: 'string' }, period: { type: 'string' } },
+          required: ['portfolioId'],
+        },
       }),
       ToolManifestSchema.parse({
         id: 'terra_analyze_anomaly',
@@ -118,7 +132,11 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
         domainTags: ['finance', 'analytics'],
         policyTier: 'internal-workflow',
         timeoutMs: 15000,
-        inputSchema: { type: 'object', properties: { propertyId: { type: 'string' }, threshold: { type: 'number' } }, required: ['propertyId'] },
+        inputSchema: {
+          type: 'object',
+          properties: { propertyId: { type: 'string' }, threshold: { type: 'number' } },
+          required: ['propertyId'],
+        },
       }),
     ],
   },
@@ -127,20 +145,34 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
       ToolManifestSchema.parse({
         id: 'aegis_triage_threat',
         name: 'aegis_triage_threat',
-        description: 'Triage and classify an incoming threat signal using adversarial pattern matching.',
+        description:
+          'Triage and classify an incoming threat signal using adversarial pattern matching.',
         domainTags: ['security', 'analytics'],
         policyTier: 'operator-assisted',
         timeoutMs: 20000,
-        inputSchema: { type: 'object', properties: { signalId: { type: 'string' }, severity: { type: 'string' } }, required: ['signalId'] },
+        inputSchema: {
+          type: 'object',
+          properties: { signalId: { type: 'string' }, severity: { type: 'string' } },
+          required: ['signalId'],
+        },
       }),
       ToolManifestSchema.parse({
         id: 'aegis_search_signals',
         name: 'aegis_search_signals',
-        description: 'Search defense and intelligence threat signals by domain, actor, or time range.',
+        description:
+          'Search defense and intelligence threat signals by domain, actor, or time range.',
         domainTags: ['security', 'analytics'],
         policyTier: 'operator-assisted',
         timeoutMs: 20000,
-        inputSchema: { type: 'object', properties: { query: { type: 'string' }, domain: { type: 'string' }, limit: { type: 'number' } }, required: ['query'] },
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: { type: 'string' },
+            domain: { type: 'string' },
+            limit: { type: 'number' },
+          },
+          required: ['query'],
+        },
       }),
     ],
   },
@@ -149,20 +181,30 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
       ToolManifestSchema.parse({
         id: 'vessels_track_voyage',
         name: 'vessels_track_voyage',
-        description: 'Track a maritime vessel voyage by IMO number and return current position and route.',
+        description:
+          'Track a maritime vessel voyage by IMO number and return current position and route.',
         domainTags: ['infrastructure', 'analytics'],
         policyTier: 'internal-workflow',
         timeoutMs: 15000,
-        inputSchema: { type: 'object', properties: { imoNumber: { type: 'string' }, includeHistory: { type: 'boolean' } }, required: ['imoNumber'] },
+        inputSchema: {
+          type: 'object',
+          properties: { imoNumber: { type: 'string' }, includeHistory: { type: 'boolean' } },
+          required: ['imoNumber'],
+        },
       }),
       ToolManifestSchema.parse({
         id: 'vessels_detect_anomaly',
         name: 'vessels_detect_anomaly',
-        description: 'Detect anomalous voyage behavior such as AIS gaps, dark periods, or route deviations.',
+        description:
+          'Detect anomalous voyage behavior such as AIS gaps, dark periods, or route deviations.',
         domainTags: ['infrastructure', 'analytics'],
         policyTier: 'internal-workflow',
         timeoutMs: 15000,
-        inputSchema: { type: 'object', properties: { vesselId: { type: 'string' }, lookbackHours: { type: 'number' } }, required: ['vesselId'] },
+        inputSchema: {
+          type: 'object',
+          properties: { vesselId: { type: 'string' }, lookbackHours: { type: 'number' } },
+          required: ['vesselId'],
+        },
       }),
     ],
   },
@@ -176,7 +218,11 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
         policyTier: 'internal-workflow',
         timeoutMs: 10000,
         observabilityHooks: { emitTrace: false, emitMetrics: true },
-        inputSchema: { type: 'object', properties: { traceId: { type: 'string' } }, required: ['traceId'] },
+        inputSchema: {
+          type: 'object',
+          properties: { traceId: { type: 'string' } },
+          required: ['traceId'],
+        },
       }),
       ToolManifestSchema.parse({
         id: 'observability_query_metrics',
@@ -186,7 +232,15 @@ const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
         policyTier: 'internal-workflow',
         timeoutMs: 10000,
         observabilityHooks: { emitTrace: false, emitMetrics: true },
-        inputSchema: { type: 'object', properties: { metricName: { type: 'string' }, labels: { type: 'object' }, limitMs: { type: 'number' } }, required: ['metricName'] },
+        inputSchema: {
+          type: 'object',
+          properties: {
+            metricName: { type: 'string' },
+            labels: { type: 'object' },
+            limitMs: { type: 'number' },
+          },
+          required: ['metricName'],
+        },
       }),
     ],
   },
@@ -238,7 +292,10 @@ async function fetchAndCacheExternalTools(serverId: string, endpoint: string): P
         .map((t) => ({
           name: String(t['name'] ?? ''),
           description: String(t['description'] ?? ''),
-          inputSchema: (t['inputSchema'] ?? { type: 'object', properties: {} }) as import('./descriptor.js').McpToolDescriptor['inputSchema'],
+          inputSchema: (t['inputSchema'] ?? {
+            type: 'object',
+            properties: {},
+          }) as import('./descriptor.js').McpToolDescriptor['inputSchema'],
         }))
         .filter((d) => d.name.length > 0);
       if (descriptors.length > 0) {
@@ -321,7 +378,8 @@ const serverRegistry = new McpServerRegistry({
 serverRegistry.register({
   serverId: 'szl-tool-mesh',
   name: 'SZL Tool Mesh',
-  description: 'Core SZL tool mesh — document retrieval, finance, security, graph-query, and operations tools.',
+  description:
+    'Core SZL tool mesh — document retrieval, finance, security, graph-query, and operations tools.',
   capabilitiesSummary: 'documents, finance, security, infrastructure, analytics, graph',
   endpoint: 'internal://tool-mesh',
 });
@@ -329,7 +387,8 @@ serverRegistry.register({
 serverRegistry.register({
   serverId: 'szl-counsel-evidence',
   name: 'Counsel Evidence MCP',
-  description: 'Legal matter evidence packaging, contract analysis, and regulatory document tools for Counsel.',
+  description:
+    'Legal matter evidence packaging, contract analysis, and regulatory document tools for Counsel.',
   capabilitiesSummary: 'legal, documents, evidence, contracts, compliance',
   endpoint: 'internal://counsel-evidence',
 });
@@ -337,7 +396,8 @@ serverRegistry.register({
 serverRegistry.register({
   serverId: 'szl-terra-portfolio',
   name: 'Terra Portfolio MCP',
-  description: 'Real estate portfolio analytics, anomaly detection, and property intelligence tools for Terra.',
+  description:
+    'Real estate portfolio analytics, anomaly detection, and property intelligence tools for Terra.',
   capabilitiesSummary: 'finance, analytics, real-estate, portfolio, data',
   endpoint: 'internal://terra-portfolio',
 });
@@ -345,7 +405,8 @@ serverRegistry.register({
 serverRegistry.register({
   serverId: 'szl-aegis-threat',
   name: 'AEGIS Threat Intelligence MCP',
-  description: 'Defense and intelligence threat triage, security signal analysis, and adversarial pattern detection.',
+  description:
+    'Defense and intelligence threat triage, security signal analysis, and adversarial pattern detection.',
   capabilitiesSummary: 'security, intelligence, threat, defense, analytics',
   endpoint: 'internal://aegis-threat',
 });
@@ -353,7 +414,8 @@ serverRegistry.register({
 serverRegistry.register({
   serverId: 'szl-vessels-maritime',
   name: 'Vessels Maritime Intelligence MCP',
-  description: 'Maritime voyage anomaly detection, vessel tracking, and logistics intelligence tools.',
+  description:
+    'Maritime voyage anomaly detection, vessel tracking, and logistics intelligence tools.',
   capabilitiesSummary: 'logistics, analytics, infrastructure, maritime, data',
   endpoint: 'internal://vessels-maritime',
 });
@@ -361,7 +423,8 @@ serverRegistry.register({
 serverRegistry.register({
   serverId: 'szl-cognitive-observability',
   name: 'Cognitive Observability MCP',
-  description: 'Trace graph, metrics collection, run ledger, and agent reliability observability tools.',
+  description:
+    'Trace graph, metrics collection, run ledger, and agent reliability observability tools.',
   capabilitiesSummary: 'analytics, infrastructure, observability, tracing, metrics',
   endpoint: 'internal://cognitive-observability',
 });
@@ -529,6 +592,25 @@ function err(message: string, data?: unknown): ToolResult {
   };
 }
 
+function notFound(kind: 'run' | 'approval'): ToolResult {
+  return err(kind === 'run' ? 'Run not found.' : 'Approval request not found.', {
+    code: 'NOT_FOUND',
+  });
+}
+
+async function loadRunForCurrentTenant(runId: string) {
+  const tenantId = getCurrentTenantId();
+  const cached = getRunForTenant(runId, tenantId);
+  if (cached) return cached;
+
+  const stored = await defaultRunStore.get(runId);
+  if (!stored || stored.tenantId !== tenantId) return undefined;
+  storeRun(stored);
+  return stored;
+}
+
+const approvalTenantById = new Map<string, string | undefined>();
+
 export async function handleToolCall(
   toolName: string,
   rawParams: unknown,
@@ -537,16 +619,37 @@ export async function handleToolCall(
   const t0 = Date.now();
   let success = false;
   try {
-    const result = await dispatchTool(toolName, rawParams, actorId);
+    const productionRuntime = isProductionRuntime();
+    const tenantId = getCurrentTenantId();
+    const accessRequirement = getToolAccessRequirement(toolName);
+    let result: ToolResult;
+    if (productionRuntime && accessRequirement !== 'read' && !tenantId) {
+      result = err('An authenticated tenant context is required for production mutations.', {
+        code: 'TENANT_CONTEXT_REQUIRED',
+      });
+    } else if (productionRuntime && accessRequirement !== 'read') {
+      result = err('Production execution is held until qualified runtime adapters are deployed.', {
+        code: 'PRODUCTION_EXECUTION_HOLD',
+        execution: getExecutionCapabilityStatus(),
+      });
+    } else {
+      // Covenant policy is an execution gate, not post-hoc metadata. A deny is
+      // returned before dispatch so mutating handlers cannot produce side effects.
+      const covenant = evaluateCovenant(toolName, actorId, tenantId);
+      result = covenant.allowed
+        ? await dispatchTool(toolName, rawParams, actorId)
+        : err('Covenant policy denied this tool invocation.', {
+            code: 'COVENANT_DENIED',
+            policyResult: covenant.policyResult,
+            reason: covenant.reason,
+            matchedPolicies: covenant.matchedPolicies,
+          });
+    }
     success = !result.isError;
 
-    // ── Attach PRAXIS consciousness + proof envelopes ──────────────────────────
-    // Every tool response gets metacognitive confidence metadata and a
-    // cryptographic proof envelope. We build the envelopes from the serialized
-    // response text so the proof hash covers the actual content delivered to the
-    // client. This includes agent_delegate — its outer envelope records the MCP
-    // tool invocation, while the inner proof (inside delegateToAgent) records
-    // the delegation act itself. Two distinct events → two distinct proof records.
+    // ── Attach PRAXIS consciousness + governance receipt envelopes ─────────────
+    // The response digest is correlation metadata, explicitly marked unverified;
+    // this release does not advertise it as a signature or immutable proof.
     const responseText = result.content.map((c) => c.text).join('');
     // Pass the effective tenantId from the request context so evaluateCovenant()
     // can use the real tenant authorization decision instead of keyword heuristics alone.
@@ -625,11 +728,15 @@ async function dispatchTool(
               agentId: actorId,
             });
             if (!result.success) {
-              return err(result.error ?? `Tool '${toolName}' invocation denied by guardrail chain.`);
+              return err(
+                result.error ?? `Tool '${toolName}' invocation denied by guardrail chain.`,
+              );
             }
             return ok(result);
           } catch (e) {
-            return err(`Tool '${toolName}' execution failed: ${e instanceof Error ? e.message : String(e)}`);
+            return err(
+              `Tool '${toolName}' execution failed: ${e instanceof Error ? e.message : String(e)}`,
+            );
           }
         }
       }
@@ -651,12 +758,16 @@ async function dispatchTool(
             signal: AbortSignal.timeout(30_000),
           });
           if (!httpRes.ok) {
-            return err(`External server '${serverId}' returned HTTP ${httpRes.status} for tool '${toolName}'.`);
+            return err(
+              `External server '${serverId}' returned HTTP ${httpRes.status} for tool '${toolName}'.`,
+            );
           }
           const payload = (await httpRes.json()) as unknown;
           return ok(payload);
         } catch (e) {
-          return err(`External tool '${toolName}' call to '${serverId}' failed: ${e instanceof Error ? e.message : String(e)}`);
+          return err(
+            `External tool '${toolName}' call to '${serverId}' failed: ${e instanceof Error ? e.message : String(e)}`,
+          );
         }
       }
 
@@ -675,6 +786,14 @@ async function handleSubmitRun(rawParams: unknown, actorId: string): Promise<Too
 
   const { workflowId, input, mode, metadata } = parsed.data;
   const workflow = lookupWorkflow(workflowId);
+  const authenticatedTenantId = getCurrentTenantId();
+
+  const isProduction = isProductionRuntime();
+  if (isProduction && !authenticatedTenantId) {
+    return err('An authenticated tenant context is required to submit a production run.', {
+      code: 'TENANT_CONTEXT_REQUIRED',
+    });
+  }
 
   if (!workflow) {
     const registered = listWorkflows();
@@ -702,6 +821,7 @@ async function handleSubmitRun(rawParams: unknown, actorId: string): Promise<Too
 
   const opts: RuntimeStartOptions = {
     mode,
+    ...(authenticatedTenantId !== undefined ? { tenantId: authenticatedTenantId } : {}),
     metadata: {
       ...metadata,
       submittedBy: actorId,
@@ -715,6 +835,7 @@ async function handleSubmitRun(rawParams: unknown, actorId: string): Promise<Too
   // Fan-out run lifecycle events to any connected SSE clients
   emitRunEvent({
     type: 'run_started',
+    tenantId: pipelineRun.tenantId,
     runId: pipelineRun.runId,
     workflowId: pipelineRun.workflowId,
     workflowName: pipelineRun.workflowName,
@@ -723,6 +844,7 @@ async function handleSubmitRun(rawParams: unknown, actorId: string): Promise<Too
   if (pipelineRun.status === 'pending-approval') {
     emitRunEvent({
       type: 'approval_required',
+      tenantId: pipelineRun.tenantId,
       runId: pipelineRun.runId,
       workflowId: pipelineRun.workflowId,
       status: pipelineRun.status,
@@ -731,6 +853,7 @@ async function handleSubmitRun(rawParams: unknown, actorId: string): Promise<Too
   } else if (pipelineRun.status === 'completed' || pipelineRun.status === 'dry-run-complete') {
     emitRunEvent({
       type: 'run_complete',
+      tenantId: pipelineRun.tenantId,
       runId: pipelineRun.runId,
       workflowId: pipelineRun.workflowId,
       status: pipelineRun.status,
@@ -739,6 +862,7 @@ async function handleSubmitRun(rawParams: unknown, actorId: string): Promise<Too
   } else if (pipelineRun.status === 'failed') {
     emitRunEvent({
       type: 'run_failed',
+      tenantId: pipelineRun.tenantId,
       runId: pipelineRun.runId,
       workflowId: pipelineRun.workflowId,
       status: pipelineRun.status,
@@ -772,21 +896,10 @@ async function handleGetRun(rawParams: unknown): Promise<ToolResult> {
 
   const { runId } = parsed.data;
 
-  // Try in-process store first, then fall back to the substrate journal
-  let run = getRun(runId);
-
+  // Resolve through the tenant guard before returning either cached or durable state.
+  const run = await loadRunForCurrentTenant(runId);
   if (!run) {
-    const stored = await defaultRunStore.get(runId);
-    if (stored) {
-      run = stored;
-      storeRun(run);
-    }
-  }
-
-  if (!run) {
-    return err(
-      `Run '${runId}' not found. The gateway only tracks runs submitted in this process session.`,
-    );
+    return notFound('run');
   }
 
   return ok({
@@ -824,6 +937,8 @@ async function handleReplay(rawParams: unknown): Promise<ToolResult> {
   }
 
   const { runId, workflowId } = parsed.data;
+  const sourceRun = await loadRunForCurrentTenant(runId);
+  if (!sourceRun) return notFound('run');
   const workflow = lookupWorkflow(workflowId) ?? knownWorkflows.get(workflowId);
 
   if (!workflow) {
@@ -864,6 +979,8 @@ async function handleCounterfactual(rawParams: unknown): Promise<ToolResult> {
   }
 
   const { runId, workflowId, modelAdapterId, policyId } = parsed.data;
+  const sourceRun = await loadRunForCurrentTenant(runId);
+  if (!sourceRun) return notFound('run');
   const workflow = lookupWorkflow(workflowId) ?? knownWorkflows.get(workflowId);
 
   if (!workflow) {
@@ -920,6 +1037,9 @@ function handleListApprovals(rawParams: unknown): ToolResult {
 
   let actions = verdict ? getInboxByVerdict(verdict as ApprovalVerdict) : getApprovalActions();
 
+  const tenantId = getCurrentTenantId();
+  actions = actions.filter((action) => approvalTenantById.get(action.id) === tenantId);
+
   if (domain) {
     actions = actions.filter((a) => a.domain === domain);
   }
@@ -950,25 +1070,36 @@ async function handleApprove(rawParams: unknown, actorId: string): Promise<ToolR
   }
 
   const { recommendationId, actor, note, domain } = parsed.data;
-  const resolvedActor = actor !== 'mcp-gateway' ? actor : actorId;
+  const ownedRun = await loadRunForCurrentTenant(recommendationId);
+  if (!ownedRun || ownedRun.status !== 'pending-approval') return notFound('approval');
+  if (actor !== 'mcp-gateway' && actor !== actorId) {
+    return err('The approval actor must match the authenticated principal.', {
+      code: 'ACTOR_IDENTITY_MISMATCH',
+    });
+  }
+  const resolvedActor = actorId;
 
-  // Record approval in the approvals-inbox audit trail
+  // Route the approval through the substrate runtime — this resumes the paused
+  // run, writes an HMAC-signed evidence bundle, and continues graph execution.
+  const resumedRun = await defaultRuntime.resume(recommendationId, resolvedActor);
+  if (!resumedRun || resumedRun.tenantId !== getCurrentTenantId()) return notFound('approval');
+
+  // Record only after the governed runtime accepted the tenant-owned decision.
   const action = submitApprovalAction(recommendationId, 'approved', {
     actor: resolvedActor,
     ...(note ? { note } : {}),
     domain,
     surface: 'substrate-mcp-gateway',
   });
+  approvalTenantById.set(action.id, getCurrentTenantId());
 
-  // Route the approval through the substrate runtime — this resumes the paused
-  // run, writes an HMAC-signed evidence bundle, and continues graph execution.
-  const resumedRun = await defaultRuntime.resume(recommendationId, resolvedActor);
   if (resumedRun) {
     updateRun(resumedRun);
 
     // Fan-out the approval and final run status to SSE clients
     emitRunEvent({
       type: 'approval_granted',
+      tenantId: resumedRun.tenantId,
       runId: resumedRun.runId,
       actor: resolvedActor,
       status: resumedRun.status,
@@ -977,6 +1108,7 @@ async function handleApprove(rawParams: unknown, actorId: string): Promise<ToolR
     if (resumedRun.status === 'completed') {
       emitRunEvent({
         type: 'run_complete',
+        tenantId: resumedRun.tenantId,
         runId: resumedRun.runId,
         workflowId: resumedRun.workflowId,
         status: resumedRun.status,
@@ -985,6 +1117,7 @@ async function handleApprove(rawParams: unknown, actorId: string): Promise<ToolR
     } else if (resumedRun.status === 'failed') {
       emitRunEvent({
         type: 'run_failed',
+        tenantId: resumedRun.tenantId,
         runId: resumedRun.runId,
         workflowId: resumedRun.workflowId,
         status: resumedRun.status,
@@ -1014,26 +1147,36 @@ async function handleReject(rawParams: unknown, actorId: string): Promise<ToolRe
   }
 
   const { recommendationId, note, actor, domain } = parsed.data;
-  const resolvedActor = actor !== 'mcp-gateway' ? actor : actorId;
+  const ownedRun = await loadRunForCurrentTenant(recommendationId);
+  if (!ownedRun || ownedRun.status !== 'pending-approval') return notFound('approval');
+  if (actor !== 'mcp-gateway' && actor !== actorId) {
+    return err('The rejection actor must match the authenticated principal.', {
+      code: 'ACTOR_IDENTITY_MISMATCH',
+    });
+  }
+  const resolvedActor = actorId;
 
-  // Record rejection in the approvals-inbox audit trail
+  // Route the rejection through the substrate runtime — this marks the pending
+  // approval gate as failed, writes a signed evidence bundle, sets run status to
+  // "failed", and persists via the run store. No in-memory mutation needed here.
+  const rejectedRun = await defaultRuntime.reject(recommendationId, resolvedActor, note);
+  if (!rejectedRun || rejectedRun.tenantId !== getCurrentTenantId()) return notFound('approval');
+
   const action = submitApprovalAction(recommendationId, 'rejected', {
     actor: resolvedActor,
     note,
     domain,
     surface: 'substrate-mcp-gateway',
   });
+  approvalTenantById.set(action.id, getCurrentTenantId());
 
-  // Route the rejection through the substrate runtime — this marks the pending
-  // approval gate as failed, writes a signed evidence bundle, sets run status to
-  // "failed", and persists via the run store. No in-memory mutation needed here.
-  const rejectedRun = await defaultRuntime.reject(recommendationId, resolvedActor, note);
   if (rejectedRun) {
     updateRun(rejectedRun);
 
     // Fan-out rejection and run-failed events to SSE clients
     emitRunEvent({
       type: 'approval_rejected',
+      tenantId: rejectedRun.tenantId,
       runId: rejectedRun.runId,
       actor: resolvedActor,
       status: rejectedRun.status,
@@ -1041,6 +1184,7 @@ async function handleReject(rawParams: unknown, actorId: string): Promise<ToolRe
     });
     emitRunEvent({
       type: 'run_failed',
+      tenantId: rejectedRun.tenantId,
       runId: rejectedRun.runId,
       workflowId: rejectedRun.workflowId,
       status: rejectedRun.status,
@@ -1070,7 +1214,7 @@ function handleListWorkflows(): ToolResult {
 
   // Augment run counts from the in-process run store
   const runCounts = new Map<string, number>();
-  for (const run of getAllRuns()) {
+  for (const run of getAllRunsForTenant(getCurrentTenantId())) {
     runCounts.set(run.workflowId, (runCounts.get(run.workflowId) ?? 0) + 1);
   }
 
@@ -1208,17 +1352,21 @@ async function handleAgentDelegate(rawParams: unknown, actorId: string): Promise
       confidence: result.confidence,
       latencyMs: result.latencyMs,
       proofHash: result.proofHash,
+      federationSource: result.federationSource,
       verificationPath: `/mcp/nexus/verify/${result.proofHash}`,
       completedAt: result.completedAt,
       ...(result.status === 'pending_approval'
-        ? { governanceNote: 'This delegation requires operator approval before execution proceeds. Check substrate_list_approvals for the pending gate.' }
+        ? {
+            governanceNote:
+              'This delegation requires operator approval before execution proceeds. Check substrate_list_approvals for the pending gate.',
+          }
         : {}),
     });
   } catch (e) {
-    return err(
-      `Agent delegation failed: ${e instanceof Error ? e.message : String(e)}`,
-      { targetAgentId, hint: 'Query nexus://agents/registry to verify available agents.' },
-    );
+    return err(`Agent delegation failed: ${e instanceof Error ? e.message : String(e)}`, {
+      targetAgentId,
+      hint: 'Query nexus://agents/registry to verify available agents.',
+    });
   }
 }
 
@@ -1416,35 +1564,48 @@ export async function handleResourceRead(
     case 'nexus://convergence/active': {
       const correlations = getActiveCorrelations();
       return {
-        contents: [{
-          uri,
-          mimeType: 'application/json',
-          text: JSON.stringify({
-            resourceType: 'nexus:convergence:active',
-            count: correlations.length,
-            generatedAt: new Date().toISOString(),
-            description: 'Live cross-domain intelligence correlations from the PRAXIS Convergence Engine.',
-            _dataSource: 'synthetic',
-            correlations,
-          }, null, 2),
-        }],
+        contents: [
+          {
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(
+              {
+                resourceType: 'nexus:convergence:active',
+                count: correlations.length,
+                generatedAt: new Date().toISOString(),
+                description:
+                  'Synthetic cross-domain correlation fixtures for schema and integration testing; no live signal bridge is deployed.',
+                _dataSource: 'synthetic',
+                correlations,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
 
     case 'nexus://convergence/history': {
       const history = getCorrelationHistory(50);
       return {
-        contents: [{
-          uri,
-          mimeType: 'application/json',
-          text: JSON.stringify({
-            resourceType: 'nexus:convergence:history',
-            count: history.length,
-            generatedAt: new Date().toISOString(),
-            _dataSource: 'synthetic',
-            correlations: history,
-          }, null, 2),
-        }],
+        contents: [
+          {
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(
+              {
+                resourceType: 'nexus:convergence:history',
+                count: history.length,
+                generatedAt: new Date().toISOString(),
+                _dataSource: 'synthetic',
+                correlations: history,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
 
@@ -1457,19 +1618,26 @@ export async function handleResourceRead(
       const domainPart = uri.replace('nexus://signals/', '') as PRAXISSignalDomain;
       const signals = await getSignalsForDomain(domainPart, effectiveTenantId);
       return {
-        contents: [{
-          uri,
-          mimeType: 'application/json',
-          text: JSON.stringify({
-            resourceType: `nexus:signals:${domainPart}`,
-            domain: domainPart,
-            count: signals.length,
-            generatedAt: new Date().toISOString(),
-            _tenantScope: effectiveTenantId ?? 'global',
-            _dataSource: signals.length > 0 ? 'live' : 'synthetic',
-            signals,
-          }, null, 2),
-        }],
+        contents: [
+          {
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(
+              {
+                resourceType: `nexus:signals:${domainPart}`,
+                domain: domainPart,
+                count: signals.length,
+                generatedAt: new Date().toISOString(),
+                _tenantScope: effectiveTenantId ?? 'global',
+                _dataSource: 'synthetic',
+                _capabilityStatus: 'prism_bus_unavailable',
+                signals,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
 
@@ -1477,18 +1645,26 @@ export async function handleResourceRead(
     case 'nexus://agents/registry': {
       const agents = getAgentRegistry();
       return {
-        contents: [{
-          uri,
-          mimeType: 'application/json',
-          text: JSON.stringify({
-            resourceType: 'nexus:agents:registry',
-            count: agents.length,
-            generatedAt: new Date().toISOString(),
-            description: 'NuroMesh domain agents discoverable and delegatable via MCP. Use agent_delegate tool to route tasks.',
-            delegationTool: 'agent_delegate',
-            agents,
-          }, null, 2),
-        }],
+        contents: [
+          {
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(
+              {
+                resourceType: 'nexus:agents:registry',
+                count: agents.length,
+                generatedAt: new Date().toISOString(),
+                description:
+                  'NuroMesh agent catalogue. Availability is derived from configured external routes; offline agents cannot execute tasks in this release.',
+                delegationTool: 'agent_delegate',
+                runtimeCapabilities: getNexusRuntimeCapabilities(),
+                agents,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
 
@@ -1496,90 +1672,128 @@ export async function handleResourceRead(
     case 'nexus://evidence/graph': {
       const items = getEvidenceGraph();
       return {
-        contents: [{
-          uri,
-          mimeType: 'application/json',
-          text: JSON.stringify({
-            resourceType: 'nexus:evidence:graph',
-            count: items.length,
-            generatedAt: new Date().toISOString(),
-            description: 'Current evidence items with provenance chains. Shows the raw intelligence items that underpin AI recommendations.',
-            _dataSource: 'synthetic',
-            evidenceItems: items,
-          }, null, 2),
-        }],
+        contents: [
+          {
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(
+              {
+                resourceType: 'nexus:evidence:graph',
+                count: items.length,
+                generatedAt: new Date().toISOString(),
+                description:
+                  'Synthetic evidence fixtures with example provenance chains; these are not current operational intelligence.',
+                _dataSource: 'synthetic',
+                evidenceItems: items,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
 
     case 'nexus://evidence/recommendations': {
       const recs = getEvidenceRecommendations();
       return {
-        contents: [{
-          uri,
-          mimeType: 'application/json',
-          text: JSON.stringify({
-            resourceType: 'nexus:evidence:recommendations',
-            count: recs.length,
-            generatedAt: new Date().toISOString(),
-            description: 'Active AI recommendations with supporting evidence chains and policy evaluation status.',
-            _dataSource: 'synthetic',
-            recommendations: recs,
-          }, null, 2),
-        }],
+        contents: [
+          {
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(
+              {
+                resourceType: 'nexus:evidence:recommendations',
+                count: recs.length,
+                generatedAt: new Date().toISOString(),
+                description:
+                  'Synthetic recommendation fixtures with example evidence chains and policy states; no action is active or dispatched.',
+                _dataSource: 'synthetic',
+                recommendations: recs,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
 
     // ── PRAXIS Proof Verification Resource ─────────────────────────────────────────
     case 'nexus://proof/recent': {
-      const proofs = getRecentProofs(20);
+      const proofs = getRecentProofs(20, effectiveTenantId);
       return {
-        contents: [{
-          uri,
-          mimeType: 'application/json',
-          text: JSON.stringify({
-            resourceType: 'nexus:proof:recent',
-            count: proofs.length,
-            generatedAt: new Date().toISOString(),
-            description: 'Most recent proof records. Use the verificationPath on any proof envelope to retrieve individual records.',
-            proofs,
-          }, null, 2),
-        }],
+        contents: [
+          {
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(
+              {
+                resourceType: 'nexus:proof:recent',
+                count: proofs.length,
+                generatedAt: new Date().toISOString(),
+                description:
+                  'Most recent tenant-scoped governance correlation receipts. Cryptographic verification is unavailable in this release.',
+                capability: getProofCapabilityStatus(),
+                proofs,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     }
 
     default: {
       // ── Template URI handling ──────────────────────────────────────────────────
 
-      // nexus://signals/{domain}/{tenantId} — per-tenant subscription channel
-      // The convergence bridge emits notifications ONLY on the tenant-specific URI
-      // when a tenantId is present on the Prism Bus event. This eliminates the
-      // cross-tenant timing/volume leakage that would occur with global broadcasts.
+      // nexus://signals/{domain}/{tenantId} — per-tenant synthetic fixture channel.
       if (uri.startsWith('nexus://signals/')) {
         const remainder = uri.replace('nexus://signals/', '');
         const parts = remainder.split('/');
         if (parts.length === 2) {
           const [domainPart, uriTenantId] = parts as [string, string];
-          const validDomains: PRAXISSignalDomain[] = ['maritime', 'security', 'realestate', 'legal', 'all'];
+          const validDomains: PRAXISSignalDomain[] = [
+            'maritime',
+            'security',
+            'realestate',
+            'legal',
+            'all',
+          ];
           if (validDomains.includes(domainPart as PRAXISSignalDomain)) {
-            // Use the request-context tenant as the authoritative tenant for access control;
-            // fall back to the URI tenant segment for subscription-driven reads.
+            if (effectiveTenantId && uriTenantId !== effectiveTenantId) {
+              return {
+                error: `Tenant-scoped resource '${uri}' does not match the authenticated tenant context.`,
+              };
+            }
             const resolvedTenant = effectiveTenantId ?? uriTenantId;
-            const signals = await getSignalsForDomain(domainPart as PRAXISSignalDomain, resolvedTenant);
+            const signals = await getSignalsForDomain(
+              domainPart as PRAXISSignalDomain,
+              resolvedTenant,
+            );
             return {
-              contents: [{
-                uri,
-                mimeType: 'application/json',
-                text: JSON.stringify({
-                  resourceType: `nexus:signals:${domainPart}:tenant`,
-                  domain: domainPart,
-                  tenantId: uriTenantId,
-                  count: signals.length,
-                  generatedAt: new Date().toISOString(),
-                  _tenantScope: uriTenantId,
-                  _dataSource: signals.length > 0 ? 'live' : 'synthetic',
-                  signals,
-                }, null, 2),
-              }],
+              contents: [
+                {
+                  uri,
+                  mimeType: 'application/json',
+                  text: JSON.stringify(
+                    {
+                      resourceType: `nexus:signals:${domainPart}:tenant`,
+                      domain: domainPart,
+                      tenantId: resolvedTenant,
+                      count: signals.length,
+                      generatedAt: new Date().toISOString(),
+                      _tenantScope: resolvedTenant,
+                      _dataSource: 'synthetic',
+                      _capabilityStatus: 'prism_bus_unavailable',
+                      signals,
+                    },
+                    null,
+                    2,
+                  ),
+                },
+              ],
             };
           }
         }
@@ -1590,23 +1804,31 @@ export async function handleResourceRead(
         const correlationId = uri.slice('nexus://convergence/'.length);
         const correlation = getCorrelationById(correlationId);
         if (!correlation) {
-          return { error: `Convergence correlation '${correlationId}' not found. Query nexus://convergence/active for current IDs.` };
+          return {
+            error: `Convergence correlation '${correlationId}' not found. Query nexus://convergence/active for current IDs.`,
+          };
         }
         return {
-          contents: [{
-            uri,
-            mimeType: 'application/json',
-            text: JSON.stringify({
-              resourceType: 'nexus:convergence:detail',
-              generatedAt: new Date().toISOString(),
-              _dataSource: 'synthetic',
-              correlation,
-              signalDecomposition: {
-                note: 'Full signal decomposition available via nexus://evidence/trace/{id} for each contributing signal.',
-                evidenceGraphUri: 'nexus://evidence/graph',
-              },
-            }, null, 2),
-          }],
+          contents: [
+            {
+              uri,
+              mimeType: 'application/json',
+              text: JSON.stringify(
+                {
+                  resourceType: 'nexus:convergence:detail',
+                  generatedAt: new Date().toISOString(),
+                  _dataSource: 'synthetic',
+                  correlation,
+                  signalDecomposition: {
+                    note: 'Full signal decomposition available via nexus://evidence/trace/{id} for each contributing signal.',
+                    evidenceGraphUri: 'nexus://evidence/graph',
+                  },
+                },
+                null,
+                2,
+              ),
+            },
+          ],
         };
       }
 
@@ -1615,40 +1837,59 @@ export async function handleResourceRead(
         const traceId = uri.slice('nexus://evidence/trace/'.length);
         const trace = getEvidenceTrace(traceId);
         if (!trace) {
-          return { error: `Evidence trace '${traceId}' not found. Query nexus://evidence/recommendations for active recommendation IDs.` };
+          return {
+            error: `Evidence trace '${traceId}' not found. Query nexus://evidence/recommendations for active recommendation IDs.`,
+          };
         }
         return {
-          contents: [{
-            uri,
-            mimeType: 'application/json',
-            text: JSON.stringify({
-              resourceType: 'nexus:evidence:trace',
-              generatedAt: new Date().toISOString(),
-              _dataSource: 'synthetic',
-              trace,
-            }, null, 2),
-          }],
+          contents: [
+            {
+              uri,
+              mimeType: 'application/json',
+              text: JSON.stringify(
+                {
+                  resourceType: 'nexus:evidence:trace',
+                  generatedAt: new Date().toISOString(),
+                  _dataSource: 'synthetic',
+                  trace,
+                },
+                null,
+                2,
+              ),
+            },
+          ],
         };
       }
 
       // nexus://proof/verify/{hash} — proof verification by hash
       if (uri.startsWith('nexus://proof/verify/')) {
         const hash = uri.slice('nexus://proof/verify/'.length);
-        const record = lookupProof(hash);
+        const record = lookupProof(hash, effectiveTenantId);
         if (!record) {
-          return { error: `Proof hash '${hash}' not found in the verification store. Proofs are retained for the most recent 2,000 tool calls.` };
+          return {
+            error: `Governance receipt '${hash}' was not found.`,
+          };
         }
         return {
-          contents: [{
-            uri,
-            mimeType: 'application/json',
-            text: JSON.stringify({
-              resourceType: 'nexus:proof:verification',
-              verified: true,
-              record,
-              verifiedAt: new Date().toISOString(),
-            }, null, 2),
-          }],
+          contents: [
+            {
+              uri,
+              mimeType: 'application/json',
+              text: JSON.stringify(
+                {
+                  resourceType: 'nexus:proof:correlation-receipt',
+                  verified: false,
+                  recorded: true,
+                  evidenceState: 'UNAVAILABLE',
+                  capability: getProofCapabilityStatus(),
+                  record,
+                  lookedUpAt: new Date().toISOString(),
+                },
+                null,
+                2,
+              ),
+            },
+          ],
         };
       }
 
@@ -1677,7 +1918,7 @@ export function handlePromptGet(
     case 'substrate_run_summary': {
       const { runId } = args;
       if (!runId) return { error: 'Missing required argument: runId' };
-      const run = getRun(runId);
+      const run = getRunForTenant(runId, getCurrentTenantId());
       if (!run) return { error: `Run '${runId}' not found` };
 
       return {

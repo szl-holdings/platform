@@ -38,7 +38,7 @@ function response(params: {
       responseSha256: sha256(params.answer),
       policyEffect: 'allow',
       policyEvaluationId: 'policy_test',
-      evidenceState: 'OBSERVED',
+      evidenceState: 'MEASURED',
       ledgerEntryId: null,
       ledgerState: 'PENDING_API_APPEND',
       memoryState: 'PENDING_API_COMMIT',

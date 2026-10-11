@@ -6,28 +6,40 @@
   "description": "Alloy Embedding Fabric — retrieval evaluation harness with recall@k, nDCG, MRR, exact-match recovery, latency/throughput benchmarks, smoke tests, and hand-curated golden fixtures for the six SZL domain profiles.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./runner": {
+      "development": "./src/runner.ts",
+      "workspace": "./src/runner.ts",
       "types": "./dist/runner.d.ts",
-      "import": "./src/runner.ts"
+      "import": "./dist/runner.js"
     },
     "./metrics": {
+      "development": "./src/metrics.ts",
+      "workspace": "./src/metrics.ts",
       "types": "./dist/metrics.d.ts",
-      "import": "./src/metrics.ts"
+      "import": "./dist/metrics.js"
     },
     "./harness": {
+      "development": "./src/harness.ts",
+      "workspace": "./src/harness.ts",
       "types": "./dist/harness.d.ts",
-      "import": "./src/harness.ts"
+      "import": "./dist/harness.js"
     },
     "./fixtures": {
+      "development": "./src/fixtures/index.ts",
+      "workspace": "./src/fixtures/index.ts",
       "types": "./dist/fixtures/index.d.ts",
-      "import": "./src/fixtures/index.ts"
+      "import": "./dist/fixtures/index.js"
     },
     "./smoke": {
+      "development": "./src/smoke.ts",
+      "workspace": "./src/smoke.ts",
       "types": "./dist/smoke.d.ts",
-      "import": "./src/smoke.ts"
+      "import": "./dist/smoke.js"
     }
   },
   "dependencies": {

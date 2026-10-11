@@ -8,18 +8,20 @@
  * Also tests authz_denied, auth_failed, and forbidden paths end-to-end.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { AgentGateway } from '../src/gateway.js';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { issueToken } from '../src/auth.js';
-import type { GatewayConfig, CallerIdentity } from '../src/types.js';
+import { AgentGateway, RequestValidationError } from '../src/gateway.js';
+import type { CallerIdentity, GatewayConfig } from '../src/types.js';
 
 const TEST_SECRET = 'gateway-integration-test-secret';
 
 const TEST_CONFIG: GatewayConfig = {
-  jwtSecret: TEST_SECRET,
+  jwt: { algorithm: 'HS256', secret: TEST_SECRET },
   opaEndpoint: 'local',
   temporalEndpoint: 'local',
   openAiApiKey: 'local',
+  approvalWorkflow: null,
+  evidenceLedger: null,
   auditLogPath: '/tmp/gateway-integration-test-audit.ndjson',
   approvalTimeoutMs: 5_000,
 };
@@ -28,13 +30,6 @@ const PLATFORM_ENGINEER: Omit<CallerIdentity, 'iat' | 'exp'> = {
   sub: 'eng@szl.io',
   role: 'platform-engineer',
   groups: ['platform-team'],
-  orgId: 'szl-holdings',
-};
-
-const AGENT_SERVICE_CALLER: Omit<CallerIdentity, 'iat' | 'exp'> = {
-  sub: 'agent-service@szl.io',
-  role: 'agent-service',
-  groups: [],
   orgId: 'szl-holdings',
 };
 
@@ -105,7 +100,7 @@ describe('AgentGateway — auth failure paths', () => {
       'inspect_code',
       undefined,
       {},
-      { target: 'api-server', domain: 'platform' },
+      { target: 'api-server', domain: 'platform', targetEnvironment: 'development' },
     );
     expect(response.status).toBe('auth_failed');
     expect(response.auditId).toBeDefined();
@@ -117,7 +112,7 @@ describe('AgentGateway — auth failure paths', () => {
       'inspect_code',
       badToken,
       {},
-      { target: 'api-server', domain: 'platform' },
+      { target: 'api-server', domain: 'platform', targetEnvironment: 'development' },
     );
     expect(response.status).toBe('auth_failed');
   });
@@ -136,7 +131,7 @@ describe('AgentGateway — forbidden capability paths', () => {
       'direct_prod_change',
       undefined,
       {},
-      { target: 'prod-db', domain: 'platform' },
+      { target: 'prod-db', domain: 'platform', targetEnvironment: 'production' },
     );
     expect(response.status).toBe('forbidden');
     expect(response.message).toContain('categorically forbidden');
@@ -147,7 +142,7 @@ describe('AgentGateway — forbidden capability paths', () => {
       'policy_bypass',
       bearerHeader(PLATFORM_ENGINEER),
       {},
-      { target: 'opa', domain: 'platform' },
+      { target: 'opa', domain: 'platform', targetEnvironment: 'development' },
     );
     expect(response.status).toBe('forbidden');
   });
@@ -157,7 +152,7 @@ describe('AgentGateway — forbidden capability paths', () => {
       'approval_bypass',
       bearerHeader(PLATFORM_ENGINEER),
       {},
-      { target: 'temporal', domain: 'platform' },
+      { target: 'temporal', domain: 'platform', targetEnvironment: 'development' },
     );
     expect(response.status).toBe('forbidden');
   });
@@ -167,7 +162,7 @@ describe('AgentGateway — forbidden capability paths', () => {
       'plaintext_secret_access',
       bearerHeader(PLATFORM_ENGINEER),
       {},
-      { target: 'keyvault', domain: 'platform' },
+      { target: 'keyvault', domain: 'platform', targetEnvironment: 'development' },
     );
     expect(response.status).toBe('forbidden');
   });
@@ -177,7 +172,7 @@ describe('AgentGateway — forbidden capability paths', () => {
       'pr_flow_bypass',
       bearerHeader(PLATFORM_ENGINEER),
       {},
-      { target: 'github', domain: 'platform' },
+      { target: 'github', domain: 'platform', targetEnvironment: 'development' },
     );
     expect(response.status).toBe('forbidden');
   });
@@ -187,8 +182,33 @@ describe('AgentGateway — forbidden capability paths', () => {
       'delete_everything',
       bearerHeader(PLATFORM_ENGINEER),
       {},
-      { target: 'all', domain: 'platform' },
+      { target: 'all', domain: 'platform', targetEnvironment: 'development' },
     );
     expect(response.status).toBe('forbidden');
+  });
+});
+
+describe('AgentGateway — target environment validation', () => {
+  it.each([
+    undefined,
+    null,
+    '',
+    'qa',
+    'Development',
+    42,
+  ])('rejects missing or invalid targetEnvironment=%s without a development default', async (targetEnvironment) => {
+    const gateway = new AgentGateway(TEST_CONFIG);
+    await expect(
+      gateway.handleRequest(
+        'inspect_code',
+        bearerHeader(PLATFORM_ENGINEER),
+        {},
+        {
+          target: 'api-server',
+          domain: 'platform',
+          targetEnvironment,
+        },
+      ),
+    ).rejects.toBeInstanceOf(RequestValidationError);
   });
 });

@@ -1,11 +1,13 @@
+import { timingSafeEqual } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
+import { FABRIC_API_KEY, FABRIC_API_TENANT_ID, FABRIC_SERVICE_SECRET } from '../runtime-config.js';
 
-const SERVICE_API_KEY = process.env.AEF_BEARER_TOKEN ?? process.env.AEF_API_KEY;
-const SERVICE_TO_SERVICE_SECRET = process.env.AEF_S2S_SECRET;
-
-if (!SERVICE_API_KEY) {
-  throw new Error(
-    'AEF_BEARER_TOKEN (or AEF_API_KEY) env var is required — refusing to start with no auth key',
+function constantTimeTokenEqual(candidate: string, expected: string): boolean {
+  // These are opaque API tokens, compared directly rather than stored password hashes.
+  const candidateBytes = Buffer.from(candidate, 'utf8');
+  const expectedBytes = Buffer.from(expected, 'utf8');
+  return (
+    candidateBytes.length === expectedBytes.length && timingSafeEqual(candidateBytes, expectedBytes)
   );
 }
 
@@ -20,9 +22,9 @@ export function bearerAuthMiddleware(req: Request, res: Response, next: NextFunc
     return;
   }
 
-  const [scheme, token] = authHeader.split(' ');
+  const token = /^Bearer ([^\s]+)$/i.exec(authHeader)?.[1];
 
-  if (scheme?.toLowerCase() !== 'bearer' || !token) {
+  if (!token) {
     res.status(401).json({
       error: 'invalid_authorization_scheme',
       message: 'Authorization must use the Bearer scheme.',
@@ -30,7 +32,12 @@ export function bearerAuthMiddleware(req: Request, res: Response, next: NextFunc
     return;
   }
 
-  if (token === SERVICE_API_KEY || token === SERVICE_TO_SERVICE_SECRET) {
+  const validApiKey = constantTimeTokenEqual(token, FABRIC_API_KEY);
+  const validServiceSecret = FABRIC_SERVICE_SECRET
+    ? constantTimeTokenEqual(token, FABRIC_SERVICE_SECRET)
+    : false;
+  if (validApiKey || validServiceSecret) {
+    res.locals.authenticatedTenantId = FABRIC_API_TENANT_ID;
     next();
     return;
   }

@@ -6,32 +6,46 @@
   "description": "Guardian — unified policy engine and approval tiers. Eight policy tiers, deny-by-default decision engine, and rule schema for the SZL Agentic Cognitive Operating Intelligence Platform.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./tiers": {
+      "development": "./src/tiers.ts",
+      "workspace": "./src/tiers.ts",
       "types": "./dist/tiers.d.ts",
-      "import": "./src/tiers.ts"
+      "import": "./dist/tiers.js"
     },
     "./schema": {
+      "development": "./src/schema.ts",
+      "workspace": "./src/schema.ts",
       "types": "./dist/schema.d.ts",
-      "import": "./src/schema.ts"
+      "import": "./dist/schema.js"
     },
     "./decision-engine": {
+      "development": "./src/decision-engine.ts",
+      "workspace": "./src/decision-engine.ts",
       "types": "./dist/decision-engine.d.ts",
-      "import": "./src/decision-engine.ts"
+      "import": "./dist/decision-engine.js"
     },
     "./crypto": {
+      "development": "./src/crypto.ts",
+      "workspace": "./src/crypto.ts",
       "types": "./dist/crypto.d.ts",
-      "import": "./src/crypto.ts"
+      "import": "./dist/crypto.js"
     },
     "./telemetry-buffer": {
+      "development": "./src/telemetry-buffer.ts",
+      "workspace": "./src/telemetry-buffer.ts",
       "types": "./dist/telemetry-buffer.d.ts",
-      "import": "./src/telemetry-buffer.ts"
+      "import": "./dist/telemetry-buffer.js"
     },
     "./guardrail-prober": {
+      "development": "./src/guardrail-prober.ts",
+      "workspace": "./src/guardrail-prober.ts",
       "types": "./dist/guardrail-prober.d.ts",
-      "import": "./src/guardrail-prober.ts"
+      "import": "./dist/guardrail-prober.js"
     }
   },
   "dependencies": {

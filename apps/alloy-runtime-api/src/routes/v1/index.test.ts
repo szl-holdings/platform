@@ -42,3 +42,62 @@ describe('GET /v1/index/verify', () => {
     expect(Array.isArray(res.json.shards)).toBe(true);
   });
 });
+
+describe('production capability admission', () => {
+  it('does not accept a phantom rebuild job', async () => {
+    const previous = process.env.NODE_ENV;
+    const previousKey = process.env.ALLOY_API_KEY;
+    const previousTenant = process.env.ALLOY_API_TENANT_ID;
+    process.env.NODE_ENV = 'production';
+    process.env.ALLOY_API_KEY = 'production-route-test-key';
+    process.env.ALLOY_API_TENANT_ID = 'production-route-test-tenant';
+    try {
+      const res = await client.req('POST', '/v1/index/rebuild', {
+        body: {},
+        headers: { 'x-api-key': 'production-route-test-key' },
+      });
+      expect(res.status).toBe(503);
+      expect(res.json).toMatchObject({
+        status: 'UNAVAILABLE',
+        code: 'CAPABILITY_UNAVAILABLE',
+        capability: 'index-rebuild',
+      });
+      expect(res.json.jobId).toBeUndefined();
+    } finally {
+      if (previous === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previous;
+      if (previousKey === undefined) delete process.env.ALLOY_API_KEY;
+      else process.env.ALLOY_API_KEY = previousKey;
+      if (previousTenant === undefined) delete process.env.ALLOY_API_TENANT_ID;
+      else process.env.ALLOY_API_TENANT_ID = previousTenant;
+    }
+  });
+
+  it('does not report synthetic index health', async () => {
+    const previous = process.env.NODE_ENV;
+    const previousKey = process.env.ALLOY_API_KEY;
+    const previousTenant = process.env.ALLOY_API_TENANT_ID;
+    process.env.NODE_ENV = 'production';
+    process.env.ALLOY_API_KEY = 'production-route-test-key';
+    process.env.ALLOY_API_TENANT_ID = 'production-route-test-tenant';
+    try {
+      const res = await client.req('GET', '/v1/index/verify?jobId=rebuild_123', {
+        headers: { 'x-api-key': 'production-route-test-key' },
+      });
+      expect(res.status).toBe(503);
+      expect(res.json).toMatchObject({
+        status: 'UNAVAILABLE',
+        code: 'CAPABILITY_UNAVAILABLE',
+        capability: 'index-verification',
+      });
+      expect(res.json.integrityCheckPassed).toBeUndefined();
+    } finally {
+      if (previous === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previous;
+      if (previousKey === undefined) delete process.env.ALLOY_API_KEY;
+      else process.env.ALLOY_API_KEY = previousKey;
+      if (previousTenant === undefined) delete process.env.ALLOY_API_TENANT_ID;
+      else process.env.ALLOY_API_TENANT_ID = previousTenant;
+    }
+  });
+});
