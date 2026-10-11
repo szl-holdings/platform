@@ -1,10 +1,10 @@
 {
   "schema": "szl.truth/v1",
-  "generated_at": "2026-09-29T06:48:19.450Z",
+  "generated_at": "2026-10-07T12:33:20.366Z",
   "generated_by": "tools/truth/generate-truth.ts@szl.truth/v1",
   "metrics": {
     "surfaces_customer_facing": {
-      "value": 2,
+      "value": 1,
       "label": "MEASURED",
       "source": "artifacts/PUBLIC_SURFACES.json#summary.customer_facing_products"
     },
@@ -62,17 +62,17 @@
       "source": "drizzle introspect against DATABASE_URL"
     },
     "hf_models": {
-      "value": 49,
+      "value": 47,
       "label": "MEASURED",
       "source": "Hugging Face Hub API: https://huggingface.co/api/models?author=SZLHOLDINGS&limit=1000&full=true"
     },
     "hf_datasets": {
-      "value": 34,
+      "value": 37,
       "label": "MEASURED",
       "source": "Hugging Face Hub API: https://huggingface.co/api/datasets?author=SZLHOLDINGS&limit=1000&full=true"
     },
     "hf_spaces": {
-      "value": 23,
+      "value": 35,
       "label": "MEASURED",
       "source": "Hugging Face Hub API: https://huggingface.co/api/spaces?author=SZLHOLDINGS&limit=1000&full=true"
     },

@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-06T08:29:23Z",
+  "repository": "szl-holdings/platform",
+  "source": {
+    "endpoint": "GET /repos/szl-holdings/platform/rulesets/22286649",
+    "http_status": 200,
+    "scope": "repository",
+    "organization_ruleset_detail": "UNKNOWN: authenticated caller received HTTP 403"
+  },
+  "ruleset": {
+    "id": 22286649,
+    "name": "Protect main - solo-builder exact-head",
+    "target": "branch",
+    "enforcement": "active",
+    "include_refs": ["~DEFAULT_BRANCH"],
+    "exclude_refs": [],
+    "bypass_actors": [],
+    "current_user_can_bypass": "never",
+    "rules": {
+      "deletion_blocked": true,
+      "non_fast_forward_blocked": true,
+      "required_signatures": true,
+      "pull_request": {
+        "required_approving_review_count": 0,
+        "dismiss_stale_reviews_on_push": false,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": true,
+        "require_extra_approval_for_unattributed_changes": true,
+        "allowed_merge_methods": ["squash"]
+      },
+      "required_status_checks": {
+        "strict_required_status_checks_policy": true,
+        "do_not_enforce_on_create": false,
+        "contexts": [
+          {
+            "context": "Runtime Audit (audit:full)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Security Gate (blocking)",
+            "integration_id": 15368
+          },
+          {
+            "context": "E2E Gate",
+            "integration_id": 15368
+          },
+          {
+            "context": "severity-gate",
+            "integration_id": 15368
+          },
+          {
+            "context": "lockfiles / No lockfile references a Replit-internal registry host",
+            "integration_id": null
+          }
+        ]
+      }
+    }
+  },
+  "boundary": "This receipt records configuration only. It does not assert any check conclusion, organization-wide control, deployment health, secret value, or environment protection."
+}

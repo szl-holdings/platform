@@ -1,59 +1,111 @@
-# CircleCI Setup — szl-holdings/platform
+# CircleCI Setup — `szl-holdings/platform`
 
-Last updated: 2026-04-26
+Last updated: 2026-10-06
 
-## Overview
+## Evidence boundary
 
-CircleCI provides a second CI provider alongside the existing GitHub Actions pipelines. Both systems can coexist — GitHub Actions remains the primary CI (PR checks, branch protection gates, deployments) while CircleCI is available for redundancy, faster ARM builds, or enterprise procurement requirements.
+`.circleci/config.yml` defines an optional secondary CI pipeline alongside the
+repository's GitHub Actions workflows. The checked-in configuration does not,
+by itself, prove that the CircleCI project is connected or that a hosted run
+has passed. Treat a CircleCI run as evidence only when its URL, exact source
+revision, and job conclusions are recorded.
+
+GitHub Actions remains the primary CI source for the repository. The latest
+sanitized ruleset receipt in
+`audit/evidence/github-platform-ruleset-summary-2026-10-06.json` does not list a
+CircleCI context as a required status check. That receipt records configuration
+only and is not evidence of any check conclusion or deployment state.
 
 ## Pipeline summary
 
-The CircleCI pipeline is defined in `.circleci/config.yml` and runs the following jobs on every branch push:
+Once an authorized operator connects the repository to CircleCI, the `ci`
+workflow is configured for branch events and ignores tags. It declares these
+jobs:
 
-| Job | Description | Equivalent GitHub Actions job |
+| Job | Exact repository command or contract | Nearest GitHub Actions coverage |
 |---|---|---|
-| `lint` | Biome / oxlint code style checks | `lint` in `ci.yml` |
-| `typecheck` | Full TypeScript type-check across the monorepo | `typecheck` in `ci.yml` |
-| `unit-test` | Vitest unit tests with coverage output | `test` in `ci.yml` |
-| `build` | Recursive workspace build + per-artifact build gates | `build` in `ci.yml` and `build-all` in `build.yml` |
-| `integration-test` | API integration tests against a live PostgreSQL 16 service, including the health-pool saturation regression test | `integration-test` in `ci.yml` |
-| `secret-scan` | Gitleaks 8.21.2 full-tree secret detection | `secret-scan` in `ci.yml` |
+| `lint` | `pnpm run lint` | `Lint` in `.github/workflows/ci.yml` (the GitHub job uses `lint:ci`, so it is not command-identical) |
+| `typecheck` | `pnpm run typecheck` | `Typecheck` in `.github/workflows/ci.yml` |
+| `unit-test` | `pnpm run test`; the config points test-result and artifact collection at `coverage` | `.github/workflows/tests.yml` |
+| `build` | `pnpm run build` | `Build All Artifacts` in `.github/workflows/build.yml` |
+| `integration-test` | Builds and tests the three current backend applications, then runs local process preflights and probes both `/healthz` and `/readyz` | No command-identical GitHub Actions job |
+| `secret-scan` | Downloads Gitleaks 8.21.2, verifies its pinned SHA-256, and scans committed content reachable from the checkout | `Secret Scan (Gitleaks)` in `.github/workflows/security.yml` |
 
-`integration-test` runs after `build` succeeds; all other jobs run in parallel.
+`integration-test` waits for `build`. The other five jobs have no workflow
+dependency on `build` and can run in parallel.
 
-## Differences from GitHub Actions
+## Toolchain and dependency installation
 
-- Uses **Node 24** (matching `.nvmrc` and `package.json engines`). GitHub Actions currently uses Node 22 — that is a separate upgrade tracked elsewhere.
-- PostgreSQL service containers are declared inline in the `node24-with-postgres` executor rather than as a separate `services:` block.
-- Gitleaks always performs a full-tree scan (CircleCI does not expose a PR base SHA env var in the same way GitHub does; adapt to use `$CIRCLE_MERGE_BASE_SHA` if needed in future).
-- Artifact upload uses CircleCI's `store_artifacts` / `store_test_results` rather than `actions/upload-artifact`.
+All jobs use the sole `node24` executor, backed by `cimg/node:24.4`. This
+satisfies the repository's Node.js `>=24.0.0` contract. Dependency jobs source
+`scripts/activate-pnpm.sh`, verify pnpm `10.26.1` exactly, restore the pnpm-store
+cache keyed by `pnpm-lock.yaml`, and run:
 
-## Connecting the CircleCI project (operator steps)
+```bash
+pnpm install --frozen-lockfile --prefer-offline
+```
 
-These steps are performed once by an operator with admin access to the GitHub org and the CircleCI org.
+The cache is an optimization. The frozen lockfile remains authoritative.
+GitHub Actions also requests Node 24; the former Node 22 difference no longer
+exists.
 
-1. **Log in** to [app.circleci.com](https://app.circleci.com) with your GitHub account.
-2. **Create or join the `szl-holdings` CircleCI organization** (Settings → Organization Settings).
-3. **Add the project**: Projects → Add Project → select `szl-holdings/platform` → click **Set Up Project**.
-4. CircleCI detects `.circleci/config.yml` automatically. Select "Use Existing Config" and click **Start Building**.
-5. **Set required environment variables** in Project Settings → Environment Variables:
+## Backend integration preflight
 
-   | Variable | Value |
-   |---|---|
-   | `INTEGRATION_TEST_TOKEN` | Same value as the `INTEGRATION_TEST_TOKEN` GitHub Actions secret |
+The integration job exercises the backend applications currently named in the
+configuration:
 
-6. Optionally enable **SSH Debug** (Project Settings → SSH Keys) for interactive debugging of failed builds.
+| Package | Port | Local-only configuration |
+|---|---:|---|
+| `@workspace/alloy-runtime-api` | 4010 | `NODE_ENV=development` |
+| `@workspace/alloy-embedding-api` | 8766 | `NODE_ENV=development`, `AEF_AUTH_BYPASS=true`, `AEF_STORE_BACKEND=in-memory` |
+| `@workspace/alloy-ingestion-orchestrator` | 3003 | `NODE_ENV=development` |
 
-## Relationship to GitHub Actions
+Before starting those processes with the package commands defined in
+`.circleci/config.yml`, Turbo builds and tests the same three package filters.
+Each local preflight then has up to 60 seconds to satisfy both its loopback
+liveness and readiness endpoint. The job always prints the tail of the local
+service logs and stores `/tmp/backend-logs` as an artifact.
 
-Both CI systems watch the same repository. They are independent — a failure in CircleCI does not block GitHub pull request checks, and vice versa. Branch protection rules on GitHub are enforced exclusively by GitHub Actions status checks (see `ops/github/manual-click-paths.md` §2).
+This is deliberately a local, in-memory preflight. It does **not** start
+PostgreSQL, run migrations, invoke `@workspace/api-server`, require an
+`INTEGRATION_TEST_TOKEN`, exercise a remote environment, or establish deployed
+health.
 
-To add CircleCI as a required status check on GitHub, a GitHub admin would add the relevant CircleCI check name under Settings → Rulesets → `main-protection` → Status Checks. This is not currently required.
+## Connecting the CircleCI project
+
+These are operator actions, not completed state asserted by this repository:
+
+1. Sign in to CircleCI through the GitHub identity authorized for the
+   `szl-holdings` organization.
+2. Grant the CircleCI GitHub integration access to `szl-holdings/platform` and
+   select the existing `.circleci/config.yml`.
+3. Do not add `INTEGRATION_TEST_TOKEN` for this pipeline; the current
+   configuration neither reads nor needs it. The current configuration does
+   not reference a project-level secret.
+4. Ensure the runner can install the locked dependency graph and download the
+   pinned Gitleaks archive from its GitHub release URL.
+5. Run the pipeline and retain the run URL, exact 40-character revision, and
+   all job conclusions before treating CircleCI as verified redundancy.
+
+SSH debugging is optional and should be enabled only under the organization's
+access policy.
+
+## Relationship to branch protection
+
+CircleCI and GitHub Actions are separate execution systems. Do not describe a
+CircleCI source file, project connection, or local preflight as a passing
+hosted check. If a CircleCI context is later proposed as required, first prove
+that exact context green on the candidate head, update the protected-branch
+ruleset through an authorized operator, and capture a new sanitized ruleset
+receipt. Never replace an existing required GitHub check implicitly.
 
 ## Reference files
 
-- `.circleci/config.yml` — pipeline definition
-- `.github/workflows/ci.yml` — GitHub Actions CI (primary)
-- `.github/workflows/build.yml` — GitHub Actions build check on push to main/master
-- `.github/workflows/security.yml` — GitHub Actions weekly security audit
-- `ops/github/manual-click-paths.md` — GitHub UI configuration guide
+- `.circleci/config.yml` — CircleCI pipeline definition
+- `.github/workflows/ci.yml` — primary lint and typecheck workflow
+- `.github/workflows/tests.yml` — primary workspace test workflow
+- `.github/workflows/build.yml` — primary workspace build workflow
+- `.github/workflows/security.yml` — primary security and Gitleaks workflow
+- `audit/evidence/github-platform-ruleset-summary-2026-10-06.json` — latest
+  sanitized repository-ruleset observation
+- `ops/github/manual-click-paths.md` — operator-only GitHub UI procedures

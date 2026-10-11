@@ -20,7 +20,12 @@ const UNEVALUABLE: LocalAdapterScore = {
 };
 
 function words(value: string): Set<string> {
-  return new Set(value.toLowerCase().split(/\s+/).filter((word) => word.length > 0));
+  return new Set(
+    value
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((word) => word.length > 0),
+  );
 }
 
 /**
@@ -36,9 +41,13 @@ export function scoreLocalAdapterCase(
   if (strategy === 'keyword_match') {
     const keywords = reference.expectedKeywords;
     if (!keywords || keywords.length === 0) return UNEVALUABLE;
-    const found = keywords.filter((keyword) => output.toLowerCase().includes(keyword.toLowerCase()));
+    const found = keywords.filter((keyword) =>
+      output.toLowerCase().includes(keyword.toLowerCase()),
+    );
     const score = found.length / keywords.length;
-    const missing = keywords.filter((keyword) => !output.toLowerCase().includes(keyword.toLowerCase()));
+    const missing = keywords.filter(
+      (keyword) => !output.toLowerCase().includes(keyword.toLowerCase()),
+    );
     return {
       passed: score >= 0.8,
       score,

@@ -122,8 +122,11 @@ test('axe gate accepts only a successful completed matrix', () => {
   assert.match(gate, /^ {4}if: always\(\)$/m);
   assert.doesNotMatch(gate, /^\s+continue-on-error:/m);
   assert.match(script, /^result="\$\{\{ needs\.a11y-axe\.result \}\}"$/m);
-  assert.match(script, /^if \[\[ "\$result" != "success" \]\]; then$/m);
-  assert.match(script, /::error::Axe matrix did not complete successfully: \$result/);
-  assert.match(script, /exit 1/);
-  assert.match(script, /All axe scans passed/);
+  assert.match(script, /^case "\$result" in$/m);
+  assert.doesNotMatch(shellCaseArm(script, 'success'), /exit 1/);
+  assert.match(shellCaseArm(script, 'failure'), /exit 1/);
+  assert.match(shellCaseArm(script, 'cancelled|skipped'), /exit 1/);
+  assert.match(shellCaseArm(script, '*'), /exit 1/);
+  assert.match(shellCaseArm(script, 'success'), /All axe matrix jobs completed and passed/);
+  assert.match(shellCaseArm(script, 'cancelled|skipped'), /Accessibility evidence is incomplete/);
 });

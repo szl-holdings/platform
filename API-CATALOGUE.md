@@ -1,7 +1,7 @@
 # API Catalogue — SZL Holdings DreamStack API
 
 > **Auto-generated** from `lib/api-spec/openapi.yaml` — do not edit by hand.
-> Last generated: **2026-10-03** | Spec version: **0.3.0** | Base URL: `/api`
+> Last generated: **2026-10-11** | Spec version: **0.3.0** | Base URL: `/api`
 
 Run `pnpm docs:generate` to refresh after editing the spec.
 

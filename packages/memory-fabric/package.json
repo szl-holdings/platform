@@ -6,28 +6,40 @@
   "description": "Memory Fabric — 10-type cognitive memory for working, session, episodic, semantic, workflow, entity, artifact, operator-feedback, executive, and skill scopes. Provenance, freshness, confidence, retention enforcement, episodic summarization, lesson distillation, and tier-based sensitivity redaction.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./store": {
+      "development": "./src/store.ts",
+      "workspace": "./src/store.ts",
       "types": "./dist/store.d.ts",
-      "import": "./src/store.ts"
+      "import": "./dist/store.js"
     },
     "./postgres-store": {
+      "development": "./src/postgres-store.ts",
+      "workspace": "./src/postgres-store.ts",
       "types": "./dist/postgres-store.d.ts",
-      "import": "./src/postgres-store.ts"
+      "import": "./dist/postgres-store.js"
     },
     "./retention": {
+      "development": "./src/retention.ts",
+      "workspace": "./src/retention.ts",
       "types": "./dist/retention.d.ts",
-      "import": "./src/retention.ts"
+      "import": "./dist/retention.js"
     },
     "./behaviors": {
+      "development": "./src/behaviors.ts",
+      "workspace": "./src/behaviors.ts",
       "types": "./dist/behaviors.d.ts",
-      "import": "./src/behaviors.ts"
+      "import": "./dist/behaviors.js"
     }
   },
   "dependencies": {
@@ -44,6 +56,7 @@
     "format": "biome format --write ./src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build": "tsc --build"
   }
 }

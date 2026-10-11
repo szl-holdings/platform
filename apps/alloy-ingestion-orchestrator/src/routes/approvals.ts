@@ -5,9 +5,14 @@
  * Resuming an approved run continues from the gate's checkpoint.
  */
 
+import {
+  getPendingApprovalRequest,
+  resolvePendingApprovalRequest,
+} from '@workspace/approvals-inbox';
 import { type Request, type Response, Router } from 'express';
 import { defaultEngine } from '../engine.js';
 import { defaultRunStore } from '../run-store.js';
+import { approvalPrincipal, requestTenantId } from '../security.js';
 import { ApprovalDecisionSchema } from '../types.js';
 import { buildIngestDocumentWorkflow } from '../workflows/ingest-document.js';
 import { buildRebuildIndexWorkflow } from '../workflows/rebuild-index.js';
@@ -18,17 +23,23 @@ import { buildVerifyIndexHealthWorkflow } from '../workflows/verify-index-health
 export function createApprovalsRouter(): Router {
   const router = Router();
 
-  router.post('/runs/:runId/approve', async (req: Request, res: Response) => {
+  router.post('/:runId/approve', async (req: Request, res: Response) => {
     const { runId } = req.params;
-    const parse = ApprovalDecisionSchema.safeParse(req.body);
-    if (!parse.success) {
-      res.status(400).json({ error: 'Validation failed', detail: parse.error.issues });
+    const principal = approvalPrincipal(req);
+    if (!principal) {
+      res.status(403).json({ error: 'Forbidden', code: 'APPROVAL_ROLE_REQUIRED' });
       return;
     }
 
     const run = defaultRunStore.get(runId as string);
-    if (!run) {
-      res.status(404).json({ error: `Run not found: ${runId}` });
+    if (!run || run.tenantId !== requestTenantId(req)) {
+      res.status(404).json({ error: 'Run not found', code: 'RUN_NOT_FOUND' });
+      return;
+    }
+
+    const parse = ApprovalDecisionSchema.safeParse(req.body);
+    if (!parse.success) {
+      res.status(400).json({ error: 'Validation failed', detail: parse.error.issues });
       return;
     }
 
@@ -38,6 +49,25 @@ export function createApprovalsRouter(): Router {
         runId: run.runId,
         status: run.status,
       });
+      return;
+    }
+
+    const gateResult = run.stepResults.find(
+      (result) => result.approvalRequestId === run.approvalRequestId,
+    );
+    const pendingRequest = gateResult
+      ? getPendingApprovalRequest(run.runId, gateResult.stepId)
+      : undefined;
+    if (
+      !gateResult ||
+      !pendingRequest ||
+      pendingRequest.status !== 'pending' ||
+      pendingRequest.id !== run.approvalRequestId ||
+      pendingRequest.tenantId !== run.tenantId ||
+      pendingRequest.tenantId !== requestTenantId(req) ||
+      parse.data.approvalRequestId !== run.approvalRequestId
+    ) {
+      res.status(404).json({ error: 'Approval request not found', code: 'APPROVAL_NOT_FOUND' });
       return;
     }
 
@@ -54,14 +84,24 @@ export function createApprovalsRouter(): Router {
         runId as string,
         definition,
         parse.data.decision,
-        parse.data.actorId,
+        principal.actorId,
         parse.data.note,
       );
+      const approvalAction = resolvePendingApprovalRequest(
+        run.runId,
+        gateResult.stepId,
+        parse.data.decision,
+        { actor: principal.actorId, note: parse.data.note },
+      );
+      if (!approvalAction) {
+        throw new Error('Pending approval request could not be resolved');
+      }
 
       res.status(200).json({
         runId: resumed.runId,
         workflowId: resumed.workflowId,
         status: resumed.status,
+        approvalRequestId: pendingRequest.id,
         completedAt: resumed.completedAt,
         error: resumed.error,
         stepResults: resumed.stepResults.map((r) => ({

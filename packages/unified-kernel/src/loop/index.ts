@@ -20,28 +20,28 @@
  * Runtime contract: ouroboros-runtime-contract.v4.json (max_steps 12).
  */
 
-import { runLoop } from "./vendor_ouroboros/loop-kernel.ts";
-import type { LoopTrace } from "./vendor_ouroboros/types.ts";
+import { runLoop } from './vendor_ouroboros/loop-kernel.ts';
+import type { LoopTrace } from './vendor_ouroboros/types.ts';
 
-export { runLoop } from "./vendor_ouroboros/loop-kernel.ts";
-export type { LoopTrace, LoopConfig, LoopStep, ExitReason } from "./vendor_ouroboros/types.ts";
+export { runLoop } from './vendor_ouroboros/loop-kernel.ts';
+export type { LoopTrace, LoopConfig, LoopStep, ExitReason } from './vendor_ouroboros/types.ts';
 
 /** Runtime-contract v4 max step budget. */
 export const RUNTIME_CONTRACT_V4_MAX_STEPS = 12;
 
 /** Provenance of the wired Ouroboros runtime. */
 export const OUROBOROS_PROVENANCE = {
-  package: "@szl-holdings/ouroboros",
-  tag: "v6.3.0",
-  commit: "d64748cc9ad67296be296c1ef6752ae181413fd7",
+  package: '@szl-holdings/ouroboros',
+  tag: 'v6.3.0',
+  commit: 'd64748cc9ad67296be296c1ef6752ae181413fd7',
   upstreamTests: 218,
-  note: "v6.3.0 vendor base plus a later maxSteps normalization; donor receipt sink excluded",
+  note: 'v6.3.0 vendor base plus a later maxSteps normalization; donor receipt sink excluded',
   budgetNormalization: {
-    source: "szl-holdings/ouroboros",
-    path: "src/loop-kernel.ts",
-    commit: "0f030741f567bdf397d33c4d607790af6ed39688",
-    recovered: "finite integer nonnegative maxSteps",
-    excluded: "emitLoopReceipt",
+    source: 'szl-holdings/ouroboros',
+    path: 'src/loop-kernel.ts',
+    commit: '0f030741f567bdf397d33c4d607790af6ed39688',
+    recovered: 'finite integer nonnegative maxSteps',
+    excluded: 'emitLoopReceipt',
   },
 } as const;
 
@@ -51,7 +51,10 @@ export const OUROBOROS_PROVENANCE = {
  */
 export async function step<S>(
   initialState: S,
-  stepFn: (s: S, i: number) => Promise<{ state: S; output?: number }> | { state: S; output?: number },
+  stepFn: (
+    s: S,
+    i: number,
+  ) => Promise<{ state: S; output?: number }> | { state: S; output?: number },
   delta: (a: S, b: S) => number,
   maxSteps = RUNTIME_CONTRACT_V4_MAX_STEPS,
 ): Promise<LoopTrace<S, number>> {
@@ -59,7 +62,7 @@ export async function step<S>(
     initialState,
     step: async (s, i) => stepFn(s, i),
     delta,
-    config: { maxSteps, convergenceThreshold: 1e-3, label: "unified-kernel.loop" },
+    config: { maxSteps, convergenceThreshold: 1e-3, label: 'unified-kernel.loop' },
   });
 }
 
@@ -80,7 +83,7 @@ export async function terminates(maxSteps = RUNTIME_CONTRACT_V4_MAX_STEPS): Prom
     maxSteps,
   );
   return {
-    halted: trace.exitReason !== "budgetExhausted" || trace.steps.length <= maxSteps,
+    halted: trace.exitReason !== 'budgetExhausted' || trace.steps.length <= maxSteps,
     steps: trace.steps.length,
     exitReason: trace.exitReason,
   };

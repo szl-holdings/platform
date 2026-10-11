@@ -4,6 +4,7 @@ const stringify = require('./lib/stringify');
 const compile = require('./lib/compile');
 const expand = require('./lib/expand');
 const parse = require('./lib/parse');
+const utils = require('./lib/utils');
 
 /**
  * Expand the given pattern or create a regex-compatible string.
@@ -21,10 +22,11 @@ const parse = require('./lib/parse');
 
 const braces = (input, options = {}) => {
   let output = [];
+  const maxDepth = utils.getMaxDepth(options);
 
   if (Array.isArray(input)) {
     for (const pattern of input) {
-      const result = braces.create(pattern, options);
+      const result = braces.create(pattern, options, maxDepth);
       if (Array.isArray(result)) {
         output.push(...result);
       } else {
@@ -32,7 +34,7 @@ const braces = (input, options = {}) => {
       }
     }
   } else {
-    output = [].concat(braces.create(input, options));
+    output = [].concat(braces.create(input, options, maxDepth));
   }
 
   if (options && options.expand === true && options.nodupes === true) {
@@ -55,7 +57,8 @@ const braces = (input, options = {}) => {
  * @api public
  */
 
-braces.parse = (input, options = {}) => parse(input, options);
+braces.parse = (input, options = {}, maxDepth = utils.getMaxDepth(options)) =>
+  parse(input, options, maxDepth);
 
 /**
  * Creates a braces string from an AST, or an AST node.
@@ -71,11 +74,11 @@ braces.parse = (input, options = {}) => parse(input, options);
  * @api public
  */
 
-braces.stringify = (input, options = {}) => {
+braces.stringify = (input, options = {}, maxDepth = utils.getMaxDepth(options)) => {
   if (typeof input === 'string') {
-    return stringify(braces.parse(input, options), options);
+    return stringify(braces.parse(input, options, maxDepth), options, maxDepth);
   }
-  return stringify(input, options);
+  return stringify(input, options, maxDepth);
 };
 
 /**
@@ -93,11 +96,11 @@ braces.stringify = (input, options = {}) => {
  * @api public
  */
 
-braces.compile = (input, options = {}) => {
+braces.compile = (input, options = {}, maxDepth = utils.getMaxDepth(options)) => {
   if (typeof input === 'string') {
-    input = braces.parse(input, options);
+    input = braces.parse(input, options, maxDepth);
   }
-  return compile(input, options);
+  return compile(input, options, maxDepth);
 };
 
 /**
@@ -117,12 +120,12 @@ braces.compile = (input, options = {}) => {
  * @api public
  */
 
-braces.expand = (input, options = {}) => {
+braces.expand = (input, options = {}, maxDepth = utils.getMaxDepth(options)) => {
   if (typeof input === 'string') {
-    input = braces.parse(input, options);
+    input = braces.parse(input, options, maxDepth);
   }
 
-  let result = expand(input, options);
+  let result = expand(input, options, maxDepth);
 
   // filter out empty strings if specified
   if (options.noempty === true) {
@@ -153,12 +156,14 @@ braces.expand = (input, options = {}) => {
  * @api public
  */
 
-braces.create = (input, options = {}) => {
+braces.create = (input, options = {}, maxDepth = utils.getMaxDepth(options)) => {
   if (input === '' || input.length < 3) {
     return [input];
   }
 
-  return options.expand !== true ? braces.compile(input, options) : braces.expand(input, options);
+  return options.expand !== true
+    ? braces.compile(input, options, maxDepth)
+    : braces.expand(input, options, maxDepth);
 };
 
 /**
