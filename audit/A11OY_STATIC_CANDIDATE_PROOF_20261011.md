@@ -3,11 +3,11 @@
 - workcell_id: `A11OY-STATIC-CANDIDATE-20261011`
 - agent: Codex / BuildWarden / PixelProof / ClaimGuard / SecretHawk / ProofSmith
 - objective: Prepare a bounded, network-free A11oy interface candidate that can later be published at an additive preview path without changing an existing live root or API.
-- source_revision: `97e62630b5fb48a69b9a96907611b37620b9aa05`
+- source_revision: `1d4654f0feb3d23850ef20cbba31faf8bea5db1b`
 - protected-main baseline: `690959d29c6d26f0f3f4a42ef91fd442067c186e`
-- branch: `codex/a11oy-static-candidate-boundary-20261011`
+- branch: `codex/production-hardening-20261011`
 - proof_level: **4 — local source, focused tests, exact-source live UI, claim and security review**
-- recorded_at: `2026-10-11T06:29:00Z`
+- recorded_at: `2026-10-11T07:25:00Z`
 - recorded_by: Codex
 
 ## Plan summary
@@ -38,7 +38,9 @@ The patch:
 - adds an exact-source Playwright evidence capture that fails on foreign or
   undeclared same-origin requests; and
 - narrows route smoke coverage to the two reviewed candidate routes and records
-  remaining deployment and operational gaps.
+  remaining deployment and operational gaps; and
+- raises the sidebar group-label color to the reviewed text-dim token so its
+  contrast against the navigation background meets the WCAG AA axe contract.
 
 ## Test results
 
@@ -48,6 +50,7 @@ The patch:
 | `corepack pnpm --filter @workspace/a11oy typecheck` | **MEASURED — exit 0.** |
 | `node --test scripts/qa/dependency-patches.test.mjs` | **MEASURED — exit 0; every dependency-patch assertion passed.** |
 | `BASE_PATH=/preview/platform-a11oy/ corepack pnpm --filter @workspace/a11oy build` | **MEASURED — exit 0.** The bundle verifier admitted exactly `index.html`, one CSS asset, the main JavaScript asset, and the lazy security-agent JavaScript asset. |
+| `PLAYWRIGHT_BASE_URL=http://localhost:4111/preview/platform-a11oy A11Y_ARTIFACT_NAME=a11oy CI=true corepack pnpm exec playwright test tests/e2e/a11y.spec.ts --grep "Per-Artifact Root Page" --reporter=list --project=chromium` | **MEASURED — exit 0; 3/3 accessibility checks passed, including zero critical or serious WCAG 2.1 AA axe violations.** |
 | `VESSELS_URL=http://127.0.0.1:8099 corepack pnpm qa:routes --web-only` with six local web servers | **MEASURED — exit 0; 62/62 web route checks passed.** Terra used port 6100 because Fetch rejects port 6000; Vessels used the explicit 8099 override. |
 | candidate-home evidence capture | **MEASURED — exit 0; HTTP 200 for the document and two declared assets; zero foreign or undeclared same-origin requests.** |
 | security-agent evidence capture | **MEASURED — exit 0; HTTP 200 for the document and three declared assets; zero foreign or undeclared same-origin requests.** |
@@ -70,10 +73,17 @@ That run exited 1 with 49/50 Node tests passing. Revision
 the two reviewed routes and reject the three held routes. The full package test
 was then rerun and passed 50/50 Node plus 5/5 UI tests as recorded above.
 
+Integration CI later exposed a serious contrast violation in the sidebar group
+label: the muted token measured 3.05:1 against the navigation background, below
+the required 4.5:1. Revision `1d4654f0feb3d23850ef20cbba31faf8bea5db1b`
+moved that label to the text-dim token. The exact-source accessibility rerun then
+passed all three per-artifact checks, and both admitted routes were recaptured
+from that clean revision.
+
 ## Screenshot references
 
-- [Candidate home](../docs/assets/screenshots/current/a11oy-candidate-home-2026-10-11.png) at `/preview/platform-a11oy/` — SHA-256 `e1a3afa615193149c5cba1bea0159a807a70cf65711dde259853a23bbeab63b2`
-- [Security-agent fixture](../docs/assets/screenshots/current/a11oy-candidate-security-agents-2026-10-11.png) at `/preview/platform-a11oy/security-agents` — SHA-256 `396eab9e22009ad81212c7f207a3240978164f83e5cef80d6eb5e5e7b699e421`
+- [Candidate home](../docs/assets/screenshots/current/a11oy-candidate-home-2026-10-11.png) at `/preview/platform-a11oy/` — SHA-256 `ee78b026bc2791e1e080a89e7099e2a5a1810315447d8f2ce953c450c558e27c`
+- [Security-agent fixture](../docs/assets/screenshots/current/a11oy-candidate-security-agents-2026-10-11.png) at `/preview/platform-a11oy/security-agents` — SHA-256 `33142a17c2be1b91c150fd026e573018077e240f49f8bcb47ed734dbe9c2e800`
 - [Screenshot catalog](screenshot-catalog.md)
 
 Both screenshots were captured from the locally served build of the exact

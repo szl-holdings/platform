@@ -2,7 +2,7 @@
   "schema": "szl.a11oy-candidate-screenshot/v1",
   "evidence_status": "LOCAL_NON_AUTHORITATIVE",
   "claim_boundary": "Candidate UI fixture only; this capture is not production, deployment, certification, or signed-proof evidence.",
-  "captured_at": "2026-10-11T06:28:47.605Z",
+  "captured_at": "2026-10-11T07:24:35.482Z",
   "route": "http://127.0.0.1:4111/preview/platform-a11oy/",
   "viewport": {
     "width": 1440,
@@ -11,12 +11,12 @@
   },
   "screenshot": {
     "path": "docs/assets/screenshots/current/a11oy-candidate-home-2026-10-11.png",
-    "bytes": 114822,
-    "sha256": "e1a3afa615193149c5cba1bea0159a807a70cf65711dde259853a23bbeab63b2"
+    "bytes": 114886,
+    "sha256": "ee78b026bc2791e1e080a89e7099e2a5a1810315447d8f2ce953c450c558e27c"
   },
   "build": {
-    "index_html_sha256": "2096b8fecd0b318824bc9ca0a9967e576d770480eae396257a63578ae1bc4773",
-    "source_head": "97e62630b5fb48a69b9a96907611b37620b9aa05",
+    "index_html_sha256": "14b1285511bcd901bb5e621a4d5f0b612b136da2a6d3fc1cc6662592567e4afa",
+    "source_head": "1d4654f0feb3d23850ef20cbba31faf8bea5db1b",
     "working_tree_clean": true
   },
   "runtime": {
@@ -36,7 +36,7 @@
       {
         "method": "GET",
         "resource_type": "script",
-        "url": "http://127.0.0.1:4111/preview/platform-a11oy/assets/index-Cuo27aFU.js"
+        "url": "http://127.0.0.1:4111/preview/platform-a11oy/assets/index-CTnamNpU.js"
       },
       {
         "method": "GET",
@@ -55,7 +55,7 @@
       },
       {
         "status": 200,
-        "url": "http://127.0.0.1:4111/preview/platform-a11oy/assets/index-Cuo27aFU.js"
+        "url": "http://127.0.0.1:4111/preview/platform-a11oy/assets/index-CTnamNpU.js"
       }
     ],
     "foreign_requests": [],

@@ -26,19 +26,19 @@ captured base plus the two new hardened PNGs in this documentation successor).
   - `http://127.0.0.1:4111/preview/platform-a11oy/`
   - `http://127.0.0.1:4111/preview/platform-a11oy/security-agents`
 - surfaces: A11oy candidate home and deterministic security-agent fixture
-- capture_date: `2026-10-11T06:28:47.605Z` and `2026-10-11T06:28:55.475Z`
+- capture_date: `2026-10-11T07:24:35.482Z` and `2026-10-11T07:24:42.226Z`
 - captured_by: Codex / PixelProof
 - capture_environment: `local-exact-head`, Linux, Node `v24.19.0`, Playwright `1.60.0` / Chromium `151.0.7922.173`
-- source_revision: `97e62630b5fb48a69b9a96907611b37620b9aa05`
-- workflow_run_or_command: `BASE_PATH=/preview/platform-a11oy/ corepack pnpm --filter @workspace/a11oy build; corepack pnpm --dir artifacts/a11oy exec vite preview --config vite.config.ts --host 127.0.0.1 --port 4111 --strictPort; node scripts/qa/capture-a11oy-candidate-evidence.mjs http://127.0.0.1:4111/preview/platform-a11oy/ docs/assets/screenshots/current/a11oy-candidate-home-2026-10-11.png; node scripts/qa/capture-a11oy-candidate-evidence.mjs http://127.0.0.1:4111/preview/platform-a11oy/security-agents docs/assets/screenshots/current/a11oy-candidate-security-agents-2026-10-11.png`
+- source_revision: `1d4654f0feb3d23850ef20cbba31faf8bea5db1b`
+- workflow_run_or_command: `BASE_PATH=/preview/platform-a11oy/ corepack pnpm --filter @workspace/a11oy build; BASE_PATH=/preview/platform-a11oy/ corepack pnpm --dir artifacts/a11oy exec vite preview --config vite.config.ts --host 127.0.0.1 --port 4111 --strictPort; node scripts/qa/capture-a11oy-candidate-evidence.mjs <route> /tmp/<evidence-file>; copy the digest-verified PNG and normalized sidecar path into docs/assets/screenshots/current/`
 - viewport: `1440 x 900`, full-page artifacts `1440 x 1088` and `1440 x 1109`
 - artifact_sha256:
-  - candidate home: `e1a3afa615193149c5cba1bea0159a807a70cf65711dde259853a23bbeab63b2`
-  - security-agent fixture: `396eab9e22009ad81212c7f207a3240978164f83e5cef80d6eb5e5e7b699e421`
+  - candidate home: `ee78b026bc2791e1e080a89e7099e2a5a1810315447d8f2ce953c450c558e27c`
+  - security-agent fixture: `33142a17c2be1b91c150fd026e573018077e240f49f8bcb47ed734dbe9c2e800`
 - workcell_id: `A11OY-STATIC-CANDIDATE-20261011`
 - proof_level: `4`
 - status: `current`
-- notes: Both captures are **MEASURED** local candidate evidence. Their metadata records only the requested document and declared same-origin fingerprinted assets, with zero foreign or undeclared same-origin requests. The visible content identifies itself as a candidate demo and deterministic fixture. These captures do not establish deployment, production readiness, customer use, certification, model execution, external attestation, or durable signed proof.
+- notes: Both captures are **MEASURED** local candidate evidence. Their metadata records only the requested document and declared same-origin fingerprinted assets, with zero foreign or undeclared same-origin requests. The visible content identifies itself as a candidate demo and deterministic fixture. Visual review confirmed the revised sidebar label is legible and neither full-page capture clips content. These captures do not establish deployment, production readiness, customer use, certification, model execution, external attestation, or durable signed proof.
 - sidecars:
   - [`a11oy-candidate-home-2026-10-11.metadata.json`](../docs/assets/screenshots/current/a11oy-candidate-home-2026-10-11.metadata.json)
   - [`a11oy-candidate-security-agents-2026-10-11.metadata.json`](../docs/assets/screenshots/current/a11oy-candidate-security-agents-2026-10-11.metadata.json)
