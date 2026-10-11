@@ -3,9 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "description": "Ouroboros closure operator O: X → X with Λ-gate, Newton fluxions-receipt, Gauss least-squares forecast, Bekenstein bound, dual-witness, and receipt chain composed into a single reusable runtime.",
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
@@ -14,6 +24,7 @@
     "@workspace/ouroboros-newton": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "vitest": "catalog:",
     "typescript": "^6.0.3",
     "tsx": "^4.22.4"

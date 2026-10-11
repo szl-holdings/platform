@@ -4,11 +4,14 @@
  *
  * The target server is already running. This probe verifies build identity,
  * dependency readiness, fail-closed API-key enforcement, and an authenticated,
- * tenant-scoped read without calling any mutation endpoint.
+ * tenant-scoped read or explicit production admission HOLD without calling any
+ * mutation endpoint. SMOKE_READINESS_POLICY defaults to ready; production-hold
+ * requires the precise unavailable-backend contract rather than accepting 503s.
  */
 
 import { appendFileSync } from 'node:fs';
 import { artifactUrl } from '../lib/artifact-ports.js';
+import { EXPECTED_HOLDS, validateRuntimeReadiness } from './runtime-readiness-policy.mjs';
 
 const API_BASE_URL = (
   process.env.API_BASE_URL ??
@@ -21,7 +24,7 @@ const EXPECTED_GIT_SHA = process.env.GITHUB_SHA?.trim() || null;
 const SMOKE_TENANT_ID = `runtime-audit-${process.env.GITHUB_RUN_ID ?? process.pid}`;
 const parsedTimeout = Number.parseInt(process.env.SMOKE_TIMEOUT_MS ?? '10000', 10);
 const TIMEOUT_MS = Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : 10_000;
-const EXPECTED_DEPENDENCIES = ['memory-store', 'run-registry', 'workflow-runtime'];
+const READINESS_POLICY = process.env.SMOKE_READINESS_POLICY ?? 'ready';
 
 const checks = [];
 let livenessGitSha = null;
@@ -134,42 +137,18 @@ await runCheck('liveness-build-identity', async () => {
   return `HTTP 200; service=${body.service}; gitSha=${body.gitSha}`;
 });
 
+await runCheck('readiness-policy', async () => {
+  invariant(
+    ['ready', 'production-hold'].includes(READINESS_POLICY),
+    'SMOKE_READINESS_POLICY must be ready or production-hold',
+  );
+  return READINESS_POLICY;
+});
+
 await runCheck('dependency-readiness', async () => {
   const { response, body } = await fetchJson('/readyz');
 
-  invariant(response.status === 200, `/readyz returned HTTP ${response.status}, expected 200`);
-  invariant(body && typeof body === 'object', '/readyz returned no JSON object');
-  invariant(body.ready === true, `/readyz ready is ${JSON.stringify(body.ready)}, expected true`);
-  invariant(
-    body.service === 'alloy-runtime-api',
-    `/readyz service is ${JSON.stringify(body.service)}, expected "alloy-runtime-api"`,
-  );
-  invariant(isValidDate(body.checkedAt), '/readyz checkedAt is not a valid timestamp');
-  invariant(Array.isArray(body.dependencies), '/readyz dependencies is not an array');
-  invariant(typeof livenessGitSha === 'string', 'liveness build identity was not established');
-  invariant(
-    body.gitSha === livenessGitSha,
-    `/readyz gitSha ${JSON.stringify(body.gitSha)} does not match /healthz ${livenessGitSha}`,
-  );
-
-  const dependencyNames = body.dependencies.map((dependency) => dependency?.name);
-  invariant(
-    body.dependencies.length === EXPECTED_DEPENDENCIES.length &&
-      new Set(dependencyNames).size === EXPECTED_DEPENDENCIES.length &&
-      EXPECTED_DEPENDENCIES.every((name) => dependencyNames.includes(name)),
-    `/readyz dependencies are ${JSON.stringify(dependencyNames)}, expected ${JSON.stringify(EXPECTED_DEPENDENCIES)}`,
-  );
-
-  for (const dependency of body.dependencies) {
-    invariant(dependency.ready === true, `${dependency.name} readiness is not true`);
-    invariant(
-      Number.isFinite(dependency.latencyMs) && dependency.latencyMs >= 0,
-      `${dependency.name} latencyMs is not a finite nonnegative number`,
-    );
-    invariant(dependency.detail === 'ok', `${dependency.name} detail is not "ok"`);
-  }
-
-  return `HTTP 200; ready=true; dependencies=${dependencyNames.join(',')}`;
+  return validateRuntimeReadiness(response.status, body, livenessGitSha, READINESS_POLICY);
 });
 
 await runCheck('anonymous-api-key-guard', async () => {
@@ -222,6 +201,38 @@ await runCheck('authenticated-tenant-read', async () => {
     },
   });
 
+  if (READINESS_POLICY === 'production-hold') {
+    invariant(
+      response.status === 503,
+      `/v1/workflows returned HTTP ${response.status}, expected 503`,
+    );
+    invariant(
+      body?.ready === false && body?.status === 'HOLD',
+      'authenticated production traffic must remain on HOLD',
+    );
+    invariant(body?.code === 'PRODUCTION_CAPABILITY_UNAVAILABLE', 'production HOLD code mismatch');
+    invariant(
+      body?.evidenceState === 'UNAVAILABLE' && body?.service === 'alloy-runtime-api',
+      'production HOLD evidence or service mismatch',
+    );
+    invariant(
+      Array.isArray(body?.holds) &&
+        body.holds.length === EXPECTED_HOLDS.length &&
+        EXPECTED_HOLDS.every((hold, index) => body.holds[index] === hold),
+      'production HOLD capabilities mismatch',
+    );
+    invariant(
+      response.headers.get('x-evidence-state') === 'UNAVAILABLE',
+      'production HOLD evidence header mismatch',
+    );
+    invariant(
+      response.headers.get('retry-after') === '60',
+      'production HOLD retry header mismatch',
+    );
+    invariant(!('runs' in body), 'production HOLD must not return workflow results');
+    return 'HTTP 503; authenticated production admission HOLD; no workflow execution accepted';
+  }
+
   invariant(
     response.status === 200,
     `/v1/workflows returned HTTP ${response.status}, expected 200`,
@@ -240,6 +251,7 @@ const result = {
   schemaVersion: 1,
   baseUrl: API_BASE_URL,
   expectedGitSha: EXPECTED_GIT_SHA,
+  readinessPolicy: READINESS_POLICY,
   tenantId: SMOKE_TENANT_ID,
   passed,
   checks,

@@ -6,20 +6,28 @@
   "description": "Evidence graph store — evidence items linked to entities and signals, recommendations with evidence chains, and the 'why does the system believe X' query layer",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./store": {
+      "development": "./src/store.ts",
+      "workspace": "./src/store.ts",
       "types": "./dist/store.d.ts",
-      "import": "./src/store.ts"
+      "import": "./dist/store.js"
     },
     "./query": {
+      "development": "./src/query.ts",
+      "workspace": "./src/query.ts",
       "types": "./dist/query.d.ts",
-      "import": "./src/query.ts"
+      "import": "./dist/query.js"
     },
     "./postgres-store": {
+      "development": "./src/postgres-store.ts",
+      "workspace": "./src/postgres-store.ts",
       "types": "./dist/postgres-store.d.ts",
-      "import": "./src/postgres-store.ts"
+      "import": "./dist/postgres-store.js"
     }
   },
   "dependencies": {
@@ -34,6 +42,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc --build"
   }
 }

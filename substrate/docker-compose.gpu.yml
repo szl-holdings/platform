@@ -1,14 +1,12 @@
-version: "3.9"
-
 # ─── Substrate Fleet — GPU Compose Stack ─────────────────────────────────────
 # Boot the full substrate fleet on a GPU host:
-#   docker compose -f docker-compose.gpu.yml up
+#   docker compose --env-file .env.substrate -f docker-compose.gpu.yml up --build
 #
-# CPU-stub fallback (no GPU required):
-#   docker compose -f docker-compose.gpu.yml -f docker-compose.cpu-stub.yml up
+# Standalone CPU development stub (no production credentials or GPU required):
+#   docker compose -f docker-compose.cpu-stub.yml up --build
 #
 # Environment variables (copy .env.substrate.example → .env.substrate):
-#   SUBSTRATE_API_KEY, ACR_LOGIN_SERVER, GIT_SHA, etc.
+#   inference and worker credentials, tenant bindings, and model revisions.
 
 x-logging: &default-logging
   driver: "json-file"
@@ -42,7 +40,7 @@ services:
   # ── Substrate Inference (oLLM GPU engine) ───────────────────────────────────
   substrate-inference:
     build:
-      context: apps/substrate-inference
+      context: ../apps/substrate-inference
       dockerfile: Dockerfile
       target: runtime
     # INFERENCE_IMAGE must include the full repository path when ACR_LOGIN_SERVER is set.
@@ -59,12 +57,17 @@ services:
     environment:
       PORT: "8070"
       SUBSTRATE_INFERENCE_PORT: "8070"
+      SUBSTRATE_INFERENCE_ENV: "production"
       SUBSTRATE_BIND_HOST: "0.0.0.0"
       SUBSTRATE_MODELS_DIR: /data/models
       SUBSTRATE_CACHE_DIR: /data/cache
       SUBSTRATE_MAX_CONCURRENT: "${SUBSTRATE_MAX_CONCURRENT:-4}"
       SUBSTRATE_DEFAULT_MODEL: "${SUBSTRATE_DEFAULT_MODEL:-}"
       SUBSTRATE_API_KEY: "${SUBSTRATE_API_KEY:?SUBSTRATE_API_KEY must be set}"
+      SUBSTRATE_API_TENANT_ID: "${SUBSTRATE_API_TENANT_ID:?SUBSTRATE_API_TENANT_ID must be set}"
+      SUBSTRATE_MODEL_ADMIN_API_KEY: "${SUBSTRATE_MODEL_ADMIN_API_KEY:?SUBSTRATE_MODEL_ADMIN_API_KEY must be set}"
+      SUBSTRATE_MODEL_REVISIONS_JSON: "${SUBSTRATE_MODEL_REVISIONS_JSON:?SUBSTRATE_MODEL_REVISIONS_JSON must be set}"
+      SUBSTRATE_INFERENCE_AUTH_BYPASS: "false"
       SUBSTRATE_ALLOWED_ORIGINS: "${SUBSTRATE_ALLOWED_ORIGINS:-http://localhost:5000}"
     volumes:
       - model-cache:/data/models
@@ -80,7 +83,7 @@ services:
           memory: "${INFERENCE_MEMORY_LIMIT:-48g}"
     healthcheck:
       test: ["CMD", "python3.11", "-c",
-             "import urllib.request; urllib.request.urlopen('http://localhost:8070/health')"]
+             "import urllib.request; urllib.request.urlopen('http://localhost:8070/ready')"]
       interval: 30s
       timeout: 10s
       start_period: 90s
@@ -89,7 +92,7 @@ services:
   # ── Substrate Python Workers (stage execution fleet) ─────────────────────────
   substrate-py-workers:
     build:
-      context: services/substrate-py-workers
+      context: ../services/substrate-py-workers
       dockerfile: Dockerfile
       target: runtime
     # WORKER_IMAGE must include the full repository path when ACR_LOGIN_SERVER is set.
@@ -105,6 +108,7 @@ services:
       - "${WORKER_PORT:-8090}:8090"
     environment:
       PORT: "8090"
+      HOST: "0.0.0.0"
       WORKER_ID: "${WORKER_ID:-py-worker-compose}"
       WORKER_MAX_CONCURRENCY: "${WORKER_MAX_CONCURRENCY:-4}"
       WORKER_DRAIN_TIMEOUT_S: "${WORKER_DRAIN_TIMEOUT_S:-60}"
@@ -113,10 +117,10 @@ services:
       SCALE_IN_IDLE_SECONDS: "${SCALE_IN_IDLE_SECONDS:-120}"
       MAX_WORKERS: "${MAX_WORKERS:-10}"
       MIN_WORKERS: "${MIN_WORKERS:-1}"
-      # SUBSTRATE_INFERENCE_URL tells model_router.py where the GPU inference
-      # engine lives. This is the correct gate variable — not SUBSTRATE_PYTHON_WORKER_URL
-      # (which is the TS API server's env var pointing outward to this worker).
-      SUBSTRATE_INFERENCE_URL: "http://substrate-inference:8070"
+      SUBSTRATE_PYTHON_WORKER_ENV: "production"
+      SUBSTRATE_PYTHON_WORKER_API_KEY: "${SUBSTRATE_PYTHON_WORKER_API_KEY:?SUBSTRATE_PYTHON_WORKER_API_KEY must be set}"
+      SUBSTRATE_PYTHON_WORKER_TENANT_ID: "${SUBSTRATE_PYTHON_WORKER_TENANT_ID:?SUBSTRATE_PYTHON_WORKER_TENANT_ID must be set}"
+      SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS: "false"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-}"
       SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC: "${SUBSTRATE_RETRIEVAL_ALLOW_SYNTHETIC:-0}"
       SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL: "${SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL:-0}"
@@ -134,7 +138,7 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c",
-             "import urllib.request; urllib.request.urlopen('http://localhost:8090/health')"]
+             "import urllib.request; urllib.request.urlopen('http://localhost:8090/ready')"]
       interval: 20s
       timeout: 8s
       start_period: 30s

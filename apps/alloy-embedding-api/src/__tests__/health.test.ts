@@ -1,11 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import {
-  DEFAULT_PROFILE,
-  getProfile,
-  listProfiles,
-  registerProfile,
-} from '../profiles/default.js';
 import { openApiSpec } from '../openapi/spec.js';
+import { DEFAULT_PROFILE, getProfile, listProfiles, registerProfile } from '../profiles/default.js';
 
 describe('profile registry (src/profiles/default.ts)', () => {
   // Snapshot the initial registry so per-test registrations don't leak.

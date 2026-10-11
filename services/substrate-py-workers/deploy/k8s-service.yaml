@@ -35,10 +35,9 @@ metadata:
   labels:
     app: substrate-py-workers
 spec:
-  # Start at 3 replicas — matches the load-test fleet size proven in
-  # tests/test_concurrent.py. The autoscaling coordinator (see
-  # docs/substrate/python-workers.md §Autoscaling) can adjust between
-  # MIN_WORKERS and MAX_WORKERS based on /metrics.
+  # Illustrative fixed fleet size only. tests/test_concurrent.py exercises an
+  # in-process concurrency helper, not this manifest or a deployed fleet. No
+  # checked-in coordinator currently evaluates /metrics or changes replicas.
   replicas: 3
   selector:
     matchLabels:
@@ -46,9 +45,9 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      # Zero-downtime rollouts: bring up a new Pod before tearing down the
-      # old one. The old Pod's SIGTERM triggers ClaimLoop.drain() which
-      # flips /ready to 503 → removed from Endpoints → no new claims.
+      # Availability-oriented rollout: bring up a new Pod before tearing down
+      # the old one. This does not establish duplicate-free claim execution;
+      # callers and proxies must not retry an ambiguous POST /claim.
       maxUnavailable: 0
       maxSurge: 1
   template:
@@ -69,6 +68,23 @@ spec:
           env:
             - name: PORT
               value: "8090"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: SUBSTRATE_PYTHON_WORKER_ENV
+              value: "production"
+            # The same secret must be injected into the TypeScript authority.
+            # This manifest references it; it never creates or stores it.
+            - name: SUBSTRATE_PYTHON_WORKER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: substrate-py-workers
+                  key: api-key
+            # A worker credential is valid only for this configured tenant.
+            - name: SUBSTRATE_PYTHON_WORKER_TENANT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: substrate-py-workers
+                  key: tenant-id
             - name: WORKER_ID
               valueFrom:
                 fieldRef:
@@ -107,8 +123,7 @@ spec:
               memory: "2Gi"
           lifecycle:
             preStop:
-              # Give the readiness probe one cycle to mark this Pod NotReady
-              # before the SIGTERM lands, so no new claims race in during
-              # the Endpoints update propagation window.
+              # Give the readiness probe one cycle to observe the rollout.
+              # This is a best-effort routing aid, not a durable claim fence.
               exec:
                 command: ["sh", "-c", "sleep 5"]

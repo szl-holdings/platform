@@ -8,6 +8,11 @@
     "composite": true,
     "types": ["node"]
   },
+  "references": [
+    { "path": "../ai-control-plane" },
+    { "path": "../decision-engine" },
+    { "path": "../tool-mesh" }
+  ],
   "include": ["src/**/*"],
   "exclude": ["src/**/*.test.ts"]
 }

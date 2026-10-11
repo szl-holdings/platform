@@ -62,14 +62,18 @@ OVIS_EMBED_PATH=/aef/ovis/embed
 OVIS_HEALTH_PATH=/aef/ovis/health
 ```
 
-Production additionally requires all of the following and refuses startup otherwise:
+Production serving is intentionally unavailable while the canonical manifest
+is `EVALUATION_HOLD` with `productionServingAllowed=false`. Setting
+`OVIS_PROMOTION_STATE=QUALIFIED` or supplying any 64-hex value in
+`OVIS_QUALIFICATION_RECEIPT_SHA256` does not promote the runtime; a digest
+string does not prove what receipt was signed. The production embed and health
+routes return `503` before acquiring or loading the model runtime.
 
-```text
-OVIS_PROMOTION_STATE=QUALIFIED
-OVIS_QUALIFICATION_RECEIPT_SHA256=<64-hex Forge receipt digest>
-OVIS_VERIFY_ARTIFACTS=1
-OVIS_INTERNAL_API_KEY=<secret>
-```
+Lifting this HOLD requires a reviewed canonical-manifest change and a runtime
+receipt verifier that parses authenticated receipt content and binds it to the
+exact protected source head, `MODEL_ID`, `MODEL_REVISION`, artifact-set digest,
+processor/dependency identities, evaluation suite and results, and the serving
+configuration. That verifier is not implemented in this source.
 
 ## Media admission
 

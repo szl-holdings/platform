@@ -14,15 +14,20 @@ export type {
 } from './backends/interface.js';
 export type { BatchItem, BatchKey, MicroBatchQueueConfig } from './batch-queue.js';
 export { MicroBatchQueue } from './batch-queue.js';
-export { MultimodalHttpEmbeddingClient } from './multimodal-http.js';
 export type { MultimodalHttpEmbeddingClientConfig } from './multimodal-http.js';
-export { OVIS_OMNI_ARTIFACT_SET_DIGEST, OVIS_OMNI_MODEL_ID, OVIS_OMNI_REVISION } from './ovis-omni.js';
+export { MultimodalHttpEmbeddingClient } from './multimodal-http.js';
+export {
+  OVIS_OMNI_ARTIFACT_SET_DIGEST,
+  OVIS_OMNI_MODEL_ID,
+  OVIS_OMNI_REVISION,
+} from './ovis-omni.js';
 export { applyPooling, l2Normalize } from './pooling.js';
 export type { TruncationResult } from './truncation.js';
 export { applyTruncation, applyTruncationBatch } from './truncation.js';
 export type { WarmPoolEntry } from './warm-pool.js';
 export { WarmPool } from './warm-pool.js';
 
+import { isProductionRuntime } from '@workspace/aef-contracts';
 import { AzureEmbeddingBackendStub } from './backends/azure-stub.js';
 import { CpuLocalEmbeddingBackend } from './backends/cpu-local.js';
 import { DevHashEmbeddingBackend } from './backends/dev-hash.js';
@@ -38,41 +43,74 @@ import { WarmPool } from './warm-pool.js';
  * through the separately governed multimodal client and is never substituted
  * into this path implicitly.
  */
-export function buildExternalHttpBackend(): ExternalHttpEmbeddingBackend | null {
-  const baseUrl = process.env.SUBSTRATE_EMBED_URL ?? process.env.HF_EMBED_URL;
+export interface ExternalHttpBackendBuildOptions {
+  timeoutMs?: number;
+}
+
+function firstNonBlank(...values: Array<string | undefined>): string | undefined {
+  for (const value of values) {
+    const normalized = value?.trim();
+    if (normalized) return normalized;
+  }
+  return undefined;
+}
+
+export function buildExternalHttpBackend(
+  options: ExternalHttpBackendBuildOptions = {},
+): ExternalHttpEmbeddingBackend | null {
+  const production = isProductionRuntime(process.env, ['AEF_ENV', 'SUBSTRATE_PYTHON_WORKER_ENV']);
+  const substrateBaseUrl = firstNonBlank(process.env.SUBSTRATE_EMBED_URL);
+  const baseUrl = substrateBaseUrl ?? firstNonBlank(process.env.HF_EMBED_URL);
   if (!baseUrl) return null;
 
-  const model = process.env.HF_EMBED_MODEL ?? 'BAAI/bge-m3';
+  const model = firstNonBlank(process.env.HF_EMBED_MODEL) ?? 'BAAI/bge-m3';
+  const modelRevision = firstNonBlank(process.env.HF_EMBED_MODEL_REVISION);
+  const artifactSetDigest = firstNonBlank(process.env.HF_EMBED_ARTIFACT_SET_DIGEST)?.toLowerCase();
+  const apiKey = firstNonBlank(
+    process.env.SUBSTRATE_EMBED_API_KEY,
+    substrateBaseUrl ? process.env.SUBSTRATE_PYTHON_WORKER_API_KEY : undefined,
+  );
+  const tenantId = firstNonBlank(
+    process.env.SUBSTRATE_EMBED_TENANT_ID,
+    substrateBaseUrl ? process.env.SUBSTRATE_PYTHON_WORKER_TENANT_ID : undefined,
+  );
+  if (production && substrateBaseUrl) {
+    if (!apiKey) {
+      throw new Error('SUBSTRATE_EMBED_API_KEY is required for production substrate embedding');
+    }
+    if (!tenantId) {
+      throw new Error('SUBSTRATE_EMBED_TENANT_ID is required for production substrate embedding');
+    }
+  }
+  const promotionState =
+    (firstNonBlank(process.env.AEF_EMBED_PROMOTION_STATE) as
+      | 'DEVELOPMENT'
+      | 'EVALUATION_HOLD'
+      | 'QUALIFIED'
+      | 'REVOKED'
+      | undefined) ?? 'DEVELOPMENT';
   return new ExternalHttpEmbeddingBackend({
     backendId: 'external-http',
     displayName: `External HTTP embedder (${model})`,
     baseUrl,
+    embedPath:
+      firstNonBlank(process.env.SUBSTRATE_EMBED_PATH, process.env.HF_EMBED_PATH) ?? '/embed',
     model,
     dimensions: Number(process.env.VECTOR_DIM ?? 1024),
     maxTokens: Number(process.env.AEF_EMBED_MAX_TOKENS ?? 8192),
-    timeoutMs: Number(process.env.AEF_EMBED_TIMEOUT_MS ?? 120_000),
+    timeoutMs: options.timeoutMs ?? Number(process.env.AEF_EMBED_TIMEOUT_MS ?? 120_000),
     maxResponseBytes: Number(process.env.AEF_EMBED_MAX_RESPONSE_BYTES ?? 32 * 1024 * 1024),
-    promotionState:
-      (process.env.AEF_EMBED_PROMOTION_STATE as
-        | 'DEVELOPMENT'
-        | 'EVALUATION_HOLD'
-        | 'QUALIFIED'
-        | 'REVOKED'
-        | undefined) ?? 'DEVELOPMENT',
-    ...(process.env.HF_EMBED_MODEL_REVISION
-      ? { modelRevision: process.env.HF_EMBED_MODEL_REVISION }
-      : {}),
-    ...(process.env.HF_EMBED_ARTIFACT_SET_DIGEST
-      ? { artifactSetDigest: process.env.HF_EMBED_ARTIFACT_SET_DIGEST }
-      : {}),
-    ...(process.env.SUBSTRATE_EMBED_API_KEY
-      ? { apiKey: process.env.SUBSTRATE_EMBED_API_KEY }
-      : {}),
+    promotionState,
+    requirePromotionStateProof: production,
+    ...(modelRevision ? { modelRevision } : {}),
+    ...(artifactSetDigest ? { artifactSetDigest } : {}),
+    ...(apiKey ? { apiKey } : {}),
+    ...(tenantId ? { tenantId } : {}),
   });
 }
 
 export function hasRealEmbedderConfigured(): boolean {
-  return Boolean(process.env.SUBSTRATE_EMBED_URL ?? process.env.HF_EMBED_URL);
+  return Boolean(firstNonBlank(process.env.SUBSTRATE_EMBED_URL, process.env.HF_EMBED_URL));
 }
 
 let defaultQueue: MicroBatchQueue | undefined;

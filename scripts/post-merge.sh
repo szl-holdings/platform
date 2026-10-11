@@ -1,12 +1,23 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Post-merge setup script.
 # IMPORTANT: Do NOT add workflow start commands here (e.g. pnpm dev, dev:api,
 # dev:command, dev:flagship, dev:web). All application workflows are managed
 # exclusively by the artifact system and are reconciled automatically after this
 # script exits. Starting them here would create duplicate processes competing for
 # the same ports.
-set -e
-pnpm install --frozen-lockfile 2>&1 || pnpm install 2>&1 || true
+set -euo pipefail
+
+NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
+if [[ ! "${NODE_MAJOR}" =~ ^[0-9]+$ ]] || (( NODE_MAJOR < 24 )); then
+  echo "Node.js 24 or newer is required; found $(node --version)." >&2
+  exit 1
+fi
+
+POST_MERGE_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=activate-pnpm.sh
+source "${POST_MERGE_SCRIPT_DIR}/activate-pnpm.sh"
+test "$(pnpm --version)" = "10.26.1"
+pnpm install --frozen-lockfile
 # Run schema sync non-interactively.
 # Uses the non-interactive wrapper (push-non-interactive) so the workflow
 # never hangs on drizzle-kit's "Is `foo` a new table or rename?" prompts.

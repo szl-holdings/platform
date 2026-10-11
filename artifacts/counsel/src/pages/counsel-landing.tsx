@@ -164,7 +164,10 @@ export default function CounselLandingPage() {
               Request a Pilot <ChevronRight className="w-4 h-4" />
             </button>
             <Link href="/dashboard">
-              <button type="button" className="flex items-center gap-2 px-6 py-3 bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.08] text-[#e0e0e0] font-medium rounded-xl transition-all text-sm">
+              <button
+                type="button"
+                className="flex items-center gap-2 px-6 py-3 bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.08] text-[#e0e0e0] font-medium rounded-xl transition-all text-sm"
+              >
                 Open Matter Command <Activity className="w-4 h-4" />
               </button>
             </Link>
@@ -406,16 +409,41 @@ export default function CounselLandingPage() {
         </div>
       </section>
 
-      <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)', background: '#0a0a0a' }}>
+      <section
+        style={{
+          padding: '80px 24px',
+          borderTop: '1px solid rgba(255,255,255,0.04)',
+          background: '#0a0a0a',
+        }}
+      >
         <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
-          <p style={{ fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.25em', color: '#5e5e5e', marginBottom: 20, textTransform: 'uppercase' as const }}>
+          <p
+            style={{
+              fontSize: 10,
+              fontFamily: 'monospace',
+              letterSpacing: '0.25em',
+              color: '#8a8a8a',
+              marginBottom: 20,
+              textTransform: 'uppercase' as const,
+            }}
+          >
             Part of the SZL Holdings ecosystem
           </p>
           <p style={{ fontSize: 22, fontWeight: 600, color: '#f5f5f5', marginBottom: 14 }}>
             Orchestrated by <span style={{ color: '#c9b787' }}>a11oy</span>
           </p>
-          <p style={{ fontSize: 13, color: '#8a8a8a', lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
-            Every decision in Counsel follows the same governed path — Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The same attribution. The same governance.
+          <p
+            style={{
+              fontSize: 13,
+              color: '#8a8a8a',
+              lineHeight: 1.8,
+              maxWidth: 520,
+              margin: '0 auto',
+            }}
+          >
+            Every decision in Counsel follows the same governed path — Signal, Context,
+            Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The
+            same attribution. The same governance.
           </p>
         </div>
       </section>
@@ -451,7 +479,10 @@ export default function CounselLandingPage() {
               Request a Pilot <Gavel className="w-4 h-4" />
             </button>
             <Link href="/dashboard">
-              <button type="button" className="flex items-center gap-2 px-6 py-3 border border-white/[0.08] hover:border-white/[0.12] text-[#e0e0e0] font-medium rounded-xl transition-all text-sm">
+              <button
+                type="button"
+                className="flex items-center gap-2 px-6 py-3 border border-white/[0.08] hover:border-white/[0.12] text-[#e0e0e0] font-medium rounded-xl transition-all text-sm"
+              >
                 Open Matter Command <FileText className="w-4 h-4" />
               </button>
             </Link>

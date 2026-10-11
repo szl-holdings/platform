@@ -6,19 +6,23 @@
   "description": "AEF Ingestion Orchestrator — deterministic workflow control plane for document ingestion, index rebuilds, verification, retrieval evals, and profile rotations.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./client": {
+      "development": "./src/client.ts",
+      "workspace": "./src/client.ts",
       "types": "./dist/client.d.ts",
-      "import": "./src/client.ts"
+      "import": "./dist/client.js"
     }
   },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "node --conditions=workspace --import tsx --watch src/server.ts",
     "start": "node --enable-source-maps dist/server.js",
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit --customConditions workspace",
     "test": "vitest run",
     "test:watch": "vitest"
   },

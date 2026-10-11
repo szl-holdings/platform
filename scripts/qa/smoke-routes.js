@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import { artifactUrl } from '../lib/artifact-ports.js';
+import { validateRuntimeReadiness } from './runtime-readiness-policy.mjs';
 
 const TIMEOUT_MS = parseInt(process.env.SMOKE_TIMEOUT ?? '10000', 10);
 const CONCURRENCY = parseInt(process.env.SMOKE_CONCURRENCY ?? '5', 10);
@@ -193,8 +194,9 @@ const WEB_DOMAIN_CONFIGS = [
 
 // The runtime API (apps/alloy-runtime-api) mounts its router at the root, so
 // these are the real unauthenticated 2xx endpoints — NOT the legacy /api/*
-// surface of the retired api-server. /readyz returns 503 (a failure) if any
-// in-process dependency probe fails, so it is a genuine readiness gate.
+// surface of the retired api-server. Readiness follows an explicit policy:
+// ready requires healthy dependencies; production-hold requires the exact
+// unavailable-backend contract while every process-local dependency is healthy.
 const KNOWN_READ_API_ROUTES = ['/health', '/healthz', '/readyz', '/metrics', '/docs'];
 
 async function checkRouteUrl(url, timeout, tier) {
@@ -208,15 +210,30 @@ async function checkRouteUrl(url, timeout, tier) {
       headers: { 'User-Agent': 'SZL-QA-Smoke/2.0' },
     });
     const duration = Date.now() - start;
-    clearTimeout(timer);
     let ok;
     if (tier === 'web') {
       ok = res.status < 400;
     } else if (tier === 'api') {
-      ok = res.status >= 200 && res.status < 300;
+      if (new URL(url).pathname === '/readyz') {
+        const health = await fetch(new URL('/healthz', url), { signal: controller.signal });
+        if (health.status !== 200) throw new Error('readiness build identity health check failed');
+        const identity = await health.json();
+        if (process.env.GITHUB_SHA && identity.gitSha !== process.env.GITHUB_SHA)
+          throw new Error('readiness build identity does not match GITHUB_SHA');
+        validateRuntimeReadiness(
+          res.status,
+          await res.json(),
+          identity.gitSha,
+          process.env.SMOKE_READINESS_POLICY ?? 'ready',
+        );
+        ok = true;
+      } else {
+        ok = res.status >= 200 && res.status < 300;
+      }
     } else {
       ok = res.status < 500;
     }
+    clearTimeout(timer);
     return { url, status: res.status, duration, ok, tier };
   } catch (err) {
     clearTimeout(timer);
@@ -297,7 +314,11 @@ async function main() {
   if (!WEB_ONLY) {
     const apiBaseUrl = BASE_URL || API_URL;
     const apiSections = [
-      { label: 'API Health & Core (2xx required)', paths: KNOWN_READ_API_ROUTES, tier: 'api' },
+      {
+        label: 'API Health & Core (strict readiness policy)',
+        paths: KNOWN_READ_API_ROUTES,
+        tier: 'api',
+      },
       {
         label: 'API Prefixes (discovered router.use mounts, <500 required)',
         paths: newlyDiscovered,
