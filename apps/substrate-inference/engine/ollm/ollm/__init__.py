@@ -1,25 +1,21 @@
 """
 oLLM — Vendored Engine Interface for Substrate Inference.
 
-This package provides the ``AutoInference`` class that wraps HuggingFace
-transformer models with SSD-offloaded KV cache and FlashAttention-2 support
-for running 80B+ parameter models on consumer GPUs (>= 8 GB VRAM).
+This package provides the checked-in ``AutoInference`` compatibility adapter
+around Hugging Face Transformers. It can select FlashAttention-2 when that
+optional dependency is present.
 
-Core capabilities:
-  - SSD-offloaded KV cache for context windows exceeding available VRAM
-  - CPU layer offloading for memory-constrained GPU environments
-  - FlashAttention-2 integration for O(N) attention memory usage
-  - Multimodal support via AutoProcessor (image + audio content blocks)
+SSD KV-cache offload and explicit CPU-layer offload are not implemented in this
+source subset. Requests for either option fail closed.
 
-Install the full engine::
+Development installation::
 
-    pip install ollm            # PyPI release
-    pip install -e engine/ollm  # from vendored source
+    pip install -e engine/ollm
 
 Requires:
-    - CUDA-capable GPU with >= 8 GB VRAM
-    - torch >= 2.2 with CUDA support
-    - flash-attn >= 2.5 (optional but recommended)
+    - a supported GPU backend
+    - the dependency versions declared by this package
+    - flash-attn (optional)
 """
 
 from .auto_inference import AutoInference

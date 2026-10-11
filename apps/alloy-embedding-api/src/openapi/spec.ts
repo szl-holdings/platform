@@ -5,7 +5,8 @@ export const openApiSpec = {
     version: '0.2.0',
     description:
       'Governed text and multimodal embedding, reranking, hybrid retrieval, ingestion, index operations, and evaluation. ' +
-      'Embedding responses carry exact model/runtime execution receipts and retrieval paths write evidence entries.',
+      'Embedding responses carry exact model/runtime execution receipts and retrieval paths write evidence entries. ' +
+      'Every protected operation requires a non-empty X-Tenant-Id header matching the credential binding and any tenantId in the request body or query.',
   },
   servers: [{ url: '/alloy-embedding-api', description: 'AEF API' }],
   security: [{ BearerAuth: [] }],
@@ -29,6 +30,23 @@ export const openApiSpec = {
             type: 'string',
             enum: ['DEVELOPMENT', 'EVALUATION_HOLD', 'QUALIFIED', 'REVOKED'],
           },
+        },
+      },
+      RerankExecutionReceipt: {
+        type: 'object',
+        required: ['backendId', 'modelId', 'promotionState', 'implementationKind', 'fallback'],
+        properties: {
+          backendId: { type: 'string' },
+          modelId: { type: 'string', const: 'lexical-overlap-v1' },
+          modelRevision: { type: 'string' },
+          artifactSetDigest: { type: 'string', pattern: '^[a-fA-F0-9]{64}$' },
+          promotionState: {
+            type: 'string',
+            enum: ['DEVELOPMENT', 'EVALUATION_HOLD', 'QUALIFIED', 'REVOKED'],
+          },
+          implementationKind: { type: 'string', const: 'lexical-overlap' },
+          fallback: { type: 'boolean' },
+          fallbackReason: { type: 'string', enum: ['forced', 'primary-error'] },
         },
       },
       CasAsset: {
@@ -91,7 +109,10 @@ export const openApiSpec = {
           200: { description: 'Vectors plus execution receipt' },
           400: { description: 'Validation error' },
           409: { description: 'Requested model identity is not admitted' },
-          503: { description: 'Production embedder is not configured' },
+          503: {
+            description:
+              'Production embedder or durable tamper-evident evidence ledger is not admitted',
+          },
         },
       },
     },
@@ -168,36 +189,77 @@ export const openApiSpec = {
           200: { description: 'Receipt-bound multimodal vectors' },
           400: { description: 'Validation error' },
           409: { description: 'Model revision or projection is not admitted' },
-          503: { description: 'Runtime absent or model not qualified for production' },
+          503: {
+            description: 'Runtime/model is not qualified or the production evidence ledger is held',
+          },
         },
       },
     },
     '/v1/rerank': {
       post: {
-        summary: 'Rerank candidate documents',
-        responses: { 200: { description: 'Reranked results' } },
+        summary: 'Rerank candidates with a server-owned implementation identity',
+        description:
+          'Returns an execution receipt. Deterministic fallback is development/test-only; production is disabled unless a qualified immutable backend is configured.',
+        responses: {
+          200: { description: 'Reranked results plus execution receipt' },
+          400: { description: 'Validation error or duplicate candidate identity' },
+          502: { description: 'Configured reranker unavailable or returned invalid evidence' },
+          503: {
+            description:
+              'Reranking is disabled, its configuration is not admitted, or the production evidence ledger is held',
+          },
+        },
       },
     },
     '/v1/hybrid-search': {
       post: {
         summary: 'Hybrid dense and keyword search with optional reranking',
-        responses: { 200: { description: 'Ranked results with evidence' } },
+        responses: {
+          200: { description: 'Ranked results with embedding and optional rerank evidence' },
+          502: { description: 'Embedding, retrieval, or requested rerank backend unavailable' },
+          503: {
+            description:
+              'Production model, durable retrieval store, or durable evidence ledger is not admitted',
+          },
+        },
       },
     },
     '/v1/ingest': {
       post: {
         summary: 'Ingest documents',
-        responses: { 202: { description: 'Payload accepted' } },
+        responses: {
+          200: { description: 'Development ingest completed' },
+          207: { description: 'Development ingest completed with per-document failures' },
+          503: { description: 'Production durability admission hold' },
+        },
       },
     },
     '/v1/index/rebuild': {
-      post: { summary: 'Trigger index rebuild', responses: { 202: { description: 'Job queued' } } },
+      post: {
+        summary: 'Trigger index rebuild',
+        responses: {
+          202: { description: 'Development workflow queued' },
+          503: { description: 'Production durability admission hold' },
+        },
+      },
     },
     '/v1/index/verify': {
-      post: { summary: 'Verify index integrity', responses: { 200: { description: 'Result' } } },
+      post: {
+        summary: 'Verify index integrity',
+        responses: {
+          200: { description: 'Development workflow result' },
+          503: { description: 'Production durability admission hold' },
+        },
+      },
     },
     '/v1/evals/run': {
-      post: { summary: 'Run an evaluation suite', responses: { 200: { description: 'Result' } } },
+      post: {
+        summary: 'Run an evaluation suite',
+        responses: {
+          200: { description: 'Development workflow result' },
+          503: { description: 'Production durability admission hold' },
+        },
+      },
     },
     '/v1/openai/embeddings': {
       post: {

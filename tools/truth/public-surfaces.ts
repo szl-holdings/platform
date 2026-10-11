@@ -76,10 +76,10 @@ const MAX_OBSERVATION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
 const MAX_METADATA_BODY_BYTES = 128 * 1024;
 const JSON_WHITESPACE = new Set([' ', '\t', '\n', '\r']);
-const KILLINCHU_SOURCE_REVISION = '859e26cf27164b38c4e289e40a751ce80d403368';
+const KILLINCHU_SOURCE_REVISION = '13477c429f5742cdc718a6294a80d00c7e8dc634';
 const KILLINCHU_MANIFEST_SHA256 =
-  '7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960';
-const KILLINCHU_ATTESTATION_ID = '39971795';
+  '915abaa7f910fc6822468df1d747318676962de4876222641c5231884a30f32c';
+const KILLINCHU_ATTESTATION_ID = '53547813';
 const LIVE_SURFACE_PROBE_CONCURRENCY = 4;
 const LIVE_SURFACE_RETRY_DELAYS_MS = [750, 1_500] as const;
 const TRANSIENT_TRANSPORT_CODES = new Set([
@@ -95,6 +95,7 @@ const TRANSIENT_TRANSPORT_CODES = new Set([
 type ApprovedSurfaceTarget = Readonly<{
   canonicalUrl: string;
   finalUrl: string;
+  redirectStatus?: number;
 }>;
 
 const APPROVED_PUBLIC_SURFACE_TARGETS = {
@@ -120,11 +121,13 @@ const APPROVED_PUBLIC_SURFACE_TARGETS = {
   },
   'a11oy-net-chat-gap': {
     canonicalUrl: 'https://a11oy.net/chat',
-    finalUrl: 'https://a11oy.net/chat',
+    finalUrl: 'https://a11oy.net/chat/',
+    redirectStatus: 301,
   },
   'a11oy-net-code-gap': {
     canonicalUrl: 'https://a11oy.net/code',
-    finalUrl: 'https://a11oy.net/code',
+    finalUrl: 'https://a11oy.net/code/',
+    redirectStatus: 301,
   },
   'a11oy-net-robots-gap': {
     canonicalUrl: 'https://a11oy.net/robots.txt',
@@ -176,7 +179,7 @@ const APPROVED_PUBLIC_SURFACE_TARGETS = {
   },
   'killinchu-public-console': {
     canonicalUrl: 'https://a-11-oy.com/killinchu',
-    finalUrl: 'https://szlholdings-killinchu.hf.space/',
+    finalUrl: 'https://a-11-oy.com/killinchu',
   },
   'killinchu-readiness-api': {
     canonicalUrl: 'https://szlholdings-killinchu.hf.space/readyz',
@@ -732,10 +735,20 @@ function hasExactKeys(value: Record<string, unknown>, expected: readonly string[
 function isExactKillinchuBuildInfo(value: unknown): boolean {
   if (!isObject(value)) return false;
   if (
-    !hasExactKeys(value, ['status', 'service', 'build', 'receipt_minted', 'release_receipt']) ||
+    !hasExactKeys(value, [
+      'status',
+      'service',
+      'build',
+      'receipt_minted',
+      'receipt_minted_on_request',
+      'receipt_minted_scope',
+      'release_receipt',
+    ]) ||
     value.status !== 'OBSERVED' ||
     value.service !== 'killinchu' ||
     value.receipt_minted !== true ||
+    value.receipt_minted_on_request !== false ||
+    value.receipt_minted_scope !== 'DEPLOYMENT_RELEASE_REFERENCE' ||
     !isObject(value.build) ||
     !isObject(value.release_receipt)
   ) {
@@ -772,26 +785,108 @@ function isExactKillinchuBuildInfo(value: unknown): boolean {
 
 function isExactKillinchuReadiness(value: unknown): boolean {
   if (!isObject(value)) return false;
-  return (
-    hasExactKeys(value, [
+  if (
+    !hasExactKeys(value, [
       'status',
       'organ',
-      'khipu_backend',
-      'khipu_durable',
-      'khipu_depth',
-      'khipu_chain_ok',
-      'khipu_first_break_seq',
       'doctrine',
+      'ledger',
+      'ledger_role',
+      'backend_store_diagnostics',
+      'receipt_minted',
+    ]) ||
+    value.status !== 'ready' ||
+    value.organ !== 'killinchu' ||
+    value.doctrine !== 'v11' ||
+    value.ledger_role !== 'CANONICAL_RECEIPT_LEDGER' ||
+    value.receipt_minted !== false ||
+    !isObject(value.ledger) ||
+    !isObject(value.backend_store_diagnostics)
+  ) {
+    return false;
+  }
+
+  const ledger = value.ledger;
+  const diagnostics = value.backend_store_diagnostics;
+  if (
+    !hasExactKeys(ledger, [
+      'schema',
+      'durability_state',
+      'requested_mode',
+      'ready',
+      'production_ready',
+      'production_readiness_basis',
+      'readiness_probe',
+      'persistence_scope',
+      'startup_state',
+      'adapter_configured',
+      'adapter_state',
+      'integrity',
+      'replay',
+      'recovery',
+      'reason',
+    ]) ||
+    ledger.schema !== 'szl.killinchu.ledger-readiness/v1' ||
+    ledger.durability_state !== 'EPHEMERAL' ||
+    ledger.requested_mode !== 'EPHEMERAL' ||
+    ledger.ready !== true ||
+    ledger.production_ready !== false ||
+    ledger.production_readiness_basis !== 'NOT_APPLICABLE' ||
+    ledger.readiness_probe !== 'READ_ONLY' ||
+    ledger.persistence_scope !== 'PROCESS_MEMORY' ||
+    ledger.startup_state !== 'READY' ||
+    ledger.adapter_configured !== false ||
+    ledger.adapter_state !== 'NOT_APPLICABLE' ||
+    ledger.reason !== 'ephemeral ledger is available for this process only' ||
+    !isObject(ledger.integrity) ||
+    !isObject(ledger.replay) ||
+    !isObject(ledger.recovery)
+  ) {
+    return false;
+  }
+
+  const integrity = ledger.integrity;
+  const replay = ledger.replay;
+  const recovery = ledger.recovery;
+  const integrityNodes = integrity.nodes;
+  const rootMatchesNodes =
+    (integrityNodes === 0 && integrity.root === null) ||
+    (typeof integrityNodes === 'number' &&
+      integrityNodes > 0 &&
+      typeof integrity.root === 'string' &&
+      /^[a-f0-9]{64}$/.test(integrity.root));
+
+  return (
+    hasExactKeys(integrity, ['state', 'verified', 'nodes', 'root']) &&
+    integrity.state === 'VERIFIED' &&
+    integrity.verified === true &&
+    Number.isSafeInteger(integrityNodes) &&
+    (integrityNodes as number) >= 0 &&
+    rootMatchesNodes &&
+    hasExactKeys(replay, ['state', 'nodes']) &&
+    replay.state === 'NOT_APPLICABLE' &&
+    Number.isSafeInteger(replay.nodes) &&
+    (replay.nodes as number) >= 0 &&
+    hasExactKeys(recovery, ['attempts', 'retry_after_s']) &&
+    recovery.attempts === 0 &&
+    recovery.retry_after_s === 0 &&
+    hasExactKeys(diagnostics, [
+      'ledger_role',
+      'backend',
+      'depth',
+      'chain_ok',
+      'first_break_seq',
+      'provider_persistence',
+      'production_ready',
     ]) &&
-    value.status === 'ready' &&
-    value.organ === 'killinchu' &&
-    value.khipu_backend === 'sqlite' &&
-    value.khipu_durable === true &&
-    Number.isSafeInteger(value.khipu_depth) &&
-    (value.khipu_depth as number) >= 0 &&
-    value.khipu_chain_ok === true &&
-    value.khipu_first_break_seq === -1 &&
-    value.doctrine === 'v11'
+    diagnostics.ledger_role === 'BACKEND_HARDENING_DIAGNOSTIC_STORE' &&
+    diagnostics.backend === 'sqlite' &&
+    Number.isSafeInteger(diagnostics.depth) &&
+    (diagnostics.depth as number) >= 0 &&
+    diagnostics.chain_ok === true &&
+    diagnostics.first_break_seq === -1 &&
+    diagnostics.provider_persistence === 'UNKNOWN' &&
+    diagnostics.production_ready === false
   );
 }
 
@@ -914,7 +1009,7 @@ async function validateMetadataResponse(
     if (!isObject(manifest)) {
       return [`${surfaceId}: manifest metadata must be a JSON object`];
     }
-    if (manifest.name !== 'A11oy Proof Registry' || manifest.short_name !== 'A11oy.net') {
+    if (manifest.name !== 'a11oy Proof Registry' || manifest.short_name !== 'a11oy.net') {
       return [`${surfaceId}: manifest metadata has an unexpected product identity`];
     }
     if (manifest.start_url !== '/' || manifest.scope !== '/') {
@@ -1041,9 +1136,18 @@ async function verifyLivePublicSurface(
     let response = firstResponse;
     let responseFailures = firstResult.responseFailures;
     if (approvedTarget.canonicalUrl !== approvedTarget.finalUrl) {
-      if (firstResponse.status < 300 || firstResponse.status >= 400) {
+      const expectedRedirectStatus = approvedTarget.redirectStatus;
+      if (
+        expectedRedirectStatus === undefined
+          ? firstResponse.status < 300 || firstResponse.status >= 400
+          : firstResponse.status !== expectedRedirectStatus
+      ) {
         await cancelResponseBody(firstResponse);
-        return [`${surface.id}: expected an approved redirect from ${approvedTarget.canonicalUrl}`];
+        return [
+          `${surface.id}: expected ${
+            expectedRedirectStatus === undefined ? 'an approved' : `HTTP ${expectedRedirectStatus}`
+          } redirect from ${approvedTarget.canonicalUrl}, observed ${firstResponse.status}`,
+        ];
       }
       const location = firstResponse.headers?.get('location');
       let redirectTarget: string | null;

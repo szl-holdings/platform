@@ -6,28 +6,40 @@
   "description": "Alloy Embedding Fabric — policy rule evaluation, tenant boundary enforcement, retention controls, and redaction hook registry. Returns structured PolicyDecision objects; no silent fallbacks.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./engine": {
+      "development": "./src/engine.ts",
+      "workspace": "./src/engine.ts",
       "types": "./dist/engine.d.ts",
-      "import": "./src/engine.ts"
+      "import": "./dist/engine.js"
     },
     "./tenant": {
+      "development": "./src/tenant.ts",
+      "workspace": "./src/tenant.ts",
       "types": "./dist/tenant.d.ts",
-      "import": "./src/tenant.ts"
+      "import": "./dist/tenant.js"
     },
     "./retention": {
+      "development": "./src/retention.ts",
+      "workspace": "./src/retention.ts",
       "types": "./dist/retention.d.ts",
-      "import": "./src/retention.ts"
+      "import": "./dist/retention.js"
     },
     "./redaction": {
+      "development": "./src/redaction.ts",
+      "workspace": "./src/redaction.ts",
       "types": "./dist/redaction.d.ts",
-      "import": "./src/redaction.ts"
+      "import": "./dist/redaction.js"
     }
   },
   "dependencies": {

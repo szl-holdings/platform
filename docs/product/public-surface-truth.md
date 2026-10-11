@@ -69,3 +69,151 @@ sets `require_surface_freshness`. If that lifecycle gate fails, re-observe every
 update `observed_at` and any changed observation fields in `config/public-surfaces.json`, run
 `pnpm surfaces:generate`, inspect both deterministic artifacts, and rerun
 `pnpm surfaces:freshness` before presenting the snapshot as current.
+
+## A11oy frontend candidate boundary — 2026-10-07
+
+This section records a source review of the uncommitted A11oy frontend candidate
+based on `150b166171cbd339acb287f7f5d37809c21774ee`. It is not an update to the
+observed public-surface registry and does not establish public reachability,
+deployment, uptime, or runtime behavior.
+
+| Candidate receipt | State |
+| --- | --- |
+| Exact candidate commit | **PENDING** |
+| Exact candidate tree | **PENDING** |
+| Local candidate build | **PASS at a mutable checkpoint; exact-head binding pending** |
+| Local candidate E2E | **PASS, 16/16 in the root release lane and 16/16 in a follow-up root-mount audit; exact-head binding pending** |
+| Local home screenshot | **OBSERVED / LOCAL_NON_AUTHORITATIVE** — `audit/evidence/a11oy-home-wcag-2026-10-07.png`, captured from a dirty working tree |
+| Exact-source screenshot paths and digests | **PENDING** |
+| Hosted route/deployment identity | **UNOBSERVED / HOLD** |
+
+### Route-wide candidate notice
+
+`artifacts/a11oy/src/App.tsx` mounts one `CandidateBoundaryBanner` outside the
+router `Switch` and its lazy-loading `Suspense` boundary. The public-candidate
+allowlist contains exactly six route concepts:
+
+`/`, `/agent-viz`, `/adversarial`, `/frontier`, `/verifier`, and
+`/security-agents`.
+
+The base-path root also accepts its no-trailing-slash alias. Every other client
+path resolves to `PublicationHoldPage`, which states that the requested legacy
+route is excluded pending evidence review. Both the six reviewed routes and the
+catch-all HOLD page render beneath this notice:
+
+> **CANDIDATE DEMO:** repository fixtures and target contracts only. No page
+> establishes production operation, certification, external attestation, or
+> durable signed proof without separately linked exact-head evidence.
+
+The banner placement and catch-all relationship are source-level findings. The
+mutable local E2E receipt below exercised lazy-module loading and visible
+rendering. Direct-host deep-link fallback and server rewrite behavior at a
+public deployment remain **HOLD** until the exact-head E2E command passes
+against that deployment candidate.
+
+`corepack pnpm --filter @workspace/a11oy build` passed at the mutable
+`2026-10-07 11:27:01 UTC` checkpoint. The final root-lane rebuild observed at
+`11:28:28 UTC`, and a later root-mount audit rebuild, retained six reviewed page chunks and three shared
+entry/UI/proxy chunks. It contained no
+`DevPlatform`, `Compass`, `CareEngine`, `complianceFabric`,
+`SecurityCompliance`, `AgentIdentityRegistry`, `ApprovalQueue`,
+`CommandSurface`, `TrustExchange`, `CiAction`, or `DarpaResilienceHub` chunk,
+and no source-map file. This is a pre-freeze build receipt, not exact-head
+release proof.
+
+### Exact connector catalogue
+
+The home-page source defines exactly 24 unique named connector examples:
+
+| Category | Fixture names |
+| --- | --- |
+| CRM | Salesforce; HubSpot |
+| Communication | Slack; Microsoft Teams |
+| Project Mgmt | Jira; Linear |
+| Engineering | GitHub; GitLab |
+| Data | Snowflake; BigQuery |
+| Database | PostgreSQL; MongoDB |
+| Cloud | AWS S3; Azure Blob |
+| Productivity | Google Sheets; Notion |
+| Payments | Stripe |
+| Finance | Bloomberg |
+| Observability | Datadog |
+| Ops | PagerDuty |
+| ITSM | ServiceNow |
+| HR | Workday |
+| ERP | SAP; NetSuite |
+
+These names are catalogue fixtures only. They do not prove a connector package,
+vendor relationship, credential binding, tenant authorization, API call,
+write path, runtime health, or production admission. Each named connector stays
+on production **HOLD** until it has its own authenticated and tenant-scoped
+runtime evidence.
+
+### Deep-link E2E contract
+
+The candidate `tests/e2e/a11oy.spec.ts` defines this browser contract:
+
+- the base URL and A11oy base-path inputs are configurable; the passing receipt
+  below covers a root mount;
+- `/` and each of the five non-root allowlist routes must mount non-empty React
+  content, resolve the expected fixture heading, remove the loading fallback,
+  display the candidate notice, avoid the application error fallback, and avoid
+  `PublicationHoldPage`;
+- direct navigation to `/sdk`, `/compass`, `/care`, `/boardroom`, `/terminal`,
+  `/agent-identity`, `/agent-bom`, and `/applications` must render
+  `PublicationHoldPage` and echo the full requested path, including the
+  configured deployment base path;
+- primary navigation from `/` to `/agent-viz` must preserve mounted content,
+  remove the loading fallback, and avoid `PublicationHoldPage`; and
+- the root route must have no critical or serious Axe findings for the selected
+  WCAG 2.1 A/AA tags.
+
+The shared route helper additionally requires a non-null HTTP response below
+400. The root release lane ran the 16-test file against the final six-route
+local build on `localhost:4111` at `2026-10-07 11:29:19 UTC`: 16 passed in
+13.118 seconds. This candidate checkpoint samples the complete six-route
+allowlist and eight excluded paths, but it does not enumerate every possible
+catch-all path, prove a public host's SPA rewrite configuration, or replace the
+required exact-head rerun.
+
+A follow-up root-mount audit rebuilt the current shared source and reran the
+same contract with system Chromium: 16/16 passed in 12.2 seconds at
+`2026-10-07 11:42 UTC`. The assertion was then corrected to compare the full
+mounted request path rather than discard the configured base. A production-
+shape `/a11oy/` build passed the same 16/16 contract in 11.0 seconds on
+`localhost:4113` at `2026-10-07 11:45 UTC`, including all eight HOLD routes.
+These remain mutable local receipts; the exact deployed base path must still be
+covered by the exact-head hosted run.
+
+The local homepage capture at
+`audit/evidence/a11oy-home-wcag-2026-10-07.png` was recorded at
+`2026-10-07T11:37:18.923Z` from `http://127.0.0.1:4111/` at a 1440 × 900
+full-page viewport. Its SHA-256 is
+`cc38fbd129c93dc9f401173dcaf4d18beb1caa62a66b14e158b3fbce66f2279d`
+and its size is 1,637,749 bytes. The companion metadata labels the evidence
+`LOCAL_NON_AUTHORITATIVE`, records source HEAD
+`150b166171cbd339acb287f7f5d37809c21774ee`, and records
+`working_tree_clean=false`. This receipt demonstrates only the mutable local
+candidate fixture; it does not fill the exact-source screenshot placeholder or
+establish a hosted or production surface.
+
+### Remaining false or unverified content
+
+The strict allowlist removes the known legacy claim pages from the production
+router and current page-chunk inventory. The six reviewed route sources have
+no literal `status="LIVE"` PageHeader. The repository still retains 87 legacy
+page files with a literal `status="LIVE"`; they are dormant source and must not
+be re-imported or re-routed without claim-by-claim review.
+
+One public-bundle claim risk remains:
+
+- The home-page competitor cards are explicitly introduced as a product
+  hypothesis, but individual comparison and primitive rows still use
+  affirmative and negative phrasing. Treat every row as a hypothetical fixture;
+  no row is a verified benchmark, parity result, current vendor assessment, or
+  proof that an A11oy production primitive operates.
+
+Those statements and all dormant legacy claims are false or unverified as
+production claims. Certification, customer use, external attestation, live
+connectors, live policy enforcement, immutable or durable proof, active
+telemetry, and production operation remain explicit **HOLDs**.
