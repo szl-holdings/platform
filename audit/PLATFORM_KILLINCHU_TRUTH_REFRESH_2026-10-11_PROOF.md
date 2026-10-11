@@ -34,7 +34,7 @@ The read and signature verification support the exact source/manifest contract. 
 | --- | --- |
 | `corepack pnpm install --filter . --frozen-lockfile --ignore-scripts` | PASS with pinned pnpm 10.26.1 in a sparse, isolated checkout. |
 | `corepack pnpm exec tsx tools/truth/generate-public-surfaces.ts --check` | PASS; generated manifest matches registry bytes. |
-| `corepack pnpm exec tsx --test tools/truth/public-surfaces.test.ts` | PASS, 37/37 tests including exact-body and negative controls. |
+| `corepack pnpm exec tsx --test tools/truth/public-surfaces.test.ts` | PASS; exact-body and negative controls executed. |
 | `corepack pnpm surfaces:check` | PASS, live routes verified in a bounded local run. |
 | `corepack pnpm surfaces:freshness` | PASS, live routes and the unchanged observation age verified. |
 | `git diff --check` | PASS. |
