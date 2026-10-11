@@ -7,6 +7,11 @@ import test from 'node:test';
 
 test('only the exact public tokenizer revision assignment is exempted from generic-api-key', () => {
   const config = readFileSync(new URL('../../.gitleaks.toml', import.meta.url), 'utf8');
+  assert.equal(
+    config.match(/^\[\[rules\]\]\n\s*id = "generic-api-key"$/gm)?.length,
+    1,
+    'Duplicate rule IDs overwrite earlier extensions in Gitleaks 8.21.2',
+  );
   const rule = config.match(
     /\[\[rules\]\]\n  id = "generic-api-key"\n([\s\S]*?)(?=\n# ── Global allowlist)/,
   )?.[1];
