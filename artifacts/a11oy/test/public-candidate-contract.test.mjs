@@ -10,6 +10,7 @@ const routes = read('../src/candidateRoutes.ts');
 const home = read('../src/pages/PublicCandidateHome.tsx');
 const securityAgents = read('../src/pages/GovernedSecurityAgents.tsx');
 const capture = read('../../../scripts/qa/capture-a11oy-candidate-evidence.mjs');
+const routeSmoke = read('../../../scripts/qa/smoke-routes.js');
 
 test('admits only the source-bound home and security fixture', () => {
   const reviewedPaths = [...routes.matchAll(/path: '([^']+)'/g)].map((match) => match[1]);
@@ -46,6 +47,10 @@ test('keeps the public candidate source free of runtime clients and automatic AP
   assert.match(capture, /candidateBasePath}assets\//);
   assert.match(capture, /candidate attempted foreign requests/);
   assert.match(capture, /undeclared same-origin request/);
+  assert.match(routeSmoke, /routes: \['\/a11oy\/', '\/a11oy\/security-agents'\]/);
+  for (const heldRoute of ['/a11oy/frontier', '/a11oy/atelier', '/a11oy/start']) {
+    assert.equal(routeSmoke.includes(`'${heldRoute}'`), false);
+  }
 });
 
 test('states the claim boundary locally and keeps fixture language honest', () => {
