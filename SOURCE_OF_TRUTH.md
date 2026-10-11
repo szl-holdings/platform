@@ -10,9 +10,9 @@
 
 **Registry version:** 2.1.9
 
-**Integration baseline inspected:** `platform@95d303fe94b0e773b31593426f8172e48bcb9d5f`
+**Integration baseline inspected:** `platform@952439b96efe5eccaf9474d831edb4dd46343d15`
 
-**Measured:** 2026-10-07
+**Measured:** 2026-10-11 from the combined tracked branch tree
 
 **Validator:** `node scripts/audit/validate-source-of-truth.js`
 
@@ -21,8 +21,8 @@ obsolete legacy DCO compatibility workflow was retired. They do not claim that
 the inspected baseline is already on protected `main`. The validator recomputes
 the current-tree metrics from whichever commit is checked out.
 
-> **Candidate measurement (2026-10-07):** The staged frontier candidate measures
-> 44 route source files, 333 handler declarations, and 246 root example
+> **Candidate measurement (2026-10-11):** The integrated frontier candidate measures
+> 44 route source files, 334 handler declarations, and 246 root example
 > environment variables. Source counts require a passing validator and do not
 > establish hosted availability or production readiness.
 
@@ -35,17 +35,17 @@ the current-tree metrics from whichever commit is checked out.
 | Registered artifacts | **6** | Tracked `artifacts/*/(.replit-artifact/)?artifact.toml` files |
 | Artifact directories | **8** | Unique tracked top-level children of `artifacts/`; includes the unregistered, asset-only `szl-holdings` directory |
 | Registered product verticals | **5** | Registered customer-facing domain artifacts; A11oy is counted separately as the orchestration product |
-| Domain packages (`packages/`) | **162** | Tracked top-level package directories; excludes root file `packages/proxy-routes.ts` |
+| Domain packages (`packages/`) | **164** | Tracked top-level package directories, including `vertical-runtime`; excludes root file `packages/proxy-routes.ts` |
 | Shared library packages (`lib/`) | **53** | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | **215** | 162 + 53 |
-| Apps (`apps/`) | **11** | Unique tracked top-level children of `apps/` |
+| Total packages (`packages/` + `lib/`) | **217** | 164 + 53 |
+| Apps (`apps/`) | **12** | Unique tracked top-level children of `apps/`, including `vertical-cells` |
 | Services (`services/`) | **11** | Unique tracked top-level children of `services/` |
 | Workers (`workers/`) | **5** | Unique tracked top-level children of `workers/` |
 | DB schema files | **197** | Tracked `lib/db/src/schema/**/*.ts` files |
 | DB `pgTable` call sites | **1,067** | Source call sites; not a claim about currently provisioned tables |
 | DB migrations (SQL files) | **149** | Tracked `lib/db/drizzle/*.sql` files; duplicate sequence numbers may exist |
 | API route source files | **44** | Non-test files under `apps/`, `services/`, and `artifacts/api-server/` containing a detected Express route declaration |
-| API handler declarations | **333** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
+| API handler declarations | **334** | Static non-test HTTP method declarations on `app`, `router`, and named Express Router receivers in the current runtime roots |
 | CI workflows | **47** | Permanent tracked `.github/workflows/*.yml` and `*.yaml`, including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | **246** | Lines matching `^[A-Z_]+=` |
 

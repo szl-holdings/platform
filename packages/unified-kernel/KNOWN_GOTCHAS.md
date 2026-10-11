@@ -18,9 +18,12 @@ Do NOT describe it as "proven" in docs, comments, or code. The CI
 
 ## 2. Ouroboros vendored copy — do NOT replace with stubs
 
-`loop/vendor_ouroboros/` is a byte-for-byte copy of the upstream
-`@szl-holdings/ouroboros` kernel at tag `v6.3.0`. In the monorepo this resolves
-as a `workspace:*` dep. The 218 upstream tests are the proof of correctness.
+`loop/vendor_ouroboros/` vendors the upstream `@szl-holdings/ouroboros`
+kernel from tag `v6.3.0`, plus the later finite/integer/nonnegative
+`maxSteps` normalization from `0f030741f567`. The donor receipt sink is not
+included, so the directory is not a byte-for-byte copy of either pin. In the
+monorepo the package still resolves as a `workspace:*` dep. The historical
+218 upstream tests belong to the v6.3.0 pin.
 
 Never replace `runLoop` with a stub that returns `() => true`. The boot sequence
 test (`kernel.test.ts`) asserts real execution.

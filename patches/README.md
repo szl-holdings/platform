@@ -1,9 +1,10 @@
 # pnpm dependency patch provenance
 
-These source-level diffs are applied by pnpm to exact dependency releases.
-They are local derivative works, not claims of upstream acceptance. The patch
-bytes, release identities, and preserved upstream license texts are pinned
-below. SZL Holdings' changes in each patch are distributed under the same
+These source-level diffs are retained with exact provenance. Only patches
+listed under `patchedDependencies` in `pnpm-workspace.yaml` are applied by
+pnpm. Other entries below are historical or provide the source delta for a
+repository-local fork. They are local derivative works, not claims of upstream
+acceptance. SZL Holdings' changes in each patch are distributed under the same
 license named for that patch; the repository's proprietary license does not
 apply to these patch files or their accompanying license copies.
 
@@ -20,10 +21,12 @@ apply to these patch files or their accompanying license copies.
   SHA-256 `f63ff0e4e239244aa79280da2dd4811a0469e5e201caf5cbc0d97c3a1dff8e82`;
   [upstream source](https://github.com/digitalbazaar/forge/blob/fa385f92440879601240020f158bed68e444e83a/LICENSE)
 
+**Status:** archival/inactive. `node-forge@1.4.0` is absent from the current
+lockfile and this patch is not registered in `patchedDependencies`.
+
 Modified by SZL Holdings on 2026-10-06 to harden RSA DigestInfo validation,
 canonical DER handling, and inherited-option behavior while an upstream fixed
-release is unavailable. The separate mitigation record remains authoritative
-for advisory scope, tests, and expiry. The element-count change is based on
+release was unavailable. The element-count change is based on
 [upstream pull-request commit `ceba34402e329f0365134f23fe19898756527d65`](https://github.com/digitalbazaar/forge/pull/1152/commits/ceba34402e329f0365134f23fe19898756527d65);
 the additional hardening is local and is not represented as upstream work.
 
@@ -39,10 +42,14 @@ the additional hardening is local and is not represented as upstream work.
   SHA-256 `35bdd8a44339719441900fb50fbefc5e2dca1ca662cbaed7a687de842c8b70f2`;
   [upstream source](https://github.com/micromatch/braces/blob/74b2db2938fad48a2ea54a9c8bf27a37a62c350d/LICENSE)
 
+**Status:** consolidated fork provenance. This patch is applied to the published
+3.0.3 source inside `packages/braces-safe@0.2.0`; it is not registered as a pnpm
+dependency patch. The private fork's package metadata, `UPSTREAM.md`, override
+resolution, adversarial tests, and SBOM identity define the current control.
+
 Modified by SZL Holdings on 2026-10-06 to enforce parser and AST traversal
 ceilings and reject cyclic or stateful structures while an upstream fixed
-release is unavailable. The separate mitigation record remains authoritative
-for advisory scope, tests, and expiry. The patch is a local response to
+release is unavailable. The patch is a local response to
 [upstream issue 70](https://github.com/micromatch/braces/issues/70), not an
 upstream-authored or accepted fix.
 
@@ -62,7 +69,8 @@ Modified by SZL Holdings on 2026-10-06 to retain syntax and whitespace
 minification while disabling checkout-path-sensitive identifier minification
 for deterministic static Storybook output.
 
-The exact package registrations are in `pnpm-workspace.yaml` and
-`pnpm-lock.yaml`. `security/vulnerability-mitigations.json` governs the two
-temporary security mitigations; the Storybook patch is a reproducibility
-control and is not a vulnerability mitigation.
+The exact active package registration is in `pnpm-workspace.yaml` and
+`pnpm-lock.yaml`. Only the Storybook patch is currently applied by pnpm; it is a
+reproducibility control, not a vulnerability mitigation. The live
+`security/vulnerability-mitigations.json` registry is empty because the current
+lockfile has no High/Critical finding admitted through a local dependency patch.

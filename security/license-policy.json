@@ -112,16 +112,6 @@
       "expires": "2027-04-06"
     },
     {
-      "package": "node-forge",
-      "version": "1.4.0",
-      "license": "(BSD-3-Clause OR GPL-2.0)",
-      "classification": "REVIEW",
-      "decision": "allow",
-      "rationale": "Dual-licensed dependency admitted under BSD-3-Clause; the exact locally patched version remains separately digest-gated.",
-      "reviewedAt": "2026-10-06",
-      "expires": "2027-04-06"
-    },
-    {
       "package": "@replit/connectors-sdk",
       "version": "0.3.0",
       "license": "UNKNOWN",

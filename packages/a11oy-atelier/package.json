@@ -10,6 +10,12 @@
       "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./proofweave-verifier": {
+      "development": "./src/proofweave-verifier.ts",
+      "workspace": "./src/proofweave-verifier.ts",
+      "types": "./dist/proofweave-verifier.d.ts",
+      "import": "./dist/proofweave-verifier.js"
     }
   },
   "scripts": {

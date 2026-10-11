@@ -1,7 +1,7 @@
 # SZL Holdings — Security Posture
 
-**Version:** 1.1
-**Date:** 2026-10-07
+**Version:** 1.2
+**Date:** 2026-10-11
 **Classification:** Public — source posture, not a deployment attestation
 **Status labels:** SOURCE-CONFIRMED · PARTIAL · UNVERIFIED · BROKEN
 
@@ -53,13 +53,10 @@ documentation-consistency value, not an automated current-tree security metric.
 
 ## Transport, API, and data boundary
 
-The candidate source-of-truth registry still records 45 detected Express route
-source files and 315 static handler declarations, but the
-`2026-10-07T11:35:16.688Z` validator measured 44 route files and 332 handler
-declarations. It also measured 246 environment variables against the registry's
-245, for three failed drift checks in total. Neither side of a drifted pair is a
-publication metric: regenerate only after the candidate stabilizes, review the
-diff, and require the validator to pass. Route counts do not prove deployment,
+The integrated candidate source-of-truth validator measures 44 detected Express
+route source files, 334 static handler declarations, and 246 root example
+environment variables. The registry and canonical documents now carry those
+same values and must pass the validator together. Route counts do not prove deployment,
 reachability, authentication, schema validation, or HTTP behavior. The retired
 claim of “Zod validation on all 347 route files across 12 groups” referenced
 keys that no longer exist in the current metric schema and is not a current
@@ -79,18 +76,20 @@ security fact.
 | CodeQL | `.github/workflows/codeql.yml` analyzes JavaScript/TypeScript and Python; the exact-PR-ref `severity-gate` was live-required in the dated repository ruleset read |
 | Dependency review | `.github/workflows/dependency-review.yml` reviews pull-request dependency changes; it was not in the dated live-required list |
 | Secret scanning | `.github/workflows/security.yml` runs Gitleaks plus the project-specific scanner on PR, default-branch, scheduled, and manual paths |
-| Package-manager audit | The 2026-10-07 11:26:02 UTC `security/vuln-report.md` checkpoint recorded `pnpm@10.26.1`, 0 Critical / 2 High / 2 Moderate / 0 Low findings, and a PASS only after two exact local patch mitigations were verified. Released fixes were applied for the other findings. The one detailed Moderate is `sprintf-js` GHSA-hp3w-g68c-fv3c, for which the advisory reports no patched version and npm latest remains vulnerable; one additional Moderate is aggregate-only in pnpm output. Do not force an unsafe override. |
-| License admission | Candidate `security.yml` makes the license-report job a dependency of `Security Gate (blocking)`; exact package/version/license/classification reviews expire and parse errors block. The 2026-10-07 11:26:18 UTC local report scanned 1,726 unique pairs, matched all 11 REVIEW and 6 CHECK findings to 17 exact admissions from an 18-entry registry, and recorded 0 parse errors and 0 violations; hosted exact-head success remains unobserved |
+| Package-manager audit | The 2026-10-11 candidate `security/vuln-report.md` records pinned `pnpm@10.26.1`, 0 Critical / 0 High / 2 Moderate / 0 Low findings across 1,820 reported dependencies. The live local-patch mitigation registry is empty. `braces` consumers resolve to the private, source-attributed `@szl-holdings/braces-safe@0.2.0` fork, whose override identity and adversarial recursion/cycle/stateful-input behavior are tested; `node-forge@1.4.0` is absent from the lockfile. The one detailed Moderate is `sprintf-js` GHSA-hp3w-g68c-fv3c and one Moderate is aggregate-only. Hosted exact-head success remains required. |
+| License admission | Candidate `security.yml` makes the license-report job a dependency of `Security Gate (blocking)`; exact package/version/license/classification reviews expire and parse errors block. The 2026-10-11 clean-install local report scans 1,522 unique pairs, matches all 8 REVIEW and 6 CHECK findings to 14 exact admissions from a 17-entry registry, and records 0 parse errors and 0 violations; hosted exact-head success remains unobserved. |
 | Python dependency coverage | **HOLD** — the pnpm SBOM, vulnerability, and license reports do not cover the three deployable Python services. Their declarations remain ranged and unhashed, with no resolved lock, Python SBOM/vulnerability/license evidence, or reproducible image proof. |
 | Filesystem/SCA scan | `.github/workflows/trivy.yml` retains raw, digest-sealed Grype JSON and fails closed on unadmitted High/Critical findings; hosted success and live-required status were not established by the dated read |
 | Reproducibility | `.github/workflows/repro-check.yml` compares two clean builds of one SHA; hosted success and live-required status were not established by the dated read |
 | Aggregate security gate | `Security Gate (blocking)` was live-required in the authenticated 2026-10-06 Platform repository-ruleset observation |
 
-The `node-forge@1.4.0` and `braces@3.0.3` local mitigation records expire on
-2026-11-05 and fail closed on version, registration, patch digest, behavior, or
-expiry drift; the registered braces behavior test includes a stateful Proxy
-regression. Replace the mitigations with released upstream fixes when available.
-Moderate and Low findings remain nonblocking but visible. The current report
+The historical node-forge patch is inactive because that package is absent.
+The braces patch is retained as exact provenance for the private fork and is
+not an active pnpm `patchedDependencies` entry. The current fork tests include
+stateful Proxy, cycle, depth, breadth, parent-chain, and consumer-resolution
+regressions. Replace the fork with an official fixed release only after source,
+compatibility, and advisory review. Moderate and Low findings remain
+nonblocking but visible. The current report
 renders the one detailed `sprintf-js` Moderate and explicitly preserves one
 aggregate-only Moderate whose package detail pnpm omitted at the selected audit
 level. Track an upstream fix for `sprintf-js`; absence of a patched release is

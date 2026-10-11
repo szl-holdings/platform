@@ -754,8 +754,9 @@ export function auditBlockingVerdict(
 }
 
 /**
- * pnpm uses exit 1 when the selected audit level has findings. Admit only that
- * documented non-zero case, and require it to agree with the complete payload.
+ * pnpm uses exit 1 when it reports findings, including nonblocking Moderate or
+ * Low findings under the pinned manager. Admit only statuses 0 and 1 after the
+ * payload has passed strict normalization; severity policy is evaluated later.
  */
 export function auditExecutionFailure(audit, normalized) {
   if (audit?.error) return audit.error.message ?? String(audit.error);
@@ -768,8 +769,12 @@ export function auditExecutionFailure(audit, normalized) {
   const blockingCount =
     Number(normalized.vulnerabilities?.critical ?? 0) +
     Number(normalized.vulnerabilities?.high ?? 0);
-  if (audit.status === 1 && blockingCount === 0) {
-    return 'pnpm audit returned exit 1 without a parsed High/Critical finding';
+  const findingCount = ['critical', 'high', 'moderate', 'low'].reduce(
+    (total, severity) => total + Number(normalized.vulnerabilities?.[severity] ?? 0),
+    0,
+  );
+  if (audit.status === 1 && findingCount === 0) {
+    return 'pnpm audit returned exit 1 without any parsed finding';
   }
   if (audit.status === 0 && blockingCount > 0) {
     return 'pnpm audit returned exit 0 despite parsed High/Critical findings';

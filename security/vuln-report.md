@@ -1,6 +1,6 @@
 # Dependency Vulnerability Report
 
-**Generated:** 2026-10-08T02:18:33.250Z
+**Generated:** 2026-10-11T05:12:20.613Z
 **Policy:** unmitigated High/Critical advisories block; exact local patches must be registered, digest-bound, behavior-tested, and unexpired; Moderate/Low remain reported
 **Command:** `pnpm audit --json --audit-level=high`
 **Expected package manager:** `pnpm@10.26.1`
@@ -11,27 +11,20 @@
 **Command termination signal:** NONE
 **Audit timeout:** 120000 ms
 **Parsed schema:** legacy-advisories
-**Total dependencies reported by audit:** 2006
+**Total dependencies reported by audit:** 1820
 
 ## Blocking verdict
 
-PASS — no unmitigated parsed High/Critical advisory (2 exact local patch mitigation(s) verified).
+PASS — no parsed High/Critical advisory.
 
 ## Parsed counts
 
 | Severity | Count |
 |---|---:|
 | Critical | 0 |
-| High | 2 |
+| High | 0 |
 | Moderate | 2 |
 | Low | 0 |
-
-## Verified local patch mitigations
-
-| Package | Advisory | Version | Patch SHA-256 | Behavior verification | Expires | Upstream |
-|---|---|---:|---|---|---:|---|
-| `node-forge` | [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv) | `1.4.0` | `de8829eac6e09806b4b749a7221e7a2a62e6d88c796d38880d0f61bb2eb035ec` | `dependency-patches/node-forge-digestalgorithm-v1` | 2026-11-05 | [patch source](https://github.com/digitalbazaar/forge/pull/1152/commits/ceba34402e329f0365134f23fe19898756527d65) |
-| `braces` | [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) | `3.0.3` | `c056b5c1123a999cfcaa5ad56c70e69a1120e186c410ee091a1f86e941411cf9` | `dependency-patches/braces-recursive-nesting-v1` | 2026-11-05 | [patch source](https://github.com/micromatch/braces/issues/70) |
 
 ## Reported Moderate / Low findings
 
@@ -52,6 +45,7 @@ PASS — no unmitigated parsed High/Critical advisory (2 exact local patch mitig
 | `path-to-regexp` | `8.4.2` |
 | `serve-handler>path-to-regexp` | `3.3.0` |
 | `brace-expansion` | `5.0.12` |
+| `braces` | `link:packages/braces-safe` |
 | `fflate` | `0.8.3` |
 | `vite` | `8.0.16` |
 | `form-data@2` | `2.5.6` |
@@ -78,6 +72,7 @@ PASS — no unmitigated parsed High/Critical advisory (2 exact local patch mitig
 | `image-size` | `link:packages/image-size-safe` |
 | `shell-quote` | `1.11.0` |
 | `source-map-js` | `1.2.2` |
+| `@modelcontextprotocol/sdk` | `1.31.0` |
 | `tsx>esbuild` | `0.28.1` |
 | `vite>esbuild` | `0.28.1` |
 | `drizzle-kit>esbuild` | `0.28.1` |

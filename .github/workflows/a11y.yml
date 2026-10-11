@@ -184,7 +184,6 @@ jobs:
           echo "Accessibility gate — WCAG 2.1 AA (wcag2a, wcag2aa, wcag21a, wcag21aa)"
           echo "Tool: @axe-core/playwright — 6 CI-scanned web artifacts."
           echo "See audit/a11y/findings.md for the findings register."
-
           case "$result" in
             success)
               echo "All axe matrix jobs completed and passed."

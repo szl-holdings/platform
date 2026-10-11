@@ -27,7 +27,7 @@ import {
 } from './generate-sbom.js';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
-const EXPECTED_CURRENT_WORKSPACE_MANIFEST_COUNT = 203;
+const EXPECTED_CURRENT_WORKSPACE_MANIFEST_COUNT = 204;
 
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -741,11 +741,7 @@ test('tracked latest SBOM exactly reflects the current lockfile and verified pat
   const workspaceText = readFileSync(path.join(ROOT, 'pnpm-workspace.yaml'), 'utf8');
   const lockfileText = readFileSync(path.join(ROOT, 'pnpm-lock.yaml'), 'utf8');
   const patches = parsePatchMetadata({ workspaceText, lockfileText, root: ROOT });
-  assert.deepEqual(Object.keys(patches), [
-    '@storybook/core@8.6.18',
-    'braces@3.0.3',
-    'node-forge@1.4.0',
-  ]);
+  assert.deepEqual(Object.keys(patches), ['@storybook/core@8.6.18']);
 
   const latestPath = path.join(ROOT, 'security', 'sbom-latest.json');
   const latestText = readFileSync(latestPath, 'utf8');
@@ -769,7 +765,31 @@ test('tracked latest SBOM exactly reflects the current lockfile and verified pat
   const patchedComponents = latest.components.filter((component) =>
     component.properties?.some(({ name }) => name === 'szl:pnpm:patch:sha256'),
   );
-  assert.equal(patchedComponents.length, 3);
+  assert.equal(patchedComponents.length, 1);
+  const hardenedBraces = latest.components.filter(
+    (component) => component.name === '@szl-holdings/braces-safe',
+  );
+  assert.equal(hardenedBraces.length, 1);
+  assert.equal(hardenedBraces[0].version, '0.2.0');
+  assert.equal(hardenedBraces[0].purl, 'pkg:npm/%40szl-holdings/braces-safe@0.2.0');
+  assert.ok(
+    hardenedBraces[0].properties?.some(
+      ({ name, value }) =>
+        name === 'szl:pnpm:workspace-importer' && value === 'packages/braces-safe',
+    ),
+  );
+  assert.equal(
+    latest.components.filter(
+      (component) => component.name === 'braces' && component.version === '3.0.3',
+    ).length,
+    0,
+  );
+  assert.equal(
+    latest.components.filter(
+      (component) => component.name === 'node-forge' && component.version === '1.4.0',
+    ).length,
+    0,
+  );
   const scopedComponents = latest.components.filter((component) => component.name.startsWith('@'));
   assert.ok(scopedComponents.length > 500);
   assert.ok(scopedComponents.every((component) => component.purl.startsWith('pkg:npm/%40')));

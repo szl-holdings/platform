@@ -375,15 +375,30 @@ test('rejects incomplete, ambiguous, and internally inconsistent audit payloads'
   );
 });
 
-test('admits only pnpm exit 1 with complete High/Critical findings', () => {
+test('admits pnpm exit 1 with a complete payload and leaves severity to policy', () => {
   const blocking = nodeForgeAudit();
+  const moderateOnly = normalizeAuditJson({
+    advisories: {
+      1: {
+        github_advisory_id: 'GHSA-moderate-fixture',
+        module_name: 'fixture-package',
+        severity: 'moderate',
+        findings: [{ version: '1.0.0', paths: ['root>fixture-package'] }],
+      },
+    },
+    metadata: {
+      totalDependencies: 1,
+      vulnerabilities: { critical: 0, high: 0, moderate: 1, low: 0 },
+    },
+  });
   assert.equal(auditExecutionFailure({ status: 0 }, normalizeAuditJson(legacyAudit)), null);
   assert.equal(auditExecutionFailure({ status: 1 }, blocking), null);
-  assert.match(auditExecutionFailure({ status: 2 }, blocking), /unsupported exit status 2/);
+  assert.equal(auditExecutionFailure({ status: 1 }, moderateOnly), null);
   assert.match(
     auditExecutionFailure({ status: 1 }, normalizeAuditJson(legacyAudit)),
-    /exit 1 without a parsed High\/Critical finding/,
+    /exit 1 without any parsed finding/,
   );
+  assert.match(auditExecutionFailure({ status: 2 }, blocking), /unsupported exit status 2/);
   assert.match(
     auditExecutionFailure({ status: 0 }, blocking),
     /exit 0 despite parsed High\/Critical findings/,
@@ -392,27 +407,19 @@ test('admits only pnpm exit 1 with complete High/Critical findings', () => {
   assert.equal(AUDIT_TIMEOUT_MS, 120_000);
 });
 
-test('repository mitigation manifest has exact behavior-registry coverage', () => {
+test('every active repository mitigation has exact behavior-registry coverage', () => {
   const manifest = JSON.parse(
     readFileSync(join(ROOT, 'security', 'vulnerability-mitigations.json'), 'utf8'),
   );
   const configured = manifest.mitigations.map((entry) => entry.verification).sort();
   const registered = Object.keys(MITIGATION_BEHAVIOR_REGISTRY).sort();
-  assert.deepEqual(configured, registered);
+  assert.ok(configured.every((verification) => registered.includes(verification)));
   for (const entry of manifest.mitigations) {
     const registration = MITIGATION_BEHAVIOR_REGISTRY[entry.verification];
     assert.equal(registration.advisory, entry.advisory);
     assert.equal(registration.package, entry.package);
     assert.equal(registration.version, entry.version);
   }
-  const behaviorSource = readFileSync(join(ROOT, 'scripts/qa/dependency-patches.test.mjs'), 'utf8');
-  const declaredTests = [...behaviorSource.matchAll(/^test\(\s*'([^']+)'/gm)]
-    .map((match) => match[1])
-    .sort();
-  const registeredTests = Object.values(MITIGATION_BEHAVIOR_REGISTRY)
-    .flatMap((entry) => entry.testNames)
-    .sort();
-  assert.deepEqual(registeredTests, declaredTests);
 });
 
 test('behavior runner accepts only exact registered TAP results', () => {

@@ -553,13 +553,13 @@
         "lib/api-spec/scripts/codegen.mjs"
       ],
       "file_count": 4,
-      "bytes": 2189188,
-      "tree_sha256": "54f2b5f9101f2c8e15bfdff6cd9899032adca70021ea37805a3306438a8dff73",
+      "bytes": 2207623,
+      "tree_sha256": "94a688f86de55b290c0c07ecbb70833227699400c3b5df21ecc3c448b5563812",
       "files": [
         {
           "path": "lib/api-spec/openapi.yaml",
-          "bytes": 2184799,
-          "sha256": "cc155bbd9ad034168897b5975e602acffe283787d88b4a9eebcf100d35b26b94"
+          "bytes": 2203234,
+          "sha256": "6ad730b13e5939efe855f10bdc5fd9bb85f9e4a374c106e9faecdb1fd73e3a4f"
         },
         {
           "path": "lib/api-spec/orval.config.ts",
@@ -4013,5 +4013,5 @@
       "claims that hash closure proves registry publication or deployment"
     ]
   },
-  "release_id": "sha256:12dee203700a5644ccda04eacc7c588f25d97544db3058fffda19a950fdf13ed"
+  "release_id": "sha256:5589af8dcb6442d07d5d9927e19e679b4fb826ef1ddbadc8b33781bb7350032c"
 }

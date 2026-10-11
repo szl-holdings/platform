@@ -1,7 +1,7 @@
 # API Catalogue — SZL Holdings DreamStack API
 
 > **Auto-generated** from `lib/api-spec/openapi.yaml` — do not edit by hand.
-> Last generated: **2026-10-06** | Spec version: **0.3.0** | Base URL: `/api`
+> Last generated: **2026-10-11** | Spec version: **0.3.0** | Base URL: `/api`
 
 Run `pnpm docs:generate` to refresh after editing the spec.
 
@@ -9,9 +9,9 @@ Run `pnpm docs:generate` to refresh after editing the spec.
 
 | Metric | Value |
 |--------|-------|
-| Total paths | 4089 |
-| Total operations | 5065 |
-| Tag groups | 283 |
+| Total paths | 4090 |
+| Total operations | 5066 |
+| Tag groups | 284 |
 | Spec version | 0.3.0 |
 
 ## Table of Contents
@@ -298,6 +298,7 @@ Run `pnpm docs:generate` to refresh after editing the spec.
 - [vessels-voyage-risk](#vessels-voyage-risk) (5 endpoints)
 - [web-push-subscriptions](#web-push-subscriptions) (5 endpoints)
 - [worldline](#worldline) (5 endpoints)
+- [a11oy-atelier](#a11oy-atelier) (1 endpoint)
 - [Auth](#auth-2) (6 endpoints)
 
 <a id="health"></a>
@@ -7899,6 +7900,16 @@ Auto-generated tag for worldline route group
 | `GET` | /worldline/worldline/sources/{slug} | `worldline_get_worldline_worldline_sources_slug` | [stub] List/get /worldline/worldline/sources/{slug} (worldline) |
 | `POST` | /worldline/worldline/sources/{slug}/fetch | `worldline_post_worldline_worldline_sources_slug_fetch` | [stub] Create/invoke /worldline/worldline/sources/{slug}/fetch (worldline) |
 | `GET` | /worldline/worldline/sources/{slug}/history | `worldline_get_worldline_worldline_sources_slug_history` | [stub] List/get /worldline/worldline/sources/{slug}/history (worldline) |
+
+<a id="a11oy-atelier"></a>
+
+## a11oy-atelier
+
+A11oy Atelier authenticated, tenant-scoped compile and inference contracts
+
+| Method | Path | Operation ID | Summary |
+|--------|------|-------------|---------|
+| `POST` | /api/a11oy/v1/atelier/proofweave/compile | `compileA11oyAtelierProofweave` | Compile a deterministic Proofweave research plan |
 
 <a id="auth-2"></a>
 

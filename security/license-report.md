@@ -1,21 +1,21 @@
 # License Compliance Report
 
-**Generated:** 2026-10-07T11:26:18.409Z
+**Generated:** 2026-10-11T05:12:13.822Z
 **Verdict:** PASS
-**Policy:** `security/license-policy.json` (schema 1; 18 exact review entries)
-**Total unique package/version pairs scanned:** 1726
+**Policy:** `security/license-policy.json` (schema 1; 17 exact review entries)
+**Total unique package/version pairs scanned:** 1522
 **Manifest parse errors:** 0
 
 ## Summary
 
 | Category | Count |
 |---|---:|
-| Permissive — OK | 1709 |
-| Copyleft/restrictive — REVIEW | 11 |
+| Permissive — OK | 1508 |
+| Copyleft/restrictive — REVIEW | 8 |
 | Unknown/non-standard — CHECK | 6 |
-| Exact reviewed admissions | 17 |
+| Exact reviewed admissions | 14 |
 | Blocking policy/inventory violations | 0 |
-| **Total** | **1726** |
+| **Total** | **1522** |
 
 `REVIEW` and `CHECK` findings block unless package, version, exact license string, and classification match an unexpired entry in the reviewed policy registry. Manifest parse failures always block. A registry entry is a narrow engineering admission, not a blanket license-family approval or legal opinion.
 
@@ -24,16 +24,13 @@
 | Package | Version | License | Disposition |
 |---|---:|---|---|
 | `@axe-core/playwright` | 4.11.3 | MPL-2.0 | REVIEWED ALLOW (expires 2027-04-06) |
-| `@img/sharp-libvips-linux-x64` | 1.3.3 | LGPL-3.0-or-later | REVIEWED ALLOW (expires 2027-04-07) |
 | `@img/sharp-libvips-linux-x64` | 1.3.4 | LGPL-3.0-or-later | REVIEWED ALLOW (expires 2027-04-07) |
 | `axe-core` | 4.11.4 | MPL-2.0 | REVIEWED ALLOW (expires 2027-04-07) |
 | `axe-core` | 4.12.1 | MPL-2.0 | REVIEWED ALLOW (expires 2027-04-06) |
-| `dompurify` | 3.4.13 | (MPL-2.0 OR Apache-2.0) | REVIEWED ALLOW (expires 2027-04-06) |
 | `dompurify` | 3.4.16 | (MPL-2.0 OR Apache-2.0) | REVIEWED ALLOW (expires 2027-04-07) |
 | `jszip` | 3.10.1 | (MIT OR GPL-3.0-or-later) | REVIEWED ALLOW (expires 2027-04-06) |
 | `lightningcss-linux-x64-gnu` | 1.32.0 | MPL-2.0 | REVIEWED ALLOW (expires 2027-04-06) |
 | `lightningcss` | 1.32.0 | MPL-2.0 | REVIEWED ALLOW (expires 2027-04-06) |
-| `node-forge` | 1.4.0 | (BSD-3-Clause OR GPL-2.0) | REVIEWED ALLOW (expires 2027-04-06) |
 
 ## Unknown / non-standard license metadata
 
@@ -51,16 +48,13 @@
 | Package | Version | License | Classification | Disposition |
 |---|---:|---|---|---|
 | `@axe-core/playwright` | 4.11.3 | MPL-2.0 | REVIEW | REVIEWED ALLOW (expires 2027-04-06) |
-| `@img/sharp-libvips-linux-x64` | 1.3.3 | LGPL-3.0-or-later | REVIEW | REVIEWED ALLOW (expires 2027-04-07) |
 | `@img/sharp-libvips-linux-x64` | 1.3.4 | LGPL-3.0-or-later | REVIEW | REVIEWED ALLOW (expires 2027-04-07) |
 | `axe-core` | 4.11.4 | MPL-2.0 | REVIEW | REVIEWED ALLOW (expires 2027-04-07) |
 | `axe-core` | 4.12.1 | MPL-2.0 | REVIEW | REVIEWED ALLOW (expires 2027-04-06) |
-| `dompurify` | 3.4.13 | (MPL-2.0 OR Apache-2.0) | REVIEW | REVIEWED ALLOW (expires 2027-04-06) |
 | `dompurify` | 3.4.16 | (MPL-2.0 OR Apache-2.0) | REVIEW | REVIEWED ALLOW (expires 2027-04-07) |
 | `jszip` | 3.10.1 | (MIT OR GPL-3.0-or-later) | REVIEW | REVIEWED ALLOW (expires 2027-04-06) |
 | `lightningcss-linux-x64-gnu` | 1.32.0 | MPL-2.0 | REVIEW | REVIEWED ALLOW (expires 2027-04-06) |
 | `lightningcss` | 1.32.0 | MPL-2.0 | REVIEW | REVIEWED ALLOW (expires 2027-04-06) |
-| `node-forge` | 1.4.0 | (BSD-3-Clause OR GPL-2.0) | REVIEW | REVIEWED ALLOW (expires 2027-04-06) |
 | `@replit/connectors-sdk` | 0.3.0 | UNKNOWN | CHECK | REVIEWED ALLOW (expires 2027-04-06) |
 | `browser-assert` | 1.2.1 | UNKNOWN | CHECK | REVIEWED ALLOW (expires 2027-04-06) |
 | `mapbox-gl` | 3.27.0 | SEE LICENSE IN LICENSE.txt | CHECK | REVIEWED ALLOW (expires 2027-04-06) |
@@ -87,43 +81,26 @@
 | `@babel/core` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/generator` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/generator` | 7.29.8 | MIT | OK | PERMISSIVE |
-| `@babel/helper-annotate-as-pure` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/helper-compilation-targets` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/helper-create-class-features-plugin` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/helper-create-regexp-features-plugin` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/helper-define-polyfill-provider` | 0.6.8 | MIT | OK | PERMISSIVE |
 | `@babel/helper-globals` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/helper-member-expression-to-functions` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/helper-module-imports` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/helper-module-transforms` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/helper-optimise-call-expression` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/helper-plugin-utils` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/helper-remap-async-to-generator` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/helper-replace-supers` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/helper-skip-transparent-expression-wrappers` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/helper-string-parser` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/helper-validator-identifier` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/helper-validator-option` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/helper-wrap-function` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/helpers` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/highlight` | 7.25.9 | MIT | OK | PERMISSIVE |
 | `@babel/parser` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/parser` | 7.29.8 | MIT | OK | PERMISSIVE |
 | `@babel/parser` | 7.29.9 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-proposal-decorators` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-proposal-export-default-from` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-async-generators` | 7.8.4 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-bigint` | 7.8.3 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-class-properties` | 7.12.13 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-class-static-block` | 7.14.5 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-syntax-decorators` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-syntax-dynamic-import` | 7.8.3 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-syntax-export-default-from` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-syntax-flow` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-import-attributes` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-import-meta` | 7.10.4 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-json-strings` | 7.8.3 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-syntax-jsx` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-logical-assignment-operators` | 7.10.4 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-nullish-coalescing-operator` | 7.8.3 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-numeric-separator` | 7.10.4 | MIT | OK | PERMISSIVE |
@@ -132,51 +109,9 @@
 | `@babel/plugin-syntax-optional-chaining` | 7.8.3 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-private-property-in-object` | 7.14.5 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-top-level-await` | 7.14.5 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-syntax-typescript` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-arrow-functions` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-async-generator-functions` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-async-to-generator` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-block-scoping` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-class-properties` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-class-static-block` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-classes` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-computed-properties` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-destructuring` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-export-namespace-from` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-flow-strip-types` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-for-of` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-function-name` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-literals` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-logical-assignment-operators` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-modules-commonjs` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-named-capturing-groups-regex` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-nullish-coalescing-operator` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-numeric-separator` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-object-rest-spread` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-optional-catch-binding` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-optional-chaining` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-parameters` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-private-methods` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-private-property-in-object` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-react-display-name` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-react-jsx-development` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-react-jsx-self` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-react-jsx-source` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-react-jsx` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-react-pure-annotations` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-regenerator` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-runtime` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-shorthand-properties` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-spread` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-sticky-regex` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-typescript` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/plugin-transform-unicode-regex` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/preset-react` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/preset-typescript` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/runtime` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/template` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/traverse` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/traverse` | 7.29.8 | MIT | OK | PERMISSIVE |
 | `@babel/types` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/types` | 7.29.8 | MIT | OK | PERMISSIVE |
 | `@bcoe/v8-coverage` | 1.0.2 | MIT | OK | PERMISSIVE |
@@ -204,40 +139,16 @@
 | `@date-fns/tz` | 1.5.0 | MIT | OK | PERMISSIVE |
 | `@drizzle-team/brocli` | 0.10.2 | Apache-2.0 | OK | PERMISSIVE |
 | `@esbuild/linux-x64` | 0.28.1 | MIT | OK | PERMISSIVE |
-| `@expo/cli` | 54.0.25 | MIT | OK | PERMISSIVE |
-| `@expo/code-signing-certificates` | 0.0.6 | MIT | OK | PERMISSIVE |
 | `@expo/config-plugins` | 10.1.2 | MIT | OK | PERMISSIVE |
-| `@expo/config-plugins` | 54.0.4 | MIT | OK | PERMISSIVE |
 | `@expo/config-types` | 53.0.5 | MIT | OK | PERMISSIVE |
-| `@expo/config-types` | 54.0.10 | MIT | OK | PERMISSIVE |
 | `@expo/config` | 11.0.13 | MIT | OK | PERMISSIVE |
-| `@expo/config` | 12.0.13 | MIT | OK | PERMISSIVE |
-| `@expo/devcert` | 1.2.1 | MIT | OK | PERMISSIVE |
-| `@expo/devtools` | 0.1.8 | MIT | OK | PERMISSIVE |
 | `@expo/env` | 1.0.7 | MIT | OK | PERMISSIVE |
-| `@expo/env` | 2.0.11 | MIT | OK | PERMISSIVE |
 | `@expo/env` | 2.1.2 | MIT | OK | PERMISSIVE |
-| `@expo/fingerprint` | 0.15.5 | MIT | OK | PERMISSIVE |
 | `@expo/image-utils` | 0.7.6 | MIT | OK | PERMISSIVE |
-| `@expo/image-utils` | 0.8.14 | MIT | OK | PERMISSIVE |
-| `@expo/json-file` | 10.0.16 | MIT | OK | PERMISSIVE |
-| `@expo/json-file` | 10.2.0 | MIT | OK | PERMISSIVE |
 | `@expo/json-file` | 9.1.5 | MIT | OK | PERMISSIVE |
-| `@expo/metro-config` | 54.0.16 | MIT | OK | PERMISSIVE |
-| `@expo/metro` | 54.2.0 | MIT | OK | PERMISSIVE |
-| `@expo/osascript` | 2.6.0 | MIT | OK | PERMISSIVE |
-| `@expo/package-manager` | 1.12.1 | MIT | OK | PERMISSIVE |
 | `@expo/plist` | 0.3.5 | MIT | OK | PERMISSIVE |
-| `@expo/plist` | 0.4.9 | MIT | OK | PERMISSIVE |
-| `@expo/prebuild-config` | 54.0.8 | MIT | OK | PERMISSIVE |
-| `@expo/require-utils` | 55.0.5 | MIT | OK | PERMISSIVE |
-| `@expo/schema-utils` | 0.1.8 | MIT | OK | PERMISSIVE |
 | `@expo/sdk-runtime-versions` | 1.0.0 | MIT | OK | PERMISSIVE |
 | `@expo/spawn-async` | 1.8.0 | MIT | OK | PERMISSIVE |
-| `@expo/sudo-prompt` | 9.3.2 | MIT | OK | PERMISSIVE |
-| `@expo/vector-icons` | 15.1.1 | MIT | OK | PERMISSIVE |
-| `@expo/ws-tunnel` | 1.0.6 | MIT | OK | PERMISSIVE |
-| `@expo/xcpretty` | 4.4.4 | BSD-3-Clause | OK | PERMISSIVE |
 | `@floating-ui/core` | 1.7.5 | MIT | OK | PERMISSIVE |
 | `@floating-ui/dom` | 1.7.6 | MIT | OK | PERMISSIVE |
 | `@floating-ui/react-dom` | 2.1.8 | MIT | OK | PERMISSIVE |
@@ -257,10 +168,8 @@
 | `@huggingface/transformers` | 4.2.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@ide/backoff` | 1.0.0 | MIT | OK | PERMISSIVE |
 | `@img/colour` | 1.1.0 | MIT | OK | PERMISSIVE |
-| `@img/sharp-linux-x64` | 0.35.4 | Apache-2.0 | OK | PERMISSIVE |
 | `@img/sharp-linux-x64` | 0.35.5 | Apache-2.0 | OK | PERMISSIVE |
 | `@isaacs/cliui` | 8.0.2 | ISC | OK | PERMISSIVE |
-| `@isaacs/fs-minipass` | 4.0.1 | ISC | OK | PERMISSIVE |
 | `@isaacs/ttlcache` | 1.4.1 | ISC | OK | PERMISSIVE |
 | `@istanbuljs/load-nyc-config` | 1.1.0 | ISC | OK | PERMISSIVE |
 | `@istanbuljs/schema` | 0.1.6 | MIT | OK | PERMISSIVE |
@@ -281,8 +190,7 @@
 | `@juggle/resize-observer` | 3.4.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@mdx-js/react` | 3.1.1 | MIT | OK | PERMISSIVE |
 | `@modelcontextprotocol/ext-apps` | 1.7.4 | MIT | OK | PERMISSIVE |
-| `@modelcontextprotocol/sdk` | 1.29.0 | MIT | OK | PERMISSIVE |
-| `@modelcontextprotocol/sdk` | 1.32.1 | MIT | OK | PERMISSIVE |
+| `@modelcontextprotocol/sdk` | 1.31.0 | MIT | OK | PERMISSIVE |
 | `@noble/ciphers` | 1.3.0 | MIT | OK | PERMISSIVE |
 | `@noble/hashes` | 1.8.0 | MIT | OK | PERMISSIVE |
 | `@nodable/entities` | 2.1.1 | MIT | OK | PERMISSIVE |
@@ -317,7 +225,6 @@
 | `@opentelemetry/instrumentation-aws-lambda` | 0.69.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-aws-sdk` | 0.72.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-bunyan` | 0.62.0 | Apache-2.0 | OK | PERMISSIVE |
-| `@opentelemetry/instrumentation-cassandra-driver` | 0.62.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-cassandra-driver` | 0.66.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-connect` | 0.60.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-cucumber` | 0.33.0 | Apache-2.0 | OK | PERMISSIVE |
@@ -332,24 +239,18 @@
 | `@opentelemetry/instrumentation-http` | 0.217.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-ioredis` | 0.65.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-kafkajs` | 0.26.0 | Apache-2.0 | OK | PERMISSIVE |
-| `@opentelemetry/instrumentation-knex` | 0.61.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-knex` | 0.65.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-koa` | 0.65.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-lru-memoizer` | 0.61.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-memcached` | 0.60.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-mongodb` | 0.70.0 | Apache-2.0 | OK | PERMISSIVE |
-| `@opentelemetry/instrumentation-mongoose` | 0.63.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-mongoose` | 0.67.0 | Apache-2.0 | OK | PERMISSIVE |
-| `@opentelemetry/instrumentation-mysql` | 0.63.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-mysql` | 0.67.0 | Apache-2.0 | OK | PERMISSIVE |
-| `@opentelemetry/instrumentation-mysql2` | 0.63.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-mysql2` | 0.67.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-nestjs-core` | 0.63.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-net` | 0.61.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-openai` | 0.15.0 | Apache-2.0 | OK | PERMISSIVE |
-| `@opentelemetry/instrumentation-oracledb` | 0.42.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-oracledb` | 0.46.0 | Apache-2.0 | OK | PERMISSIVE |
-| `@opentelemetry/instrumentation-pg` | 0.69.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-pg` | 0.73.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-pino` | 0.63.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-redis` | 0.65.0 | Apache-2.0 | OK | PERMISSIVE |
@@ -357,7 +258,6 @@
 | `@opentelemetry/instrumentation-router` | 0.61.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-runtime-node` | 0.30.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-socket.io` | 0.64.0 | Apache-2.0 | OK | PERMISSIVE |
-| `@opentelemetry/instrumentation-tedious` | 0.36.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-tedious` | 0.40.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-undici` | 0.27.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/instrumentation-winston` | 0.61.0 | Apache-2.0 | OK | PERMISSIVE |
@@ -390,7 +290,6 @@
 | `@opentelemetry/sdk-trace-base` | 2.8.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/sdk-trace-node` | 2.7.1 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/semantic-conventions` | 1.41.1 | Apache-2.0 | OK | PERMISSIVE |
-| `@opentelemetry/sql-common` | 0.41.2 | Apache-2.0 | OK | PERMISSIVE |
 | `@opentelemetry/sql-common` | 0.42.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@orval/angular` | 8.22.0 | MIT | OK | PERMISSIVE |
 | `@orval/axios` | 8.22.0 | MIT | OK | PERMISSIVE |
@@ -479,8 +378,6 @@
 | `@radix-ui/rect` | 1.1.2 | MIT | OK | PERMISSIVE |
 | `@react-native-async-storage/async-storage` | 2.2.0 | MIT | OK | PERMISSIVE |
 | `@react-native/assets-registry` | 0.81.5 | MIT | OK | PERMISSIVE |
-| `@react-native/babel-plugin-codegen` | 0.81.5 | MIT | OK | PERMISSIVE |
-| `@react-native/babel-preset` | 0.81.5 | MIT | OK | PERMISSIVE |
 | `@react-native/codegen` | 0.81.5 | MIT | OK | PERMISSIVE |
 | `@react-native/community-cli-plugin` | 0.81.5 | MIT | OK | PERMISSIVE |
 | `@react-native/debugger-frontend` | 0.81.5 | BSD-3-Clause | OK | PERMISSIVE |
@@ -550,6 +447,7 @@
 | `@storybook/test` | 8.6.18 | MIT | OK | PERMISSIVE |
 | `@storybook/theming` | 8.6.18 | MIT | OK | PERMISSIVE |
 | `@swc/helpers` | 0.5.23 | Apache-2.0 | OK | PERMISSIVE |
+| `@szl-holdings/braces-safe` | 0.2.0 | MIT | OK | PERMISSIVE |
 | `@tabby_ai/hijri-converter` | 1.0.5 | MIT | OK | PERMISSIVE |
 | `@tailwindcss/node` | 4.3.3 | MIT | OK | PERMISSIVE |
 | `@tailwindcss/oxide-linux-x64-gnu` | 4.3.3 | MIT | OK | PERMISSIVE |
@@ -654,7 +552,6 @@
 | `@udecode/react-utils` | 47.3.1 | MIT | OK | PERMISSIVE |
 | `@udecode/slate` | 49.0.0 | MIT | OK | PERMISSIVE |
 | `@udecode/utils` | 47.2.7 | MIT | OK | PERMISSIVE |
-| `@ungap/structured-clone` | 1.3.1 | ISC | OK | PERMISSIVE |
 | `@uppy/aws-s3` | 5.1.0 | MIT | OK | PERMISSIVE |
 | `@uppy/companion-client` | 5.1.1 | MIT | OK | PERMISSIVE |
 | `@uppy/components` | 1.2.0 | MIT | OK | PERMISSIVE |
@@ -665,10 +562,8 @@
 | `@uppy/store-default` | 5.0.0 | MIT | OK | PERMISSIVE |
 | `@uppy/thumbnail-generator` | 5.1.0 | MIT | OK | PERMISSIVE |
 | `@uppy/utils` | 7.2.0 | MIT | OK | PERMISSIVE |
-| `@urql/core` | 5.2.0 | MIT | OK | PERMISSIVE |
 | `@urql/core` | 6.0.3 | MIT | OK | PERMISSIVE |
 | `@urql/exchange-graphcache` | 9.0.1 | MIT | OK | PERMISSIVE |
-| `@urql/exchange-retry` | 1.3.2 | MIT | OK | PERMISSIVE |
 | `@vitejs/plugin-react` | 6.0.2 | MIT | OK | PERMISSIVE |
 | `@vitest/coverage-v8` | 4.1.11 | MIT | OK | PERMISSIVE |
 | `@vitest/expect` | 2.0.5 | MIT | OK | PERMISSIVE |
@@ -692,7 +587,6 @@
 | `@xmldom/xmldom` | 0.9.12 | MIT | OK | PERMISSIVE |
 | `@zeit/schemas` | 2.36.0 | MIT | OK | PERMISSIVE |
 | `abort-controller` | 3.0.0 | MIT | OK | PERMISSIVE |
-| `accepts` | 1.3.8 | MIT | OK | PERMISSIVE |
 | `accepts` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `acorn-import-attributes` | 1.9.5 | MIT | OK | PERMISSIVE |
 | `acorn` | 8.18.0 | MIT | OK | PERMISSIVE |
@@ -705,8 +599,6 @@
 | `ajv` | 8.20.0 | MIT | OK | PERMISSIVE |
 | `anser` | 1.4.10 | MIT | OK | PERMISSIVE |
 | `ansi-align` | 3.0.1 | ISC | OK | PERMISSIVE |
-| `ansi-escapes` | 4.3.2 | MIT | OK | PERMISSIVE |
-| `ansi-regex` | 4.1.1 | MIT | OK | PERMISSIVE |
 | `ansi-regex` | 5.0.1 | MIT | OK | PERMISSIVE |
 | `ansi-regex` | 6.2.2 | MIT | OK | PERMISSIVE |
 | `ansi-styles` | 3.2.1 | MIT | OK | PERMISSIVE |
@@ -741,15 +633,8 @@
 | `babel-jest` | 29.7.0 | MIT | OK | PERMISSIVE |
 | `babel-plugin-istanbul` | 6.1.1 | BSD-3-Clause | OK | PERMISSIVE |
 | `babel-plugin-jest-hoist` | 29.6.3 | MIT | OK | PERMISSIVE |
-| `babel-plugin-polyfill-corejs2` | 0.4.17 | MIT | OK | PERMISSIVE |
-| `babel-plugin-polyfill-corejs3` | 0.13.0 | MIT | OK | PERMISSIVE |
-| `babel-plugin-polyfill-regenerator` | 0.6.8 | MIT | OK | PERMISSIVE |
-| `babel-plugin-react-compiler` | 1.0.0 | MIT | OK | PERMISSIVE |
-| `babel-plugin-react-native-web` | 0.21.2 | MIT | OK | PERMISSIVE |
 | `babel-plugin-syntax-hermes-parser` | 0.29.1 | MIT | OK | PERMISSIVE |
-| `babel-plugin-transform-flow-enums` | 0.0.2 | MIT | OK | PERMISSIVE |
 | `babel-preset-current-node-syntax` | 1.2.0 | MIT | OK | PERMISSIVE |
-| `babel-preset-expo` | 54.0.11 | MIT | OK | PERMISSIVE |
 | `babel-preset-jest` | 29.6.3 | MIT | OK | PERMISSIVE |
 | `badgin` | 1.2.3 | MIT | OK | PERMISSIVE |
 | `balanced-match` | 4.0.4 | MIT | OK | PERMISSIVE |
@@ -772,9 +657,7 @@
 | `boxen` | 7.0.0 | MIT | OK | PERMISSIVE |
 | `bplist-creator` | 0.1.0 | MIT | OK | PERMISSIVE |
 | `bplist-parser` | 0.3.1 | MIT | OK | PERMISSIVE |
-| `bplist-parser` | 0.3.2 | MIT | OK | PERMISSIVE |
 | `brace-expansion` | 5.0.12 | MIT | OK | PERMISSIVE |
-| `braces` | 3.0.3 | MIT | OK | PERMISSIVE |
 | `brotli` | 1.3.3 | MIT | OK | PERMISSIVE |
 | `browserify-zlib` | 0.2.0 | MIT | OK | PERMISSIVE |
 | `browserslist` | 4.28.7 | MIT | OK | PERMISSIVE |
@@ -783,7 +666,6 @@
 | `buffer-equal-constant-time` | 1.0.1 | BSD-3-Clause | OK | PERMISSIVE |
 | `buffer-from` | 1.1.2 | MIT | OK | PERMISSIVE |
 | `buffer-image-size` | 0.6.4 | MIT | OK | PERMISSIVE |
-| `buffer` | 5.7.1 | MIT | OK | PERMISSIVE |
 | `buffer` | 6.0.3 | MIT | OK | PERMISSIVE |
 | `bytes` | 3.0.0 | MIT | OK | PERMISSIVE |
 | `bytes` | 3.1.2 | MIT | OK | PERMISSIVE |
@@ -806,7 +688,6 @@
 | `chalk` | 5.6.2 | MIT | OK | PERMISSIVE |
 | `check-error` | 2.1.3 | MIT | OK | PERMISSIVE |
 | `chokidar` | 5.0.0 | MIT | OK | PERMISSIVE |
-| `chownr` | 3.0.0 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `chrome-launcher` | 0.15.2 | Apache-2.0 | OK | PERMISSIVE |
 | `chromium-edge-launcher` | 0.2.0 | Apache-2.0 | OK | PERMISSIVE |
 | `ci-info` | 2.0.0 | MIT | OK | PERMISSIVE |
@@ -815,12 +696,9 @@
 | `class-variance-authority` | 0.7.1 | Apache-2.0 | OK | PERMISSIVE |
 | `classnames` | 2.5.1 | MIT | OK | PERMISSIVE |
 | `cli-boxes` | 3.0.0 | MIT | OK | PERMISSIVE |
-| `cli-cursor` | 2.1.0 | MIT | OK | PERMISSIVE |
-| `cli-spinners` | 2.9.2 | MIT | OK | PERMISSIVE |
 | `cli-table3` | 0.6.5 | MIT | OK | PERMISSIVE |
 | `clipboardy` | 3.0.0 | MIT | OK | PERMISSIVE |
 | `cliui` | 8.0.1 | ISC | OK | PERMISSIVE |
-| `clone` | 1.0.4 | MIT | OK | PERMISSIVE |
 | `clone` | 2.1.2 | MIT | OK | PERMISSIVE |
 | `clsx` | 2.1.1 | MIT | OK | PERMISSIVE |
 | `cmdk` | 1.1.1 | MIT | OK | PERMISSIVE |
@@ -834,7 +712,6 @@
 | `commander` | 15.0.0 | MIT | OK | PERMISSIVE |
 | `commander` | 2.20.3 | MIT | OK | PERMISSIVE |
 | `commander` | 4.1.1 | MIT | OK | PERMISSIVE |
-| `commander` | 7.2.0 | MIT | OK | PERMISSIVE |
 | `compare-func` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `compare-versions` | 6.1.1 | MIT | OK | PERMISSIVE |
 | `component-emitter` | 1.3.1 | MIT | OK | PERMISSIVE |
@@ -856,7 +733,6 @@
 | `cookie-signature` | 1.2.2 | MIT | OK | PERMISSIVE |
 | `cookie` | 0.7.2 | MIT | OK | PERMISSIVE |
 | `cookiejar` | 2.1.4 | MIT | OK | PERMISSIVE |
-| `core-js-compat` | 3.49.0 | MIT | OK | PERMISSIVE |
 | `core-js` | 3.49.0 | MIT | OK | PERMISSIVE |
 | `core-util-is` | 1.0.3 | MIT | OK | PERMISSIVE |
 | `cors` | 2.8.6 | MIT | OK | PERMISSIVE |
@@ -887,13 +763,11 @@
 | `date-fns` | 4.4.0 | MIT | OK | PERMISSIVE |
 | `dateformat` | 4.6.3 | MIT | OK | PERMISSIVE |
 | `debug` | 2.6.9 | MIT | OK | PERMISSIVE |
-| `debug` | 3.2.7 | MIT | OK | PERMISSIVE |
 | `debug` | 4.4.3 | MIT | OK | PERMISSIVE |
 | `decimal.js-light` | 2.5.1 | MIT | OK | PERMISSIVE |
 | `deep-eql` | 5.0.2 | MIT | OK | PERMISSIVE |
 | `deep-extend` | 0.6.0 | MIT | OK | PERMISSIVE |
 | `deepmerge` | 4.3.1 | MIT | OK | PERMISSIVE |
-| `defaults` | 1.0.4 | MIT | OK | PERMISSIVE |
 | `define-data-property` | 1.1.4 | MIT | OK | PERMISSIVE |
 | `define-lazy-prop` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `define-properties` | 1.2.1 | MIT | OK | PERMISSIVE |
@@ -936,7 +810,6 @@
 | `enhanced-resolve` | 5.24.3 | MIT | OK | PERMISSIVE |
 | `entities` | 4.5.0 | BSD-2-Clause | OK | PERMISSIVE |
 | `entities` | 7.0.1 | BSD-2-Clause | OK | PERMISSIVE |
-| `env-editor` | 0.4.2 | MIT | OK | PERMISSIVE |
 | `env-paths` | 2.2.1 | MIT | OK | PERMISSIVE |
 | `error-ex` | 1.3.4 | MIT | OK | PERMISSIVE |
 | `error-stack-parser` | 2.1.4 | MIT | OK | PERMISSIVE |
@@ -970,29 +843,20 @@
 | `exifr` | 7.1.3 | MIT | OK | PERMISSIVE |
 | `expect-type` | 1.3.0 | Apache-2.0 | OK | PERMISSIVE |
 | `expo-application` | 6.1.5 | MIT | OK | PERMISSIVE |
-| `expo-asset` | 12.0.13 | MIT | OK | PERMISSIVE |
 | `expo-blur` | 14.1.5 | MIT | OK | PERMISSIVE |
 | `expo-constants` | 17.1.8 | MIT | OK | PERMISSIVE |
-| `expo-constants` | 18.0.13 | MIT | OK | PERMISSIVE |
 | `expo-constants` | 55.0.16 | MIT | OK | PERMISSIVE |
 | `expo-device` | 8.0.10 | MIT | OK | PERMISSIVE |
 | `expo-file-system` | 19.0.23 | MIT | OK | PERMISSIVE |
-| `expo-font` | 14.0.12 | MIT | OK | PERMISSIVE |
-| `expo-keep-awake` | 15.0.8 | MIT | OK | PERMISSIVE |
 | `expo-linking` | 55.0.15 | MIT | OK | PERMISSIVE |
 | `expo-local-authentication` | 17.0.8 | MIT | OK | PERMISSIVE |
-| `expo-modules-autolinking` | 3.0.26 | MIT | OK | PERMISSIVE |
-| `expo-modules-core` | 3.0.30 | MIT | OK | PERMISSIVE |
 | `expo-notifications` | 0.30.7 | MIT | OK | PERMISSIVE |
 | `expo-secure-store` | 15.0.8 | MIT | OK | PERMISSIVE |
-| `expo-server` | 1.0.7 | MIT | OK | PERMISSIVE |
-| `expo` | 54.0.35 | MIT | OK | PERMISSIVE |
 | `exponential-backoff` | 3.1.3 | Apache-2.0 | OK | PERMISSIVE |
 | `express-rate-limit` | 8.5.2 | MIT | OK | PERMISSIVE |
 | `express` | 5.2.1 | MIT | OK | PERMISSIVE |
 | `extend` | 3.0.2 | MIT | OK | PERMISSIVE |
 | `fast-check` | 3.23.2 | MIT | OK | PERMISSIVE |
-| `fast-copy` | 4.0.3 | MIT | OK | PERMISSIVE |
 | `fast-copy` | 4.1.2 | MIT | OK | PERMISSIVE |
 | `fast-deep-equal` | 3.1.3 | MIT | OK | PERMISSIVE |
 | `fast-equals` | 5.4.0 | MIT | OK | PERMISSIVE |
@@ -1019,7 +883,6 @@
 | `flatbuffers` | 25.9.23 | Apache-2.0 | OK | PERMISSIVE |
 | `flatted` | 3.4.2 | ISC | OK | PERMISSIVE |
 | `flow-enums-runtime` | 0.0.6 | MIT | OK | PERMISSIVE |
-| `fontfaceobserver` | 2.3.0 | BSD-2-Clause | OK | PERMISSIVE |
 | `fontkit` | 2.0.4 | MIT | OK | PERMISSIVE |
 | `for-each` | 0.3.5 | MIT | OK | PERMISSIVE |
 | `foreground-child` | 3.3.1 | ISC | OK | PERMISSIVE |
@@ -1031,7 +894,6 @@
 | `forwarded` | 0.2.0 | MIT | OK | PERMISSIVE |
 | `framer-motion` | 12.35.1 | MIT | OK | PERMISSIVE |
 | `framer-motion` | 12.42.2 | MIT | OK | PERMISSIVE |
-| `freeport-async` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `fresh` | 0.5.2 | MIT | OK | PERMISSIVE |
 | `fresh` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `fs-extra` | 11.4.0 | MIT | OK | PERMISSIVE |
@@ -1056,7 +918,6 @@
 | `getenv` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `git-raw-commits` | 4.0.0 | MIT | OK | PERMISSIVE |
 | `glob` | 10.5.0 | ISC | OK | PERMISSIVE |
-| `glob` | 13.0.6 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `glob` | 7.2.3 | ISC | OK | PERMISSIVE |
 | `global-agent` | 3.0.0 | BSD-3-Clause | OK | PERMISSIVE |
 | `global-directory` | 4.0.1 | MIT | OK | PERMISSIVE |
@@ -1082,14 +943,11 @@
 | `hasown` | 2.0.4 | MIT | OK | PERMISSIVE |
 | `help-me` | 5.0.0 | MIT | OK | PERMISSIVE |
 | `hermes-estree` | 0.29.1 | MIT | OK | PERMISSIVE |
-| `hermes-estree` | 0.32.0 | MIT | OK | PERMISSIVE |
 | `hermes-estree` | 0.35.0 | MIT | OK | PERMISSIVE |
 | `hermes-parser` | 0.29.1 | MIT | OK | PERMISSIVE |
-| `hermes-parser` | 0.32.0 | MIT | OK | PERMISSIVE |
 | `hermes-parser` | 0.35.0 | MIT | OK | PERMISSIVE |
 | `hoist-non-react-statics` | 3.3.2 | BSD-3-Clause | OK | PERMISSIVE |
 | `hono` | 4.13.9 | MIT | OK | PERMISSIVE |
-| `hosted-git-info` | 7.0.2 | ISC | OK | PERMISSIVE |
 | `html-entities` | 2.6.0 | MIT | OK | PERMISSIVE |
 | `html-escaper` | 2.0.2 | MIT | OK | PERMISSIVE |
 | `html-parse-stringify` | 3.0.1 | MIT | OK | PERMISSIVE |
@@ -1105,7 +963,6 @@
 | `iconv-lite` | 0.7.2 | MIT | OK | PERMISSIVE |
 | `idb` | 8.0.3 | ISC | OK | PERMISSIVE |
 | `ieee754` | 1.2.1 | BSD-3-Clause | OK | PERMISSIVE |
-| `ignore` | 5.3.2 | MIT | OK | PERMISSIVE |
 | `image-size` | 3.0.0-szl.1 | Apache-2.0 | OK | PERMISSIVE |
 | `immediate` | 3.0.6 | MIT | OK | PERMISSIVE |
 | `immer` | 10.2.0 | MIT | OK | PERMISSIVE |
@@ -1195,8 +1052,6 @@
 | `jspdf` | 4.2.1 | MIT | OK | PERMISSIVE |
 | `jwa` | 2.0.1 | MIT | OK | PERMISSIVE |
 | `jws` | 4.0.1 | MIT | OK | PERMISSIVE |
-| `kleur` | 3.0.3 | MIT | OK | PERMISSIVE |
-| `lan-network` | 0.2.1 | MIT | OK | PERMISSIVE |
 | `lazystream` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `leven` | 3.1.0 | MIT | OK | PERMISSIVE |
 | `leven` | 4.1.0 | MIT | OK | PERMISSIVE |
@@ -1210,7 +1065,6 @@
 | `locate-path` | 7.2.0 | MIT | OK | PERMISSIVE |
 | `locate-path` | 8.0.0 | MIT | OK | PERMISSIVE |
 | `lodash.camelcase` | 4.3.0 | MIT | OK | PERMISSIVE |
-| `lodash.debounce` | 4.0.8 | MIT | OK | PERMISSIVE |
 | `lodash.isplainobject` | 4.0.6 | MIT | OK | PERMISSIVE |
 | `lodash.kebabcase` | 4.1.1 | MIT | OK | PERMISSIVE |
 | `lodash.mapvalues` | 4.6.0 | MIT | OK | PERMISSIVE |
@@ -1222,7 +1076,6 @@
 | `lodash.uniq` | 4.5.0 | MIT | OK | PERMISSIVE |
 | `lodash.upperfirst` | 4.3.1 | MIT | OK | PERMISSIVE |
 | `lodash` | 4.18.1 | MIT | OK | PERMISSIVE |
-| `log-symbols` | 2.2.0 | MIT | OK | PERMISSIVE |
 | `long` | 5.3.2 | Apache-2.0 | OK | PERMISSIVE |
 | `loose-envify` | 1.4.0 | MIT | OK | PERMISSIVE |
 | `loupe` | 3.2.1 | MIT | OK | PERMISSIVE |
@@ -1252,33 +1105,19 @@
 | `merge-options` | 3.0.4 | MIT | OK | PERMISSIVE |
 | `merge-stream` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `methods` | 1.1.2 | MIT | OK | PERMISSIVE |
-| `metro-babel-transformer` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-babel-transformer` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-cache-key` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-cache-key` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-cache` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-cache` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-config` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-config` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-core` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-core` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-file-map` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-file-map` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-minify-terser` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-minify-terser` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-resolver` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-resolver` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-runtime` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-runtime` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-source-map` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-source-map` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-symbolicate` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-symbolicate` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-transform-plugins` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-transform-plugins` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro-transform-worker` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro-transform-worker` | 0.83.7 | MIT | OK | PERMISSIVE |
-| `metro` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `metro` | 0.83.7 | MIT | OK | PERMISSIVE |
 | `micromatch` | 4.0.8 | MIT | OK | PERMISSIVE |
 | `mime-db` | 1.33.0 | MIT | OK | PERMISSIVE |
@@ -1291,18 +1130,15 @@
 | `mime` | 1.6.0 | MIT | OK | PERMISSIVE |
 | `mime` | 2.6.0 | MIT | OK | PERMISSIVE |
 | `mime` | 3.0.0 | MIT | OK | PERMISSIVE |
-| `mimic-fn` | 1.2.0 | MIT | OK | PERMISSIVE |
 | `mimic-fn` | 2.1.0 | MIT | OK | PERMISSIVE |
 | `min-indent` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `minimalistic-assert` | 1.0.1 | ISC | OK | PERMISSIVE |
-| `minimatch` | 10.2.5 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `minimatch` | 10.2.6 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `minimatch` | 3.1.5 | ISC | OK | PERMISSIVE |
 | `minimatch` | 5.1.9 | ISC | OK | PERMISSIVE |
 | `minimatch` | 9.0.9 | ISC | OK | PERMISSIVE |
 | `minimist` | 1.2.8 | MIT | OK | PERMISSIVE |
 | `minipass` | 7.1.3 | BlueOak-1.0.0 | OK | PERMISSIVE |
-| `minizlib` | 3.1.0 | MIT | OK | PERMISSIVE |
 | `mitt` | 3.0.1 | MIT | OK | PERMISSIVE |
 | `mkdirp` | 1.0.4 | MIT | OK | PERMISSIVE |
 | `module-details-from-path` | 1.0.4 | MIT | OK | PERMISSIVE |
@@ -1317,10 +1153,8 @@
 | `namespace-emitter` | 2.0.1 | MIT | OK | PERMISSIVE |
 | `nanoid` | 3.3.18 | MIT | OK | PERMISSIVE |
 | `nanoid` | 5.1.16 | MIT | OK | PERMISSIVE |
-| `negotiator` | 0.6.3 | MIT | OK | PERMISSIVE |
 | `negotiator` | 0.6.4 | MIT | OK | PERMISSIVE |
 | `negotiator` | 1.0.0 | MIT | OK | PERMISSIVE |
-| `nested-error-stacks` | 2.0.1 | MIT | OK | PERMISSIVE |
 | `next-themes` | 0.4.6 | MIT | OK | PERMISSIVE |
 | `node-domexception` | 1.0.0 | MIT | OK | PERMISSIVE |
 | `node-fetch` | 2.7.0 | MIT | OK | PERMISSIVE |
@@ -1330,11 +1164,9 @@
 | `node-releases` | 2.0.54 | MIT | OK | PERMISSIVE |
 | `nodemailer` | 10.0.9 | MIT-0 | OK | PERMISSIVE |
 | `normalize-path` | 3.0.0 | MIT | OK | PERMISSIVE |
-| `npm-package-arg` | 11.0.3 | ISC | OK | PERMISSIVE |
 | `npm-run-path` | 4.0.1 | MIT | OK | PERMISSIVE |
 | `npm-run-path` | 6.0.0 | MIT | OK | PERMISSIVE |
 | `nullthrows` | 1.1.1 | MIT | OK | PERMISSIVE |
-| `ob1` | 0.83.3 | MIT | OK | PERMISSIVE |
 | `ob1` | 0.83.7 | MIT | OK | PERMISSIVE |
 | `object-assign` | 4.1.1 | MIT | OK | PERMISSIVE |
 | `object-inspect` | 1.13.4 | MIT | OK | PERMISSIVE |
@@ -1347,7 +1179,6 @@
 | `on-finished` | 2.4.1 | MIT | OK | PERMISSIVE |
 | `on-headers` | 1.1.0 | MIT | OK | PERMISSIVE |
 | `once` | 1.4.0 | ISC | OK | PERMISSIVE |
-| `onetime` | 2.0.1 | MIT | OK | PERMISSIVE |
 | `onetime` | 5.1.2 | MIT | OK | PERMISSIVE |
 | `onnxruntime-common` | 1.24.0-dev.20251116-b39e144322 | MIT | OK | PERMISSIVE |
 | `onnxruntime-common` | 1.24.3 | MIT | OK | PERMISSIVE |
@@ -1359,7 +1190,6 @@
 | `openai` | 6.42.0 | Apache-2.0 | OK | PERMISSIVE |
 | `optics-ts` | 2.4.1 | MIT | OK | PERMISSIVE |
 | `optimism` | 0.18.1 | MIT | OK | PERMISSIVE |
-| `ora` | 3.4.0 | MIT | OK | PERMISSIVE |
 | `orval` | 8.22.0 | MIT | OK | PERMISSIVE |
 | `oxlint` | 1.69.0 | MIT | OK | PERMISSIVE |
 | `p-limit` | 2.3.0 | MIT | OK | PERMISSIVE |
@@ -1393,7 +1223,6 @@
 | `path-key` | 4.0.0 | MIT | OK | PERMISSIVE |
 | `path-parse` | 1.0.7 | MIT | OK | PERMISSIVE |
 | `path-scurry` | 1.11.1 | BlueOak-1.0.0 | OK | PERMISSIVE |
-| `path-scurry` | 2.0.2 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `path-to-regexp` | 3.3.0 | MIT | OK | PERMISSIVE |
 | `path-to-regexp` | 8.4.2 | MIT | OK | PERMISSIVE |
 | `pathe` | 2.0.3 | MIT | OK | PERMISSIVE |
@@ -1425,7 +1254,6 @@
 | `pngjs` | 3.4.0 | MIT | OK | PERMISSIVE |
 | `polished` | 4.3.1 | MIT | OK | PERMISSIVE |
 | `possible-typed-array-names` | 1.1.0 | MIT | OK | PERMISSIVE |
-| `postcss-selector-parser` | 6.0.10 | MIT | OK | PERMISSIVE |
 | `postcss-selector-parser` | 7.1.6 | MIT | OK | PERMISSIVE |
 | `postcss` | 8.5.23 | MIT | OK | PERMISSIVE |
 | `postgres-array` | 2.0.0 | MIT | OK | PERMISSIVE |
@@ -1434,28 +1262,22 @@
 | `postgres-interval` | 1.2.0 | MIT | OK | PERMISSIVE |
 | `preact` | 10.29.2 | MIT | OK | PERMISSIVE |
 | `prettier` | 3.8.4 | MIT | OK | PERMISSIVE |
-| `pretty-bytes` | 5.6.0 | MIT | OK | PERMISSIVE |
 | `pretty-bytes` | 6.1.1 | MIT | OK | PERMISSIVE |
 | `pretty-format` | 27.5.1 | MIT | OK | PERMISSIVE |
 | `pretty-format` | 29.7.0 | MIT | OK | PERMISSIVE |
 | `pretty-ms` | 9.3.1 | MIT | OK | PERMISSIVE |
-| `proc-log` | 4.2.0 | ISC | OK | PERMISSIVE |
 | `process-nextick-args` | 2.0.1 | MIT | OK | PERMISSIVE |
 | `process-warning` | 5.0.0 | MIT | OK | PERMISSIVE |
 | `process` | 0.11.10 | MIT | OK | PERMISSIVE |
-| `progress` | 2.0.3 | MIT | OK | PERMISSIVE |
 | `prom-client` | 15.1.3 | Apache-2.0 | OK | PERMISSIVE |
 | `promise` | 8.3.0 | MIT | OK | PERMISSIVE |
-| `prompts` | 2.4.2 | MIT | OK | PERMISSIVE |
 | `prop-types` | 15.8.1 | MIT | OK | PERMISSIVE |
 | `protobufjs` | 7.6.5 | BSD-3-Clause | OK | PERMISSIVE |
 | `proxy-addr` | 2.0.8 | MIT | OK | PERMISSIVE |
 | `proxy-compare` | 2.6.0 | MIT | OK | PERMISSIVE |
 | `pump` | 3.0.4 | MIT | OK | PERMISSIVE |
 | `punycode.js` | 2.3.1 | MIT | OK | PERMISSIVE |
-| `punycode` | 2.3.1 | MIT | OK | PERMISSIVE |
 | `pure-rand` | 6.1.0 | MIT | OK | PERMISSIVE |
-| `qrcode-terminal` | 0.11.0 | Apache 2.0 | OK | PERMISSIVE |
 | `qs` | 6.16.0 | BSD-3-Clause | OK | PERMISSIVE |
 | `query-selector-shadow-dom` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `quick-format-unescaped` | 4.0.4 | MIT | OK | PERMISSIVE |
@@ -1497,29 +1319,20 @@
 | `recharts-scale` | 0.4.5 | MIT | OK | PERMISSIVE |
 | `recharts` | 2.15.4 | MIT | OK | PERMISSIVE |
 | `redent` | 3.0.0 | MIT | OK | PERMISSIVE |
-| `regenerate-unicode-properties` | 10.2.2 | MIT | OK | PERMISSIVE |
-| `regenerate` | 1.4.2 | MIT | OK | PERMISSIVE |
 | `regenerator-runtime` | 0.13.11 | MIT | OK | PERMISSIVE |
 | `regexparam` | 3.0.0 | MIT | OK | PERMISSIVE |
-| `regexpu-core` | 6.4.0 | MIT | OK | PERMISSIVE |
 | `registry-auth-token` | 3.3.2 | MIT | OK | PERMISSIVE |
 | `registry-url` | 3.1.0 | MIT | OK | PERMISSIVE |
-| `regjsgen` | 0.8.0 | MIT | OK | PERMISSIVE |
-| `regjsparser` | 0.13.1 | BSD-2-Clause | OK | PERMISSIVE |
 | `rehackt` | 0.1.0 | MIT | OK | PERMISSIVE |
 | `remeda` | 2.45.0 | MIT | OK | PERMISSIVE |
 | `require-directory` | 2.1.1 | MIT | OK | PERMISSIVE |
 | `require-from-string` | 2.0.2 | MIT | OK | PERMISSIVE |
 | `require-in-the-middle` | 8.0.1 | MIT | OK | PERMISSIVE |
-| `requireg` | 0.2.2 | MIT | OK | PERMISSIVE |
 | `resolve-from` | 4.0.0 | MIT | OK | PERMISSIVE |
 | `resolve-from` | 5.0.0 | MIT | OK | PERMISSIVE |
 | `resolve-pkg-maps` | 1.0.0 | MIT | OK | PERMISSIVE |
 | `resolve-workspace-root` | 2.0.1 | MIT | OK | PERMISSIVE |
-| `resolve.exports` | 2.0.3 | MIT | OK | PERMISSIVE |
 | `resolve` | 1.22.12 | MIT | OK | PERMISSIVE |
-| `resolve` | 1.7.1 | MIT | OK | PERMISSIVE |
-| `restore-cursor` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `restructure` | 3.0.2 | MIT | OK | PERMISSIVE |
 | `retry-request` | 7.0.2 | MIT | OK | PERMISSIVE |
 | `retry` | 0.13.1 | MIT | OK | PERMISSIVE |
@@ -1554,12 +1367,10 @@
 | `setimmediate` | 1.0.5 | MIT | OK | PERMISSIVE |
 | `setprototypeof` | 1.2.0 | ISC | OK | PERMISSIVE |
 | `shallow-equal` | 3.1.0 | MIT | OK | PERMISSIVE |
-| `sharp` | 0.35.4 | Apache-2.0 | OK | PERMISSIVE |
 | `sharp` | 0.35.5 | Apache-2.0 | OK | PERMISSIVE |
 | `shebang-command` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `shebang-regex` | 3.0.0 | MIT | OK | PERMISSIVE |
 | `shell-quote` | 1.11.0 | MIT | OK | PERMISSIVE |
-| `shell-quote` | 1.9.0 | MIT | OK | PERMISSIVE |
 | `side-channel-list` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `side-channel-map` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `side-channel-weakmap` | 1.0.2 | MIT | OK | PERMISSIVE |
@@ -1569,7 +1380,6 @@
 | `signal-exit` | 4.1.0 | ISC | OK | PERMISSIVE |
 | `simple-plist` | 1.3.1 | MIT | OK | PERMISSIVE |
 | `sirv` | 3.0.2 | MIT | OK | PERMISSIVE |
-| `sisteransi` | 1.0.5 | MIT | OK | PERMISSIVE |
 | `slash` | 3.0.0 | MIT | OK | PERMISSIVE |
 | `slate-dom` | 0.114.0 | MIT | OK | PERMISSIVE |
 | `slate-history` | 0.113.1 | MIT | OK | PERMISSIVE |
@@ -1607,7 +1417,6 @@
 | `string-argv` | 0.3.2 | MIT | OK | PERMISSIVE |
 | `string-width` | 4.2.3 | MIT | OK | PERMISSIVE |
 | `string-width` | 5.1.2 | MIT | OK | PERMISSIVE |
-| `strip-ansi` | 5.2.0 | MIT | OK | PERMISSIVE |
 | `strip-ansi` | 6.0.1 | MIT | OK | PERMISSIVE |
 | `strip-ansi` | 7.2.0 | MIT | OK | PERMISSIVE |
 | `strip-bom` | 3.0.0 | MIT | OK | PERMISSIVE |
@@ -1618,16 +1427,13 @@
 | `strip-json-comments` | 2.0.1 | MIT | OK | PERMISSIVE |
 | `strip-json-comments` | 5.0.3 | MIT | OK | PERMISSIVE |
 | `strnum` | 2.4.0 | MIT | OK | PERMISSIVE |
-| `structured-headers` | 0.4.1 | MIT | OK | PERMISSIVE |
 | `stubs` | 3.0.0 | MIT | OK | PERMISSIVE |
 | `sucrase` | 3.35.0 | MIT | OK | PERMISSIVE |
-| `sucrase` | 3.35.1 | MIT | OK | PERMISSIVE |
 | `superagent` | 10.3.0 | MIT | OK | PERMISSIVE |
 | `supertest` | 7.2.2 | MIT | OK | PERMISSIVE |
 | `supports-color` | 5.5.0 | MIT | OK | PERMISSIVE |
 | `supports-color` | 7.2.0 | MIT | OK | PERMISSIVE |
 | `supports-color` | 8.1.1 | MIT | OK | PERMISSIVE |
-| `supports-hyperlinks` | 2.3.0 | MIT | OK | PERMISSIVE |
 | `supports-preserve-symlinks-flag` | 1.0.0 | MIT | OK | PERMISSIVE |
 | `svg-pathdata` | 6.0.3 | MIT | OK | PERMISSIVE |
 | `symbol-observable` | 4.0.0 | MIT | OK | PERMISSIVE |
@@ -1635,12 +1441,10 @@
 | `tailwindcss` | 4.3.3 | MIT | OK | PERMISSIVE |
 | `tapable` | 2.3.3 | MIT | OK | PERMISSIVE |
 | `tar-stream` | 3.2.0 | MIT | OK | PERMISSIVE |
-| `tar` | 7.5.21 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `tdigest` | 0.1.2 | MIT | OK | PERMISSIVE |
 | `teeny-request` | 9.0.0 | Apache-2.0 | OK | PERMISSIVE |
 | `teex` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `temp-dir` | 2.0.0 | MIT | OK | PERMISSIVE |
-| `terminal-link` | 2.1.1 | MIT | OK | PERMISSIVE |
 | `terser` | 5.48.0 | BSD-2-Clause | OK | PERMISSIVE |
 | `test-exclude` | 6.0.0 | ISC | OK | PERMISSIVE |
 | `text-decoder` | 1.2.7 | Apache-2.0 | OK | PERMISSIVE |
@@ -1678,7 +1482,6 @@
 | `tw-animate-css` | 1.4.0 | MIT | OK | PERMISSIVE |
 | `type-detect` | 4.0.8 | MIT | OK | PERMISSIVE |
 | `type-fest` | 0.13.1 | (MIT OR CC0-1.0) | OK | PERMISSIVE |
-| `type-fest` | 0.21.3 | (MIT OR CC0-1.0) | OK | PERMISSIVE |
 | `type-fest` | 0.7.1 | (MIT OR CC0-1.0) | OK | PERMISSIVE |
 | `type-fest` | 2.19.0 | (MIT OR CC0-1.0) | OK | PERMISSIVE |
 | `type-is` | 2.1.0 | MIT | OK | PERMISSIVE |
@@ -1690,12 +1493,7 @@
 | `uc.micro` | 2.1.0 | MIT | OK | PERMISSIVE |
 | `undici-types` | 7.18.2 | MIT | OK | PERMISSIVE |
 | `undici-types` | 7.24.6 | MIT | OK | PERMISSIVE |
-| `undici` | 6.29.0 | MIT | OK | PERMISSIVE |
-| `unicode-canonical-property-names-ecmascript` | 2.0.1 | MIT | OK | PERMISSIVE |
-| `unicode-match-property-ecmascript` | 2.0.0 | MIT | OK | PERMISSIVE |
-| `unicode-match-property-value-ecmascript` | 2.2.1 | MIT | OK | PERMISSIVE |
 | `unicode-properties` | 1.4.1 | MIT | OK | PERMISSIVE |
-| `unicode-property-aliases-ecmascript` | 2.2.0 | MIT | OK | PERMISSIVE |
 | `unicode-trie` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `unicorn-magic` | 0.1.0 | MIT | OK | PERMISSIVE |
 | `unicorn-magic` | 0.3.0 | MIT | OK | PERMISSIVE |
@@ -1717,7 +1515,6 @@
 | `utils-merge` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `utrie` | 1.0.2 | MIT | OK | PERMISSIVE |
 | `uuid` | 14.0.1 | MIT | OK | PERMISSIVE |
-| `validate-npm-package-name` | 5.0.1 | ISC | OK | PERMISSIVE |
 | `vary` | 1.1.2 | MIT | OK | PERMISSIVE |
 | `vaul` | 1.1.2 | MIT | OK | PERMISSIVE |
 | `victory-vendor` | 36.9.2 | MIT AND ISC | OK | PERMISSIVE |
@@ -1726,16 +1523,13 @@
 | `vlq` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `void-elements` | 3.1.0 | MIT | OK | PERMISSIVE |
 | `walker` | 1.0.8 | Apache-2.0 | OK | PERMISSIVE |
-| `wcwidth` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `web-streams-polyfill` | 3.3.3 | MIT | OK | PERMISSIVE |
 | `web-vitals` | 5.1.0 | Apache-2.0 | OK | PERMISSIVE |
 | `web-vitals` | 5.3.0 | Apache-2.0 | OK | PERMISSIVE |
 | `webidl-conversions` | 3.0.1 | BSD-2-Clause | OK | PERMISSIVE |
-| `webidl-conversions` | 5.0.0 | BSD-2-Clause | OK | PERMISSIVE |
 | `webpack-virtual-modules` | 0.6.2 | MIT | OK | PERMISSIVE |
 | `whatwg-fetch` | 3.6.20 | MIT | OK | PERMISSIVE |
 | `whatwg-mimetype` | 3.0.0 | MIT | OK | PERMISSIVE |
-| `whatwg-url-without-unicode` | 8.0.0-3 | MIT | OK | PERMISSIVE |
 | `whatwg-url` | 5.0.0 | MIT | OK | PERMISSIVE |
 | `which-typed-array` | 1.1.22 | MIT | OK | PERMISSIVE |
 | `which` | 2.0.2 | ISC | OK | PERMISSIVE |
@@ -1759,7 +1553,6 @@
 | `xtend` | 4.0.2 | MIT | OK | PERMISSIVE |
 | `y18n` | 5.0.8 | ISC | OK | PERMISSIVE |
 | `yallist` | 3.1.1 | ISC | OK | PERMISSIVE |
-| `yallist` | 5.0.0 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `yaml` | 2.9.0 | ISC | OK | PERMISSIVE |
 | `yargs-parser` | 21.1.1 | ISC | OK | PERMISSIVE |
 | `yargs` | 17.7.2 | MIT | OK | PERMISSIVE |

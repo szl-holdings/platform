@@ -102,6 +102,7 @@ overrides:
   path-to-regexp: 8.4.2
   'serve-handler>path-to-regexp': 3.3.0
   brace-expansion: 5.0.12
+  braces: link:packages/braces-safe
   fflate: 0.8.3
   vite: 8.0.16
   'form-data@2': 2.5.6
@@ -128,6 +129,7 @@ overrides:
   image-size: link:packages/image-size-safe
   shell-quote: 1.11.0
   source-map-js: 1.2.2
+  '@modelcontextprotocol/sdk': 1.31.0
   'tsx>esbuild': 0.28.1
   'vite>esbuild': 0.28.1
   'drizzle-kit>esbuild': 0.28.1
@@ -241,5 +243,3 @@ patchedDependencies:
   # Storybook resolves absolute cache-entry paths before manager bundling.
   # Keep syntax/whitespace minification while avoiding path-sensitive identifier mangling.
   '@storybook/core@8.6.18': patches/@storybook__core@8.6.18.patch
-  braces@3.0.3: patches/braces@3.0.3.patch
-  node-forge@1.4.0: patches/node-forge@1.4.0.patch

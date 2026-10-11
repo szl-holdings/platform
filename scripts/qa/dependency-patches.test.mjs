@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { lstatSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import test from 'node:test';
@@ -7,43 +8,14 @@ import test from 'node:test';
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const VIRTUAL_STORE = path.join(ROOT, 'node_modules', '.pnpm');
 const require = createRequire(import.meta.url);
-const BRACES_PATCH_HASH = 'c056b5c1123a999cfcaa5ad56c70e69a1120e186c410ee091a1f86e941411cf9';
 
-function requirePatchedPackage(packageName, version, patchHash) {
-  const expected = `${packageName}@${version}_patch_hash=${patchHash}`;
-  const matches = readdirSync(VIRTUAL_STORE).filter((entry) => entry === expected);
-  assert.deepEqual(matches, [expected], `expected exactly one installed ${expected}`);
-  return require(path.join(VIRTUAL_STORE, expected, 'node_modules', packageName));
-}
-
-function requirePatchedBracesFromConsumer(patchHash) {
-  const direct = requirePatchedPackage('braces', '3.0.3', patchHash);
+function requireHardenedBracesFromConsumer() {
+  const direct = require(path.join(ROOT, 'packages', 'braces-safe'));
   const consumerRequire = createRequire(
     path.join(VIRTUAL_STORE, 'micromatch@4.0.8', 'node_modules', 'micromatch', 'package.json'),
   );
   const resolved = consumerRequire('braces');
-  assert.equal(resolved, direct, 'micromatch must resolve the exact patched braces instance');
-  return resolved;
-}
-
-function requirePatchedNodeForgeFromConsumer(patchHash) {
-  const direct = requirePatchedPackage('node-forge', '1.4.0', patchHash);
-  const consumerRequire = createRequire(
-    path.join(
-      VIRTUAL_STORE,
-      '@expo+code-signing-certificates@0.0.6',
-      'node_modules',
-      '@expo',
-      'code-signing-certificates',
-      'package.json',
-    ),
-  );
-  const resolved = consumerRequire('node-forge');
-  assert.equal(
-    resolved,
-    direct,
-    '@expo/code-signing-certificates must resolve the exact patched node-forge instance',
-  );
+  assert.equal(resolved, direct, 'micromatch must resolve the repository-local hardened braces');
   return resolved;
 }
 
@@ -81,8 +53,31 @@ function assertSyntaxError(callback, message, description) {
   );
 }
 
-test('braces patch rejects excessive recursive AST nesting', () => {
-  const braces = requirePatchedBracesFromConsumer(BRACES_PATCH_HASH);
+test('hardened braces fork binds its exact source provenance', () => {
+  const manifest = JSON.parse(
+    readFileSync(path.join(ROOT, 'packages', 'braces-safe', 'package.json'), 'utf8'),
+  );
+  const metadata = manifest.szlSecurityBackport;
+  assert.equal(manifest.version, '0.2.0');
+  assert.equal(metadata.upstreamPackage, 'braces@3.0.3');
+  assert.equal(metadata.advisory, 'GHSA-vfj7-8cjw-p6xm');
+  assert.equal(
+    metadata.upstreamIntegrity,
+    'sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==',
+  );
+  assert.equal(metadata.localHardeningPatch, 'patches/braces@3.0.3.patch');
+  const patchPath = path.join(ROOT, metadata.localHardeningPatch);
+  const stat = lstatSync(patchPath);
+  assert.ok(stat.isFile());
+  assert.equal(stat.isSymbolicLink(), false);
+  assert.equal(
+    createHash('sha256').update(readFileSync(patchPath)).digest('hex'),
+    metadata.localHardeningPatchSha256,
+  );
+});
+
+test('hardened braces rejects excessive recursive AST nesting', () => {
+  const braces = requireHardenedBracesFromConsumer();
 
   const nested = (open, close, depth) => `${open.repeat(depth)}x${close.repeat(depth)}`;
   assert.doesNotThrow(() => braces(nested('{', '}', 100)));
@@ -92,8 +87,8 @@ test('braces patch rejects excessive recursive AST nesting', () => {
   assert.throws(() => braces(mixedNesting(101)), /nesting depth exceeds max depth \(100\)/);
 });
 
-test('braces patch enforces custom depth with a single stateful option read', () => {
-  const braces = requirePatchedBracesFromConsumer(BRACES_PATCH_HASH);
+test('hardened braces enforces custom depth with a single stateful option read', () => {
+  const braces = requireHardenedBracesFromConsumer();
   let reads = 0;
   const options = Object.defineProperty({}, 'maxDepth', {
     get() {
@@ -108,8 +103,8 @@ test('braces patch enforces custom depth with a single stateful option read', ()
   assert.throws(() => braces('{x}', { maxDepth: 0 }), /max depth \(0\)/);
 });
 
-test('braces patch gates direct AST inputs before every recursive walker', () => {
-  const braces = requirePatchedBracesFromConsumer(BRACES_PATCH_HASH);
+test('hardened braces gates direct AST inputs before every recursive walker', () => {
+  const braces = requireHardenedBracesFromConsumer();
   const maliciousAst = nestedAst(101);
 
   for (const operation of ['compile', 'expand', 'stringify']) {
@@ -121,8 +116,8 @@ test('braces patch gates direct AST inputs before every recursive walker', () =>
   }
 });
 
-test('braces patch rejects deeply nested and cyclic value arrays', { timeout: 5_000 }, () => {
-  const braces = requirePatchedBracesFromConsumer(BRACES_PATCH_HASH);
+test('hardened braces rejects deeply nested and cyclic value arrays', { timeout: 5_000 }, () => {
+  const braces = requireHardenedBracesFromConsumer();
 
   for (const operation of ['compile', 'expand', 'stringify']) {
     assertSyntaxError(
@@ -141,8 +136,8 @@ test('braces patch rejects deeply nested and cyclic value arrays', { timeout: 5_
   }
 });
 
-test('braces patch rejects cyclic and excessive parent chains', { timeout: 5_000 }, () => {
-  const braces = requirePatchedBracesFromConsumer(BRACES_PATCH_HASH);
+test('hardened braces rejects cyclic and excessive parent chains', { timeout: 5_000 }, () => {
+  const braces = requireHardenedBracesFromConsumer();
 
   for (const operation of ['compile', 'expand', 'stringify']) {
     const selfParent = { type: 'group' };
@@ -186,8 +181,8 @@ test('braces patch rejects cyclic and excessive parent chains', { timeout: 5_000
   }
 });
 
-test('braces patch rejects excessive AST breadth without iteration', { timeout: 2_000 }, () => {
-  const braces = requirePatchedBracesFromConsumer(BRACES_PATCH_HASH);
+test('hardened braces rejects excessive AST breadth without iteration', { timeout: 2_000 }, () => {
+  const braces = requireHardenedBracesFromConsumer();
 
   for (const operation of ['compile', 'expand', 'stringify']) {
     const sparseNodes = [];
@@ -221,10 +216,10 @@ test('braces patch rejects excessive AST breadth without iteration', { timeout: 
   }
 });
 
-test('braces patch resists stateful AST getters during actual traversal', {
+test('hardened braces resists stateful AST getters during actual traversal', {
   timeout: 5_000,
 }, () => {
-  const braces = requirePatchedBracesFromConsumer(BRACES_PATCH_HASH);
+  const braces = requireHardenedBracesFromConsumer();
 
   for (const operation of ['compile', 'expand', 'stringify']) {
     let nodesReads = 0;
@@ -382,8 +377,8 @@ test('braces patch resists stateful AST getters during actual traversal', {
   assert.equal(typeReads, 2, 'expand must snapshot a node type once per validation/traversal');
 });
 
-test('braces patch rejects untrusted recursive parent queues', { timeout: 2_000 }, () => {
-  const braces = requirePatchedBracesFromConsumer(BRACES_PATCH_HASH);
+test('hardened braces rejects untrusted recursive parent queues', { timeout: 2_000 }, () => {
+  const braces = requireHardenedBracesFromConsumer();
   const recursiveQueue = [];
   recursiveQueue.push(recursiveQueue, recursiveQueue);
   const foreignParent = { type: 'root', queue: recursiveQueue };
@@ -411,8 +406,8 @@ test('braces patch rejects untrusted recursive parent queues', { timeout: 2_000 
   assert.equal(queueReads, 0, 'expand must keep its queues outside the caller-supplied AST');
 });
 
-test('braces patch ignores concat-spreadable non-array values', { timeout: 2_000 }, () => {
-  const braces = requirePatchedBracesFromConsumer(BRACES_PATCH_HASH);
+test('hardened braces ignores concat-spreadable non-array values', { timeout: 2_000 }, () => {
+  const braces = requireHardenedBracesFromConsumer();
   const spreadable = {
     0: 'x',
     length: 1_000_000_000,
@@ -421,8 +416,8 @@ test('braces patch ignores concat-spreadable non-array values', { timeout: 2_000
   assert.deepEqual(braces.expand(astWithValue(spreadable)), ['[object Object]']);
 });
 
-test('braces patch snapshots stateful range values', { timeout: 2_000 }, () => {
-  const braces = requirePatchedBracesFromConsumer(BRACES_PATCH_HASH);
+test('hardened braces snapshots stateful range values', { timeout: 2_000 }, () => {
+  const braces = requireHardenedBracesFromConsumer();
   for (const operation of ['compile', 'expand']) {
     let valueReads = 0;
     const text = { type: 'text' };
@@ -443,162 +438,4 @@ test('braces patch snapshots stateful range values', { timeout: 2_000 }, () => {
     );
     assert.equal(valueReads, 2, `${operation} must read a range value once per pass`);
   }
-});
-
-test('node-forge patch rejects nested DigestAlgorithm garbage', () => {
-  const forge = requirePatchedPackage(
-    'node-forge',
-    '1.4.0',
-    'de8829eac6e09806b4b749a7221e7a2a62e6d88c796d38880d0f61bb2eb035ec',
-  );
-  const N = new forge.jsbn.BigInteger(
-    'E932AC92252F585B3A80A4DD76A897C8B7652952FE788F6EC8DD640587A1EE56' +
-      '47670A8AD4C2BE0F9FA6E49C605ADF77B5174230AF7BD50E5D6D6D6D28CCF0A8' +
-      '86A514CC72E51D209CC772A52EF419F6A953F3135929588EBE9B351FCA61CED7' +
-      '8F346FE00DBB6306E5C2A4C6DFC3779AF85AB417371CF34D8387B9B30AE46D7A' +
-      '5FF5A655B8D8455F1B94AE736989D60A6F2FD5CADBFFBD504C5A756A2E6BB5CE' +
-      'CC13BCA7503F6DF8B52ACE5C410997E98809DB4DC30D943DE4E812A47553DCE5' +
-      '4844A78E36401D13F77DC650619FED88D8B3926E3D8E319C80C744779AC5D6AB' +
-      'E252896950917476ECE5E8FC27D5F053D6018D91B502C4787558A002B9283DA7',
-    16,
-  );
-  const e = new forge.jsbn.BigInteger('3');
-  const signature = forge.util.binary.hex.decode(
-    'a4ae63dd5e7712b78f4870d0f51e294df5503d4f16c5d27ae33370981fb57f0de49f' +
-      '50f3d6a04666774cd984cd13972db9bf8e12bd294ef0ddc916c7c86cbae63efd7b6b' +
-      '97885e69760c208a40f1aecc76a90d7af5145177efce1bb55807a8d05c20b1596753' +
-      'ba710642fc9acdde6c160232654662c77cc4466c8257a38edb49f894e8845d0fd987' +
-      'b857ced88f4b62505a080bd87ef700d35d392a6e8f6fde34250c50b86fae606cb551' +
-      '215e8f4813239b77651d5565ad453698c071d48c31e8e526fb4a37610f64b3e1fb8e' +
-      '5be5898e408ad08197a0947794a530b54f84485377ce4a7488ed485ce4e5e105dd89' +
-      '698a472f390c3b1b76bc16b73276c4d1c81d',
-  );
-  const digest = forge.md.sha256.create();
-  digest.update('hello world!');
-  const publicKey = forge.pki.rsa.setPublicKey(N, e);
-
-  assert.throws(
-    () =>
-      publicKey.verify(digest.digest().getBytes(), signature, undefined, {
-        _parseAllDigestBytes: true,
-        _skipPaddingChecks: true,
-      }),
-    /ASN\.1 object does not contain a valid RSASSA-PKCS1-v1_5 DigestInfo value/,
-  );
-});
-
-function encodeDigestInfo(forge, digest, options = {}) {
-  const oid = options.oid ?? forge.oids.sha256;
-  const oidBytes = options.oidBytes ?? forge.asn1.oidToDer(oid).getBytes();
-  const algorithm = [
-    forge.asn1.create(forge.asn1.Class.UNIVERSAL, forge.asn1.Type.OID, false, oidBytes),
-  ];
-
-  if (options.parameters !== 'absent') {
-    algorithm.push(
-      forge.asn1.create(
-        forge.asn1.Class.UNIVERSAL,
-        forge.asn1.Type.NULL,
-        false,
-        options.parameters === 'nonempty-null' ? '\x00' : '',
-      ),
-    );
-  }
-
-  return forge.asn1
-    .toDer(
-      forge.asn1.create(forge.asn1.Class.UNIVERSAL, forge.asn1.Type.SEQUENCE, true, [
-        forge.asn1.create(forge.asn1.Class.UNIVERSAL, forge.asn1.Type.SEQUENCE, true, algorithm),
-        forge.asn1.create(forge.asn1.Class.UNIVERSAL, forge.asn1.Type.OCTETSTRING, false, digest),
-      ]),
-    )
-    .getBytes();
-}
-
-test('node-forge patch accepts standards-compatible DER and rejects noncanonical encodings', () => {
-  const forge = requirePatchedNodeForgeFromConsumer(
-    'de8829eac6e09806b4b749a7221e7a2a62e6d88c796d38880d0f61bb2eb035ec',
-  );
-  const { privateKey, publicKey } = forge.pki.rsa.generateKeyPair({
-    bits: 1024,
-    e: 0x10001,
-  });
-  const signDigestInfo = (digestInfo) => forge.pki.rsa.encrypt(digestInfo, privateKey, 0x01);
-  const sha256Digest = forge.md.sha256
-    .create()
-    .update('canonical DigestInfo regression')
-    .digest()
-    .getBytes();
-  const shaWithNull = encodeDigestInfo(forge, sha256Digest);
-  const shaWithoutParameters = encodeDigestInfo(forge, sha256Digest, { parameters: 'absent' });
-
-  assert.equal(publicKey.verify(sha256Digest, signDigestInfo(shaWithNull)), true);
-  assert.equal(publicKey.verify(sha256Digest, signDigestInfo(shaWithoutParameters)), true);
-
-  const md5Digest = forge.md.md5.create().update('required NULL regression').digest().getBytes();
-  const md5WithNull = encodeDigestInfo(forge, md5Digest, { oid: forge.oids.md5 });
-  const md5WithoutParameters = encodeDigestInfo(forge, md5Digest, {
-    oid: forge.oids.md5,
-    parameters: 'absent',
-  });
-  assert.equal(publicKey.verify(md5Digest, signDigestInfo(md5WithNull)), true);
-  assert.throws(
-    () => publicKey.verify(md5Digest, signDigestInfo(md5WithoutParameters)),
-    /Missing algorithm identifier NULL parameters/,
-  );
-
-  const nonemptyNull = encodeDigestInfo(forge, sha256Digest, {
-    parameters: 'nonempty-null',
-  });
-  assert.throws(
-    () => publicKey.verify(sha256Digest, signDigestInfo(nonemptyNull)),
-    /ASN\.1 object does not contain a valid RSASSA-PKCS1-v1_5 DigestInfo value/,
-  );
-
-  const canonicalOid = forge.asn1.oidToDer(forge.oids.sha256).getBytes();
-  const overlongOid = `${canonicalOid.slice(0, -1)}\x80${canonicalOid.slice(-1)}`;
-  const noncanonicalOid = encodeDigestInfo(forge, sha256Digest, { oidBytes: overlongOid });
-  assert.throws(
-    () => publicKey.verify(sha256Digest, signDigestInfo(noncanonicalOid)),
-    /canonical DER-encoded RSASSA-PKCS1-v1_5 DigestInfo/,
-  );
-
-  assert.ok(shaWithNull.charCodeAt(1) < 0x80, 'fixture must use a short-form outer length');
-  const noncanonicalLength = `${shaWithNull[0]}\x81${shaWithNull.slice(1)}`;
-  assert.throws(
-    () => publicKey.verify(sha256Digest, signDigestInfo(noncanonicalLength)),
-    /canonical DER-encoded RSASSA-PKCS1-v1_5 DigestInfo/,
-  );
-
-  const priorParameters = Object.getOwnPropertyDescriptor(Object.prototype, 'parameters');
-  Object.defineProperty(Object.prototype, 'parameters', {
-    configurable: true,
-    value: 'polluted',
-    writable: true,
-  });
-  try {
-    assert.equal(publicKey.verify(sha256Digest, signDigestInfo(shaWithoutParameters)), true);
-  } finally {
-    if (priorParameters) {
-      Object.defineProperty(Object.prototype, 'parameters', priorParameters);
-    } else {
-      Reflect.deleteProperty(Object.prototype, 'parameters');
-    }
-  }
-
-  const inheritedTestFlags = Object.create({
-    _parseAllDigestBytes: false,
-    _skipPaddingChecks: true,
-  });
-  const digestInfoWithTrailingByte = `${shaWithNull}\x00`;
-  assert.throws(
-    () =>
-      publicKey.verify(
-        sha256Digest,
-        signDigestInfo(digestInfoWithTrailingByte),
-        undefined,
-        inheritedTestFlags,
-      ),
-    /Unparsed DER bytes remain after ASN\.1 parsing/,
-  );
 });

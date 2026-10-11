@@ -12,22 +12,37 @@ import {
 } from './gate-grype-report.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
-const REPOSITORY_MANIFEST = JSON.parse(
-  readFileSync(path.join(ROOT, 'security', 'vulnerability-mitigations.json'), 'utf8'),
-);
-const NODE_FORGE = REPOSITORY_MANIFEST.mitigations.find(
-  (entry) => entry.advisory === 'GHSA-86w9-cpqp-85rv',
-);
-const BRACES = REPOSITORY_MANIFEST.mitigations.find(
-  (entry) => entry.advisory === 'GHSA-vfj7-8cjw-p6xm',
-);
+const NODE_FORGE = {
+  advisory: 'GHSA-86w9-cpqp-85rv',
+  package: 'node-forge',
+  version: '1.4.0',
+  severity: 'high',
+  patch: 'patches/node-forge@1.4.0.patch',
+  patchSha256: 'de8829eac6e09806b4b749a7221e7a2a62e6d88c796d38880d0f61bb2eb035ec',
+  expires: '2026-11-05',
+  upstream:
+    'https://github.com/digitalbazaar/forge/pull/1152/commits/ceba34402e329f0365134f23fe19898756527d65',
+  rationale: 'Synthetic exact local-patch admission fixture.',
+  verification: 'dependency-patches/node-forge-digestalgorithm-v1',
+};
+const BRACES = {
+  advisory: 'GHSA-vfj7-8cjw-p6xm',
+  package: 'braces',
+  version: '3.0.3',
+  severity: 'high',
+  patch: 'patches/braces@3.0.3.patch',
+  patchSha256: 'c056b5c1123a999cfcaa5ad56c70e69a1120e186c410ee091a1f86e941411cf9',
+  expires: '2026-11-05',
+  upstream: 'https://github.com/micromatch/braces/issues/70',
+  rationale: 'Synthetic exact local-patch admission fixture.',
+  verification: 'dependency-patches/braces-recursive-nesting-v1',
+};
+const FIXTURE_MANIFEST = { schemaVersion: 1, mitigations: [NODE_FORGE, BRACES] };
 const PATCHED_DEPENDENCIES = {
   'braces@3.0.3': 'patches/braces@3.0.3.patch',
   'node-forge@1.4.0': 'patches/node-forge@1.4.0.patch',
 };
-const VERIFIED_BEHAVIORS = new Set(
-  REPOSITORY_MANIFEST.mitigations.map((entry) => entry.verification),
-);
+const VERIFIED_BEHAVIORS = new Set(FIXTURE_MANIFEST.mitigations.map((entry) => entry.verification));
 const EVIDENCE_NOW = new Date('2026-10-07T10:00:00.000Z');
 const DATABASE_SOURCE = `https://grype.anchore.io/databases/v6/vulnerability-db.tar.zst?checksum=sha256%3A${'a'.repeat(64)}`;
 
@@ -108,13 +123,13 @@ function normalizeFixtureReport(report) {
 function manifestWithNodeForge(overrides = {}) {
   return {
     schemaVersion: 1,
-    mitigations: REPOSITORY_MANIFEST.mitigations.map((entry) =>
+    mitigations: FIXTURE_MANIFEST.mitigations.map((entry) =>
       entry.advisory === NODE_FORGE.advisory ? { ...entry, ...overrides } : { ...entry },
     ),
   };
 }
 
-function evaluate(report, manifest = REPOSITORY_MANIFEST, options = {}) {
+function evaluate(report, manifest = FIXTURE_MANIFEST, options = {}) {
   return evaluateGrypeReport(normalizeFixtureReport(report), manifest, {
     now: new Date('2026-10-06T00:00:00Z'),
     patchedDependencies: PATCHED_DEPENDENCIES,
@@ -221,7 +236,7 @@ test('accepts an exact GHSA correlation supplied by Grype for a primary CVE', ()
 
 test('executes registered behavior verification inside the admission gate', () => {
   let requested = null;
-  const result = evaluate(grypeReport([grypeMatch()]), REPOSITORY_MANIFEST, {
+  const result = evaluate(grypeReport([grypeMatch()]), FIXTURE_MANIFEST, {
     behaviorRunner(ids) {
       requested = ids;
       return { errors: [], verified: new Set(ids) };
@@ -232,7 +247,7 @@ test('executes registered behavior verification inside the admission gate', () =
   assert.deepEqual(requested, [NODE_FORGE.verification]);
   assert.equal(result.passed, true);
 
-  const failedBehavior = evaluate(grypeReport([grypeMatch()]), REPOSITORY_MANIFEST, {
+  const failedBehavior = evaluate(grypeReport([grypeMatch()]), FIXTURE_MANIFEST, {
     behaviorRunner: () => ({ errors: ['behavior suite failed'], verified: new Set() }),
     verifiedBehaviors: undefined,
   });
@@ -259,7 +274,7 @@ test('fails closed on ecosystem, package, version, severity, registration, diges
   const fixtures = [
     {
       match: grypeMatch({ type: 'python' }),
-      manifest: REPOSITORY_MANIFEST,
+      manifest: FIXTURE_MANIFEST,
       pattern: /ecosystem python is not npm/,
     },
     {
