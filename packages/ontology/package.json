@@ -6,40 +6,58 @@
   "description": "Canonical entity, entity-link, entity-snapshot, signal, and evidence type definitions for the SZL Holdings platform. Also provides Zod-validated Signal, EvidenceItem, and Recommendation contracts for the living signal mesh.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./entities": {
+      "development": "./src/entities.ts",
+      "workspace": "./src/entities.ts",
       "types": "./dist/entities.d.ts",
-      "import": "./src/entities.ts"
+      "import": "./dist/entities.js"
     },
     "./signals": {
+      "development": "./src/signals.ts",
+      "workspace": "./src/signals.ts",
       "types": "./dist/signals.d.ts",
-      "import": "./src/signals.ts"
+      "import": "./dist/signals.js"
     },
     "./entity-links": {
+      "development": "./src/entity-links.ts",
+      "workspace": "./src/entity-links.ts",
       "types": "./dist/entity-links.d.ts",
-      "import": "./src/entity-links.ts"
+      "import": "./dist/entity-links.js"
     },
     "./entity-snapshot": {
+      "development": "./src/entity-snapshot.ts",
+      "workspace": "./src/entity-snapshot.ts",
       "types": "./dist/entity-snapshot.d.ts",
-      "import": "./src/entity-snapshot.ts"
+      "import": "./dist/entity-snapshot.js"
     },
     "./evidence": {
+      "development": "./src/evidence.ts",
+      "workspace": "./src/evidence.ts",
       "types": "./dist/evidence.d.ts",
-      "import": "./src/evidence.ts"
+      "import": "./dist/evidence.js"
     },
     "./domains": {
+      "development": "./src/domains.ts",
+      "workspace": "./src/domains.ts",
       "types": "./dist/domains.d.ts",
-      "import": "./src/domains.ts"
+      "import": "./dist/domains.js"
     },
     "./signal": {
+      "development": "./src/signal.ts",
+      "workspace": "./src/signal.ts",
       "types": "./dist/signal.d.ts",
-      "import": "./src/signal.ts"
+      "import": "./dist/signal.js"
     },
     "./entity": {
+      "development": "./src/entity.ts",
+      "workspace": "./src/entity.ts",
       "types": "./dist/entity.d.ts",
-      "import": "./src/entity.ts"
+      "import": "./dist/entity.js"
     }
   },
   "scripts": {

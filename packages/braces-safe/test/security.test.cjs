@@ -55,7 +55,7 @@ test('expand rejects cyclic parent chains instead of looping', () => {
   self.parent = self;
   assert.throws(
     () => vm.runInNewContext('expand(ast)', { expand, ast: self }, { timeout: 250 }),
-    (error) => error instanceof RangeError && /parent chain contains a cycle/.test(error.message),
+    (error) => error?.name === 'SyntaxError' && /recursive parent cycle/.test(error.message),
   );
 
   const parent = { type: 'paren' };
@@ -63,7 +63,7 @@ test('expand rejects cyclic parent chains instead of looping', () => {
   parent.parent = child;
   assert.throws(
     () => vm.runInNewContext('expand(ast)', { expand, ast: child }, { timeout: 250 }),
-    (error) => error instanceof RangeError && /parent chain contains a cycle/.test(error.message),
+    (error) => error?.name === 'SyntaxError' && /recursive parent cycle/.test(error.message),
   );
 });
 

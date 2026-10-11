@@ -40,7 +40,7 @@ jobs:
       - name: Verify clean-clone invariants
         run: node scripts/check-clean-clone.mjs
       - name: Test dependency-free clone guards
-        run: node --test scripts/check-package-manager.test.mjs scripts/check-clean-clone.test.mjs scripts/setup-hooks.test.mjs scripts/brand-paths.test.ts lib/api-spec/scripts/codegen.test.mjs
+        run: node --test --test-reporter=spec --test-reporter=./scripts/ci/clone-guard-reporter.mjs --test-reporter-destination=stdout --test-reporter-destination=stdout scripts/check-package-manager.test.mjs scripts/check-clean-clone.test.mjs scripts/setup-hooks.test.mjs scripts/brand-paths.test.ts scripts/ci/governance-workflows.test.mjs lib/api-spec/scripts/codegen.test.mjs
 
   lint:
     name: Lint

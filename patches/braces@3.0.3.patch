@@ -1,0 +1,804 @@
+diff --git a/index.js b/index.js
+index d222c13b579d2d476dc26d692219dbaee1665b88..38fb1d99f0d3dd437a04bb5c891971578fe05d18 100644
+--- a/index.js
++++ b/index.js
+@@ -4,6 +4,7 @@ const stringify = require('./lib/stringify');
+ const compile = require('./lib/compile');
+ const expand = require('./lib/expand');
+ const parse = require('./lib/parse');
++const utils = require('./lib/utils');
+ 
+ /**
+  * Expand the given pattern or create a regex-compatible string.
+@@ -21,10 +22,11 @@ const parse = require('./lib/parse');
+ 
+ const braces = (input, options = {}) => {
+   let output = [];
++  const maxDepth = utils.getMaxDepth(options);
+ 
+   if (Array.isArray(input)) {
+     for (const pattern of input) {
+-      const result = braces.create(pattern, options);
++      const result = braces.create(pattern, options, maxDepth);
+       if (Array.isArray(result)) {
+         output.push(...result);
+       } else {
+@@ -32,7 +34,7 @@ const braces = (input, options = {}) => {
+       }
+     }
+   } else {
+-    output = [].concat(braces.create(input, options));
++    output = [].concat(braces.create(input, options, maxDepth));
+   }
+ 
+   if (options && options.expand === true && options.nodupes === true) {
+@@ -55,7 +57,8 @@ const braces = (input, options = {}) => {
+  * @api public
+  */
+ 
+-braces.parse = (input, options = {}) => parse(input, options);
++braces.parse = (input, options = {}, maxDepth = utils.getMaxDepth(options)) =>
++  parse(input, options, maxDepth);
+ 
+ /**
+  * Creates a braces string from an AST, or an AST node.
+@@ -71,11 +74,11 @@ braces.parse = (input, options = {}) => parse(input, options);
+  * @api public
+  */
+ 
+-braces.stringify = (input, options = {}) => {
++braces.stringify = (input, options = {}, maxDepth = utils.getMaxDepth(options)) => {
+   if (typeof input === 'string') {
+-    return stringify(braces.parse(input, options), options);
++    return stringify(braces.parse(input, options, maxDepth), options, maxDepth);
+   }
+-  return stringify(input, options);
++  return stringify(input, options, maxDepth);
+ };
+ 
+ /**
+@@ -93,11 +96,11 @@ braces.stringify = (input, options = {}) => {
+  * @api public
+  */
+ 
+-braces.compile = (input, options = {}) => {
++braces.compile = (input, options = {}, maxDepth = utils.getMaxDepth(options)) => {
+   if (typeof input === 'string') {
+-    input = braces.parse(input, options);
++    input = braces.parse(input, options, maxDepth);
+   }
+-  return compile(input, options);
++  return compile(input, options, maxDepth);
+ };
+ 
+ /**
+@@ -117,12 +120,12 @@ braces.compile = (input, options = {}) => {
+  * @api public
+  */
+ 
+-braces.expand = (input, options = {}) => {
++braces.expand = (input, options = {}, maxDepth = utils.getMaxDepth(options)) => {
+   if (typeof input === 'string') {
+-    input = braces.parse(input, options);
++    input = braces.parse(input, options, maxDepth);
+   }
+ 
+-  let result = expand(input, options);
++  let result = expand(input, options, maxDepth);
+ 
+   // filter out empty strings if specified
+   if (options.noempty === true) {
+@@ -153,14 +156,14 @@ braces.expand = (input, options = {}) => {
+  * @api public
+  */
+ 
+-braces.create = (input, options = {}) => {
++braces.create = (input, options = {}, maxDepth = utils.getMaxDepth(options)) => {
+   if (input === '' || input.length < 3) {
+     return [input];
+   }
+ 
+   return options.expand !== true
+-    ? braces.compile(input, options)
+-    : braces.expand(input, options);
++    ? braces.compile(input, options, maxDepth)
++    : braces.expand(input, options, maxDepth);
+ };
+ 
+ /**
+diff --git a/lib/compile.js b/lib/compile.js
+index dce69beb90ece5c3b0ca234a949418f9f34eedbc..e57abacae1f5861acc07f6db3dd0aa846749aa3a 100644
+--- a/lib/compile.js
++++ b/lib/compile.js
+@@ -3,55 +3,82 @@
+ const fill = require('fill-range');
+ const utils = require('./utils');
+ 
+-const compile = (ast, options = {}) => {
+-  const walk = (node, parent = {}) => {
++const compile = (ast, options = {}, maxDepth = utils.getMaxDepth(options)) => {
++  maxDepth = utils.normalizeMaxDepth(maxDepth);
++  utils.assertNestingDepth(ast, maxDepth);
++  const budget = utils.createTraversalBudget();
++
++  const walk = (node, parent = {}, depth = 0, active = new WeakSet()) => {
++    if (active.has(node)) {
++      throw new SyntaxError('AST contains a recursive node cycle');
++    }
++    const children = node.nodes;
++    const hasChildren = Array.isArray(children);
++    const length = hasChildren ? utils.getArrayLength(children, budget) : 0;
++    const type = node.type;
++    const nodeDepth = hasChildren
++      ? node === ast && type === 'root'
++        ? depth
++        : depth + 1
++      : depth;
++    if (nodeDepth > maxDepth) {
++      throw new SyntaxError(`AST nesting depth exceeds max depth (${maxDepth})`);
++    }
++    if (hasChildren) active.add(node);
++
+     const invalidBlock = utils.isInvalidBrace(parent);
+     const invalidNode = node.invalid === true && options.escapeInvalid === true;
+     const invalid = invalidBlock === true || invalidNode === true;
+     const prefix = options.escapeInvalid === true ? '\\' : '';
++    const value = utils.snapshotValue(node.value, maxDepth, budget);
+     let output = '';
+ 
+-    if (node.isOpen === true) {
+-      return prefix + node.value;
+-    }
++    try {
++      if (node.isOpen === true) {
++        return prefix + value;
++      }
+ 
+-    if (node.isClose === true) {
+-      console.log('node.isClose', prefix, node.value);
+-      return prefix + node.value;
+-    }
++      if (node.isClose === true) {
++        console.log('node.isClose', prefix, value);
++        return prefix + value;
++      }
+ 
+-    if (node.type === 'open') {
+-      return invalid ? prefix + node.value : '(';
+-    }
++      if (type === 'open') {
++        return invalid ? prefix + value : '(';
++      }
+ 
+-    if (node.type === 'close') {
+-      return invalid ? prefix + node.value : ')';
+-    }
++      if (type === 'close') {
++        return invalid ? prefix + value : ')';
++      }
+ 
+-    if (node.type === 'comma') {
+-      return node.prev.type === 'comma' ? '' : invalid ? node.value : '|';
+-    }
++      if (type === 'comma') {
++        return node.prev.type === 'comma' ? '' : invalid ? value : '|';
++      }
+ 
+-    if (node.value) {
+-      return node.value;
+-    }
++      if (value) {
++        return value;
++      }
+ 
+-    if (node.nodes && node.ranges > 0) {
+-      const args = utils.reduce(node.nodes);
+-      const range = fill(...args, { ...options, wrap: false, toRegex: true, strictZeros: true });
++      if (hasChildren && node.ranges > 0) {
++        const args = utils.reduce(children, length, maxDepth, budget);
++        const range = fill(...args, { ...options, wrap: false, toRegex: true, strictZeros: true });
+ 
+-      if (range.length !== 0) {
+-        return args.length > 1 && range.length > 1 ? `(${range})` : range;
++        if (range.length !== 0) {
++          return args.length > 1 && range.length > 1 ? `(${range})` : range;
++        }
+       }
+-    }
+ 
+-    if (node.nodes) {
+-      for (const child of node.nodes) {
+-        output += walk(child, node);
++      if (hasChildren) {
++        for (let index = 0; index < length; index++) {
++          const child = children[index];
++          output += walk(child, node, nodeDepth, active);
++        }
+       }
+-    }
+ 
+-    return output;
++      return output;
++    } finally {
++      if (hasChildren) active.delete(node);
++    }
+   };
+ 
+   return walk(ast);
+diff --git a/lib/expand.js b/lib/expand.js
+index 35b2c41d6afdb8f0197959e26079f266e48370d3..86e27086539fbdf0c3b5eeb0f64228c8b34e1ea4 100644
+--- a/lib/expand.js
++++ b/lib/expand.js
+@@ -7,8 +7,8 @@ const utils = require('./utils');
+ const append = (queue = '', stash = '', enclose = false) => {
+   const result = [];
+ 
+-  queue = [].concat(queue);
+-  stash = [].concat(stash);
++  queue = Array.isArray(queue) ? queue : [queue];
++  stash = Array.isArray(stash) ? stash : [stash];
+ 
+   if (!stash.length) return queue;
+   if (!queue.length) {
+@@ -30,81 +30,117 @@ const append = (queue = '', stash = '', enclose = false) => {
+   return utils.flatten(result);
+ };
+ 
+-const expand = (ast, options = {}) => {
+-  const rangeLimit = options.rangeLimit === undefined ? 1000 : options.rangeLimit;
+-
+-  const walk = (node, parent = {}) => {
+-    node.queue = [];
++const expand = (ast, options = {}, maxDepth = utils.getMaxDepth(options)) => {
++  maxDepth = utils.normalizeMaxDepth(maxDepth);
++  utils.assertNestingDepth(ast, maxDepth);
++  const budget = utils.createTraversalBudget();
+ 
+-    let p = parent;
+-    let q = parent.queue;
+-
+-    while (p.type !== 'brace' && p.type !== 'root' && p.parent) {
+-      p = p.parent;
+-      q = p.queue;
+-    }
++  const rangeLimit = options.rangeLimit === undefined ? 1000 : options.rangeLimit;
+ 
+-    if (node.invalid || node.dollar) {
+-      q.push(append(q.pop(), stringify(node, options)));
+-      return;
++  const unread = Symbol('unread children');
++  const queues = new WeakMap();
++  const walk = (
++    node,
++    parent = {},
++    depth = 0,
++    active = new WeakSet(),
++    knownChildren = unread,
++    knownType = unread,
++    knownParentType = unread
++  ) => {
++    if (active.has(node)) {
++      throw new SyntaxError('AST contains a recursive node cycle');
+     }
+-
+-    if (node.type === 'brace' && node.invalid !== true && node.nodes.length === 2) {
+-      q.push(append(q.pop(), ['{}']));
+-      return;
++    const children = knownChildren === unread ? node.nodes : knownChildren;
++    const hasChildren = Array.isArray(children);
++    const length = hasChildren ? utils.getArrayLength(children, budget) : 0;
++    const type = knownType === unread ? node.type : knownType;
++    const nodeDepth = hasChildren
++      ? node === ast && type === 'root'
++        ? depth
++        : depth + 1
++      : depth;
++    if (nodeDepth > maxDepth) {
++      throw new SyntaxError(`AST nesting depth exceeds max depth (${maxDepth})`);
+     }
+-
+-    if (node.nodes && node.ranges > 0) {
+-      const args = utils.reduce(node.nodes);
+-
+-      if (utils.exceedsLimit(...args, options.step, rangeLimit)) {
+-        throw new RangeError('expanded array length exceeds range limit. Use options.rangeLimit to increase or disable the limit.');
++    if (hasChildren) active.add(node);
++
++    try {
++      queues.set(node, []);
++      const parentState = knownParentType === unread
++        ? utils.findParentQueue(parent, maxDepth)
++        : utils.findParentQueue(parent, maxDepth, knownParentType, true);
++      const q = queues.get(parentState.node);
++
++      if (node.invalid || node.dollar) {
++        q.push(append(q.pop(), stringify(node, options, maxDepth)));
++        return;
+       }
+ 
+-      let range = fill(...args, options);
+-      if (range.length === 0) {
+-        range = stringify(node, options);
++      if (type === 'brace' && node.invalid !== true && length === 2) {
++        q.push(append(q.pop(), ['{}']));
++        return;
+       }
+ 
+-      q.push(append(q.pop(), range));
+-      node.nodes = [];
+-      return;
+-    }
+-
+-    const enclose = utils.encloseBrace(node);
+-    let queue = node.queue;
+-    let block = node;
++      if (hasChildren && node.ranges > 0) {
++        const args = utils.reduce(children, length, maxDepth, budget);
+ 
+-    while (block.type !== 'brace' && block.type !== 'root' && block.parent) {
+-      block = block.parent;
+-      queue = block.queue;
+-    }
++        if (utils.exceedsLimit(...args, options.step, rangeLimit)) {
++          throw new RangeError('expanded array length exceeds range limit. Use options.rangeLimit to increase or disable the limit.');
++        }
+ 
+-    for (let i = 0; i < node.nodes.length; i++) {
+-      const child = node.nodes[i];
++        let range = fill(...args, options);
++        if (range.length === 0) {
++          range = stringify(node, options, maxDepth);
++        }
+ 
+-      if (child.type === 'comma' && node.type === 'brace') {
+-        if (i === 1) queue.push('');
+-        queue.push('');
+-        continue;
++        q.push(append(q.pop(), range));
++        node.nodes = [];
++        return;
+       }
+ 
+-      if (child.type === 'close') {
+-        q.push(append(q.pop(), queue, enclose));
+-        continue;
++      const enclose = utils.encloseBrace(node, type);
++      const nodeState = utils.findParentQueue(node, maxDepth, type, true, active);
++      const queue = queues.get(nodeState.node);
++      if (!Array.isArray(queue)) {
++        throw new SyntaxError('AST parent queue is not owned by the active traversal');
+       }
+ 
+-      if (child.value && child.type !== 'open') {
+-        queue.push(append(queue.pop(), child.value));
+-        continue;
++      for (let i = 0; i < length; i++) {
++        const child = children[i];
++        if (active.has(child)) {
++          throw new SyntaxError('AST contains a recursive node cycle');
++        }
++        const childType = child.type;
++
++        if (childType === 'comma' && type === 'brace') {
++          if (i === 1) queue.push('');
++          queue.push('');
++          continue;
++        }
++
++        if (childType === 'close') {
++          q.push(append(q.pop(), queue, enclose));
++          continue;
++        }
++
++        const childValue = child.value;
++        if (childValue && childType !== 'open') {
++          const safeValue = utils.snapshotValue(childValue, maxDepth, budget);
++          queue.push(append(queue.pop(), safeValue));
++          continue;
++        }
++
++        const childNodes = child.nodes;
++        if (Array.isArray(childNodes)) {
++          walk(child, node, nodeDepth, active, childNodes, childType, type);
++        }
+       }
+ 
+-      if (child.nodes) {
+-        walk(child, node);
+-      }
++      return queue;
++    } finally {
++      if (hasChildren) active.delete(node);
+     }
+-
+-    return queue;
+   };
+ 
+   return utils.flatten(walk(ast));
+diff --git a/lib/parse.js b/lib/parse.js
+index 3a6988e629f52aee6609dc5ec290a5e9ff47cecb..b370903b3e32803520499d2a6b25574b3b4bff81 100644
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -1,6 +1,7 @@
+ 'use strict';
+ 
+ const stringify = require('./stringify');
++const utils = require('./utils');
+ 
+ /**
+  * Constants
+@@ -28,7 +29,8 @@ const {
+  * parse
+  */
+ 
+-const parse = (input, options = {}) => {
++const parse = (input, options = {}, maxDepth = utils.getMaxDepth(options)) => {
++  maxDepth = utils.normalizeMaxDepth(maxDepth);
+   if (typeof input !== 'string') {
+     throw new TypeError('Expected a string');
+   }
+@@ -143,6 +145,9 @@ const parse = (input, options = {}) => {
+      */
+ 
+     if (value === CHAR_LEFT_PARENTHESES) {
++      if (stack.length - 1 >= maxDepth) {
++        throw new SyntaxError(`Input nesting depth exceeds max depth (${maxDepth})`);
++      }
+       block = push({ type: 'paren', nodes: [] });
+       stack.push(block);
+       push({ type: 'text', value });
+@@ -195,6 +200,9 @@ const parse = (input, options = {}) => {
+      */
+ 
+     if (value === CHAR_LEFT_CURLY_BRACE) {
++      if (stack.length - 1 >= maxDepth) {
++        throw new SyntaxError(`Input nesting depth exceeds max depth (${maxDepth})`);
++      }
+       depth++;
+ 
+       const dollar = prev.value && prev.value.slice(-1) === '$' || block.dollar === true;
+diff --git a/lib/stringify.js b/lib/stringify.js
+index 8bcf872c31894f81a8c64d9202fd607e4fd7ea2b..9b3623b0c19c4444dc71f505e57c4dc1d1ea05d1 100644
+--- a/lib/stringify.js
++++ b/lib/stringify.js
+@@ -2,31 +2,53 @@
+ 
+ const utils = require('./utils');
+ 
+-module.exports = (ast, options = {}) => {
+-  const stringify = (node, parent = {}) => {
++module.exports = (ast, options = {}, maxDepth = utils.getMaxDepth(options)) => {
++  maxDepth = utils.normalizeMaxDepth(maxDepth);
++  utils.assertNestingDepth(ast, maxDepth);
++  const budget = utils.createTraversalBudget();
++
++  const stringify = (node, parent = {}, depth = 0, active = new WeakSet()) => {
++    if (active.has(node)) {
++      throw new SyntaxError('AST contains a recursive node cycle');
++    }
++    const children = node.nodes;
++    const hasChildren = Array.isArray(children);
++    const length = hasChildren ? utils.getArrayLength(children, budget) : 0;
++    const type = node.type;
++    const nodeDepth = hasChildren
++      ? node === ast && type === 'root'
++        ? depth
++        : depth + 1
++      : depth;
++    if (nodeDepth > maxDepth) {
++      throw new SyntaxError(`AST nesting depth exceeds max depth (${maxDepth})`);
++    }
++    if (hasChildren) active.add(node);
++
+     const invalidBlock = options.escapeInvalid && utils.isInvalidBrace(parent);
+     const invalidNode = node.invalid === true && options.escapeInvalid === true;
++    const value = utils.snapshotValue(node.value, maxDepth, budget);
+     let output = '';
+ 
+-    if (node.value) {
+-      if ((invalidBlock || invalidNode) && utils.isOpenOrClose(node)) {
+-        return '\\' + node.value;
++    try {
++      if (value) {
++        if ((invalidBlock || invalidNode) && utils.isOpenOrClose(node)) {
++          return '\\' + value;
++        }
++        return value;
+       }
+-      return node.value;
+-    }
+-
+-    if (node.value) {
+-      return node.value;
+-    }
+ 
+-    if (node.nodes) {
+-      for (const child of node.nodes) {
+-        output += stringify(child);
++      if (hasChildren) {
++        for (let index = 0; index < length; index++) {
++          const child = children[index];
++          output += stringify(child, {}, nodeDepth, active);
++        }
+       }
++      return output;
++    } finally {
++      if (hasChildren) active.delete(node);
+     }
+-    return output;
+   };
+ 
+   return stringify(ast);
+ };
+-
+diff --git a/lib/utils.js b/lib/utils.js
+index d19311fe044ad5157624077670dc297e8b53da49..524452588df642d60bcf8d8b7899ad4b3e2e2fda 100644
+--- a/lib/utils.js
++++ b/lib/utils.js
+@@ -1,5 +1,182 @@
+ 'use strict';
+ 
++const MAX_DEPTH = 100;
++const MAX_AST_ITEMS = 100000;
++
++exports.MAX_AST_ITEMS = MAX_AST_ITEMS;
++
++exports.createTraversalBudget = () => ({ remaining: MAX_AST_ITEMS });
++
++exports.getArrayLength = (value, budget) => {
++  const length = value.length;
++  if (!Number.isSafeInteger(length) || length < 0 || length > MAX_AST_ITEMS) {
++    throw new SyntaxError(`AST array item count exceeds safety limit (${MAX_AST_ITEMS})`);
++  }
++  if (budget !== undefined) {
++    if (budget.remaining < length) {
++      throw new SyntaxError(`AST array item count exceeds safety limit (${MAX_AST_ITEMS})`);
++    }
++    budget.remaining -= length;
++  }
++  return length;
++};
++
++/**
++ * Resolve the recursive-AST ceiling exactly once per public operation. A
++ * caller may choose a stricter limit, but cannot raise the safety ceiling.
++ */
++
++exports.normalizeMaxDepth = value => {
++  return Number.isFinite(value)
++    ? Math.max(0, Math.min(MAX_DEPTH, Math.trunc(value)))
++    : MAX_DEPTH;
++};
++
++exports.getMaxDepth = options => {
++  const value = options == null ? undefined : options.maxDepth;
++  return exports.normalizeMaxDepth(value);
++};
++
++/**
++ * Validate caller-provided ASTs without recursion before recursive walkers run.
++ */
++
++exports.snapshotValue = (value, maxDepth, budget = exports.createTraversalBudget()) => {
++  if (!Array.isArray(value)) return value;
++
++  const result = [];
++  const active = new WeakSet([value]);
++  const stack = [{
++    source: value,
++    target: result,
++    depth: 1,
++    index: 0,
++    length: exports.getArrayLength(value, budget)
++  }];
++  if (maxDepth < 1) {
++    throw new SyntaxError(`AST value nesting depth exceeds max depth (${maxDepth})`);
++  }
++
++  while (stack.length > 0) {
++    const entry = stack[stack.length - 1];
++    if (entry.index >= entry.length) {
++      active.delete(entry.source);
++      stack.pop();
++      continue;
++    }
++
++    const index = entry.index++;
++    const element = entry.source[index];
++    if (!Array.isArray(element)) {
++      entry.target[index] = element;
++      continue;
++    }
++
++    if (active.has(element)) {
++      throw new SyntaxError('AST contains a recursive value array cycle');
++    }
++    const depth = entry.depth + 1;
++    if (depth > maxDepth) {
++      throw new SyntaxError(`AST value nesting depth exceeds max depth (${maxDepth})`);
++    }
++
++    const target = [];
++    entry.target[index] = target;
++    active.add(element);
++    stack.push({
++      source: element,
++      target,
++      depth,
++      index: 0,
++      length: exports.getArrayLength(element, budget)
++    });
++  }
++
++  return result;
++};
++
++exports.assertValueNesting = (value, maxDepth, budget) => {
++  exports.snapshotValue(value, maxDepth, budget);
++};
++
++exports.findParentQueue = (
++  node,
++  maxDepth,
++  firstType,
++  hasFirstType = false,
++  allowed = undefined
++) => {
++  const parents = new WeakSet();
++  let current = node;
++  let depth = 0;
++
++  while (current !== null && typeof current === 'object') {
++    if (allowed !== undefined && !allowed.has(current)) {
++      throw new SyntaxError('AST parent chain leaves the active traversal');
++    }
++    if (parents.has(current)) {
++      throw new SyntaxError('AST contains a recursive parent cycle');
++    }
++    parents.add(current);
++
++    const type = hasFirstType ? firstType : current.type;
++    hasFirstType = false;
++    if (type === 'brace' || type === 'root') break;
++    if (++depth > maxDepth) {
++      throw new SyntaxError(`AST parent chain exceeds max depth (${maxDepth})`);
++    }
++
++    const parent = current.parent;
++    if (parent === null || typeof parent !== 'object') break;
++    current = parent;
++  }
++
++  return { node: current };
++};
++
++exports.assertNestingDepth = (ast, maxDepth) => {
++  if (ast === null || typeof ast !== 'object') return;
++
++  const active = new WeakSet();
++  const budget = exports.createTraversalBudget();
++  const stack = [{ node: ast, depth: 0, leave: false }];
++
++  while (stack.length > 0) {
++    const entry = stack.pop();
++    const { node, depth, leave } = entry;
++
++    if (leave) {
++      active.delete(node);
++      continue;
++    }
++    if (active.has(node)) {
++      throw new SyntaxError('AST contains a recursive node cycle');
++    }
++
++    const parent = node.parent;
++    exports.findParentQueue(parent, maxDepth);
++    const children = node.nodes;
++    const nestedValue = node.value;
++    exports.assertValueNesting(nestedValue, maxDepth, budget);
++    if (!Array.isArray(children)) continue;
++    const length = exports.getArrayLength(children, budget);
++
++    const type = node.type;
++    const nodeDepth = node === ast && type === 'root' ? depth : depth + 1;
++    if (nodeDepth > maxDepth) {
++      throw new SyntaxError(`AST nesting depth exceeds max depth (${maxDepth})`);
++    }
++
++    active.add(node);
++    stack.push({ node, depth: nodeDepth, leave: true });
++    for (let index = length - 1; index >= 0; index--) {
++      const child = children[index];
++      if (child === null || typeof child !== 'object' || Array.isArray(child)) continue;
++      stack.push({ node: child, depth: nodeDepth, leave: false });
++    }
++  }
++};
++
+ exports.isInteger = num => {
+   if (typeof num === 'number') {
+     return Number.isInteger(num);
+@@ -46,8 +223,8 @@ exports.escapeNode = (block, n = 0, type) => {
+  * Returns true if the given brace node should be enclosed in literal braces
+  */
+ 
+-exports.encloseBrace = node => {
+-  if (node.type !== 'brace') return false;
++exports.encloseBrace = (node, type = node.type) => {
++  if (type !== 'brace') return false;
+   if ((node.commas >> 0 + node.ranges >> 0) === 0) {
+     node.invalid = true;
+     return true;
+@@ -88,11 +265,21 @@ exports.isOpenOrClose = node => {
+  * Reduce an array of text nodes.
+  */
+ 
+-exports.reduce = nodes => nodes.reduce((acc, node) => {
+-  if (node.type === 'text') acc.push(node.value);
+-  if (node.type === 'range') node.type = 'text';
+-  return acc;
+-}, []);
++exports.reduce = (
++  nodes,
++  length = exports.getArrayLength(nodes),
++  maxDepth = MAX_DEPTH,
++  budget = exports.createTraversalBudget()
++) => {
++  const result = [];
++  for (let index = 0; index < length; index++) {
++    const node = nodes[index];
++    const type = node.type;
++    if (type === 'text') result.push(exports.snapshotValue(node.value, maxDepth, budget));
++    if (type === 'range') node.type = 'text';
++  }
++  return result;
++};
+ 
+ /**
+  * Flatten an array
+@@ -100,23 +287,31 @@ exports.reduce = nodes => nodes.reduce((acc, node) => {
+ 
+ exports.flatten = (...args) => {
+   const result = [];
++  const active = new WeakSet([args]);
++  const stack = [{ array: args, index: 0, length: exports.getArrayLength(args) }];
+ 
+-  const flat = arr => {
+-    for (let i = 0; i < arr.length; i++) {
+-      const ele = arr[i];
+-
+-      if (Array.isArray(ele)) {
+-        flat(ele);
+-        continue;
+-      }
++  while (stack.length > 0) {
++    const entry = stack[stack.length - 1];
++    if (entry.index >= entry.length) {
++      active.delete(entry.array);
++      stack.pop();
++      continue;
++    }
+ 
+-      if (ele !== undefined) {
+-        result.push(ele);
++    const element = entry.array[entry.index++];
++    if (Array.isArray(element)) {
++      if (active.has(element)) {
++        throw new SyntaxError('AST contains a recursive value array cycle');
+       }
++      active.add(element);
++      stack.push({
++        array: element,
++        index: 0,
++        length: exports.getArrayLength(element)
++      });
++      continue;
+     }
+-    return result;
+-  };
+-
+-  flat(args);
++    if (element !== undefined) result.push(element);
++  }
+   return result;
+ };

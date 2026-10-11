@@ -1,0 +1,75 @@
+services:
+  ovis-evaluation-worker:
+    image: "__OVIS_EVAL_IMAGE__"
+    user: "1001:1001"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=2g,mode=1777
+    pull_policy: always
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${OVIS_EVAL_PORT:-8091}:8090"
+    environment:
+      PORT: "8090"
+      HOST: "0.0.0.0"
+      RUNTIME_MODE: "internal-preview"
+      WORKER_ID: "ovis-evaluation-compose"
+      WORKER_MAX_CONCURRENCY: "0"
+      SUBSTRATE_PYTHON_WORKER_API_KEY_FILE: "/run/secrets/ovis-internal-api-key"
+      SUBSTRATE_PYTHON_WORKER_TENANT_ID: "${OVIS_EVAL_TENANT_ID:?set the governed evaluation tenant ID}"
+      AEF_DEVELOPMENT_ENDPOINTS_ENABLED: "0"
+      OVIS_OMNI_ENABLED: "1"
+      OVIS_MAX_CONCURRENCY: "1"
+      OVIS_PROMOTION_STATE: "EVALUATION_HOLD"
+      OVIS_VERIFY_ARTIFACTS: "1"
+      OVIS_LOCAL_FILES_ONLY: "1"
+      OVIS_INTERNAL_API_KEY_FILE: "/run/secrets/ovis-internal-api-key"
+      OVIS_INTERNAL_TENANT_ID: "${OVIS_EVAL_TENANT_ID:?set the governed evaluation tenant ID}"
+      OVIS_ASSET_ROOT: "/var/lib/szl/cas"
+      OVIS_MODEL_SNAPSHOT_ROOT: "/var/lib/szl/ovis-snapshot"
+      HF_HOME: "/tmp/huggingface"
+    secrets:
+      - source: ovis-internal-api-key
+        target: ovis-internal-api-key
+    volumes:
+      - type: bind
+        source: "${OVIS_MODEL_SNAPSHOT_DIR:?set the flattened local model-snapshot directory}"
+        target: /var/lib/szl/ovis-snapshot
+        read_only: true
+      - type: bind
+        source: "${OVIS_CAS_DIR:?set the governed local CAS directory}"
+        target: /var/lib/szl/cas
+        read_only: true
+    networks:
+      - ovis-evaluation
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+        limits:
+          memory: "${OVIS_MEMORY_LIMIT:-24g}"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import pathlib, urllib.request; key = pathlib.Path('/run/secrets/ovis-internal-api-key').read_text().strip(); request = urllib.request.Request('http://localhost:8090/aef/ovis/health', headers={'Authorization': 'Bearer ' + key}); urllib.request.urlopen(request, timeout=5)"
+      interval: 20s
+      timeout: 8s
+      start_period: 30s
+      retries: 3
+
+secrets:
+  ovis-internal-api-key:
+    file: "${OVIS_INTERNAL_API_KEY_FILE:?set a path to the Ovis internal API key file}"
+
+networks:
+  ovis-evaluation:
+    internal: true
