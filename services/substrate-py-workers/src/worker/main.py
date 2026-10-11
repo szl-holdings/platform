@@ -17,6 +17,7 @@ Environment variables:
   WORKER_DRAIN_TIMEOUT_S    — seconds to wait for in-flight stages on drain (default: 60)
   HOST                      — listen host (default: 127.0.0.1; deploys opt into 0.0.0.0)
   SUBSTRATE_PYTHON_WORKER_API_KEY — bearer credential for POST /claim (no default)
+  SUBSTRATE_PYTHON_WORKER_API_KEY_FILE — mounted bearer credential file (alternative)
   SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS — explicit development/test-only auth bypass
   SUBSTRATE_PYTHON_WORKER_ENV — worker environment override (development/test/production)
   RUNTIME_MODE               — canonical runtime mode; invalid values fail startup
@@ -52,6 +53,7 @@ from .stages import STAGE_REGISTRY
 from .telemetry import stage_span, get_current_span_id
 from .aef_endpoints import aef_router
 from .ovis_omni import OvisRuntimeError, validate_ovis_configuration
+from .ovis_boundary import OvisBoundaryMiddleware
 from .security import (
     ClaimAuthenticationError,
     WorkerSecurityConfigurationError,
@@ -137,6 +139,7 @@ app = FastAPI(
     ),
     lifespan=lifespan,
 )
+app.add_middleware(OvisBoundaryMiddleware)
 
 # AEF CPU-dev embed/rerank endpoints (no model download; deterministic hash-based)
 app.include_router(aef_router)

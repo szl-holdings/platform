@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-11 (rev 39 — public-candidate and migration authority boundaries)
+**Last updated:** 2026-10-11 (rev 40 — candidate, migration, and Ovis evaluation boundaries)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -105,9 +105,10 @@ and the current `security/sbom-latest.json` contains 1,989 components with
 SHA-256 `4ddcac69665a80ef9e7ebd53606ceb76c48fbc55b7d72bd09fd9a3b38736f198`.
 These are frozen-manifest, pnpm-only local candidate checkpoints; they do not
 cover Python dependencies, and none is bound to an immutable release commit or
-hosted conclusion. The three deployable Python services still lack resolved,
-hashed locks and Python SBOM, vulnerability, license, and reproducible-image
-evidence. Do not hand-edit generated
+hosted conclusion. The Ovis evaluation graph now has a service-local `uv.lock`,
+but the general worker image does not consume it; the inference and Lyte
+services still lack resolved hashed locks. All three still lack complete Python
+SBOM, vulnerability, license, and reproducible-image evidence. Do not hand-edit generated
 counts or refresh timestamps. Freeze the remaining source candidate, revalidate
 the lock-derived vulnerability report, license report, SBOM, API catalogue, and
 truth registries, and regenerate any artifact whose inputs change. Then run the
@@ -135,10 +136,10 @@ result replay, crash/restart tests, and ambiguous-response tests exist.
 `AutoscalingPolicy` currently produces recommendations only. No tracked
 coordinator aggregates `/metrics`, invokes `evaluate()`, or changes replicas,
 and the service exposes only its own worker view. Autoscaling and whole-fleet
-status are **NOT IMPLEMENTED**, not deployment features. In addition, the
-worker/inference/Lyte service dependency files use ranges without a committed
-hashed lock or reproducible image receipt; dependency-backed pytest was not
-available in the restricted onboarding environment. Packaging and deployment
+status are **NOT IMPLEMENTED**, not deployment features. The worker's Ovis
+evaluation graph is locked for CPU contract CI, while its tracked general image
+still resolves ranged core dependencies and has no reproducible image receipt.
+The inference and Lyte services remain range-based. Packaging and deployment
 remain **HOLD**.
 
 ### LOCAL-STACK-001 — source remediated; image/runtime proof remains HOLD
@@ -234,6 +235,47 @@ daily schedule and an explicit manual `require_truth_freshness` input run
 requires rerunning the canonical generator with its admitted local and remote
 sources and reviewing the resulting evidence; changing only the timestamp is
 not an accepted remediation.
+
+### 2026-10-11 Ovis evaluation dependency and image boundary
+
+The Ovis candidate remains `EVALUATION_HOLD`. Its manifest, Python optional
+dependencies, and runtime source now agree on Accelerate `1.15.0`, Transformers
+`5.3.0`, Torch `2.14.0`, and Qwen Omni Utils `0.0.9`; runtime health and loading
+fail closed on version drift. A service-local `uv.lock` records the complete
+cross-platform Python resolution and the manifest binds its SHA-256. Lock
+resolution and static CPU-side contracts do not establish that the GPU
+dependencies install or run on a supported CUDA host. The OSV vulnerability
+audit remains unresolved because the current network policy blocks
+`api.osv.dev`.
+
+The general Compose and Kubernetes worker examples explicitly disable Ovis.
+Separate evaluation adapters require a renderer-validated digest-addressed
+image, file-mounted internal key, read-only flattened model snapshot and asset
+CAS, single-request execution, local-files-only operation, denied egress, and
+a hard-coded `EVALUATION_HOLD`. The current identity verifies three weight
+shards and `tokenizer.json`, while the complete supporting processor/config
+inventory is not hash-bound. No GPU image recipe, owned image build, published
+image digest, hardware execution receipt, or model qualification receipt is
+admitted in this repository yet. Those remain release blockers; authenticated
+health with status `cold` and the deployment adapters are configuration
+contracts rather than evidence of a live or qualified model. Runtime receipts
+identify this contract as `1.0.1` but do not carry an image or dependency-lock
+digest. The canonical HOLD cannot be lifted by a receipt-digest environment
+value; an authenticated receipt parser and verifier is not implemented.
+Kubernetes currently treats the admitted `cold` response as Ready and defers
+model warm-up to the first embed request; a qualified lane needs a distinct
+loaded-readiness or controlled-prewarm gate.
+The isolated container also requires verified UID/GID `1001` read/traverse
+permissions on its host/PVC inputs. Its request limiter and model lock are
+process-local, so the unpublished image must prove a single server process and
+worker; multiple application workers would permit overlapping GPU execution.
+The Kubernetes template uses `Recreate` to prevent rollout overlap, but the
+image entrypoint still needs to prove one application process. Ovis credentials
+are checked before JSON parsing and request bodies are capped at 10 MiB. The
+supplied NetworkPolicy denies egress but does not choose a cluster-specific
+ingress allowlist; operators must add one before admitting callers.
+CPU contract CI checks the lock and worker suite, but it cannot establish
+filesystem ownership, process topology, or GPU behavior.
 
 ### 2026-08-26 A11oy Series A route boundary
 

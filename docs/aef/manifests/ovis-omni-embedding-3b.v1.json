@@ -50,11 +50,18 @@
   },
   "runtime": {
     "owner": "services/substrate-py-workers/src/worker/ovis_omni.py",
+    "runtimeVersion": "1.0.1",
     "internalEndpoint": "/aef/ovis/embed",
     "publicGateway": "/v1/multimodal/embed",
+    "accelerate": "1.15.0",
     "transformers": "5.3.0",
     "torch": "2.14.0",
     "qwenOmniUtils": "0.0.9",
+    "dependencyLock": {
+      "format": "uv",
+      "path": "services/substrate-py-workers/uv.lock",
+      "sha256": "8ea6299600ee02b636dfe6daf955273fdd9c9170df5454c4afcdb7058c4b9f7a"
+    },
     "remoteMediaAllowed": false,
     "inputTransport": "cas://sha256/<digest>",
     "artifactVerificationDefault": true

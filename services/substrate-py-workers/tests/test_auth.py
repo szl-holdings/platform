@@ -8,11 +8,13 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 import worker.main as worker_main
+from worker.claim_loop import ClaimLoop
 from worker.security import WorkerSecurityConfigurationError, load_worker_security_config
 from worker.stages import STAGE_REGISTRY
 
 
 API_KEY_ENV = "SUBSTRATE_PYTHON_WORKER_API_KEY"
+API_KEY_FILE_ENV = "SUBSTRATE_PYTHON_WORKER_API_KEY_FILE"
 AUTH_BYPASS_ENV = "SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS"
 WORKER_ENV_ENV = "SUBSTRATE_PYTHON_WORKER_ENV"
 TENANT_ID_ENV = "SUBSTRATE_PYTHON_WORKER_TENANT_ID"
@@ -51,6 +53,7 @@ def _claim(*, tenant_id: str = TENANT_ID, stage_type: str = "retrieval") -> dict
 def _enable_bearer_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(WORKER_ENV_ENV, "test")
     monkeypatch.setenv(API_KEY_ENV, TEST_CREDENTIAL)
+    monkeypatch.delenv(API_KEY_FILE_ENV, raising=False)
     monkeypatch.setenv(TENANT_ID_ENV, TENANT_ID)
     monkeypatch.delenv(AUTH_BYPASS_ENV, raising=False)
 
@@ -162,6 +165,90 @@ async def test_claim_accepts_matching_bearer_and_tenant(
 
 
 @pytest.mark.asyncio
+async def test_claim_accepts_matching_file_backed_bearer(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    credential_file = tmp_path / "worker-api-key"
+    credential_file.write_text(f"{TEST_CREDENTIAL}\n", encoding="utf-8")
+    monkeypatch.setenv(WORKER_ENV_ENV, "test")
+    monkeypatch.delenv(API_KEY_ENV, raising=False)
+    monkeypatch.setenv(API_KEY_FILE_ENV, str(credential_file))
+    monkeypatch.setenv(TENANT_ID_ENV, TENANT_ID)
+    monkeypatch.delenv(AUTH_BYPASS_ENV, raising=False)
+
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
+        response = await client.post("/claim", json=_claim(), headers=_headers())
+
+    assert response.status_code == 200
+
+
+def test_worker_security_rejects_ambiguous_direct_and_file_credentials(
+    tmp_path,
+) -> None:
+    credential_file = tmp_path / "worker-api-key"
+    credential_file.write_text(TEST_CREDENTIAL, encoding="utf-8")
+
+    with pytest.raises(WorkerSecurityConfigurationError, match="Configure only one"):
+        load_worker_security_config(
+            {
+                WORKER_ENV_ENV: "test",
+                API_KEY_ENV: TEST_CREDENTIAL,
+                API_KEY_FILE_ENV: str(credential_file),
+            }
+        )
+
+
+@pytest.mark.parametrize("case", ["symlink", "oversize", "empty", "missing"])
+def test_worker_security_rejects_invalid_file_credentials(tmp_path, case: str) -> None:
+    credential_file = tmp_path / "worker-api-key"
+    if case == "symlink":
+        target = tmp_path / "worker-api-key-target"
+        target.write_text(TEST_CREDENTIAL, encoding="utf-8")
+        credential_file.symlink_to(target)
+    elif case == "oversize":
+        credential_file.write_bytes(b"x" * ((16 * 1024) + 1))
+    elif case == "empty":
+        credential_file.write_bytes(b"")
+
+    with pytest.raises(WorkerSecurityConfigurationError, match=API_KEY_FILE_ENV):
+        load_worker_security_config(
+            {
+                WORKER_ENV_ENV: "test",
+                API_KEY_FILE_ENV: str(credential_file),
+            }
+        )
+
+
+@pytest.mark.asyncio
+async def test_zero_capacity_worker_refuses_claim_before_handler_resolution(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _enable_bearer_auth(monkeypatch)
+    zero_capacity_loop = ClaimLoop(worker_id="ovis-evaluation-test", max_concurrency=0)
+    handler_resolutions = 0
+
+    def observed_resolver(_stage_type: str, _stage_config: dict):
+        nonlocal handler_resolutions
+        handler_resolutions += 1
+        return STAGE_REGISTRY["retrieval"]
+
+    monkeypatch.setattr(worker_main, "get_claim_loop", lambda: zero_capacity_loop)
+    monkeypatch.setattr(worker_main, "_resolve_stage_handler", observed_resolver)
+
+    async with AsyncClient(
+        transport=ASGITransport(app=worker_main.app), base_url="http://test"
+    ) as client:
+        response = await client.post("/claim", json=_claim(), headers=_headers())
+
+    assert response.status_code == 503
+    assert response.json()["errorCode"] == "WORKER_UNAVAILABLE"
+    assert handler_resolutions == 0
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("marker", "value"),
     [
@@ -186,6 +273,7 @@ async def test_every_production_marker_holds_before_claim_or_handler_side_effect
         )
     monkeypatch.setenv(marker, value)
     monkeypatch.setenv(API_KEY_ENV, TEST_CREDENTIAL)
+    monkeypatch.delenv(API_KEY_FILE_ENV, raising=False)
     monkeypatch.setenv(TENANT_ID_ENV, TENANT_ID)
     monkeypatch.delenv(AUTH_BYPASS_ENV, raising=False)
 
@@ -298,6 +386,7 @@ async def test_production_startup_rejects_missing_secret(
 ) -> None:
     monkeypatch.setenv(WORKER_ENV_ENV, "production")
     monkeypatch.delenv(API_KEY_ENV, raising=False)
+    monkeypatch.delenv(API_KEY_FILE_ENV, raising=False)
     monkeypatch.delenv(AUTH_BYPASS_ENV, raising=False)
 
     with pytest.raises(RuntimeError, match=API_KEY_ENV):
@@ -313,6 +402,7 @@ async def test_production_startup_rejects_development_bypass(
     monkeypatch.setenv("NODE_ENV", "production")
     monkeypatch.setenv(AUTH_BYPASS_ENV, "1")
     monkeypatch.delenv(API_KEY_ENV, raising=False)
+    monkeypatch.delenv(API_KEY_FILE_ENV, raising=False)
 
     with pytest.raises(RuntimeError, match="permitted only"):
         async with worker_main.lifespan(worker_main.app):
@@ -326,6 +416,7 @@ async def test_invalid_bypass_value_fails_closed(
     monkeypatch.setenv(WORKER_ENV_ENV, "test")
     monkeypatch.setenv(AUTH_BYPASS_ENV, "maybe")
     monkeypatch.delenv(API_KEY_ENV, raising=False)
+    monkeypatch.delenv(API_KEY_FILE_ENV, raising=False)
 
     with pytest.raises(RuntimeError, match="explicit boolean"):
         async with worker_main.lifespan(worker_main.app):
@@ -338,6 +429,7 @@ async def test_production_startup_rejects_unbound_credential(
 ) -> None:
     monkeypatch.setenv(WORKER_ENV_ENV, "production")
     monkeypatch.setenv(API_KEY_ENV, TEST_CREDENTIAL)
+    monkeypatch.delenv(API_KEY_FILE_ENV, raising=False)
     monkeypatch.delenv(TENANT_ID_ENV, raising=False)
     monkeypatch.delenv(AUTH_BYPASS_ENV, raising=False)
 
@@ -381,6 +473,7 @@ async def test_public_probes_do_not_overstate_readiness(
 ) -> None:
     monkeypatch.setenv(WORKER_ENV_ENV, "production")
     monkeypatch.delenv(API_KEY_ENV, raising=False)
+    monkeypatch.delenv(API_KEY_FILE_ENV, raising=False)
     monkeypatch.delenv(AUTH_BYPASS_ENV, raising=False)
 
     async with AsyncClient(

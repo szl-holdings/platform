@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 
-# The worker currently has no hashed dependency lock or release SBOM. This
-# image makes the tracked service buildable and testable, but it is not itself
-# a production-promotion receipt.
+# A service-local uv.lock exists for CPU contract CI, but this general image
+# build resolves ranged core dependencies and does not install the Ovis GPU
+# extra. It has no release SBOM or reproducible-build receipt.
 
 FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6 AS builder
 

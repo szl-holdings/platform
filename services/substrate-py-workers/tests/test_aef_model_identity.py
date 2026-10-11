@@ -114,6 +114,30 @@ async def test_development_aef_backends_are_unavailable_in_production(
 
 
 @pytest.mark.asyncio
+async def test_development_aef_backends_require_explicit_enablement(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("AEF_DEVELOPMENT_ENDPOINTS_ENABLED", raising=False)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        embed = await client.post(
+            "/aef/embed",
+            headers=_TENANT_HEADERS,
+            json={"texts": ["evidence"]},
+        )
+        rerank = await client.post(
+            "/aef/rerank",
+            headers=_TENANT_HEADERS,
+            json={
+                "query": "evidence",
+                "candidates": [{"id": "candidate-1", "text": "evidence"}],
+            },
+        )
+
+    assert embed.status_code == 503
+    assert rerank.status_code == 503
+
+
+@pytest.mark.asyncio
 async def test_aef_helpers_require_tenant_context_even_in_test_bypass() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post("/aef/embed", json={"texts": ["evidence"]})

@@ -38,6 +38,66 @@ The engine will `POST /claim` to that URL; the LB picks an available worker.
 See `docs/substrate/python-workers.md` for the full startup, failover, and
 drain runbook.
 
+## Ovis evaluation lane
+
+The deployment above is the general Python worker fleet and has
+`OVIS_OMNI_ENABLED=0`. Do not enable Ovis in that mutable, mixed-purpose
+deployment.
+
+For the governed Ovis candidate, render
+`k8s-ovis-evaluation.yaml.template` with `render_ovis_deployment.py`. The
+renderer accepts only `repository@sha256:<64 lowercase hex>` and rejects tags.
+The rendered Deployment retains `EVALUATION_HOLD`, uses one GPU, mounts the
+flattened model snapshot and asset CAS read-only, denies pod egress when the
+cluster CNI enforces NetworkPolicy, serializes Ovis inference, and reads the
+worker and Ovis internal API keys from the same `ovis-evaluation-runtime`
+Secret file. The lane runs in `internal-preview`, binds both authentication
+layers to one tenant, disables the deterministic development AEF helpers, and
+sets general stage-claim capacity to zero. `Recreate` rollout strategy prevents
+old and new GPU pods from overlapping. Operators must
+provision these names before applying the rendered file:
+
+- Secret `ovis-evaluation-runtime`, key `internal-api-key`
+- ConfigMap `ovis-evaluation-runtime`, key `tenant-id`
+- PVC `ovis-model-snapshot`, containing a flattened regular-file snapshot
+- PVC `ovis-asset-cas`, containing admitted `cas://sha256/*` assets
+
+The Secret key is mounted as a single `subPath` file so the runtime can reject
+symlink traversal. Kubernetes does not update `subPath` Secret mounts in place;
+restart the evaluation pod after rotating `internal-api-key`.
+
+The authenticated readiness probe checks configuration gates and the four
+exact-pinned runtime distribution versions. A successful `cold` response does
+not load the model, hash the snapshot, execute a GPU operation, or prove model
+readiness. The current manifest authenticates four admitted LFS artifacts;
+full processor/config inventory remains a release blocker.
+
+Kubernetes currently treats that authenticated `cold` response as Ready. The
+hold-only lane therefore warms on its first admitted embed request. A future
+qualified lane must separate configuration admission from model readiness or
+complete a controlled prewarm and require `loaded: true` before receiving
+traffic.
+
+The Compose template mirrors the pod's non-root, read-only, dropped-capability
+contract and provides only a bounded writable `/tmp`. The eventual image must
+run as UID/GID `1001` under those constraints. Before launch, the host paths
+for the secret, flattened snapshot, and CAS must grant UID/GID `1001` the
+minimum read and directory-traverse permissions they need; the eventual image
+receipt must verify those permissions without making the inputs writable.
+The request limiter and model lock are process-local, so the admitted image
+must also run exactly one application server process with one worker. The image
+receipt must verify that entrypoint before the lane can be exercised.
+The general `/claim` path remains authenticated but has zero capacity in this
+evaluation deployment; the lane admits only bounded Ovis evaluation requests.
+Ovis authentication runs before JSON parsing, and request bodies are capped at
+10 MiB. The supplied NetworkPolicy denies egress only; operators must add an
+ingress allowlist appropriate to their cluster before exposing the Service to
+other workloads.
+
+The source tree does not currently publish an admitted evaluation image
+digest. A rendered manifest is deployment configuration, not evidence of a
+build, a running GPU workload, or model qualification.
+
 ## Production execution HOLD
 
 These sketches are usable only for development and evaluation exercises. If
@@ -66,7 +126,9 @@ and completed-result record exists for `(tenantId, runId, stageId)`.
 
 `POST /claim` is an internal protected boundary. Inject the same
 `SUBSTRATE_PYTHON_WORKER_API_KEY` secret into the TypeScript Substrate authority
-and every worker. Set `SUBSTRATE_PYTHON_WORKER_TENANT_ID` on both sides to the
+and every worker, or point a worker at its mounted copy with
+`SUBSTRATE_PYTHON_WORKER_API_KEY_FILE`. Configure exactly one of the direct and
+file-backed worker settings. Set `SUBSTRATE_PYTHON_WORKER_TENANT_ID` on both sides to the
 single governed tenant authorized for that credential. The authority sends the
 key as `Authorization: Bearer ...`, derives `X-Tenant-ID` from the authenticated
 run context, and mirrors that value in the claim payload. The worker compares
@@ -97,7 +159,8 @@ heuristics, not production model backends. They accept only the server-owned
 identities `aef-dev-hash` and `lexical-overlap-v1`, respectively, and return `503`
 in production. They also require the shared worker bearer/tenant boundary (or
 the explicit dev/test bypass plus `X-Tenant-ID`). A caller cannot relabel their
-output as another model.
+output as another model. They remain disabled unless a local development or
+test environment explicitly sets `AEF_DEVELOPMENT_ENDPOINTS_ENABLED=1`.
 
 The optional `/aef/ovis/*` route is also production-HOLD. Its canonical
 manifest is `EVALUATION_HOLD` with production serving forbidden, and the worker
@@ -108,12 +171,12 @@ requests return `503` before the runtime is acquired or invoked.
 
 ## Release packaging hold
 
-This service currently declares version ranges in `pyproject.toml` and
-`requirements.txt` without a committed, hashed Python lock, and this directory
-does not contain a reproducible image build. The Kubernetes image reference is
-therefore illustrative only: do not promote it as a reproducible production
-artifact until CI installs from an exact locked dependency graph, builds the
-image from tracked instructions, and proves a clean rebuild digest/SBOM.
+This service now has a committed `uv.lock`, and CPU contract CI installs that
+exact graph. The tracked general-purpose Dockerfile still resolves ranged core
+dependencies from `pyproject.toml`; it does not consume the lock or install the
+Ovis GPU extra. No reproducible Ovis GPU image, published digest, clean rebuild,
+or image SBOM receipt exists. The rendered Kubernetes image reference remains
+illustrative and must not be promoted as a production artifact.
 
 The repository also contains an `AutoscalingPolicy` recommendation helper and
 capacity telemetry. No checked-in coordinator invokes that evaluator or changes

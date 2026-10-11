@@ -80,7 +80,7 @@ separately recorded measurement dates.
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
 | API route source files | 44 | Non-test files with detected Express route declarations across current runtime roots |
 | API handler declarations | 334 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
-| CI workflows | 47 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
+| CI workflows | 48 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, public npm release paths, the frontier receipt-chain gate, and locked Ovis CPU contracts; excludes the retired DCO compatibility workflow |
 | Environment variables (in `.env.example`) | 246 | Lines matching `^[A-Z_]+=` |
 
 ---
