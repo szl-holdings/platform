@@ -64,8 +64,10 @@ test('publishes only the reviewed candidate allowlist and holds legacy routes', 
   ]) {
     assert.doesNotMatch(app, new RegExp(`\\b${excludedImport}\\b`));
   }
-  assert.match(smokeRoutes, /\/a11oy\/start/);
-  assert.match(smokeRoutes, /\/a11oy\/atelier/);
+  assert.match(smokeRoutes, /routes: \['\/a11oy\/', '\/a11oy\/security-agents'\]/);
+  for (const heldRoute of ['/a11oy/frontier', '/a11oy/atelier', '/a11oy/start']) {
+    assert.equal(smokeRoutes.includes(`'${heldRoute}'`), false);
+  }
 });
 
 test('provides explicit investor and developer paths without operational overclaims', () => {
