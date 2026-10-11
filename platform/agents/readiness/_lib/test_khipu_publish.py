@@ -3,8 +3,9 @@
 Stdlib only; huggingface_hub is replaced by an in-memory fake, so nothing here
 touches the network or the Hub.
 
-- A receipt that does not reach the dataset fails the run inside GitHub Actions
-  (anti-fake-green); a local run without HF_TOKEN only warns.
+- An unsigned or invalid receipt is never uploaded. A receipt that does not
+  reach the dataset fails inside GitHub Actions (anti-fake-green); a local run
+  without credentials only warns.
 - All eight agent workflows share the per-asset lock
   hf-write/dataset/SZLHOLDINGS/readiness-runs (HF plan D3), pin the hub client
   (plan D6), and start at least 10 minutes apart (GitHub cancels a pending run
@@ -16,6 +17,9 @@ with a broken contract fails before it publishes anything.
 from __future__ import annotations
 
 import contextlib
+import base64
+import hashlib
+import hmac
 import io
 import itertools
 import os
@@ -57,13 +61,62 @@ def _fake_hub() -> types.ModuleType:
     return module
 
 
+class _FakeVerifyKey:
+    """Offline signing double; this suite tests gates, not Ed25519 itself."""
+
+    def __init__(self, key: bytes) -> None:
+        if len(key) != 32:
+            raise ValueError("invalid public key length")
+        self.key = key
+
+    def __bytes__(self) -> bytes:
+        return self.key
+
+    def verify(self, message: bytes, signature: bytes) -> bytes:
+        expected = hmac.new(self.key, message, hashlib.sha512).digest()
+        if not hmac.compare_digest(expected, signature):
+            raise ValueError("invalid signature")
+        return message
+
+
+class _FakeSigningKey:
+    def __init__(self, seed: bytes) -> None:
+        if len(seed) != 32:
+            raise ValueError("invalid signing seed length")
+        self.verify_key = _FakeVerifyKey(hashlib.sha256(seed).digest())
+
+    def sign(self, message: bytes) -> types.SimpleNamespace:
+        signature = hmac.new(bytes(self.verify_key), message, hashlib.sha512).digest()
+        return types.SimpleNamespace(signature=signature)
+
+
+def _fake_nacl() -> tuple[types.ModuleType, types.ModuleType]:
+    parent = types.ModuleType("nacl")
+    parent.__path__ = []
+    signing = types.ModuleType("nacl.signing")
+    signing.SigningKey = _FakeSigningKey
+    signing.VerifyKey = _FakeVerifyKey
+    parent.signing = signing
+    return parent, signing
+
+
 class EmitFailsClosedTest(unittest.TestCase):
     def setUp(self) -> None:
         _FakeHfApi.uploads = []
         _FakeHfApi.error = None
-        patcher = unittest.mock.patch.dict(sys.modules, {"huggingface_hub": _fake_hub()})
+        nacl, signing = _fake_nacl()
+        patcher = unittest.mock.patch.dict(sys.modules, {
+            "huggingface_hub": _fake_hub(), "nacl": nacl, "nacl.signing": signing,
+        })
         patcher.start()
         self.addCleanup(patcher.stop)
+
+    def _signed_env(self) -> dict:
+        return {
+            "GITHUB_ACTIONS": "true",
+            "HF_TOKEN": "test-token",
+            "KHIPU_SIGNING_KEY_B64": base64.b64encode(os.urandom(32)).decode(),
+        }
 
     def _emit(self, env: dict) -> tuple[str, dict | None, int | None]:
         out = io.StringIO()
@@ -75,8 +128,9 @@ class EmitFailsClosedTest(unittest.TestCase):
                 return out.getvalue(), None, exc.code
 
     def test_published_receipt_passes_and_lands_under_the_agent_path(self) -> None:
-        text, result, code = self._emit({"GITHUB_ACTIONS": "true", "HF_TOKEN": "t"})
+        text, result, code = self._emit(self._signed_env())
         self.assertIsNone(code)
+        self.assertTrue(result["receipt"]["signed"])
         self.assertTrue(result["publish"]["published"])
         (upload,) = _FakeHfApi.uploads
         self.assertEqual(upload["repo_id"], "SZLHOLDINGS/readiness-runs")
@@ -89,7 +143,7 @@ class EmitFailsClosedTest(unittest.TestCase):
 
     def test_rejected_publish_fails_the_run_after_printing_the_receipt(self) -> None:
         _FakeHfApi.error = RuntimeError("Bad request")
-        text, _result, code = self._emit({"GITHUB_ACTIONS": "true", "HF_TOKEN": "t"})
+        text, _result, code = self._emit(self._signed_env())
         self.assertEqual(code, 1)
         self.assertIn('"published": false', text)
         self.assertIn("::error title=readiness publish failed::readiness-test receipt", text)
@@ -97,16 +151,78 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertLess(text.index('"receipt"'), text.index("::error"))
 
     def test_missing_token_fails_the_run_in_actions(self) -> None:
-        text, _result, code = self._emit({"GITHUB_ACTIONS": "true"})
+        env = self._signed_env()
+        del env["HF_TOKEN"]
+        text, _result, code = self._emit(env)
         self.assertEqual(code, 1)
         self.assertIn("no HF_TOKEN", text)
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_missing_signing_key_fails_actions_without_upload(self) -> None:
+        text, _result, code = self._emit({"GITHUB_ACTIONS": "true", "HF_TOKEN": "test-token"})
+        self.assertEqual(code, 1)
+        self.assertIn('"signed": false', text)
+        self.assertIn('"published": false', text)
+        self.assertIn("unsigned receipt", text)
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_invalid_signing_key_fails_actions_without_upload(self) -> None:
+        env = self._signed_env()
+        env["KHIPU_SIGNING_KEY_B64"] = "invalid-base64!"
+        text, _result, code = self._emit(env)
+        self.assertEqual(code, 1)
+        self.assertIn('"signed": false', text)
+        self.assertIn('"signError": "signing unavailable or invalid key"', text)
+        self.assertNotIn("invalid-base64!", text)
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_tampered_signed_receipt_cannot_upload(self) -> None:
+        with unittest.mock.patch.dict(os.environ, self._signed_env(), clear=True):
+            receipt = khipu.sign_khipu_receipt("readiness-test", {"ok": True})
+            receipt["payloadSha256"] = "0" * 64
+            result = khipu.publish_to_hf("readiness-test", receipt)
+        self.assertFalse(result["published"])
+        self.assertEqual(result["reason"], "payload digest mismatch")
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_signed_flag_without_signature_cannot_upload(self) -> None:
+        with unittest.mock.patch.dict(os.environ, self._signed_env(), clear=True):
+            receipt = khipu.sign_khipu_receipt("readiness-test", {"ok": True})
+            receipt["signatures"] = []
+            result = khipu.publish_to_hf("readiness-test", receipt)
+        self.assertFalse(result["published"])
+        self.assertEqual(result["reason"], "expected one Ed25519 signature")
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_foreign_self_signed_receipt_cannot_upload(self) -> None:
+        foreign_env = self._signed_env()
+        with unittest.mock.patch.dict(os.environ, foreign_env, clear=True):
+            receipt = khipu.sign_khipu_receipt("readiness-test", {"ok": True})
+        fleet_env = self._signed_env()
+        with unittest.mock.patch.dict(os.environ, fleet_env, clear=True):
+            result = khipu.publish_to_hf("readiness-test", receipt)
+        self.assertTrue(receipt["signed"])
+        self.assertFalse(result["published"])
+        self.assertEqual(result["reason"], "signer does not match configured fleet key")
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_missing_fleet_key_rejects_claimed_signed_receipt(self) -> None:
+        signed_env = self._signed_env()
+        with unittest.mock.patch.dict(os.environ, signed_env, clear=True):
+            receipt = khipu.sign_khipu_receipt("readiness-test", {"ok": True})
+        with unittest.mock.patch.dict(os.environ, {"HF_TOKEN": "test-token"}, clear=True):
+            result = khipu.publish_to_hf("readiness-test", receipt)
+        self.assertFalse(result["published"])
+        self.assertEqual(result["reason"], "no KHIPU_SIGNING_KEY_B64")
         self.assertEqual(_FakeHfApi.uploads, [])
 
     def test_local_run_without_token_only_warns(self) -> None:
         text, result, code = self._emit({})
         self.assertIsNone(code)
+        self.assertFalse(result["receipt"]["signed"])
         self.assertFalse(result["publish"]["published"])
         self.assertIn("WARNING: readiness-test receipt not published", text)
+        self.assertEqual(_FakeHfApi.uploads, [])
 
     def test_unuploaded_dr_dump_fails_the_run_in_actions(self) -> None:
         out = io.StringIO()
