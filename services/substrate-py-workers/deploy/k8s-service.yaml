@@ -77,6 +77,9 @@ spec:
               value: "4"
             - name: WORKER_DRAIN_TIMEOUT_S
               value: "60"
+            # This general fleet is not the governed Ovis evaluation lane.
+            - name: OVIS_OMNI_ENABLED
+              value: "0"
           # Liveness — restart if the process is wedged.
           livenessProbe:
             httpGet:

@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-03 (rev 31 — A11oy Atelier Proofweave compile-only boundary)
+**Last updated:** 2026-10-11 (rev 32 — Ovis evaluation dependency and image boundary)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -46,6 +46,41 @@ daily schedule and an explicit manual `require_truth_freshness` input run
 requires rerunning the canonical generator with its admitted local and remote
 sources and reviewing the resulting evidence; changing only the timestamp is
 not an accepted remediation.
+
+### 2026-10-11 Ovis evaluation dependency and image boundary
+
+The Ovis candidate remains `EVALUATION_HOLD`. Its manifest, Python optional
+dependencies, and runtime source now agree on Accelerate `1.15.0`, Transformers
+`5.3.0`, Torch `2.14.0`, and Qwen Omni Utils `0.0.9`; runtime health and loading
+fail closed on version drift. A service-local `uv.lock` records the complete
+cross-platform Python resolution and the manifest binds its SHA-256. Lock
+resolution and static CPU-side contracts do not establish that the GPU
+dependencies install or run on a supported CUDA host. The OSV vulnerability
+audit remains unresolved because the current network policy blocks
+`api.osv.dev`.
+
+The general Compose and Kubernetes worker examples explicitly disable Ovis.
+Separate evaluation adapters require a renderer-validated digest-addressed
+image, file-mounted internal key, read-only flattened model snapshot and asset
+CAS, single-request execution, local-files-only operation, denied egress, and
+a hard-coded `EVALUATION_HOLD`. The current identity verifies three weight
+shards and `tokenizer.json`, while the complete supporting processor/config
+inventory is not hash-bound. No GPU image recipe, owned image build, published
+image digest, hardware execution receipt, or model qualification receipt is
+admitted in this repository yet. Those remain release blockers; authenticated
+health with status `cold` and the deployment adapters are configuration
+contracts rather than evidence of a live or qualified model. Runtime receipts
+identify this contract as `1.0.1` but do not carry an image or dependency-lock
+digest. Qualification receipt admission also checks only 64-hex syntax, not
+Forge ownership or receipt contents. Kubernetes currently treats the admitted
+`cold` response as Ready and defers model warm-up to the first embed request; a
+qualified lane needs a distinct loaded-readiness or controlled-prewarm gate.
+The isolated container also requires verified UID/GID `1001` read/traverse
+permissions on its host/PVC inputs. Its request limiter and model lock are
+process-local, so the unpublished image must prove a single server process and
+worker; multiple application workers would permit overlapping GPU execution.
+CPU contract CI checks the lock and worker suite, but it cannot establish
+filesystem ownership, process topology, or GPU behavior.
 
 ### 2026-08-26 A11oy Series A route boundary
 

@@ -128,10 +128,10 @@
   },
   "ci": {
     "workflows": {
-      "count": 47,
+      "count": 48,
       "command": "Count tracked .github/workflows/*.yml and *.yaml files",
-      "computed": "2026-09-24",
-      "note": "Counts the permanent protected-source workflows after the read-only legacy DCO compatibility workflow was retired. The frontier receipt-chain gate remains included."
+      "computed": "2026-10-11",
+      "note": "Counts the permanent protected-source workflows after the read-only legacy DCO compatibility workflow was retired. The frontier receipt-chain and locked Ovis CPU contract gates remain included."
     }
   },
   "env": {
