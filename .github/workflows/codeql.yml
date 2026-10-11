@@ -47,6 +47,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Test workflow security contracts
+        run: node --test scripts/qa/workflow-security.test.mjs
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
         with:
@@ -90,17 +93,19 @@ jobs:
         env:
           ANALYZE_RESULT: ${{ needs.analyze.result }}
           GH_TOKEN: ${{ github.token }}
-          REF: ${{ github.event.pull_request.head.ref }}
+          REF: ${{ github.ref }}
         run: |
           set -euo pipefail
           if [ "${ANALYZE_RESULT}" != "success" ]; then
             echo "::error::CodeQL analysis ended ${ANALYZE_RESULT}; blocking merge because the analyzer did not produce a trustworthy result."
             exit 1
           fi
-          # Open alerts for the PR head ref, filtered to the CodeQL tool.
+          # The analyzer scans github.ref (refs/pull/<number>/merge), including
+          # fork PRs. Read every alert page for that exact analysis ref.
           if ! alerts=$(gh api \
-              "repos/${{ github.repository }}/code-scanning/alerts?state=open&ref=refs/heads/${REF}&tool_name=CodeQL&per_page=100" \
-              --jq '[.[] | {sev: (.rule.security_severity_level // .rule.severity), num: .number, rule: .rule.id}]'); then
+              "repos/${GITHUB_REPOSITORY}/code-scanning/alerts?state=open&ref=${REF}&tool_name=CodeQL&per_page=100" \
+              --paginate --slurp \
+              | jq -e '[.[][] | {sev: (.rule.security_severity_level // .rule.severity), num: .number, rule: .rule.id}]'); then
             echo "::error::Unable to read CodeQL alerts; blocking merge because absence of evidence is not evidence of absence."
             exit 1
           fi

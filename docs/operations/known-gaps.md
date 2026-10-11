@@ -800,3 +800,10 @@ Operational gaps, process health, test coverage, observability, team ownership.
 - **2026-04-17 (Diligence Security Gap Remediation Sprint):** Five pre-commercial security gaps from the diligence review resolved or formally accepted. (1) **MFA (KG026)** — Formally accepted. IdP-level MFA via Azure AD SSO is the enforced control; platform-native MFA scoped for enterprise tier. (2) **IP address storage (KG034)** — Resolved. `hashIp()` in `lib/audit/src/ip-hash.ts` applies SHA-256 with configurable salt before all audit and session IP storage. Raw IPs never reach the DB. (3) **Input validation (KG003–KG008)** — Confirmed resolved. All high-traffic write routes verified to have Zod `validateBody()` applied (already resolved in Apr-2026 hardening sprint). (4) **Session revocation on role change (AF-010)** — Resolved. `revokeUserSessionsOnRoleChange()` added to `session-policy.ts`; wired into SCIM group member operations and new `PUT /admin/users/:userId/roles` endpoint. (5) **Dependency pinning (KG035)** — Formally accepted. `pnpm-lock.yaml` provides exact pinning; `pnpm install --frozen-lockfile` used in all CI/deploy pipelines; dependency vulnerability scanning via KG012. KNOWN-GAPS.md rev 9.
 
 ---
+
+## 2026-10-05 workflow security source correction
+
+The CodeQL severity gate now queries the same PR merge ref the analyzer scanned and aggregates every API alert page. Analyzer and API failures remain blocking; high/critical findings on later pages cannot be omitted by the first-page limit. The post-deployment smoke checkout now resolves the event SHA as an Actions expression and does not persist checkout credentials. Six local workflow contracts pass. See [the bounded proof packet](../../audit/SECURITY_WORKFLOW_REPAIR_2026-10-05.md).
+
+These corrections close source defects only after normal protected admission. The current native security/dependency state, required-check enforcement and live deployment readiness remain separate evidence gates. No advisory is dismissed and KG011 is not relabeled fully closed.
+
