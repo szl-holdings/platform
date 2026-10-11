@@ -22,7 +22,7 @@
 - `infra/parameters.json` no longer embeds a mutable `latest` tag or a placeholder digest.
 - `scripts/infra/bicep-contract.test.mjs` verifies all local module paths, the removed substrate surface, digest plumbing, and absence of mutable image tags.
 - `infra/README.md` documents digest resolution and states that compilation, deployment, and production qualification remain unverified.
-- `package.json` exposes the focused test as `pnpm test:infra-contract`.
+- `package.json` exposes the focused test as `pnpm test:infra-contract` and includes it in the repository test gate used by `.github/workflows/tests.yml`.
 
 ## Test results
 
