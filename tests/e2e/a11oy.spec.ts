@@ -51,21 +51,17 @@ test.describe('A11oy product E2E', () => {
     await openMountedRoute(page, '/');
 
     await expect(page).toHaveTitle(/a11oy/i);
-    await expect(page.locator('nav').first()).toBeVisible();
+    const primaryNavigation = page.getByLabel('Primary navigation');
+    await expect(primaryNavigation).toBeVisible();
     await expect(
-      page.getByRole('link', { name: 'Agent visualization', exact: true }),
+      primaryNavigation.getByRole('link', { name: 'Candidate home', exact: true }),
+    ).toBeVisible();
+    await expect(
+      primaryNavigation.getByRole('link', { name: 'Security-agent fixture', exact: true }),
     ).toBeVisible();
   });
 
   for (const route of [
-    { path: '/agent-viz', label: 'agent visualization', heading: 'Agent Visualization' },
-    { path: '/adversarial', label: 'adversarial fixture', heading: 'Governance Stress Testing' },
-    {
-      path: '/frontier',
-      label: 'positioning fixture',
-      heading: 'Competitive Positioning Matrix',
-    },
-    { path: '/verifier', label: 'verifier fixture', heading: 'Autonomous Verification Suite' },
     {
       path: '/security-agents',
       label: 'security agent fixture',
@@ -79,6 +75,10 @@ test.describe('A11oy product E2E', () => {
   }
 
   for (const route of [
+    '/agent-viz',
+    '/adversarial',
+    '/frontier',
+    '/verifier',
     '/sdk',
     '/compass',
     '/care',
@@ -100,12 +100,15 @@ test.describe('A11oy product E2E', () => {
   }) => {
     await openMountedRoute(page, '/');
 
-    await page.getByRole('link', { name: 'Agent visualization', exact: true }).click();
+    await page
+      .getByLabel('Primary navigation')
+      .getByRole('link', { name: 'Security-agent fixture', exact: true })
+      .click();
     await expect(page).toHaveURL(
-      new RegExp(`${BASE_PATH.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/agent-viz/?$`),
+      new RegExp(`${BASE_PATH.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/security-agents/?$`),
     );
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Agent Visualization' }),
+      page.getByRole('heading', { level: 1, name: 'AI Security Operations' }),
     ).toBeVisible();
     await expect(page.getByTestId('publication-hold')).toHaveCount(0);
     await expect(page.getByTestId('route-loader')).toHaveCount(0);
