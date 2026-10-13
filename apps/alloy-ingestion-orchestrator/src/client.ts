@@ -134,8 +134,9 @@ export async function submitRetrievalEval(params: RunRetrievalEvalParams): Promi
 
 // ─── Get Run Status ───────────────────────────────────────────────────────────
 
-export function getRun(runId: string): WorkflowRun | undefined {
-  return defaultRunStore.get(runId);
+export function getRun(runId: string, tenantId: string): WorkflowRun | undefined {
+  const run = defaultRunStore.get(runId);
+  return run?.tenantId === tenantId ? run : undefined;
 }
 
 // ─── Get Audit Events ─────────────────────────────────────────────────────────

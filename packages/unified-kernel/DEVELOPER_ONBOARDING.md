@@ -32,7 +32,7 @@ packages/unified-kernel/src/
 │   ├── bekenstein.ts  Bekenstein capacity cap
 │   └── reidemeister.ts Reidemeister knot invariant
 ├── loop/              T02 — Ouroboros bounded step/termination (wired v6.3.0)
-│   └── vendor_ouroboros/  vendored kernel (byte-for-byte upstream, 218 tests)
+│   └── vendor_ouroboros/  vendored kernel (v6.3.0 base, later maxSteps guard)
 ├── ledger/            T04 — receipt append + SHA-256 chain verify
 ├── tamper/            T18 — tamper detection (Ed25519 key generation + signing)
 ├── doctrine/          T11 — banned-token scanner + doctrine invariant enforcer
@@ -113,8 +113,8 @@ theorem). The CAUCHY_ND sorry in `Lutar/Uniqueness.lean:120` is still open.
 ## 6. Ouroboros loop wiring (T02)
 
 `loop/` uses the real Ouroboros runtime (vendored from `@szl-holdings/ouroboros`
-tag v6.3.0, SHA `d64748cc`). The vendored copy is byte-for-byte upstream; the
-218 upstream tests are the proof. Do NOT replace the vendored copy with a stub.
+tag v6.3.0, SHA `d64748cc`, with maxSteps normalization from `0f030741f567`).
+The donor receipt sink is excluded. Do NOT replace the vendored copy with a stub.
 
 `RUNTIME_CONTRACT_V4_MAX_STEPS = 12` is the canonical max step budget from the
 v4 runtime contract. Do not bump this without a doctrine version change.

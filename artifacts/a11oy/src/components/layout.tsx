@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
+import { REVIEWED_PUBLIC_ROUTES } from '../candidateRoutes';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 
@@ -7,7 +8,9 @@ function b(path: string) {
   return path === '/' ? `${BASE}/` : `${BASE}${path}`;
 }
 
-const NAV_GROUPS = [
+// Retained in source for migration reference only. The public candidate renders
+// the evidence-reviewed navigation below, so Rollup drops this legacy catalogue.
+const _LEGACY_NAV_GROUPS = [
   {
     label: 'SYSTEM',
     items: [
@@ -225,6 +228,13 @@ const NAV_GROUPS = [
     items: [{ href: '/karpathy-evolution', label: 'Karpathy Evolution' }],
   },
 ];
+
+const NAV_GROUPS = [
+  {
+    label: 'REVIEWED CANDIDATE',
+    items: REVIEWED_PUBLIC_ROUTES.map((route) => ({ href: route.path, label: route.label })),
+  },
+] as const;
 
 const TOKENS = {
   bg: '#0a0a0a',
@@ -473,7 +483,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             <span>Active prototype</span>
           </div>
           <Link
-            href={b('/start')}
+            href={b('/')}
             style={{
               padding: isDesktop ? '0.4rem 0.875rem' : '0.4rem 0.5rem',
               minHeight: 44,
@@ -490,7 +500,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
               letterSpacing: '-0.005em',
             }}
           >
-            Series A view
+            Candidate home
           </Link>
         </div>
       </div>
@@ -590,7 +600,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
                     fontFamily: TOKENS.mono,
                     fontWeight: 500,
                     letterSpacing: '0.16em',
-                    color: TOKENS.textMuted,
+                    color: TOKENS.textDim,
                   }}
                 >
                   {group.label}

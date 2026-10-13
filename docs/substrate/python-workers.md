@@ -1,21 +1,40 @@
-# Substrate Python Worker Fleet
+# Substrate Python Worker Source Contract
 
 **Package:** `services/substrate-py-workers`
 **Protocol version:** 1.0
 **Runtime:** Python 3.11+, FastAPI, Pydantic v2
+**Status:** Candidate source implementation; deployment and reproducible packaging **HOLD**
+
+> **Evidence boundary (2026-10-07):** This document describes tracked code and
+> reference deployment sketches. No provider receipt establishes a running
+> fleet, load balancer, autoscaler, durable completed-claim store, exact Python
+> dependency graph, image digest, or production traffic. The service dependency
+> files use ranges and no committed hashed service lock. Dependency-backed
+> pytest could not be executed in the restricted onboarding environment because
+> the required packages were unavailable. Do not describe this source as a
+> production fleet, exactly-once execution, or zero-downtime deployment.
+
+> **Production execution HOLD:** If any supported environment marker is `prod`
+> or `production`, `/ready` and authenticated `/claim` return `503` before the
+> process-local claim loop or a stage handler is touched. Production admission
+> requires verified stage-specific qualification receipts, a shared durable
+> tenant/run/stage claim-and-result store, and a durable transactional evidence
+> ledger. All three capabilities are unavailable in this source.
 
 ---
 
 ## Overview
 
-The Python worker fleet enables the Substrate execution engine to dispatch
-heavy-compute stages to dedicated Python processes instead of running them
-inside the TypeScript engine. The TypeScript substrate retains full control
-of the journal, policy, approval gates, and evidence graph — only stage
-_execution_ is federated.
+The Python worker source lets the TypeScript Substrate engine dispatch selected
+heavy-compute stages to a configured Python HTTP process. In the current source
+contract, the TypeScript substrate remains the policy, journal, approval, and
+evidence authority; only stage _execution_ is delegated. This is an
+implementation boundary, not proof that either side is deployed or durable.
 
-This is an opt-in extension: only stages explicitly tagged `runtime: "python"`
-are dispatched to the fleet. All other stages continue to execute in-process.
+This is opt-in: only stages explicitly tagged `runtime: "python"` use the
+Python channel. All other stages continue to execute in-process. Live mode
+fails closed when the configured worker cannot be reached; non-live modes may
+use the explicitly labeled in-process simulation.
 
 ---
 
@@ -37,7 +56,7 @@ are dispatched to the fleet. All other stages continue to execute in-process.
               │  HTTP (StageClaimMessage)
               ▼
 ┌─────────────────────────────────────────┐
-│  Python Worker Fleet                    │
+│  Python Worker HTTP process(es)         │
 │  services/substrate-py-workers          │
 │                                         │
 │  /claim → ClaimLoop → stage handler     │
@@ -69,7 +88,7 @@ const heavyRetrieval = Retrieve({
 The `stageKind` OTel tag (or the stageType itself) is used by the worker to
 select the correct handler from `STAGE_REGISTRY`.
 
-### Retriever adapters (real index)
+### Retriever adapter HTTP contract
 
 `retrieverAdapterId` resolves to a registered backend in
 `worker/adapters/retriever.py` (mirrors the
@@ -90,16 +109,17 @@ Predefined adapter ids: `lyte-metrics-store`, `lyte-retriever`,
 `signal-retriever`. Register more with
 `retriever_adapter_manager.register(RetrieverAdapterConfig(...))`.
 
-The `lyte-metrics-store` and `lyte-retriever` ids resolve to the standalone
+The `lyte-metrics-store` and `lyte-retriever` ids resolve in source to the standalone
 `services/lyte-metrics-store` FastAPI service (see its `README.md` for the
-wire contract, auth model, and corpus). In production set:
+wire contract, auth model, and corpus). For a future admitted deployment,
+configure:
 
 ```bash
 LYTE_METRICS_STORE_URL=http://lyte-metrics-store.internal:8081
 LYTE_METRICS_STORE_API_KEY=<bearer-token>
 ```
 
-The same env vars feed the substrate Python worker fleet (which is the
+The same env vars feed the substrate Python worker process (which is the
 client) and the Lyte metrics store service (which validates the bearer).
 Locally the service binds to `PORT` (default `8081`) and accepts unauthenticated
 calls from `127.0.0.1` so dev runs work without a key.
@@ -160,6 +180,8 @@ and mirrored in `services/substrate-py-workers/src/worker/protocol.py`).
 ```json
 POST /claim
 Content-Type: application/json
+Authorization: Bearer ${SUBSTRATE_PYTHON_WORKER_API_KEY}
+X-Tenant-ID: <authenticated-tenant-id>
 
 {
   "protocolVersion": "1.0",
@@ -169,6 +191,7 @@ Content-Type: application/json
   "workerId": "substrate-ts-engine",
   "runId": "<run-uuid>",
   "workflowId": "<workflow-id>",
+  "tenantId": "<authenticated-tenant-id>",
   "stageId": "<stage-id>",
   "stageType": "Retrieve",
   "stageConfig": { "stageKind": "retrieval", "topK": 20, "minRelevanceScore": 0.5 },
@@ -180,6 +203,16 @@ Content-Type: application/json
 }
 ```
 
+The TypeScript authority obtains `tenantId` from its governed run context and
+uses that one value for both the payload and `X-Tenant-ID`; there is no
+independent transport override. The Python worker compares the header and body
+tenant identities and, in production, compares them with the server-configured
+`SUBSTRATE_PYTHON_WORKER_TENANT_ID` bound to that bearer credential. A mismatch
+returns `403` before it claims a worker slot. Use a distinct worker deployment
+and credential per tenant; a shared key plus a caller-selected tenant header is
+not treated as tenant authorization. The payload field is optional only for
+protocol-v1 compatibility; the tenant header is always required.
+
 ### Success response (Python → TypeScript)
 
 ```json
@@ -190,13 +223,18 @@ Content-Type: application/json
   "runId": "<run-uuid>",
   "stageId": "<stage-id>",
   "output": { ... },
-  "confidence": 0.92,
+  "confidence": null,
   "durationMs": 340,
   "otelSpanId": "<hex-span-id>",
   "evidenceIds": [],
   "metadata": {}
 }
 ```
+
+`confidence` is a measured handler output or `null` with
+`metadata.confidenceAssessment="UNASSESSED"`. The worker never substitutes a
+default confidence. A TypeScript stage that requires confidence-based routing
+rejects an unassessed result rather than treating it as evidence.
 
 ### Error response
 
@@ -209,10 +247,21 @@ Content-Type: application/json
   "stageId": "<stage-id>",
   "errorCode": "STAGE_EXECUTION_ERROR",
   "errorMessage": "...",
-  "retryable": true,
-  "durationMs": 12
+  "retryable": false,
+  "durationMs": 12,
+  "correlationId": "<operator-correlation-id>"
 }
 ```
+
+Stage execution failures return HTTP `500` with a stable error envelope and an
+operator correlation ID. Internal exception messages remain in server-side
+telemetry and are not returned to callers. Admission failures use `400` for an
+invalid/missing tenant, `401` for missing/wrong bearer credentials, and `403`
+for a cross-tenant mismatch.
+
+An authenticated request under any production marker returns `503` with
+`PRODUCTION_STAGE_EXECUTION_UNAVAILABLE`; it contains no stage result and is
+rejected before `ClaimLoop.try_claim()` or handler resolution.
 
 **Live-mode fail-closed:** The TypeScript channel throws if
 `SUBSTRATE_PYTHON_WORKER_URL` is not set in live mode, preventing simulation
@@ -220,19 +269,27 @@ fallback from producing evidence chains over fabricated data.
 
 ---
 
-## Autoscaling and Drain Behavior
+## Capacity Recommendation and Drain Source
 
-### Scale-out
+### Autoscaling boundary
 
-The fleet scales out when `total_available_slots < SCALE_OUT_QUEUE_DEPTH`
-(default: 3). The coordinator polls `/metrics` on each worker and applies
-`AutoscalingPolicy.evaluate()` to decide the desired fleet size.
+`worker/autoscaling.py` defines an `AutoscalingPolicy` that can emit a desired
+worker count from supplied reports. The current service only reports its own
+capacity at `/metrics`; no tracked coordinator polls every worker, invokes
+`AutoscalingPolicy.evaluate()`, or changes a deployment's replica count.
+`SCALE_OUT_QUEUE_DEPTH` is declared but is not wired into an executing
+coordinator. Autoscaling is therefore **NOT IMPLEMENTED / HOLD**, not an
+operational fleet property.
 
 Environment variables:
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `WORKER_MAX_CONCURRENCY` | `4` | Max concurrent claims per worker |
+| `SUBSTRATE_PYTHON_WORKER_API_KEY` | none | Required bearer secret for the TypeScript authority and its tenant-dedicated workers |
+| `SUBSTRATE_PYTHON_WORKER_TENANT_ID` | none | Production-required tenant bound to that bearer secret; configure the same value on the authority for fail-fast dispatch |
+| `SUBSTRATE_PYTHON_WORKER_ENV` | `development` | Worker environment; `prod`/`production` activates the current execution HOLD |
+| `SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS` | unset | Explicit credential bypass accepted only in development/test |
 | `SCALE_OUT_QUEUE_DEPTH` | `3` | Queue depth threshold to trigger scale-out |
 | `SCALE_IN_IDLE_SECONDS` | `120` | Idle seconds before scale-in |
 | `MAX_WORKERS` | `10` | Fleet ceiling |
@@ -247,16 +304,22 @@ Environment variables:
 4. In-flight stages are awaited for up to `WORKER_DRAIN_TIMEOUT_S` (default 60 s).
 5. The process exits once the active claim count reaches 0.
 
-**Duplicate execution prevention:** The TypeScript engine uses optimistic
-locking on the journal — a stage can only transition from `pending → running`
-once. Even if two workers race to claim the same stage, only one will succeed
-at the journal layer. The Python `ClaimLoop` also rejects duplicate
-`(runId, stageId)` pairs at the worker level as a belt-and-suspenders guard.
+**Duplicate execution boundary:** The Python `ClaimLoop` rejects a duplicate
+active `(runId, stageId)` only inside one process. It does not persist completed
+claims and does not coordinate multiple workers. The TypeScript stage state is
+advanced before HTTP dispatch, but that does not prevent a proxy or engine
+retry after a worker accepted a claim and its response was lost. Until a
+durable tenant/run/stage reservation and completed-result replay contract
+exists, the outcome after a lost response is ambiguous and replay is not
+duplicate-safe. Candidate source sends one HTTP attempt and disables proxy
+failover for `/claim`; side-effecting Python stages must not be admitted where
+recovery would require an ungoverned replay.
 
-### Horizontal scale test
+### Concurrency test source
 
-The test suite in `tests/test_concurrent.py` spins up N=3 concurrent claims
-against a single in-process worker and asserts:
+`tests/test_concurrent.py` defines N=3 concurrent-claim cases against one
+in-process worker. That is not a three-worker, load-balancer, restart, or
+ambiguous-response test. The cases assert:
 - All three claims complete without error.
 - No duplicate execution occurs for the same `(runId, stageId)`.
 - Capacity enforcement: a second concurrent claim to a `maxConcurrency=1`
@@ -267,7 +330,7 @@ against a single in-process worker and asserts:
 
 ## OpenTelemetry Integration
 
-Python stages join the same OTel trace as their TypeScript parent.
+The source is designed for Python stages to join the TypeScript parent trace:
 
 1. The TypeScript engine encodes the active span as a W3C `traceparent` header
    and includes it in the `StageClaimMessage`.
@@ -288,7 +351,7 @@ Without the endpoint configured, spans are emitted to stdout (console exporter).
 
 ## Execution Modes
 
-All four stages support the same modes as TypeScript stages:
+The four stage handlers define the following source-mode behavior:
 
 | Mode | Behaviour |
 |---|---|
@@ -333,17 +396,31 @@ know the input has drifted.
 
 ## Running the Worker Locally
 
+The command below resolves dependency ranges and is for development only. It is
+not a reproducible release install; promotion requires a committed exact,
+hash-verified dependency graph and a clean image rebuild/SBOM receipt.
+
 ```bash
 cd services/substrate-py-workers
 pip install -e ".[dev]"
 
-# Start one worker
+# Start one worker with the explicit local-only bypass
+SUBSTRATE_PYTHON_WORKER_ENV=development \
+SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS=1 \
 PORT=8090 uvicorn worker.main:app --host 0.0.0.0 --port 8090
 
 # Point the TS engine at it
 SUBSTRATE_PYTHON_WORKER_URL=http://localhost:8090 \
+SUBSTRATE_PYTHON_WORKER_ENV=development \
+SUBSTRATE_PYTHON_WORKER_AUTH_BYPASS=1 \
   node packages/substrate/dist/engine.js
 ```
+
+The direct runner must also receive a governed `tenantId`. Deployed callers
+must inject `SUBSTRATE_PYTHON_WORKER_API_KEY` and set
+`SUBSTRATE_PYTHON_WORKER_TENANT_ID` to the credential's single authorized
+tenant; the bypass above is intentionally rejected when the worker environment
+is production.
 
 ### Run tests
 
@@ -352,7 +429,7 @@ cd services/substrate-py-workers
 pytest -v tests/
 ```
 
-### Simulate N=3 fleet locally
+### Start three independent local processes (not fleet proof)
 
 ```bash
 PORT=8090 uvicorn worker.main:app &
@@ -362,13 +439,19 @@ PORT=8092 WORKER_ID=py-worker-3 uvicorn worker.main:app &
 
 ---
 
-## Load-Balancing the Fleet
+## Reference Load-Balancer Sketches
 
-In production the TypeScript engine **must not** point
-`SUBSTRATE_PYTHON_WORKER_URL` at any single worker — that worker becomes a
-single point of failure and cannot be replaced without downtime. Instead,
-point it at a load-balancer that fronts the fleet and round-robins POST
-`/claim` across all healthy workers.
+The tracked proxy and Kubernetes files are deployment sketches, not admitted
+production configurations. They have no exact image build, provider readback,
+cross-worker idempotency store, or end-to-end failover receipt. Pointing the
+engine at a proxy can remove a single address dependency, but it does not make
+stage execution exactly once or zero downtime.
+
+`POST /claim` is not currently safe to retry after an ambiguous upstream
+failure. A worker may finish the stage while the response is lost; sending the
+same claim to another worker can execute it again because deduplication is
+process-local. Automatic cross-upstream retries must remain disabled unless a
+durable tenant/run/stage reservation and result-replay contract is added.
 
 Three reference configurations are committed in
 `services/substrate-py-workers/deploy/`:
@@ -379,20 +462,19 @@ Three reference configurations are committed in
 | `Caddyfile` | Standalone Caddy with native active health checks against `/ready` |
 | `k8s-service.yaml` | Kubernetes `Service` + `Deployment` with `readinessProbe` driving Endpoints membership |
 
-All three apply the same contract:
+They express related routing targets, with important implementation differences:
 
-1. **Round-robin** POST `/claim` across `py-worker-1..N` (default 3 workers
-   on ports `8090–8092`).
-2. **Active health checks** poll `GET /ready` every 5 s with a 2 s timeout.
-   A worker that returns `503` (draining or at capacity) is removed from
-   rotation immediately.
-3. **Passive health checks** as a fallback: 2 consecutive 5xx responses
-   take a worker offline for 10–30 s.
-4. **Retry on the next upstream** (`proxy_next_upstream` / `lb_try_duration`)
-   so a single worker failure surfaces to the engine as a successful claim
-   on a different worker, not as a hard error.
-5. **Long read timeouts** (120 s) because heavy stages (OCR, geospatial)
-   can take tens of seconds.
+1. The examples distribute new requests among configured processes or ready
+   Pods; this source behavior has not been exercised in a deployed topology.
+2. Caddy and Kubernetes declare active readiness checks. Open-source nginx uses
+   passive upstream failure handling; the referenced active-check sidecar is
+   not present in this directory.
+3. Capacity-based `/ready` can temporarily remove a busy worker, but no source
+   coordinator aggregates queue depth or changes replica count.
+4. Long read timeouts accommodate heavy stages but enlarge the ambiguous
+   completion window; they do not prove safe failover.
+5. Authentication and tenant headers must be preserved, and each credential is
+   bound to one tenant in production source configuration.
 
 ### Pointing the engine at the load-balancer
 
@@ -410,7 +492,7 @@ SUBSTRATE_PYTHON_WORKER_URL=http://substrate-py-workers.default.svc.cluster.loca
 The TS engine still calls `POST {URL}/claim` exactly as documented in the
 wire protocol — the load-balancer is transparent.
 
-### Startup runbook
+### Candidate deployment exercise (not a production receipt)
 
 1. Start `MIN_WORKERS` (default 3) worker processes/Pods. Each binds its
    own `PORT` and exposes `/health`, `/ready`, `/claim`, `/metrics`.
@@ -418,23 +500,45 @@ wire protocol — the load-balancer is transparent.
    - **nginx:** `nginx -c $(pwd)/services/substrate-py-workers/deploy/nginx.conf -g 'daemon off;'`
    - **Caddy:** `caddy run --config services/substrate-py-workers/deploy/Caddyfile`
    - **Kubernetes:** `kubectl apply -f services/substrate-py-workers/deploy/k8s-service.yaml`
-3. Verify the LB sees a healthy fleet:
+3. Verify the proxy can reach at least one process:
    ```bash
-   curl http://substrate-py-lb:8080/ready          # → 200
+   curl http://substrate-py-lb:8080/ready          # → 200 only in development/evaluation
    curl http://substrate-py-lb:8080/workers        # → fleet view
    ```
 4. Set `SUBSTRATE_PYTHON_WORKER_URL` on the TypeScript engine and start it.
 
-### Failover behaviour
+Before step 1, inject the same `SUBSTRATE_PYTHON_WORKER_API_KEY` secret and
+`SUBSTRATE_PYTHON_WORKER_TENANT_ID` binding into the engine and tenant-dedicated
+workers. For the Kubernetes example, create the externally managed
+`substrate-py-workers` Secret with an `api-key` entry and ConfigMap with a
+`tenant-id` entry before applying the Deployment. The committed manifest
+contains only those references.
 
-| Event | What the LB does | What the engine sees |
+`GET /health` and `GET /ready` remain public in source for orchestrator probes.
+Readiness returns `503` when security configuration is invalid and under every
+production marker. In development/evaluation it labels the process as a
+`stage-execution-worker` whose authority is the TypeScript Substrate and reports
+dependency status as `not-asserted`; a development-ready response does not claim
+that a stage-specific retriever, OCR binary, model, or other external dependency
+is available.
+
+The colocated `/aef/embed` and `/aef/rerank` routes are local smoke-test
+heuristics only. They accept and emit the exact server-owned identities
+`aef-dev-hash` and `lexical-overlap-v1`; requests naming any other model are
+rejected. Both routes return `503` in production and therefore cannot be
+admitted as real embedding or cross-encoder backends.
+
+### Failure boundary
+
+| Event | Source/configuration behavior | Unresolved risk |
 |---|---|---|
-| Worker crashes | Connect/read fails → `proxy_next_upstream` retries on next worker; passive check takes the dead worker out of rotation for `fail_timeout` | One successful `stage.result` (transparent) |
-| Worker hits `WORKER_MAX_CONCURRENCY` | `/ready` returns `503` → active health check removes worker from pool until a slot frees up | No degradation — claim lands on a different worker |
-| Rolling deploy / scale-in | Platform sends `SIGTERM` → `ClaimLoop.drain()` → `/ready` returns `503` → LB stops sending new claims; in-flight claims drain for up to `WORKER_DRAIN_TIMEOUT_S` | One successful `stage.result` on the replacement worker; no failed claims |
-| All workers unreachable | LB returns `502` after `proxy_next_upstream_tries` exhausted | In `live` mode the engine fails closed (per `python-worker.ts` policy); in non-live modes it falls back to in-process simulation |
+| Worker unavailable before accepting a claim | Readiness/passive checks can steer a later new request elsewhere | No deployment test proves detection time or availability |
+| Response lost after a worker accepts a claim | The caller sees an ambiguous failure | Retrying elsewhere can duplicate execution; fail closed until durable result replay exists |
+| Worker reaches `WORKER_MAX_CONCURRENCY` | Its `/ready` returns `503` | Requests already selected for it can fail; no queue/dispatcher contract is proved |
+| Rolling replacement | `SIGTERM` triggers process-local drain and `/ready` becomes `503` | Endpoint propagation races, forced termination, and in-flight side effects are untested |
+| All workers unreachable | The TypeScript channel fails closed in `live` mode; non-live modes may simulate | This is correct truth behavior, not an availability guarantee |
 
-### Replacing a worker without downtime
+### Illustrative replacement sequence
 
 ```bash
 # 1. Bring up the replacement first (k8s rolling update does this automatically).
@@ -450,4 +554,6 @@ kill -TERM $OLD_WORKER_PID
 #    The process exits on its own once active_claims == 0.
 ```
 
-No engine restart, no env var change, no claim loss.
+This sequence is an operator target, not proof of uninterrupted service or no
+claim loss. Retain exact image identities, proxy/endpoint state, in-flight claim
+receipts, and post-replacement semantic checks before making either claim.

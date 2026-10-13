@@ -1,18 +1,11 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { generateKeyPairSync } from 'node:crypto';
-import {
-  mkdtempSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import {
-  createArticle12Archive,
-  verifyArticle12Archive,
-} from './article12.ts';
+import { createArticle12Archive, verifyArticle12Archive } from './article12.ts';
 
 function signingKey() {
   const { privateKey } = generateKeyPairSync('ed25519');
@@ -34,9 +27,7 @@ function receipt(id, article, timestampIso8601) {
       eu_ai_act: {
         article,
         obligation:
-          article === '12'
-            ? 'record-keeping and traceability'
-            : 'transparency to deployers',
+          article === '12' ? 'record-keeping and traceability' : 'transparency to deployers',
         annex_iii_category: null,
         high_risk: false,
         log_retention_class: 'lifetime',
@@ -150,12 +141,20 @@ test('the bundled offline instructions execute without vendor services', () => {
       cwd: directory,
       encoding: 'utf8',
     });
+    assert.equal(extract.error, undefined, extract.error?.message);
     assert.equal(extract.status, 0, extract.stderr);
 
+    const verificationEnv = { ...process.env };
+    // Node's test runner marks worker children with NODE_TEST_CONTEXT. The
+    // offline verifier is a normal CLI subprocess, so do not let it inherit a
+    // worker marker that can make newer Node releases exit without executing.
+    delete verificationEnv.NODE_TEST_CONTEXT;
     const verify = spawnSync(process.execPath, ['verify.mjs'], {
       cwd: directory,
       encoding: 'utf8',
+      env: verificationEnv,
     });
+    assert.equal(verify.error, undefined, verify.error?.message);
     assert.equal(verify.status, 0, verify.stderr);
     assert.match(verify.stdout, /manifest signature: PASS/);
     assert.match(verify.stdout, /file checksums: PASS/);

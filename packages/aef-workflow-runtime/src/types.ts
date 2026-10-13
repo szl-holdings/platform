@@ -40,6 +40,10 @@ export type WorkflowStepResult = z.infer<typeof WorkflowStepResultSchema>;
 
 export const WorkflowCheckpointSchema = z.object({
   workflowId: z.string().min(1),
+  // Older file checkpoints did not carry a tenant owner. Keep the field
+  // optional for on-disk compatibility; callers must fail closed when it is
+  // absent instead of treating an unowned checkpoint as globally accessible.
+  tenantId: z.string().min(1).optional(),
   kind: z.string(),
   currentStepIndex: z.number().int().nonnegative(),
   totalSteps: z.number().int().positive(),
