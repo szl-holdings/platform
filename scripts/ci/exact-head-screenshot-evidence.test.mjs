@@ -430,6 +430,54 @@ test('pnpm admission Bash binds contained action output and rejects a symlink es
   assert.match(escaped.stderr, /resolved outside its runner-scoped root/);
 });
 
+test('runtime path binding keeps candidate tooling outside the private evidence root', {
+  skip: process.platform === 'win32',
+}, async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'szl-capture-path-binding-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const workspace = path.join(root, 'workspace');
+  const runnerTemp = path.join(root, 'runner-temp');
+  const candidateHome = path.join(workspace, 'candidate-home-42-1');
+  const githubEnvironment = path.join(root, 'github-env');
+  const workflow = await readFile(
+    new URL('../../.github/workflows/exact-head-screenshot-evidence.yml', import.meta.url),
+    'utf8',
+  );
+  const run = workflowStepRun(workflow, 'Bind isolated controller paths');
+  const admittedEnvironment = {
+    ...process.env,
+    GITHUB_ENV: githubEnvironment,
+    GITHUB_WORKSPACE: workspace,
+    RUNNER_TEMP: runnerTemp,
+    SZL_EVIDENCE_ROOT_VALUE: path.join(runnerTemp, 'exact-head-evidence-42-1'),
+    SZL_DEPENDENCY_DIRS_MANIFEST_VALUE: path.join(runnerTemp, 'dependency-dirs-42-1'),
+    SZL_CANDIDATE_HOME_VALUE: candidateHome,
+    SZL_CANDIDATE_CACHE_VALUE: path.join(candidateHome, 'cache'),
+    SZL_CANDIDATE_STORE_VALUE: path.join(candidateHome, 'store'),
+    SZL_PNPM_ROOT_VALUE: path.join(workspace, 'candidate-pnpm-42-1'),
+  };
+  const admitted = spawnSync('/bin/bash', ['-c', run], {
+    encoding: 'utf8',
+    env: admittedEnvironment,
+  });
+  assert.equal(admitted.status, 0, admitted.stderr || admitted.stdout);
+  assert.match(await readFile(githubEnvironment, 'utf8'), /SZL_PNPM_ROOT=.*candidate-pnpm-42-1/);
+
+  const escapedPnpm = spawnSync('/bin/bash', ['-c', run], {
+    encoding: 'utf8',
+    env: { ...admittedEnvironment, SZL_PNPM_ROOT_VALUE: path.join(runnerTemp, 'pnpm') },
+  });
+  assert.notEqual(escapedPnpm.status, 0);
+  assert.match(escapedPnpm.stderr, /candidate runtime path escaped protected workspace/);
+
+  const escapedEvidence = spawnSync('/bin/bash', ['-c', run], {
+    encoding: 'utf8',
+    env: { ...admittedEnvironment, SZL_EVIDENCE_ROOT_VALUE: path.join(workspace, 'evidence') },
+  });
+  assert.notEqual(escapedEvidence.status, 0);
+  assert.match(escapedEvidence.stderr, /runner-scoped path escaped RUNNER_TEMP/);
+});
+
 test('an HTTP-200 SPA not-found surface is rejected', () => {
   assert.throws(
     () =>
@@ -722,8 +770,10 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(workflow, /standalone: true/);
   assert.match(
     workflow,
-    /dest: \$\{\{ runner\.temp \}\}\/candidate-pnpm-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/,
+    /dest: \$\{\{ github\.workspace \}\}\/candidate-pnpm-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/,
   );
+  assert.match(workflow, /SZL_CANDIDATE_HOME_VALUE: \$\{\{ github\.workspace \}\}\/candidate-home-/);
+  assert.match(workflow, /SZL_EVIDENCE_ROOT_VALUE: \$\{\{ runner\.temp \}\}\/exact-head-evidence-/);
   assert.match(workflow, /steps\.pnpm_setup\.outputs\.dest/);
   assert.match(workflow, /steps\.pnpm_setup\.outputs\.bin_dest/);
   assert.match(workflow, /SZL_PNPM_EXECUTABLE/);
@@ -735,6 +785,10 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
     /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/,
   );
   assert.match(workflow, /candidate identity can write admitted pnpm runtime/);
+  assert.match(workflow, /candidate identity cannot traverse protected workspace/);
+  assert.match(workflow, /"\$GITHUB_WORKSPACE" "\$\(realpath -e "\$GITHUB_WORKSPACE"\)"/);
+  assert.match(workflow, /candidate identity can write protected workspace ancestor/);
+  assert.match(workflow, /candidate identity cannot execute admitted pnpm runtime/);
   assert.match(workflow, /chmod -R a-w "\$SZL_CANDIDATE_ROOT"/);
   assert.match(workflow, /\$SZL_CANDIDATE_ROOT\/artifacts\/a11oy\/node_modules\/\.vite-temp/);
   assert.match(workflow, /\$SZL_CANDIDATE_ROOT\/artifacts\/a11oy\/node_modules\/\.cache/);
