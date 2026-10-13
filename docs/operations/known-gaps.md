@@ -195,10 +195,12 @@ envelopes. The registry was updated from those reviewed sources rather than by
 loosening response checks.
 
 A subsequent full `surfaces:freshness` run passed all 29 approved targets and is
-bound to `observed_at=2026-10-07T12:31:38.131Z`. Killinchu build identity is pinned
-to full main revision `13477c429f5742cdc718a6294a80d00c7e8dc634` and the exact
-GitHub OIDC attestation subject. Its readiness contract positively requires the
-canonical ledger to be `EPHEMERAL`, `PROCESS_MEMORY`, and
+bound to `observed_at=2026-10-07T12:31:38.131Z`. A separate bounded Killinchu
+read on 2026-10-11 pins its current build identity to main revision
+`e3a3c4cf94d91b588e6708cca64239c98a8ec868` and a verified GitHub OIDC
+attestation for the exact deployment manifest. That single-surface refresh does
+not advance the registry-wide observation timestamp. Its readiness contract
+positively requires the canonical ledger to be `EPHEMERAL`, `PROCESS_MEMORY`, and
 `production_ready=false`; the separately labeled SQLite diagnostic store cannot
 satisfy durability. Current whole-site DNS, TLS, headers, accessibility,
 continuous availability, and functional behavior remain **UNKNOWN / HOLD**.
@@ -386,6 +388,19 @@ within that boundary; production multi-tenant confidentiality requires an
 identity-to-tenant binding before this route is publicly exposed. Protected
 source merge also does not itself deploy Atelier: a separately witnessed
 hosted build, identity configuration, and functional provider probe remain open.
+
+**2026-10-07 local provider-completion candidate:** The xAI Responses adapter now
+rejects non-completed/unbound responses before returning final text. Shared
+vectors are replayed against the pinned SZL Python parser, including Unicode
+whitespace and code-point-length cases. Injected route checks preserve ambiguous
+reservations and prevent ledger/session writes or a second provider call after
+an invalid response. The separate Anthropic adapter now preserves all supported
+text/system blocks and makes nonfinal plain completions explicit. These are
+MEASURED local mocked/AST checks, not live provider operation. Source publication,
+exact-head hosted CI, complete Anthropic SDK typecheck, deployment, identity,
+durability and independent runtime witness remain open; artifact status remains
+Partial. Commands and scope are recorded in
+`audit/ATELIER_PROVIDER_COMPLETION_REPAIR_20261007.md`.
 
 ### 2026-10-02 A11oy Workcell proof-coverage boundary
 

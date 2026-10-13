@@ -127,6 +127,68 @@ function extractResponseText(payload: unknown): string {
   return text;
 }
 
+function isPythonWhitespace(character: string): boolean {
+  const point = character.codePointAt(0) ?? -1;
+  return (
+    (point >= 0x09 && point <= 0x0d) ||
+    (point >= 0x1c && point <= 0x20) ||
+    (point >= 0x2000 && point <= 0x200a) ||
+    point === 0x85 ||
+    point === 0xa0 ||
+    point === 0x1680 ||
+    point === 0x2028 ||
+    point === 0x2029 ||
+    point === 0x202f ||
+    point === 0x205f ||
+    point === 0x3000
+  );
+}
+
+/** Responses success is final assistant text bound to the model actually returned. */
+function extractFinalXaiResponseText(payload: unknown, expectedModel: string): string {
+  const root = asRecord(payload);
+  if (!root || root.model !== expectedModel || root.status !== 'completed') {
+    throw new AtelierProviderResponseError('Provider response was not a model-bound completion.');
+  }
+  if (!Array.isArray(root.output)) {
+    throw new AtelierProviderResponseError('Provider response did not contain an output array.');
+  }
+  const chunks: string[] = [];
+  for (const item of root.output) {
+    const record = asRecord(item);
+    // Reasoning ciphertext and tools are not assistant answer text or authority.
+    if (record?.type !== 'message' || record.role !== 'assistant') continue;
+    // Match the pinned Python Responses compatibility contract for omitted status.
+    if ((record.status === undefined ? 'completed' : record.status) !== 'completed') {
+      throw new AtelierProviderResponseError('Provider assistant message was not completed.');
+    }
+    if (!Array.isArray(record.content)) {
+      throw new AtelierProviderResponseError('Provider assistant message had invalid content.');
+    }
+    for (const part of record.content) {
+      const content = asRecord(part);
+      if (content?.type === 'output_text' && typeof content.text === 'string') {
+        chunks.push(content.text);
+      }
+    }
+  }
+  const text = chunks.join('\n');
+  // Python len() counts Unicode code points, not JavaScript UTF-16 code units.
+  // Python str.strip() differs from JS trim(): NEL/C0 separators are whitespace,
+  // whereas BOM is not. Keep the pinned parser's admission semantics exactly.
+  const codePoints = [...text];
+  if (codePoints.every(isPythonWhitespace) || codePoints.length > 32_768) {
+    throw new AtelierProviderResponseError('Provider response did not contain bounded final text.');
+  }
+  return text;
+}
+
+function sanitizedProviderId(value: unknown): string | undefined {
+  return typeof value === 'string' && /^[A-Za-z0-9_.:-]{1,200}$/.exec(value)?.[0] === value
+    ? value
+    : undefined;
+}
+
 function extractUsage(payload: unknown): AtelierUsage {
   const root = asRecord(payload);
   const usage = asRecord(root?.usage) ?? {};
@@ -240,11 +302,9 @@ export class XaiResponsesProvider implements AtelierProvider {
       }
       const root = asRecord(payload);
       const responseId =
-        (typeof root?.id === 'string' ? root.id : undefined) ??
-        response.headers.get('x-request-id') ??
-        undefined;
+        sanitizedProviderId(root?.id) ?? sanitizedProviderId(response.headers.get('x-request-id'));
       return {
-        text: extractResponseText(payload),
+        text: extractFinalXaiResponseText(payload, model),
         provider: this.id,
         providerLabel: this.label,
         model,
