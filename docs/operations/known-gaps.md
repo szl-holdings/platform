@@ -183,6 +183,25 @@ by this bounded patch.
 
 ---
 
+
+### 2026-10-02 operability source-evidence repair (draft)
+
+The scoped readiness-operability repair distinguishes UNKNOWN/inaccessible
+source observations from confirmed absence, binds all source reads to one
+observed default-branch revision, and explicitly limits Docker evidence to
+instruction presence (STRUCTURE_ONLY, build NOT_MEASURED). An incomplete row
+has no complete score; even a complete source score leaves runtime readiness
+NOT_ASSESSED. Offline regressions are part of the existing readiness discovery.
+
+Remaining: valid Hub publication/signing bindings, verified flagship registry
+access, substantive runbook/environment documentation, real image builds,
+rollback execution and runtime qualification. The existing audit-rift consumer
+uses its own moving commit window, so its resampling does not establish exact
+revision/time parity. The four October 2 readiness publication failures were
+HTTP 401; this patch neither repairs nor suppresses that provider failure.
+Protected admission and exact-head hosted checks remain required. Evidence
+Steward and estate-auditor PRs are separate; no source files overlap them.
+
 ## Current Bounded Public Surface Registry — observed 2026-10-07
 
 The generated public-surface manifest distinguishes source-tree product
