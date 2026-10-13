@@ -1,0 +1,187 @@
+{
+  "schema_version": "a11oy-edge-security-readback/v1",
+  "surface": "https://a11oy.net",
+  "observed_at_utc": "2026-10-13T16:43:01Z",
+  "expected_protected_source_revision": "2ed4a76edfb8925bf0611f00ee9d9e4943a026c0",
+  "result": "FAIL",
+  "failed_controls": [
+    "security_headers"
+  ],
+  "probes": {
+    "source_control": {
+      "status": "PASS",
+      "expected_revision": "2ed4a76edfb8925bf0611f00ee9d9e4943a026c0",
+      "observed_main_revision": "2ed4a76edfb8925bf0611f00ee9d9e4943a026c0",
+      "branch_protected": true,
+      "commit_signature_verified": true,
+      "verification_reason": "valid",
+      "errors": []
+    },
+    "pages_control_plane": {
+      "status": "PASS",
+      "build_type": "workflow",
+      "provider_status": "built",
+      "cname": "a11oy.net",
+      "https_enforced": true,
+      "html_url": "https://a11oy.net/",
+      "protected_domain_state": "verified",
+      "https_certificate": {
+        "state": "approved",
+        "domains": [
+          "a11oy.net",
+          "www.a11oy.net"
+        ],
+        "expires_at": "2027-01-11",
+        "remaining_days": 89
+      },
+      "errors": []
+    },
+    "deployed_source_witness": {
+      "status": "PASS",
+      "url": "https://a11oy.net/.well-known/szl-source.json",
+      "expected_revision": "2ed4a76edfb8925bf0611f00ee9d9e4943a026c0",
+      "observed_revision": "2ed4a76edfb8925bf0611f00ee9d9e4943a026c0",
+      "artifact_kind": "STATIC_GITHUB_PAGES",
+      "artifact_binding": "EXACT_SOURCE_REVISION",
+      "product_runtime_readiness": "UNAVAILABLE",
+      "uptime": "UNAVAILABLE",
+      "errors": []
+    },
+    "tls_edge": {
+      "status": "PASS",
+      "connect_hostname": "a11oy.net",
+      "verification_hostname": "a11oy.net",
+      "hostname_verified": true,
+      "protocol": "TLSv1.3",
+      "cipher": "TLS_AES_128_GCM_SHA256",
+      "alpn": "h2",
+      "issuer": "countryName=US, organizationName=Let's Encrypt, commonName=YR2",
+      "not_after_utc": "2027-01-11T14:48:53Z",
+      "minimum_remaining_days": 7,
+      "errors": []
+    },
+    "tls_pages_origin": {
+      "status": "PASS",
+      "connect_hostname": "szl-holdings.github.io",
+      "verification_hostname": "a11oy.net",
+      "hostname_verified": true,
+      "protocol": "TLSv1.3",
+      "cipher": "TLS_AES_128_GCM_SHA256",
+      "alpn": "h2",
+      "issuer": "countryName=US, organizationName=Let's Encrypt, commonName=YR2",
+      "not_after_utc": "2027-01-11T14:48:53Z",
+      "minimum_remaining_days": 7,
+      "errors": []
+    },
+    "dnssec": {
+      "status": "PASS",
+      "meaning": "Validating recursive-resolver readback; authenticated DS and DNSKEY answers are required from each configured resolver.",
+      "resolvers": [
+        {
+          "resolver": "cloudflare",
+          "records": {
+            "DS": {
+              "status": "PASS",
+              "authenticated_data": true,
+              "record_present": true,
+              "errors": []
+            },
+            "DNSKEY": {
+              "status": "PASS",
+              "authenticated_data": true,
+              "record_present": true,
+              "errors": []
+            }
+          },
+          "status": "PASS"
+        },
+        {
+          "resolver": "google",
+          "records": {
+            "DS": {
+              "status": "PASS",
+              "authenticated_data": true,
+              "record_present": true,
+              "errors": []
+            },
+            "DNSKEY": {
+              "status": "PASS",
+              "authenticated_data": true,
+              "record_present": true,
+              "errors": []
+            }
+          },
+          "status": "PASS"
+        }
+      ],
+      "errors": []
+    },
+    "security_headers": {
+      "status": "FAIL",
+      "committed_contract": "PASS",
+      "live": [
+        {
+          "url": "https://a11oy.net/",
+          "status": "FAIL",
+          "errors": [
+            "https://a11oy.net/: missing live content-security-policy",
+            "https://a11oy.net/: missing live cross-origin-opener-policy",
+            "https://a11oy.net/: missing live cross-origin-resource-policy",
+            "https://a11oy.net/: missing live permissions-policy",
+            "https://a11oy.net/: missing live referrer-policy",
+            "https://a11oy.net/: missing live strict-transport-security",
+            "https://a11oy.net/: missing live x-content-type-options",
+            "https://a11oy.net/: missing live x-frame-options"
+          ]
+        },
+        {
+          "url": "https://a11oy.net/site.webmanifest",
+          "status": "FAIL",
+          "errors": [
+            "https://a11oy.net/site.webmanifest: missing live content-security-policy",
+            "https://a11oy.net/site.webmanifest: missing live cross-origin-opener-policy",
+            "https://a11oy.net/site.webmanifest: missing live cross-origin-resource-policy",
+            "https://a11oy.net/site.webmanifest: missing live permissions-policy",
+            "https://a11oy.net/site.webmanifest: missing live referrer-policy",
+            "https://a11oy.net/site.webmanifest: missing live strict-transport-security",
+            "https://a11oy.net/site.webmanifest: missing live x-content-type-options",
+            "https://a11oy.net/site.webmanifest: missing live x-frame-options"
+          ]
+        }
+      ],
+      "meaning": "The committed _headers file is a policy contract. Only the live response readback can establish whether an edge actually enforces it.",
+      "errors": [
+        "https://a11oy.net/: missing live content-security-policy",
+        "https://a11oy.net/: missing live cross-origin-opener-policy",
+        "https://a11oy.net/: missing live cross-origin-resource-policy",
+        "https://a11oy.net/: missing live permissions-policy",
+        "https://a11oy.net/: missing live referrer-policy",
+        "https://a11oy.net/: missing live strict-transport-security",
+        "https://a11oy.net/: missing live x-content-type-options",
+        "https://a11oy.net/: missing live x-frame-options",
+        "https://a11oy.net/site.webmanifest: missing live content-security-policy",
+        "https://a11oy.net/site.webmanifest: missing live cross-origin-opener-policy",
+        "https://a11oy.net/site.webmanifest: missing live cross-origin-resource-policy",
+        "https://a11oy.net/site.webmanifest: missing live permissions-policy",
+        "https://a11oy.net/site.webmanifest: missing live referrer-policy",
+        "https://a11oy.net/site.webmanifest: missing live strict-transport-security",
+        "https://a11oy.net/site.webmanifest: missing live x-content-type-options",
+        "https://a11oy.net/site.webmanifest: missing live x-frame-options"
+      ]
+    },
+    "source_control_reauthorization": {
+      "status": "PASS",
+      "expected_revision": "2ed4a76edfb8925bf0611f00ee9d9e4943a026c0",
+      "observed_main_revision": "2ed4a76edfb8925bf0611f00ee9d9e4943a026c0",
+      "branch_protected": true,
+      "meaning": "Final protected-main readback performed after the source witness, TLS, DNSSEC, and live-header probes and immediately before receipt admission.",
+      "errors": []
+    }
+  },
+  "boundaries": [
+    "This receipt is a point-in-time external readback, not an uptime claim.",
+    "Edge TLS, Pages-origin TLS, DNSSEC, Pages settings, source binding, and response headers are independent controls.",
+    "The static proof origin does not establish a-11-oy.com product-runtime readiness.",
+    "A committed _headers file is not evidence that GitHub Pages or Cloudflare enforced those headers."
+  ]
+}

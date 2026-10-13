@@ -54,10 +54,14 @@ const COMMITTED_PAYLOAD_SCHEMA = 'a11oy.atelier.committed-turn-payload.v1' as co
 const INDEX_AUTH_DOMAIN = 'a11oy.atelier.encrypted-local-index-auth.v1';
 const PATH_DOMAIN = 'a11oy.atelier.encrypted-local-path.v1';
 const MAX_INDEX_BYTES = 256 * 1024;
+// Marker freshness bounds first-start admission only. Age alone never proves
+// that an index or object publication candidate is abandoned.
+const UNPUBLISHED_FILE_GRACE_MS = 60 * 60 * 1000;
 const HEX_64 = /^[a-f0-9]{64}$/;
 const STATE_CAPSULE_ID = /^state_[a-f0-9]{64}$/;
 const KEY_CHECK_TEMP_NAME =
   /^key-check\.json\.\d+\.[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}\.tmp$/;
+const KEY_CHECK_PUBLICATION_WAIT_MS = 1000;
 const DIRECTORY_SYNC_UNSUPPORTED = new Set([
   'EBADF',
   'EISDIR',
@@ -226,7 +230,7 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
     persistenceState: 'ENCRYPTED_LOCAL_DURABLE',
     durable: true,
     encryptionState: 'ENCRYPTED_AT_REST',
-    evidenceState: 'OBSERVED',
+    evidenceState: 'MEASURED',
     retentionHours: ATELIER_STATE_RETENTION_HOURS,
     retentionMs: ATELIER_STATE_RETENTION_MS,
   });
@@ -867,13 +871,7 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
 
   async #reconcileOrphans(): Promise<void> {
     await this.#transport.inspect(`state_${'0'.repeat(64)}`);
-    const referenced = new Set<string>();
-    for (const record of await this.#allIndexRecords()) {
-      referenced.add(record.stateCapsuleId);
-      for (const retired of record.retiredStateCapsuleIds) {
-        referenced.add(retired);
-      }
-    }
+    await this.#allIndexRecords();
 
     const objectsRoot = join(this.#rootDirectory, 'capsules', 'objects');
     for (const firstShard of await this.#directoryEntries(objectsRoot)) {
@@ -905,8 +903,8 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
                 'Encrypted continuity temporary object is not a regular file.',
               );
             }
-            // Another store can be preparing this object for atomic publication.
-            // A reader cannot prove that a same-host temporary file is abandoned.
+            // A paused local writer can still own even an old candidate.
+            // Ordinary startup cannot establish exclusive cleanup authority.
             continue;
           }
           const capsuleId = basename(entry.name, '.json');
@@ -921,25 +919,9 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
               'Encrypted continuity object is stored in the wrong shard.',
             );
           }
-          if (!referenced.has(capsuleId)) {
-            const orphan = await this.#transport.get(capsuleId);
-            if (!orphan) {
-              await this.#transport.delete(capsuleId);
-              continue;
-            }
-            const expiresAt = orphan.capsule.expiresAt;
-            const expiresAtMs = expiresAt ? Date.parse(expiresAt) : Number.NaN;
-            if (!Number.isFinite(expiresAtMs)) {
-              throw new AtelierCapsuleIntegrityError(
-                'Unindexed encrypted continuity object lacks an authenticated expiry.',
-              );
-            }
-            // A newly published object may still be waiting for its index link.
-            // Only an expired orphan is no longer eligible for that reservation.
-            if (expiresAtMs <= this.#clock().milliseconds) {
-              await this.#transport.delete(capsuleId);
-            }
-          }
+          // A different local process can still own a final object while its
+          // index is unpublished. Age and an index snapshot cannot prove an
+          // orphan, so leave final objects for quiescent maintenance.
         }
       }
     }
@@ -1113,8 +1095,8 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
             'Continuity index temporary entries must be regular files.',
           );
         }
-        // A concurrent writer may still need this candidate for its hard link.
-        // It removes its own temporary file after publishing or failing.
+        // Age cannot establish that another local publisher has stopped.
+        // Abandoned candidates require offline, exclusive-access maintenance.
         continue;
       }
       if (!entry.isFile() || entry.isSymbolicLink() || !entry.name.endsWith('.json')) {
@@ -1225,106 +1207,137 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
   async #readAuthenticated(
     path: string,
     schema: string,
+    retryIdentity?: {
+      readonly dev: number;
+      readonly ino: number;
+      readonly size: number;
+      readonly mtimeMs: number;
+      readonly mode: number;
+      readonly uid: number;
+      readonly gid: number;
+      readonly bytesSha256: string;
+    },
   ): Promise<Record<string, unknown> | undefined> {
-    // Each attempt uses one descriptor for all content and size checks. A
-    // publisher's hard-link release may race the first attempt; retry that
-    // transition once and require a fresh, stable authenticated read.
+    // Open once before inspecting the file. All content and size checks use
+    // this descriptor, not a path that may be replaced between check and use.
     const flags =
       fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0) | (fsConstants.O_NONBLOCK ?? 0);
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      const handle = await open(path, flags).catch((error: unknown) => {
-        if (errorCode(error) === 'ENOENT') return undefined;
-        if (errorCode(error) === 'ELOOP') {
-          throw new AtelierCapsuleIntegrityError('Continuity index must not be a symbolic link.');
-        }
-        throw error;
-      });
-      if (!handle) {
-        if (attempt === 0) return undefined;
-        throw new AtelierCapsuleIntegrityError('Continuity index disappeared during readback.');
+    const handle = await open(path, flags).catch((error: unknown) => {
+      if (errorCode(error) === 'ENOENT') return undefined;
+      if (errorCode(error) === 'ELOOP') {
+        throw new AtelierCapsuleIntegrityError('Continuity index must not be a symbolic link.');
       }
-      try {
-        const opened = await handle.stat();
-        if (!opened.isFile() || opened.size > MAX_INDEX_BYTES) {
-          throw new AtelierCapsuleIntegrityError('Continuity index is not a bounded regular file.');
-        }
-        // Bound allocation and bytes consumed even if another writer grows
-        // the open file after stat. The extra byte distinguishes overflow.
-        const buffer = Buffer.alloc(MAX_INDEX_BYTES + 1);
-        let length = 0;
-        while (length < buffer.length) {
-          const read = await handle.read(buffer, length, buffer.length - length, null);
-          if (read.bytesRead === 0) break;
-          length += read.bytesRead;
-        }
-        if (length > MAX_INDEX_BYTES) {
-          throw new AtelierCapsuleIntegrityError('Continuity index exceeded its read bound.');
-        }
-        const afterRead = await handle.stat();
-        const current = await lstat(path).catch(() => undefined);
-        if (
-          !current?.isFile() ||
-          current.isSymbolicLink() ||
-          current.dev !== afterRead.dev ||
-          current.ino !== afterRead.ino ||
-          current.size !== afterRead.size ||
-          current.mtimeMs !== afterRead.mtimeMs ||
-          current.mode !== afterRead.mode ||
-          current.uid !== afterRead.uid ||
-          current.gid !== afterRead.gid ||
-          opened.size !== afterRead.size ||
-          opened.mtimeMs !== afterRead.mtimeMs ||
-          opened.mode !== afterRead.mode ||
-          opened.uid !== afterRead.uid ||
-          opened.gid !== afterRead.gid ||
-          length !== afterRead.size
-        ) {
-          throw new AtelierCapsuleIntegrityError(
-            'Continuity index changed during authenticated readback.',
-          );
-        }
-        const stableMetadata =
-          opened.ctimeMs === afterRead.ctimeMs &&
-          afterRead.ctimeMs === current.ctimeMs &&
-          opened.nlink === afterRead.nlink &&
-          afterRead.nlink === current.nlink;
-        if (!stableMetadata) {
-          const releasedPublicationLink =
-            opened.nlink === 2 &&
-            current.nlink === 1 &&
-            (afterRead.nlink === 2 || afterRead.nlink === 1);
-          if (attempt === 0 && releasedPublicationLink) continue;
-          throw new AtelierCapsuleIntegrityError(
-            'Continuity index changed during authenticated readback.',
-          );
-        }
-
-        const value = objectValue(JSON.parse(buffer.subarray(0, length).toString('utf8')));
-        if (
-          value?.schema !== schema ||
-          typeof value.authenticationTag !== 'string' ||
-          !HEX_64.test(value.authenticationTag)
-        ) {
-          throw new AtelierCapsuleIntegrityError('Continuity index record is malformed.');
-        }
-        const { authenticationTag, ...record } = value;
-        const expected = createHmac('sha256', this.#masterKey)
-          .update(canonicalJson({ domain: INDEX_AUTH_DOMAIN, record }), 'utf8')
-          .digest('hex');
-        if (!constantTimeEqualHex(authenticationTag, expected)) {
-          throw new AtelierCapsuleIntegrityError('Continuity index authentication failed.');
-        }
-        return value;
-      } catch (error) {
-        if (error instanceof AtelierCapsuleIntegrityError) throw error;
-        throw new AtelierCapsuleIntegrityError('Continuity index failed closed during parsing.');
-      } finally {
-        await handle.close();
+      throw error;
+    });
+    if (!handle) {
+      if (retryIdentity) {
+        throw new AtelierCapsuleIntegrityError(
+          'Continuity index disappeared during authenticated readback.',
+        );
       }
+      return undefined;
     }
-    throw new AtelierCapsuleIntegrityError(
-      'Continuity index changed during authenticated readback.',
-    );
+    try {
+      const opened = await handle.stat();
+      if (!opened.isFile() || opened.size > MAX_INDEX_BYTES) {
+        throw new AtelierCapsuleIntegrityError('Continuity index is not a bounded regular file.');
+      }
+      if (
+        retryIdentity &&
+        (opened.dev !== retryIdentity.dev ||
+          opened.ino !== retryIdentity.ino ||
+          opened.nlink !== 1 ||
+          opened.size !== retryIdentity.size ||
+          opened.mtimeMs !== retryIdentity.mtimeMs ||
+          opened.mode !== retryIdentity.mode ||
+          opened.uid !== retryIdentity.uid ||
+          opened.gid !== retryIdentity.gid)
+      ) {
+        throw new AtelierCapsuleIntegrityError(
+          'Continuity index changed during authenticated readback.',
+        );
+      }
+      // Bound allocation and bytes consumed even if another writer grows the
+      // open file after stat. The extra byte distinguishes overflow from EOF.
+      const buffer = Buffer.alloc(MAX_INDEX_BYTES + 1);
+      let length = 0;
+      while (length < buffer.length) {
+        const read = await handle.read(buffer, length, buffer.length - length, null);
+        if (read.bytesRead === 0) break;
+        length += read.bytesRead;
+      }
+      if (length > MAX_INDEX_BYTES) {
+        throw new AtelierCapsuleIntegrityError('Continuity index exceeded its read bound.');
+      }
+      const afterRead = await handle.stat();
+      const current = await lstat(path).catch(() => undefined);
+      const ctimeChanged = opened.ctimeMs !== afterRead.ctimeMs;
+      const publishedLinkRemoved =
+        !retryIdentity &&
+        ctimeChanged &&
+        opened.nlink === 2 &&
+        afterRead.nlink === 1 &&
+        opened.mode === afterRead.mode &&
+        opened.uid === afterRead.uid &&
+        opened.gid === afterRead.gid;
+      if (
+        !current?.isFile() ||
+        current.isSymbolicLink() ||
+        current.dev !== afterRead.dev ||
+        current.ino !== afterRead.ino ||
+        opened.size !== afterRead.size ||
+        opened.mtimeMs !== afterRead.mtimeMs ||
+        (ctimeChanged && !publishedLinkRemoved) ||
+        length !== afterRead.size
+      ) {
+        throw new AtelierCapsuleIntegrityError(
+          'Continuity index changed during authenticated readback.',
+        );
+      }
+      const bytes = buffer.subarray(0, length);
+      const value = objectValue(JSON.parse(bytes.toString('utf8')));
+      if (
+        value?.schema !== schema ||
+        typeof value.authenticationTag !== 'string' ||
+        !HEX_64.test(value.authenticationTag)
+      ) {
+        throw new AtelierCapsuleIntegrityError('Continuity index record is malformed.');
+      }
+      const { authenticationTag, ...record } = value;
+      const expected = createHmac('sha256', this.#masterKey)
+        .update(canonicalJson({ domain: INDEX_AUTH_DOMAIN, record }), 'utf8')
+        .digest('hex');
+      if (!constantTimeEqualHex(authenticationTag, expected)) {
+        throw new AtelierCapsuleIntegrityError('Continuity index authentication failed.');
+      }
+      const bytesSha256 = sha256Hex(bytes);
+      if (retryIdentity && bytesSha256 !== retryIdentity.bytesSha256) {
+        throw new AtelierCapsuleIntegrityError(
+          'Continuity index bytes changed during authenticated readback.',
+        );
+      }
+      if (publishedLinkRemoved) {
+        // Publishing via a hard link briefly leaves two names for one inode.
+        // Its removal changes ctime. Verify these bytes, then reread the same
+        // inode once; any byte or metadata change still fails closed.
+        return this.#readAuthenticated(path, schema, {
+          dev: opened.dev,
+          ino: opened.ino,
+          size: opened.size,
+          mtimeMs: opened.mtimeMs,
+          mode: opened.mode,
+          uid: opened.uid,
+          gid: opened.gid,
+          bytesSha256,
+        });
+      }
+      return value;
+    } catch (error) {
+      if (error instanceof AtelierCapsuleIntegrityError) throw error;
+      throw new AtelierCapsuleIntegrityError('Continuity index failed closed during parsing.');
+    } finally {
+      await handle.close();
+    }
   }
 
   async #atomicCreate(path: string, record: object): Promise<boolean> {
@@ -1393,6 +1406,20 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
     }
   }
 
+  async #isStaleUnpublishedFile(path: string): Promise<boolean> {
+    const metadata = await lstat(path).catch((error: unknown) => {
+      if (errorCode(error) === 'ENOENT') return undefined;
+      throw error;
+    });
+    if (!metadata) return false;
+    if (!metadata.isFile() || metadata.isSymbolicLink()) {
+      throw new AtelierCapsuleIntegrityError(
+        'Unpublished continuity entry must be a regular file.',
+      );
+    }
+    return Date.now() - metadata.mtimeMs >= UNPUBLISHED_FILE_GRACE_MS;
+  }
+
   async #directoryEntries(path: string) {
     return readdir(path, { withFileTypes: true }).catch((error: unknown) => {
       if (errorCode(error) === 'ENOENT') return [];
@@ -1412,6 +1439,47 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
     }
   }
 
+  #isTransientMarkerReadError(error: unknown): boolean {
+    return (
+      error instanceof AtelierCapsuleIntegrityError &&
+      (error.message === 'Continuity index failed closed during parsing.' ||
+        error.message === 'Continuity index record is malformed.' ||
+        error.message === 'Continuity index changed during authenticated readback.')
+    );
+  }
+
+  async #verifyFirstStartMarkerTemp(temporaryPath: string, markerPath: string): Promise<void> {
+    const expectedVerifier = this.#pathDigest('key-check', KEY_CHECK_SCHEMA);
+    const deadline = Date.now() + KEY_CHECK_PUBLICATION_WAIT_MS;
+    for (;;) {
+      if (await this.#isStaleUnpublishedFile(temporaryPath)) {
+        throw new AtelierCapsuleIntegrityError('Continuity key marker temp is stale.');
+      }
+      try {
+        const pending = await this.#readAuthenticated(temporaryPath, KEY_CHECK_SCHEMA);
+        if (pending && pending.verifier !== expectedVerifier) {
+          throw new AtelierCapsuleIntegrityError('Continuity key marker temp has wrong verifier.');
+        }
+        return;
+      } catch (error) {
+        if (!this.#isTransientMarkerReadError(error)) throw error;
+        try {
+          const published = await this.#readAuthenticated(markerPath, KEY_CHECK_SCHEMA);
+          if (published) {
+            if (published.verifier !== expectedVerifier) {
+              throw new AtelierCapsuleIntegrityError('Continuity key marker has wrong verifier.');
+            }
+            return;
+          }
+        } catch (markerError) {
+          if (!this.#isTransientMarkerReadError(markerError)) throw markerError;
+        }
+        if (Date.now() >= deadline) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+    }
+  }
+
   async #containsFiles(path: string, markerPath: string): Promise<boolean> {
     for (const entry of await this.#directoryEntries(path)) {
       const candidate = join(path, entry.name);
@@ -1425,12 +1493,18 @@ export class EncryptedLocalAtelierStateStore implements AtelierStateStore {
         throw new AtelierCapsuleIntegrityError(
           'Continuity storage must not contain symbolic links.',
         );
-      // A first-start peer may be publishing the marker. Only its exact
-      // regular-file temporary shape is non-durable; other contents block.
-      if (path === dirname(markerPath) && entry.isFile() && KEY_CHECK_TEMP_NAME.test(entry.name))
+      // A first-start peer may be publishing the marker. A matching name is
+      // not enough: authenticate the temp or final marker before continuing.
+      // A partial write gets a bounded wait; foreign keys fail immediately.
+      if (path === dirname(markerPath) && entry.isFile() && KEY_CHECK_TEMP_NAME.test(entry.name)) {
+        await this.#verifyFirstStartMarkerTemp(candidate, markerPath);
         continue;
+      }
       if (entry.isFile()) return true;
       if (entry.isDirectory() && (await this.#containsFiles(candidate, markerPath))) return true;
+      if (!entry.isDirectory()) {
+        throw new AtelierCapsuleIntegrityError('Continuity storage contains an unexpected entry.');
+      }
     }
     return false;
   }

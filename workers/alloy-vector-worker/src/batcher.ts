@@ -42,6 +42,7 @@ export class MicroBatcher {
   private readonly maxTokensPerBatch: number;
   private readonly maxQueueDepth: number;
   private readonly oversizeTokenThreshold: number;
+  private nextBatchId = 0;
 
   private readonly partitions = new Map<string, PartitionQueue>();
 
@@ -144,21 +145,37 @@ export class MicroBatcher {
     }
 
     partition.stats.batchCount++;
-    const inputs = batch.map((e) => e.input);
+    const batchId = this.nextBatchId++;
+    // External backends may correlate their response by chunkId. Replace caller
+    // identifiers with one-use internal identifiers so duplicate chunkIds from
+    // concurrent requests cannot collapse into one Map entry or receive another
+    // caller's vector. Restore the original identifier only after correlation.
+    const inputs = batch.map((entry, index) => ({
+      ...entry.input,
+      chunkId: `aef-internal-batch-${batchId}-${index}`,
+    }));
 
     try {
       const outputs = await this.backend.embed(inputs);
+      if (outputs.length !== batch.length) {
+        throw new Error(
+          `Backend returned ${outputs.length} outputs for ${batch.length} inputs in partition "${key}"`,
+        );
+      }
       const outputMap = new Map(outputs.map((o) => [o.chunkId, o]));
-      for (const entry of batch) {
-        const output = outputMap.get(entry.input.chunkId);
+      if (outputMap.size !== outputs.length) {
+        throw new Error(`Backend returned duplicate correlation IDs in partition "${key}"`);
+      }
+      for (const [index, entry] of batch.entries()) {
+        const output = outputMap.get(inputs[index]!.chunkId);
         if (output) {
           partition.stats.flushed++;
-          entry.resolve(output);
+          entry.resolve({ ...output, chunkId: entry.input.chunkId });
         } else {
           partition.stats.errors++;
           entry.reject(
             new Error(
-              `Backend returned no output for chunkId "${entry.input.chunkId}" in partition "${key}"`,
+              `Backend returned no output for correlation ID "${inputs[index]!.chunkId}" in partition "${key}"`,
             ),
           );
         }

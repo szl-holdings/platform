@@ -6,16 +6,22 @@
   "description": "Typed client SDK for the Substrate MCP Gateway. Covers submitRun, getRun, replay, counterfactual, listApprovals, approve, reject, listWorkflows, and streaming run events.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./streaming": {
+      "development": "./src/streaming.ts",
+      "workspace": "./src/streaming.ts",
       "types": "./dist/streaming.d.ts",
-      "import": "./src/streaming.ts"
+      "import": "./dist/streaming.js"
     }
   },
   "scripts": {
