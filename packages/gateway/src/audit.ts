@@ -2,26 +2,27 @@
  * SZL Holdings — Agent Gateway: Audit Logger
  * Phase 11 — Agent Gateway
  *
- * Writes a structured, immutable audit entry for every gateway action —
- * successful or failed. Every entry carries a correlation ID, actor,
+ * Writes a structured audit entry for every gateway action — successful or
+ * failed. Every entry carries a correlation ID, actor,
  * model, prompt hash, target, diff, and final result.
  *
- * In production the audit log is shipped to the observability baseline
- * (OTel structured log → Azure Monitor). In local mode it is written to
- * a newline-delimited JSON file and to stdout.
+ * Live mode requires an acknowledged durable, append-only, tamper-evident
+ * ledger. The local/test NDJSON file is explicitly development evidence: it
+ * is mutable and is not a production immutability claim.
  */
 
-import { randomUUID } from 'crypto';
-import { appendFileSync } from 'fs';
+import { randomUUID } from 'node:crypto';
+import { persistAuditRecord } from './persistence.js';
 import type {
+  AgentActionRequest,
+  AgentExecutionResult,
+  ApprovalOutcome,
   AuditEntry,
   CallerIdentity,
-  AgentActionRequest,
+  GatewayConfig,
+  ManifestDiff,
   OpaDecision,
   SimulationResult,
-  ApprovalOutcome,
-  AgentExecutionResult,
-  ManifestDiff,
 } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -95,7 +96,11 @@ interface StructuredLog {
 
 function toStructuredLog(entry: AuditEntry): StructuredLog {
   const level: StructuredLog['level'] =
-    entry.status === 'completed' ? 'INFO' : entry.status === 'approval_pending' ? 'WARN' : 'ERROR';
+    entry.status === 'completed' || entry.status === 'execution_authorized'
+      ? 'INFO'
+      : entry.status === 'approval_pending'
+        ? 'WARN'
+        : 'ERROR';
 
   return {
     level,
@@ -121,26 +126,9 @@ function toStructuredLog(entry: AuditEntry): StructuredLog {
 // Persistence
 // ---------------------------------------------------------------------------
 
-export function writeAuditEntry(entry: AuditEntry, auditLogPath: string): void {
+export async function writeAuditEntry(entry: AuditEntry, config: GatewayConfig): Promise<void> {
   const structured = toStructuredLog(entry);
-
-  // Structured stdout — always emit regardless of path (OTel pipeline picks this up)
-  process.stdout.write(JSON.stringify(structured) + '\n');
-
-  // Append to NDJSON audit file
-  try {
-    appendFileSync(auditLogPath, JSON.stringify(entry) + '\n', 'utf8');
-  } catch {
-    // File write failure must not suppress the gateway response,
-    // but we log the failure visibly.
-    process.stderr.write(
-      JSON.stringify({
-        level: 'ERROR',
-        timestamp: new Date().toISOString(),
-        correlationId: entry.correlationId,
-        message: 'Audit log file write failed — in-memory entry still valid',
-        auditLogPath,
-      }) + '\n',
-    );
-  }
+  await persistAuditRecord(config, entry);
+  // Emit only after required persistence has acknowledged the exact record.
+  process.stdout.write(`${JSON.stringify(structured)}\n`);
 }

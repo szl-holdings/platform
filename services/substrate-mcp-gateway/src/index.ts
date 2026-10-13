@@ -29,13 +29,22 @@ import {
 } from '@szl/substrate';
 import express from 'express';
 import { SERVER_INFO } from './descriptor.js';
-import { syncIdpConfigsFromDb, syncRevokedSubjectsFromDb } from './enterprise-auth.js';
-import { createAuthorizationServerMetadata, createDiscoveryHandler, createHttpTransport } from './transport/http.js';
+import {
+  getRevocationSyncReadiness,
+  syncIdpConfigsFromDb,
+  syncRevokedSubjectsFromDb,
+} from './enterprise-auth.js';
+import { getNexusRuntimeCapabilities } from './nexus-fabric.js';
+import { assertProductionGatewayConfig, getExecutionCapabilityStatus } from './runtime-config.js';
+import {
+  createAuthorizationServerMetadata,
+  createDiscoveryHandler,
+  createHttpTransport,
+} from './transport/http.js';
 import { startStdioTransport } from './transport/stdio.js';
 
 const IS_STDIO = process.argv.includes('--stdio');
 const PORT = parseInt(process.env.SUBSTRATE_GATEWAY_PORT ?? process.env.PORT ?? '3700', 10);
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 // ─── Register all vertical and reference workflows ────────────────────────────
 // These must be registered before the server begins accepting connections so
@@ -72,17 +81,28 @@ function warnIfRegistryEmpty(log: (msg: string) => void): void {
   }
 }
 
-// Fail-fast: refuse to start in production without an API key.
-// In development a warning is logged by auth.ts and unauthenticated mode is used.
-if (IS_PRODUCTION && !process.env.SUBSTRATE_GATEWAY_API_KEY) {
-  process.exit(1);
+// Fail before either transport starts if production auth or evidence signing is
+// not configured with durable, non-blank key material.
+assertProductionGatewayConfig();
+
+async function initializeEnterpriseState(): Promise<void> {
+  const [revocationResult, idpResult] = await Promise.allSettled([
+    syncRevokedSubjectsFromDb(),
+    syncIdpConfigsFromDb(),
+  ]);
+  if (idpResult.status === 'rejected') {
+    console.warn('[substrate-mcp-gateway] Enterprise IdP configuration sync failed');
+  }
+  if (revocationResult.status === 'rejected') {
+    console.error('[substrate-mcp-gateway] Persisted revocation sync failed; readiness is closed');
+  }
 }
 
-if (IS_STDIO) {
-  // stdio transport: stderr is the only safe place for diagnostic logs
-  warnIfRegistryEmpty((_msg) => {});
-  void startStdioTransport();
-} else {
+async function startHttpServer(): Promise<void> {
+  // Complete the first persistence attempt before opening the listener. A failed
+  // attempt still starts liveness endpoints, but readiness and protected MCP
+  // traffic remain closed until a clean restart can synchronize state.
+  await initializeEnterpriseState();
   warnIfRegistryEmpty((_msg) => {});
   const app = express();
 
@@ -123,18 +143,19 @@ if (IS_STDIO) {
   });
 
   app.get('/readyz', (_req, res) => {
-    res.status(200).json({ ready: true });
+    const revocationSync = getRevocationSyncReadiness();
+    const execution = getExecutionCapabilityStatus();
+    const ready = revocationSync.ready && execution.ready;
+    res.status(ready ? 200 : 503).json({
+      ready,
+      status: ready ? 'ready' : execution.ready ? 'not-ready' : 'execution-held',
+      revocationSync,
+      execution,
+      optionalCapabilities: getNexusRuntimeCapabilities(),
+    });
   });
 
-  const server = app.listen(PORT, '0.0.0.0', () => {
-    // Pre-load enterprise IdP configs from DB so the gateway never starts with
-    // an empty IdP registry after a restart. Without this, every enterprise token
-    // exchange would fail until each IdP was manually re-pushed via the admin API.
-    void syncIdpConfigsFromDb();
-    // Pre-load revoked subjects from DB so revocations are enforced immediately
-    // even for subjects revoked while this gateway instance was offline.
-    void syncRevokedSubjectsFromDb();
-  });
+  const server = app.listen(PORT, '0.0.0.0');
 
   // Graceful shutdown
   process.on('SIGTERM', () => {
@@ -145,3 +166,25 @@ if (IS_STDIO) {
     server.close(() => process.exit(0));
   });
 }
+
+async function main(): Promise<void> {
+  if (IS_STDIO) {
+    // A stdio process has no readiness endpoint, so a failed production sync
+    // must prevent the transport from accepting any requests.
+    await initializeEnterpriseState();
+    if (!getRevocationSyncReadiness().ready) {
+      throw new Error('Persisted enterprise revocation state is unavailable');
+    }
+    warnIfRegistryEmpty((_msg) => {});
+    await startStdioTransport();
+    return;
+  }
+  await startHttpServer();
+}
+
+void main().catch((error: unknown) => {
+  console.error(
+    `[substrate-mcp-gateway] Startup failed: ${error instanceof Error ? error.message : 'unknown error'}`,
+  );
+  process.exitCode = 1;
+});

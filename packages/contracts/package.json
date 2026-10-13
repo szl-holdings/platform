@@ -5,17 +5,63 @@
   "type": "module",
   "description": "Zod request/response contracts for internal APIs and webhooks. TS types are inferred from schemas — never hand-written in parallel.",
   "exports": {
-    ".": "./src/index.ts",
-    "./auth": "./src/auth.ts",
-    "./alloy": "./src/alloy.ts",
-    "./ai": "./src/ai.ts",
-    "./webhooks": "./src/webhooks.ts",
-    "./admin": "./src/admin.ts",
-    "./common": "./src/common.ts",
-    "./decision-genome": "./src/decision-genome.ts",
-    "./governance": "./src/governance.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./auth": {
+      "development": "./src/auth.ts",
+      "workspace": "./src/auth.ts",
+      "types": "./dist/auth.d.ts",
+      "import": "./dist/auth.js"
+    },
+    "./alloy": {
+      "development": "./src/alloy.ts",
+      "workspace": "./src/alloy.ts",
+      "types": "./dist/alloy.d.ts",
+      "import": "./dist/alloy.js"
+    },
+    "./ai": {
+      "development": "./src/ai.ts",
+      "workspace": "./src/ai.ts",
+      "types": "./dist/ai.d.ts",
+      "import": "./dist/ai.js"
+    },
+    "./webhooks": {
+      "development": "./src/webhooks.ts",
+      "workspace": "./src/webhooks.ts",
+      "types": "./dist/webhooks.d.ts",
+      "import": "./dist/webhooks.js"
+    },
+    "./admin": {
+      "development": "./src/admin.ts",
+      "workspace": "./src/admin.ts",
+      "types": "./dist/admin.d.ts",
+      "import": "./dist/admin.js"
+    },
+    "./common": {
+      "development": "./src/common.ts",
+      "workspace": "./src/common.ts",
+      "types": "./dist/common.d.ts",
+      "import": "./dist/common.js"
+    },
+    "./decision-genome": {
+      "development": "./src/decision-genome.ts",
+      "workspace": "./src/decision-genome.ts",
+      "types": "./dist/decision-genome.d.ts",
+      "import": "./dist/decision-genome.js"
+    },
+    "./governance": {
+      "development": "./src/governance.ts",
+      "workspace": "./src/governance.ts",
+      "types": "./dist/governance.d.ts",
+      "import": "./dist/governance.js"
+    }
   },
   "scripts": {
+    "build": "tsc --build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -8,6 +8,7 @@ import { randomUUID } from 'node:crypto';
 import { type Request, type Response, Router } from 'express';
 import { defaultEngine } from '../engine.js';
 import { defaultRunStore } from '../run-store.js';
+import { requestTenantId } from '../security.js';
 import { type ListRunsFilter, SubmitRunRequestSchema } from '../types.js';
 import { buildIngestDocumentWorkflow } from '../workflows/ingest-document.js';
 import { buildRebuildIndexWorkflow } from '../workflows/rebuild-index.js';
@@ -18,14 +19,20 @@ import { buildVerifyIndexHealthWorkflow } from '../workflows/verify-index-health
 export function createRunsRouter(): Router {
   const router = Router();
 
-  router.post('/runs', async (req: Request, res: Response) => {
+  router.post('/', async (req: Request, res: Response) => {
     const parse = SubmitRunRequestSchema.safeParse(req.body);
     if (!parse.success) {
       res.status(400).json({ error: 'Validation failed', detail: parse.error.issues });
       return;
     }
 
-    const { workflowId, tenantId, profileId, input, metadata } = parse.data;
+    const tenantId = requestTenantId(req);
+    if (parse.data.tenantId !== tenantId) {
+      res.status(403).json({ error: 'Forbidden', code: 'TENANT_SCOPE_MISMATCH' });
+      return;
+    }
+
+    const { workflowId, profileId, input, metadata } = parse.data;
     const definition = resolveWorkflowDefinition(
       workflowId,
       input as Record<string, unknown>,
@@ -63,34 +70,50 @@ export function createRunsRouter(): Router {
     }
   });
 
-  router.get('/runs/:runId', (req: Request, res: Response) => {
+  router.get('/:runId', (req: Request, res: Response) => {
     const { runId } = req.params;
     const run = defaultRunStore.get(runId as string);
-    if (!run) {
-      res.status(404).json({ error: `Run not found: ${runId}` });
+    if (!run || run.tenantId !== requestTenantId(req)) {
+      res.status(404).json({ error: 'Run not found', code: 'RUN_NOT_FOUND' });
       return;
     }
     res.status(200).json(run);
   });
 
-  router.delete('/runs/:runId', (req: Request, res: Response) => {
+  router.delete('/:runId', (req: Request, res: Response) => {
     const { runId } = req.params;
+    const run = defaultRunStore.get(runId as string);
+    if (!run || run.tenantId !== requestTenantId(req)) {
+      res.status(404).json({ error: 'Run not found', code: 'RUN_NOT_FOUND' });
+      return;
+    }
+
     try {
       const cancelled = defaultEngine.cancel(runId as string);
       res.status(200).json({ runId: cancelled.runId, status: cancelled.status });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       if (message.includes('not found')) {
-        res.status(404).json({ error: message });
+        res.status(404).json({ error: 'Run not found', code: 'RUN_NOT_FOUND' });
       } else {
         res.status(409).json({ error: message });
       }
     }
   });
 
-  router.get('/runs', (req: Request, res: Response) => {
+  router.get('/', (req: Request, res: Response) => {
+    const tenantId = requestTenantId(req);
+    const requestedTenant = req.query.tenantId;
+    if (
+      requestedTenant !== undefined &&
+      (typeof requestedTenant !== 'string' || requestedTenant.trim() !== tenantId)
+    ) {
+      res.status(403).json({ error: 'Forbidden', code: 'TENANT_SCOPE_MISMATCH' });
+      return;
+    }
+
     const filter: ListRunsFilter = {
-      tenantId: req.query.tenantId as string | undefined,
+      tenantId,
       profileId: req.query.profileId as string | undefined,
       status: req.query.status as ListRunsFilter['status'],
       workflowId: req.query.workflowId as string | undefined,

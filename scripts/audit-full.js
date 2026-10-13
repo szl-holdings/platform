@@ -305,6 +305,10 @@ for (const step of STEPS) {
   // build/typecheck/routes are broken.
   if (r.status === 'fail' && r.priority === 'P0') {
     log(`\n🛑  P0 failure in "${r.label}" — aborting pipeline.`);
+    if (process.env.GITHUB_ACTIONS === 'true') {
+      // Report only trusted step metadata; captured output can contain secrets.
+      log(`::error title=Runtime audit failure::${r.id}: ${r.label} exited ${r.exitCode}`);
+    }
     break;
   }
 }

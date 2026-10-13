@@ -21,12 +21,12 @@
  * rows we ingested into the store, not `synthetic-chunk-*` fabrications.
  */
 
+import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
+import { embedTexts } from '@workspace/alloy-embed-worker';
 import express, { type Express } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { embedTexts } from '@workspace/alloy-embed-worker';
-import { defaultLedgerStore } from '@workspace/aef-evidence-ledger';
-import { getRetrievalStore, __resetRetrievalStoreForTests } from '../retrieval-store.js';
+import { __resetRetrievalStoreForTests, getRetrievalStore } from '../retrieval-store.js';
 import { hybridSearchRouter } from '../routes/hybrid-search.js';
 
 const TENANT = 'test-tenant';
@@ -144,20 +144,18 @@ afterAll(() => {
 describe('hybrid-search route — every layer fires end-to-end', () => {
   it('embeds, retrieves from the real store, fuses, governs, and writes a receipt', async () => {
     const requestId = `req-${Date.now()}`;
-    const res = await request(app)
-      .post('/v1/hybrid-search')
-      .send({
-        requestId,
-        tenantId: TENANT,
-        query: 'hybrid retrieval reciprocal rank fusion keyword search',
-        topK: 3,
-        candidatePool: 10,
-        denseWeight: 0.6,
-        keywordWeight: 0.4,
-        rerankEnabled: false,
-        includeProvenance: true,
-        metadata: {},
-      });
+    const res = await request(app).post('/v1/hybrid-search').send({
+      requestId,
+      tenantId: TENANT,
+      query: 'hybrid retrieval reciprocal rank fusion keyword search',
+      topK: 3,
+      candidatePool: 10,
+      denseWeight: 0.6,
+      keywordWeight: 0.4,
+      rerankEnabled: false,
+      includeProvenance: true,
+      metadata: {},
+    });
 
     // ── Layer 0: route responded 200 (policy allowed) ──────────────────────
     expect(res.status).toBe(200);
@@ -201,22 +199,20 @@ describe('hybrid-search route — every layer fires end-to-end', () => {
     expect(ledgerEntries.every((e) => typeof e.finalScore === 'number')).toBe(true);
   });
 
-  it('returns an honest empty result for a tenant with no ingested data (no fabrication)', async () => {
+  it('rejects a caller-selected tenant before retrieval executes', async () => {
     const requestId = `req-empty-${Date.now()}`;
-    const res = await request(app)
-      .post('/v1/hybrid-search')
-      .send({
-        requestId,
-        tenantId: 'tenant-with-no-data',
-        query: 'anything at all',
-        topK: 3,
-        candidatePool: 10,
-        rerankEnabled: false,
-        includeProvenance: true,
-        metadata: {},
-      });
-    expect(res.status).toBe(200);
-    // Fail-honest: no rows ingested for this tenant => zero hits, not synthetic.
-    expect(res.body.hits.length).toBe(0);
+    const res = await request(app).post('/v1/hybrid-search').send({
+      requestId,
+      tenantId: 'tenant-with-no-data',
+      query: 'anything at all',
+      topK: 3,
+      candidatePool: 10,
+      rerankEnabled: false,
+      includeProvenance: true,
+      metadata: {},
+    });
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe('TENANT_SCOPE_MISMATCH');
+    expect(defaultLedgerStore.query({ requestId })).toHaveLength(0);
   });
 });

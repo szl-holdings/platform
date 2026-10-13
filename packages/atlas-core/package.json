@@ -6,20 +6,28 @@
   "description": "ATLAS Enterprise State Model — canonical schema, primitives, and Zod validation for the SZL Holdings platform",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./primitives": {
+      "development": "./src/primitives.ts",
+      "workspace": "./src/primitives.ts",
       "types": "./dist/primitives.d.ts",
-      "import": "./src/primitives.ts"
+      "import": "./dist/primitives.js"
     },
     "./domain": {
+      "development": "./src/domain.ts",
+      "workspace": "./src/domain.ts",
       "types": "./dist/domain.d.ts",
-      "import": "./src/domain.ts"
+      "import": "./dist/domain.js"
     },
     "./validation": {
+      "development": "./src/validation.ts",
+      "workspace": "./src/validation.ts",
       "types": "./dist/validation.d.ts",
-      "import": "./src/validation.ts"
+      "import": "./dist/validation.js"
     }
   },
   "dependencies": {
@@ -32,6 +40,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc --build"
   }
 }

@@ -5,9 +5,15 @@
   "type": "module",
   "description": "Zod-validated environment variable loader. Throws at startup if required variables are missing or invalid.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "scripts": {
+    "build": "tsc --build",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",

@@ -6,98 +6,140 @@
   "description": "Sovereign Execution Substrate — policy-shaped graphs, evidence-chained transitions, confidence-budget routing, and counterfactual replay for all SZL workflows.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./engine": {
+      "development": "./src/engine.ts",
+      "workspace": "./src/engine.ts",
       "types": "./dist/engine.d.ts",
-      "import": "./src/engine.ts"
+      "import": "./dist/engine.js"
     },
     "./compiler": {
+      "development": "./src/compiler.ts",
+      "workspace": "./src/compiler.ts",
       "types": "./dist/compiler.d.ts",
-      "import": "./src/compiler.ts"
+      "import": "./dist/compiler.js"
     },
     "./journal": {
+      "development": "./src/journal.ts",
+      "workspace": "./src/journal.ts",
       "types": "./dist/journal.d.ts",
-      "import": "./src/journal.ts"
+      "import": "./dist/journal.js"
     },
     "./budget-router": {
+      "development": "./src/budget-router.ts",
+      "workspace": "./src/budget-router.ts",
       "types": "./dist/budget-router.d.ts",
-      "import": "./src/budget-router.ts"
+      "import": "./dist/budget-router.js"
     },
     "./adapters": {
+      "development": "./src/adapters.ts",
+      "workspace": "./src/adapters.ts",
       "types": "./dist/adapters.d.ts",
-      "import": "./src/adapters.ts"
+      "import": "./dist/adapters.js"
     },
     "./telemetry": {
+      "development": "./src/telemetry.ts",
+      "workspace": "./src/telemetry.ts",
       "types": "./dist/telemetry.d.ts",
-      "import": "./src/telemetry.ts"
+      "import": "./dist/telemetry.js"
     },
     "./workflows/opportunity-audit": {
+      "development": "./src/workflows/opportunity-audit.ts",
+      "workspace": "./src/workflows/opportunity-audit.ts",
       "types": "./dist/workflows/opportunity-audit.d.ts",
-      "import": "./src/workflows/opportunity-audit.ts"
+      "import": "./dist/workflows/opportunity-audit.js"
     },
     "./workflows/cross-system-reconciliation": {
+      "development": "./src/workflows/cross-system-reconciliation.ts",
+      "workspace": "./src/workflows/cross-system-reconciliation.ts",
       "types": "./dist/workflows/cross-system-reconciliation.d.ts",
-      "import": "./src/workflows/cross-system-reconciliation.ts"
+      "import": "./dist/workflows/cross-system-reconciliation.js"
     },
     "./workflows/executive-brief": {
+      "development": "./src/workflows/executive-brief.ts",
+      "workspace": "./src/workflows/executive-brief.ts",
       "types": "./dist/workflows/executive-brief.d.ts",
-      "import": "./src/workflows/executive-brief.ts"
+      "import": "./dist/workflows/executive-brief.js"
     },
     "./workflows/risk-escalation": {
+      "development": "./src/workflows/risk-escalation.ts",
+      "workspace": "./src/workflows/risk-escalation.ts",
       "types": "./dist/workflows/risk-escalation.d.ts",
-      "import": "./src/workflows/risk-escalation.ts"
+      "import": "./dist/workflows/risk-escalation.js"
     },
     "./workflows/evidence-based-recommendation": {
+      "development": "./src/workflows/evidence-based-recommendation.ts",
+      "workspace": "./src/workflows/evidence-based-recommendation.ts",
       "types": "./dist/workflows/evidence-based-recommendation.d.ts",
-      "import": "./src/workflows/evidence-based-recommendation.ts"
+      "import": "./dist/workflows/evidence-based-recommendation.js"
     },
     "./workflows/lyte-operational-drift": {
+      "development": "./src/workflows/lyte-operational-drift.ts",
+      "workspace": "./src/workflows/lyte-operational-drift.ts",
       "types": "./dist/workflows/lyte-operational-drift.d.ts",
-      "import": "./src/workflows/lyte-operational-drift.ts"
+      "import": "./dist/workflows/lyte-operational-drift.js"
     },
     "./workflows/aegis-threat-triage": {
+      "development": "./src/workflows/aegis-threat-triage.ts",
+      "workspace": "./src/workflows/aegis-threat-triage.ts",
       "types": "./dist/workflows/aegis-threat-triage.d.ts",
-      "import": "./src/workflows/aegis-threat-triage.ts"
+      "import": "./dist/workflows/aegis-threat-triage.js"
     },
     "./workflows/vessels-voyage-anomaly": {
+      "development": "./src/workflows/vessels-voyage-anomaly.ts",
+      "workspace": "./src/workflows/vessels-voyage-anomaly.ts",
       "types": "./dist/workflows/vessels-voyage-anomaly.d.ts",
-      "import": "./src/workflows/vessels-voyage-anomaly.ts"
+      "import": "./dist/workflows/vessels-voyage-anomaly.js"
     },
     "./workflows/terra-portfolio-anomaly": {
+      "development": "./src/workflows/terra-portfolio-anomaly.ts",
+      "workspace": "./src/workflows/terra-portfolio-anomaly.ts",
       "types": "./dist/workflows/terra-portfolio-anomaly.d.ts",
-      "import": "./src/workflows/terra-portfolio-anomaly.ts"
+      "import": "./dist/workflows/terra-portfolio-anomaly.js"
     },
     "./workflows/prism-counsel-evidence-packaging": {
+      "development": "./src/workflows/prism-counsel-evidence-packaging.ts",
+      "workspace": "./src/workflows/prism-counsel-evidence-packaging.ts",
       "types": "./dist/workflows/prism-counsel-evidence-packaging.d.ts",
-      "import": "./src/workflows/prism-counsel-evidence-packaging.ts"
+      "import": "./dist/workflows/prism-counsel-evidence-packaging.js"
     },
     "./workflows/carlota-jo-task-routing": {
+      "development": "./src/workflows/carlota-jo-task-routing.ts",
+      "workspace": "./src/workflows/carlota-jo-task-routing.ts",
       "types": "./dist/workflows/carlota-jo-task-routing.d.ts",
-      "import": "./src/workflows/carlota-jo-task-routing.ts"
+      "import": "./dist/workflows/carlota-jo-task-routing.js"
     },
     "./workflows/seeds": {
+      "development": "./src/workflows/seeds/index.ts",
+      "workspace": "./src/workflows/seeds/index.ts",
       "types": "./dist/workflows/seeds/index.d.ts",
-      "import": "./src/workflows/seeds/index.ts"
+      "import": "./dist/workflows/seeds/index.js"
     },
     "./python-worker": {
+      "development": "./src/python-worker.ts",
+      "workspace": "./src/python-worker.ts",
       "types": "./dist/python-worker.d.ts",
-      "import": "./src/python-worker.ts"
+      "import": "./dist/python-worker.js"
     }
   },
   "bin": {
-    "substrate": "./src/cli/bin.ts"
+    "substrate": "./dist/cli/bin.js"
   },
   "scripts": {
     "build": "tsc --build",
     "typecheck": "tsc --noEmit",
     "cli": "tsx src/cli/bin.ts",
-    "test": "vitest run src/workflows/phase2.test.ts src/engine.test.ts src/compiler.test.ts"
+    "test": "vitest run src/workflows/phase2.test.ts src/engine.test.ts src/compiler.test.ts src/python-worker.test.ts"
   },
   "dependencies": {
     "@szl-holdings/policy-engine": "workspace:*",

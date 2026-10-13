@@ -6,17 +6,20 @@
   "description": "Adapters that lift the Ouroboros runtime + SZL Sovereign Engine (44 innovations) into the three deployable products: a11oy, sentra, amaru. Reference implementation for ouroboros-thesis papers v1–v11.",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
       "workspace": "./src/index.ts",
-      "import": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./sovereign-engine": {
-      "types": "./dist/sovereign-engine.d.ts",
+      "development": "./src/sovereign-engine.ts",
       "workspace": "./src/sovereign-engine.ts",
-      "import": "./src/sovereign-engine.ts"
+      "types": "./dist/sovereign-engine.d.ts",
+      "import": "./dist/sovereign-engine.js"
     }
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts --reporter=verbose"
   },

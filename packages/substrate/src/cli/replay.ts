@@ -10,7 +10,17 @@
 
 import { lookupWorkflow, type SubstrateRuntimeOptions } from '../engine.js';
 import { defaultJournal, defaultRunStore } from '../journal.js';
-import { type CounterfactualDiff, type PipelineRun, type PolicyProfile, type RuntimeStartOptions, type StageDiff, type StageResultStatus, type StageType, type WorkflowDefinition, PolicyProfileSchema } from '../types.js';
+import {
+  type CounterfactualDiff,
+  type PipelineRun,
+  type PolicyProfile,
+  PolicyProfileSchema,
+  type RuntimeStartOptions,
+  type StageDiff,
+  type StageResultStatus,
+  type StageType,
+  type WorkflowDefinition,
+} from '../types.js';
 
 /**
  * Look up a policy from the policy-engine registry by ID and project it into a
@@ -106,6 +116,7 @@ export async function replay(opts: ReplayOptions): Promise<ReplayResult> {
   const replayRun = await runtime.start(workflow, sourceRun.input, {
     mode,
     sourceRunId: opts.runId,
+    ...(sourceRun.tenantId !== undefined ? { tenantId: sourceRun.tenantId } : {}),
     ...(opts.model !== undefined ? { counterfactualModel: opts.model } : {}),
     ...(opts.policy !== undefined ? { counterfactualPolicy: opts.policy } : {}),
     replayDiffOnly: !opts.counterfactual,

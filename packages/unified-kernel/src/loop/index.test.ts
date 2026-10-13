@@ -1,37 +1,37 @@
 /** loop (T02) — boots the kernel, then asserts the WIRED ouroboros runtime. */
-import { describe, it, expect } from "vitest";
-import { start } from "../kernel.ts";
-import { step, terminates, uniqueFixedPoint, OUROBOROS_PROVENANCE } from "./index.ts";
+import { describe, it, expect } from 'vitest';
+import { start } from '../kernel.ts';
+import { step, terminates, uniqueFixedPoint, OUROBOROS_PROVENANCE } from './index.ts';
 
-describe("T02 loop (wired ouroboros v6.3.0)", () => {
-  it("kernel boot runs the termination check and it passes", async () => {
+describe('T02 loop (wired ouroboros v6.3.0)', () => {
+  it('kernel boot runs the termination check and it passes', async () => {
     const h = await start();
-    const c = h.initReceipt.checks.find((x) => x.name === "ouroboros-termination");
+    const c = h.initReceipt.checks.find((x) => x.name === 'ouroboros-termination');
     expect(c?.pass).toBe(true);
   });
 
-  it("is wired to the real ouroboros runtime, not stubbed", () => {
-    expect(OUROBOROS_PROVENANCE.package).toBe("@szl-holdings/ouroboros");
-    expect(OUROBOROS_PROVENANCE.tag).toBe("v6.3.0");
-    expect(OUROBOROS_PROVENANCE.commit).toBe("d64748cc9ad67296be296c1ef6752ae181413fd7");
+  it('is wired to the real ouroboros runtime, not stubbed', () => {
+    expect(OUROBOROS_PROVENANCE.package).toBe('@szl-holdings/ouroboros');
+    expect(OUROBOROS_PROVENANCE.tag).toBe('v6.3.0');
+    expect(OUROBOROS_PROVENANCE.commit).toBe('d64748cc9ad67296be296c1ef6752ae181413fd7');
     expect(OUROBOROS_PROVENANCE.upstreamTests).toBe(218);
     expect(OUROBOROS_PROVENANCE.budgetNormalization.commit).toBe(
-      "0f030741f567bdf397d33c4d607790af6ed39688",
+      '0f030741f567bdf397d33c4d607790af6ed39688',
     );
-    expect(OUROBOROS_PROVENANCE.budgetNormalization.excluded).toBe("emitLoopReceipt");
+    expect(OUROBOROS_PROVENANCE.budgetNormalization.excluded).toBe('emitLoopReceipt');
   });
 
-  it("a contraction map converges within budget", async () => {
+  it('a contraction map converges within budget', async () => {
     const t = await terminates();
     expect(t.halted).toBe(true);
-    expect(t.exitReason).toBe("converged");
+    expect(t.exitReason).toBe('converged');
   });
 
-  it("the converged state is a fixed point", async () => {
+  it('the converged state is a fixed point', async () => {
     expect(await uniqueFixedPoint()).toBe(true);
   });
 
-  it("runs the real kernel over a custom contraction", async () => {
+  it('runs the real kernel over a custom contraction', async () => {
     const trace = await step<{ x: number }>(
       { x: 4 },
       (s) => ({ state: { x: s.x / 2 }, output: s.x / 2 }),

@@ -9,9 +9,14 @@
     "types": ["node"]
   },
   "references": [
+    { "path": "../../lib/forge-runtime" },
+    { "path": "../ai-control-plane" },
     { "path": "../aef-contracts" },
     { "path": "../aef-sdk" },
+    { "path": "../cognitive-observability" },
     { "path": "../guardian" },
+    { "path": "../nexus-mcp" },
+    { "path": "../policy-engine" },
     { "path": "../trace-graph" }
   ],
   "include": ["src/**/*"],

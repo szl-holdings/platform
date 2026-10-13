@@ -2,23 +2,25 @@
  * SZL Holdings — Agent Gateway: Evidence Attachment
  * Phase 11 — Agent Gateway
  *
- * Assembles an immutable EvidenceRecord before any agent execution.
+ * Assembles an EvidenceRecord before any agent execution.
  * The evidence record is the primary artifact of the gateway: it ties
  * together caller identity, OPA decision, simulation result, action plan,
  * diff, and rollback path into a single attestation that is stored in the
- * audit ledger and referenced by the approval workflow.
+ * required ledger and referenced by the approval workflow. Construction alone
+ * is not a durability or immutability claim; persistence is enforced by the
+ * gateway before approval or execution.
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type {
+  ActionPlan,
   AgentActionRequest,
+  AllowedCapability,
   CallerIdentity,
   EvidenceRecord,
+  ManifestDiff,
   OpaDecision,
   SimulationResult,
-  ActionPlan,
-  ManifestDiff,
-  AllowedCapability,
 } from './types.js';
 
 // ---------------------------------------------------------------------------

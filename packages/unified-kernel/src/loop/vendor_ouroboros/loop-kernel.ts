@@ -73,16 +73,8 @@ export interface RunLoopArgs<S, O = unknown> {
   config?: LoopConfig;
 }
 
-export async function runLoop<S, O = unknown>(
-  args: RunLoopArgs<S, O>,
-): Promise<LoopTrace<S, O>> {
-  const {
-    initialState,
-    step,
-    delta,
-    consistency,
-    config = {},
-  } = args;
+export async function runLoop<S, O = unknown>(args: RunLoopArgs<S, O>): Promise<LoopTrace<S, O>> {
+  const { initialState, step, delta, consistency, config = {} } = args;
 
   const maxSteps = normalizeStepBudget(config.maxSteps);
   const convergenceThreshold = config.convergenceThreshold ?? DEFAULT_CONVERGENCE;

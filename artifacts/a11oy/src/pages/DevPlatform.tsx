@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
+import { Card, KpiCard, PageHeader, SectionTitle } from '../components/ui';
 import { COOKBOOK, COOKBOOK_CATEGORIES } from '../data/cookbookData';
 
 const T = {
@@ -1668,8 +1668,8 @@ const ADMIN_API = {
 const CLOUD_PLATFORMS = [
   {
     name: 'Microsoft Azure AI Foundry',
-    desc: 'Deploy a11oy agents on Azure AI Foundry with enterprise-grade security, compliance, and global scale. Leverage Azure Entra ID for SSO, Azure Key Vault for secrets, and Azure Monitor for observability.',
-    status: 'GA',
+    desc: 'Target adapter design for Azure AI Foundry. Entra ID, Key Vault, private networking, and Azure Monitor require separately configured and verified customer infrastructure.',
+    status: 'DESIGN',
     features: [
       'Entra ID SSO',
       'Key Vault integration',
@@ -1694,8 +1694,8 @@ resp = client.agents.run(
   },
   {
     name: 'Amazon Bedrock',
-    desc: 'Run a11oy agents on Amazon Bedrock with VPC isolation, IAM-based access control, and CloudTrail audit logging. Cross-region inference for latency optimization.',
-    status: 'GA',
+    desc: 'Target adapter design for Amazon Bedrock. VPC, IAM, CloudTrail, and regional routing require separately configured and verified customer infrastructure.',
+    status: 'DESIGN',
     features: [
       'IAM access control',
       'VPC isolation',
@@ -1719,8 +1719,8 @@ resp = client.agents.run(
   },
   {
     name: 'Google Cloud Vertex AI',
-    desc: 'Deploy a11oy agents on Vertex AI with Workbench integration, BigQuery connectors, and Vertex AI Search for enterprise RAG. CMEK encryption and VPC-SC support.',
-    status: 'GA',
+    desc: 'Target adapter design for Vertex AI. Workbench, BigQuery, Vertex AI Search, CMEK, and VPC-SC require separately configured and verified customer infrastructure.',
+    status: 'DESIGN',
     features: [
       'Workbench integration',
       'BigQuery connectors',
@@ -1744,15 +1744,15 @@ resp = client.agents.run(
   },
   {
     name: 'a11oy Sovereign Cloud',
-    desc: 'Air-gapped, FedRAMP High deployment for defense and intelligence workloads. ITAR-compliant, IL5-certified, with hardware security modules and zero-trust architecture.',
-    status: 'GA',
+    desc: 'Unimplemented sovereign deployment target. Air gap, government authorization, export-control scope, impact-level eligibility, HSMs, and zero-trust controls require independent accreditation and runtime evidence.',
+    status: 'NOT AVAILABLE',
     features: [
-      'FedRAMP High',
-      'IL5 certified',
-      'ITAR compliant',
-      'HSM key management',
-      'Air-gapped option',
-      'Zero-trust',
+      'FedRAMP High target — not authorized',
+      'IL5 target — not certified',
+      'ITAR scope — not attested',
+      'HSM requirement',
+      'Air-gap requirement',
+      'Zero-trust requirement',
     ],
     code: `from a11oy.cloud import SovereignCloud
 
@@ -1774,9 +1774,9 @@ const GLASSWING_SECURITY = {
   pillars: [
     {
       name: 'Proof Chain Integrity',
-      desc: 'Every agent decision, tool call, and data access is cryptographically anchored to an immutable proof chain. Tamper-evident, auditable, court-admissible.',
-      metric: '4.2M proofs verified',
-      status: '100% integrity',
+      desc: 'Target contract for durable, signed evidence covering decisions, tool calls, and data access. Current fixtures are not immutable, court-admissible, or production attestations.',
+      metric: 'No production proof set',
+      status: 'HOLD',
     },
     {
       name: 'Zero-Trust Agent Architecture',
@@ -1786,9 +1786,9 @@ const GLASSWING_SECURITY = {
     },
     {
       name: 'Sovereign Data Residency',
-      desc: 'Data never leaves designated regions. GDPR, CCPA, LGPD, PIPL compliant. Customer-managed encryption keys. Hardware security modules for key material.',
-      metric: '5 regions active',
-      status: 'Compliant',
+      desc: 'Target controls for regional processing, privacy requirements, customer-managed keys, and HSM-backed key material. Compliance and residency require deployment-specific verification.',
+      metric: 'No regions admitted',
+      status: 'HOLD',
     },
     {
       name: 'AI Red Team Program',
@@ -1798,9 +1798,9 @@ const GLASSWING_SECURITY = {
     },
     {
       name: 'Supply Chain Verification',
-      desc: 'Every model, skill, MCP server, and connector is signed and verified. SBOM for all dependencies. Reproducible builds. Governed update pipeline.',
-      metric: 'verified builds (scoped)',
-      status: 'Enforced',
+      desc: 'Target requirement for signed artifacts, complete SBOM coverage, reproducible builds, and governed updates. Current evidence is explicitly scoped and incomplete for Python deployables.',
+      metric: 'Scoped Node evidence',
+      status: 'PARTIAL',
     },
     {
       name: 'Incident Response Automation',
@@ -1846,18 +1846,18 @@ const GLASSWING_SECURITY = {
     },
   ],
   certifications: [
-    'SOC 2 Type II',
-    'ISO 27001',
-    'ISO 27701',
-    'FedRAMP High',
-    'IL5',
-    'ITAR',
-    'HIPAA',
-    'PCI DSS Level 1',
-    'GDPR',
-    'CCPA',
-    'CSA STAR Level 2',
-    'NIST 800-53',
+    'SOC 2 target — not attested',
+    'ISO 27001 target — not certified',
+    'ISO 27701 target — not certified',
+    'FedRAMP target — not authorized',
+    'IL5 target — not certified',
+    'ITAR scope — not attested',
+    'HIPAA scope — not attested',
+    'PCI DSS target — not certified',
+    'GDPR mapping — not legal assurance',
+    'CCPA mapping — not legal assurance',
+    'CSA STAR target — not certified',
+    'NIST 800-53 mapping — not authorization',
   ],
 };
 
@@ -3108,7 +3108,7 @@ export function DevPlatform() {
         label="DEVELOPER PLATFORM"
         title="a11oy SDK"
         subtitle="Product exploration surface. Registries and evaluation values below are seeded demonstrations unless a linked receipt explicitly marks them MEASURED."
-        status="WARN"
+        status="DEMO"
       />
 
       <div
@@ -4870,7 +4870,7 @@ new_key = admin.api_keys.rotate(
               className="text-[9px] font-mono uppercase tracking-wider mb-3"
               style={{ color: T.muted }}
             >
-              Compliance & Certifications
+              Assurance targets · no certification or authorization claimed
             </div>
             <div className="flex flex-wrap gap-2">
               {GLASSWING_SECURITY.certifications.map((c) => (
