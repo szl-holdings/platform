@@ -39,7 +39,7 @@ Each of the six SZL product surfaces received one new retrieval page wired to it
 | PRISM Counsel — Legal Command | `/prism-counsel/aef-search` | `prism_legal_matter` |
 | Carlota Jo Consulting | `/carlota-jo/aef-search` | `carlota_private_advisory` |
 
-Every result card exposes the full evidence breakdown — dense vector score, BM25 keyword score, reciprocal-rank fusion score, cross-encoder reranker score (when enabled), and final score — alongside the retrieval pathway used (e.g. `dense+keyword → fusion → rerank`) and any rationale text produced by the profile's query prompt template. Trace IDs and evidence IDs are displayed for every hit, making every retrieval event auditable to its ledger entry.
+Every result card exposes the available evidence breakdown — dense vector score, BM25 keyword score, reciprocal-rank fusion score, deterministic lexical-overlap reranker score (when enabled), and final score — alongside the retrieval pathway used (e.g. `dense+keyword → fusion → rerank`) and any rationale text produced by the profile's query prompt template. The shipping worker does not load a cross-encoder model. In development/test, trace IDs and local evidence IDs can be displayed per returned hit; those IDs are not production audit authority.
 
 When AEF is not configured (i.e., `VITE_AEF_GATEWAY_URL` or `VITE_AEF_API_KEY` are absent), the page renders a clear, actionable configuration notice rather than an empty result set.
 
@@ -64,7 +64,7 @@ Consumer app (React/Vite)
                  ├─ Exact-match boost rules applied
                  ├─ Reciprocal-rank fusion (@workspace/aef-retrieval-core/fusion)
                  ├─ Metadata filter pass
-                 ├─ Cross-encoder rerank (when rerankEnabled=true)
+                 ├─ Deterministic lexical-overlap rerank (when rerankEnabled=true)
                  ├─ Evidence assembled (@workspace/aef-evidence-ledger)
                  ├─ Policy guard check (@workspace/aef-policy-guard)
                  └─ Response normalised and returned to SDK
@@ -75,7 +75,10 @@ Agent workflows (tool-mesh)
             └─ Results mapped to DocumentRetrievalHit with evidence
 ```
 
-The AEF evidence ledger writes a record for every retrieval event, linking the `traceId` and `evidenceId` to the originating request. These IDs propagate to the consumer UI so that any displayed result can be traced back to its audit record.
+The development/test recorder writes per-hit records and can propagate local
+IDs to consumers. It does not create a durable request-level record for every
+retrieval, so production evidence-producing routes are held and those IDs must
+not be represented as audit records.
 
 ---
 

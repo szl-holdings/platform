@@ -25,6 +25,31 @@ title = "SZL Holdings — Secret Scanning Policy"
 [extend]
 useDefault = true
 
+# The tokenizer's public Hugging Face commit SHA is not credential material.
+# Keep upstream generic-api-key detection unchanged; exempt only this exact
+# assignment in this exact file (including historical versions in PR diffs).
+[[rules]]
+  id = "generic-api-key"
+
+  [[rules.allowlists]]
+    description = "Exact public Xenova/all-MiniLM-L6-v2 tokenizer revision"
+    condition = "AND"
+    regexTarget = "line"
+    paths = ['''^workers/alloy-vector-worker/src/tokenizer\.ts$''']
+    # Gitleaks 8.21.2 includes the preceding newline in finding.Line.
+    regexes = ['''^(\r?\n)?const DEFAULT_TOKENIZER_REVISION = '751bff37182d3f1213fa05d7196b954e230abad9';$''']
+
+  # Historical public tokenizer revision false positive (main push run
+  # 37728417920). Keep this exception bound to the original commit, exact file,
+  # and immutable-revision assignment.
+  [[rules.allowlists]]
+    description = "Provider-confirmed public tokenizer model revision in historical commit bff9531"
+    condition = "AND"
+    commits = ["bff95314865f57ad07c8c1dce797cef4bd141865"]
+    paths = ["^workers/alloy-vector-worker/src/tokenizer[.]ts$"]
+    regexTarget = "match"
+    regexes = ["^DEFAULT_TOKENIZER_REVISION = '[0-9a-f]{40}'$"]
+
 # ── Global allowlist ──────────────────────────────────────────────────────────
 # Entries here suppress matches across ALL rules.
 # Policy: prefer targeted regex suppressions over broad path/directory skips.
@@ -569,18 +594,3 @@ useDefault = true
       # GitHub Secrets; the string committed to source is the reference itself.
       "\\$\\{\\{\\s*secrets\\.",
     ]
-
-# Historical public tokenizer revision false positive (main push run 37728417920).
-# The exact forty-hex value is a provider-confirmed Hugging Face model commit,
-# not a credential. Keep the exception bound to that historical commit, this
-# file, and the immutable-revision assignment; all other findings remain actionable.
-[[rules]]
-  id = "generic-api-key"
-
-  [[rules.allowlists]]
-    description = "Provider-confirmed public tokenizer model revision in historical commit bff9531"
-    condition = "AND"
-    commits = ["bff95314865f57ad07c8c1dce797cef4bd141865"]
-    paths = ["^workers/alloy-vector-worker/src/tokenizer[.]ts$"]
-    regexTarget = "match"
-    regexes = ["^DEFAULT_TOKENIZER_REVISION = '[0-9a-f]{40}'$"]

@@ -4,9 +4,15 @@
   "type": "module",
   "description": "AEEP workflow runtime — run engine, step executor, state machine, and approval gate",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "scripts": {
+    "build": "tsc --build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

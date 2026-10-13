@@ -3,6 +3,8 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "customConditions": ["workspace"],
+    "jsx": "react-jsx",
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,

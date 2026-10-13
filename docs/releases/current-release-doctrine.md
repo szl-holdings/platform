@@ -1,6 +1,6 @@
 # Current Release Doctrine
 
-**Date:** April 16, 2026
+**Date:** October 6, 2026
 **Status:** Authoritative — supersedes `release-strategy.md` and `release-governance.md` where there is conflict
 **Scope:** How code becomes a build, how builds are validated, how a release is cut and rolled back, how secrets enter runtime, and how environments differ
 
@@ -8,41 +8,59 @@
 
 ## 1. How Code Becomes a Build
 
-The SZL Holdings platform is a pnpm monorepo managed by Replit. The build pipeline is as follows:
+The SZL Holdings platform is a pnpm monorepo. The checkout contains Replit,
+GitHub Actions, container, and Azure-oriented configuration, but configuration
+presence is not evidence that any provider currently hosts the platform.
 
 ### Development Build
 
-1. Code changes are authored by the Replit Agent or collaborators in the Replit workspace.
-2. Replit automatically commits and checkpoints changes after each task merge — no manual `git commit` is required during development.
-3. Each artifact (web app, mobile app, API server) is built independently via its own `pnpm build` script.
-4. The top-level build command is: `pnpm -r build`
-5. Each artifact runs Vite (web frontends) or tsc (API server) to produce a compiled output.
+1. Code changes may be authored in any authorized checkout, including a managed
+   cloud workspace.
+2. Changes are committed and reviewed through Git. Provider checkpoint or
+   auto-commit behavior is not assumed by this doctrine.
+3. Each registered workspace package is invoked only through scripts that its
+   current `package.json` actually defines.
+4. The top-level build command is: `pnpm run build` (Turbo workspace graph)
+5. Web frontends generally use Vite; the startable TypeScript services under
+   `apps/*` use `tsc`. Python services use their package-specific checks.
 6. TypeScript compilation errors fail the build.
 
 ### Build Artifacts
 
-| Artifact | Build Command | Output |
+This is a source/build inventory, not a deployment inventory:
+
+| Package | Build Command | Output / boundary |
 |----------|-------------|--------|
-| `api-server` | `pnpm --filter @workspace/api-server build` | `dist/` — compiled JS |
-| `szl-holdings` | `pnpm --filter @workspace/szl-holdings build` | `dist/` — Vite bundle |
-| `aegis` | `pnpm --filter @workspace/aegis build` | `dist/` — Vite bundle |
+| `apps/alloy-runtime-api` | `pnpm --filter @workspace/alloy-runtime-api build` | `dist/` — startable Express implementation in source |
+| `apps/alloy-embedding-api` | `pnpm --filter @workspace/alloy-embedding-api build` | `dist/` — startable Express implementation in source |
+| `apps/alloy-ingestion-orchestrator` | `pnpm --filter @workspace/alloy-ingestion-orchestrator build` | `dist/` — startable Express implementation in source |
+| `artifacts/api-server` | No build or start script | Historical compatibility stub retaining a narrow export; it is not the canonical runnable backend |
+| `a11oy` | `pnpm --filter @workspace/a11oy build` | `dist/` — Vite bundle |
+| `counsel` | `pnpm --filter @workspace/counsel build` | `dist/` — Vite bundle |
+| `sentra` | `pnpm --filter @workspace/sentra build` | `dist/` — Vite bundle |
 | `vessels` | `pnpm --filter @workspace/vessels build` | `dist/` — Vite bundle |
 | `terra` | `pnpm --filter @workspace/terra build` | `dist/` — Vite bundle |
-| `command` | `pnpm --filter @workspace/command build` | `dist/` — Vite bundle |
 | `carlota-jo` | `pnpm --filter @workspace/carlota-jo build` | `dist/` — Vite bundle |
-| `szl-holdings-mobile` | `expo export` | Expo export bundle |
 
 ### CI Validation (GitHub Actions)
 
-The CI pipeline (`.github/workflows/ci.yml`) runs on every push and PR:
+The core `.github/workflows/ci.yml` workflow runs on pull requests, pushes to
+`main`, and manual dispatch. It defines:
 
-1. **Lint:** `pnpm -r lint` — ESLint across all packages
-2. **Type-check:** `pnpm -r type-check` — TypeScript strict mode
-3. **Unit tests:** `pnpm -r test` — Vitest unit tests
-4. **Integration tests:** Separate job with PostgreSQL service container
-5. **Build check:** `pnpm -r build` — confirms all artifacts compile
+1. **Clean clone:** dependency-free invariants on Ubuntu and Windows.
+2. **Lint:** `pnpm run lint:ci` after a frozen install.
+3. **Type-check:** `pnpm run typecheck` after a frozen install.
 
-> **Known issue:** Integration test job uses pnpm 9 / Node 20 while other jobs use pnpm 10 / Node 22 (GAP-009 in gap register). Remediate in Q2 2026.
+Tests, builds, integration coverage, runtime audit, E2E, security,
+reproducibility, and filesystem/SCA scanning are separate workflows with their
+own triggers. Only the contexts in the dated authenticated ruleset receipt are
+branch-required; workflow source is not enforcement evidence.
+
+> **Runtime contract:** GitHub CI source declares Node 24 and the root-pinned
+> pnpm 10.26.1. The preinstall and clean-clone contracts fail closed if the
+> effective package manager differs. Reviewed container source declares
+> digest-pinned Node 26 and the same exact pnpm version. Execution must still
+> verify those effective versions.
 
 ---
 
@@ -52,13 +70,12 @@ The CI pipeline (`.github/workflows/ci.yml`) runs on every push and PR:
 
 Before tagging any release:
 
-- [ ] `pnpm -r build` — clean build, no errors
-- [ ] `pnpm -r type-check` — no TypeScript errors
-- [ ] `pnpm -r lint` — no lint errors
-- [ ] `pnpm -r test` — all unit tests pass
-- [ ] Smoke test: `pnpm qa:site` or `scripts/smoke-tests/run-smoke-tests.sh`
-- [ ] `GET /api/health` returns `status: "healthy"`
-- [ ] `GET /api/ready` returns ready
+- [ ] `pnpm run build` — clean workspace build, no errors
+- [ ] `pnpm run typecheck` — no TypeScript errors
+- [ ] `pnpm run lint:ci` — no lint or environment-coverage errors
+- [ ] `pnpm test` — all configured contract and workspace tests pass
+- [ ] Run the applicable source and route smoke suites, including `pnpm qa:site`
+- [ ] For each promoted service, bind `/healthz` and `/readyz` semantics to the exact deployed source/image and dependency state
 - [ ] Review `CHANGELOG.md` entry for the release
 - [ ] No new `console.log` or debug artifacts in production code
 - [ ] No secrets committed (verify with `git diff`)
@@ -74,8 +91,8 @@ Formal release gates are documented in `docs/RELEASE_GATES.md`. Key gates:
 |------|-------------|
 | Build | All artifacts build without error |
 | Type safety | Zero TypeScript errors |
-| Auth | Global auth enforcer verified active |
-| Health | API health endpoint returns healthy |
+| Auth | Package-specific authentication and negative-authorization tests pass; deployed configuration is read back |
+| Health | Each promoted service's health/readiness response is bound to exact deployed identity and dependencies |
 | Smoke tests | Smoke test matrix passes |
 | CHANGELOG | Release notes written |
 
@@ -93,14 +110,14 @@ SZL Holdings follows Semantic Versioning (`MAJOR.MINOR.PATCH`).
 
 ### Current Version Range
 
-- `v0.x.x` = Pre-commercial (platform built and demonstrable; not commercially deployed)
-- `v1.0.0` = First commercial release (first paying customer)
+- `v0.x.x` = Pre-commercial versioning policy; no deployment or customer status is inferred
+- `v1.0.0` = Reserved release-policy milestone; customer or deployment state requires separate evidence
 
 ### Cutting a Release
 
 ```bash
 # 1. Ensure build is clean
-pnpm -r build
+pnpm run build
 
 # 2. Run smoke tests
 pnpm qa:site
@@ -114,9 +131,9 @@ git push origin v0.2.0
 #    Body: Contents of docs/releases/v0.2.0.md
 #    Mark as pre-release if beta/RC
 
-# 5. Replit deployment update
-#    In Replit, the deployment is updated by restarting workflows
-#    after the code change is merged/checkpointed
+# 5. Deployment is a separate, receipted operation
+#    This tree has no production-deployment workflow. A tag or release does
+#    not establish that any provider received or is serving the release.
 ```
 
 ### Release Naming Convention
@@ -137,19 +154,19 @@ Examples:
 
 **Rule: Secrets are never committed to version control. No exceptions.**
 
-### Development (Replit)
+### Configured targets and evidence boundary
 
-- Secrets are stored in Replit Secrets (isolated environment variable store)
-- Available to the runtime as `process.env.*`
-- Set via the Replit UI or Replit CLI — never in `.env` files with real values
-- Each development workspace has isolated secrets from production
-
-### Production
-
-- Secrets stored in Azure Key Vault (production vault)
-- Injected into runtime via Azure App Service application settings / managed identity
-- Separate vault from staging — no shared secrets across environments
-- Emergency backup: encrypted password manager (offline, founder-only access)
+- Application code reads secrets from environment variables. Real values must
+  come from an authorized secret store and must never be committed.
+- `.replit` declares non-secret environment defaults and Replit-oriented
+  targets; it does not reveal whether a Replit vault, deployment, or production
+  binding currently exists.
+- Azure Key Vault and managed-identity references are target architecture in
+  repository documentation/IaC. No current Azure staging or production secret
+  binding was observed.
+- Managed cloud-environment vault bindings, when configured, belong to the
+  environment control plane rather than this repository. Draft presence is not
+  runtime publication or deployment evidence.
 
 ### Secret Rotation Policy
 
@@ -162,35 +179,51 @@ Examples:
 | Webhook signing secrets | Every 90 days |
 | Internal auth token | Every 90 days |
 
-Full policy: `docs/SECRETS_POLICY.md`
+Full policy target: `docs/SECRETS_POLICY.md`. The schedules above are policy
+requirements; this document is not a rotation receipt.
 
 ---
 
 ## 5. How Environments Differ
 
-| Attribute | Development (Replit) | Staging | Production |
-|-----------|---------------------|---------|-----------|
-| Host | Replit workspace container | Azure App Service (staging slot) | Azure App Service (production) |
-| Database | Replit-managed PostgreSQL | Azure PostgreSQL Flexible (staging) | Azure PostgreSQL Flexible (prod) |
-| Secrets | Replit Secrets | Azure Key Vault (staging vault) | Azure Key Vault (production vault) |
-| Auth | Replit OIDC (dev mode) | Azure AD (staging tenant) | Azure AD (production tenant) |
-| Domain | `*.replit.dev` | `staging.szlholdings.com` | `szlholdings.com` |
-| Data | Synthetic demo data only | Anonymized/synthetic | Real customer data |
-| Rate limiting | Relaxed (1000 req/15 min global) | Production-equivalent | Strict (200 req/15 min global) |
-| CORS | `*.replit.app, *.replit.dev, *.repl.co` | Staging domain | `szlholdings.com` (update before DNS cutover — GAP-004) |
-| Error reporting | Pino console logging | Sentry (if configured) | Sentry (required before first paid tenant — GAP-006) |
+The repository describes development, staging, and production *targets*, but a
+current provider/environment inventory was not observed. Treat the following as
+admission requirements, not present-tense topology:
 
-> **Important:** Azure staging/production environments are the documented target. As of April 2026, the active deployment is Replit-hosted. Environment docs represent the production-intent architecture. See environment promotion model for promotion path.
+| Attribute | Development target | Staging target | Production target |
+|-----------|--------------------|----------------|-------------------|
+| Host | Managed/local workspace; provider **UNKNOWN** | **UNKNOWN** until a deployment receipt identifies it | **UNKNOWN** until a deployment receipt identifies it |
+| Database | Disposable or isolated development database | Isolated staging database required; provider **UNKNOWN** | Isolated production database required; provider **UNKNOWN** |
+| Secrets | Authorized development vault binding | Separate staging vault binding required | Separate production vault binding required |
+| Auth | Source supports Replit OIDC and other integration paths; active mode **UNKNOWN** | Identity provider and tenant require deployment evidence | Identity provider and tenant require deployment evidence |
+| Domain | Workspace/local URL as configured | No current staging-domain receipt | The bounded domain receipts do not identify the serving origin or full runtime |
+| Data | Synthetic/demo only | Synthetic or approved anonymized data only | Customer-data admission is **UNKNOWN / HOLD** until tenancy, security, retention, and deployment gates are evidenced |
+| Rate limiting, CORS, telemetry | Local/source defaults only | Production-equivalent policy must be proved | Exact active policy must be proved |
+
+Azure and Replit references elsewhere in the repository are configuration or
+target doctrine unless a dated provider receipt says otherwise. See the
+environment-promotion model for intended gates, not for proof that promotion
+occurred.
 
 ---
 
-## 6. Current Deployment Platform
+## 6. Deployment Evidence Boundary
 
-The platform is currently deployed exclusively on Replit:
+The current deployment platform is **UNKNOWN** from the evidence in this
+checkout. Source inspection establishes that:
 
-- All artifacts run as Replit workflows in the development workspace
-- The Replit deployment (Autoscale or Reserved VM) serves as the production environment
-- Replit checkpoints serve as the rollback mechanism
-- Database is Replit-managed PostgreSQL
+- `.replit` declares an autoscale application-router target and several local
+  workflow/port settings; it does not prove a live Replit deployment.
+- `.github/workflows/deploy-staging.yml` is a fail-soft Replit staging trigger.
+  It can skip for missing credentials and treats remote failures as warnings,
+  so workflow presence or success is not a deployment receipt.
+- No `.github/workflows/deploy-production.yml` exists in the current tree.
+- Azure Bicep files and integration code are target/source artifacts, not an
+  observed Azure environment.
+- The dated domain homepage receipts do not establish origin provider,
+  database, deployed revision, or customer-data handling.
 
-See `docs/releases/current-environment-promotion-model.md` for the path to Azure production.
+See `docs/releases/current-environment-promotion-model.md` for intended
+promotion gates. Record provider, exact source/image identity, configuration,
+health/readiness, data classification, and rollback readback before naming any
+environment production.
