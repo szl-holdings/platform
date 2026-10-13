@@ -156,7 +156,7 @@ export function GovernedSecurityAgents() {
               ].map(target => (
                 <div key={target} className="flex items-center justify-between gap-3">
                   <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{target}</span>
-                  <span className="font-mono" style={{ color: GOLD }}>UNVERIFIED</span>
+                  <span className="font-mono whitespace-nowrap shrink-0" style={{ color: GOLD }}>UNVERIFIED</span>
                 </div>
               ))}
             </div>

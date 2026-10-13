@@ -152,6 +152,28 @@ The locked Playwright 1.60.0 CLI with the unchanged native configuration
 successfully loads and lists all 25 supplemental Chromium cases. This checks
 the actual transformer boundary; it is not a browser execution claim.
 
+### First completed browser matrix and visual correction
+
+Run `38458625406`, job `115507702780`, passed all 41 A11oy Chromium
+tests, including all 25 supplemental boundary cases without retries. Artifact
+`11845486717` contains 25 original PNGs, 25 sidecars and the build witness;
+its 3,079,221-byte ZIP SHA-256 is
+`4987709dee4c1a48146f0ace4be8b29cefae0540bf7803299829bd40dec71d01`.
+The captured source is `ce82d2b97a813be185e4e3a853582e4d1ea89db6`,
+whose tree `5fbf3018bc7d87f197808e0a137ebbb2ab755a39` was independently
+read back from GitHub and exactly equals candidate `dd3bf024d02bb41ca93d48f31a8adb8d77aab77a`.
+All image/sidecar source, route, viewport, build-witness, asset and served-response
+digests matched, with zero recorded page/console errors. The build witness SHA-256
+is `72e25b3f83aeaa75e36d46c97742ce19c97cf64dcce76bd7e42f29aeca72ddbb`.
+
+Visual review found the mobile `UNVERIFIED` target label could wrap its final
+letter onto a second line. The status now retains its intrinsic width and stays
+on one line; explanatory labels can still wrap. The browser specification now
+checks actual status-label height against line height at every viewport, in
+addition to the existing no-overflow assertions. This source edit requires a
+fresh matrix: the earlier images are historical observations, not final-source
+qualification. The native Playwright loader still lists all 25 cases.
+
 ## Original proposal disposition
 
 All original files remain accessible under the immutable source above.

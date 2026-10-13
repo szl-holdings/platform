@@ -104,7 +104,15 @@ for (const target of targets) {
           'UNAVAILABLE — no verified receipt chain for these workflows.',
           'UNAVAILABLE — no current environment or approval evidence.',
         ]) await expect(page.getByText(gap, { exact: true })).toBeVisible();
-        await expect(page.getByText('UNVERIFIED', { exact: true })).toHaveCount(4);
+        const statusLabels = page.getByText('UNVERIFIED', { exact: true });
+        await expect(statusLabels).toHaveCount(4);
+        for (const label of await statusLabels.all()) {
+          const size = await label.evaluate(element => ({
+            height: element.getBoundingClientRect().height,
+            lineHeight: Number.parseFloat(getComputedStyle(element).lineHeight),
+          }));
+          expect(size.height).toBeLessThanOrEqual(size.lineHeight + 1);
+        }
       } else {
         const hold = page.getByTestId('publication-hold');
         await expect(hold).toBeVisible();
