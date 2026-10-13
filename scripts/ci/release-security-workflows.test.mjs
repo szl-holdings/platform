@@ -434,3 +434,9 @@ test('required aggregate security gate accepts success as its sole passing resul
   assert.match(script, /^\s*exit 1$/m);
   assert.doesNotMatch(script, /continue-on-error|\|\| true/);
 });
+
+test('smoke checkout consumes the resolved deploy SHA without persisted credentials', () => {
+  const smoke = readRepositoryFile('.github/workflows/post-deploy-smoke.yml');
+  assert.match(smoke, /ref: \$\{\{ env\.WORKFLOW_RUN_HEAD_SHA \}\}\n\s+persist-credentials: false/);
+  assert.doesNotMatch(smoke, /ref: \$WORKFLOW_RUN_HEAD_SHA/);
+});
