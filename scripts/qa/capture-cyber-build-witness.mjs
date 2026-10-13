@@ -106,12 +106,11 @@ export async function captureBuild(root, environment = process.env, runBuild) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
-  try {
-    const witness = await captureBuild(process.cwd());
+  captureBuild(process.cwd()).then(witness => {
     process.stdout.write(JSON.stringify({ source_sha: witness.source_sha, source_tree: witness.source_tree,
       manifest_sha256: witness.output.manifest_sha256, witness: WITNESS_PATH }) + '\n');
-  } catch (error) {
+  }).catch(error => {
     process.stderr.write(`${error.message}\n`);
     process.exitCode = Number.isInteger(error.status) && error.status > 0 ? error.status : 1;
-  }
+  });
 }

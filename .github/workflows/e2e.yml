@@ -119,16 +119,16 @@ jobs:
             echo "::error::Required E2E specification is missing or empty: $spec_path"
             exit 1
           fi
-          spec_paths=("$spec_path")
+          supplemental_specs=()
           if [[ '${{ matrix.app }}' == 'a11oy' ]]; then
             boundary_spec="tests/e2e/a11oy-cyber-boundaries.spec.ts"
             if [[ ! -s "$boundary_spec" ]]; then
               echo "::error::Required supplemental boundary specification is missing or empty"
               exit 1
             fi
-            spec_paths+=("$boundary_spec")
+            supplemental_specs+=("$boundary_spec")
           fi
-          pnpm exec playwright test "${spec_paths[@]}" --project=chromium --reporter=list
+          pnpm exec playwright test "$spec_path" "${supplemental_specs[@]}" --project=chromium --reporter=list
         shell: bash
         env:
           CI: true

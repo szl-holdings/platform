@@ -114,6 +114,25 @@ the held page lacks its required `#main-content`, so this rail is explicitly
 supplemental presentation evidence. A partial artifact is not a full pass.
 Fresh compiled-browser execution remains pending before merge.
 
+### First hosted integration result and correction
+
+Candidate `7a2774ac7c3b5befc55e60f9accbf70486be14c5` successfully ran the
+seven build-witness contracts and the forced A11oy build, but the browser job
+`115500692376` stopped before tests: Playwright's CommonJS loader refused the
+helper's conditional top-level `await`. The CLI now invokes its existing async
+function with explicit success/error callbacks, retaining build-error propagation.
+A real CommonJS subprocess regression passes without invoking the CLI.
+
+Clean-clone jobs `115500688701` and `115500688511`, and unit job
+`115500686177`, failed the unchanged required-E2E workflow contract because the
+new array had replaced the explicit required specification argument. The original
+`"$spec_path"` argument is restored; a separate, guarded supplemental array is
+appended. No contract or required specification was removed or weakened.
+The corrected local witness suite passes 8/8 and the original required-E2E
+contract passes 1/1. The first local loader-regression invocation accidentally
+identified the imported helper as the CLI; its argv fixture was corrected before
+the passing run. The first hosted attempt produced no qualifying screenshots.
+
 ## Original proposal disposition
 
 All original files remain accessible under the immutable source above.

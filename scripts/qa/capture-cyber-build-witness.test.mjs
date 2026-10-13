@@ -4,7 +4,16 @@ import { execFileSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { captureBuild, verifyBuildWitness, WITNESS_PATH } from './capture-cyber-build-witness.mjs';
+
+test('Playwright CommonJS loading can import the witness helpers without running the CLI', () => {
+  const helper = fileURLToPath(new URL('./capture-cyber-build-witness.mjs', import.meta.url));
+  const output = execFileSync(process.execPath, ['--input-type=commonjs', '-e',
+    'const helper = require(process.argv[2]); process.stdout.write(typeof helper.verifyBuildWitness);', 'playwright-loader', helper],
+  { encoding: 'utf8', stdio: 'pipe' });
+  assert.equal(output, 'function');
+});
 
 async function fixture(run) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'cyber-build-witness-'));
