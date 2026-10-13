@@ -22,7 +22,9 @@ env:
 jobs:
   e2e-app:
     name: e2e-app (${{ matrix.app }})
-    runs-on: ubuntu-latest
+    # Playwright 1.60.0 has no Ubuntu 26 browser/dependency target.
+    # Remove after a tested Playwright >=1.61 upgrade and Ubuntu 26 browser CI.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
