@@ -183,6 +183,46 @@ by this bounded patch.
 
 ---
 
+### 2026-10-03 Series A candidate capture authority
+
+At protected main `f2f8df6f89056e9104587674ccec0855dd5b177a`, the
+candidate-owned Series A capture script could label locally generated metadata
+`VERIFIED_GITHUB_RUNTIME` from caller-supplied `GITHUB_ACTIONS` and related
+environment values. That label was not a trustworthy hosted-runtime witness.
+The P1 successor branch makes candidate metadata unconditionally
+`LOCAL_NON_AUTHORITATIVE` and inadmissible to the hosted gate. Its source and
+focused local tests are recorded in
+`audit/P1_SERIES_A_CAPTURE_AUTHORITY_PROOF_20261003.md`.
+
+The first protected screenshot-controller dispatch for successor PR #884,
+[run 37106028221](https://github.com/szl-holdings/platform/actions/runs/37106028221),
+failed before artifact publication. A new controller repair and fresh
+exact-head dispatch are required; no hosted capture is proved. PR #884's
+initial CI also failed an inherited Atelier concurrent-initialization test
+and inherited High-severity `node-forge`/`braces` vulnerability gates. Those
+gates remain blocking. PR #690's controller repair has not retroactively
+produced a capture for merged PR #668. No deployment, production, or customer
+status is inferred from this source correction.
+
+
+### 2026-10-02 operability source-evidence repair (draft)
+
+The scoped readiness-operability repair distinguishes UNKNOWN/inaccessible
+source observations from confirmed absence, binds all source reads to one
+observed default-branch revision, and explicitly limits Docker evidence to
+instruction presence (STRUCTURE_ONLY, build NOT_MEASURED). An incomplete row
+has no complete score; even a complete source score leaves runtime readiness
+NOT_ASSESSED. Offline regressions are part of the existing readiness discovery.
+
+Remaining: valid Hub publication/signing bindings, verified flagship registry
+access, substantive runbook/environment documentation, real image builds,
+rollback execution and runtime qualification. The review follow-up independently paginates audit-rift resampling at the
+reported immutable revision and observation bounds; legacy receipts without
+these pins remain UNVERIFIED. The four October 2 readiness publication failures were
+HTTP 401; this patch neither repairs nor suppresses that provider failure.
+Protected admission and exact-head hosted checks remain required. Evidence
+Steward and estate-auditor PRs are separate; no source files overlap them.
+
 ## Current Bounded Public Surface Registry — observed 2026-10-07
 
 The generated public-surface manifest distinguishes source-tree product
@@ -1147,3 +1187,9 @@ Operational gaps, process health, test coverage, observability, team ownership.
 - **2026-04-17 (Diligence Security Gap Remediation Sprint):** Five pre-commercial security gaps from the diligence review resolved or formally accepted. (1) **MFA (KG026)** — Formally accepted. IdP-level MFA via Azure AD SSO is the enforced control; platform-native MFA scoped for enterprise tier. (2) **IP address storage (KG034)** — Resolved. `hashIp()` in `lib/audit/src/ip-hash.ts` applies SHA-256 with configurable salt before all audit and session IP storage. Raw IPs never reach the DB. (3) **Input validation (KG003–KG008)** — Confirmed resolved. All high-traffic write routes verified to have Zod `validateBody()` applied (already resolved in Apr-2026 hardening sprint). (4) **Session revocation on role change (AF-010)** — Resolved. `revokeUserSessionsOnRoleChange()` added to `session-policy.ts`; wired into SCIM group member operations and new `PUT /admin/users/:userId/roles` endpoint. (5) **Dependency pinning (KG035)** — Formally accepted. `pnpm-lock.yaml` provides exact pinning; `pnpm install --frozen-lockfile` used in all CI/deploy pipelines; dependency vulnerability scanning via KG012. KNOWN-GAPS.md rev 9.
 
 ---
+
+## 2026-10-13 workflow security source reconciliation
+
+Current main already has the stronger fail-closed CodeQL merge-ref and paginated alert validation gate. This candidate preserves it and corrects the post-deployment checkout to evaluate the event SHA as an Actions expression while disabling persisted checkout credentials. The existing release-security contract suite covers the checkout binding. See [the bounded proof packet](../../audit/SECURITY_WORKFLOW_REPAIR_2026-10-05.md).
+
+Protected admission and successful hosted deployment/smoke evidence remain separate gates. This source repair does not claim production readiness or dismiss any advisory.

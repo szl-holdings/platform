@@ -25,8 +25,10 @@ Author: Yachay <yachay@szlholdings.dev>
 from __future__ import annotations
 
 import base64
+import datetime as dt
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.request
@@ -121,23 +123,51 @@ def audit_peer(agent: str) -> dict:
         elif agent == "readiness-operability":
             fls = payload.get("flagships", [])
             if fls:
-                import datetime as dt
-                since = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
-                rc, out = gh(f"repos/{fls[0]['repo']}/commits?since={since}&per_page=50")
-                if rc != 0:
-                    raise RuntimeError(f"GitHub commit recheck failed (exit {rc})")
-                commits = json.loads(out)
-                if not isinstance(commits, list):
-                    raise ValueError("GitHub commit recheck did not return a list")
-                n = len(commits)
-                claimed = fls[0].get("commits_last_7d", -99)
+                sample = fls[0]
+                claimed = sample.get("commits_last_7d")
+                revision = sample.get("revision")
+                observed_at = sample.get("observed_at_utc")
                 if type(claimed) is not int or claimed < 0:
                     return {**finding, "status": "UNVERIFIED",
                             "reason": "reported commit count is missing or invalid"}
-                finding["resampled_repo"] = fls[0]["repo"]
+                if (not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is None
+                        or not isinstance(observed_at, str)):
+                    return {**finding, "status": "UNVERIFIED",
+                            "reason": "reported commit revision or observation time is missing or invalid"}
+                try:
+                    observed = dt.datetime.fromisoformat(observed_at.replace("Z", "+00:00"))
+                    if observed.utcoffset() != dt.timedelta(0):
+                        raise ValueError("observation time must be UTC")
+                    since = (observed - dt.timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                    until = observed.strftime("%Y-%m-%dT%H:%M:%SZ")
+                except (ValueError, OverflowError):
+                    return {**finding, "status": "UNVERIFIED",
+                            "reason": "reported observation time is missing or invalid"}
+                seen = set()
+                for page in range(1, 11):
+                    rc, out = gh(f"repos/{sample['repo']}/commits?sha={revision}&since={since}&until={until}&per_page=100&page={page}")
+                    if rc != 0:
+                        raise RuntimeError(f"GitHub commit recheck failed (exit {rc})")
+                    commits = json.loads(out)
+                    if (not isinstance(commits, list) or len(commits) > 100
+                            or any(not isinstance(item, dict) or not isinstance(item.get("sha"), str)
+                                   or re.fullmatch(r"[0-9a-f]{40}", item["sha"]) is None for item in commits)):
+                        raise ValueError("GitHub commit recheck returned malformed commits")
+                    ids = [item["sha"] for item in commits]
+                    if len(set(ids)) != len(ids) or seen.intersection(ids):
+                        raise ValueError("GitHub commit recheck returned duplicate commits")
+                    seen.update(ids)
+                    if len(commits) < 100:
+                        break
+                else:
+                    raise ValueError("GitHub commit recheck history is incomplete")
+                finding["resampled_repo"] = sample["repo"]
+                finding["resampled_revision"] = revision
+                finding["resampled_observed_at_utc"] = observed_at
                 finding["claimed_commits"] = claimed
-                finding["independent_commits"] = n
-                finding["over_claimed"] = (abs(n - claimed) > 2)
+                finding["independent_commits"] = len(seen)
+                # Identical immutable revision and time bounds require exact agreement.
+                finding["over_claimed"] = len(seen) != claimed
         elif agent == "readiness-docs":
             repos = payload.get("repos", [])
             target = next((r for r in repos if r.get("present", {}).get("README.md")), None)
