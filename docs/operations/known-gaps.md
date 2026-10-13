@@ -1273,3 +1273,42 @@ access maintenance; this source does not implement safe automated cleanup or
 cross-process lifecycle coordination. Per-process serialization and the local
 filesystem lease do not establish a distributed database, production identity,
 provider operation, customer continuity, or durable external-ledger writes.
+
+
+## 2026-10-13 security claim and evidence reconciliation
+
+The reachable security-agent page is a local design surface with unavailable
+operational measurements. Cyber-resilience and compliance source corrections
+remain behind the existing publication hold; the route allowlist is unchanged.
+Four unsupported tool handlers are disabled and reject directly before any
+database/provider operation. No scanner, delivery, certification, containment
+or production control is established by those definitions.
+
+The read-only readiness collector binds observed workflow source and successful
+job/step evidence to the current default-branch head and freshness window. Its
+Platform scan-step source identity is conservative and must be reviewed after
+future edits. Metadata-only release signatures remain UNVERIFIED and cannot
+produce GREEN. The receipt's own signature is a separate requirement.
+
+Source/lock retirement checks do not replace native vulnerability scanning or
+installed-consumer compatibility. Archived node-forge provenance/helper bytes
+are historical and do not establish installed signing consumers. The repaired
+bounded descriptor reader closes the leaf-file check/reopen boundary; it does
+not confer arbitrary ancestor-directory authority.
+
+Fresh browser captures must bind compiled bytes, source and route state. Native
+E2E uses a localhost `/` base and supplemental source-presentation authority;
+it does not qualify canonical isolated-controller admission, deployed `/a11oy/`
+routes, actual security operations or customer evidence. Full hosted checks,
+normal protected squash, provider publication and outside runtime witnesses are
+separate gates. Earlier October receipts retain their original source and failures.
+Proof: [`PLATFORM_SECURITY_RECONCILIATION_2026-10-13_PROOF.md`](../../audit/PLATFORM_SECURITY_RECONCILIATION_2026-10-13_PROOF.md).
+
+Source-presentation follow-up: native run `38459759355` passed 41 A11oy browser
+cases, including 25 fresh workflow/hold/viewport captures without retries. All
+image, sidecar, source-tree, build and served-response bindings were checked;
+the corrected mobile status labels stay readable. Original images and the
+source-bound receipt are cataloged under the same proof packet. This closes the
+fresh local-presentation evidence gap only. Publication holds, unavailable live
+security controls, provider/signing admission and deployed-domain observations
+retain the separate limitations above.

@@ -50,6 +50,15 @@ jobs:
       - name: Verify security override consumer compatibility
         run: node --test scripts/qa/security-overrides-compat.test.mjs
 
+      - name: Verify archived pristine-control helper (not installed signing compatibility)
+        run: node --test scripts/qa/prepare-node-forge-pristine.test.mjs
+
+      - name: Verify actual retired signing graph and maintained braces backport
+        run: |
+          node --test scripts/qa/check-retired-signing-graph.test.mjs
+          node scripts/qa/check-retired-signing-graph.mjs
+          node --test packages/braces-safe/test/security.test.cjs
+
       - name: Run dependency vulnerability scan and generate SBOM
         id: sbom
         run: |

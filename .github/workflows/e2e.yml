@@ -86,7 +86,13 @@ jobs:
       - name: Build ${{ matrix.app }}
         # Include workspace dependencies whose package exports require compiled dist files.
         # Preserve browser-test environment flags and avoid production-base caches.
-        run: pnpm exec turbo run build --filter='${{ matrix.filter }}...' --env-mode=loose --force
+        run: |
+          if [[ '${{ matrix.app }}' == 'a11oy' ]]; then
+            node --test scripts/qa/capture-cyber-build-witness.test.mjs
+            node scripts/qa/capture-cyber-build-witness.mjs
+          else
+            pnpm exec turbo run build --filter='${{ matrix.filter }}...' --env-mode=loose --force
+          fi
         env:
           BASE_PATH: /
           # Vessels gates its dashboard behind PrivateAppGuard. Enable the app's
@@ -113,7 +119,16 @@ jobs:
             echo "::error::Required E2E specification is missing or empty: $spec_path"
             exit 1
           fi
-          pnpm exec playwright test "$spec_path" --project=chromium --reporter=list
+          supplemental_specs=()
+          if [[ '${{ matrix.app }}' == 'a11oy' ]]; then
+            boundary_spec="tests/e2e/a11oy-cyber-boundaries.spec.ts"
+            if [[ ! -s "$boundary_spec" ]]; then
+              echo "::error::Required supplemental boundary specification is missing or empty"
+              exit 1
+            fi
+            supplemental_specs+=("$boundary_spec")
+          fi
+          pnpm exec playwright test "$spec_path" "${supplemental_specs[@]}" --project=chromium --reporter=list
         shell: bash
         env:
           CI: true
@@ -147,6 +162,17 @@ jobs:
           name: playwright-screenshots-${{ matrix.app }}
           path: test-results/**/*.png
           retention-days: 7
+
+      - name: Upload supplemental A11oy boundary evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always() && matrix.app == 'a11oy'
+        with:
+          name: a11oy-cyber-boundaries-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/a11oy/dist/cyber-boundary-build.json
+            test-results/**/cyber-boundary.png
+            test-results/**/cyber-boundary.json
+          retention-days: 14
 
   e2e:
     name: E2E Gate
