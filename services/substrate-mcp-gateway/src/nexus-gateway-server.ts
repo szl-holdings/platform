@@ -17,17 +17,27 @@
  *                             on the same instance.
  */
 
+import {
+  buildTenantInstructions,
+  createDomainApps,
+  PRAXISMcpServer,
+  type TenantContext,
+} from '@workspace/nexus-mcp';
 import { z } from 'zod';
-import { PRAXISMcpServer, buildTenantInstructions, createDomainApps, type TenantContext } from '@workspace/nexus-mcp';
-import { getCurrentActorId } from './request-context.js';
-import { GATEWAY_VERSION, SERVER_INFO, SUBSTRATE_RESOURCES, SUBSTRATE_PROMPTS } from './descriptor.js';
+import {
+  GATEWAY_VERSION,
+  SERVER_INFO,
+  SUBSTRATE_PROMPTS,
+  SUBSTRATE_RESOURCES,
+} from './descriptor.js';
 import {
   getAvailableTools,
-  handleToolCall,
-  handleResourceRead,
   handlePromptGet,
+  handleResourceRead,
+  handleToolCall,
 } from './handlers.js';
 import { buildPRAXISEnvelopes, setResourceUpdateCallback } from './nexus-fabric.js';
+import { getCurrentActorId, getCurrentTenantId } from './request-context.js';
 import { emitToolListChanged, type RunLifecycleEvent } from './run-events.js';
 
 // ─── Singleton PRAXISMcpServer ─────────────────────────────────────────────────
@@ -79,7 +89,7 @@ function _buildGatewayServer(): PRAXISMcpServer {
       capturedRes.uri,
       { description: capturedRes.description, mimeType: capturedRes.mimeType },
       async (uri: string, ctx: TenantContext) => {
-        const tenantId = ctx.tenantId !== 'system' ? ctx.tenantId : undefined;
+        const tenantId = ctx.tenantId !== 'system' ? ctx.tenantId : getCurrentTenantId();
         const result = await handleResourceRead(uri, tenantId);
         if (result && typeof result === 'object' && 'error' in result) {
           throw new Error(String((result as { error: unknown }).error));
@@ -87,17 +97,25 @@ function _buildGatewayServer(): PRAXISMcpServer {
         const r = result as { contents: Array<{ uri: string; text?: string; mimeType?: string }> };
         const primaryText = r.contents[0]?.text ?? '';
 
-        // Append PRAXIS consciousness + proof envelopes to every resource read
+        // Append explicitly unvalidated assessment + governance receipt metadata.
         const envelopes = buildPRAXISEnvelopes({
           toolName: `resource:${String(uri)}`,
-          actor: 'mcp-resource',
+          actor: ctx.actorId ?? getCurrentActorId(),
           responseText: primaryText,
           isError: false,
+          ...(tenantId ? { tenantId } : {}),
         });
-        const envelopeContent = { uri: String(uri), mimeType: 'application/json', text: JSON.stringify({ _nexus: envelopes }, null, 2) };
+        const envelopeContent = {
+          uri: String(uri),
+          mimeType: 'application/json',
+          text: JSON.stringify({ _nexus: envelopes }, null, 2),
+        };
 
         return {
-          contents: [...r.contents.map(c => ({ ...c, uri: c.uri, text: c.text ?? '' })), envelopeContent],
+          contents: [
+            ...r.contents.map((c) => ({ ...c, uri: c.uri, text: c.text ?? '' })),
+            envelopeContent,
+          ],
         };
       },
     );
@@ -121,7 +139,9 @@ function _buildGatewayServer(): PRAXISMcpServer {
         if (result && typeof result === 'object' && 'error' in result) {
           throw new Error(String((result as { error: unknown }).error));
         }
-        const r = result as { messages: Array<{ role: string; content: { type: string; text: string } }> };
+        const r = result as {
+          messages: Array<{ role: string; content: { type: string; text: string } }>;
+        };
         return {
           messages: r.messages.map((m) => ({
             role: m.role as 'user' | 'assistant',
@@ -146,10 +166,9 @@ export function getGatewayServer(): PRAXISMcpServer {
 
   _server = _buildGatewayServer();
 
-  // ── Wire resource update notifications (Prism Bus → MCP subscriptions) ──────
-  // When startConvergenceBridge() receives a cross_domain_correlation event from
-  // the Prism Bus, it calls this callback which pushes notifications/resources/updated
-  // to all connected MCP clients that have subscribed to the affected URIs.
+  // Keep the subscription callback registered for a future verified signal
+  // adapter. This release exposes synthetic fixtures and never invokes it from
+  // a Prism Bus bridge.
   setResourceUpdateCallback((uri: string) => {
     void _server?.notifyResourceUpdated(uri);
   });
@@ -179,63 +198,82 @@ function _registerSubstrateTool(
   server: PRAXISMcpServer,
   toolName: string,
   description: string,
-  inputSchema: { type: 'object'; properties: Record<string, unknown>; required?: string[]; additionalProperties?: boolean },
+  inputSchema: {
+    type: 'object';
+    properties: Record<string, unknown>;
+    required?: string[];
+    additionalProperties?: boolean;
+  },
 ): void {
-  server.rawTool(toolName, description, inputSchema, async (args: Record<string, unknown>, ctx: TenantContext) => {
-    // Resolve actor identity for proof attribution. Priority:
-    //   1. MCP SDK context actorId (future SDK versions may set this)
-    //   2. ctx.tenantId if it is not the static 'system' default
-    //   3. Per-request AsyncLocalStorage actor set by the HTTP transport (authenticated caller)
-    //   4. Static fallback 'mcp-gateway' for non-HTTP transports (e.g. stdio)
-    const ctxTenantId = ctx.tenantId !== 'system' ? ctx.tenantId : undefined;
-    const actorId = ctx.actorId ?? ctxTenantId ?? getCurrentActorId();
-    const result = await handleToolCall(toolName, args, actorId);
+  server.rawTool(
+    toolName,
+    description,
+    inputSchema,
+    async (args: Record<string, unknown>, ctx: TenantContext) => {
+      // Resolve actor identity for proof attribution. Priority:
+      //   1. MCP SDK context actorId (future SDK versions may set this)
+      //   2. ctx.tenantId if it is not the static 'system' default
+      //   3. Per-request AsyncLocalStorage actor set by the HTTP transport (authenticated caller)
+      //   4. Static fallback 'mcp-gateway' for non-HTTP transports (e.g. stdio)
+      const ctxTenantId = ctx.tenantId !== 'system' ? ctx.tenantId : undefined;
+      const actorId = ctx.actorId ?? ctxTenantId ?? getCurrentActorId();
+      const result = await handleToolCall(toolName, args, actorId);
 
-    // ── Inject PRAXIS envelopes as a trailing content item ────────────────────
-    // Attach PRAXIS governance envelopes to every tool response (including
-    // agent_delegate). Both a trailing text content block (human-readable) and
-    // a first-class _meta structured field (programmatic) are emitted.
-    //
-    // For agent_delegate the outer envelope records the MCP tool invocation
-    // itself. The inner proof (inside delegateToAgent) records the delegation
-    // act. These are distinct events and distinct proof records — they should
-    // both be present on the response.
-    if (result._nexus) {
-      const nexusBlock = {
-        type: 'text' as const,
-        text: JSON.stringify({
-          _nexus: {
-            description: 'PRAXIS Intelligence Fabric — Governed Cognition Metadata',
-            ...result._nexus,
+      // ── Inject PRAXIS envelopes as a trailing content item ────────────────────
+      // Attach PRAXIS governance envelopes to every tool response (including
+      // agent_delegate). Both a trailing text content block (human-readable) and
+      // a first-class _meta structured field (programmatic) are emitted.
+      //
+      // For agent_delegate the outer envelope records the MCP tool invocation
+      // itself. The inner proof (inside delegateToAgent) records the delegation
+      // act. These are distinct events and distinct proof records — they should
+      // both be present on the response.
+      if (result._nexus) {
+        const nexusBlock = {
+          type: 'text' as const,
+          text: JSON.stringify(
+            {
+              _nexus: {
+                description:
+                  'PRAXIS governance metadata — assessment and verification evidence unavailable',
+                ...result._nexus,
+              },
+            },
+            null,
+            2,
+          ),
+        };
+        // Return a fully-typed CallToolResult with _meta for programmatic clients.
+        // The rawTool passthrough in PRAXISMcpServer.rawTool() detects content[]
+        // arrays and preserves _meta without re-serializing to text.
+        // Emit _meta with both:
+        //   • Canonical flat keys ("x-nexus-consciousness", "x-nexus-proof") for
+        //     strict MCP client interoperability and spec compliance.
+        //   • A nested "nexus" shorthand for clients that prefer structured access.
+        const enriched: {
+          content: typeof result.content;
+          isError?: boolean;
+          _meta: Record<string, unknown>;
+        } = {
+          content: [...result.content, nexusBlock],
+          isError: result.isError,
+          _meta: {
+            // Canonical key form — primary contract
+            'x-nexus-consciousness': result._nexus['x-nexus-consciousness'],
+            'x-nexus-proof': result._nexus['x-nexus-proof'],
+            // Shorthand form — convenience alias for programmatic clients
+            nexus: {
+              consciousness: result._nexus['x-nexus-consciousness'],
+              proof: result._nexus['x-nexus-proof'],
+            },
           },
-        }, null, 2),
-      };
-      // Return a fully-typed CallToolResult with _meta for programmatic clients.
-      // The rawTool passthrough in PRAXISMcpServer.rawTool() detects content[]
-      // arrays and preserves _meta without re-serializing to text.
-      // Emit _meta with both:
-      //   • Canonical flat keys ("x-nexus-consciousness", "x-nexus-proof") for
-      //     strict MCP client interoperability and spec compliance.
-      //   • A nested "nexus" shorthand for clients that prefer structured access.
-      const enriched: { content: typeof result.content; isError?: boolean; _meta: Record<string, unknown> } = {
-        content: [...result.content, nexusBlock],
-        isError: result.isError,
-        _meta: {
-          // Canonical key form — primary contract
-          'x-nexus-consciousness': result._nexus['x-nexus-consciousness'],
-          'x-nexus-proof': result._nexus['x-nexus-proof'],
-          // Shorthand form — convenience alias for programmatic clients
-          nexus: {
-            consciousness: result._nexus['x-nexus-consciousness'],
-            proof: result._nexus['x-nexus-proof'],
-          },
-        },
-      };
-      return enriched;
-    }
+        };
+        return enriched;
+      }
 
-    return result;
-  });
+      return result;
+    },
+  );
 }
 
 /**

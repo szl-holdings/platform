@@ -17,9 +17,6 @@
     "customDomain": {
       "value": "szlholdings.com"
     },
-    "apiImageTag": {
-      "value": "latest"
-    },
     "acrLoginServer": {
       "value": "szlholdingsacr.azurecr.io"
     },

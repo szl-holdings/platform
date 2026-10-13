@@ -1,5 +1,13 @@
 # Audit — Zero-Gap Track 1
 
+> **Authority boundary (2026-10-07):** “Zero-Gap” is the historical track name,
+> not a claim that the present estate has no gaps. Current publication decisions
+> are governed by
+> [`SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md`](./SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md).
+> The quick-reference registry below is usable as current-tree evidence only
+> when `node scripts/audit/validate-source-of-truth.js` passes; while it reports
+> drift, the mismatched metrics are **HOLD**, not estimates.
+
 **Completed:** 2026-04-21  
 **Track:** Zero-Gap Track 1 — Audit, Truth Map & Root Cleanup
 
@@ -37,34 +45,45 @@ mean.
 | [`frontier/DSLSA_STANDALONE_PUBLICATION_PROOF_CORRECTION_2026-07-29.md`](./frontier/DSLSA_STANDALONE_PUBLICATION_PROOF_CORRECTION_2026-07-29.md) | Append-only D-SLSA publication proof correction | Reproducible commands, numeric exit codes, attribution, patch scope, and unchanged DOI/D3/D4 boundaries |
 | [`FRONTIER_CONFORMANCE_PROOF.md`](./FRONTIER_CONFORMANCE_PROOF.md) | Frontier vertical conformance proof packet | Seven-gate reference fixture and honest 0/3 live-target result |
 | [`exact-head-screenshot-evidence-hardening-2026-08-20.md`](./exact-head-screenshot-evidence-hardening-2026-08-20.md) | Exact-head screenshot evidence hardening proof packet | PR/branch/checkout binding, fail-closed capture, isolated artifacts, and regression evidence |
+| [`A11OY_WORKCELL_PROOF_COVERAGE_HARDENING_PROOF_2026-10-05.md`](./A11OY_WORKCELL_PROOF_COVERAGE_HARDENING_PROOF_2026-10-05.md) | Hardened Workcell proof-coverage successor packet | 17-obligation fail-closed evaluator and exact-source five-width browser evidence |
+| [`A11OY_KERNEL_MUTATION_HARDENING_PROOF_2026-10-05.md`](./A11OY_KERNEL_MUTATION_HARDENING_PROOF_2026-10-05.md) | Kernel mutation authentication hardening proof packet | Fail-closed Bearer gates, bounded wake receipts, atomic idempotency, and explicit hosted-state limits |
+| [`SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md`](./SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md) | GitHub, Hugging Face, domain, and stack prepublication audit | Separates bounded current observations, retained/local evidence, unknowns, and promotion gates |
+| [`A11OY_FRONTIER_RELEASE_HARDENING_PROOF_2026-10-06.md`](./A11OY_FRONTIER_RELEASE_HARDENING_PROOF_2026-10-06.md) | Frontier candidate proof packet | Records current validation evidence and explicit exact-head, generated-truth, Python delivery, hosted-check, cloud-publication, and deployment holds |
+| [`MIGRATION_AUTHORITY_HARDENING_PROOF_2026-10-11.md`](./MIGRATION_AUTHORITY_HARDENING_PROOF_2026-10-11.md) | Migration authority hardening proof packet | Read-only preflight, fail-closed checksum drift, qualified tracker status, tests, and preserved production HOLD |
+| [`OVIS_EVALUATION_HARDENING_INTEGRATION_PROOF_20261011.md`](./OVIS_EVALUATION_HARDENING_INTEGRATION_PROOF_20261011.md) | Integrated Ovis evaluation hardening proof | Locked evaluation contract, isolated deployment adapters, exact merged-tree checks, and preserved qualification HOLD |
+| [`OVIS_EVALUATION_SECURITY_REFRESH_20261011.md`](./OVIS_EVALUATION_SECURITY_REFRESH_20261011.md) | Ovis dependency security refresh proof | CI-triggered Transformers advisory response, refreshed lock identity, compatibility checks, and residual audit boundary |
 
 ---
 
 ## Canonical Current-Tree Numbers (Quick Reference)
 
-> Updated 2026-09-24 after integrating the A11oy Atelier Turn Capsule source with
-> the retired legacy DCO compatibility workflow. Source:
-> `audit/source-of-truth.json` v2.1.5. Historical runtime/database snapshots
+> Updated 2026-10-07 against the staged frontier candidate.
+> Source:
+> `audit/source-of-truth.json` v2.1.9. Historical runtime/database snapshots
 > remain in the JSON but are not current public claims.
+
+The package directory counts below were refreshed from the tracked branch tree
+on 2026-10-07 when `packages/braces-safe` was added; other counts retain their
+separately recorded measurement dates.
 
 | Metric | Verified Count | Source |
 |--------|---------------|--------|
 | Registered artifacts | 6 | Tracked artifact manifests |
-| Artifact directories | 7 | Tracked top-level `artifacts/` children |
+| Artifact directories | 8 | Tracked top-level `artifacts/` children; includes the unregistered, asset-only `szl-holdings` directory |
 | Registered product verticals | 5 | Registered domain artifacts; A11oy is separate |
-| Domain packages (`packages/`) | 162 | Tracked top-level package directories |
+| Domain packages (`packages/`) | 164 | Tracked top-level package directories, including `vertical-runtime` |
 | Shared library packages (`lib/`) | 53 | Tracked top-level library directories |
-| Total packages (`packages/` + `lib/`) | 215 | 162 + 53 |
-| Apps (`apps/`) | 11 | Tracked top-level `apps/` children |
+| Total packages (`packages/` + `lib/`) | 217 | 164 + 53 |
+| Apps (`apps/`) | 12 | Tracked top-level `apps/` children, including `vertical-cells` |
 | Services (`services/`) | 11 | Tracked top-level `services/` children |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |
 | DB schema files | 197 | Tracked `lib/db/src/schema/**/*.ts` files |
 | DB `pgTable` call sites | 1,067 | Static source call sites; not provisioned-table count |
 | DB migrations (SQL files) | 149 | Tracked `lib/db/drizzle/*.sql` files |
-| API route source files | 45 | Non-test files with detected Express route declarations across current runtime roots |
-| API handler declarations | 315 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
-| CI workflows | 47 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, public npm release paths, and the frontier receipt-chain gate; excludes the retired DCO compatibility workflow |
-| Environment variables (in `.env.example`) | 245 | Lines matching `^[A-Z_]+=` |
+| API route source files | 44 | Non-test files with detected Express route declarations across current runtime roots |
+| API handler declarations | 334 | Static non-test method declarations on `app`, `router`, and named Express Router receivers |
+| CI workflows | 48 | Permanent workflows including exact-head screenshot evidence, hosted observability proof, public npm release paths, the frontier receipt-chain gate, and locked Ovis CPU contracts; excludes the retired DCO compatibility workflow |
+| Environment variables (in `.env.example`) | 246 | Lines matching `^[A-Z_]+=` |
 
 ---
 

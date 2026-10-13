@@ -25,6 +25,8 @@ const ALLOW_VALUES = new Set([
   // Exact public example values from AWS documentation. Future values remain blocking.
   'AKIAIOSFODNN7EXAMPLE',
   'AKIA0000000000EXAMPLE',
+  // Exact synthetic rejection fixture in the Python model-policy tests.
+  'sk-abcdef1234567890abcdef1234567890ab',
 ]);
 
 const SECRET_PATTERNS = [
@@ -54,6 +56,7 @@ const SCAN_EXTENSIONS = new Set([
   '.tsx',
   '.js',
   '.jsx',
+  '.py',
   '.json',
   '.jsonc',
   '.md',
@@ -68,7 +71,10 @@ const SCAN_EXTENSIONS = new Set([
   '.key',
   '.pem',
 ]);
-const MAX_FILES = 20_000;
+// The tracked estate already exceeds 20,000 files. Keep a generous bounded
+// traversal guard so a recursive mount or runaway generated tree still fails
+// closed without making the current repository impossible to scan.
+const MAX_FILES = 100_000;
 
 const SKIP_DIRECTORY_NAMES = new Set([
   // Repository metadata and installed dependencies are external to tracked source.

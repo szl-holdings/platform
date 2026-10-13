@@ -1,0 +1,100 @@
+{
+  "allowed_actions": [
+    "retrieve cited authority",
+    "summarize",
+    "draft",
+    "compare",
+    "flag deadline",
+    "request review",
+    "record approved action"
+  ],
+  "buyer": "Law firms and in-house legal teams that need matter context, cited authority, deadlines, review, and audit.",
+  "core_workflows": [
+    "matter intake",
+    "fact/document timeline",
+    "authority-grounded research",
+    "deadline and obligation",
+    "draft/review/redline",
+    "approval/filing/outcome"
+  ],
+  "data_policy": {
+    "protected": [
+      "client matters",
+      "privileged documents",
+      "work product",
+      "deadlines"
+    ],
+    "public": [
+      "synthetic matters",
+      "public-domain or licensed authority examples"
+    ],
+    "training_use": "never without explicit firm/client authorization and privilege safeguards"
+  },
+  "decision_problem": "What authority, fact, deadline, draft, review, approval, filing, or escalation is justified for this matter and jurisdiction?",
+  "display_name": "Counsel Assurance — Matter Decision Record and Legal Workflow Governance",
+  "formula_bindings": [
+    "F1",
+    "F7",
+    "F11",
+    "F18",
+    "F19",
+    "LAMBDA"
+  ],
+  "hf_space_id": "SZLHOLDINGS/counsel-assurance",
+  "human_authority": [
+    "licensed attorney owns legal judgment",
+    "authorized staff owns filing/admin action",
+    "client consent where required"
+  ],
+  "leaders": [
+    {
+      "name": "Clio",
+      "pattern": "matter-aware AI, verifiable legal data, workflow and practice context",
+      "url": "https://www.clio.com/"
+    },
+    {
+      "name": "Harvey",
+      "pattern": "shared matter context, secure collaboration, professional oversight and custom agents",
+      "url": "https://www.harvey.ai/"
+    },
+    {
+      "name": "Relativity",
+      "pattern": "large-scale document review, investigations and configurable analyses",
+      "url": "https://www.relativity.com/"
+    },
+    {
+      "name": "Thomson Reuters CoCounsel",
+      "pattern": "authority-grounded research and professional legal workflows",
+      "url": "https://legal.thomsonreuters.com/en/products/cocounsel-legal"
+    }
+  ],
+  "negative_tests": [
+    "jurisdiction absent blocks answer",
+    "authority not current escalates",
+    "privileged data isolation",
+    "uncited proposition rejected",
+    "no filing without attorney approval"
+  ],
+  "original_szl_design": "Matter Decision Record: every proposition links to matter fact, document, authority, jurisdiction, reviewer, deadline, action, and correction history.",
+  "portfolio_role": "PRIVATE_INCUBATOR",
+  "prohibited_actions": [
+    "legal advice to public",
+    "automatic filing",
+    "privilege waiver",
+    "uncited legal conclusion",
+    "cross-matter leakage"
+  ],
+  "public_launch": "BLOCKED_UNTIL_QUALIFIED_LEGAL_PARTNER_AND_AUTHORITY_CORPUS",
+  "schema": "szl.vertical-cell/v1",
+  "space_visibility": "private",
+  "stage": "QUALIFIED_PARTNER_GATE",
+  "success_metrics": [
+    "authority citation coverage",
+    "deadline accuracy",
+    "review correction rate",
+    "matter isolation",
+    "time saved",
+    "approved-work reuse"
+  ],
+  "vertical_id": "counsel-assurance"
+}

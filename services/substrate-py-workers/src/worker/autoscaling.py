@@ -1,25 +1,25 @@
 """
 Autoscaling policy for the Python worker fleet.
 
-Autoscaling is claim-based: the substrate coordinator tracks queue depth
-and registered worker capacity, then signals the platform (e.g. Kubernetes
-HPA or a container orchestrator) to scale out/in.
+This source module can evaluate supplied capacity reports and emit a scale
+recommendation. No checked-in coordinator currently invokes ``evaluate`` or
+applies its result to Kubernetes or another deployment platform.
 
 This module exposes:
   - AutoscalingPolicy  — evaluates metrics and emits scale recommendations
   - WorkerCapacityReport — snapshot reported to the coordinator endpoint
 
-The actual scale-out mechanism (spawning processes, k8s replicas) is handled
-by the deployment platform; this module only produces recommendations.
+The actual scale-out mechanism (spawning processes, k8s replicas) is not
+implemented here; this module only produces recommendations when called.
 
 Drain contract:
   - When the platform requests scale-in it sends SIGTERM to the target worker.
   - The worker's ClaimLoop.drain() is called; it stops accepting new claims
     and waits up to DRAIN_TIMEOUT_S for in-flight stages to complete.
   - The worker exits once drain completes (or times out gracefully).
-  - Duplicate execution is prevented because the TypeScript engine uses
-    optimistic locking on the journal (stage can only transition from
-    "pending" → "running" once; a second claim on the same stageId is ignored).
+  - This process-local drain and active-claim state is not durable
+    cross-worker idempotency. Callers and proxies must not retry an ambiguous
+    ``POST /claim`` until a shared durable reservation/result boundary exists.
 """
 
 from __future__ import annotations

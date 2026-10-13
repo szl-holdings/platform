@@ -1,0 +1,128 @@
+import { createServer } from 'node:http';
+import { readFile, stat } from 'node:fs/promises';
+import { extname, join, normalize } from 'node:path';
+import { createRequire } from 'node:module';
+
+const require = createRequire('/workspace/platform/package.json');
+const { chromium } = require('@playwright/test');
+
+const buildRoot = '/tmp/a11oy-workcell-proof-coverage-677c9ab3';
+const origin = 'http://127.0.0.1:43111';
+const route = '/a11oy/workcells/wc-001/replay';
+const mime = new Map([
+  ['.css', 'text/css; charset=utf-8'],
+  ['.html', 'text/html; charset=utf-8'],
+  ['.ico', 'image/x-icon'],
+  ['.jpeg', 'image/jpeg'],
+  ['.jpg', 'image/jpeg'],
+  ['.js', 'text/javascript; charset=utf-8'],
+  ['.json', 'application/json; charset=utf-8'],
+  ['.png', 'image/png'],
+  ['.svg', 'image/svg+xml'],
+  ['.woff', 'font/woff'],
+  ['.woff2', 'font/woff2'],
+]);
+
+const server = createServer(async (request, response) => {
+  try {
+    const pathname = decodeURIComponent(new URL(request.url ?? '/', origin).pathname);
+    const stripped = pathname.startsWith('/a11oy/') ? pathname.slice('/a11oy/'.length) : '';
+    const relative = normalize(stripped).replace(/^(\.\.(\/|\\|$))+/, '');
+    let target = join(buildRoot, relative);
+    const targetStat = await stat(target).catch(() => undefined);
+    if (!targetStat?.isFile()) target = join(buildRoot, 'index.html');
+    const bytes = await readFile(target);
+    response.writeHead(200, {
+      'cache-control': 'no-store',
+      'content-type': mime.get(extname(target)) ?? 'application/octet-stream',
+    });
+    response.end(bytes);
+  } catch (error) {
+    response.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' });
+    response.end(error instanceof Error ? error.message : String(error));
+  }
+});
+
+await new Promise((resolve, reject) => {
+  server.once('error', reject);
+  server.listen(43111, '127.0.0.1', resolve);
+});
+
+const browser = await chromium.launch({ headless: true, executablePath: '/usr/bin/chromium' });
+const captures = [];
+
+try {
+  for (const capture of [
+    {
+      name: 'desktop',
+      viewport: { width: 1366, height: 900 },
+      path: '/tmp/a11oy-workcell-proof-coverage-desktop-2026-10-02.jpg',
+    },
+    {
+      name: 'mobile',
+      viewport: { width: 390, height: 900 },
+      path: '/tmp/a11oy-workcell-proof-coverage-mobile-2026-10-02.jpg',
+    },
+  ]) {
+    const context = await browser.newContext({
+      viewport: capture.viewport,
+      serviceWorkers: 'block',
+    });
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(`${error.name}: ${error.message}`));
+    page.on('console', (message) => {
+      if (message.type() === 'error') errors.push(`console.error: ${message.text()}`);
+    });
+    await context.route('**/*', async (intercepted) => {
+      const target = new URL(intercepted.request().url());
+      if (target.origin === origin || ['data:', 'blob:'].includes(target.protocol)) {
+        await intercepted.continue();
+      } else {
+        errors.push(`undeclared origin: ${target.origin}`);
+        await intercepted.abort();
+      }
+    });
+    const response = await page.goto(`${origin}${route}`, { waitUntil: 'networkidle' });
+    if (response?.status() !== 200) throw new Error(`route returned ${response?.status()}`);
+    await page.waitForFunction(() => document.body.dataset.screenshotReady === 'true');
+    await page.evaluate(async () => document.fonts.ready);
+    const inspector = page.locator('section[data-screenshot-reveal="true"]');
+    await inspector.waitFor({ state: 'visible' });
+    await inspector.evaluate((element) => element.scrollIntoView({ block: 'start' }));
+    await page.evaluate(() => window.scrollBy(0, -72));
+    await page.waitForTimeout(250);
+    const blockedCopy = await page
+      .locator('body')
+      .getByText(/TODO|LOREM|PLACEHOLDER/i)
+      .count();
+    if (blockedCopy !== 0) throw new Error(`blocked placeholder copy count: ${blockedCopy}`);
+    if (errors.length > 0) throw new Error(`browser errors: ${JSON.stringify(errors)}`);
+    const capturedAt = new Date().toISOString();
+    await page.screenshot({
+      path: capture.path,
+      type: 'jpeg',
+      quality: 92,
+      animations: 'disabled',
+      fullPage: false,
+    });
+    captures.push({
+      name: capture.name,
+      path: capture.path,
+      route,
+      viewport: capture.viewport,
+      capturedAt,
+      browser: browser.version(),
+      scrollY: await page.evaluate(() => window.scrollY),
+      title: await page.title(),
+    });
+    await context.close();
+  }
+} finally {
+  await browser.close();
+  await new Promise((resolve, reject) =>
+    server.close((error) => (error ? reject(error) : resolve())),
+  );
+}
+
+process.stdout.write(`${JSON.stringify({ origin, captures }, null, 2)}\n`);

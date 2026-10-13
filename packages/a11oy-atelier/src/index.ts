@@ -1,5 +1,7 @@
 export * from './contracts.js';
 export * from './policy.js';
+export * from './proofweave.js';
+export * from './proofweave-verifier.js';
 export * from './provider.js';
 export * from './service.js';
 export * from './state.js';

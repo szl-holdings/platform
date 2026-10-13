@@ -9,6 +9,7 @@ export * from './model-identity.js';
 export * from './multimodal.js';
 export * from './openai-compat.js';
 export * from './rerank.js';
+export * from './runtime-environment.js';
 export * from './search.js';
 export * from './tenant.js';
 

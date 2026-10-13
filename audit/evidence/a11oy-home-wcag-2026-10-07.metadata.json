@@ -1,0 +1,31 @@
+{
+  "schema": "szl.a11oy-candidate-screenshot/v1",
+  "evidence_status": "LOCAL_NON_AUTHORITATIVE",
+  "claim_boundary": "Candidate UI fixture only; this capture is not production, deployment, certification, or signed-proof evidence.",
+  "captured_at": "2026-10-07T11:37:18.923Z",
+  "route": "http://127.0.0.1:4111/",
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "full_page": true
+  },
+  "screenshot": {
+    "path": "audit/evidence/a11oy-home-wcag-2026-10-07.png",
+    "bytes": 1637749,
+    "sha256": "cc38fbd129c93dc9f401173dcaf4d18beb1caa62a66b14e158b3fbce66f2279d"
+  },
+  "build": {
+    "index_html_sha256": "12b8f609e7c5866dddb0afa1dcab117dbeb85f3034ea1eff816d9addedc9e91e",
+    "source_head": "150b166171cbd339acb287f7f5d37809c21774ee",
+    "working_tree_clean": false
+  },
+  "runtime": {
+    "node": "v24.19.0",
+    "playwright": "1.60.0",
+    "chromium": "151.0.7922.173",
+    "executable_path": "/usr/bin/chromium"
+  },
+  "network": {
+    "foreign_requests_blocked": []
+  }
+}

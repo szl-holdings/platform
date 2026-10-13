@@ -226,6 +226,9 @@ className="md:grid-cols-2"
 ## Known technical debt (as of Phase 6)
 
 1. **Inline styles vs. Tailwind:** The public site uses a hybrid of inline styles (for dynamic values) and Tailwind classes (for responsive breakpoints). This is intentional for the current stage but should be moved to CSS custom properties or a component library in Phase 8+.
-2. **OG images:** `/og/` directory is referenced but images not yet generated. A static fallback image should be placed at `/og/og-home.jpg` before launch.
+2. **OG images (closed 2026-10-06 for the declared set):** the canonical
+   generator now commits 13 route-specific 1200×630 JPEGs under `/og/`, and
+   the pre-push `--check` gate rejects missing or stale bytes. New routes must
+   be added to the generator and metadata map before promotion.
 3. **Sitemap:** `robots.txt` references `sitemap.xml` — not yet auto-generated. Add to build step or create static file.
 4. **Font loading:** Two font families (Plus Jakarta Sans + Inter) load via Google Fonts. Consider self-hosting for better LCP and privacy.
