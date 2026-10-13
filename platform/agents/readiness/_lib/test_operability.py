@@ -155,6 +155,35 @@ class OperabilityEvidenceTest(unittest.TestCase):
         }})
         self.assertIsNone(row["signals"]["rollback_runbook"])
 
+    def test_unsupported_root_entries_only_affect_their_own_signal(self) -> None:
+        for path, signal in (("RUNBOOK.md", "rollback_runbook"),
+                             (".env.example", "env_var_docs"), ("Dockerfile", "dockerfile_ok")):
+            for kind, mode in (("blob", "120000"), ("tree", "040000"), ("commit", "160000")):
+                with self.subTest(path=path, kind=kind):
+                    entries = [file_entry("RUNBOOK.md"), file_entry(".env.example"), file_entry("Dockerfile", BLOB)]
+                    entry = next(item for item in entries if item["path"] == path)
+                    entry.update(type=kind, mode=mode)
+                    row, calls = self.observe({f"repos/{REPO}/git/trees/{TREE}?recursive=1": {
+                        "sha": TREE, "truncated": False, "tree": entries,
+                    }})
+                    self.assertIsNone(row["signals"][signal])
+                    self.assertEqual(row["signal_details"][signal]["reason"], "unsupported_file_type")
+                    self.assertEqual(row["signal_details"][signal]["paths"], [path])
+                    self.assertIsNone(row["score"])
+                    self.assertEqual(row["observed_score"], 3)
+                    self.assertTrue(all(value is True for name, value in row["signals"].items() if name != signal))
+                    if path == "Dockerfile":
+                        self.assertFalse(any("/contents/Dockerfile" in call for call in calls))
+
+    def test_regular_alternative_document_satisfies_signal(self) -> None:
+        symlink = file_entry("RUNBOOK.md")
+        symlink["mode"] = "120000"
+        row, _ = self.observe({f"repos/{REPO}/git/trees/{TREE}?recursive=1": {
+            "sha": TREE, "truncated": False, "tree": [symlink, file_entry("rollback.md")],
+        }})
+        self.assertIs(row["signals"]["rollback_runbook"], True)
+        self.assertEqual(row["signal_details"]["rollback_runbook"]["paths"], ["rollback.md"])
+
     def test_commit_read_error_and_malformed_data_are_unknown(self) -> None:
         for commits in [operability.EvidenceUnavailable("request_failed"), {}, [None],
                         [{"sha": "4" * 40}, {"sha": "4" * 40}]]:

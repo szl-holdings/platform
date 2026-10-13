@@ -50,7 +50,7 @@ def sha(value: object) -> bool:
     return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{40}", value) is not None
 
 
-def root_files(repo: str, tree_sha: str) -> dict[str, dict]:
+def root_files(repo: str, tree_sha: str) -> tuple[dict[str, dict], set[str]]:
     data = gh(f"repos/{repo}/git/trees/{tree_sha}?recursive=1")
     if not isinstance(data, dict) or data.get("sha") != tree_sha:
         raise EvidenceUnavailable("malformed_tree")
@@ -59,7 +59,7 @@ def root_files(repo: str, tree_sha: str) -> dict[str, dict]:
     entries = data.get("tree")
     if not isinstance(entries, list):
         raise EvidenceUnavailable("malformed_tree")
-    files, seen = {}, set()
+    files, seen, unsupported = {}, set(), set()
     for entry in entries:
         if (not isinstance(entry, dict) or not isinstance(entry.get("path"), str)
                 or not sha(entry.get("sha")) or entry.get("type") not in ("blob", "tree", "commit")):
@@ -72,8 +72,8 @@ def root_files(repo: str, tree_sha: str) -> dict[str, dict]:
         if "/" not in path and entry["type"] == "blob" and entry.get("mode") in ("100644", "100755"):
             files[path] = entry
         elif "/" not in path and (path.lower() in RUNBOOK_NAMES | ENV_NAMES or path == "Dockerfile"):
-            raise EvidenceUnavailable("unsupported_file_type")
-    return files
+            unsupported.add(path)
+    return files, unsupported
 
 
 def dockerfile_structure(repo: str, revision: str, entry: dict) -> bool:
@@ -153,12 +153,18 @@ def score_flagship(repo: str) -> dict:
         return row
 
     try:
-        files = root_files(repo, tree)
+        files, unsupported = root_files(repo, tree)
         for name, names in (("rollback_runbook", RUNBOOK_NAMES), ("env_var_docs", ENV_NAMES)):
             matches = sorted(path for path in files if path.lower() in names)
-            record(name, bool(matches), "recognized_root_file_present" if matches else "recognized_root_file_absent", matches)
+            unreadable = sorted(path for path in unsupported if path.lower() in names)
+            if not matches and unreadable:
+                record(name, None, "unsupported_file_type", unreadable)
+            else:
+                record(name, bool(matches), "recognized_root_file_present" if matches else "recognized_root_file_absent", matches)
         entry = files.get("Dockerfile")
-        if entry is None:
+        if "Dockerfile" in unsupported:
+            record("dockerfile_ok", None, "unsupported_file_type", ["Dockerfile"])
+        elif entry is None:
             record("dockerfile_ok", False, "root_dockerfile_absent")
         else:
             try:
