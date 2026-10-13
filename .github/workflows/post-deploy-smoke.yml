@@ -52,7 +52,9 @@ jobs:
 
   smoke:
     name: Artifact smoke (${{ matrix.artifact }})
-    runs-on: ubuntu-latest
+    # Playwright 1.60.0 has no Ubuntu 26 browser/dependency target.
+    # Remove after a tested Playwright >=1.61 upgrade and Ubuntu 26 browser CI.
+    runs-on: ubuntu-24.04
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
     # environment: production is required so that environment-scoped secrets
