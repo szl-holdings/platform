@@ -18,7 +18,7 @@ async function provider(content = [{ type: 'text', text: 'done' }]) {
   const requests = [];
   const ai = new exports.AnthropicChatInterface({ messages: {
     async create(request) { requests.push(json(request)); return response(content); },
-    async *stream() { throw new Error('Unexpected stream'); },
+    stream() { throw new Error('Unexpected stream'); },
   } });
   return { ai, requests };
 }
