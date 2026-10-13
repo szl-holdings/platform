@@ -14,24 +14,166 @@
  * versions of express/path-to-regexp.
  */
 
-import { createServer as createHttpServer, type IncomingMessage, type ServerResponse } from 'http';
-import { randomUUID } from 'crypto';
-import { AgentGateway } from './gateway.js';
-import { listCapabilities } from './capabilities/enforce.js';
-import type { GatewayConfig } from './types.js';
+import { createPublicKey, randomUUID } from 'node:crypto';
+import {
+  createServer as createHttpServer,
+  type IncomingMessage,
+  type ServerResponse,
+} from 'node:http';
+import { probeApprovalWorkflow, probeTemporalClientAvailability } from './approval-readiness.js';
+import { probeOpaDecision } from './authz.js';
+import { listCapabilities } from './enforce.js';
+import { AgentGateway, requireTargetEnvironment } from './gateway.js';
+import { probeEvidenceLedger } from './persistence.js';
+import { isDevelopmentOrTestRuntime, isProductionRuntime } from './runtime-environment.js';
+import type { GatewayConfig, TargetEnvironment } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Config from environment
 // ---------------------------------------------------------------------------
 
-function loadConfig(): GatewayConfig {
+export function loadConfig(): GatewayConfig {
+  const requestedExecutionMode = process.env['GATEWAY_EXECUTION_MODE'];
+  if (
+    requestedExecutionMode !== undefined &&
+    requestedExecutionMode !== 'live' &&
+    requestedExecutionMode !== 'stub'
+  ) {
+    throw new Error('GATEWAY_EXECUTION_MODE must be either live or stub');
+  }
+  const executionMode = requestedExecutionMode ?? 'live';
+  const configuredOpenAiKey = process.env['OPENAI_API_KEY']?.trim();
+  const developmentMode = isDevelopmentOrTestRuntime();
+  if (executionMode === 'stub' && !developmentMode) {
+    throw new Error('GATEWAY_EXECUTION_MODE=stub is permitted only in development or test');
+  }
+  if (!configuredOpenAiKey && executionMode !== 'stub') {
+    throw new Error(
+      'OPENAI_API_KEY is required unless the explicit development/test stub is enabled',
+    );
+  }
+  const configuredOpaEndpoint = process.env['OPA_ENDPOINT']?.trim();
+  const configuredTemporalEndpoint = process.env['TEMPORAL_ENDPOINT']?.trim();
+  if (executionMode !== 'stub' && !configuredOpaEndpoint) {
+    throw new Error(
+      'OPA_ENDPOINT is required unless the explicit development/test stub is enabled',
+    );
+  }
+  if (executionMode !== 'stub' && !configuredTemporalEndpoint) {
+    throw new Error(
+      'TEMPORAL_ENDPOINT is required unless the explicit development/test stub is enabled',
+    );
+  }
+
+  const jwtAlgorithm = process.env['JWT_ALGORITHM']?.trim();
+  let jwt: GatewayConfig['jwt'];
+  if (executionMode === 'stub') {
+    if (jwtAlgorithm !== undefined && jwtAlgorithm !== 'HS256') {
+      throw new Error('The development/test stub permits only JWT_ALGORITHM=HS256');
+    }
+    const jwtSecret = process.env['JWT_SECRET']?.trim();
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET is required for the explicit development/test stub');
+    }
+    jwt = { algorithm: 'HS256', secret: jwtSecret };
+  } else {
+    if (jwtAlgorithm !== 'RS256') {
+      throw new Error('Live mode requires explicit JWT_ALGORITHM=RS256');
+    }
+    if (process.env['JWT_SECRET']?.trim()) {
+      throw new Error(
+        'JWT_SECRET is forbidden in live mode; configure asymmetric RS256 verification',
+      );
+    }
+    const publicKey = process.env['JWT_PUBLIC_KEY']?.replace(/\\n/g, '\n').trim();
+    const issuer = process.env['JWT_ISSUER']?.trim();
+    const audience = process.env['JWT_AUDIENCE']?.trim();
+    const orgId = process.env['JWT_ORG_ID']?.trim();
+    if (!publicKey || !issuer || !audience || !orgId) {
+      throw new Error(
+        'Live mode requires JWT_PUBLIC_KEY, JWT_ISSUER, JWT_AUDIENCE, and JWT_ORG_ID',
+      );
+    }
+    try {
+      const key = createPublicKey(publicKey);
+      if (
+        key.asymmetricKeyType !== 'rsa' ||
+        (key.asymmetricKeyDetails?.modulusLength ?? 0) < 2_048
+      ) {
+        throw new Error('not an RSA key of at least 2048 bits');
+      }
+    } catch (error) {
+      throw new Error(
+        `JWT_PUBLIC_KEY must be a valid RSA public key of at least 2048 bits: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+    jwt = { algorithm: 'RS256', publicKey, issuer, audience, orgId };
+  }
+
+  let evidenceLedger: GatewayConfig['evidenceLedger'] = null;
+  if (executionMode === 'live') {
+    const endpoint = process.env['EVIDENCE_LEDGER_ENDPOINT']?.trim();
+    const token = process.env['EVIDENCE_LEDGER_TOKEN']?.trim();
+    if (!endpoint || !token) {
+      throw new Error(
+        'Live mode is on HOLD until EVIDENCE_LEDGER_ENDPOINT and EVIDENCE_LEDGER_TOKEN configure the required durable tamper-evident ledger',
+      );
+    }
+    let parsedEndpoint: URL;
+    try {
+      parsedEndpoint = new URL(endpoint);
+    } catch {
+      throw new Error('EVIDENCE_LEDGER_ENDPOINT must be a valid HTTPS URL');
+    }
+    if (parsedEndpoint.protocol !== 'https:') {
+      throw new Error('EVIDENCE_LEDGER_ENDPOINT must use HTTPS in live mode');
+    }
+    evidenceLedger = { endpoint: endpoint.replace(/\/$/, ''), token };
+  }
+
+  let approvalWorkflow: GatewayConfig['approvalWorkflow'] = null;
+  if (executionMode === 'live') {
+    const namespace = process.env['TEMPORAL_NAMESPACE']?.trim();
+    const taskQueue = process.env['TEMPORAL_APPROVAL_TASK_QUEUE']?.trim();
+    const proofEndpoint = process.env['TEMPORAL_APPROVAL_PROOF_ENDPOINT']?.trim();
+    const proofToken = process.env['TEMPORAL_APPROVAL_PROOF_TOKEN']?.trim();
+    if (!namespace || !taskQueue || !proofEndpoint || !proofToken) {
+      throw new Error(
+        'Live mode is on HOLD until TEMPORAL_NAMESPACE, TEMPORAL_APPROVAL_TASK_QUEUE, TEMPORAL_APPROVAL_PROOF_ENDPOINT, and TEMPORAL_APPROVAL_PROOF_TOKEN configure a deployed approvalWorkflow round-trip proof',
+      );
+    }
+    let parsedProofEndpoint: URL;
+    try {
+      parsedProofEndpoint = new URL(proofEndpoint);
+    } catch {
+      throw new Error('TEMPORAL_APPROVAL_PROOF_ENDPOINT must be a valid HTTPS URL');
+    }
+    if (parsedProofEndpoint.protocol !== 'https:') {
+      throw new Error('TEMPORAL_APPROVAL_PROOF_ENDPOINT must use HTTPS in live mode');
+    }
+    approvalWorkflow = {
+      namespace,
+      taskQueue,
+      proofEndpoint: proofEndpoint.replace(/\/$/, ''),
+      proofToken,
+    };
+  }
+
+  const approvalTimeoutMs = Number(process.env['APPROVAL_TIMEOUT_MS'] ?? '300000');
+  if (!Number.isSafeInteger(approvalTimeoutMs) || approvalTimeoutMs < 1) {
+    throw new Error('APPROVAL_TIMEOUT_MS must be a positive integer');
+  }
   return {
-    jwtSecret: process.env['JWT_SECRET'] ?? 'szl-agent-gateway-dev-secret-do-not-use-in-prod',
-    opaEndpoint: process.env['OPA_ENDPOINT'] ?? 'local',
-    temporalEndpoint: process.env['TEMPORAL_ENDPOINT'] ?? 'local',
-    openAiApiKey: process.env['OPENAI_API_KEY'] ?? 'local',
-    auditLogPath: process.env['AUDIT_LOG_PATH'] ?? '/tmp/agent-gateway-audit.ndjson',
-    approvalTimeoutMs: parseInt(process.env['APPROVAL_TIMEOUT_MS'] ?? '300000', 10),
+    jwt,
+    opaEndpoint: executionMode === 'stub' ? 'local' : (configuredOpaEndpoint as string),
+    temporalEndpoint: executionMode === 'stub' ? 'local' : (configuredTemporalEndpoint as string),
+    openAiApiKey: executionMode === 'stub' ? 'local' : (configuredOpenAiKey as string),
+    approvalWorkflow,
+    evidenceLedger,
+    auditLogPath: process.env['AUDIT_LOG_PATH'] ?? '/tmp/agent-gateway-development-evidence.ndjson',
+    approvalTimeoutMs,
   };
 }
 
@@ -78,6 +220,9 @@ async function readJsonBody(req: IncomingMessage, maxBytes = 1_048_576): Promise
 // ---------------------------------------------------------------------------
 
 export function createServer(config?: GatewayConfig) {
+  // Validate the explicit platform marker even when tests or embedders inject
+  // a config object instead of going through loadConfig().
+  isProductionRuntime();
   const cfg = config ?? loadConfig();
   const gateway = new AgentGateway(cfg);
 
@@ -112,9 +257,30 @@ export function createServer(config?: GatewayConfig) {
 
       // GET /ready
       if (method === 'GET' && url === '/ready') {
-        return sendJson(res, 200, {
-          status: 'ready',
+        const [opaReady, approvalProofReady, temporalClientReady, evidenceLedgerReady] =
+          await Promise.all([
+            probeOpaDecision(cfg.opaEndpoint),
+            probeApprovalWorkflow(cfg),
+            probeTemporalClientAvailability(cfg),
+            probeEvidenceLedger(cfg),
+          ]);
+        const approvalWorkflowReady = approvalProofReady && temporalClientReady;
+        const ready = opaReady && approvalWorkflowReady && evidenceLedgerReady;
+        const developmentStub =
+          isDevelopmentOrTestRuntime() &&
+          cfg.opaEndpoint === 'local' &&
+          cfg.temporalEndpoint === 'local' &&
+          cfg.openAiApiKey === 'local';
+        return sendJson(res, ready ? 200 : 503, {
+          status: ready ? 'ready' : 'not_ready',
           service: 'agent-gateway',
+          mode: developmentStub ? 'development-stub' : 'live',
+          evidenceState: developmentStub ? 'UNAVAILABLE' : 'CONFIGURED',
+          dependencies: {
+            opa: opaReady,
+            temporal: approvalWorkflowReady,
+            evidenceLedger: evidenceLedgerReady,
+          },
           timestamp: new Date().toISOString(),
         });
       }
@@ -135,11 +301,23 @@ export function createServer(config?: GatewayConfig) {
           parameters?: Record<string, unknown>;
         };
 
-        if (!body.capability || !body.target || !body.domain) {
+        if (!body.capability || !body.target || !body.domain || !body.targetEnvironment) {
           return sendJson(res, 400, {
             correlationId,
             status: 'error',
-            message: 'Missing required fields: capability, target, domain',
+            message: 'Missing required fields: capability, target, domain, targetEnvironment',
+            auditId: 'n/a',
+          });
+        }
+
+        let targetEnvironment: TargetEnvironment;
+        try {
+          targetEnvironment = requireTargetEnvironment(body.targetEnvironment);
+        } catch {
+          return sendJson(res, 400, {
+            correlationId,
+            status: 'error',
+            message: 'targetEnvironment must be development, staging, or production',
             auditId: 'n/a',
           });
         }
@@ -152,9 +330,7 @@ export function createServer(config?: GatewayConfig) {
             model: body.model,
             target: body.target,
             domain: body.domain,
-            targetEnvironment:
-              (body.targetEnvironment as 'development' | 'staging' | 'production') ??
-              'development',
+            targetEnvironment,
             correlationId,
           },
         );
@@ -182,7 +358,15 @@ export function createServer(config?: GatewayConfig) {
     } catch (err) {
       // Log full error server-side (with correlationId) for ops; return a generic
       // message so internal details are never leaked to the caller (CWE-209).
-      console.error('[gateway] request error (correlationId=%s):', correlationId, err);
+      process.stderr.write(
+        `${JSON.stringify({
+          level: 'ERROR',
+          timestamp: new Date().toISOString(),
+          correlationId,
+          message: 'Gateway request failed',
+          error: err instanceof Error ? err.message : String(err),
+        })}\n`,
+      );
       sendJson(res, 500, {
         correlationId,
         status: 'error',
@@ -196,19 +380,63 @@ export function createServer(config?: GatewayConfig) {
 // Main entry point
 // ---------------------------------------------------------------------------
 
-if (process.env['NODE_ENV'] !== 'test') {
-  const port = parseInt(process.env['PORT'] ?? '8090', 10);
-  const server = createServer();
-  server.listen(port, '0.0.0.0', () => {
-    process.stdout.write(
-      JSON.stringify({
-        level: 'INFO',
-        timestamp: new Date().toISOString(),
-        message: 'Agent Gateway server started',
-        port,
-        opaEndpoint: process.env['OPA_ENDPOINT'] ?? 'local',
-        temporalEndpoint: process.env['TEMPORAL_ENDPOINT'] ?? 'local',
-      }) + '\n',
+export async function startServer(config = loadConfig()): Promise<ReturnType<typeof createServer>> {
+  const [opaReady, approvalProofReady, temporalClientReady, evidenceLedgerReady] =
+    await Promise.all([
+      probeOpaDecision(config.opaEndpoint),
+      probeApprovalWorkflow(config),
+      probeTemporalClientAvailability(config),
+      probeEvidenceLedger(config),
+    ]);
+  const approvalWorkflowReady = approvalProofReady && temporalClientReady;
+  if (!opaReady) {
+    throw new Error(
+      'Agent Gateway startup HOLD: OPA did not return the exact pinned production decision contract',
     );
+  }
+  if (!approvalWorkflowReady) {
+    throw new Error(
+      'Agent Gateway startup HOLD: deployed Temporal approvalWorkflow group/count round trip was not proven',
+    );
+  }
+  if (!evidenceLedgerReady) {
+    throw new Error(
+      'Agent Gateway startup HOLD: durable tamper-evident evidence ledger did not pass its readiness contract',
+    );
+  }
+  const port = Number(process.env['PORT'] ?? '8090');
+  if (!Number.isSafeInteger(port) || port < 1 || port > 65_535) {
+    throw new Error('PORT must be an integer from 1 through 65535');
+  }
+  const server = createServer(config);
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(port, '0.0.0.0', resolve);
+  });
+  process.stdout.write(
+    `${JSON.stringify({
+      level: 'INFO',
+      timestamp: new Date().toISOString(),
+      message: 'Agent Gateway server started',
+      port,
+      opaEndpoint: config.opaEndpoint,
+      temporalEndpoint: config.temporalEndpoint,
+      evidenceBackend: config.evidenceLedger ? 'durable-ledger' : 'development-file',
+    })}\n`,
+  );
+  return server;
+}
+
+if (process.env['NODE_ENV'] !== 'test') {
+  void startServer().catch((error) => {
+    process.stderr.write(
+      `${JSON.stringify({
+        level: 'FATAL',
+        timestamp: new Date().toISOString(),
+        message: 'Agent Gateway startup failed closed',
+        error: error instanceof Error ? error.message : String(error),
+      })}\n`,
+    );
+    process.exitCode = 1;
   });
 }

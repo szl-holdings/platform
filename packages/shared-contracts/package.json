@@ -4,10 +4,21 @@
   "type": "module",
   "description": "AEEP shared TypeScript contracts — agent roles, workflow types, evidence, policy, retrieval, memory, eval registry",
   "exports": {
-    ".": "./src/index.ts",
-    "./eval-types": "./src/eval-types.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./eval-types": {
+      "development": "./src/eval-types.ts",
+      "workspace": "./src/eval-types.ts",
+      "types": "./dist/eval-types.d.ts",
+      "import": "./dist/eval-types.js"
+    }
   },
   "scripts": {
+    "build": "tsc --build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

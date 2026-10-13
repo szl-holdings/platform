@@ -21,6 +21,7 @@ jobs:
   dependency-scan:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       security-events: write
@@ -38,6 +39,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          ONNXRUNTIME_NODE_INSTALL: skip
 
       - name: Verify fflate dependency convergence
         run: |
@@ -52,18 +55,33 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Generate vulnerability report from pnpm audit
+      - name: Initialize current-run vulnerability failure artifact
+        id: vulnerability-preflight
         if: always()
-        run: node scripts/qa/generate-vuln-report.js
+        run: node scripts/qa/write-vuln-preflight-report.mjs
 
-      - name: Upload SBOM and vulnerability report artifacts
+      - name: Generate vulnerability report from pnpm audit
+        if: always() && steps.vulnerability-preflight.outcome == 'success'
+        run: |
+          node --test scripts/qa/generate-vuln-report.test.js scripts/qa/dependency-patches.test.mjs scripts/qa/third-party-licenses.test.mjs
+          node scripts/qa/generate-vuln-report.js
+
+      - name: Upload current-run SBOM artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
+        if: always() && steps.sbom.outcome == 'success'
         with:
           name: sbom-${{ github.run_id }}
-          path: |
-            security/sbom-latest.json
-            security/vuln-report.md
+          path: security/sbom-latest.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Upload current-run vulnerability report artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always() && steps.vulnerability-preflight.outcome == 'success'
+        with:
+          name: vulnerability-report-${{ github.run_id }}
+          path: security/vuln-report.md
+          if-no-files-found: error
           retention-days: 90
 
   secret-scan:
@@ -98,25 +116,40 @@ jobs:
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          REF_NAME: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          # On a pull_request event scan only the commits in the PR. Push, scheduled,
-          # and manual runs scan the repository history reachable from the checkout.
+          set -euo pipefail
+          node --test scripts/ci/report-gitleaks-findings.test.mjs scripts/ci/gitleaks-tokenizer-policy.test.mjs
+          report_path="$RUNNER_TEMP/gitleaks-redacted.json"
+          safe_report_path="$RUNNER_TEMP/gitleaks-findings-metadata.json"
+          scan_args=(detect --source . --config .gitleaks.toml --redact --exit-code 1
+            --report-format json --report-path "$report_path")
+          # PR and explicit candidate runs scan their changes; default-branch,
+          # push, and scheduled runs retain the historical scan.
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            gitleaks detect \
-              --source . \
-              --config .gitleaks.toml \
-              --log-opts "$PR_BASE_SHA..$PR_HEAD_SHA" \
-              --redact \
-              --verbose \
-              --exit-code 1
-          else
-            gitleaks detect \
-              --source . \
-              --config .gitleaks.toml \
-              --redact \
-              --verbose \
-              --exit-code 1
+            scan_args+=(--log-opts "$PR_BASE_SHA..$PR_HEAD_SHA")
+          elif [[ "$EVENT_NAME" == "workflow_dispatch" && "$REF_NAME" != "$DEFAULT_BRANCH" ]]; then
+            # An explicit candidate run checks its changes against the protected
+            # default branch. Default-branch and scheduled runs retain the full
+            # historical scan below.
+            candidate_base="$(git rev-parse "origin/$DEFAULT_BRANCH^{commit}")"
+            scan_args+=(--log-opts "$candidate_base..HEAD")
           fi
+          scan_status=0
+          gitleaks "${scan_args[@]}" || scan_status=$?
+          node scripts/ci/report-gitleaks-findings.mjs "$report_path" "$safe_report_path"
+          exit "$scan_status"
+
+      - name: Upload safe Gitleaks finding metadata
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gitleaks-metadata-${{ github.run_id }}
+          path: ${{ runner.temp }}/gitleaks-findings-metadata.json
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Secondary scan — project-specific patterns (belt-and-suspenders)
         run: |
@@ -148,6 +181,7 @@ jobs:
   license-report:
     name: License Compliance Report
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
@@ -164,16 +198,27 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          ONNXRUNTIME_NODE_INSTALL: skip
+
+      - name: Initialize current-run license failure artifact
+        id: license-preflight
+        if: always()
+        run: node scripts/qa/write-license-preflight-report.mjs
 
       - name: Generate license compliance report
-        run: node scripts/qa/generate-license-report.js
+        if: always() && steps.license-preflight.outcome == 'success'
+        run: |
+          node --test scripts/qa/third-party-licenses.test.mjs scripts/ci/release-security-workflows.test.mjs
+          node scripts/qa/generate-license-report.js
 
       - name: Upload license report artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
+        if: always() && steps.license-preflight.outcome == 'success'
         with:
           name: license-report-${{ github.run_id }}
           path: security/license-report.md
+          if-no-files-found: error
           retention-days: 90
 
   security-gate:

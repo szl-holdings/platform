@@ -18,7 +18,7 @@ kind = "web"
     run = "bash -c 'cd /home/runner/workspace/artifacts/counsel && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
 
     [services.production]
-    build = [ "pnpm", "--filter", "@workspace/counsel", "run", "build" ]
+    build = [ "bash", "-c", "source scripts/activate-pnpm.sh && exec pnpm --filter @workspace/counsel run build" ]
     publicDir = "artifacts/counsel/dist/public"
     serve = "static"
 

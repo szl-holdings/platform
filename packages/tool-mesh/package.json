@@ -6,60 +6,94 @@
   "description": "MCP Tool Mesh — canonical schema-bound tool registry and gateway. Consolidates tool-registry, gateway, rate limiting, timeouts, fallback chains, guardian approval, observability hooks, MCP bridging, and execution tracking.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./manifest": {
+      "development": "./src/manifest.ts",
+      "workspace": "./src/manifest.ts",
       "types": "./dist/manifest.d.ts",
-      "import": "./src/manifest.ts"
+      "import": "./dist/manifest.js"
     },
     "./registry": {
+      "development": "./src/registry.ts",
+      "workspace": "./src/registry.ts",
       "types": "./dist/registry.d.ts",
-      "import": "./src/registry.ts"
+      "import": "./dist/registry.js"
     },
     "./gateway": {
+      "development": "./src/gateway.ts",
+      "workspace": "./src/gateway.ts",
       "types": "./dist/gateway.d.ts",
-      "import": "./src/gateway.ts"
+      "import": "./dist/gateway.js"
     },
     "./rate-limiter": {
+      "development": "./src/rate-limiter.ts",
+      "workspace": "./src/rate-limiter.ts",
       "types": "./dist/rate-limiter.d.ts",
-      "import": "./src/rate-limiter.ts"
+      "import": "./dist/rate-limiter.js"
+    },
+    "./server-registry": {
+      "development": "./src/server-registry.ts",
+      "workspace": "./src/server-registry.ts",
+      "types": "./dist/server-registry.d.ts",
+      "import": "./dist/server-registry.js"
     },
     "./executor": {
+      "development": "./src/executor.ts",
+      "workspace": "./src/executor.ts",
       "types": "./dist/executor.d.ts",
-      "import": "./src/executor.ts"
+      "import": "./dist/executor.js"
     },
     "./mcp-bridge": {
+      "development": "./src/mcp-bridge.ts",
+      "workspace": "./src/mcp-bridge.ts",
       "types": "./dist/mcp-bridge.d.ts",
-      "import": "./src/mcp-bridge.ts"
+      "import": "./dist/mcp-bridge.js"
     },
     "./tools/graph-query": {
+      "development": "./src/tools/graph-query.ts",
+      "workspace": "./src/tools/graph-query.ts",
       "types": "./dist/tools/graph-query.d.ts",
-      "import": "./src/tools/graph-query.ts"
+      "import": "./dist/tools/graph-query.js"
     },
     "./tools/document-retrieval": {
+      "development": "./src/tools/document-retrieval.ts",
+      "workspace": "./src/tools/document-retrieval.ts",
       "types": "./dist/tools/document-retrieval.d.ts",
-      "import": "./src/tools/document-retrieval.ts"
+      "import": "./dist/tools/document-retrieval.js"
     },
     "./tools/security-tools": {
+      "development": "./src/tools/security-tools.ts",
+      "workspace": "./src/tools/security-tools.ts",
       "types": "./dist/tools/security-tools.d.ts",
-      "import": "./src/tools/security-tools.ts"
+      "import": "./dist/tools/security-tools.js"
     },
     "./tools/finance-tools": {
+      "development": "./src/tools/finance-tools.ts",
+      "workspace": "./src/tools/finance-tools.ts",
       "types": "./dist/tools/finance-tools.d.ts",
-      "import": "./src/tools/finance-tools.ts"
+      "import": "./dist/tools/finance-tools.js"
     },
     "./tools/operations-tools": {
+      "development": "./src/tools/operations-tools.ts",
+      "workspace": "./src/tools/operations-tools.ts",
       "types": "./dist/tools/operations-tools.d.ts",
-      "import": "./src/tools/operations-tools.ts"
+      "import": "./dist/tools/operations-tools.js"
     },
     "./catalog-search": {
+      "development": "./src/catalog-search.ts",
+      "workspace": "./src/catalog-search.ts",
       "types": "./dist/catalog-search.d.ts",
-      "import": "./src/catalog-search.ts"
+      "import": "./dist/catalog-search.js"
     },
     "./code-sandbox": {
+      "development": "./src/code-sandbox.ts",
+      "workspace": "./src/code-sandbox.ts",
       "types": "./dist/code-sandbox.d.ts",
-      "import": "./src/code-sandbox.ts"
+      "import": "./dist/code-sandbox.js"
     }
   },
   "dependencies": {
@@ -87,6 +121,7 @@
     "format": "biome format --write ./src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build": "tsc --build"
   }
 }

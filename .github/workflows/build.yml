@@ -6,6 +6,10 @@ on:
     branches: [master, main]
     paths-ignore:
       - 'replit-sync/**'
+  pull_request:
+    branches: [master, main]
+    paths-ignore:
+      - 'replit-sync/**'
 
 permissions:
   contents: read
@@ -16,11 +20,13 @@ concurrency:
 
 env:
   NODE_OPTIONS: --max-old-space-size=6144
+  ONNXRUNTIME_NODE_INSTALL: skip
 
 jobs:
   build-all:
     name: Build All Artifacts
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
     steps:
@@ -28,10 +34,7 @@ jobs:
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with: { node-version: '24', cache: 'pnpm' }
-      - run: pnpm install --no-frozen-lockfile --prefer-offline
-      - run: pnpm --filter @workspace/a11oy run build
-      - run: pnpm --filter @workspace/sentra run build
-      - run: pnpm --filter @workspace/terra run build
-      - run: pnpm --filter @workspace/vessels run build
-      - run: pnpm --filter @workspace/carlota-jo run build
-      - run: pnpm --filter @workspace/counsel run build
+      - name: Install exact locked dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Build every workspace target
+        run: pnpm run build

@@ -1,202 +1,180 @@
-# SZL Holdings — Deployment Model
+# SZL Holdings — Deployment Model and Evidence Boundary
 
-**Date:** April 16, 2026  
-**Status:** ⚠️ PARTIALLY SUPERSEDED — See `docs/architecture/canonical-deployment-model.md` for the authoritative deployment doctrine. The Azure tier described in this document has been revised: Azure is used for enterprise feature integrations (SSO, Power BI) only, not as a production deployment host. Replit is the sole primary deployment target.  
-**Audience:** Engineering, DevOps, investors conducting technical due diligence
+**Date:** October 6, 2026
+**Status:** Source-declared targets reconciled; live deployment topology **UNKNOWN**
+**Audience:** Engineering, DevOps, and technical diligence reviewers
 
 ---
 
 ## Summary
 
-SZL Holdings deployment model (updated April 16, 2026):
-1. **Replit** — primary live environment for development, demos, investor evaluation, **and production deployment** (autoscale)
-2. **GitHub Actions** — CI validation on every PR/merge; deploy workflows trigger Replit deployments
-3. **Azure** — ~~enterprise production target~~ enterprise feature integrations only (Azure AD SSO, SCIM, Power BI embed); not the deployment host
+This checkout proves deployment-related source configuration, not a live
+deployment. The current evidence supports only these statements:
 
-> **Deployment doctrine decision (April 16, 2026):** Replit is the sole primary deployment target. Azure infrastructure (App Service, Bicep templates, Key Vault as secrets store) is not part of the production deployment. See `docs/architecture/canonical-deployment-model.md`.
+1. `.replit` declares an application-router/autoscale target, Node 24,
+   Python 3.11, PostgreSQL 16, local workflows, and environment defaults.
+2. Six tracked `.replit-artifact/artifact.toml` files declare static web build
+   and path-routing targets.
+3. `.github/workflows/deploy-staging.yml` declares a fail-soft Replit staging
+   trigger. It can skip for missing credentials and converts remote failures to
+   warnings, so neither file presence nor a green job proves deployment.
+4. No `.github/workflows/deploy-production.yml` exists in the current tree.
+5. `infra/` contains Azure-oriented Bicep templates. They are target artifacts,
+   not evidence of an Azure subscription, resource, secret binding, or runtime.
+6. The bounded domain receipts do not identify serving provider, exact deployed
+   revision, backend health, database, or customer-data state.
+
+Therefore no current Replit, Azure, Hugging Face, Hetzner, or other production
+host is asserted here. Provider, environment, and customer-data admission stay
+**UNKNOWN / HOLD** until a dated deployment and readback receipt establishes
+them.
 
 ---
 
-## Tier 1: Replit (Primary)
+## Replit-Oriented Source Configuration
 
-### Role
-The Replit workspace is the **primary deployment surface** for all active demos, investor evaluations, and pre-commercial staging. It serves as both the development environment and the public-facing presentation environment.
+### Root declaration
 
-### Architecture
-
-| Component | Detail |
-|---|---|
-| **Routing model** | Path-based via Replit application router; each artifact gets a unique path prefix |
-| **Deploy target** | `autoscale` (Replit managed) |
-| **HTTPS** | Automatic — managed by Replit |
-| **Database** | Replit-managed PostgreSQL 16 (separate dev and production instances) |
-| **Secrets** | Replit Secrets (UI); never in source control |
-| **Session management** | In-memory (dev); production uses same in-memory (Redis upgrade pending first contract) |
-| **Object storage** | Replit Object Storage when `STORAGE_BUCKET` configured; local filesystem fallback |
-
-### Artifact → URL Routing
-
-| Artifact | Public URL Path | Internal Port |
+| Source declaration | What it establishes | What remains unknown |
 |---|---|---|
-| `szl-holdings` (corporate + Lyte) | `/` | 8080 |
-| `api-server` | `/api/` | 9090 |
-| `aegis` | `/aegis/` | Assigned |
-| `carlota-jo` | `/carlota-jo/` | Assigned |
-| `command` | `/command/` | Assigned |
-| `mockup-sandbox` | `/__mockup` | 21130 |
-| `szl-holdings-mobile` | `/szl-holdings-mobile/` | Expo |
-| `terra` | `/terra/` | Assigned |
-| `vessels` | `/vessels/` | Assigned |
+| `.replit [deployment]` uses `router = "application"` and `deploymentTarget = "autoscale"` | A Replit target is configured in source | Whether a deployment exists, is current, or serves traffic |
+| `.replit modules` lists Node 24, Python 3.11, and PostgreSQL 16 | Requested environment versions | Installed production versions and active database identity |
+| `.replit [userenv.production]` contains non-secret defaults | Intended Replit-target environment values | Active values, secret bindings, and production use |
+| `.replit [postMerge]` names `scripts/post-merge.sh` | A provider hook is declared | Whether it executed for any merge and with what result |
+| Root `[[artifacts]]` lists `artifacts/api-server` and `artifacts/mockup-sandbox` | Two legacy artifact registrations remain | Whether either registration is valid or deployed |
 
-### What is Public vs. Internal vs. Prototype
+`artifacts/api-server` is a historical compatibility stub. Its current package
+defines only a typecheck script and one narrow route export; it has no build or
+start script. The root artifact registration does not turn that stub into a
+runnable canonical backend and should be reconciled before any deployment.
 
-| Classification | Artifacts |
-|---|---|
-| **Public** (investor/customer facing) | `szl-holdings`, `carlota-jo`, `aegis`, `vessels`, `terra` |
-| **Internal** (platform operations) | `api-server`, `command` |
-| **Mobile** | `szl-holdings-mobile` |
-| **Tooling** (dev-only) | `mockup-sandbox` |
-| **Archived/Deprecated** (marker files only) | `firestorm` (→ aegis), `prism-counsel` (→ aegis), `stephen-site` (→ szl-holdings) |
+### Per-artifact route targets
 
-### Health Check
+The following paths are source declarations only:
 
-The API server exposes a health endpoint at both `GET /api/healthz` (canonical) and `GET /api/health` (alias). The full schema is implemented in `artifacts/api-server/src/routes/health.ts`. Actual response shape (derived from source, April 2026):
-
-```json
-{
-  "status": "ok | degraded",
-  "timestamp": "<ISO 8601>",
-  "version": "<npm_package_version>",
-  "uptime": "<seconds>",
-  "services": {
-    "server":   { "status": "ok" },
-    "database": { "status": "ok | degraded", "latencyMs": "<number>", "tables": "<number>" },
-    "storage":  { "status": "ok", "mode": "cloud | local" },
-    "auth":     { "status": "ok | degraded", "mode": "configured | missing_secret" },
-    "ai":       { "status": "ok", "mode": "live | mock" },
-    "backup":   {
-      "status": "<string>", "lastBackupAt": "<ISO 8601 | null>",
-      "lastBackupSizeBytes": "<number | null>", "ageHours": "<number | null>",
-      "warning": "<string | null>", "totalBackups": "<number>", "details": "<string>"
-    }
-  },
-  "platform": {
-    "apps": [ { "slug": "<string>", "name": "<string>", "type": "<string>" } ],
-    "totalApps": 11
-  }
-}
-```
-
-Overall `status` is `"ok"` only when both `database.status === "ok"` and `auth.status === "ok"`. There is no `job_queue` service in this endpoint.
-
----
-
-## Tier 2: GitHub Actions (CI/CD Pipeline)
-
-### Role
-Validates code quality on every commit and PR. Triggers staging and production deployments when configured.
-
-### CI Gate (Active)
-
-All four jobs must pass before a merge proceeds:
-
-1. `lint` — ESLint
-2. `typecheck` — TypeScript
-3. `test` — Unit/integration tests
-4. `build` — All packages build
-
-CI uses Node.js 22 and pnpm 10 (updated in Phase 2). Replit dev environment runs Node.js 24 (platform constraint).
-
-### Staging Deploy (Defined, Inactive)
-
-- **Trigger:** Push to `master`/`main`
-- **Mechanism:** Calls Replit deployment API via `REPLIT_STAGING_DEPLOY_TOKEN` and `REPLIT_STAGING_APP_ID` secrets
-- **Status:** Workflow defined in `.github/workflows/deploy-staging.yml`; secrets not yet configured → deployment skipped
-
-### Production Deploy (Defined, Inactive)
-
-- **Trigger:** Published GitHub Release OR manual dispatch with `confirm="deploy"`
-- **Mechanism:** Calls Replit deployment API via `REPLIT_DEPLOY_TOKEN` and `REPLIT_APP_ID` secrets
-- **Safeguard:** Manual dispatch requires explicit confirmation string (`confirm="deploy"`)
-- **Status:** Workflow defined in `.github/workflows/deploy-production.yml`; `REPLIT_DEPLOY_TOKEN` and `REPLIT_APP_ID` secrets not yet configured → deployment skipped
-
----
-
-## Tier 3: Azure (Secondary — Enterprise Production)
-
-### Role
-The enterprise-grade production environment for the first commercial customer. **Not yet deployed.** All infrastructure is defined and ready to activate.
-
-### Activation Trigger
-Azure production is activated when the first commercial enterprise contract is signed. It is not needed for investor demonstrations or pre-commercial pilots (those use Replit).
-
-### Infrastructure Defined (IaC — `infra/`)
-
-| Module | Azure Resource | Purpose |
+| Configuration | Declared path | Build/serve target |
 |---|---|---|
-| `containerapp.bicep` | Azure Container Apps | App server hosting |
-| `postgres.bicep` | PostgreSQL Flexible Server (General Purpose) | Primary database |
-| `redis.bicep` | Azure Cache for Redis | Session store at scale |
-| `keyvault.bicep` | Azure Key Vault | Centralized secret management |
-| `frontdoor.bicep` | Azure Front Door | CDN + edge caching + WAF |
-| `blobstorage.bicep` + `storage.bicep` | Azure Blob Storage | File and asset storage |
-| `servicebus.bicep` | Azure Service Bus | Async message queue |
-| `vnet.bicep` | Azure Virtual Network | Network isolation |
-| `alerting.bicep` | Azure Monitor | Operational alerting |
-| `staticwebapp.bicep` | Azure Static Web Apps | Frontend static hosting (alt) |
-| `docintell.bicep` | Azure AI Document Intelligence | Document processing |
+| `artifacts/a11oy/.replit-artifact/artifact.toml` | `/a11oy/` | Vite build, static serve |
+| `artifacts/carlota-jo/.replit-artifact/artifact.toml` | `/carlota-jo/` | Vite build, static serve |
+| `artifacts/counsel/.replit-artifact/artifact.toml` | `/counsel/` | Vite build, static serve |
+| `artifacts/sentra/.replit-artifact/artifact.toml` | `/sentra/` | Vite build, static serve |
+| `artifacts/terra/.replit-artifact/artifact.toml` | `/terra/` | Vite build, static serve |
+| `artifacts/vessels/.replit-artifact/artifact.toml` | `/vessels/` | Vite build, static serve |
 
-### Multi-Tenant Enterprise Features
-
-- Per-tenant row-level security
-- Azure AD / Entra ID SSO (code exists; requires tenant admin consent)
-- SCIM provisioning endpoint (`/api/scim`) ready
-- Tenant provisioning wizard (4-step onboarding)
-- Per-tenant configuration in `azure_tenants` database table
-
-### Activation Checklist (When Ready)
-
-1. Provision Azure subscription and resource group
-2. Deploy Bicep stack: `az deployment group create --template-file infra/main.bicep`
-3. Configure secrets in Azure Key Vault
-4. Configure `AZURE_REDIS_CONNECTION_STRING` to replace in-memory session store
-5. Set `CORS_ORIGINS` to custom domain list
-6. Configure DNS for custom domains per artifact
-7. Run `pnpm migrate` against Azure PostgreSQL instance
-8. Configure Stripe live keys (`sk_live_...`)
-9. Configure `RESEND_API_KEY` and email domain SPF/DKIM
-10. Deploy frontend artifacts to Azure Static Web Apps or Container Apps
+No current deployment receipt establishes that these paths are reachable or
+that a Replit router applies the files. The separate dated domain-homepage
+receipt is intentionally narrower than this source inventory.
 
 ---
 
-## Rollback Strategy
+## Backend Source Topology
 
-### Code Rollback
-- **Replit:** Checkpoint created automatically before each task merge → restore via Replit UI → Checkpoints
-- **GitHub:** Full Git history at `stephenlutar2-hash/szl-holdings-platform` → `git revert` or reset to previous commit
+The old claim that `artifacts/api-server` is the single Express backend is no
+longer true of the current tree.
 
-### Database Rollback
-- Drizzle ORM uses forward-only migrations (`db:push`)
-- Replit provides automatic database snapshots
-- Seed data is idempotent — safe to re-run: `pnpm seed`
-- No destructive migrations in current schema
-
-### Emergency Procedures
-1. API server crash → Restart workflow from Replit UI
-2. Database corruption → Restore from Replit DB snapshot
-3. Deployment failure → Roll back to previous Replit checkpoint
-4. Frontend broken → Each artifact is independently deployable and restartable
-
----
-
-## Port Allocation
-
-| External Port | Internal Port | Service |
+| Source path | Current source role | Evidence boundary |
 |---|---|---|
-| 80 | 8080 | Primary web routing (szl-holdings + path-based router) |
-| 3000 | 9090 | API server |
-| 3001 | 21130 | Mockup sandbox (internal) |
+| `artifacts/api-server` | Historical compatibility stub with one exported route | Not startable; not deployment authority |
+| `apps/alloy-runtime-api` | Startable TypeScript/Express runtime API | Source implementation only |
+| `apps/alloy-embedding-api` | Startable TypeScript/Express embedding gateway | Source implementation only |
+| `apps/alloy-ingestion-orchestrator` | Startable TypeScript/Express ingestion control plane | Source implementation only |
+| `apps/eval-runner`, `apps/substrate-inference`, `apps/energy-harvest`, `apps/mesh-resilience`, `apps/revenue-estimate`, `apps/verify-api` | Python/FastAPI implementations present in source | Presence does not prove deployment or whole-platform authority |
+| `services/*` and `workers/*` | Additional TypeScript and Python services/workers | Inspect each package contract separately |
+
+The three startable TypeScript apps expose package-specific health/readiness
+code paths. Those source handlers and their local tests are not a whole-platform
+health receipt. An operator must bind a health response to exact deployed
+source/image identity and dependencies before using it for promotion.
 
 ---
 
-*This document is the authoritative deployment model. Update when deployment surfaces or topology changes.*
+## GitHub Actions and Live Merge Gate
+
+`.github/workflows/ci.yml` declares clean-clone checks on Ubuntu and Windows,
+followed by lint and full-workspace typecheck. Tests, builds, runtime audit,
+E2E, security, reproducibility, and filesystem/SCA scanning are declared in
+separate workflows. Workflow presence does not itself make a context required
+or prove a hosted conclusion.
+
+The authenticated repository-ruleset receipt at
+`audit/evidence/github-platform-ruleset-summary-2026-10-06.json` records five
+required contexts for `main`:
+
+- `Runtime Audit (audit:full)`
+- `Security Gate (blocking)`
+- `E2E Gate`
+- `severity-gate`
+- `lockfiles / No lockfile references a Replit-internal registry host`
+
+`severity-gate` is already required in that receipt. Grype and reproducibility
+are source-declared gates but were not in the observed required list. Settings
+do not prove that any context passed for a candidate SHA.
+
+The source toolchain contract is Node >=24 with pnpm 10.26.1 exactly. GitHub,
+CircleCI, `.replit`, and devcontainer configuration declare Node 24; reviewed
+Node service Dockerfiles declare digest-pinned Node 26. Execution must still
+verify the effective versions.
+
+### Staging source declaration
+
+`.github/workflows/deploy-staging.yml` triggers on pushes to `main`/`master`
+and attempts a Replit API call only when staging secrets are present. It exits
+successfully when credentials are missing and treats curl/HTTP failures as
+warnings. This is a best-effort trigger, not a release admission gate or a
+staging deployment receipt. Secret presence and hosted outcomes are
+**UNKNOWN**.
+
+### Production workflow
+
+A production deployment workflow is **absent** from the current tree. There is
+no `.github/workflows/deploy-production.yml`. Release, package-publication, and
+post-deploy-smoke workflows do not substitute for a production promotion
+transaction. Production deployment remains blocked until a fail-closed,
+exact-artifact workflow and an authorized provider readback are defined and
+observed.
+
+---
+
+## Azure-Oriented Target Artifacts
+
+`infra/main.bicep` and modules for Container Apps, PostgreSQL, Redis, Key Vault,
+Front Door, Blob Storage, Service Bus, networking, monitoring, Static Web Apps,
+and Document Intelligence are present. Their presence establishes source
+templates only.
+
+Before any Azure claim, record at minimum:
+
+1. authorized subscription, tenant, region, and resource-group identity;
+2. successful template validation/deployment against the exact source revision;
+3. immutable image/artifact identities and vulnerability attestations;
+4. separate secret bindings and managed identities;
+5. database migration, tenancy, backup/restore, and rollback evidence;
+6. DNS/TLS routing plus health/readiness and observability readback; and
+7. data-classification approval before any customer data is admitted.
+
+Azure AD/Entra, SCIM, Power BI, or other integration code does not prove Azure
+hosting, tenant consent, or production enablement.
+
+---
+
+## Rollback and Emergency Boundary
+
+Git revert, provider rollback/checkpoint, database restore, and artifact
+redeployment are possible procedure targets, not verified capabilities in this
+report. No current provider checkpoint, database snapshot, recovery-point
+objective, restoration test, or deployed artifact identity was observed.
+
+Before production promotion, prove a rollback against the exact candidate:
+
+1. capture the pre-promotion source and immutable artifact identities;
+2. back up and verify the database or durable state;
+3. deploy and perform bounded health/readiness/semantic checks;
+4. roll back application and compatible schema/state changes;
+5. verify traffic, data integrity, and audit continuity after rollback; and
+6. retain provider responses and timestamps as a sanitized receipt.
+
+---
+
+*Update this document from repository source and dated provider receipts. Never
+infer live deployment, production readiness, or customer-data handling from
+configuration files alone.*

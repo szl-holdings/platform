@@ -1,7 +1,6 @@
 'use strict';
 
 module.exports = {
-  MAX_DEPTH: 100,
   MAX_LENGTH: 10000,
 
   // Digits

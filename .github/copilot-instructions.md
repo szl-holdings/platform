@@ -1,11 +1,12 @@
-This is the **SZL Holdings Platform** — a pnpm monorepo hosted on Replit.
+This is the **SZL Holdings Platform** — a pnpm monorepo with GitHub CI and checked-in Replit workspace configuration. Deployment state must be established from current receipts, not inferred from that configuration.
 
 ## Architecture
 
-- **Package manager**: pnpm 10 with corepack. Lock file is `pnpm-lock.yaml`.
-- **Workspaces**: `artifacts/*`, `lib/*`, `lib/integrations/*`, `scripts`
+- **Runtime**: Node.js 24 or newer, as required by the root engine contract.
+- **Package manager**: pnpm 10.26.1 exactly. Source `scripts/activate-pnpm.sh`; it uses Corepack when available and an exact npm bootstrap fallback when it is not. Lock file is `pnpm-lock.yaml`.
+- **Workspaces**: the patterns in `pnpm-workspace.yaml` are authoritative.
 - **All packages** are scoped under `@workspace/*` and use `"type": "module"` (ESM-only).
-- **TypeScript** ~5.9 with project references (`tsconfig.json` at root references shared `lib/` packages).
+- **TypeScript** 6.x through the workspace catalog, with project references where configured.
 - **Build**: `pnpm run build` (typechecks libs, then recursively builds all packages).
 - **Typecheck**: `pnpm run typecheck` (builds libs via `tsc --build`, then checks each artifact).
 - Dependencies shared via `catalog:` entries in `pnpm-workspace.yaml`.

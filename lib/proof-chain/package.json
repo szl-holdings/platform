@@ -14,8 +14,10 @@
   "type": "module",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     }
   },
   "dependencies": {
@@ -30,6 +32,7 @@
     "lint": "biome lint ./src",
     "lint:ci": "biome lint ./src",
     "format": "biome format --write ./src",
-    "typecheck": "tsc -b tsconfig.json"
+    "typecheck": "tsc -b tsconfig.json",
+    "build": "tsc --build"
   }
 }

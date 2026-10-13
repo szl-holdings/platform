@@ -21,16 +21,16 @@
  * gateway through the proxy without code changes.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { spawn, type ChildProcess } from 'child_process';
-import { mkdtempSync, readFileSync, statSync, existsSync } from 'fs';
-import { tmpdir } from 'os';
-import { join, resolve } from 'path';
-import { createServer } from 'net';
+import { type ChildProcess, spawn } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync, statSync } from 'node:fs';
+import { createServer } from 'node:net';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { issueToken } from '../src/auth.js';
 
-const E2E_URL = process.env['GATEWAY_E2E_URL']?.replace(/\/$/, '');
-const JWT_SECRET = process.env['GATEWAY_E2E_JWT_SECRET'] ?? 'gateway-e2e-test-secret';
+const E2E_URL = process.env.GATEWAY_E2E_URL?.replace(/\/$/, '');
+const JWT_SECRET = process.env.GATEWAY_E2E_JWT_SECRET ?? 'gateway-e2e-test-secret';
 
 // When the test owns the server, it picks an isolated audit log path so it can
 // reliably observe the tail growing. When pointed at a deployed gateway via
@@ -38,7 +38,7 @@ const JWT_SECRET = process.env['GATEWAY_E2E_JWT_SECRET'] ?? 'gateway-e2e-test-se
 // default path the sidecar uses.
 const tmpDir = mkdtempSync(join(tmpdir(), 'agent-gateway-e2e-'));
 const AUDIT_LOG_PATH = E2E_URL
-  ? process.env['GATEWAY_E2E_AUDIT_LOG'] ?? '/tmp/agent-gateway-audit.ndjson'
+  ? (process.env.GATEWAY_E2E_AUDIT_LOG ?? '/tmp/agent-gateway-audit.ndjson')
   : join(tmpDir, 'audit.ndjson');
 
 let baseUrl: string;
@@ -89,18 +89,19 @@ beforeAll(async () => {
   const port = await getEphemeralPort();
   baseUrl = `http://127.0.0.1:${port}`;
   const serverEntry = resolve(__dirname, '../src/server.ts');
-  const tsxBin = resolve(__dirname, '../node_modules/.bin/tsx');
+  const repositoryRoot = resolve(__dirname, '../../..');
 
-  child = spawn(tsxBin, [serverEntry], {
+  child = spawn(process.execPath, ['--conditions=workspace', '--import', 'tsx', serverEntry], {
+    cwd: repositoryRoot,
     env: {
       ...process.env,
-      NODE_ENV: 'production', // server.ts only auto-listens when NODE_ENV !== 'test'
+      NODE_ENV: 'development', // server.ts auto-listens in every mode except test
       PORT: String(port),
       JWT_SECRET,
+      GATEWAY_EXECUTION_MODE: 'stub',
       AUDIT_LOG_PATH,
       OPA_ENDPOINT: 'local',
       TEMPORAL_ENDPOINT: 'local',
-      OPENAI_API_KEY: 'local',
       BASE_PATH: '',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -192,7 +193,7 @@ describe('Agent Gateway — end-to-end against running HTTP server', () => {
     expect(body.auditId).toMatch(/^[0-9a-f-]{36}$/);
     expect(body.correlationId).toBe(correlationId);
 
-    // The gateway writes audit asynchronously; poll for a record that matches
+    // Poll the development ledger for an audit payload that matches
     // *our* correlationId so the assertion holds even on a busy shared log
     // (deployed-mode case). Falls back to size-growth detection only as a
     // sanity check.
@@ -210,16 +211,17 @@ describe('Agent Gateway — end-to-end against running HTTP server', () => {
           for (const line of tail.split('\n')) {
             if (!line.trim()) continue;
             try {
-              const parsed = JSON.parse(line) as Record<string, unknown>;
-              if (parsed['correlationId'] === correlationId) {
+              const envelope = JSON.parse(line) as Record<string, unknown>;
+              const parsed = envelope.payload as Record<string, unknown> | undefined;
+              if (envelope.kind === 'audit' && parsed?.correlationId === correlationId) {
                 matched = parsed;
-                break;
+                if (parsed.status === 'completed') break;
               }
             } catch {
               // ignore malformed line — not ours
             }
           }
-          if (matched) break;
+          if (matched?.status === 'completed') break;
         }
       }
       await new Promise((r) => setTimeout(r, 100));
@@ -229,9 +231,9 @@ describe('Agent Gateway — end-to-end against running HTTP server', () => {
       matched,
       `no audit record with correlationId=${correlationId} found in ${AUDIT_LOG_PATH}`,
     ).toBeTruthy();
-    expect(matched!['capability']).toBe('inspect_code');
-    expect(matched!['target']).toBe('api-server');
-    expect(matched!['status']).toBe('completed');
+    expect(matched?.capability).toBe('inspect_code');
+    expect(matched?.target).toBe('api-server');
+    expect(matched?.status).toBe('completed');
   });
 
   it('POST /v1/agent/action without Authorization is rejected with 401', async () => {
@@ -242,6 +244,7 @@ describe('Agent Gateway — end-to-end against running HTTP server', () => {
         capability: 'inspect_code',
         target: 'api-server',
         domain: 'platform',
+        targetEnvironment: 'development',
       }),
     });
     expect(res.status).toBe(401);
