@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:dd7636a3-380f-5441-b1b2-44ee77dcd13f",
+  "serialNumber": "urn:uuid:1fe079fc-dae8-56c7-a9cb-6a9029bccab6",
   "metadata": {
     "tools": [
       {
@@ -35,7 +35,7 @@
       },
       {
         "name": "szl:sbom:component-count",
-        "value": "1807"
+        "value": "1809"
       }
     ]
   },
@@ -7498,6 +7498,12 @@
     },
     {
       "type": "library",
+      "name": "entities",
+      "version": "8.1.0",
+      "purl": "pkg:npm/entities@8.1.0"
+    },
+    {
+      "type": "library",
       "name": "env-paths",
       "version": "2.2.1",
       "purl": "pkg:npm/env-paths@2.2.1"
@@ -9955,6 +9961,12 @@
       "name": "parse-png",
       "version": "2.1.0",
       "purl": "pkg:npm/parse-png@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "parse5",
+      "version": "8.0.1",
+      "purl": "pkg:npm/parse5@8.0.1"
     },
     {
       "type": "library",

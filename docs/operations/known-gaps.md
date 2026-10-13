@@ -1204,3 +1204,53 @@ inventory assertions while preserving the current workspace isolation and
 all fail-closed predicates. Fixed command doubles test diagnostics only.
 The historical application register is preserved as superseded; hosted
 capture, deployment and runtime qualification still require fresh evidence.
+
+
+## 2026-10-13 public-surface observation and verifier reconciliation
+
+The fresh bounded readback in `audit/PUBLIC_SURFACE_READBACK_2026-10-13.json`
+records all 29 approved surfaces and 31 HTTP hops at 18:04–18:05 UTC. From
+that observation route, all 19 `a-11-oy.com` entries returned Cloudflare HTTP
+403 with error 1010. Their registry state is `UNAVAILABLE`; their origin
+runtime, authorization, and route existence could not be observed. This is
+an observation-route limitation, not evidence of a global outage. The derived
+zero customer-facing products is scoped to these observations. No access
+control was bypassed to obtain a different verdict.
+
+The six `a11oy.net` entries returned their expected static documentation or
+metadata, with exact 301 canonicalization for `/chat` and `/code`. The
+independent source witness identified Pages source
+`2ed4a76edfb8925bf0611f00ee9d9e4943a026c0`. Same-session edge receipts still
+show eight required response headers absent: CSP, HSTS, X-Content-Type-Options,
+Referrer-Policy, Permissions-Policy, X-Frame-Options, COOP, and CORP. The
+current domain receipt supersedes older TLS/DNSSEC/Pages claims only for the
+checks it actually records; HTTP 200 and source identity do not close edge
+header delivery or qualify a product runtime.
+
+The four explicit Hugging Face runtime API URLs returned HTTP 200. A11oy
+build-info self-reported source `3856bf185bb8436be3ce853630ca219fd2ab8767`;
+Killinchu self-reported source `a6f6ce97afd09044df36b8ac610e3d42759e8462`,
+manifest `72f1e751dd84994e30021d7366ba7bcc10b6b71f81b9dce29cbc4a2e5cd828f3`,
+and attestation reference `55508160`. The GitHub source commit signatures
+were verified; this refresh did not independently verify that attestation's
+contents or the Hub repository content revision. Killinchu still declares
+`EPHEMERAL`, `PROCESS_MEMORY`, and `production_ready: false`, with zero
+recovery attempts/delay and backend provider persistence `UNKNOWN`. These
+upstream endpoints do not qualify the separately blocked custom domain.
+
+The reviewed verifier now parses HTML structurally, checks one exact explicit
+head declaration/title/canonical URL, rejects ambiguous or duplicate metadata,
+and uses the bounded duplicate-free JSON parser for the webmanifest. Existing
+closed target admission, exact 301 redirects, timeouts, retries, and stronger
+ephemeral-readiness checks remain enforced. Static declaration checks do not
+establish rendered visibility, screenshots, authorization, or runtime health.
+
+The new exact `parse5@8.0.1` dependency and `entities@8.1.0` transitive addition
+preserve all previous lockfile data and the admitted dependency-security
+overrides/patch. The official deterministic SBOM inventories 1,809 dependency components,
+one verified local patch, and SHA-256
+`4dac02d1bcac96f94d04e5841810ad4254e3279c9b177ee326530ce9da2e88f9`. This
+inventory is not a vulnerability verdict; unchanged blocking security gates
+still apply. The October 3 and October 7 packets remain in the original immutable PR #906
+source history and are linked from the current proof; their frozen counts
+are not introduced as current operational qualification.

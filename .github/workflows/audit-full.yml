@@ -43,6 +43,9 @@ jobs:
       - name: Install dependencies (skip ONNXRuntime download to avoid postinstall network flake)
         run: ONNXRUNTIME_NODE_INSTALL=skip pnpm install --frozen-lockfile
 
+      - name: Validate claims and public-surface contracts
+        run: pnpm claims:validate
+
       - name: Verify deployable service runtime closure
         run: pnpm run test:service-runtime
 

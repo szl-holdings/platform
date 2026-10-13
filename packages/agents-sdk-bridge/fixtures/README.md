@@ -31,8 +31,8 @@ The model list intentionally includes `SZLHOLDINGS/SZLHOLDINGS`, which the
 replay reports as `UNKNOWN`. Replay at `2026-10-02T00:00:00.000Z` is 42
 complete days after observation, so the steward correctly treats that inventory
 as stale. The tracked root catalog at that path is refreshed independently
-(for example, the 2026-10-07 refresh lists 47 models); it is not a replacement
-for this fixture and the replay never reads it. The historical
+(see the [dated source](https://github.com/szl-holdings/platform/blob/aaa5417bd9a1fe755a5eaaa4e45bb29c8940370c/audit/evidence/huggingface-public-catalog.snapshot.json));
+it is not a replacement for this fixture and the replay never reads it. The historical
 `replit-sync/HF_ASSET_MANIFEST.json` is not a current inventory source.
 
 Fixture content was copied from the connected GitHub repository at the pinned
