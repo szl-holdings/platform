@@ -4,10 +4,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  DEFAULT_SNAPSHOT_PATH,
-  validateSnapshot,
-} from '../../../tools/hf-catalog/catalog.mjs';
+import { validateSnapshot } from '../../../tools/hf-catalog/catalog.mjs';
 import {
   createEvidenceSteward,
   verifyEvidenceStewardFixtureBlob,
@@ -33,7 +30,7 @@ function readFixture(name, kind) {
 }
 
 export function replayEvidenceSteward() {
-  const catalog = JSON.parse(verifiedBlob(DEFAULT_SNAPSHOT_PATH, 'catalog').toString('utf8'));
+  const catalog = readFixture('huggingface-public-catalog.snapshot.json', 'catalog');
   const errors = validateSnapshot(catalog);
   if (errors.length > 0) throw new Error(`TRACKED_CATALOG_INVALID:${errors.join('|')}`);
   const steward = createEvidenceSteward({

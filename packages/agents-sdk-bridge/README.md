@@ -2,7 +2,7 @@
 
 This package contains a bounded, source-only first agent for the OpenAI Agents SDK. It extends the existing SDK bridge and exposes exactly four read-only functions: `list_catalog`, `inspect_asset`, `assess_evidence_gaps`, and `propose_next_step`. The source adapter is exported as `@workspace/agents-sdk-bridge/evidence-steward`; its pure evidence engine is exported as `@workspace/agents-sdk-bridge/evidence-steward-core`.
 
-The offline replay uses the platform's existing Hugging Face catalog loader and tracked snapshot. It reads two pinned public Forge source files copied into `fixtures/`, checks their Git blob identities, and makes no remote calls. The four curated Forge bindings cover only a subset of the Forge model-type repository roster and are not a current Hub census. The platform snapshot was observed on 2026-08-20 and is stale under this agent's 30-day rule at the fixed replay date.
+The offline replay reads three pinned public source files copied into `fixtures/`: the historical platform Hugging Face catalog snapshot and two Forge source files. It checks each file's Git blob identity before parsing those same bytes, validates the catalog with the platform loader's existing `validateSnapshot`, and makes no remote calls. It never reads the tracked root catalog at `audit/evidence/huggingface-public-catalog.snapshot.json`; that file is refreshed independently and is neither this replay's input nor a fixture replacement. The four curated Forge bindings cover only a subset of the Forge model-type repository roster and are not a current Hub census. The pinned snapshot was observed on 2026-08-20 and is stale under this agent's 30-day rule at the fixed replay date.
 
 ## Replay
 
