@@ -1,4 +1,5 @@
 import { XMLParser, XMLValidator } from 'fast-xml-parser';
+import { type DefaultTreeAdapterMap, parse } from 'parse5';
 
 export const PUBLIC_SURFACE_REGISTRY_SCHEMA = 'szl.public-surfaces.registry/v1';
 export const PUBLIC_SURFACE_MANIFEST_SCHEMA = 'szl.public-surfaces/v1';
@@ -76,10 +77,10 @@ const MAX_OBSERVATION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
 const MAX_METADATA_BODY_BYTES = 128 * 1024;
 const JSON_WHITESPACE = new Set([' ', '\t', '\n', '\r']);
-const KILLINCHU_SOURCE_REVISION = '32760a15fcecfe50211654713d7e4e6a86d947fa';
+const KILLINCHU_SOURCE_REVISION = 'a6f6ce97afd09044df36b8ac610e3d42759e8462';
 const KILLINCHU_MANIFEST_SHA256 =
-  'e03e46480aa33c0edc4260969c8d04f9fbb18ffc980eabc4e571090cb639a91c';
-const KILLINCHU_ATTESTATION_ID = '54763629';
+  '72f1e751dd84994e30021d7366ba7bcc10b6b71f81b9dce29cbc4a2e5cd828f3';
+const KILLINCHU_ATTESTATION_ID = '55508160';
 const LIVE_SURFACE_PROBE_CONCURRENCY = 4;
 const LIVE_SURFACE_RETRY_DELAYS_MS = [750, 1_500] as const;
 const TRANSIENT_TRANSPORT_CODES = new Set([
@@ -89,6 +90,7 @@ const TRANSIENT_TRANSPORT_CODES = new Set([
   'UND_ERR_CONNECT_TIMEOUT',
   'UND_ERR_SOCKET',
 ]);
+const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 // A worker owns the whole surface transaction. The approved two-hop redirect path is therefore
 // bounded to 2 * (3 * 15 seconds + 750 ms + 1,500 ms) = 94.5 seconds of slot occupancy.
 
@@ -224,6 +226,42 @@ function approvedTargetFor(surfaceId: string): ApprovedSurfaceTarget | null {
     return null;
   }
   return APPROVED_PUBLIC_SURFACE_TARGETS[surfaceId as keyof typeof APPROVED_PUBLIC_SURFACE_TARGETS];
+}
+
+type PublicWebContract = Readonly<{
+  title: string;
+  canonicalUrl: string;
+  evidenceBoundary: string;
+}>;
+
+const PUBLIC_WEB_CONTRACTS = {
+  'a11oy-net-chat-gap': {
+    title: 'A11oy Chat Gateway | Governed Product Console',
+    canonicalUrl: 'https://a11oy.net/chat/',
+    evidenceBoundary: 'szl.public-surface-boundary/v1;surface=a11oy-net-chat;execution=UNAVAILABLE',
+  },
+  'a11oy-net-code-gap': {
+    title: 'A11oy Code Gateway | Governed Run-Loop',
+    canonicalUrl: 'https://a11oy.net/code/',
+    evidenceBoundary: 'szl.public-surface-boundary/v1;surface=a11oy-net-code;execution=UNAVAILABLE',
+  },
+  'killinchu-public-console': {
+    title: 'a11oy · Killinchu',
+    canonicalUrl: 'https://a-11-oy.com/killinchu',
+    evidenceBoundary:
+      'szl.public-surface-boundary/v1;surface=killinchu-console;effectors=SIMULATED;authorization=UNAVAILABLE',
+  },
+  'legacy-command-route': {
+    title: 'a11oy Command Center',
+    canonicalUrl: 'https://a-11-oy.com/command',
+    evidenceBoundary:
+      'szl.public-surface-boundary/v1;surface=a11oy-command;origin=MODELED;energy=UNAVAILABLE;signer=UNAVAILABLE',
+  },
+} as const satisfies Record<string, PublicWebContract>;
+
+function publicWebContractFor(surfaceId: string): PublicWebContract | null {
+  if (!Object.hasOwn(PUBLIC_WEB_CONTRACTS, surfaceId)) return null;
+  return PUBLIC_WEB_CONTRACTS[surfaceId as keyof typeof PUBLIC_WEB_CONTRACTS];
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -543,7 +581,7 @@ async function cancelResponseBody(response: SurfaceFetchResponse): Promise<void>
 async function readBoundedResponseBody(
   surfaceId: string,
   response: SurfaceFetchResponse,
-  bodyKind: 'metadata' | 'API' = 'metadata',
+  bodyKind: 'metadata' | 'API' | 'WEB' = 'metadata',
 ): Promise<{ text: string | null; failure: string | null }> {
   const contentLength = response.headers?.get('content-length');
   if (contentLength && /^\d+$/.test(contentLength)) {
@@ -921,6 +959,157 @@ async function validatePublicApiResponse(
   return [`${surfaceId}: routed API has no body validator`];
 }
 
+type HtmlNode = DefaultTreeAdapterMap['node'];
+type HtmlElement = DefaultTreeAdapterMap['element'];
+type HtmlTextNode = DefaultTreeAdapterMap['textNode'];
+
+type PublicWebDocument = Readonly<{
+  title: string | null;
+  canonicalUrls: readonly (string | null)[];
+  evidenceBoundaries: readonly (string | null)[];
+}>;
+
+function isElementNode(node: HtmlNode): node is HtmlElement {
+  return 'tagName' in node;
+}
+
+function isHtmlElement(node: HtmlNode): node is HtmlElement {
+  return isElementNode(node) && node.namespaceURI === HTML_NAMESPACE;
+}
+
+function isTextNode(node: HtmlNode): node is HtmlTextNode {
+  return node.nodeName === '#text' && 'value' in node;
+}
+
+function childNodesOf(node: HtmlNode): HtmlNode[] {
+  return 'childNodes' in node ? node.childNodes : [];
+}
+
+function findHtmlElements(root: HtmlNode, tagName: string): HtmlElement[] {
+  const elements: HtmlElement[] = [];
+  const visit = (node: HtmlNode): void => {
+    if (isHtmlElement(node) && node.tagName === tagName) elements.push(node);
+    for (const child of childNodesOf(node)) visit(child);
+  };
+  visit(root);
+  return elements;
+}
+
+function collectHtmlText(node: HtmlNode): string {
+  if (isTextNode(node)) return node.value;
+  return childNodesOf(node)
+    .map((child) => collectHtmlText(child))
+    .join('');
+}
+
+function normalizedHtmlText(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function hasExplicitContainer(element: HtmlElement): boolean {
+  return Boolean(element.sourceCodeLocation?.startTag && element.sourceCodeLocation.endTag);
+}
+
+function parsePublicWebDocument(input: string): PublicWebDocument | null {
+  const parseErrors: string[] = [];
+  let document: DefaultTreeAdapterMap['document'];
+  try {
+    document = parse(input, {
+      scriptingEnabled: true,
+      sourceCodeLocationInfo: true,
+      onParseError: (error) => parseErrors.push(error.code),
+    });
+  } catch {
+    return null;
+  }
+  if (parseErrors.length > 0) return null;
+
+  const heads = findHtmlElements(document, 'head');
+  const bodies = findHtmlElements(document, 'body');
+  if (
+    heads.length !== 1 ||
+    bodies.length !== 1 ||
+    !hasExplicitContainer(heads[0]) ||
+    !hasExplicitContainer(bodies[0])
+  ) {
+    return null;
+  }
+
+  const titles = findHtmlElements(heads[0], 'title');
+  const title =
+    titles.length === 1 && hasExplicitContainer(titles[0])
+      ? normalizedHtmlText(collectHtmlText(titles[0]))
+      : null;
+
+  const canonicalUrls = findHtmlElements(heads[0], 'link')
+    .filter((element) => {
+      const rel = element.attrs.find((attribute) => attribute.name.toLowerCase() === 'rel')?.value;
+      return rel
+        ?.toLowerCase()
+        .split(/\s+/)
+        .some((token) => token === 'canonical');
+    })
+    .map(
+      (element) =>
+        element.attrs.find((attribute) => attribute.name.toLowerCase() === 'href')?.value ?? null,
+    );
+
+  const evidenceBoundaries = findHtmlElements(heads[0], 'meta')
+    .filter((element) => {
+      const name = element.attrs.find(
+        (attribute) => attribute.name.toLowerCase() === 'name',
+      )?.value;
+      return name?.trim().toLowerCase() === 'szl-evidence-boundary';
+    })
+    .map(
+      (element) =>
+        element.attrs.find((attribute) => attribute.name.toLowerCase() === 'content')?.value ??
+        null,
+    );
+
+  return {
+    title,
+    canonicalUrls,
+    evidenceBoundaries,
+  };
+}
+
+async function validatePublicWebResponse(
+  surfaceId: string,
+  response: SurfaceFetchResponse,
+): Promise<string[]> {
+  const contract = publicWebContractFor(surfaceId);
+  if (!contract) return [`${surfaceId}: routed WEB surface has no body validator`];
+
+  const contentType = response.headers?.get('content-type')?.toLowerCase() ?? '';
+  if (!/^text\/html(?:;|$)/i.test(contentType)) {
+    await cancelResponseBody(response);
+    return [`${surfaceId}: expected a text/html response, observed ${contentType || 'missing'}`];
+  }
+
+  const { text, failure } = await readBoundedResponseBody(surfaceId, response, 'WEB');
+  if (failure || text === null) return [failure ?? `${surfaceId}: WEB body is unavailable`];
+  const document = parsePublicWebDocument(text);
+  if (!document) return [`${surfaceId}: WEB body is not structurally valid HTML`];
+
+  if (document.title !== contract.title) {
+    return [`${surfaceId}: WEB body has an unexpected product identity`];
+  }
+
+  const canonicalUrl = document.canonicalUrls.length === 1 ? document.canonicalUrls[0] : null;
+  if (canonicalUrl !== contract.canonicalUrl) {
+    return [`${surfaceId}: WEB body has an unexpected canonical URL`];
+  }
+
+  if (
+    document.evidenceBoundaries.length !== 1 ||
+    document.evidenceBoundaries[0] !== contract.evidenceBoundary
+  ) {
+    return [`${surfaceId}: WEB head lacks its exact evidence-boundary declaration`];
+  }
+  return [];
+}
+
 function isXmlRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -1000,12 +1189,9 @@ async function validateMetadataResponse(
         `${surfaceId}: expected an application/manifest+json response, observed ${contentType || 'missing'}`,
       ];
     }
-    let manifest: unknown;
-    try {
-      manifest = JSON.parse(body);
-    } catch {
-      return [`${surfaceId}: manifest metadata is not valid JSON`];
-    }
+    const parsed = parseDuplicateFreeJson(body);
+    if (!parsed.ok) return [`${surfaceId}: manifest metadata is not valid duplicate-free JSON`];
+    const manifest = parsed.value;
     if (!isObject(manifest)) {
       return [`${surfaceId}: manifest metadata must be a JSON object`];
     }
@@ -1115,13 +1301,16 @@ async function verifyLivePublicSurface(
     const validateRoutedBody =
       surface.availability !== 'UNAVAILABLE' &&
       (surface.kind === 'METADATA' ||
+        (surface.kind === 'WEB' && publicWebContractFor(surface.id) !== null) ||
         surface.id === 'killinchu-build-info-api' ||
         surface.id === 'killinchu-readiness-api')
         ? async (candidate: SurfaceFetchResponse): Promise<string[]> => {
             if (candidate.status >= 200 && candidate.status < 300) {
               return surface.kind === 'METADATA'
                 ? await validateMetadataResponse(surface.id, candidate)
-                : await validatePublicApiResponse(surface.id, candidate);
+                : surface.kind === 'WEB'
+                  ? await validatePublicWebResponse(surface.id, candidate)
+                  : await validatePublicApiResponse(surface.id, candidate);
             }
             await cancelResponseBody(candidate);
             return [];

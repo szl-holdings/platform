@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-11 (rev 42 — reconciliation candidate; migration and Ovis boundaries retained)
+**Last updated:** 2026-10-11 (rev 41 — candidate, migration, and Ovis security boundaries)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -160,158 +160,6 @@ candidate images build and the bounded runtime checks pass.
 
 ---
 
-## 2026-10-02 cyber evidence workcell
-
-**2026-10-11 supplement — MEASURED local protected-main reconciliation;
-candidate CI pending:** PR #882 now integrates protected main
-`5f9d0959114a269fe86e0cedab8f92ae4591a81e`, including its source-attributed
-bounded braces-safe `0.2.0` derivative and removal of the unused mobile-shared Expo signing
-dependency graph. The retired node-forge installed-byte/Expo regression is now
-inapplicable, not passing. Historical patch, helper and proof bytes remain;
-their obsolete active patch declarations are removed. A mandatory parsed
-source/lock contract rejects retired package reintroduction, malformed inputs,
-aliases, weakened policy, unmaintained braces edges and downgraded actual
-resolutions. Native vulnerability scans and all required gates remain unchanged.
-The exact current-main DOMPurify, fast-copy, selector-parser and eight OTel
-driver policies, Storybook patch, modern repro orchestration, report artifacts,
-secret metadata, license controls, and runtime admission remain retained.
-Unused undici/tar override policies are explicitly not installed evidence.
-
-The continuity resolution retains protected main's authenticated first-start
-marker handling and same-inode fresh authenticated reread after publication
-link churn. Fresh index and encrypted-object publication candidates are covered
-additively. Final unindexed encrypted objects remain retained pending safe
-quiescent maintenance; ordinary startup does not infer that an old object is
-orphaned or authorize its deletion. This is not distributed coordination or
-unchanged physical-purge parity. Local results and remaining exact-head CI,
-protected merge, publication, runtime and external-witness boundaries are in
-[`PLATFORM_PR882_MAIN_RECONCILIATION_20261011.md`](../../audit/PLATFORM_PR882_MAIN_RECONCILIATION_20261011.md).
-
-**2026-10-04 supplement — MEASURED native reader successor:** published
-`b941de4239f41828bf10e51c0fdf8a2a28ba0b93` passed the complete two-build
-reproducibility run again: 46 uncached tasks per build and 3,455 matching files.
-Typecheck and RuntimeAudit passed. CodeQL's remaining new finding is a fixture
-initialization check/read sequence, addressed by retaining the owned receipt
-returned by the fixture's capture operation. Native mutation controls and all
-production reader/comparison bytes remain intact. Fresh fixture-successor CodeQL
-remains required; the two High dependency findings still block release.
-
-**2026-10-04 supplement — MEASURED native input proof and local JSON read repair:**
-published `07a55f869fdfcdf85e99cc90327982323afc9fd5` passed the complete native
-two-checkout/two-install reproducibility workflow: both uncached builds ran 46
-tasks and produced identical 3,455-file archives. Its synthetic merge has the
-same source tree; the verified artifact and exact identities are retained in
-[`PLATFORM_REPRO_READ_RACE_20261004.md`](../../audit/PLATFORM_REPRO_READ_RACE_20261004.md).
-Native Typecheck also passed on that input. CodeQL then identified an actionable
-JSON check/read race. A native filename-replacement regression reproduced an
-outside read on the old helper. The local successor binds validation and bounded
-reading to one no-follow descriptor, rejects file/path drift, and closes the
-descriptor on all paths; all 37 focused controls pass. Fresh successor CodeQL,
-reproducibility and required CI remain pending. The prior-source proof is not
-relabeled as new-source success. The two High node-forge/braces dependency
-findings and their three native security gate failures remain unwaived; release
-remains blocked.
-
-**2026-10-04 supplement — MEASURED local build-proof repair:** the reproducibility
-workflow now uses RuntimeAudit's narrow ONNX download opt-out while verifying the
-actual bundled CPU runtime, preserves install/build failures, removes stale
-generated outputs and compares real output for every executable build task.
-Genuine regeneration exposed and corrected the missing estate-manifest dependency
-on API codegen. Two complete local builds passed 46 tasks each, but their strict
-comparison correctly failed on Storybook's optional telemetry timestamp. Its
-documented metadata opt-out then passed two scoped native builds with identical
-310-file archives; all 110 retained Storybook files matched their prior bytes.
-The 24 proof controls pass. Full hosted two-checkout/two-install equality at the
-eventual published head remains unmeasured; full local typecheck still meets the
-existing Corepack registry blocker. The original repro timeout and High-severity
-dependency/security failures remain failures. No advisory or gate is waived.
-See [`PLATFORM_REPRO_REPAIR_20261004.md`](../../audit/PLATFORM_REPRO_REPAIR_20261004.md).
-
-**2026-10-04 supplement — MEASURED local NULL-parameter repair:** the existing
-node-forge patch now includes the exact upstream #1157 nonempty primitive
-NULL rejection condition. Six owned-key regressions fail against the prior
-backport and pass after the supplement; the expanded 22-test suite passes
-against actual workspace Expo consumers after a clean frozen install. The
-installed RSA source matches the pinned upstream postimage byte-for-byte.
-An incremental install initially left pristine bytes in a new patch-hash slot;
-the guard rejected that tree and clean installation corrected it. The
-historical receipt is retained and a new provenance receipt binds the changed
-patch. Published advisory ranges, scanner thresholds and release status remain
-unchanged. See
-[`NODE_FORGE_NULL_PARAMETER_20261004.md`](../../audit/NODE_FORGE_NULL_PARAMETER_20261004.md)
-for the native-crypto controls, compatibility checks and remaining hosted/full
-workspace verification limits.
-
-**2026-10-04 update — MEASURED local pristine-control hardening:** the helper
-now fixes the registry URL/hash identity independently of the receipt,
-forbids redirects, bounds compressed/decompressed data, rejects unsafe archive
-paths and member types, and extracts into a private temporary directory without
-an intermediate archive. Its 25 helper regressions and the existing 13 actual
-Expo/cryptography regressions pass locally. Hosted CodeQL/CI for the successor
-remain unmeasured. The dependency gate remains blocked; published node-forge
-and braces advisory ranges have no patched registry version. A supplemental
-owned-key probe also reproduces nonempty ASN.1 NULL acceptance in the existing
-backport; it does not prove unauthorized forgery. See
-[`NODE_FORGE_PRISTINE_CONTROL_20261004.md`](../../audit/NODE_FORGE_PRISTINE_CONTROL_20261004.md)
-for commands, exact scope and the incomplete full-workspace typecheck.
-
-**2026-10-03 update — MEASURED local dependency repair; release BLOCKED:**
-`node-forge@1.4.0` has a provenance-bound pnpm backport of upstream PR #1152.
-An isolated pnpm installation passed 13 RSA and Expo certificate/CSR regressions,
-including original-package acceptance and repaired-package rejection of the
-same malformed nested DigestAlgorithm structures. The package name, version,
-registry integrity and license remain unchanged. The existing security workflow
-now requires the installed-byte guard and a hash-verified pristine control.
-**MEASURED hosted readback:** signed source
-`94f7da7b1e9e9b5f8accd7bdedad88dea10116b5` passed the
-[pristine-control and installed-byte/Expo regression steps](https://github.com/szl-holdings/platform/actions/runs/37102544409/job/111144765531).
-Its strict dependency audit, Grype and Security Gate remain **BLOCKED**. Native
-mobile integration, an external release witness, and hosted CI for a later
-prose successor remain **UNKNOWN**. The published advisory range and all
-security gates remain in force; no release pass is claimed. See
-[`NODE_FORGE_BACKPORT_20261003.md`](../../audit/NODE_FORGE_BACKPORT_20261003.md).
-
-The current A11oy cyber-resilience, governed-security-agent, and security-and-compliance
-pages now label source examples as `DEMO` and missing runtime results as
-`UNAVAILABLE` or `UNVERIFIED`. The readiness-security collector requires an
-observed inventory, exact default-branch head, recent successful workflow
-runs, and a readable security contact. Its release signature check remains
-`UNVERIFIED` because release asset names are not cryptographic verification;
-`GREEN` therefore cannot be reached through that metadata-only path.
-
-The cyber tool-mesh scan, alert escalation, compliance assessment, and
-vulnerability report lack a trusted tenant/target binding and result read-back.
-Their manifests are now disabled at the gateway, and direct handler calls
-reject before database access. They remain blocked until a real adapter and
-scoped evidence contract are supplied. No SIEM/EDR
-integration, containment effect, certification, incident SLA, customer witness,
-or production deployment is established by this workcell. Other A11oy security
-routes can still contain older operational copy; the corrected compliance page
-does not link to those routes as evidence. The six buyer-lane and shared work
-function gates are in
-[`CROSS_LANE_EVIDENCE_REGISTER_20261002.md`](CROSS_LANE_EVIDENCE_REGISTER_20261002.md).
-
-The tool-mesh package TypeScript check also remains blocked by the
-same eight `TS6305` missing referenced declarations observed before and after
-the cyber patch; its passing Vitest suite is not a typecheck substitute.
-
-Local tests, build, and screenshots establish source behavior only. The hosted
-checks at `df984acc8b6fe00dfbc993a81a78d175d2b2b3af` failed: the dependency
-scan, Grype, and Security Gate report the high-severity `node-forge` advisory
-[`GHSA-86w9-cpqp-85rv`](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
-with no patched version published; the unit suite and
-Runtime Audit report a pre-existing cross-process Atelier file race. These
-failures cannot be treated as a release pass. A signed successor
-`658ecb845db75b0f83f2e259c84fcd87d595833a` repairs the local file race;
-its focused Atelier tests and package typecheck passed, and the hosted unit suite
-passed at `7e7962a8c8050057f09d494f02087fe56283a05b`. The high-severity
-dependency gate still fails on that head. Protected merge, provider
-publication, deployed route read-back, and an outside functional witness remain
-separate, unverified gates. The dated proof packet is
-[`CYBER_LANE_EXECUTION_20261002.md`](CYBER_LANE_EXECUTION_20261002.md).
-
----
-
 ## 2026-10-11 Migration Authority Boundary
 
 The normal database migration command no longer seeds
@@ -335,6 +183,46 @@ by this bounded patch.
 
 ---
 
+### 2026-10-03 Series A candidate capture authority
+
+At protected main `f2f8df6f89056e9104587674ccec0855dd5b177a`, the
+candidate-owned Series A capture script could label locally generated metadata
+`VERIFIED_GITHUB_RUNTIME` from caller-supplied `GITHUB_ACTIONS` and related
+environment values. That label was not a trustworthy hosted-runtime witness.
+The P1 successor branch makes candidate metadata unconditionally
+`LOCAL_NON_AUTHORITATIVE` and inadmissible to the hosted gate. Its source and
+focused local tests are recorded in
+`audit/P1_SERIES_A_CAPTURE_AUTHORITY_PROOF_20261003.md`.
+
+The first protected screenshot-controller dispatch for successor PR #884,
+[run 37106028221](https://github.com/szl-holdings/platform/actions/runs/37106028221),
+failed before artifact publication. A new controller repair and fresh
+exact-head dispatch are required; no hosted capture is proved. PR #884's
+initial CI also failed an inherited Atelier concurrent-initialization test
+and inherited High-severity `node-forge`/`braces` vulnerability gates. Those
+gates remain blocking. PR #690's controller repair has not retroactively
+produced a capture for merged PR #668. No deployment, production, or customer
+status is inferred from this source correction.
+
+
+### 2026-10-02 operability source-evidence repair (draft)
+
+The scoped readiness-operability repair distinguishes UNKNOWN/inaccessible
+source observations from confirmed absence, binds all source reads to one
+observed default-branch revision, and explicitly limits Docker evidence to
+instruction presence (STRUCTURE_ONLY, build NOT_MEASURED). An incomplete row
+has no complete score; even a complete source score leaves runtime readiness
+NOT_ASSESSED. Offline regressions are part of the existing readiness discovery.
+
+Remaining: valid Hub publication/signing bindings, verified flagship registry
+access, substantive runbook/environment documentation, real image builds,
+rollback execution and runtime qualification. The review follow-up independently paginates audit-rift resampling at the
+reported immutable revision and observation bounds; legacy receipts without
+these pins remain UNVERIFIED. The four October 2 readiness publication failures were
+HTTP 401; this patch neither repairs nor suppresses that provider failure.
+Protected admission and exact-head hosted checks remain required. Evidence
+Steward and estate-auditor PRs are separate; no source files overlap them.
+
 ## Current Bounded Public Surface Registry — observed 2026-10-07
 
 The generated public-surface manifest distinguishes source-tree product
@@ -348,8 +236,8 @@ loosening response checks.
 
 A subsequent full `surfaces:freshness` run passed all 29 approved targets and is
 bound to `observed_at=2026-10-07T12:31:38.131Z`. A separate bounded Killinchu
-read on 2026-10-11 pins its build identity to main revision
-`32760a15fcecfe50211654713d7e4e6a86d947fa` and a verified GitHub OIDC
+read on 2026-10-11 pins its current build identity to main revision
+`e3a3c4cf94d91b588e6708cca64239c98a8ec868` and a verified GitHub OIDC
 attestation for the exact deployment manifest. That single-surface refresh does
 not advance the registry-wide observation timestamp. Its readiness contract
 positively requires the canonical ledger to be `EPHEMERAL`, `PROCESS_MEMORY`, and
@@ -1299,3 +1187,119 @@ Operational gaps, process health, test coverage, observability, team ownership.
 - **2026-04-17 (Diligence Security Gap Remediation Sprint):** Five pre-commercial security gaps from the diligence review resolved or formally accepted. (1) **MFA (KG026)** — Formally accepted. IdP-level MFA via Azure AD SSO is the enforced control; platform-native MFA scoped for enterprise tier. (2) **IP address storage (KG034)** — Resolved. `hashIp()` in `lib/audit/src/ip-hash.ts` applies SHA-256 with configurable salt before all audit and session IP storage. Raw IPs never reach the DB. (3) **Input validation (KG003–KG008)** — Confirmed resolved. All high-traffic write routes verified to have Zod `validateBody()` applied (already resolved in Apr-2026 hardening sprint). (4) **Session revocation on role change (AF-010)** — Resolved. `revokeUserSessionsOnRoleChange()` added to `session-policy.ts`; wired into SCIM group member operations and new `PUT /admin/users/:userId/roles` endpoint. (5) **Dependency pinning (KG035)** — Formally accepted. `pnpm-lock.yaml` provides exact pinning; `pnpm install --frozen-lockfile` used in all CI/deploy pipelines; dependency vulnerability scanning via KG012. KNOWN-GAPS.md rev 9.
 
 ---
+
+## 2026-10-13 workflow security source reconciliation
+
+Current main already has the stronger fail-closed CodeQL merge-ref and paginated alert validation gate. This candidate preserves it and corrects the post-deployment checkout to evaluate the event SHA as an Actions expression while disabling persisted checkout credentials. The existing release-security contract suite covers the checkout binding. See [the bounded proof packet](../../audit/SECURITY_WORKFLOW_REPAIR_2026-10-05.md).
+
+Protected admission and successful hosted deployment/smoke evidence remain separate gates. This source repair does not claim production readiness or dismiss any advisory.
+
+## 2026-10-13 screenshot diagnostic reconciliation
+
+The retained October 3 P0 receipt is published in
+`audit/P0_SERIES_A_EXECUTION_RECONCILIATION_20261003.md`; its failures and
+screenshots retain their dated source identities. Candidate preparation now
+names rejected source write-denial, pnpm execution/write-denial and pnpm
+inventory assertions while preserving the current workspace isolation and
+all fail-closed predicates. Fixed command doubles test diagnostics only.
+The historical application register is preserved as superseded; hosted
+capture, deployment and runtime qualification still require fresh evidence.
+
+
+## 2026-10-13 public-surface observation and verifier reconciliation
+
+The fresh bounded readback in `audit/PUBLIC_SURFACE_READBACK_2026-10-13.json`
+records all 29 approved surfaces and 31 HTTP hops at 18:04–18:05 UTC. From
+that observation route, all 19 `a-11-oy.com` entries returned Cloudflare HTTP
+403 with error 1010. Their registry state is `UNAVAILABLE`; their origin
+runtime, authorization, and route existence could not be observed. This is
+an observation-route limitation, not evidence of a global outage. The derived
+zero customer-facing products is scoped to these observations. No access
+control was bypassed to obtain a different verdict.
+
+The six `a11oy.net` entries returned their expected static documentation or
+metadata, with exact 301 canonicalization for `/chat` and `/code`. The
+independent source witness identified Pages source
+`2ed4a76edfb8925bf0611f00ee9d9e4943a026c0`. Same-session edge receipts still
+show eight required response headers absent: CSP, HSTS, X-Content-Type-Options,
+Referrer-Policy, Permissions-Policy, X-Frame-Options, COOP, and CORP. The
+current domain receipt supersedes older TLS/DNSSEC/Pages claims only for the
+checks it actually records; HTTP 200 and source identity do not close edge
+header delivery or qualify a product runtime.
+
+The four explicit Hugging Face runtime API URLs returned HTTP 200. A11oy
+build-info self-reported source `3856bf185bb8436be3ce853630ca219fd2ab8767`;
+Killinchu self-reported source `a6f6ce97afd09044df36b8ac610e3d42759e8462`,
+manifest `72f1e751dd84994e30021d7366ba7bcc10b6b71f81b9dce29cbc4a2e5cd828f3`,
+and attestation reference `55508160`. The GitHub source commit signatures
+were verified; this refresh did not independently verify that attestation's
+contents or the Hub repository content revision. Killinchu still declares
+`EPHEMERAL`, `PROCESS_MEMORY`, and `production_ready: false`, with zero
+recovery attempts/delay and backend provider persistence `UNKNOWN`. These
+upstream endpoints do not qualify the separately blocked custom domain.
+
+The reviewed verifier now parses HTML structurally, checks one exact explicit
+head declaration/title/canonical URL, rejects ambiguous or duplicate metadata,
+and uses the bounded duplicate-free JSON parser for the webmanifest. Existing
+closed target admission, exact 301 redirects, timeouts, retries, and stronger
+ephemeral-readiness checks remain enforced. Static declaration checks do not
+establish rendered visibility, screenshots, authorization, or runtime health.
+
+The new exact `parse5@8.0.1` dependency and `entities@8.1.0` transitive addition
+preserve all previous lockfile data and the admitted dependency-security
+overrides/patch. The official deterministic SBOM inventories 1,809 dependency components,
+one verified local patch, and SHA-256
+`4dac02d1bcac96f94d04e5841810ad4254e3279c9b177ee326530ce9da2e88f9`. This
+inventory is not a vulnerability verdict; unchanged blocking security gates
+still apply. The October 3 and October 7 packets remain in the original immutable PR #906
+source history and are linked from the current proof; their frozen counts
+are not introduced as current operational qualification.
+
+
+## 2026-10-13 Atelier continuity race reconciliation
+
+The reviewed source correction binds both reads around publication hard-link
+cleanup to the same authenticated bytes, file identity and metadata, with at
+most one fresh descriptor. Parse/authentication failure, disappearance, file
+replacement, repeated metadata changes, or changed bytes fail closed.
+Ordinary readers/startup retain all regular index/object temporary candidates
+regardless of age because elapsed time does not prove the writer is dead.
+The stronger existing final-object retention and exact-name first-start
+marker authentication/wait controls remain intact. Stale marker candidates
+continue to block initialization without deletion.
+
+Abandoned temporary and unreferenced final objects require offline, exclusive-
+access maintenance; this source does not implement safe automated cleanup or
+cross-process lifecycle coordination. Per-process serialization and the local
+filesystem lease do not establish a distributed database, production identity,
+provider operation, customer continuity, or durable external-ledger writes.
+
+
+## 2026-10-13 security claim and evidence reconciliation
+
+The reachable security-agent page is a local design surface with unavailable
+operational measurements. Cyber-resilience and compliance source corrections
+remain behind the existing publication hold; the route allowlist is unchanged.
+Four unsupported tool handlers are disabled and reject directly before any
+database/provider operation. No scanner, delivery, certification, containment
+or production control is established by those definitions.
+
+The read-only readiness collector binds observed workflow source and successful
+job/step evidence to the current default-branch head and freshness window. Its
+Platform scan-step source identity is conservative and must be reviewed after
+future edits. Metadata-only release signatures remain UNVERIFIED and cannot
+produce GREEN. The receipt's own signature is a separate requirement.
+
+Source/lock retirement checks do not replace native vulnerability scanning or
+installed-consumer compatibility. Archived node-forge provenance/helper bytes
+are historical and do not establish installed signing consumers. The repaired
+bounded descriptor reader closes the leaf-file check/reopen boundary; it does
+not confer arbitrary ancestor-directory authority.
+
+Fresh browser captures must bind compiled bytes, source and route state. Native
+E2E uses a localhost `/` base and supplemental source-presentation authority;
+it does not qualify canonical isolated-controller admission, deployed `/a11oy/`
+routes, actual security operations or customer evidence. Full hosted checks,
+normal protected squash, provider publication and outside runtime witnesses are
+separate gates. Earlier October receipts retain their original source and failures.
+Proof: [`PLATFORM_SECURITY_RECONCILIATION_2026-10-13_PROOF.md`](../../audit/PLATFORM_SECURITY_RECONCILIATION_2026-10-13_PROOF.md).

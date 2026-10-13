@@ -32,7 +32,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
           cache: "pnpm"
@@ -47,9 +47,11 @@ jobs:
           node --test scripts/qa/check-fflate-resolution.test.mjs
           pnpm run security:fflate
 
+      - name: Verify security override consumer compatibility
+        run: node --test scripts/qa/security-overrides-compat.test.mjs
+
       - name: Verify archived pristine-control helper (not installed signing compatibility)
-        run: |
-          node --test scripts/qa/prepare-node-forge-pristine.test.mjs
+        run: node --test scripts/qa/prepare-node-forge-pristine.test.mjs
 
       - name: Verify actual retired signing graph and maintained braces backport
         run: |
@@ -77,7 +79,7 @@ jobs:
           node scripts/qa/generate-vuln-report.js
 
       - name: Upload current-run SBOM artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always() && steps.sbom.outcome == 'success'
         with:
           name: sbom-${{ github.run_id }}
@@ -86,7 +88,7 @@ jobs:
           retention-days: 90
 
       - name: Upload current-run vulnerability report artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always() && steps.vulnerability-preflight.outcome == 'success'
         with:
           name: vulnerability-report-${{ github.run_id }}
@@ -154,7 +156,7 @@ jobs:
 
       - name: Upload safe Gitleaks finding metadata
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: gitleaks-metadata-${{ github.run_id }}
           path: ${{ runner.temp }}/gitleaks-findings-metadata.json
@@ -180,7 +182,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
           cache: "pnpm"
@@ -201,7 +203,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
           cache: "pnpm"
@@ -223,7 +225,7 @@ jobs:
           node scripts/qa/generate-license-report.js
 
       - name: Upload license report artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always() && steps.license-preflight.outcome == 'success'
         with:
           name: license-report-${{ github.run_id }}

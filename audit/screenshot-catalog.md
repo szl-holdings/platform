@@ -928,42 +928,6 @@ The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so 
 | /a11oy/resources | [320x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1728x1000.png) |
 | /a11oy/trust | [320x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1728x1000.png) |
 
-### 2026-10-02 cyber evidence presentation (CYBER-EVIDENCE-2026-10-02)
-
-Fifteen Microsoft Edge captures from a Vite build and strict-port preview started by the capture script, five viewports per modified route. The script checked the A11oy build inputs against the declared HEAD, hashed the fresh build, and matched same-origin browser responses observed and completed before each screenshot to built files. A resource arriving during or after a full-page screenshot was not separately awaited for byte verification. Unrelated worktree edits were outside those build inputs. Local installed dependencies were not independently attested. This is local source presentation evidence; it does not establish hosted CI, production operation, a security control, certification, or customer use. Capture times below are UTC on 2026-10-03 (2026-10-02 in New York).
-
-Fields common to **every** row below:
-
-- captured_by: `Codex / local Playwright`
-- capture_environment: `local-exact-head` (Windows); browser `Microsoft Edge 154.0.4258.48`; Node `v24.19.0`; Playwright `1.60.0`
-- source_revision: `7e7962a8c8050057f09d494f02087fe56283a05b`
-- workflow_run_or_command: `$env:SOURCE_REVISION='7e7962a8c8050057f09d494f02087fe56283a05b'; node scripts/qa/capture-cyber-evidence-20261002.mjs`
-- build_command: `node artifacts/a11oy/node_modules/vite/bin/vite.js build --config vite.config.ts`
-- app_start_command: `node artifacts/a11oy/node_modules/vite/bin/vite.js preview --config vite.config.ts --host 127.0.0.1 --port 58771 --strictPort`
-- capture_script_sha256: `6e400564a6e94228e2cdd7e5af8422f372a583d4391ab43509f6bea0ff53fd77`
-- served_build_sha256: `697e470a50c68ca49486dc5c1ed70026627910322a51816cad0a3803bd61deb2` (SHA-256 of the sorted built-file path and digest manifest); served index SHA-256: `1d549cbc5054f6e174d75c1220501fd183838a061c1a61f248e70c319b8e93de`
-- device_scale_factor: `1`; full-page JPEG; capture status: `current`
-- workcell_id: `CYBER-EVIDENCE-2026-10-02`; proof_level: `4 (local public-claim proof packet)`
-- metadata sidecar: [cyber-evidence-screenshots-2026-10-02.json](cyber-evidence-screenshots-2026-10-02.json), including resolved URL, HTTP 200, page title, zero console/page errors, verified response count, bytes, and SHA-256 for each row.
-
-| Filename in `docs/assets/screenshots/current/` | Route | Surface | Capture date (UTC) | Viewport | Artifact SHA-256 |
-|---|---|---|---|---|---|
-| `cyber-resilience-phone-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-03T00:04:06.121Z` | 390 x 844 | `c4e607adf95d1b7f05f6f1523e1f3600bcd4046712b9221607cc250a946aee03` |
-| `cyber-resilience-portrait-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-03T00:04:08.557Z` | 768 x 1024 | `a2c6cbb0c07894dcaf1acab699221c91ad58d8d5993f0bb0319ece9eb624cdc9` |
-| `cyber-resilience-desktop-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-03T00:04:11.466Z` | 1440 x 1100 | `cbba8b431aeac57c5288c9eeddfd82540811edb48c3c061f874d8c0fa35557b0` |
-| `cyber-resilience-full-hd-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-03T00:04:13.235Z` | 1920 x 1080 | `5c836b7dcded4662b529455c19431cd8102cb3fc036dfd15c0473ead44fb0610` |
-| `cyber-resilience-ultrawide-2026-10-02.jpg` | `/a11oy/cyber-resilience` | Cyber Resilience Center | `2026-10-03T00:04:14.997Z` | 2560 x 1440 | `707baf34e6ec064938329eceaa5ba5b11b8b89a80db78a9ea91c8b0942f871f1` |
-| `governed-security-agents-phone-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-03T00:04:16.705Z` | 390 x 844 | `880f9858dad21c5dbef7923deaa70a27bafedc113831a19cc4de01ff3ef0b4ac` |
-| `governed-security-agents-portrait-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-03T00:04:18.335Z` | 768 x 1024 | `27464339ee103e9dbb06618aa6cae31369d42b860d8347028a16c35c96bc2eaf` |
-| `governed-security-agents-desktop-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-03T00:04:19.664Z` | 1440 x 1100 | `b169c19cec13a9ace8be17d4734a33df66e501c8fbd040e50b5dc32ec9465a39` |
-| `governed-security-agents-full-hd-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-03T00:04:21.113Z` | 1920 x 1080 | `cbd4f32bc3e6d7142a304ae84e041aaf889bf733c567d95780509c2294dd57f8` |
-| `governed-security-agents-ultrawide-2026-10-02.jpg` | `/a11oy/security-agents` | AI Security Operations | `2026-10-03T00:04:22.385Z` | 2560 x 1440 | `8f8f52917736a698a46ded3c2e058e288490c48796ec8df548201341a89e8c36` |
-| `security-compliance-phone-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-03T00:04:23.591Z` | 390 x 844 | `380dac005991e5987ecf1a733c35f3f1758e989b2d08dd035aae79bcebf21876` |
-| `security-compliance-portrait-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-03T00:04:24.968Z` | 768 x 1024 | `5f790b0350753c4ee5ca1e20dceb6e817aa47a3514d5b5d9ca306fc704a341e1` |
-| `security-compliance-desktop-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-03T00:04:26.350Z` | 1440 x 1100 | `936ba644581cb91cea956a145a0e3fec4c57a043db2c819dbf29161c5eb5ffa1` |
-| `security-compliance-full-hd-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-03T00:04:27.817Z` | 1920 x 1080 | `a186295504ca7ec713d326255ef3a7470ca9a9c95eb6c93d5a2080b1085add67` |
-| `security-compliance-ultrawide-2026-10-02.jpg` | `/a11oy/security-compliance` | Security and Compliance | `2026-10-03T00:04:30.009Z` | 2560 x 1440 | `1c1c12fed1b93e8487f254eb2a2d91caa19e82beb1a2edc6d08edeba6ed81ed0` |
-
 ## A11oy Workcell Proof Coverage Inspector — 2026-10-02 superseded exact-source local proof
 
 The two captures below are **LOCAL_NON_AUTHORITATIVE** evidence from source
@@ -1071,3 +1035,493 @@ deployment, external execution, durable storage, operator identity,
 cryptographic signature verification, external attestation, or production
 readiness. The `2026-10-05` catalog date follows the client timezone; the
 timestamps above preserve the actual UTC capture instants.
+
+## Carlota Jo PR #892 substrate workflow panel — 2026-10-05
+
+These historical captures show the running Carlota Jo UI in GitHub Actions Chromium with intercepted synthetic workflow responses. They qualify rendered result states and repeated Run reset only. They do not establish provider inference, live backend execution, runtime persistence, human approval, cryptographic evidence signatures, or estate production readiness. A11oy remains an active prototype and investor demo.
+
+The original PNG bytes and source sidecars are retained unchanged. The `.png` extension preserves the actual captured format. All eight captures came from [E2E workflow run 37309171751](https://github.com/szl-holdings/platform/actions/runs/37309171751), artifact `11345077223`, at the exact source revision recorded below. GitHub's synthetic PR test merge `42e97fbc92447555cd700389006d0986e613e885` has tree `f329da317191745a95e7ae8498f2541bb634c161`, identical to candidate `a8a5fd7322854e7f9b18b635ccc0453ca3f71f92`. That generated test merge is capture provenance only; it is not an authored commit signature, DCO attestation, approval, or merge to protected main. Sidecars retain `candidateTree: null` from the shallow checkout; tree equality was subsequently verified through GitHub Git objects. The 2026-10-06 review repair changes the panel, parser and browser spec. These captures retain their original identity and bytes but are superseded for current-source qualification; fresh affected-state captures are recorded in the 2026-10-06 review section below.
+
+### cancelled
+
+- filename: [`carlota-jo-substrate-cancelled-2026-10-05.png`](../docs/assets/screenshots/current/carlota-jo-substrate-cancelled-2026-10-05.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-05T12:24:51.834Z`
+- captured_by: GitHub Actions / Codex Carlota panel qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `42e97fbc92447555cd700389006d0986e613e885`
+- workflow_run_or_command: [`37309171751`](https://github.com/szl-holdings/platform/actions/runs/37309171751), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `bf3f336588c0916bbb885ab3736f98d31235158956c3fd8ce94d1e87f296dd3d`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: Synthetic cancelled result remains CANCELLED.
+- sidecar: [`carlota-jo-substrate-cancelled-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-cancelled-2026-10-05.screenshot.json)
+
+### dry-run-pending
+
+- filename: [`carlota-jo-substrate-dry-run-pending-2026-10-05.png`](../docs/assets/screenshots/current/carlota-jo-substrate-dry-run-pending-2026-10-05.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-05T12:24:47.710Z`
+- captured_by: GitHub Actions / Codex Carlota panel qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `42e97fbc92447555cd700389006d0986e613e885`
+- workflow_run_or_command: [`37309171751`](https://github.com/szl-holdings/platform/actions/runs/37309171751), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `381a81d0babb8e73eded1e7ce4068fb57e1c2210a97a0763a8ed9faebe199fac`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: Engine-shaped low-confidence dry-run remains DEMO / PENDING APPROVAL with human review required; no claim that an explicit ApprovalGate was reached.
+- sidecar: [`carlota-jo-substrate-dry-run-pending-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-dry-run-pending-2026-10-05.screenshot.json)
+
+### failed
+
+- filename: [`carlota-jo-substrate-failed-2026-10-05.png`](../docs/assets/screenshots/current/carlota-jo-substrate-failed-2026-10-05.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-05T12:24:50.456Z`
+- captured_by: GitHub Actions / Codex Carlota panel qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `42e97fbc92447555cd700389006d0986e613e885`
+- workflow_run_or_command: [`37309171751`](https://github.com/szl-holdings/platform/actions/runs/37309171751), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `e029bc516d388d0fe700b2f37294f5a202cd89053ba1d0291ccbb21d62cd2d58`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: HTTP 200 carrying a failed run is shown as FAILED with the supplied run error.
+- sidecar: [`carlota-jo-substrate-failed-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-failed-2026-10-05.screenshot.json)
+
+### live-completed
+
+- filename: [`carlota-jo-substrate-live-completed-2026-10-05.png`](../docs/assets/screenshots/current/carlota-jo-substrate-live-completed-2026-10-05.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-05T12:24:49.114Z`
+- captured_by: GitHub Actions / Codex Carlota panel qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `42e97fbc92447555cd700389006d0986e613e885`
+- workflow_run_or_command: [`37309171751`](https://github.com/szl-holdings/platform/actions/runs/37309171751), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `d10dafaf270f5e7ae651c2195138d2cbd2d0edc05367b4b1b6c88463c75d82d0`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: Synthetic live-mode completed response is shown as COMPLETED; absent confidence remains Not reported and no SLA or signature claim is displayed. The fixture mode does not prove live execution.
+- sidecar: [`carlota-jo-substrate-live-completed-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-live-completed-2026-10-05.screenshot.json)
+
+### mode-mismatch
+
+- filename: [`carlota-jo-substrate-mode-mismatch-2026-10-05.png`](../docs/assets/screenshots/current/carlota-jo-substrate-mode-mismatch-2026-10-05.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-05T12:24:54.586Z`
+- captured_by: GitHub Actions / Codex Carlota panel qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `42e97fbc92447555cd700389006d0986e613e885`
+- workflow_run_or_command: [`37309171751`](https://github.com/szl-holdings/platform/actions/runs/37309171751), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `f9458788e6dd5c136cd28b81302e59004df845cac40579b3a526e2667e1e16ab`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: Returned mode inconsistent with the request is shown as UNKNOWN and cannot prove completion.
+- sidecar: [`carlota-jo-substrate-mode-mismatch-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-mode-mismatch-2026-10-05.screenshot.json)
+
+### repeated-dry-run
+
+- filename: [`carlota-jo-substrate-repeated-dry-run-2026-10-05.png`](../docs/assets/screenshots/current/carlota-jo-substrate-repeated-dry-run-2026-10-05.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-05T12:24:55.910Z`
+- captured_by: GitHub Actions / Codex Carlota panel qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `42e97fbc92447555cd700389006d0986e613e885`
+- workflow_run_or_command: [`37309171751`](https://github.com/szl-holdings/platform/actions/runs/37309171751), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `96f582b83aaa38c2ed6151ae8bea2c520d6200cee55852701e076cb63c80d670`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: First synthetic response in repeated Run scenario is DEMO / DRY-RUN COMPLETE.
+- sidecar: [`carlota-jo-substrate-repeated-dry-run-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-repeated-dry-run-2026-10-05.screenshot.json)
+
+### repeated-live
+
+- filename: [`carlota-jo-substrate-repeated-live-2026-10-05.png`](../docs/assets/screenshots/current/carlota-jo-substrate-repeated-live-2026-10-05.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-05T12:24:56.124Z`
+- captured_by: GitHub Actions / Codex Carlota panel qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `42e97fbc92447555cd700389006d0986e613e885`
+- workflow_run_or_command: [`37309171751`](https://github.com/szl-holdings/platform/actions/runs/37309171751), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `6ac07ed2aa21479de65ec3b27a69ac83ae6456452aaaf713ac3427fe0334c5bb`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: Second synthetic response replaces the first result, shows its live mode and missing confidence, and removes the prior dry-run result.
+- sidecar: [`carlota-jo-substrate-repeated-live-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-repeated-live-2026-10-05.screenshot.json)
+
+### unrecognised
+
+- filename: [`carlota-jo-substrate-unrecognised-2026-10-05.png`](../docs/assets/screenshots/current/carlota-jo-substrate-unrecognised-2026-10-05.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-05T12:24:53.220Z`
+- captured_by: GitHub Actions / Codex Carlota panel qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `42e97fbc92447555cd700389006d0986e613e885`
+- workflow_run_or_command: [`37309171751`](https://github.com/szl-holdings/platform/actions/runs/37309171751), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `435fd0e1c5c89dbe80e844a2ff0de77ce80e9695f46cc02530a92333325d878e`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: Unrecognised returned status is shown as UNKNOWN.
+- sidecar: [`carlota-jo-substrate-unrecognised-2026-10-05.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-unrecognised-2026-10-05.screenshot.json)
+
+
+## Carlota Jo PR #892 review regressions — 2026-10-06
+
+Historical captures of the running application qualified only the two repaired result-presentation defects: controls for an observed running workflow and untraceable completion responses. Responses are intercepted fixtures; external and other API requests are blocked. All five new browser regressions and all 40 Carlota Chromium cases passed in [E2E workflow 37396696339](https://github.com/szl-holdings/platform/actions/runs/37396696339), artifact `11383655229` (ZIP SHA-256 `8b6ecf83a6a6bcc21710d53b4092e00a2d76a81b61269175f14573fd8756ae5b`). This evidence does not establish live backend/provider execution, human approval, evidence signatures, persistence, deployment or estate production readiness.
+
+Capture checkout `b05227630f061298aa547341db914d16e16095c9` is GitHub's generated PR test merge, with tree `82d1ffb570422deeb46d365b69c6909a3ad74d87`, equal to candidate `8bbc1cb65d14f8f188aff2ba211d3a48002de62d`. Exact source/tree equality and three input-source hashes were verified separately; original sidecars preserve their shallow-checkout `candidateTree: null` values. The generated merge is capture provenance only, not authored signing, DCO or approval. Original PNG and sidecar bytes are retained unchanged. The later identity-less-running repair changes the parser and browser-spec bytes. These four records are superseded for current-source qualification; their original PNG and sidecar bytes remain unchanged.
+
+### missing-identity-dry-run
+
+- filename: [`carlota-jo-substrate-review-missing-identity-dry-run-2026-10-06.png`](../docs/assets/screenshots/current/carlota-jo-substrate-review-missing-identity-dry-run-2026-10-06.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-06T00:58:55.128Z`
+- captured_by: GitHub Actions / Codex Carlota review qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `b05227630f061298aa547341db914d16e16095c9`
+- workflow_run_or_command: [`37396696339`](https://github.com/szl-holdings/platform/actions/runs/37396696339), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `389661d69038c54ef66e7b1d3bd6e885311abb462c49ff4b57e47b1643e93293`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: A dry-run-complete/dry-run fixture with missing runId remains STATE UNVERIFIED; no demo completion badge is rendered.
+- sidecar: [`carlota-jo-substrate-review-missing-identity-dry-run-2026-10-06.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-review-missing-identity-dry-run-2026-10-06.screenshot.json)
+
+### missing-identity-live
+
+- filename: [`carlota-jo-substrate-review-missing-identity-live-2026-10-06.png`](../docs/assets/screenshots/current/carlota-jo-substrate-review-missing-identity-live-2026-10-06.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-06T00:58:57.362Z`
+- captured_by: GitHub Actions / Codex Carlota review qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `b05227630f061298aa547341db914d16e16095c9`
+- workflow_run_or_command: [`37396696339`](https://github.com/szl-holdings/platform/actions/runs/37396696339), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `c716ac44e9f9e0189661c5f94a198f09486cf762ae30429e92259962e0532b61`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: A completed/live fixture with whitespace-only runId remains STATE UNVERIFIED; no completion badge is rendered.
+- sidecar: [`carlota-jo-substrate-review-missing-identity-live-2026-10-06.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-review-missing-identity-live-2026-10-06.screenshot.json)
+
+### running-dry-run
+
+- filename: [`carlota-jo-substrate-review-running-dry-run-2026-10-06.png`](../docs/assets/screenshots/current/carlota-jo-substrate-review-running-dry-run-2026-10-06.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-06T00:58:53.993Z`
+- captured_by: GitHub Actions / Codex Carlota review qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `b05227630f061298aa547341db914d16e16095c9`
+- workflow_run_or_command: [`37396696339`](https://github.com/szl-holdings/platform/actions/runs/37396696339), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `32e7678d501c7666607bee3afce60605053e3601bc8d3ed1befae2ecc0b54a09`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: Returned dry-run running fixture keeps Run and mode disabled. Repeated native clicks produced only one intercepted submission. Dry-run mode is visible in selector and source footer.
+- sidecar: [`carlota-jo-substrate-review-running-dry-run-2026-10-06.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-review-running-dry-run-2026-10-06.screenshot.json)
+
+### running-live
+
+- filename: [`carlota-jo-substrate-review-running-live-2026-10-06.png`](../docs/assets/screenshots/current/carlota-jo-substrate-review-running-live-2026-10-06.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-06T00:58:56.279Z`
+- captured_by: GitHub Actions / Codex Carlota review qualification
+- capture_environment: `github-actions`, hosted Chromium, intercepted synthetic workflow response; `HOSTED_SYNTHETIC_UI`
+- source_revision: `b05227630f061298aa547341db914d16e16095c9`
+- workflow_run_or_command: [`37396696339`](https://github.com/szl-holdings/platform/actions/runs/37396696339), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `45d80a869d1ff0740ab8a93ea1625775765276bf7aec3a125ec8c0e3220e6a99`
+- workcell_id: `CARLOTA-SUBSTRATE-TRUTH-20261005` / PR [#892](https://github.com/szl-holdings/platform/pull/892)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `superseded`
+- notes: Returned live-mode running fixture keeps Run and mode disabled. Repeated native clicks produced only one intercepted submission.
+- sidecar: [`carlota-jo-substrate-review-running-live-2026-10-06.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-review-running-live-2026-10-06.screenshot.json)
+
+
+## Carlota Jo protected review rollup #930 — 2026-10-13
+
+Fresh captures of the running Carlota Jo application in GitHub Actions Chromium qualify synthetic UI presentation only. All 45 Carlota browser tests passed in [workflow run 38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), job 115456148103. Artifact 11837082436 has verified ZIP SHA-256 `6de6fd4ffac3cacd08f65ab0eb975a9e114b3fa96dc082b064600d959f3408e0`. All fourteen PNGs were visually inspected, and every screenshot and source-file hash was recomputed. No image or sidecar bytes were edited.
+
+The capture revision `18d0547f60ac2f38f112b5504dac6a486ad046e5` is GitHub's synthetic test merge of protected main `fb4dd6d4a072f4e940daf76225211e14031082fd` and candidate `bdc428c862b618ac4eea04d331f7705d0d541cec`. GitHub Git objects independently establish that both capture and candidate have tree `9672fc7f45eea8dc55a59ea709afde8f644e1553`. Original sidecars retain `candidateTree: null` and `matchesCandidateTree: null` from the shallow checkout; the independent equality check does not alter that observation. The evidence-retention commit changes only this catalog and copied evidence files, retaining the captured UI, parser, browser spec, dependency and build-source bytes.
+
+Requests use intercepted local synthetic responses; other API and external requests are blocked. The fixtures named live describe a requested mode and do not establish actual execution. This evidence does not establish provider inference, durable storage, human approval, authorization, signatures, a deployment, a product-domain response, or production readiness. The October 5/6 records above remain dated history and superseded.
+
+### cancelled
+
+- filename: [`carlota-jo-substrate-cancelled-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-cancelled-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:16.414Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `3af74dd6816054a0a4804463b5110656ebdd9f0f1ef73ed1b82231e0482fcc79`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `cancelled` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-cancelled-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-cancelled-2026-10-13.screenshot.json)
+
+### dry-run-pending
+
+- filename: [`carlota-jo-substrate-dry-run-pending-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-dry-run-pending-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:12.702Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `6faf6f2b6cb9115451a5dd225cc1958fdc48731f4a4292ae04c66c9ab48f003a`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `dry-run-pending` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-dry-run-pending-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-dry-run-pending-2026-10-13.screenshot.json)
+
+### failed
+
+- filename: [`carlota-jo-substrate-failed-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-failed-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:15.182Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `1a2394515eda7b4a8905d373a3d6e42af767ce4a21a971830f0775892f5e33e5`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `failed` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-failed-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-failed-2026-10-13.screenshot.json)
+
+### live-completed
+
+- filename: [`carlota-jo-substrate-live-completed-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-live-completed-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:13.933Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `d10dafaf270f5e7ae651c2195138d2cbd2d0edc05367b4b1b6c88463c75d82d0`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `live-completed` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-live-completed-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-live-completed-2026-10-13.screenshot.json)
+
+### missing-identity-dry-run
+
+- filename: [`carlota-jo-substrate-missing-identity-dry-run-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-missing-identity-dry-run-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:06:59.612Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `8253349dd9e49fc9a85f8a6b11f5cd440d08241c975831938496db9b38aa1bdf`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `missing-identity-dry-run` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-missing-identity-dry-run-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-missing-identity-dry-run-2026-10-13.screenshot.json)
+
+### missing-identity-live
+
+- filename: [`carlota-jo-substrate-missing-identity-live-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-missing-identity-live-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:04.415Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `a12050460d81716b77af9392176737d875244c06147d1c553f8c3818df3745e8`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `missing-identity-live` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-missing-identity-live-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-missing-identity-live-2026-10-13.screenshot.json)
+
+### mode-mismatch
+
+- filename: [`carlota-jo-substrate-mode-mismatch-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-mode-mismatch-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:18.815Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `65cc22913461f6f0f71a4be8c98a2fd33a7628a58f285a3d85ff5a26db5497d4`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `mode-mismatch` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-mode-mismatch-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-mode-mismatch-2026-10-13.screenshot.json)
+
+### repeated-dry-run
+
+- filename: [`carlota-jo-substrate-repeated-dry-run-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-repeated-dry-run-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:20.035Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `67c758513e916547ef8a0811e1069701fcc076762dde9e19f72bc5210a74dabe`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `repeated-dry-run` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-repeated-dry-run-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-repeated-dry-run-2026-10-13.screenshot.json)
+
+### repeated-live
+
+- filename: [`carlota-jo-substrate-repeated-live-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-repeated-live-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:20.262Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `6ac07ed2aa21479de65ec3b27a69ac83ae6456452aaaf713ac3427fe0334c5bb`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `repeated-live` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-repeated-live-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-repeated-live-2026-10-13.screenshot.json)
+
+### running-dry-run
+
+- filename: [`carlota-jo-substrate-running-dry-run-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-running-dry-run-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:06:55.427Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `986e7a9c8cfda9d8a682a9a488127d36c7d3d1a97903bc439f1db4d5d25d04ea`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `running-dry-run` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-running-dry-run-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-running-dry-run-2026-10-13.screenshot.json)
+
+### running-live
+
+- filename: [`carlota-jo-substrate-running-live-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-running-live-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:00.896Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `9e7e5003783c0c029ab8c3455ce98697ae29f45cd80d6733d729e38ec30bc04e`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `running-live` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-running-live-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-running-live-2026-10-13.screenshot.json)
+
+### running-missing-identity-dry-run
+
+- filename: [`carlota-jo-substrate-running-missing-identity-dry-run-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-running-missing-identity-dry-run-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:06:57.630Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `ddb3b1af17d0a995dce54aa134825282c4a8a91ced738a549da8e5d8275303fe`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `running-missing-identity-dry-run` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-running-missing-identity-dry-run-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-running-missing-identity-dry-run-2026-10-13.screenshot.json)
+
+### running-missing-identity-live
+
+- filename: [`carlota-jo-substrate-running-missing-identity-live-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-running-missing-identity-live-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:03.183Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `de68068b09d24489540b042e2a3f4ae5fb4b8013999527da88fb70d780933246`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `running-missing-identity-live` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-running-missing-identity-live-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-running-missing-identity-live-2026-10-13.screenshot.json)
+
+### unrecognised
+
+- filename: [`carlota-jo-substrate-unrecognised-2026-10-13.png`](../docs/assets/screenshots/current/carlota-jo-substrate-unrecognised-2026-10-13.png)
+- route: `/governed-cockpit` (local CI build, `http://localhost:3004`)
+- surface: Carlota Jo governed cockpit / White-Glove Task Routing panel
+- capture_date: `2026-10-13T18:07:17.633Z`
+- captured_by: GitHub Actions / Codex review
+- capture_environment: `github-actions`, hosted Chromium; `HOSTED_SYNTHETIC_UI`
+- source_revision: `18d0547f60ac2f38f112b5504dac6a486ad046e5`
+- workflow_run_or_command: [38443601035](https://github.com/szl-holdings/platform/actions/runs/38443601035), `pnpm exec playwright test tests/e2e/carlota-jo.spec.ts --project=chromium --reporter=list`
+- viewport: `1280 x 720`; panel locator capture
+- artifact_sha256: `ab9e91a939a340a9c24259a6b114573094a48d3ae2c7fff6aebd3e97d354c5cf`
+- workcell_id: `PLATFORM-REVIEW-930-20261013` / PR [#930](https://github.com/szl-holdings/platform/pull/930)
+- proof_level: `3` (synthetic UI result presentation only)
+- status: `current`
+- notes: Bound synthetic `unrecognised` presentation; corresponding assertions passed. No live execution or production qualification.
+- sidecar: [`carlota-jo-substrate-unrecognised-2026-10-13.screenshot.json`](../docs/assets/screenshots/current/carlota-jo-substrate-unrecognised-2026-10-13.screenshot.json)

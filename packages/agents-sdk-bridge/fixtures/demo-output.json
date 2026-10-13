@@ -1,0 +1,1028 @@
+{
+  "schema": "szl.evidence-steward.fixture-replay/v1",
+  "mode": "OFFLINE_SOURCE_ONLY",
+  "as_of": "2026-10-02T00:00:00.000Z",
+  "execution": "NOT_CONFIGURED",
+  "catalog": {
+    "schema": "szl.evidence-steward/v1",
+    "tool": "list_catalog",
+    "as_of": "2026-10-02T00:00:00.000Z",
+    "observed_at": "2026-08-20T09:51:06.037Z",
+    "catalog_age_days": 42,
+    "catalog_stale": true,
+    "total": 17,
+    "assets": [
+      {
+        "asset_id": "SZLHOLDINGS/SZL-Forge-1.5B-ReceiptAgent",
+        "classification": "NOT_PROMOTED",
+        "maturity": "MEASURED_LIMITED",
+        "promotion_state": "NOT_PROMOTED_LIMITED_EVIDENCE"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/SZL-Khipu-1.5B",
+        "classification": "RESEARCH_ONLY",
+        "maturity": "MEASURED_RESEARCH_ONLY",
+        "promotion_state": "NOT_PROMOTED_RESEARCH_ONLY"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/SZL-Khipu-1.5B-GGUF",
+        "classification": "NOT_PROMOTED",
+        "maturity": "MEASURED_OPERATIONAL_LIMITED",
+        "promotion_state": "NOT_PROMOTED_OPERATIONAL_RESEARCH_DEMO"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/SZLHOLDINGS",
+        "classification": "UNKNOWN",
+        "maturity": "UNKNOWN",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/a11oy-v19-substrate",
+        "classification": "SOFTWARE",
+        "maturity": "SOFTWARE_ARTIFACT",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/governed-inference-meter",
+        "classification": "SOFTWARE",
+        "maturity": "MEASURED_KERNEL",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-blocked",
+        "classification": "SOFTWARE",
+        "maturity": "SOURCE_UNBOUND",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-formulas",
+        "classification": "SOFTWARE",
+        "maturity": "SOFTWARE_ARTIFACT",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-governed-norm",
+        "classification": "SOFTWARE",
+        "maturity": "MEASURED_KERNEL",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-govsign",
+        "classification": "SOFTWARE",
+        "maturity": "SOURCE_UNBOUND",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-invariants",
+        "classification": "SOFTWARE",
+        "maturity": "SOFTWARE_ARTIFACT",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-kernels",
+        "classification": "SOFTWARE",
+        "maturity": "SOFTWARE_ARTIFACT",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-lambda-gate",
+        "classification": "SOFTWARE",
+        "maturity": "MEASURED_KERNEL",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-nemo",
+        "classification": "SOFTWARE",
+        "maturity": "RECIPE_NOT_FINE_TUNED",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-ouroboros",
+        "classification": "SOFTWARE",
+        "maturity": "SOFTWARE_ARTIFACT",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-provctl",
+        "classification": "SOFTWARE",
+        "maturity": "SOURCE_UNBOUND",
+        "promotion_state": "UNKNOWN"
+      },
+      {
+        "asset_id": "SZLHOLDINGS/szl-receiptagent-qwen35-0.8b-v2",
+        "classification": "NOT_PROMOTED",
+        "maturity": "MEASURED_PUBLISHED_LIMITED",
+        "promotion_state": "NOT_PROMOTED_LIMITED_EVIDENCE"
+      }
+    ],
+    "evidence": [
+      {
+        "repository": "szl-holdings/platform",
+        "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+        "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+        "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+      },
+      {
+        "repository": "szl-holdings/szl-forge",
+        "path": "publishing/model-source-bindings.json",
+        "ref": "53287761f823c3b5114e3e741b17568229688331",
+        "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+      },
+      {
+        "repository": "szl-holdings/szl-forge",
+        "path": "portfolio/model_portfolio.json",
+        "ref": "53287761f823c3b5114e3e741b17568229688331",
+        "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+      }
+    ],
+    "digest": "sha256:f1c9e1bef64d88158862796d8e3933c3d66623fef637cbe6517a83c753e6c2c2"
+  },
+  "cases": [
+    {
+      "inspect": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "inspect_asset",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZL-Forge-1.5B-ReceiptAgent",
+        "classification": "NOT_PROMOTED",
+        "artifact_class": "fine_tuned_model",
+        "maturity": "MEASURED_LIMITED",
+        "promotion_state": "NOT_PROMOTED_LIMITED_EVIDENCE",
+        "role": "governed_receipt_draft_proposer",
+        "source_binding": {
+          "repository": "szl-holdings/szl-forge",
+          "source_path": "receiptagent",
+          "source_files": [
+            "receiptagent/adversarial.jsonl",
+            "receiptagent/eval.jsonl",
+            "receiptagent/eval_receipt.signed.json",
+            "receiptagent/manifest.json",
+            "receiptagent/owner_pubkey.json",
+            "receiptagent/receiptagent.schema.json",
+            "receiptagent/train.jsonl",
+            "receiptagent/train.refusals.jsonl",
+            "receiptagent/train_receiptagent.py",
+            "receiptagent/training_receipt.signed.json"
+          ]
+        },
+        "github_source": "https://github.com/szl-holdings/szl-forge/tree/main/receiptagent",
+        "expected_weight_sha256": {
+          "adapter/adapter_model.safetensors": "706aff139489d62cb1ac221c0f92a1a8595cd6a42032c542efe8028684e57cf2",
+          "model.safetensors": "a797592fb35c32cc6ebf5739c0a1d9312123300acaf09987d207d86196bc6e7d"
+        },
+        "signed_receipts": {
+          "public_key": "owner_pubkey.json",
+          "training": "training_receipt.signed.json",
+          "evaluation": "eval_receipt.signed.json",
+          "claim_scope": "REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY"
+        },
+        "receipt_claim_scope": "REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY",
+        "runtime_output_signature": "NOT_ESTABLISHED",
+        "limitations": [
+          "The model proposes receipt drafts; it does not approve actions or mint authoritative receipts.",
+          "The public weight files are observed and hashed separately from the signed training receipt.",
+          "No independent quality certification is claimed."
+        ],
+        "qualified_inference": "NOT_ESTABLISHED",
+        "autonomous_execution": false,
+        "lambda_conjecture_1": "OPEN",
+        "evidence": [
+          {
+            "repository": "szl-holdings/platform",
+            "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "publishing/model-source-bindings.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "portfolio/model_portfolio.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+          },
+          {
+            "repository": "szl-holdings/platform",
+            "path": "replit-sync/conjecture/PROVEN_STATE_CANONICAL.md",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "git_blob_sha1": "9c950a168cc887d6345fe873c10e354cca5bd1e5"
+          }
+        ],
+        "digest": "sha256:595e5f99e41d54e70b8af28d53b954af8969dd99f7b761646cf516b910bab9a2"
+      },
+      "gaps": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "assess_evidence_gaps",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZL-Forge-1.5B-ReceiptAgent",
+        "gaps": [
+          {
+            "code": "CATALOG_STALE",
+            "detail": "The tracked public catalog is older than 30 days.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              }
+            ]
+          },
+          {
+            "code": "NOT_PROMOTED",
+            "detail": "The curated binding explicitly blocks promotion.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              }
+            ]
+          },
+          {
+            "code": "QUALIFIED_INFERENCE_NOT_ESTABLISHED",
+            "detail": "Catalog and source records do not establish qualified live inference.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "portfolio/model_portfolio.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+              }
+            ]
+          }
+        ],
+        "qualified_inference": "NOT_ESTABLISHED",
+        "digest": "sha256:c2576eb672e7daa01b1b9298b96c36523a09b052e53bd91ee458e9a5b8ab15af"
+      },
+      "proposal": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "propose_next_step",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZL-Forge-1.5B-ReceiptAgent",
+        "classification": "NOT_PROMOTED",
+        "proposal": {
+          "step": "REFRESH_PUBLIC_CATALOG",
+          "reason": "Review a new public catalog observation before current-state claims.",
+          "approval_required": true,
+          "approval_state": "PENDING_HUMAN_REVIEW",
+          "execution": "NOT_CONFIGURED",
+          "autonomous_execution": false
+        },
+        "gap_codes": [
+          "CATALOG_STALE",
+          "NOT_PROMOTED",
+          "QUALIFIED_INFERENCE_NOT_ESTABLISHED"
+        ],
+        "evidence": [
+          {
+            "repository": "szl-holdings/platform",
+            "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "publishing/model-source-bindings.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "portfolio/model_portfolio.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+          }
+        ],
+        "digest": "sha256:b7d14731493f01ee66dd58216d470794e0e912a4c11bbfc70b724bd3a3b56db9"
+      }
+    },
+    {
+      "inspect": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "inspect_asset",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZL-Khipu-1.5B",
+        "classification": "RESEARCH_ONLY",
+        "artifact_class": "fine_tuned_model",
+        "maturity": "MEASURED_RESEARCH_ONLY",
+        "promotion_state": "NOT_PROMOTED_RESEARCH_ONLY",
+        "role": "governed_retrieval_plan_proposer",
+        "source_binding": {
+          "repository": "szl-holdings/szl-forge",
+          "source_path": "khipu",
+          "source_files": [
+            "khipu/adversarial.jsonl",
+            "khipu/eval.jsonl",
+            "khipu/eval_khipu.py",
+            "khipu/eval_receipt.signed.json",
+            "khipu/khipu.schema.json",
+            "khipu/manifest.json",
+            "khipu/owner_pubkey.json",
+            "khipu/train.abstain.jsonl",
+            "khipu/train.jsonl",
+            "khipu/train_khipu.py",
+            "khipu/training_receipt.signed.json"
+          ]
+        },
+        "github_source": "https://github.com/szl-holdings/szl-forge/tree/main/khipu",
+        "expected_weight_sha256": {
+          "adapter/adapter_model.safetensors": "0a71b3a28b9f77ca3651f38c8caa1e34121934f5584dae24454d4c6eea823a66",
+          "model.safetensors": "6f9f5b9df2a877c999e33faf542dc6e62ce63f4a2bf6b358fc48a4b6b113c3c9"
+        },
+        "signed_receipts": {
+          "public_key": "owner_pubkey.json",
+          "training": "training_receipt.signed.json",
+          "evaluation": "eval_receipt.signed.json",
+          "claim_scope": "REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY"
+        },
+        "receipt_claim_scope": "REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY",
+        "runtime_output_signature": "NOT_ESTABLISHED",
+        "limitations": [
+          "The signed held-out abstention result is 2/6.",
+          "The curriculum measures synthetic routing-policy conformance, not autonomous navigation of the live Brain.",
+          "The public weight files are observed and hashed separately from the signed training receipt."
+        ],
+        "qualified_inference": "NOT_ESTABLISHED",
+        "autonomous_execution": false,
+        "lambda_conjecture_1": "OPEN",
+        "evidence": [
+          {
+            "repository": "szl-holdings/platform",
+            "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "publishing/model-source-bindings.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "portfolio/model_portfolio.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+          },
+          {
+            "repository": "szl-holdings/platform",
+            "path": "replit-sync/conjecture/PROVEN_STATE_CANONICAL.md",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "git_blob_sha1": "9c950a168cc887d6345fe873c10e354cca5bd1e5"
+          }
+        ],
+        "digest": "sha256:aa5bf0e2b08deb72ca2753c847942d262776d53ce5445f90dbc7afedfa8af743"
+      },
+      "gaps": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "assess_evidence_gaps",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZL-Khipu-1.5B",
+        "gaps": [
+          {
+            "code": "CATALOG_STALE",
+            "detail": "The tracked public catalog is older than 30 days.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              }
+            ]
+          },
+          {
+            "code": "RESEARCH_ONLY",
+            "detail": "Research evidence does not qualify autonomous inference.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "portfolio/model_portfolio.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+              }
+            ]
+          },
+          {
+            "code": "NOT_PROMOTED",
+            "detail": "The curated binding explicitly blocks promotion.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              }
+            ]
+          },
+          {
+            "code": "QUALIFIED_INFERENCE_NOT_ESTABLISHED",
+            "detail": "Catalog and source records do not establish qualified live inference.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "portfolio/model_portfolio.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+              }
+            ]
+          }
+        ],
+        "qualified_inference": "NOT_ESTABLISHED",
+        "digest": "sha256:aac8c40785e2f3309b401f71aeaa96911e3ae67a7fc56aa67031d65d0f476aeb"
+      },
+      "proposal": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "propose_next_step",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZL-Khipu-1.5B",
+        "classification": "RESEARCH_ONLY",
+        "proposal": {
+          "step": "REVIEW_RESEARCH_EVALUATION",
+          "reason": "Review the recorded evaluation limits before any use proposal.",
+          "approval_required": true,
+          "approval_state": "PENDING_HUMAN_REVIEW",
+          "execution": "NOT_CONFIGURED",
+          "autonomous_execution": false
+        },
+        "gap_codes": [
+          "CATALOG_STALE",
+          "RESEARCH_ONLY",
+          "NOT_PROMOTED",
+          "QUALIFIED_INFERENCE_NOT_ESTABLISHED"
+        ],
+        "evidence": [
+          {
+            "repository": "szl-holdings/platform",
+            "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "publishing/model-source-bindings.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "portfolio/model_portfolio.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+          }
+        ],
+        "digest": "sha256:9b6309641f9ad63f432468b8bd7da6f69b29b9364741e321f6504da4cacecee1"
+      }
+    },
+    {
+      "inspect": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "inspect_asset",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZL-Khipu-1.5B-GGUF",
+        "classification": "NOT_PROMOTED",
+        "artifact_class": "quantized_model",
+        "maturity": "MEASURED_OPERATIONAL_LIMITED",
+        "promotion_state": "NOT_PROMOTED_OPERATIONAL_RESEARCH_DEMO",
+        "role": "bounded_governed_retrieval_plan_proposer",
+        "source_binding": {
+          "repository": "szl-holdings/szl-forge",
+          "source_path": "khipu",
+          "source_files": [
+            "khipu/adversarial.jsonl",
+            "khipu/eval.jsonl",
+            "khipu/eval_khipu.py",
+            "khipu/eval_receipt.signed.json",
+            "khipu/khipu.schema.json",
+            "khipu/manifest.json",
+            "khipu/owner_pubkey.json",
+            "khipu/train.abstain.jsonl",
+            "khipu/train.jsonl",
+            "khipu/train_khipu.py",
+            "khipu/training_receipt.signed.json",
+            "spaces/szl-model-inference-lab/app.py",
+            "spaces/szl-model-inference-lab/download_artifacts.py",
+            "spaces/szl-model-inference-lab/release.json",
+            "spaces/szl-model-inference-lab/requirements.txt",
+            "spaces/szl-model-inference-lab/verify_execution_record.py"
+          ]
+        },
+        "github_source": "https://github.com/szl-holdings/szl-forge/tree/main/spaces/szl-model-inference-lab",
+        "expected_weight_sha256": {
+          "SZL-Khipu-1.5B-F16.gguf": "2348ee342efe639e100f3fb31a3dc11b8c12d8c43ecfe45e18041b9f94c71a12",
+          "SZL-Khipu-1.5B-Q4_K_M.gguf": "13c1a1993063e1dff92f7413ccf48eaca6d48efc8801ae9af35961ae3396623a",
+          "SZL-Khipu-1.5B-Q5_K_M.gguf": "3bf460ac163c5dc952c273999c38a41349e3e6d666e4b713aed22c996860fd4c",
+          "SZL-Khipu-1.5B-Q8_0.gguf": "6aff1087f64631679f4cdf032613aee6911dbde38cd3bac6b81bf63741a56f0d"
+        },
+        "signed_receipts": {
+          "public_key": "owner_pubkey.json",
+          "training": "training_receipt.signed.json",
+          "evaluation": "eval_receipt.signed.json",
+          "claim_scope": "REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY"
+        },
+        "receipt_claim_scope": "REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY",
+        "runtime_output_signature": "UNSIGNED",
+        "limitations": [
+          "The signed held-out abstention result is 2/6, so autonomous or high-stakes use is prohibited.",
+          "The live service is a bounded best-effort CPU demo with no SLA.",
+          "Runtime outputs are explicitly unsigned; the signed receipts cover training and evaluation only.",
+          "Production promotion is blocked until controlled restart reproducibility and instrumented energy evidence pass.",
+          "Energy and process-peak memory remain UNAVAILABLE until instrumented measurements are captured.",
+          "The published GGUF bytes are observed and hashed; reproducible quantization from the fine-tuned weights is not claimed."
+        ],
+        "qualified_inference": "NOT_ESTABLISHED",
+        "autonomous_execution": false,
+        "lambda_conjecture_1": "OPEN",
+        "evidence": [
+          {
+            "repository": "szl-holdings/platform",
+            "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "publishing/model-source-bindings.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "portfolio/model_portfolio.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+          },
+          {
+            "repository": "szl-holdings/platform",
+            "path": "replit-sync/conjecture/PROVEN_STATE_CANONICAL.md",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "git_blob_sha1": "9c950a168cc887d6345fe873c10e354cca5bd1e5"
+          }
+        ],
+        "digest": "sha256:e5bd852c71aade82fada58ab604f34e09a1e106bc21f02544a4ecc3563c68bfd"
+      },
+      "gaps": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "assess_evidence_gaps",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZL-Khipu-1.5B-GGUF",
+        "gaps": [
+          {
+            "code": "CATALOG_STALE",
+            "detail": "The tracked public catalog is older than 30 days.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              }
+            ]
+          },
+          {
+            "code": "NOT_PROMOTED",
+            "detail": "The curated binding explicitly blocks promotion.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              }
+            ]
+          },
+          {
+            "code": "RUNTIME_OUTPUT_UNSIGNED",
+            "detail": "Runtime outputs are unsigned; training and evaluation receipts do not cover them.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              }
+            ]
+          },
+          {
+            "code": "QUALIFIED_INFERENCE_NOT_ESTABLISHED",
+            "detail": "Catalog and source records do not establish qualified live inference.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "portfolio/model_portfolio.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+              }
+            ]
+          }
+        ],
+        "qualified_inference": "NOT_ESTABLISHED",
+        "digest": "sha256:5e98ba6d7e31664a59cdcf3421083c504be44597bdb7f5ad8c83ea540e348c1d"
+      },
+      "proposal": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "propose_next_step",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZL-Khipu-1.5B-GGUF",
+        "classification": "NOT_PROMOTED",
+        "proposal": {
+          "step": "REFRESH_PUBLIC_CATALOG",
+          "reason": "Review a new public catalog observation before current-state claims.",
+          "approval_required": true,
+          "approval_state": "PENDING_HUMAN_REVIEW",
+          "execution": "NOT_CONFIGURED",
+          "autonomous_execution": false
+        },
+        "gap_codes": [
+          "CATALOG_STALE",
+          "NOT_PROMOTED",
+          "RUNTIME_OUTPUT_UNSIGNED",
+          "QUALIFIED_INFERENCE_NOT_ESTABLISHED"
+        ],
+        "evidence": [
+          {
+            "repository": "szl-holdings/platform",
+            "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "publishing/model-source-bindings.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "portfolio/model_portfolio.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+          }
+        ],
+        "digest": "sha256:cbe161a20fb298158a743783dd2c2e0c5d5a45efda4e1cd0d81708b7d4bc5aa6"
+      }
+    },
+    {
+      "inspect": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "inspect_asset",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/szl-kernels",
+        "classification": "SOFTWARE",
+        "artifact_class": "software_kernel",
+        "maturity": "SOFTWARE_ARTIFACT",
+        "promotion_state": "UNKNOWN",
+        "role": "kernel_portfolio_card",
+        "source_binding": null,
+        "github_source": "https://github.com/szl-holdings/governed-receipt-spec",
+        "expected_weight_sha256": {},
+        "signed_receipts": null,
+        "receipt_claim_scope": "NOT_ESTABLISHED",
+        "runtime_output_signature": "NOT_ESTABLISHED",
+        "limitations": [],
+        "qualified_inference": "NOT_ESTABLISHED",
+        "autonomous_execution": false,
+        "lambda_conjecture_1": "OPEN",
+        "evidence": [
+          {
+            "repository": "szl-holdings/platform",
+            "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "portfolio/model_portfolio.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+          },
+          {
+            "repository": "szl-holdings/platform",
+            "path": "replit-sync/conjecture/PROVEN_STATE_CANONICAL.md",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "git_blob_sha1": "9c950a168cc887d6345fe873c10e354cca5bd1e5"
+          }
+        ],
+        "digest": "sha256:32ac119e29fda592c0c1a897a25a4e8fb8278fdf27acd402e7ffeb691a004d3d"
+      },
+      "gaps": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "assess_evidence_gaps",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/szl-kernels",
+        "gaps": [
+          {
+            "code": "CATALOG_STALE",
+            "detail": "The tracked public catalog is older than 30 days.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              }
+            ]
+          },
+          {
+            "code": "CURATED_BINDING_MISSING",
+            "detail": "No curated model source binding covers this asset.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              }
+            ]
+          },
+          {
+            "code": "SOFTWARE_NOT_MODEL",
+            "detail": "This is software, not qualified model inference.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "portfolio/model_portfolio.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+              }
+            ]
+          },
+          {
+            "code": "QUALIFIED_INFERENCE_NOT_ESTABLISHED",
+            "detail": "Catalog and source records do not establish qualified live inference.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "portfolio/model_portfolio.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+              }
+            ]
+          }
+        ],
+        "qualified_inference": "NOT_ESTABLISHED",
+        "digest": "sha256:88bf23157942819021e98d8c143b26d362042e96d468bd6d25e1ee1d008d6767"
+      },
+      "proposal": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "propose_next_step",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/szl-kernels",
+        "classification": "SOFTWARE",
+        "proposal": {
+          "step": "REVIEW_SOFTWARE_CONTRACT",
+          "reason": "Review software contracts and tests for this Hub model-type asset.",
+          "approval_required": true,
+          "approval_state": "PENDING_HUMAN_REVIEW",
+          "execution": "NOT_CONFIGURED",
+          "autonomous_execution": false
+        },
+        "gap_codes": [
+          "CATALOG_STALE",
+          "CURATED_BINDING_MISSING",
+          "SOFTWARE_NOT_MODEL",
+          "QUALIFIED_INFERENCE_NOT_ESTABLISHED"
+        ],
+        "evidence": [
+          {
+            "repository": "szl-holdings/platform",
+            "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+          },
+          {
+            "repository": "szl-holdings/szl-forge",
+            "path": "portfolio/model_portfolio.json",
+            "ref": "53287761f823c3b5114e3e741b17568229688331",
+            "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+          }
+        ],
+        "digest": "sha256:ef778c9bf43ab4a112a0f218271dcff7b5844d688997450d4716e2487ec18e05"
+      }
+    },
+    {
+      "inspect": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "inspect_asset",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZLHOLDINGS",
+        "classification": "UNKNOWN",
+        "artifact_class": "UNKNOWN",
+        "maturity": "UNKNOWN",
+        "promotion_state": "UNKNOWN",
+        "role": null,
+        "source_binding": null,
+        "github_source": null,
+        "expected_weight_sha256": {},
+        "signed_receipts": null,
+        "receipt_claim_scope": "NOT_ESTABLISHED",
+        "runtime_output_signature": "NOT_ESTABLISHED",
+        "limitations": [],
+        "qualified_inference": "NOT_ESTABLISHED",
+        "autonomous_execution": false,
+        "lambda_conjecture_1": "OPEN",
+        "evidence": [
+          {
+            "repository": "szl-holdings/platform",
+            "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+          },
+          {
+            "repository": "szl-holdings/platform",
+            "path": "replit-sync/conjecture/PROVEN_STATE_CANONICAL.md",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "git_blob_sha1": "9c950a168cc887d6345fe873c10e354cca5bd1e5"
+          }
+        ],
+        "digest": "sha256:23c405ddc5c4804ea4bffceed401671270f9bd733f22a37311d7adb489c2ed41"
+      },
+      "gaps": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "assess_evidence_gaps",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZLHOLDINGS",
+        "gaps": [
+          {
+            "code": "CATALOG_STALE",
+            "detail": "The tracked public catalog is older than 30 days.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              }
+            ]
+          },
+          {
+            "code": "CURATED_BINDING_MISSING",
+            "detail": "No curated model source binding covers this asset.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              }
+            ]
+          },
+          {
+            "code": "PORTFOLIO_ENTRY_MISSING",
+            "detail": "The scoped portfolio has no entry for this asset.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "portfolio/model_portfolio.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+              }
+            ]
+          },
+          {
+            "code": "CLASSIFICATION_UNKNOWN",
+            "detail": "Available sources do not establish a qualifying class.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "portfolio/model_portfolio.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+              }
+            ]
+          },
+          {
+            "code": "QUALIFIED_INFERENCE_NOT_ESTABLISHED",
+            "detail": "Catalog and source records do not establish qualified live inference.",
+            "evidence": [
+              {
+                "repository": "szl-holdings/platform",
+                "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+                "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+                "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "publishing/model-source-bindings.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "ad3b12f2d1bc9e27f030b7c980f194f9e15687c78315bda3073af9c5a28a4469"
+              },
+              {
+                "repository": "szl-holdings/szl-forge",
+                "path": "portfolio/model_portfolio.json",
+                "ref": "53287761f823c3b5114e3e741b17568229688331",
+                "canonical_json_sha256": "bc3d0949474d7a8c9076113d4fc9212dcbfc37f4d5ae6cc44605d142bcdecc7c"
+              }
+            ]
+          }
+        ],
+        "qualified_inference": "NOT_ESTABLISHED",
+        "digest": "sha256:dfedb3a618f932b4ee0a65fdf6f5aabe0567b36499b8f0ef3cb362d62e4049f4"
+      },
+      "proposal": {
+        "schema": "szl.evidence-steward/v1",
+        "tool": "propose_next_step",
+        "as_of": "2026-10-02T00:00:00.000Z",
+        "asset_id": "SZLHOLDINGS/SZLHOLDINGS",
+        "classification": "UNKNOWN",
+        "proposal": {
+          "step": "RECONCILE_SOURCE_BINDING",
+          "reason": "Resolve missing or conflicting source classification evidence.",
+          "approval_required": true,
+          "approval_state": "PENDING_HUMAN_REVIEW",
+          "execution": "NOT_CONFIGURED",
+          "autonomous_execution": false
+        },
+        "gap_codes": [
+          "CATALOG_STALE",
+          "CURATED_BINDING_MISSING",
+          "PORTFOLIO_ENTRY_MISSING",
+          "CLASSIFICATION_UNKNOWN",
+          "QUALIFIED_INFERENCE_NOT_ESTABLISHED"
+        ],
+        "evidence": [
+          {
+            "repository": "szl-holdings/platform",
+            "path": "audit/evidence/huggingface-public-catalog.snapshot.json",
+            "ref": "f2f8df6f89056e9104587674ccec0855dd5b177a",
+            "canonical_json_sha256": "638f73ca32d148d98c8421685f06c0a94cb93b26536306ed264d8b03b9eee31c"
+          }
+        ],
+        "digest": "sha256:3cf684bacfe9d488ef519f359ce7b370ec72fe438687e7b947b12fd0378966a3"
+      }
+    }
+  ],
+  "digest": "sha256:22e14a4c9609a9815f824ab4363b570cd8489c1fc7010aafdb94c1acaf50ce42"
+}

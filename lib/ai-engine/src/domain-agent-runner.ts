@@ -3,6 +3,7 @@ import type {
   StructuredToolResult,
   ToolDefinition,
 } from './types.js';
+import { selectToolMessageHistory } from './tool-message-history.js';
 
 export const MAX_TOOL_ROUNDS = 6;
 
@@ -373,32 +374,15 @@ export class DomainAgentRunner {
 
     const buildNativeMessages = () => [
       { role: 'system' as const, content: systemPrompt },
-      ...messages
-        .filter((m) => m.role !== 'system')
-        .slice(-20)
-        .map((m) => {
-          if (m.role === 'tool') {
-            return {
-              role: 'tool' as const,
-              content: m.content,
-              ...(m.toolCallId !== undefined ? { toolCallId: m.toolCallId } : {}),
-              ...(m.toolName !== undefined ? { name: m.toolName } : {}),
-            };
-          }
-          if (m.role === 'assistant' && m.toolCallId !== undefined) {
-            return {
-              role: 'assistant' as const,
-              content: m.content,
-              toolCallId: m.toolCallId,
-              name: m.toolName,
-              toolArguments: m.toolArguments,
-            };
-          }
-          return {
-            role: m.role as 'user' | 'assistant',
-            content: m.content,
-          };
-        }),
+      ...selectToolMessageHistory(
+        messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+          ...(m.toolCallId !== undefined ? { toolCallId: m.toolCallId } : {}),
+          ...(m.toolName !== undefined ? { name: m.toolName } : {}),
+          ...(m.toolArguments !== undefined ? { toolArguments: m.toolArguments } : {}),
+        })),
+      ),
     ];
 
     let rounds = 0;

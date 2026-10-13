@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:dbb39a6e-2b6b-5cab-b0c3-452e90ef345e",
+  "serialNumber": "urn:uuid:1fe079fc-dae8-56c7-a9cb-6a9029bccab6",
   "metadata": {
     "tools": [
       {
@@ -35,7 +35,7 @@
       },
       {
         "name": "szl:sbom:component-count",
-        "value": "1803"
+        "value": "1809"
       }
     ]
   },
@@ -6425,6 +6425,12 @@
     {
       "type": "library",
       "name": "balanced-match",
+      "version": "1.0.2",
+      "purl": "pkg:npm/balanced-match@1.0.2"
+    },
+    {
+      "type": "library",
+      "name": "balanced-match",
       "version": "4.0.4",
       "purl": "pkg:npm/balanced-match@4.0.4"
     },
@@ -6541,6 +6547,18 @@
       "name": "bplist-parser",
       "version": "0.3.1",
       "purl": "pkg:npm/bplist-parser@0.3.1"
+    },
+    {
+      "type": "library",
+      "name": "brace-expansion",
+      "version": "1.1.21",
+      "purl": "pkg:npm/brace-expansion@1.1.21"
+    },
+    {
+      "type": "library",
+      "name": "brace-expansion",
+      "version": "2.1.7",
+      "purl": "pkg:npm/brace-expansion@2.1.7"
     },
     {
       "type": "library",
@@ -6919,6 +6937,12 @@
       "name": "compute-scroll-into-view",
       "version": "3.1.1",
       "purl": "pkg:npm/compute-scroll-into-view@3.1.1"
+    },
+    {
+      "type": "library",
+      "name": "concat-map",
+      "version": "0.0.1",
+      "purl": "pkg:npm/concat-map@0.0.1"
     },
     {
       "type": "library",
@@ -7471,6 +7495,12 @@
       "name": "entities",
       "version": "7.0.1",
       "purl": "pkg:npm/entities@7.0.1"
+    },
+    {
+      "type": "library",
+      "name": "entities",
+      "version": "8.1.0",
+      "purl": "pkg:npm/entities@8.1.0"
     },
     {
       "type": "library",
@@ -9931,6 +9961,12 @@
       "name": "parse-png",
       "version": "2.1.0",
       "purl": "pkg:npm/parse-png@2.1.0"
+    },
+    {
+      "type": "library",
+      "name": "parse5",
+      "version": "8.0.1",
+      "purl": "pkg:npm/parse5@8.0.1"
     },
     {
       "type": "library",

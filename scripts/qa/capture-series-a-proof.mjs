@@ -9,6 +9,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import {
   installCaptureNetworkPolicy,
+  localCaptureProvenance,
   publishCaptureDirectory,
   requireOutputDirectory,
   requirePathAbsent,
@@ -39,91 +40,12 @@ function requireSha(name) {
   return value;
 }
 
-function requirePositiveInteger(name) {
-  const value = requiredEnvironment(name);
-  if (!/^[1-9][0-9]*$/.test(value)) throw new Error(`${name} must be a positive integer`);
-  return value;
-}
-
 function requireRepository(name) {
   const value = requiredEnvironment(name);
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(value)) {
     throw new Error(`${name} must identify one owner/repository`);
   }
   return value;
-}
-
-function requireWorkflowIdentity(repository) {
-  const workflowRef = requiredEnvironment('GITHUB_WORKFLOW_REF');
-  const prefix = `${repository}/`;
-  const revisionSeparator = workflowRef.lastIndexOf('@');
-  if (!workflowRef.startsWith(prefix) || revisionSeparator <= prefix.length) {
-    throw new Error('GITHUB_WORKFLOW_REF must bind the current repository and workflow revision');
-  }
-  const workflowPath = workflowRef.slice(prefix.length, revisionSeparator);
-  const workflowRevision = workflowRef.slice(revisionSeparator + 1);
-  if (!/^\.github\/workflows\/[A-Za-z0-9._-]+\.ya?ml$/.test(workflowPath) || !workflowRevision) {
-    throw new Error('GITHUB_WORKFLOW_REF must identify a repository workflow file');
-  }
-  return { workflowPath, workflowRef, workflowRevision };
-}
-
-function requireServerOrigin() {
-  const serverUrl = new URL(requiredEnvironment('GITHUB_SERVER_URL'));
-  if (
-    serverUrl.protocol !== 'https:' ||
-    serverUrl.username ||
-    serverUrl.password ||
-    serverUrl.pathname !== '/' ||
-    serverUrl.search ||
-    serverUrl.hash
-  ) {
-    throw new Error('GITHUB_SERVER_URL must be an absolute HTTPS origin');
-  }
-  return serverUrl.origin;
-}
-
-function captureProvenance(repository) {
-  if (process.env.GITHUB_ACTIONS?.trim() !== 'true') {
-    return Object.freeze({
-      authority: 'LOCAL_NON_AUTHORITATIVE',
-      provider: 'local',
-      workflow_name: null,
-      workflow_ref: null,
-      workflow_path: null,
-      workflow_revision: null,
-      workflow_source_sha: null,
-      workflow_run_id: null,
-      workflow_run_attempt: null,
-      workflow_run_url: null,
-    });
-  }
-
-  const githubRepository = requireRepository('GITHUB_REPOSITORY');
-  if (githubRepository !== repository) {
-    throw new Error('GITHUB_REPOSITORY must match SOURCE_REPOSITORY');
-  }
-  const workflowName = requiredEnvironment('GITHUB_WORKFLOW');
-  const { workflowPath, workflowRef, workflowRevision } = requireWorkflowIdentity(githubRepository);
-  const workflowSourceSha = requireSha('GITHUB_WORKFLOW_SHA');
-  const workflowRunId = requirePositiveInteger('GITHUB_RUN_ID');
-  const workflowRunAttempt = requirePositiveInteger('GITHUB_RUN_ATTEMPT');
-  const githubServerOrigin = requireServerOrigin();
-
-  return Object.freeze({
-    authority: 'VERIFIED_GITHUB_RUNTIME',
-    provider: 'github-actions',
-    workflow_name: workflowName,
-    workflow_ref: workflowRef,
-    workflow_path: workflowPath,
-    workflow_revision: workflowRevision,
-    workflow_source_sha: workflowSourceSha,
-    workflow_run_id: workflowRunId,
-    workflow_run_attempt: workflowRunAttempt,
-    workflow_run_url:
-      `${githubServerOrigin}/${githubRepository}/actions/runs/${workflowRunId}` +
-      `/attempts/${workflowRunAttempt}`,
-  });
 }
 
 function requireCaptureRoute() {
@@ -500,7 +422,7 @@ const repository = requireRepository('SOURCE_REPOSITORY');
 const sourceSha = requireSha('SOURCE_SHA');
 const sourceTreeSha = requireSha('SOURCE_TREE_SHA');
 const sourceRef = requiredEnvironment('SOURCE_REF');
-const provenance = captureProvenance(repository);
+const provenance = localCaptureProvenance();
 const captureRoute = requireCaptureRoute();
 const repositoryRoot = process.cwd();
 
@@ -509,8 +431,8 @@ if (process.env.PLAYWRIGHT_BASE_URL?.trim()) {
 }
 
 const initialCheckout = verifyCheckoutIdentity(sourceSha, sourceTreeSha, 'before capture');
-if (provenance.authority === 'LOCAL_NON_AUTHORITATIVE' && initialCheckout.branch !== sourceRef) {
-  throw new Error('local SOURCE_REF must match the checked-out branch');
+if (initialCheckout.branch !== sourceRef) {
+  throw new Error('SOURCE_REF must match the checked-out branch');
 }
 
 const outputDirectory = requireOutputDirectory(repositoryRoot);
@@ -818,6 +740,8 @@ try {
   const failed = results.filter((result) => result.status !== 'PASS');
   const metadata = {
     schema: 'szl.screenshot-proof/v1',
+    authority: provenance.authority,
+    hosted_gate_admissible: false,
     captured_at: startedAt,
     completed_at: new Date().toISOString(),
     status: failed.length === 0 ? 'PASS' : 'FAIL',
@@ -872,8 +796,8 @@ try {
     },
     capture_environment: {
       ...provenance,
-      runner_os: process.env.RUNNER_OS ?? process.platform,
-      runner_arch: process.env.RUNNER_ARCH ?? process.arch,
+      runner_os: process.platform,
+      runner_arch: process.arch,
       node_version: process.version,
       browser: { name: 'chromium', version: browserVersion },
       command: 'node scripts/qa/capture-series-a-proof.mjs',
@@ -888,9 +812,7 @@ try {
     },
     captures: results,
     non_claims: [
-      provenance.authority === 'LOCAL_NON_AUTHORITATIVE'
-        ? 'This local capture binds screenshots to exact locally built source bytes but is non-authoritative for hosted evidence gates.'
-        : 'Hosted metadata binds exact built bytes to the validated GitHub workflow runtime identity.',
+      'This candidate-owned capture binds screenshots to exact rail-built source bytes but is non-authoritative for hosted evidence gates.',
       'They do not prove deployment, production runtime, customer use, or external service parity.',
     ],
     publication: {

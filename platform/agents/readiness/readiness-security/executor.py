@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import hashlib
 import json
 import os
 import re
@@ -28,6 +29,11 @@ PLATFORM_REPO = "szl-holdings/platform"
 PLATFORM_SECRET_WORKFLOW = "security.yml"
 PLATFORM_SECRET_JOB = "Secret Scan (Gitleaks)"
 PLATFORM_SECRET_STEP = "Run Gitleaks — detect committed secrets"
+# Reviewed named step at platform aaa5417bd9a1fe755a5eaaa4e45bb29c8940370c.
+# It binds the environment, detect arguments, nonzero-status capture and final
+# exit propagation. This is source admission, not a general YAML/shell parser;
+# an edited step must be reviewed before its new identity can be admitted.
+PLATFORM_SECRET_STEP_SHA256 = "dd607271606705264ac96c6c855f5c5f60ea0e36f6afd04ac54a61be529599c1"
 SHA40 = re.compile(r"^[0-9a-fA-F]{40}$")
 CONTACT_EMAIL = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
 PRIVATE_ADVISORY = re.compile(r"https://github\.com/[^\s/]+/[^\s/]+/security/advisories/new\b")
@@ -153,25 +159,37 @@ def _platform_secret_workflow_status(repo: str, head_sha: str, names: list[str])
         if not isinstance(file.get("content"), str) or not file["content"]:
             raise ValueError("missing workflow content")
         content = base64.b64decode("".join(file["content"].split()), validate=True).decode("utf-8")
+        content = content.replace("\r\n", "\n")
     except (KeyError, TypeError, ValueError, UnicodeError, binascii.Error):
         return "INVALID_RESPONSE"
-    jobs = re.search(r"(?m)^jobs:\s*(?:#.*)?$", content)
-    if jobs is None:
+    jobs_sections = list(re.finditer(r"(?m)^jobs:[ \t]*(?:#.*)?$", content))
+    if len(jobs_sections) != 1:
         return "MISSING_WORKFLOW"
+    jobs = jobs_sections[0]
     job_lines = content[jobs.end():].splitlines()
-    job_start = next((i for i, line in enumerate(job_lines)
-                      if re.fullmatch(r"  secret-scan:\s*(?:#.*)?", line)), None)
-    if job_start is None:
+    job_starts = [i for i, line in enumerate(job_lines)
+                  if re.fullmatch(r"  secret-scan:[ \t]*(?:#.*)?", line)]
+    if len(job_starts) != 1:
         return "MISSING_WORKFLOW"
+    job_start = job_starts[0]
     job_end = next((i for i in range(job_start + 1, len(job_lines))
                     if re.match(r"^(?:  [A-Za-z0-9_-]+:|[A-Za-z_][A-Za-z0-9_-]*:)", job_lines[i])),
                    len(job_lines))
     job = "\n".join(job_lines[job_start:job_end])
-    if not re.search(r"(?m)^\s{6}- name:\s*Run Gitleaks — detect committed secrets\s*$", job):
-        return "MISSING_WORKFLOW"
-    if not re.search(r"(?m)^\s{10,}gitleaks\s+detect(?:\s|$)", job):
-        return "MISSING_WORKFLOW"
     if re.search(r"(?m)^\s+continue-on-error:", job):
+        return "MISSING_WORKFLOW"
+    lines = job.splitlines()
+    starts = [i for i, line in enumerate(lines)
+              if line == f"      - name: {PLATFORM_SECRET_STEP}"]
+    if len(starts) != 1:
+        return "MISSING_WORKFLOW"
+    start = starts[0]
+    end = next((i for i in range(start + 1, len(lines))
+                if re.match(r"^      -(?:\s|$)", lines[i])), len(lines))
+    # Normalize line endings and trailing separator whitespace only. Retain all
+    # step content, including the env mapping and the complete run block.
+    step = "\n".join(lines[start:end]).rstrip() + "\n"
+    if hashlib.sha256(step.encode("utf-8")).hexdigest() != PLATFORM_SECRET_STEP_SHA256:
         return "MISSING_WORKFLOW"
     return "SUCCESS"
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /** Source/lock policy only; not a vulnerability scan or installed-runtime proof. */
 import { execFileSync } from 'node:child_process';
-import { lstatSync, readFileSync } from 'node:fs';
+import { closeSync, constants, fstatSync, lstatSync, openSync, readSync } from 'node:fs';
 import { dirname, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseDocument, visit } from 'yaml';
@@ -248,6 +248,42 @@ export function validateRetiredSigningGraph({ workspaceText, lockText, manifests
   };
 }
 
+export function readBoundedRegularSource(root, path) {
+  const full = resolve(root, path);
+  const within = relative(root, full);
+  if (within.startsWith('..') || isAbsolute(within)) {
+    throw new Error(`unsafe source ${path}`);
+  }
+  // Nonblocking admission lets fstat reject a FIFO without waiting for a writer.
+  const fd = openSync(full, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
+  try {
+    const before = fstatSync(fd, { bigint: true });
+    if (!before.isFile() || before.size > 4n * 1024n * 1024n) {
+      throw new Error(`unsafe source ${path}`);
+    }
+    // One descriptor binds admission and bounded reading to the same file.
+    // Reserve one extra byte so growth cannot hide behind the original size.
+    const bytes = Buffer.alloc(Number(before.size) + 1);
+    let length = 0;
+    while (length < bytes.length) {
+      const count = readSync(fd, bytes, length, bytes.length - length, length);
+      if (count === 0) break;
+      length += count;
+    }
+    const after = fstatSync(fd, { bigint: true });
+    const named = lstatSync(full, { bigint: true });
+    const same = (a, b) => ['dev', 'ino', 'size', 'mtimeNs', 'ctimeNs', 'mode', 'uid', 'gid']
+      .every((field) => a[field] === b[field]);
+    if (!same(before, after) || !named.isFile() || !same(after, named)
+        || BigInt(length) !== before.size) {
+      throw new Error(`source changed during bounded read ${path}`);
+    }
+    return bytes.subarray(0, length).toString('utf8');
+  } finally {
+    closeSync(fd);
+  }
+}
+
 export function inspectRepository(root = ROOT) {
   const paths = execFileSync('git', ['-C', root, 'ls-files', '-z', '--', '*package.json'], {
     encoding: 'utf8',
@@ -256,20 +292,7 @@ export function inspectRepository(root = ROOT) {
     .split('\0')
     .filter(Boolean);
   if (!paths.length || paths.length > 1000) throw new Error('tracked manifest inventory invalid');
-  function read(path) {
-    const full = resolve(root, path);
-    const within = relative(root, full);
-    const stat = lstatSync(full);
-    if (
-      within.startsWith('..') ||
-      isAbsolute(within) ||
-      stat.isSymbolicLink() ||
-      !stat.isFile() ||
-      stat.size > 4 * 1024 * 1024
-    )
-      throw new Error(`unsafe source ${path}`);
-    return readFileSync(full, 'utf8');
-  }
+  const read = (path) => readBoundedRegularSource(root, path);
   return validateRetiredSigningGraph({
     workspaceText: read('pnpm-workspace.yaml'),
     lockText: read('pnpm-lock.yaml'),

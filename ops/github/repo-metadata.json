@@ -24,7 +24,7 @@
   },
   "branch_protection": {
     "branch": "main",
-    "required_status_checks": ["Runtime Audit (audit:full)", "Security Gate (blocking)", "E2E Gate", "severity-gate"],
+    "required_status_checks": ["Runtime Audit (audit:full)", "Security Gate (blocking)", "E2E Gate", "severity-gate", "lockfiles / No lockfile references a Replit-internal registry host"],
     "require_pull_request": true,
     "include_administrators": true,
     "allow_force_pushes": false,

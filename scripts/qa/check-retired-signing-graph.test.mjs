@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { stringify } from 'yaml';
-import { SECURE_OVERRIDES, validateRetiredSigningGraph } from './check-retired-signing-graph.mjs';
+import { readBoundedRegularSource, SECURE_OVERRIDES, validateRetiredSigningGraph } from './check-retired-signing-graph.mjs';
 
 function fixture() {
   const overrides = { ...SECURE_OVERRIDES, braces: 'link:packages/braces-safe' };
@@ -287,5 +291,38 @@ test('rejects invalid and duplicate-key JSON manifest source', () => {
     const value = inputs(fixture());
     value.manifests[0].text = text;
     assert.throws(() => validateRetiredSigningGraph(value));
+  }
+});
+
+
+test('bounded descriptor reader preserves ordinary source bytes and exact size limit', () => {
+  const root = mkdtempSync(join(tmpdir(), 'szl-source-contract-'));
+  try {
+    writeFileSync(join(root, 'source.json'), '{"fixture":true}\n');
+    assert.equal(readBoundedRegularSource(root, 'source.json'), '{"fixture":true}\n');
+    writeFileSync(join(root, 'empty'), '');
+    assert.equal(readBoundedRegularSource(root, 'empty'), '');
+    writeFileSync(join(root, 'limit'), Buffer.alloc(4 * 1024 * 1024, 0x61));
+    assert.equal(readBoundedRegularSource(root, 'limit').length, 4 * 1024 * 1024);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('bounded descriptor reader refuses nonregular, linked, oversized and escaping sources', () => {
+  const root = mkdtempSync(join(tmpdir(), 'szl-source-contract-'));
+  try {
+    writeFileSync(join(root, 'fixture'), 'fixture');
+    symlinkSync('fixture', join(root, 'linked'));
+    mkdirSync(join(root, 'directory'));
+    execFileSync('mkfifo', [join(root, 'fifo')]);
+    writeFileSync(join(root, 'oversized'), Buffer.alloc(4 * 1024 * 1024 + 1));
+    for (const path of ['linked', 'directory', 'fifo', 'oversized', '../outside', 'missing']) {
+      assert.throws(() => readBoundedRegularSource(root, path));
+    }
+    // Refusals close their owned descriptor and do not affect later reads.
+    assert.equal(readBoundedRegularSource(root, 'fixture'), 'fixture');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 });

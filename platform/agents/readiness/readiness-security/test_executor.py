@@ -220,6 +220,75 @@ class SecurityReadinessTest(unittest.TestCase):
             observed = security.workflow_status(PLATFORM, "main", HEAD)
         self.assertEqual(observed["controls"]["gitleaks"]["status"], "MISSING_WORKFLOW")
 
+    def test_platform_current_scan_step_accepts_crlf_and_unchanged_external_steps(self) -> None:
+        for content in (
+            PLATFORM_WORKFLOW.replace("\n", "\r\n"),
+            PLATFORM_WORKFLOW.replace("name: Install Gitleaks", "name: Reviewed scanner installation", 1),
+        ):
+            with self.subTest(content=content[:40]), patch.object(
+                security, "gh", side_effect=fake_gh(platform_reads(content))
+            ):
+                observed = security.workflow_status(PLATFORM, "main", HEAD)
+                self.assertEqual(observed["controls"]["gitleaks"]["status"], "SUCCESS")
+
+    def test_platform_scan_step_source_changes_require_review(self) -> None:
+        mutations = (
+            ("scan_args=(detect --source .", "scan_args=(version --source ."),
+            ("--redact --exit-code 1", "--redact --exit-code 0"),
+            ('gitleaks "${scan_args[@]}" || scan_status=$?', 'echo "scanner skipped"'),
+            ('gitleaks "${scan_args[@]}" || scan_status=$?', '# gitleaks "${scan_args[@]}" || scan_status=$?'),
+            ('gitleaks "${scan_args[@]}" || scan_status=$?', 'echo \'gitleaks "${scan_args[@]}" || scan_status=$?\''),
+            ('gitleaks "${scan_args[@]}" || scan_status=$?', 'gitleaks "${scan_args[@]}" || true'),
+            ('exit "$scan_status"', 'exit 0'),
+            ('exit "$scan_status"', '# exit "$scan_status"'),
+            ('exit "$scan_status"', 'scan_status=0\n          exit "$scan_status"'),
+            ("          scan_status=0\n", ""),
+            ('PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}', 'PR_BASE_SHA: HEAD'),
+            ("      - name: Run Gitleaks — detect committed secrets\n",
+             "      - name: Run Gitleaks — detect committed secrets\n        if: false\n"),
+            ("        run: |\n          set -euo pipefail\n          node --test scripts/ci/report-gitleaks-findings",
+             "        run: |\n          exit 0\n          node --test scripts/ci/report-gitleaks-findings"),
+        )
+        for before, after in mutations:
+            self.assertIn(before, PLATFORM_WORKFLOW)
+            content = PLATFORM_WORKFLOW.replace(before, after, 1)
+            with self.subTest(change=after), patch.object(
+                security, "gh", side_effect=fake_gh(platform_reads(content))
+            ) as provider:
+                observed = security.workflow_status(PLATFORM, "main", HEAD)
+                self.assertEqual(observed["controls"]["gitleaks"]["status"], "MISSING_WORKFLOW")
+                self.assertFalse(observed["present"]["gitleaks"])
+                self.assertNotIn(f"repos/{PLATFORM}/actions/runs/3/jobs?per_page=100",
+                                 [call.args[0] for call in provider.call_args_list])
+
+    def test_platform_repeated_or_renamed_scan_steps_cannot_pass(self) -> None:
+        marker = "      - name: Run Gitleaks — detect committed secrets"
+        for content in (
+            PLATFORM_WORKFLOW.replace(marker, "      - name: Unreviewed scan", 1),
+            PLATFORM_WORKFLOW.replace(marker, marker + "\n        run: echo duplicate\n" + marker, 1),
+            PLATFORM_WORKFLOW.replace("  secret-scan:\n", "  unrelated-job:\n", 1),
+        ):
+            with self.subTest(content=content[:40]), patch.object(
+                security, "gh", side_effect=fake_gh(platform_reads(content))
+            ):
+                observed = security.workflow_status(PLATFORM, "main", HEAD)
+                self.assertEqual(observed["controls"]["gitleaks"]["status"], "MISSING_WORKFLOW")
+
+    def test_platform_duplicate_jobs_sections_or_secret_job_keys_cannot_pass(self) -> None:
+        self.assertIn("  lockfile-integrity:\n", PLATFORM_WORKFLOW)
+        for content in (
+            PLATFORM_WORKFLOW + "\njobs:\n  alternate:\n    steps: []\n",
+            PLATFORM_WORKFLOW.replace("  lockfile-integrity:\n",
+                "  secret-scan:\n    name: Alternate\n    steps: []\n\n  lockfile-integrity:\n", 1),
+        ):
+            with self.subTest(content=content[-60:]), patch.object(
+                security, "gh", side_effect=fake_gh(platform_reads(content))
+            ) as provider:
+                observed = security.workflow_status(PLATFORM, "main", HEAD)
+                self.assertEqual(observed["controls"]["gitleaks"]["status"], "MISSING_WORKFLOW")
+                self.assertNotIn(f"repos/{PLATFORM}/actions/runs/3/jobs?per_page=100",
+                                 [call.args[0] for call in provider.call_args_list])
+
     def test_platform_security_workflow_unreadable_content_holds(self) -> None:
         responses = platform_reads()
         responses[f"repos/{PLATFORM}/contents/.github/workflows/security.yml?ref={HEAD}"] = (1, "HTTP 500")

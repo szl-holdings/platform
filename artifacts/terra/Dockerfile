@@ -24,7 +24,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts --prod=false
 RUN pnpm --filter "@workspace/terra" run build
 
-FROM nginx:alpine@sha256:72ba65eb42c10344912a84ff42408db7d34f2feb642204570ab8fc5ffd29f1d3 AS runner
+FROM nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2 AS runner
 COPY --from=builder /app/artifacts/terra/dist/public /usr/share/nginx/html
 RUN set -eux; \
     cat > /etc/nginx/conf.d/default.conf <<'NGINX'

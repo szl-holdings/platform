@@ -19,8 +19,8 @@ The agent emits one Khipu receipt; it does not modify the observed repositories.
    head SHA. It reads workflow files at that SHA and checks SBOM, Trivy, and
    Gitleaks/secret workflow files. For `szl-holdings/platform`, the Gitleaks
    control is the `secret-scan` job inside `security.yml`: the collector reads
-   that file at the observed head, requires the named scan step and `gitleaks
-   detect` command without `continue-on-error`, then requires both the job and
+   that file at the observed head, requires the exact reviewed named scan-step
+   source without `continue-on-error`, then requires both the job and
    scan step to report success in the matching workflow run. A missing or
    unreadable file, job, step, or jobs API response cannot pass. Other repos
    retain filename-based Gitleaks/secret discovery. The most recent matching run
@@ -39,6 +39,14 @@ The agent emits one Khipu receipt; it does not modify the observed repositories.
    even if an older success is present. The GitHub run query reads at most 100
    branch runs. If the matching current-head
    run is outside that page, the verdict remains `HOLD`.
+   The admitted step identity is recorded in `PLATFORM_SECRET_STEP_SHA256`
+   from protected source `aaa5417bd9a1fe755a5eaaa4e45bb29c8940370c`.
+   It includes the environment bindings, `scan_args` beginning with `detect`
+   and `--exit-code 1`, the invocation and nonzero-status capture, and final
+   status propagation. Line endings and trailing separator whitespace are
+   normalized; other step edits require review. This bounded source identity
+   check does not parse arbitrary YAML or shell, execute a scanner, or replace
+   the exact-head job and scan-step result checks.
 3. `SECURITY.md` is read at the same SHA. It needs an email contact or direct
    private-advisory URL and must not carry a stale Doctrine version marker.
    This check does not validate a policy review date.
