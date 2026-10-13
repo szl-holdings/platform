@@ -1193,3 +1193,14 @@ Operational gaps, process health, test coverage, observability, team ownership.
 Current main already has the stronger fail-closed CodeQL merge-ref and paginated alert validation gate. This candidate preserves it and corrects the post-deployment checkout to evaluate the event SHA as an Actions expression while disabling persisted checkout credentials. The existing release-security contract suite covers the checkout binding. See [the bounded proof packet](../../audit/SECURITY_WORKFLOW_REPAIR_2026-10-05.md).
 
 Protected admission and successful hosted deployment/smoke evidence remain separate gates. This source repair does not claim production readiness or dismiss any advisory.
+
+## 2026-10-13 screenshot diagnostic reconciliation
+
+The retained October 3 P0 receipt is published in
+`audit/P0_SERIES_A_EXECUTION_RECONCILIATION_20261003.md`; its failures and
+screenshots retain their dated source identities. Candidate preparation now
+names rejected source write-denial, pnpm execution/write-denial and pnpm
+inventory assertions while preserving the current workspace isolation and
+all fail-closed predicates. Fixed command doubles test diagnostics only.
+The historical application register is preserved as superseded; hosted
+capture, deployment and runtime qualification still require fresh evidence.
