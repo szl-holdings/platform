@@ -1247,9 +1247,10 @@ establish rendered visibility, screenshots, authorization, or runtime health.
 
 The new exact `parse5@8.0.1` dependency and `entities@8.1.0` transitive addition
 preserve all previous lockfile data and the admitted dependency-security
-overrides/patch. The official deterministic SBOM has 1,809 package components,
+overrides/patch. The official deterministic SBOM inventories 1,809 dependency components,
 one verified local patch, and SHA-256
 `4dac02d1bcac96f94d04e5841810ad4254e3279c9b177ee326530ce9da2e88f9`. This
 inventory is not a vulnerability verdict; unchanged blocking security gates
-still apply. The October 3 and October 7 packets carried from PR #906 are
-unaltered retained history, not current operational qualification.
+still apply. The October 3 and October 7 packets remain in the original immutable PR #906
+source history and are linked from the current proof; their frozen counts
+are not introduced as current operational qualification.

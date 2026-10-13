@@ -14,8 +14,9 @@
   regressions, duplicate-free webmanifest validation, and claims validation to
   Runtime Audit. Keep the existing closed URL allowlist, exact 301 redirect
   checks, concurrency/retry/body bounds, and stricter ephemeral recovery checks.
-  Refresh observed registry/manifest/runtime pins, truth and SBOM. Retain three
-  historical PR #906 proof packets unchanged and append the current gap scope.
+  Refresh observed registry/manifest/runtime pins, truth and SBOM. Link three
+  historical PR #906 proof packets at their unchanged immutable source and
+  append the current gap scope.
 - **screenshot_refs:** N/A — this change alters verifier and audit source only;
   it changes no rendered UI, stylesheet, route implementation, or interaction.
   Static HTML parsing is not screenshot proof.
@@ -34,10 +35,15 @@ zero recovery attempts and zero delay in ephemeral mode, and current
 dependency overrides/local patch are retained. Six old dependency upgrades
 from #906 are already admitted in main; this successor does not regress them.
 
-The three October 3 / October 7 proof packets are retained historical
-records. Their old HTTP status, runtime pins, security findings and readiness
-claims are not refreshed by their inclusion here. The current dated receipt
+The three October 3 / October 7 proof packets remain at their original
+immutable source commit; their frozen text is not copied into the current
+claim corpus. These are retained historical records. Their old HTTP status, runtime pins, security findings and readiness
+claims are not refreshed by links from this record. The current dated receipt
 and explicit boundaries below take precedence for present observations.
+
+- [PLATFORM_OWNER_SOURCE_SURFACE_ALIGNMENT_2026-10-03_PROOF.md](https://github.com/szl-holdings/platform/blob/a7764d3a4ac6256ec02037a2806003f4cef5fa7a/audit/PLATFORM_OWNER_SOURCE_SURFACE_ALIGNMENT_2026-10-03_PROOF.md)
+- [PLATFORM_PUBLIC_SURFACE_SUCCESSOR_2026-10-07_PROOF.md](https://github.com/szl-holdings/platform/blob/a7764d3a4ac6256ec02037a2806003f4cef5fa7a/audit/PLATFORM_PUBLIC_SURFACE_SUCCESSOR_2026-10-07_PROOF.md)
+- [PLATFORM_TRUTH_DRIFT_KILLINCHU_REFRESH_2026-10-03_PROOF.md](https://github.com/szl-holdings/platform/blob/a7764d3a4ac6256ec02037a2806003f4cef5fa7a/audit/PLATFORM_TRUTH_DRIFT_KILLINCHU_REFRESH_2026-10-03_PROOF.md)
 
 ## Current observations and limitations
 
@@ -122,3 +128,16 @@ is inferred from that frozen metadata check.
   readiness, and inventory boundaries while preserving the entire existing
   register. Provider settings still require actual authorized provider state;
   source merge does not make those external dependencies operational.
+
+
+## Hosted review followup
+
+The first hosted truth job (`115474381543`) passed all 134 focused regressions
+and local metric verification, then rejected newly introduced stale-count
+claims in the copied historical packet, ambiguous SBOM package wording, and
+an old explanatory model-count example in the Evidence Steward fixture README.
+The historical packets now remain linked to their unchanged original commit;
+SBOM wording explicitly describes dependency components, and the README links
+to its dated source rather than repeating a changing catalog count. Fixture
+JSON bytes/digests and source replay behavior remain unchanged. No truth
+allowlist, baseline rule, scanner, or required gate is modified.
