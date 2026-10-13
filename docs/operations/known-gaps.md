@@ -196,8 +196,8 @@ loosening response checks.
 
 A subsequent full `surfaces:freshness` run passed all 29 approved targets and is
 bound to `observed_at=2026-10-07T12:31:38.131Z`. A separate bounded Killinchu
-read on 2026-10-11 pins its build identity to main revision
-`32760a15fcecfe50211654713d7e4e6a86d947fa` and a verified GitHub OIDC
+read on 2026-10-11 pins its current build identity to main revision
+`e3a3c4cf94d91b588e6708cca64239c98a8ec868` and a verified GitHub OIDC
 attestation for the exact deployment manifest. That single-surface refresh does
 not advance the registry-wide observation timestamp. Its readiness contract
 positively requires the canonical ledger to be `EPHEMERAL`, `PROCESS_MEMORY`, and
