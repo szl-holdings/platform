@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Alloy Embedding Fabric \u2014 primary REST API gateway. Exposes /v1/embed, /v1/rerank, /v1/hybrid-search, /v1/ingest, /v1/index/rebuild, /v1/index/verify, /v1/evals/run, /v1/openai/embeddings; enforces bearer auth, tenant scoping, and policy guard on every request.",
-  "main": "src/server.ts",
+  "description": "Alloy Embedding Fabric development API surface. Production remains on HOLD pending durable tenant storage, qualified model artifacts, and durable evidence.",
+  "main": "dist/server.js",
+  "types": "dist/server.d.ts",
   "dependencies": {
     "@workspace/aef-contracts": "workspace:*",
     "@workspace/aef-evals": "workspace:*",
@@ -17,7 +18,8 @@
     "@workspace/alloy-vector-worker": "workspace:*",
     "@workspace/alloy-rank-worker": "workspace:*",
     "express": "^5.0.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "express-rate-limit": "^8.5.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
@@ -26,8 +28,9 @@
     "typescript": "catalog:"
   },
   "scripts": {
+    "build": "tsc --build",
     "dev": "tsx watch src/server.ts",
-    "start": "tsx src/server.ts",
+    "start": "node --enable-source-maps dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

@@ -6,52 +6,76 @@
   "description": "Agents Core — typed, replayable, auditable agent orchestration. Run lifecycle (start/step/complete/fail), retry policy, approval gates wired to the approvals inbox, structured-log emission, and OTel span helpers.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./run": {
+      "development": "./src/run.ts",
+      "workspace": "./src/run.ts",
       "types": "./dist/run.d.ts",
-      "import": "./src/run.ts"
+      "import": "./dist/run.js"
     },
     "./retry": {
+      "development": "./src/retry.ts",
+      "workspace": "./src/retry.ts",
       "types": "./dist/retry.d.ts",
-      "import": "./src/retry.ts"
+      "import": "./dist/retry.js"
     },
     "./approval-gate": {
+      "development": "./src/approval-gate.ts",
+      "workspace": "./src/approval-gate.ts",
       "types": "./dist/approval-gate.d.ts",
-      "import": "./src/approval-gate.ts"
+      "import": "./dist/approval-gate.js"
     },
     "./errors": {
+      "development": "./src/errors.ts",
+      "workspace": "./src/errors.ts",
       "types": "./dist/errors.d.ts",
-      "import": "./src/errors.ts"
+      "import": "./dist/errors.js"
     },
     "./dead-letter": {
+      "development": "./src/dead-letter.ts",
+      "workspace": "./src/dead-letter.ts",
       "types": "./dist/dead-letter.d.ts",
-      "import": "./src/dead-letter.ts"
+      "import": "./dist/dead-letter.js"
     },
     "./step-log": {
+      "development": "./src/step-log.ts",
+      "workspace": "./src/step-log.ts",
       "types": "./dist/step-log.d.ts",
-      "import": "./src/step-log.ts"
+      "import": "./dist/step-log.js"
     },
     "./agent": {
+      "development": "./src/agent.ts",
+      "workspace": "./src/agent.ts",
       "types": "./dist/agent.d.ts",
-      "import": "./src/agent.ts"
+      "import": "./dist/agent.js"
     },
     "./agent-runner": {
+      "development": "./src/agent-runner.ts",
+      "workspace": "./src/agent-runner.ts",
       "types": "./dist/agent-runner.d.ts",
-      "import": "./src/agent-runner.ts"
+      "import": "./dist/agent-runner.js"
     },
     "./hooks": {
+      "development": "./src/hooks.ts",
+      "workspace": "./src/hooks.ts",
       "types": "./dist/hooks.d.ts",
-      "import": "./src/hooks.ts"
+      "import": "./dist/hooks.js"
     },
     "./orchestration": {
+      "development": "./src/orchestration.ts",
+      "workspace": "./src/orchestration.ts",
       "types": "./dist/orchestration.d.ts",
-      "import": "./src/orchestration.ts"
+      "import": "./dist/orchestration.js"
     },
     "./run-context": {
+      "development": "./src/run-context.ts",
+      "workspace": "./src/run-context.ts",
       "types": "./dist/run-context.d.ts",
-      "import": "./src/run-context.ts"
+      "import": "./dist/run-context.js"
     }
   },
   "dependencies": {
@@ -74,6 +98,7 @@
     "format": "biome format --write ./src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build": "tsc --build"
   }
 }

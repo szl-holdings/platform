@@ -12,10 +12,10 @@
 
 import {
   ALLOWED_CAPABILITIES,
-  FORBIDDEN_CAPABILITIES,
   type AllowedCapability,
+  FORBIDDEN_CAPABILITIES,
   type ForbiddenCapability,
-} from '../types.js';
+} from './types.js';
 
 export class CapabilityViolation extends Error {
   constructor(

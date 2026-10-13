@@ -45,6 +45,7 @@ export type PendingApprovalStatus = 'pending' | 'approved' | 'rejected' | 'timed
 export interface PendingApprovalRequest {
   id: string;
   runId: string;
+  tenantId?: string;
   stepId: string;
   stepName: string;
   toolId?: string;
@@ -65,6 +66,7 @@ export interface PendingApprovalRequest {
 
 export interface SubmitPendingApprovalRequestOptions {
   runId: string;
+  tenantId?: string;
   stepId: string;
   stepName: string;
   toolId?: string;
@@ -147,6 +149,7 @@ export function submitPendingApprovalRequest(
     expiresAt: now + timeoutMs,
     status: 'pending',
   };
+  if (options.tenantId !== undefined) request.tenantId = options.tenantId;
   if (options.toolId !== undefined) request.toolId = options.toolId;
 
   _pendingRequests.set(id, request);
