@@ -133,6 +133,25 @@ contract passes 1/1. The first local loader-regression invocation accidentally
 identified the imported helper as the CLI; its argv fixture was corrected before
 the passing run. The first hosted attempt produced no qualifying screenshots.
 
+Candidate `4ac622a3b0a8b089ef03a408cdc2ae811b98b884` passed the native
+CommonJS loading test, but the actual Playwright transformer still rewrote the
+imported `.mjs` helper with CommonJS exports inside an ES module (job
+`115504690086`). This second attempt also stopped before browser tests and
+produced no qualifying screenshots. The native CommonJS test is explicitly
+labeled with that narrower scope.
+
+The helper now provides a strict `--verify` CLI that reads the existing witness
+and calls the unchanged source/output verifier through Node's native module
+loader. The Playwright specification invokes that exact verifier in a subprocess;
+nonzero exit and malformed output fail the test, and the complete validated
+witness must remain equal before and after each capture. The original build
+command, source bindings, asset hashes, network restrictions and assertions are
+unchanged. Actual CLI positive/missing/tampered-source/tampered-output/invalid-arg
+controls bring the offline suite to 9/9 passing, independently reproduced.
+The locked Playwright 1.60.0 CLI with the unchanged native configuration
+successfully loads and lists all 25 supplemental Chromium cases. This checks
+the actual transformer boundary; it is not a browser execution claim.
+
 ## Original proposal disposition
 
 All original files remain accessible under the immutable source above.

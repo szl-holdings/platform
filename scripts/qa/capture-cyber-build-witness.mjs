@@ -105,11 +105,24 @@ export async function captureBuild(root, environment = process.env, runBuild) {
   return witness;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
-  captureBuild(process.cwd()).then(witness => {
+async function runCli() {
+  const args = process.argv.slice(2);
+  if (args.length === 1 && args[0] === '--verify') {
+    const root = process.cwd();
+    const witness = JSON.parse(await readFile(path.join(root, WITNESS_PATH), 'utf8'));
+    await verifyBuildWitness(root, witness);
+    process.stdout.write(JSON.stringify(witness) + '\n');
+  } else if (args.length === 0) {
+    const witness = await captureBuild(process.cwd());
     process.stdout.write(JSON.stringify({ source_sha: witness.source_sha, source_tree: witness.source_tree,
       manifest_sha256: witness.output.manifest_sha256, witness: WITNESS_PATH }) + '\n');
-  }).catch(error => {
+  } else {
+    throw new Error('usage: capture-cyber-build-witness.mjs [--verify]');
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  runCli().catch(error => {
     process.stderr.write(`${error.message}\n`);
     process.exitCode = Number.isInteger(error.status) && error.status > 0 ? error.status : 1;
   });

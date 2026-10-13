@@ -1,10 +1,17 @@
 import { expect, test } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { sha256, verifyBuildWitness, WITNESS_PATH } from '../../scripts/qa/capture-cyber-build-witness.mjs';
 
 // Supplemental source-presentation captures. No live service, scanner, or effectful request.
 const root = process.cwd();
+const WITNESS_PATH = 'artifacts/a11oy/dist/cyber-boundary-build.json';
+const sha256 = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex');
+// Use Node's native module loader; Playwright transforms imported .mjs helpers.
+const verifyWitness = () => JSON.parse(execFileSync(process.execPath,
+  [path.join(root, 'scripts/qa/capture-cyber-build-witness.mjs'), '--verify'],
+  { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }));
 const origin = new URL(process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3010').origin;
 if (!['localhost', '127.0.0.1', '[::1]'].includes(new URL(origin).hostname)) {
   throw new Error('supplemental captures require the native localhost E2E server');
@@ -30,7 +37,7 @@ const viewports = [
 ];
 let witness: any;
 test.beforeAll(async () => {
-  witness = await verifyBuildWitness(root, JSON.parse(await readFile(path.join(root, WITNESS_PATH), 'utf8')));
+  witness = verifyWitness();
   expect(witness.workflow_run_id).toBe(process.env.GITHUB_RUN_ID ?? null);
   expect(witness.workflow_run_attempt).toBe(process.env.GITHUB_RUN_ATTEMPT ?? null);
 });
@@ -117,7 +124,7 @@ for (const target of targets) {
       expect(errors).toEqual([]);
       expect(served.some(row => row.file === 'index.html')).toBe(true);
       expect(served.some(row => row.file.startsWith('assets/'))).toBe(true);
-      await verifyBuildWitness(root, witness);
+      expect(verifyWitness()).toEqual(witness);
       const screenshot = testInfo.outputPath('cyber-boundary.png');
       const sidecar = testInfo.outputPath('cyber-boundary.json');
       await writeFile(screenshot, png);

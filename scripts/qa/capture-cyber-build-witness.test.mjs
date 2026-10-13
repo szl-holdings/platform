@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { captureBuild, verifyBuildWitness, WITNESS_PATH } from './capture-cyber-build-witness.mjs';
 
-test('Playwright CommonJS loading can import the witness helpers without running the CLI', () => {
+test('native CommonJS loading can import the witness helpers without running the CLI', () => {
   const helper = fileURLToPath(new URL('./capture-cyber-build-witness.mjs', import.meta.url));
   const output = execFileSync(process.execPath, ['--input-type=commonjs', '-e',
     'const helper = require(process.argv[2]); process.stdout.write(typeof helper.verifyBuildWitness);', 'playwright-loader', helper],
@@ -42,6 +42,22 @@ test('witness binds a clean exact source, successful build, and output bytes', a
   assert.deepEqual(JSON.parse(await readFile(path.join(root, WITNESS_PATH), 'utf8')), witness);
   await writeFile(path.join(root, 'artifacts/a11oy/dist/public/assets/app.js'), 'changed output');
   await assert.rejects(verifyBuildWitness(root, witness), /does not match/);
+}));
+
+test('native verifier CLI returns only validated witness JSON and rejects tampering or arguments', async () => fixture(async ({ root, build }) => {
+  const helper = fileURLToPath(new URL('./capture-cyber-build-witness.mjs', import.meta.url));
+  const cli = (...args) => execFileSync(process.execPath, [helper, ...args],
+    { cwd: root, encoding: 'utf8', stdio: 'pipe' });
+  assert.throws(() => cli('--verify'));
+  const witness = await captureBuild(root, { BASE_PATH: '/' }, build);
+  assert.deepEqual(JSON.parse(cli('--verify')), witness);
+  assert.throws(() => cli('--verify', 'extra'));
+  assert.throws(() => cli('--unknown'));
+  await writeFile(path.join(root, WITNESS_PATH), JSON.stringify({ ...witness, source_sha: '0'.repeat(40) }));
+  assert.throws(() => cli('--verify'));
+  await writeFile(path.join(root, WITNESS_PATH), JSON.stringify(witness));
+  await writeFile(path.join(root, 'artifacts/a11oy/dist/public/assets/app.js'), 'changed bytes');
+  assert.throws(() => cli('--verify'));
 }));
 
 test('failed build propagates its error and removes any earlier successful witness', async () => fixture(async ({ root, build }) => {
