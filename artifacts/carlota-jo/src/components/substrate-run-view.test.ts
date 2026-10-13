@@ -45,26 +45,96 @@ describe('Carlota Jo substrate run presentation', () => {
     expect(run.stages[0]?.status).toBe('pending-approval');
   });
 
+  // Absent, undefined, null, empty, whitespace, number, object and array IDs.
+  const MISSING_IDENTITIES: Array<[string, Record<string, unknown>]> = [
+    ['absent', {}],
+    ['undefined', { runId: undefined }],
+    ['null', { runId: null }],
+    ['empty', { runId: '' }],
+    ['whitespace', { runId: ' \t\n ' }],
+    ['number', { runId: 42 }],
+    ['zero', { runId: 0 }],
+    ['object', { runId: { id: 'run-1' } }],
+    ['array', { runId: ['run-1'] }],
+  ];
+
   it.each([
+    ['running', 'live'],
+    ['running', 'dry-run'],
     ['completed', 'live'],
     ['dry-run-complete', 'dry-run'],
-  ] as const)('requires a nonblank run identity for %s', (status, mode) => {
-    for (const runId of [undefined, null, '', '   ', 42, {}, []]) {
-      const run = parsePipelineRun({ status, mode, runId }, mode);
-      expect(run.status).toBe('unknown');
-      expect(run.runId).toBeNull();
-      expect(run.reportedStatus).toBe(status);
+  ] as const)('requires a nonblank string run identity for %s in %s mode', (status, mode) => {
+    for (const [label, identity] of MISSING_IDENTITIES) {
+      const run = parsePipelineRun(
+        { status, mode, ...identity, finalConfidence: 0.4, error: 'diagnostic retained' },
+        mode,
+      );
+      expect(run.status, label).toBe('unknown');
+      expect(run.runId, label).toBeNull();
+      expect(run.reportedStatus, label).toBe(status);
+      expect(run.mode, label).toBe(mode);
+      expect(run.requestedMode, label).toBe(mode);
+      expect(run.finalConfidence, label).toBe(0.4);
+      expect(run.error, label).toBe('diagnostic retained');
     }
-    expect(parsePipelineRun({ status, mode, runId: 'run-identified' }, mode).status).toBe(status);
+    const identified = parsePipelineRun({ status, mode, runId: 'run-identified' }, mode);
+    expect(identified.status).toBe(status);
+    expect(identified.runId).toBe('run-identified');
+  });
+
+  it.each(['live', 'dry-run'] as const)(
+    'keeps an identified %s running run active with its original identity string',
+    (mode) => {
+      const run = parsePipelineRun({ runId: '  run-7\t', status: 'running', mode }, mode);
+      expect(run.status).toBe('running');
+      expect(run.runId).toBe('  run-7\t');
+      expect(run.reportedStatus).toBe('running');
+      expect(run.mode).toBe(mode);
+    },
+  );
+
+  it('keeps an identified running run with a mismatched or missing mode unknown', () => {
+    const mismatched = parsePipelineRun(
+      { runId: 'run-1', status: 'running', mode: 'live' },
+      'dry-run',
+    );
+    expect(mismatched.status).toBe('unknown');
+    expect(mismatched.runId).toBe('run-1');
+    expect(mismatched.mode).toBe('live');
+    expect(mismatched.requestedMode).toBe('dry-run');
+    expect(parsePipelineRun({ runId: 'run-1', status: 'running', mode: 'dry-run' }, 'live').status)
+      .toBe('unknown');
+    expect(parsePipelineRun({ runId: 'run-1', status: 'running' }, 'live').status).toBe('unknown');
+  });
+
+  it('keeps an identity-less running run diagnostics without inventing an identity', () => {
+    const run = parsePipelineRun(
+      {
+        status: 'running',
+        mode: 'live',
+        stageResults: [{ stageId: 'retrieve', stageType: 'Retrieve', status: 'running' }],
+      },
+      'live',
+    );
+    expect(run.status).toBe('unknown');
+    expect(run.runId).toBeNull();
+    expect(run.stages).toEqual([
+      {
+        stageId: 'retrieve',
+        stageName: 'retrieve',
+        stageType: 'Retrieve',
+        status: 'running',
+        confidence: null,
+      },
+    ]);
   });
 
   it.each([
     ['pending-approval', 'pending-approval'],
     ['failed', 'failed'],
     ['cancelled', 'cancelled'],
-    ['running', 'running'],
     ['surprising-status', 'unknown'],
-  ])('preserves reported %s as %s', (reported, expected) => {
+  ])('preserves reported %s as %s without requiring an identity', (reported, expected) => {
     const run = parsePipelineRun({ status: reported, mode: 'live' }, 'live');
     expect(run.status).toBe(expected);
     expect(run.reportedStatus).toBe(reported);

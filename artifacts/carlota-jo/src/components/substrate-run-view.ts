@@ -43,6 +43,8 @@ const RUN_STATUSES = new Set<PanelStatus>([
   'failed',
   'cancelled',
 ]);
+// States a response may only claim with an existing, nonblank string run identity.
+const IDENTIFIED_STATUSES = new Set<PanelStatus>(['running', 'completed', 'dry-run-complete']);
 const RETRIEVER_SOURCES = new Set<RetrieverSource>(['adapter', 'synthetic', 'inline', 'dry-run']);
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -85,13 +87,17 @@ export function parsePipelineRun(value: unknown, requestedMode: RunMode): RunRes
       : null;
 
   // An HTTP-success response is only an acknowledgement. Trust the run state and
-  // mode together; terminal success also needs a traceable run identity.
+  // mode together. Terminal success and an active run both need a traceable run
+  // identity: the panel has no polling or cancellation path, so an identity-less
+  // "running" response must not lock the controls. It is reported as unknown
+  // (STATE UNVERIFIED) and the operator may deliberately submit again. The
+  // original identity string is kept as returned; nothing is coerced or invented.
   let status: PanelStatus = RUN_STATUSES.has(reportedStatus as PanelStatus)
     ? (reportedStatus as PanelStatus)
     : 'unknown';
   if (
     mode !== requestedMode ||
-    ((status === 'completed' || status === 'dry-run-complete') && runId === null) ||
+    (IDENTIFIED_STATUSES.has(status) && runId === null) ||
     (status === 'completed' && mode !== 'live') ||
     (status === 'dry-run-complete' && mode !== 'dry-run')
   ) {

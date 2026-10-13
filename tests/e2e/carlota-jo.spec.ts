@@ -126,6 +126,24 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
       await captureWorkflowPanel(panel, page, testInfo, `running-${mode}`);
     });
 
+    test(`a returned ${mode} running response without a run identity unlocks as unverified`, async ({
+      page,
+    }, testInfo) => {
+      const { panel, requests } = await mountWorkflowPanel(page, [{ status: 'running', mode }]);
+      await panel.locator('select').selectOption(mode);
+      await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+      await expect(panel.getByText('STATE UNVERIFIED', { exact: true })).toBeVisible();
+      await expect(panel.getByText('● RUNNING', { exact: true })).toHaveCount(0);
+      await expect(panel.getByText(/status:running/)).toBeVisible();
+      await expect(panel.getByRole('button', { name: 'Run on Substrate' })).toBeEnabled();
+      await expect(panel.locator('select')).toBeEnabled();
+      // Unlocking permits a deliberate new submission; it never submits on its own.
+      await page.waitForTimeout(1_000);
+      expect(requests).toHaveLength(1);
+      expect(requests[0]?.mode).toBe(mode);
+      await captureWorkflowPanel(panel, page, testInfo, `running-missing-identity-${mode}`);
+    });
+
     test(`${mode} completion without a run identity remains unverified`, async ({ page }, testInfo) => {
       const { panel } = await mountWorkflowPanel(page, [{
         status: mode === 'live' ? 'completed' : 'dry-run-complete', mode,
@@ -171,6 +189,101 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
     await panel.getByRole('button', { name: 'Run on Substrate' }).click();
     await expect(panel.getByText('fixture-recovered', { exact: true })).toBeVisible();
     expect(requests).toHaveLength(1);
+  });
+
+  test('a held submission suppresses repeated keyboard activation', async ({ page }) => {
+    const { panel, requests } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-keyboard-released', status: 'completed', mode: 'live',
+    }]);
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => { release = resolve; });
+    let submissions = 0;
+    const holdRequest = async (route: Route) => {
+      submissions += 1;
+      await held;
+      await route.fallback();
+    };
+    await page.route('**/api/control-tower/substrate/run', holdRequest);
+    await panel.locator('select').selectOption('live');
+    await panel.getByRole('button', { name: 'Run on Substrate' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(panel.getByRole('button', { name: /^Running/ })).toBeDisabled();
+    for (const key of ['Enter', 'Space', 'Enter', 'Space']) await page.keyboard.press(key);
+    await expect.poll(() => submissions).toBe(1);
+    release();
+    await expect(panel.getByText('fixture-keyboard-released', { exact: true })).toBeVisible();
+    await expect(panel.getByText('✓ COMPLETED', { exact: true })).toBeVisible();
+    expect(submissions).toBe(1);
+    expect(requests).toHaveLength(1);
+  });
+
+  test('repeated identity-less running responses stay unverified until an identified run locks', async ({
+    page,
+  }) => {
+    const { panel, requests } = await mountWorkflowPanel(page, [
+      { status: 'running', mode: 'live', runId: '   ' },
+      { status: 'running', mode: 'live', runId: 42 },
+      { runId: 'fixture-identified-running', status: 'running', mode: 'live' },
+    ]);
+    await panel.locator('select').selectOption('live');
+    const runButton = panel.getByRole('button', { name: 'Run on Substrate' });
+    for (const attempt of [1, 2]) {
+      await runButton.click();
+      await expect.poll(() => requests.length).toBe(attempt);
+      await expect(panel.getByText('STATE UNVERIFIED', { exact: true })).toBeVisible();
+      await expect(panel.getByText('● RUNNING', { exact: true })).toHaveCount(0);
+      await expect(runButton).toBeEnabled();
+      await expect(panel.locator('select')).toBeEnabled();
+    }
+    await runButton.click();
+    await expect(panel.getByText('fixture-identified-running', { exact: true })).toBeVisible();
+    await expect(panel.getByText('● RUNNING', { exact: true })).toBeVisible();
+    await expect(panel.getByText('STATE UNVERIFIED', { exact: true })).toHaveCount(0);
+    await expect(runButton).toBeDisabled();
+    await expect(panel.locator('select')).toBeDisabled();
+    await runButton.evaluate((button) => {
+      (button as HTMLButtonElement).click();
+      (button as HTMLButtonElement).click();
+    });
+    await page.waitForTimeout(500);
+    expect(requests).toHaveLength(3);
+    expect(requests.every((request) => request.mode === 'live')).toBe(true);
+  });
+
+  test('a deliberate retry after an unverified running response clears stale run data', async ({
+    page,
+  }) => {
+    const { panel, requests } = await mountWorkflowPanel(page, [
+      {
+        status: 'running', mode: 'live', finalConfidence: 0.37,
+        error: 'Synthetic stale diagnostic',
+        stageResults: [{ stageId: 'fixture-stale-stage', status: 'running', confidence: 0.37 }],
+      },
+      {
+        runId: 'fixture-retry-failed', status: 'failed', mode: 'live',
+        error: 'Synthetic retry failed', stageResults: [],
+      },
+    ]);
+    await panel.locator('select').selectOption('live');
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    await expect(panel.getByText('STATE UNVERIFIED', { exact: true })).toBeVisible();
+    await expect(panel.getByText('fixture-stale-stage', { exact: true })).toBeVisible();
+    await expect(panel.getByText('37%', { exact: true }).first()).toBeVisible();
+    await expect(panel.getByText('Synthetic stale diagnostic', { exact: true })).toBeVisible();
+    await expect(panel.getByText(/status:running/)).toBeVisible();
+    await panel.getByRole('button', { name: 'Run on Substrate' }).click();
+    await expect(panel.getByText('fixture-retry-failed', { exact: true })).toBeVisible();
+    await expect(panel.getByText('✗ FAILED', { exact: true })).toBeVisible();
+    await expect(panel.getByText('Synthetic retry failed', { exact: true })).toBeVisible();
+    await expect(panel.getByText(/status:failed/)).toBeVisible();
+    await expect(panel.getByText('STATE UNVERIFIED', { exact: true })).toHaveCount(0);
+    await expect(panel.getByText('fixture-stale-stage', { exact: true })).toHaveCount(0);
+    await expect(panel.getByText('Synthetic stale diagnostic', { exact: true })).toHaveCount(0);
+    await expect(panel.getByText('37%', { exact: true })).toHaveCount(0);
+    await expect(panel.getByText(/status:running/)).toHaveCount(0);
+    await expect(panel.getByText('Not reported', { exact: true })).toBeVisible();
+    await expect(panel.getByRole('button', { name: 'Run on Substrate' })).toBeEnabled();
+    expect(requests).toHaveLength(2);
   });
 
   test('dry-run confidence escalation remains pending human review', async ({ page }, testInfo) => {
