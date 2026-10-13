@@ -13,7 +13,7 @@ This document describes the implementation roadmap for the Alloy Embedding Fabri
 | Package | Description |
 |---|---|
 | `@workspace/aef-contracts` | Zod schemas and TypeScript DTOs for all AEF API surfaces. Single source of truth for request/response shapes across all services. |
-| `@workspace/aef-evidence-ledger` | Append-only evidence store. Every retrieval result is written here before being returned to the caller. Supports in-memory and filesystem adapters. |
+| `@workspace/aef-evidence-ledger` | Development/test recorders. The default is process-local and the filesystem JSONL class is mutable; neither is admitted as production audit authority. |
 | `@workspace/aef-policy-guard` | Tenant boundary enforcement, redaction rules, retention policy, and field-level security. Called on every retrieval before results are returned. |
 | `@workspace/aef-retrieval-core` | Query normalizer, RRF fusion, domain-profile boost logic, metadata filter, citation builder, and embedding/reranking adapter interfaces. |
 | `@workspace/aef-domain-profiles` | Versioned ProfileRegistry with staged rollout, rollback, and tenant-scoped overrides. Ships 6 starter profiles: `vessels_maritime_risk`, `lyte_governance_ops`, `terra_real_estate_intel`, `aegis_security_incident`, `prism_legal_matter`, `carlota_private_advisory`. |
@@ -33,7 +33,7 @@ This document describes the implementation roadmap for the Alloy Embedding Fabri
 | Worker | Port | Description |
 |---|---|---|
 | `alloy-vector-worker` | 4202 | Dense embedding micro-batch worker. LocalCpuBackend by default; seams for ExternalHttpBackend, FutureGpuBackend, FutureAzureBackend. |
-| `alloy-rank-worker` | 4203 | Cross-encoder reranking worker. Lightweight fallback mode (score inversion) when no model is loaded. |
+| `alloy-rank-worker` | 4203 | Deterministic lexical-overlap reranking worker with explicit prior-score passthrough; no model is loaded. |
 
 ---
 

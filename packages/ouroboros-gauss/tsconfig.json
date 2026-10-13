@@ -8,8 +8,10 @@
     "exactOptionalPropertyTypes": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "dist",
+    "rootDir": "src"
   },
-  "include": ["src/**/*", "test/**/*", "examples/**/*"]
+  "include": ["src/**/*"]
 }

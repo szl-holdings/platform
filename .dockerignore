@@ -7,6 +7,7 @@
 # Dependency + build output (rebuilt inside the image)
 **/node_modules
 **/dist
+**/*.tsbuildinfo
 **/.turbo
 .pnpm-store
 **/.pnpm-store

@@ -86,7 +86,9 @@ for (const relFile of TARGET_FILES) {
     report.files.push({
       file: relFile,
       status: 'missing-file',
-      issues: [{ type: 'missing-file', href: relFile, status: 'fail', notes: 'File does not exist' }],
+      issues: [
+        { type: 'missing-file', href: relFile, status: 'fail', notes: 'File does not exist' },
+      ],
     });
     report.summary.fail++;
     continue;
@@ -101,7 +103,13 @@ for (const relFile of TARGET_FILES) {
     if (!resolved) return;
     const exists = existsSync(resolved);
     const status = exists ? 'pass' : 'fail';
-    issues.push({ type, href, resolvedPath: resolved, status, notes: exists ? 'OK' : 'File not found' });
+    issues.push({
+      type,
+      href,
+      resolvedPath: resolved,
+      status,
+      notes: exists ? 'OK' : 'File not found',
+    });
     if (exists) report.summary.pass++;
     else report.summary.fail++;
   };
@@ -140,7 +148,9 @@ for (const f of report.files) {
   }
 }
 
-console.log(`\n  Summary: ${report.summary.pass} pass, ${report.summary.warn} warn, ${report.summary.fail} fail\n`);
+console.log(
+  `\n  Summary: ${report.summary.pass} pass, ${report.summary.warn} warn, ${report.summary.fail} fail\n`,
+);
 
 // ── Write validation report ───────────────────────────────────────────────────
 
@@ -163,17 +173,18 @@ function buildReportMd(report) {
     })
     .join('\n');
 
-  const issueRows = report.files
-    .flatMap((f) =>
-      f.issues
-        .filter((i) => i.status !== 'pass')
-        .map((i) => `| \`${f.file}\` | ${i.type} | \`${i.href}\` | ${i.status} | ${i.notes} |`)
-    )
-    .join('\n') || '| — | — | — | — | No issues found |';
+  const issueRows =
+    report.files
+      .flatMap((f) =>
+        f.issues
+          .filter((i) => i.status !== 'pass')
+          .map((i) => `| \`${f.file}\` | ${i.type} | \`${i.href}\` | ${i.status} | ${i.notes} |`),
+      )
+      .join('\n') || '| — | — | — | — | No issues found |';
 
   return `# Link & Image Validation Report
 
-**Generated:** ${report.generatedAt}  
+**Generated:** ${report.generatedAt}
 **Summary:** ${report.summary.pass} pass · ${report.summary.warn} warn · ${report.summary.fail} fail
 
 ---

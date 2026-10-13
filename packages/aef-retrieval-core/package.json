@@ -6,36 +6,52 @@
   "description": "Alloy Embedding Fabric — pure retrieval functions: query normalization, reciprocal rank fusion, exact-match boost rules, metadata filtering, score normalization, citation assembly, and pluggable dense/keyword/rerank adapter interfaces.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./adapters": {
+      "development": "./src/adapters.ts",
+      "workspace": "./src/adapters.ts",
       "types": "./dist/adapters.d.ts",
-      "import": "./src/adapters.ts"
+      "import": "./dist/adapters.js"
     },
     "./fusion": {
+      "development": "./src/fusion.ts",
+      "workspace": "./src/fusion.ts",
       "types": "./dist/fusion.d.ts",
-      "import": "./src/fusion.ts"
+      "import": "./dist/fusion.js"
     },
     "./boost": {
+      "development": "./src/boost.ts",
+      "workspace": "./src/boost.ts",
       "types": "./dist/boost.d.ts",
-      "import": "./src/boost.ts"
+      "import": "./dist/boost.js"
     },
     "./filter": {
+      "development": "./src/filter.ts",
+      "workspace": "./src/filter.ts",
       "types": "./dist/filter.d.ts",
-      "import": "./src/filter.ts"
+      "import": "./dist/filter.js"
     },
     "./normalize": {
+      "development": "./src/normalize.ts",
+      "workspace": "./src/normalize.ts",
       "types": "./dist/normalize.d.ts",
-      "import": "./src/normalize.ts"
+      "import": "./dist/normalize.js"
     },
     "./citations": {
+      "development": "./src/citations.ts",
+      "workspace": "./src/citations.ts",
       "types": "./dist/citations.d.ts",
-      "import": "./src/citations.ts"
+      "import": "./dist/citations.js"
     },
     "./query-normalizer": {
+      "development": "./src/query-normalizer.ts",
+      "workspace": "./src/query-normalizer.ts",
       "types": "./dist/query-normalizer.d.ts",
-      "import": "./src/query-normalizer.ts"
+      "import": "./dist/query-normalizer.js"
     }
   },
   "dependencies": {

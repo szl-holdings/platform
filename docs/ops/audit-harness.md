@@ -5,7 +5,9 @@
 The runtime audit harness provides a single command that runs the workspace's
 P0 and P1 quality checks, captures evidence, and produces a human-readable
 summary report. Its hosted workflow is fail-closed for P0 failures, but it is
-not currently a required branch-protection status check.
+a required status context in the repository's observed `main` ruleset. That
+statement is limited to the authenticated 2026-10-06 configuration receipt; it
+does not assert that any particular workflow run passed.
 
 ## Quick start
 
@@ -73,9 +75,10 @@ it in under 60 seconds.
 ## CI integration
 
 The harness runs in the `Runtime Audit (audit:full)` job of the
-`Runtime Audit Harness` workflow (`.github/workflows/audit-full.yml`) on pull
-requests and pushes to `master`/`main` (pushes changing only
-`replit-sync/**` are ignored), and by manual dispatch. The job:
+`Runtime Audit Harness` workflow (`.github/workflows/audit-full.yml`). Workflow
+source declares pull-request and push triggers for `master` and `main`
+(pushes changing only `replit-sync/**` are ignored), plus manual dispatch. The
+live repository ruleset targets the default branch, currently `main`. The job:
 
 1. Installs dependencies.
 2. Builds the workspace artifacts and boots the local product/runtime targets.
@@ -86,10 +89,29 @@ requests and pushes to `master`/`main` (pushes changing only
 5. Prints the `latest/summary.md` to the job log regardless of pass/fail.
 
 P0 failures cause the job to exit non-zero. P1 failures remain advisory and
-appear in the summary report. Under the current live branch-protection rules,
-Runtime Audit is hosted evidence but is not a required status context, so its
-failure does not mechanically prevent a merge. The existing jobs in `ci.yml`
-remain unchanged; this workflow is an additive, standalone check.
+appear in the summary report. Authenticated readback on 2026-10-06 observed
+`Runtime Audit (audit:full)` as one of exactly five required contexts for
+`main`, so a failing Runtime Audit context mechanically blocks merge under that
+ruleset. The complete observed set is:
+
+- `Runtime Audit (audit:full)`
+- `Security Gate (blocking)`
+- `E2E Gate`
+- `severity-gate`
+- `lockfiles / No lockfile references a Replit-internal registry host`
+
+The ruleset requires zero approving reviews; this is the observed mechanical
+minimum, not evidence of an independent review. The sanitized authenticated
+receipt is
+[`audit/evidence/github-platform-ruleset-summary-2026-10-06.json`](../../audit/evidence/github-platform-ruleset-summary-2026-10-06.json),
+and [`.github/BRANCH_PROTECTION.md`](../../.github/BRANCH_PROTECTION.md) is its
+human-readable companion.
+
+Workflow source proves only what jobs are declared to do. The receipt proves
+only repository-ruleset configuration, not a check conclusion, deployment,
+environment protection, secret-scanning posture, or organization-wide policy.
+No source-defined context outside the five listed above is branch-required
+until an authenticated live readback says otherwise.
 
 ## Interpreting the summary
 

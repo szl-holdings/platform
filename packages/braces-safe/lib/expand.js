@@ -3,13 +3,12 @@
 const fill = require('fill-range');
 const stringify = require('./stringify');
 const utils = require('./utils');
-const { MAX_DEPTH } = require('./constants');
 
 const append = (queue = '', stash = '', enclose = false) => {
   const result = [];
 
-  queue = [].concat(queue);
-  stash = [].concat(stash);
+  queue = Array.isArray(queue) ? queue : [queue];
+  stash = Array.isArray(stash) ? stash : [stash];
 
   if (!stash.length) return queue;
   if (!queue.length) {
@@ -31,94 +30,119 @@ const append = (queue = '', stash = '', enclose = false) => {
   return utils.flatten(result);
 };
 
-const queueOwner = (node) => {
-  if (node.type === 'brace' || node.type === 'root' || !node.parent) return node;
+const expand = (ast, options = {}, maxDepth = utils.getMaxDepth(options)) => {
+  maxDepth = utils.normalizeMaxDepth(maxDepth);
+  utils.assertNestingDepth(ast, maxDepth);
+  const budget = utils.createTraversalBudget();
 
-  const seen = new Set();
-  while (node.type !== 'brace' && node.type !== 'root' && node.parent) {
-    if (seen.has(node)) {
-      throw new RangeError('AST parent chain contains a cycle');
-    }
-    seen.add(node);
-    node = node.parent;
-  }
-  return node;
-};
-
-const expand = (ast, options = {}) => {
   const rangeLimit = options.rangeLimit === undefined ? 1000 : options.rangeLimit;
-  const maxDepth = Number.isFinite(options.maxDepth)
-    ? Math.min(MAX_DEPTH, options.maxDepth)
-    : MAX_DEPTH;
 
-  const walk = (node, parent = {}, depth = 0) => {
-    if (node.nodes && depth > maxDepth) {
-      throw new RangeError(`AST depth (${depth}), exceeds max depth (${maxDepth})`);
+  const unread = Symbol('unread children');
+  const queues = new WeakMap();
+  const walk = (
+    node,
+    parent = {},
+    depth = 0,
+    active = new WeakSet(),
+    knownChildren = unread,
+    knownType = unread,
+    knownParentType = unread,
+  ) => {
+    if (active.has(node)) {
+      throw new SyntaxError('AST contains a recursive node cycle');
     }
-    node.queue = [];
-
-    const q = queueOwner(parent).queue;
-
-    if (node.invalid || node.dollar) {
-      q.push(append(q.pop(), stringify(node, options)));
-      return;
+    const children = knownChildren === unread ? node.nodes : knownChildren;
+    const hasChildren = Array.isArray(children);
+    const length = hasChildren ? utils.getArrayLength(children, budget) : 0;
+    const type = knownType === unread ? node.type : knownType;
+    const nodeDepth = hasChildren ? (node === ast && type === 'root' ? depth : depth + 1) : depth;
+    if (nodeDepth > maxDepth) {
+      throw new SyntaxError(`AST nesting depth exceeds max depth (${maxDepth})`);
     }
+    if (hasChildren) active.add(node);
 
-    if (node.type === 'brace' && node.invalid !== true && node.nodes.length === 2) {
-      q.push(append(q.pop(), ['{}']));
-      return;
+    try {
+      queues.set(node, []);
+      const parentState =
+        knownParentType === unread
+          ? utils.findParentQueue(parent, maxDepth)
+          : utils.findParentQueue(parent, maxDepth, knownParentType, true);
+      const q = queues.get(parentState.node);
+
+      if (node.invalid || node.dollar) {
+        q.push(append(q.pop(), stringify(node, options, maxDepth)));
+        return;
+      }
+
+      if (type === 'brace' && node.invalid !== true && length === 2) {
+        q.push(append(q.pop(), ['{}']));
+        return;
+      }
+
+      if (hasChildren && node.ranges > 0) {
+        const args = utils.reduce(children, length, maxDepth, budget);
+
+        if (utils.exceedsLimit(...args, options.step, rangeLimit)) {
+          throw new RangeError(
+            'expanded array length exceeds range limit. Use options.rangeLimit to increase or disable the limit.',
+          );
+        }
+
+        let range = fill(...args, options);
+        if (range.length === 0) {
+          range = stringify(node, options, maxDepth);
+        }
+
+        q.push(append(q.pop(), range));
+        node.nodes = [];
+        return;
+      }
+
+      const enclose = utils.encloseBrace(node, type);
+      const nodeState = utils.findParentQueue(node, maxDepth, type, true, active);
+      const queue = queues.get(nodeState.node);
+      if (!Array.isArray(queue)) {
+        throw new SyntaxError('AST parent queue is not owned by the active traversal');
+      }
+
+      for (let i = 0; i < length; i++) {
+        const child = children[i];
+        if (active.has(child)) {
+          throw new SyntaxError('AST contains a recursive node cycle');
+        }
+        const childType = child.type;
+
+        if (childType === 'comma' && type === 'brace') {
+          if (i === 1) queue.push('');
+          queue.push('');
+          continue;
+        }
+
+        if (childType === 'close') {
+          q.push(append(q.pop(), queue, enclose));
+          continue;
+        }
+
+        const childValue = child.value;
+        if (childValue && childType !== 'open') {
+          const safeValue = utils.snapshotValue(childValue, maxDepth, budget);
+          queue.push(append(queue.pop(), safeValue));
+          continue;
+        }
+
+        const childNodes = child.nodes;
+        if (Array.isArray(childNodes)) {
+          walk(child, node, nodeDepth, active, childNodes, childType, type);
+        }
+      }
+
+      return queue;
+    } finally {
+      if (hasChildren) active.delete(node);
     }
-
-    if (node.nodes && node.ranges > 0) {
-      const args = utils.reduce(node.nodes);
-
-      if (utils.exceedsLimit(...args, options.step, rangeLimit)) {
-        throw new RangeError(
-          'expanded array length exceeds range limit. Use options.rangeLimit to increase or disable the limit.',
-        );
-      }
-
-      let range = fill(...args, options);
-      if (range.length === 0) {
-        range = stringify(node, options);
-      }
-
-      q.push(append(q.pop(), range));
-      node.nodes = [];
-      return;
-    }
-
-    const enclose = utils.encloseBrace(node);
-    const queue = queueOwner(node).queue;
-
-    for (let i = 0; i < node.nodes.length; i++) {
-      const child = node.nodes[i];
-
-      if (child.type === 'comma' && node.type === 'brace') {
-        if (i === 1) queue.push('');
-        queue.push('');
-        continue;
-      }
-
-      if (child.type === 'close') {
-        q.push(append(q.pop(), queue, enclose));
-        continue;
-      }
-
-      if (child.value && child.type !== 'open') {
-        queue.push(append(queue.pop(), child.value));
-        continue;
-      }
-
-      if (child.nodes) {
-        walk(child, node, child.nodes ? depth + 1 : depth);
-      }
-    }
-
-    return queue;
   };
 
-  return utils.flatten(walk(ast, {}, ast.type === 'root' ? 0 : 1));
+  return utils.flatten(walk(ast));
 };
 
 module.exports = expand;

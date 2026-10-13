@@ -2,7 +2,7 @@
  * AI operations contracts — request/response schemas.
  */
 import { z } from 'zod';
-import { paginationQuerySchema, sortQuerySchema } from './common';
+import { paginationQuerySchema, sortQuerySchema } from './common.js';
 
 export const aiDomainSchema = z.enum([
   'aegis',
