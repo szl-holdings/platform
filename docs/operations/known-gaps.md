@@ -1254,3 +1254,22 @@ inventory is not a vulnerability verdict; unchanged blocking security gates
 still apply. The October 3 and October 7 packets remain in the original immutable PR #906
 source history and are linked from the current proof; their frozen counts
 are not introduced as current operational qualification.
+
+
+## 2026-10-13 Atelier continuity race reconciliation
+
+The reviewed source correction binds both reads around publication hard-link
+cleanup to the same authenticated bytes, file identity and metadata, with at
+most one fresh descriptor. Parse/authentication failure, disappearance, file
+replacement, repeated metadata changes, or changed bytes fail closed.
+Ordinary readers/startup retain all regular index/object temporary candidates
+regardless of age because elapsed time does not prove the writer is dead.
+The stronger existing final-object retention and exact-name first-start
+marker authentication/wait controls remain intact. Stale marker candidates
+continue to block initialization without deletion.
+
+Abandoned temporary and unreferenced final objects require offline, exclusive-
+access maintenance; this source does not implement safe automated cleanup or
+cross-process lifecycle coordination. Per-process serialization and the local
+filesystem lease do not establish a distributed database, production identity,
+provider operation, customer continuity, or durable external-ledger writes.
