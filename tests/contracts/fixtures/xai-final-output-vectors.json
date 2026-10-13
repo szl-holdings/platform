@@ -1,0 +1,382 @@
+{
+  "schema": "szl.provider-final-output-vectors.v1",
+  "reference": {
+    "repository": "szl-holdings/a11oy",
+    "revision": "00f52f2e31c9aed93e83e3814410ec1dde08b03c",
+    "path": "routers/atelier_grok.py",
+    "function": "_final_output"
+  },
+  "vectors": [
+    {
+      "name": "completed assistant text",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "id": "resp_ok",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [
+              { "type": "output_text", "text": "A" },
+              { "type": "output_text", "text": "B" }
+            ]
+          }
+        ]
+      },
+      "expected": { "accepted": true, "text": "A\nB", "providerRequestId": "resp_ok" }
+    },
+    {
+      "name": "omitted assistant status compatibility",
+      "model": "grok-4.6",
+      "document": {
+        "model": "grok-4.6",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "content": [{ "type": "output_text", "text": "rollback" }]
+          }
+        ]
+      },
+      "expected": { "accepted": true, "text": "rollback", "providerRequestId": null }
+    },
+    {
+      "name": "reasoning and user text excluded",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "reasoning",
+            "encrypted_content": "opaque fixture",
+            "content": [{ "type": "output_text", "text": "private" }]
+          },
+          {
+            "type": "message",
+            "role": "user",
+            "content": [{ "type": "output_text", "text": "not an answer" }]
+          },
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": " final " }]
+          }
+        ]
+      },
+      "expected": { "accepted": true, "text": " final ", "providerRequestId": null }
+    },
+    {
+      "name": "invalid ID suppressed",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "id": "resp_bad\n",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": "safe" }]
+          }
+        ]
+      },
+      "expected": { "accepted": true, "text": "safe", "providerRequestId": null }
+    },
+    {
+      "name": "incomplete with shortcut text",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "incomplete",
+        "output_text": "partial",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": "partial" }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "failed",
+      "model": "grok-4.7",
+      "document": { "model": "grok-4.7", "status": "failed", "output_text": "failure" },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "cancelled",
+      "model": "grok-4.7",
+      "document": { "model": "grok-4.7", "status": "cancelled", "output_text": "cancelled" },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "in progress",
+      "model": "grok-4.7",
+      "document": { "model": "grok-4.7", "status": "in_progress", "output_text": "pending" },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "missing root status",
+      "model": "grok-4.7",
+      "document": { "model": "grok-4.7", "output_text": "unbound" },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "wrong model",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.6",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": "wrong" }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "missing model",
+      "model": "grok-4.7",
+      "document": { "status": "completed", "output_text": "unbound" },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "incomplete assistant message",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output_text": "do not bypass message",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "incomplete",
+            "content": [{ "type": "output_text", "text": "partial" }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "null assistant status",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": null,
+            "content": [{ "type": "output_text", "text": "unknown" }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "shortcut only",
+      "model": "grok-4.7",
+      "document": { "model": "grok-4.7", "status": "completed", "output_text": "not canonical" },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "reasoning only",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          { "type": "reasoning", "content": [{ "type": "output_text", "text": "private" }] }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "tool only",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          { "type": "function_call", "content": [{ "type": "output_text", "text": "tool" }] }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "blank text",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": " \n " }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "invalid content array",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": "not an array"
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "legacy nested text rejected",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": { "value": "legacy" } }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "non object",
+      "model": "grok-4.7",
+      "document": null,
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "Python NEL whitespace",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": "\u0085" }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "Python file separator whitespace",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": "\u001c" }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "Python group separator whitespace",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": "\u001d" }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "Python record separator whitespace",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": "\u001e" }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "Python unit separator whitespace",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": "\u001f" }]
+          }
+        ]
+      },
+      "expected": { "accepted": false }
+    },
+    {
+      "name": "Python BOM is not whitespace",
+      "model": "grok-4.7",
+      "document": {
+        "model": "grok-4.7",
+        "status": "completed",
+        "output": [
+          {
+            "type": "message",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{ "type": "output_text", "text": "\ufeff" }]
+          }
+        ]
+      },
+      "expected": { "accepted": true, "text": "\ufeff", "providerRequestId": null }
+    }
+  ]
+}

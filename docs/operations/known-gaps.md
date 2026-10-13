@@ -1,40 +1,252 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-03 (rev 31 — Series A capture authority boundary)
+**Last updated:** 2026-10-11 (rev 41 — candidate, migration, and Ovis security boundaries)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
 This document is the canonical reference for known security, quality, and compliance gaps in the SZL Holdings platform. It consolidates findings from the internal risk register, the April 2026 hardening sprint, and the secrets remediation audit.
 
+> **Freshness boundary for rev 36:** rev 36 adds only candidate local source
+> boundaries recorded below; it does not re-observe any external
+> state. It carries forward the four narrow, dated receipts scoped in rev 34:
+> GitHub repository metadata, the Platform repository ruleset, the Hugging Face
+> public-catalog snapshot, and bounded domain homepage transactions. Each
+> receipt establishes only its recorded transaction at its
+> `observed_at`/`observedAt` time. It does not make
+> any wider repository, deployment, model, dataset, Space, DNS, certificate, or
+> route state fresh. Unless a later section names one of those current receipts,
+> dated external results below are **RETAINED HISTORY**, not present-tense
+> status. Unobserved estate state remains **UNKNOWN / HOLD** under the
+> [2026-10-05 prepublish audit](../../audit/SZL_ESTATE_PREPUBLISH_AUDIT_2026-10-05.md).
+
+> **Current backend-topology boundary:** `artifacts/api-server` is a historical
+> compatibility stub with only a narrow export and a typecheck script. Startable
+> Express implementations currently present in source are
+> `apps/alloy-runtime-api`, `apps/alloy-embedding-api`, and
+> `apps/alloy-ingestion-orchestrator`; additional TypeScript and Python services
+> exist under `services/*`, `workers/*`, and `apps/*`. Source presence does not
+> establish deployment, provider, production authority, or customer-data use.
+> Older dated entries below that name a large `artifacts/api-server` route tree
+> describe their historical source state, not the current stub.
+
+### A11OY-PUBLIC-CANDIDATE-001 — hosted promotion remains HOLD
+
+Candidate source now admits only a static boundary home and one deterministic
+security-workflow fixture. The public entry point no longer instantiates the
+GraphQL or Omnia network providers, excluded client routes are absent from the
+compiled bundle, and a build-time contract rejects same-origin API strings,
+unsupported metrics, named competitor scoring, and the retired social card.
+Every other client route renders a publication hold.
+
+These controls establish only local source and build behavior. They do not
+establish a protected merge, deployment, production operation, customer use,
+live connectors, certification, performance, revenue, or durable signed proof.
+Hosted promotion remains **HOLD** until the protected source revision is built
+with its final preview base, bound to a per-file manifest, admitted by the
+separate Python owner, and verified at the hosted preview without a network
+request or any change to the live root and API routes.
+
+### AEF-INGEST-001 — retry/idempotency remains a production hold
+
+Candidate source now makes the local AEF smoke exercise one real
+ingest → hybrid-search → eval chain. Per-document retrieval indexing attempts
+best-effort compensating deletes for completed writes when a later write fails,
+and a mixed batch returns HTTP 207 with ordered per-document results while
+retaining successful writes.
+These are local in-memory regression results, not a pgvector, deployment, crash
+recovery, or production-runtime witness.
+
+`POST /v1/ingest` still has no durable tenant-scoped reservation or completed-
+request registry keyed by `requestId`, no payload-fingerprint conflict check,
+and no transactional source-replacement rule. A client retry can therefore run
+the workflow again, and repeated ingestion of one source can accumulate chunks
+with newly generated IDs. The gateway's compensating deletes also cannot make
+the separate orchestrator store atomic across an adapter failure or process
+crash. Exactly-once and duplicate-safe ingestion remain **UNAVAILABLE / HOLD**
+for production claims until a durable idempotency record, conflict semantics,
+source replacement, and real-adapter crash/retry tests exist. A process-local
+response cache is not an accepted substitute.
+
+Candidate source now enforces that boundary: production workflow submission,
+ingest, index, eval, and approval-resume routes return HTTP 503 with
+`DURABLE_ORCHESTRATOR_STATE_REQUIRED`; standalone orchestrator readiness reports
+`EVALUATION_HOLD`. Production hybrid retrieval also rejects the in-memory store,
+and aggregate embedding-API readiness remains HTTP 503 while retrieval,
+evidence-ledger, or stateful workflow admission is held. These controls prevent
+silent production admission. They do **not** implement
+the missing durable stores, transactional approval resolution, idempotency, or
+crash recovery, so this gap remains open.
+
+The AEF evidence ledger is likewise not a production authority. Its default
+store is process-local and the optional JSONL adapter is mutable and not
+hash-chained. Production embed, rerank, hybrid-search, and multimodal-embed
+routes now return HTTP 503 with `EVIDENCE_LEDGER_DURABILITY_REQUIRED` before
+inference or evidence-ID minting; `/readyz` exposes the ledger
+`EVALUATION_HOLD`. This closes false admission only. Durable authenticated
+storage, tamper evidence, atomic request completeness, retention enforcement,
+and independent verification remain open.
+
+### FRONTIER-RELEASE-001 — exact candidate identity and generated truth remain HOLD
+
+The 2026-10-07 hardening work is an uncommitted multi-lane working tree based on
+`150b166171cbd339acb287f7f5d37809c21774ee`. It has no immutable release source
+or tree identity yet. A prior local checkpoint passed focused governance,
+security, runtime, and package tests, but later edits make those totals
+historical rather than final-candidate evidence.
+
+The source-of-truth validator failed three drift checks at
+`2026-10-07T11:35:16.688Z`: the registry records 45 API route source files while
+the working tree measures 44, it records 315 API handler declarations while the
+tree measures 332, and it records 245 environment variables while the tree
+measures 246. The local
+vulnerability report was refreshed at `2026-10-07T11:26:02.054Z`; the license
+report at `2026-10-07T11:26:18.409Z` covers 1,726 unique package/version pairs;
+and the current `security/sbom-latest.json` contains 1,989 components with
+SHA-256 `4ddcac69665a80ef9e7ebd53606ceb76c48fbc55b7d72bd09fd9a3b38736f198`.
+These are frozen-manifest, pnpm-only local candidate checkpoints; they do not
+cover Python dependencies, and none is bound to an immutable release commit or
+hosted conclusion. The Ovis evaluation graph now has a service-local `uv.lock`,
+but the general worker image does not consume it; the inference and Lyte
+services still lack resolved hashed locks. All three still lack complete Python
+SBOM, vulnerability, license, and reproducible-image evidence. Do not hand-edit generated
+counts or refresh timestamps. Freeze the remaining source candidate, revalidate
+the lock-derived vulnerability report, license report, SBOM, API catalogue, and
+truth registries, and regenerate any artifact whose inputs change. Then run the
+complete typecheck/test/build/runtime suite and bind all receipts to the
+resulting exact commit. Until then, release proof and public operational
+promotion remain **HOLD**.
+
+### PYWORKER-DELIVERY-001 — cross-worker delivery is not duplicate-safe
+
+The Python claim boundary now has candidate bearer authentication, production
+credential-to-tenant binding, header/body tenant consistency, stable HTTP error
+semantics, and production rejection of the development embedding/reranking
+heuristics. Those source improvements do not make the worker topology
+production-ready.
+
+`ClaimLoop` tracks active behavior only inside one process and has no durable,
+shared `(tenantId, runId, stageId)` reservation or completed-result store. A
+worker can accept and finish `POST /claim` while its response is lost; an engine
+or proxy retry against another worker can execute the stage again. Candidate
+source therefore sends the mutating request at most once and disables automatic
+cross-upstream retry in the proxy sketches. Duplicate-safe retry and replay
+remain **UNAVAILABLE / HOLD** until durable idempotency, payload-conflict rules,
+result replay, crash/restart tests, and ambiguous-response tests exist.
+
+`AutoscalingPolicy` currently produces recommendations only. No tracked
+coordinator aggregates `/metrics`, invokes `evaluate()`, or changes replicas,
+and the service exposes only its own worker view. Autoscaling and whole-fleet
+status are **NOT IMPLEMENTED**, not deployment features. The worker's Ovis
+evaluation graph is locked for CPU contract CI, while its tracked general image
+still resolves ranged core dependencies and has no reproducible image receipt.
+The inference and Lyte services remain range-based. Packaging and deployment
+remain **HOLD**.
+
+### LOCAL-STACK-001 — source remediated; image/runtime proof remains HOLD
+
+Candidate source now limits `ops/local/docker-compose.yml` to four present
+Dockerfiles (`alloy-runtime-api`, `vessels`, `terra`, and `carlota-jo`), uses
+repository-root build contexts, and requires an API key plus tenant identity
+without defaults for the runtime API. `docker compose --env-file .env -f
+ops/local/docker-compose.yml config --quiet` passes when those two required
+values are supplied. This closes the missing-Dockerfile/retired-package source
+defect.
+
+No exact-image build, container startup, health/readiness, dependency, or
+cross-service transaction receipt is bound to the candidate. The stack also
+does not include PostgreSQL and is not a whole-platform topology. Container and
+release evidence therefore remain **UNOBSERVED / HOLD** until the exact
+candidate images build and the bounded runtime checks pass.
+
 ---
 
-## Current Public Surface Truth
+## 2026-10-11 Migration Authority Boundary
 
-The generated public-surface manifest now distinguishes source-tree product inventory from public
-route evidence. Customer-facing web route records are measured as `REACHABLE` or `REDIRECTED` and
-bound to a named runtime repository and path. Public quantitative claims remain governed by the
-canonical metrics registry and generated [`docs/platform-facts.md`](../platform-facts.md), not by
-historical app directories or marketing copy.
+The normal database migration command no longer seeds
+`drizzle.__drizzle_migrations` from the current source-tree journal before
+applying SQL. A read-only manual-migration preflight runs before either
+migration set can apply; checksum drift blocks the command, and dry-run tracker
+inspection does not create database objects. Migration status queries use the
+schema-qualified trackers, report an absent tracker as an explicit state, and
+propagate connection, permission, and query failures.
 
-This closes the zero-manifest tooling gap, not every web gap. The historical `/lyte`, `/aegis`,
-`/vessels`, `/terra`, `/counsel`, `/carlota-jo`, `/command`, and `/pulse` preview paths currently
-return HTTP 404 and remain explicit `UNAVAILABLE` records. `a11oy.net/chat` and `a11oy.net/code`
-remain unavailable at HTTP 404. The independently measured `manifest.webmanifest`, `robots.txt`,
-and `sitemap.xml` files now return their expected machine-readable content and are recorded as
-`REACHABLE` metadata; they are not customer-facing product surfaces and do not change the
-routed-product count. A routed page is not an uptime, customer, feature-completeness, or
-correctness claim;
-`LIVE`, `MIXED`, and `DOCUMENTATION` modes retain that boundary.
+Production migration reconciliation remains on **HOLD**. Historical use of
+`drizzle-kit push`, journal gaps and duplicate prefixes, separately tracked
+manual SQL, and the unresolved simulation/evaluation schema history mean the
+repository cannot prove a safe legacy baseline from source alone. The explicit
+`migrate:backfill` recovery command is retained for an operator-verified
+database and backup, but it is excluded from deploy and CI. Closing this hold
+requires a fixed baseline decision, a complete inventory of live tracker and
+schema state, and clean plus legacy-upgrade verification against disposable
+PostgreSQL instances. No orphan migration or schema reconciliation is attempted
+by this bounded patch.
 
-The existing `truth-drift` job validates schema, deterministic generated bytes, source ownership,
-expected status and redirect behavior, bounded `robots.txt` and sitemap content, and current live
-HTTP results. It accepts honest historical snapshot timestamps so unrelated changes do not expire
-after seven days. The workflow runs `pnpm surfaces:freshness` daily at `06:17 UTC` and when an
-operator explicitly enables `require_surface_freshness` for a manual run. That separate lifecycle
-gate adds the deliberate seven-day age audit to the same live checks without weakening or replacing
-the protected PR/main check. An expired observation is remediated by re-observing every approved
-target, updating the registry evidence, regenerating the deterministic artifacts, reviewing the
-diff, and rerunning the freshness gate.
+---
+
+### 2026-10-03 Series A candidate capture authority
+
+At protected main `f2f8df6f89056e9104587674ccec0855dd5b177a`, the
+candidate-owned Series A capture script could label locally generated metadata
+`VERIFIED_GITHUB_RUNTIME` from caller-supplied `GITHUB_ACTIONS` and related
+environment values. That label was not a trustworthy hosted-runtime witness.
+The P1 successor branch makes candidate metadata unconditionally
+`LOCAL_NON_AUTHORITATIVE` and inadmissible to the hosted gate. Its source and
+focused local tests are recorded in
+`audit/P1_SERIES_A_CAPTURE_AUTHORITY_PROOF_20261003.md`.
+
+The first protected screenshot-controller dispatch for successor PR #884,
+[run 37106028221](https://github.com/szl-holdings/platform/actions/runs/37106028221),
+failed before artifact publication. A new controller repair and fresh
+exact-head dispatch are required; no hosted capture is proved. PR #884's
+initial CI also failed an inherited Atelier concurrent-initialization test
+and inherited High-severity `node-forge`/`braces` vulnerability gates. Those
+gates remain blocking. PR #690's controller repair has not retroactively
+produced a capture for merged PR #668. No deployment, production, or customer
+status is inferred from this source correction.
+
+## Current Bounded Public Surface Registry — observed 2026-10-07
+
+The generated public-surface manifest distinguishes source-tree product
+inventory from route evidence. An initial bounded validator run on 2026-10-07
+failed closed on seven differences from the expired 2026-08-11 registry. Review
+of the exact external owners established intentional contracts for the two
+A11oy.net trailing-slash documentation gateways, lowercase webmanifest identity,
+same-origin Killinchu status and Command pages, and the changed Killinchu API
+envelopes. The registry was updated from those reviewed sources rather than by
+loosening response checks.
+
+A subsequent full `surfaces:freshness` run passed all 29 approved targets and is
+bound to `observed_at=2026-10-07T12:31:38.131Z`. A separate bounded Killinchu
+read on 2026-10-11 pins its current build identity to main revision
+`e3a3c4cf94d91b588e6708cca64239c98a8ec868` and a verified GitHub OIDC
+attestation for the exact deployment manifest. That single-surface refresh does
+not advance the registry-wide observation timestamp. Its readiness contract
+positively requires the canonical ledger to be `EPHEMERAL`, `PROCESS_MEMORY`, and
+`production_ready=false`; the separately labeled SQLite diagnostic store cannot
+satisfy durability. Current whole-site DNS, TLS, headers, accessibility,
+continuous availability, and functional behavior remain **UNKNOWN / HOLD**.
+Public quantitative claims remain governed by the canonical metrics registry
+and generated [`docs/platform-facts.md`](../platform-facts.md), not by historical
+app directories, marketing copy, or route reachability alone.
+
+This closes the seven known contract mismatches, not every web gap. `/lyte`,
+`/aegis`, `/vessels`, `/terra`, `/counsel`, `/carlota-jo`, and `/pulse` remain
+explicitly `UNAVAILABLE`; `/command/` is now a reachable, honestly `MIXED`,
+modeled browser surface. The A11oy.net manifest, robots file, and sitemap remain
+metadata rather than customer-facing product surfaces. A routed page is not an
+uptime, customer, feature-completeness, or correctness claim; `LIVE`, `MIXED`,
+and `DOCUMENTATION` are evidence modes, not production authority.
+
+Repository source defines a `truth-drift` job that validates schema,
+deterministic generated bytes, source ownership, expected status and redirect
+behavior, bounded `robots.txt` and sitemap content, and HTTP observations when
+the job can execute them. It accepts honest historical snapshot timestamps so
+unrelated changes do not silently relabel them. The workflow source schedules
+`pnpm surfaces:freshness` daily at `06:17 UTC` and exposes a manual
+`require_surface_freshness` input. No current hosted surface-freshness run is
+recorded by rev 34. An expired observation is remediated only by re-observing
+every approved target, updating the registry evidence, regenerating the
+deterministic artifacts, reviewing the diff, and rerunning the freshness gate.
 
 The generated `artifacts/SOURCE_OF_TRUTH.json` timestamp follows the same
 honest-snapshot rule. Pull requests and protected-main pushes still validate
@@ -46,6 +258,51 @@ daily schedule and an explicit manual `require_truth_freshness` input run
 requires rerunning the canonical generator with its admitted local and remote
 sources and reviewing the resulting evidence; changing only the timestamp is
 not an accepted remediation.
+
+### 2026-10-11 Ovis evaluation dependency and image boundary
+
+The Ovis candidate remains `EVALUATION_HOLD`. Its manifest, Python optional
+dependencies, and runtime source now agree on Accelerate `1.15.0`, Transformers
+`5.19.0`, Torch `2.14.0`, and Qwen Omni Utils `0.0.9`; runtime health and loading
+fail closed on version drift. A service-local `uv.lock` records the complete
+cross-platform Python resolution and the manifest binds its SHA-256. Lock
+resolution and static CPU-side contracts do not establish that the GPU
+dependencies install or run on a supported CUDA host. The OSV vulnerability
+audit remains unresolved because the current network policy blocks
+`api.osv.dev`. GitHub dependency review and Trivy rejected the earlier
+Transformers `5.3.0` lock for three HIGH advisories. The candidate now uses
+`5.19.0`, which is outside every affected range in GitHub's reviewed
+Transformers advisories observed on 2026-10-11. This bounded remediation is not
+a claim that the complete Python graph is vulnerability-free.
+
+The general Compose and Kubernetes worker examples explicitly disable Ovis.
+Separate evaluation adapters require a renderer-validated digest-addressed
+image, file-mounted internal key, read-only flattened model snapshot and asset
+CAS, single-request execution, local-files-only operation, denied egress, and
+a hard-coded `EVALUATION_HOLD`. The current identity verifies three weight
+shards and `tokenizer.json`, while the complete supporting processor/config
+inventory is not hash-bound. No GPU image recipe, owned image build, published
+image digest, hardware execution receipt, or model qualification receipt is
+admitted in this repository yet. Those remain release blockers; authenticated
+health with status `cold` and the deployment adapters are configuration
+contracts rather than evidence of a live or qualified model. Runtime receipts
+identify this contract as `1.0.2` but do not carry an image or dependency-lock
+digest. The canonical HOLD cannot be lifted by a receipt-digest environment
+value; an authenticated receipt parser and verifier is not implemented.
+Kubernetes currently treats the admitted `cold` response as Ready and defers
+model warm-up to the first embed request; a qualified lane needs a distinct
+loaded-readiness or controlled-prewarm gate.
+The isolated container also requires verified UID/GID `1001` read/traverse
+permissions on its host/PVC inputs. Its request limiter and model lock are
+process-local, so the unpublished image must prove a single server process and
+worker; multiple application workers would permit overlapping GPU execution.
+The Kubernetes template uses `Recreate` to prevent rollout overlap, but the
+image entrypoint still needs to prove one application process. Ovis credentials
+are checked before JSON parsing and request bodies are capped at 10 MiB. The
+supplied NetworkPolicy denies egress but does not choose a cluster-specific
+ingress allowlist; operators must add one before admitting callers.
+CPU contract CI checks the lock and worker suite, but it cannot establish
+filesystem ownership, process topology, or GPU behavior.
 
 ### 2026-08-26 A11oy Series A route boundary
 
@@ -95,27 +352,6 @@ this task, so those states remain UNAVAILABLE. The repository-wide strict
 claims gate also continues to fail closed on the Vessels/AIS mock while
 MARINETRAFFIC_API_KEY is absent; PR #668 does not relabel that
 external-authority gap or introduce a credential to bypass it.
-
-### 2026-10-03 Series A candidate capture authority
-
-At protected main `f2f8df6f89056e9104587674ccec0855dd5b177a`, the
-candidate-owned Series A capture script could label locally generated metadata
-`VERIFIED_GITHUB_RUNTIME` from caller-supplied `GITHUB_ACTIONS` and related
-environment values. That label was not a trustworthy hosted-runtime witness.
-The P1 successor branch makes candidate metadata unconditionally
-`LOCAL_NON_AUTHORITATIVE` and inadmissible to the hosted gate. Its source and
-focused local tests are recorded in
-`audit/P1_SERIES_A_CAPTURE_AUTHORITY_PROOF_20261003.md`.
-
-The first protected screenshot-controller dispatch for successor PR #884,
-[run 37106028221](https://github.com/szl-holdings/platform/actions/runs/37106028221),
-failed before artifact publication. A new controller repair and fresh
-exact-head dispatch are required; no hosted capture is proved. PR #884's
-initial CI also failed an inherited Atelier concurrent-initialization test
-and inherited High-severity `node-forge`/`braces` vulnerability gates. Those
-gates remain blocking. PR #690's controller repair has not retroactively
-produced a capture for merged PR #668. No deployment, production, or customer
-status is inferred from this source correction.
 
 ### 2026-08-30 A11oy Atelier Turn Capsule boundary
 
@@ -173,6 +409,148 @@ within that boundary; production multi-tenant confidentiality requires an
 identity-to-tenant binding before this route is publicly exposed. Protected
 source merge also does not itself deploy Atelier: a separately witnessed
 hosted build, identity configuration, and functional provider probe remain open.
+
+**2026-10-07 local provider-completion candidate:** The xAI Responses adapter now
+rejects non-completed/unbound responses before returning final text. Shared
+vectors are replayed against the pinned SZL Python parser, including Unicode
+whitespace and code-point-length cases. Injected route checks preserve ambiguous
+reservations and prevent ledger/session writes or a second provider call after
+an invalid response. The separate Anthropic adapter now preserves all supported
+text/system blocks and makes nonfinal plain completions explicit. These are
+MEASURED local mocked/AST checks, not live provider operation. Source publication,
+exact-head hosted CI, complete Anthropic SDK typecheck, deployment, identity,
+durability and independent runtime witness remain open; artifact status remains
+Partial. Commands and scope are recorded in
+`audit/ATELIER_PROVIDER_COMPLETION_REPAIR_20261007.md`.
+
+### 2026-10-02 A11oy Workcell proof-coverage boundary
+
+The deterministic Workcell replay now includes a conservative Proof Coverage
+Inspector. It joins the Workcell to repository signal fixtures, its PCE
+contract, and Proof Packet; compares action and trace identifiers; and checks
+policy and approval references for resolution. Each obligation is reported as `SATISFIED`,
+`MISMATCH`, or `UNAVAILABLE`; any unresolved obligation keeps the aggregate
+`INCOMPLETE`. Local challenge controls demonstrate missing packet, changed
+action, and missing approval-reference paths without changing repository data
+or authorizing execution.
+
+The inspector exposes current fixture gaps rather than closing them. For
+`wc-001`, the referenced policy evaluation `pe-001` and approval record
+`ar-001` have no corresponding registries, and `proof-001` covers signal
+ingestion rather than the Workcell or ActionBrief and does not carry those
+contract references. A stored hash-shaped string is not treated as a
+signature-verification result. Durable persistence,
+authenticated actor identity, external attestation, trust-policy verification,
+and production execution remain outside the inspector's evidence boundary and
+unverified. A11oy remains `Partial` in `docs/APP_STATUS.md`.
+
+An adversarial successor review found that the first inspector revision could
+select the first duplicate identifier and could report `COMPLETE` while only
+comparing trace ID strings. The evaluator now requires unique signal, contract,
+packet, trace, policy, and approval references; one coherent `ExecutionTrace`
+record; consistent action and MirrorEval lineage; coherent PCE verification
+fields; packet integrity fields; and a SHA-256-shaped terminal checksum. Empty,
+duplicate, malformed, missing, or contradictory records fail closed as
+`MISMATCH` or `UNAVAILABLE`. The browser contract checks every obligation and
+challenge state rather than accepting an arbitrary count.
+
+That hardening does not manufacture missing runtime evidence. The current
+`wc-001` route intentionally supplies no trace, policy-evaluation, or approval
+registry and remains `INCOMPLETE` at 8/17 obligations. Its malformed terminal
+checksum remains `MISMATCH`. A future `COMPLETE` result would establish only
+deterministic fixture-record coverage; it would not establish signature
+verification, durable storage, authenticated authority, deployment, an external
+side effect, or production execution.
+
+### 2026-10-05 Kernel mutation authentication boundary
+
+Local authentication commit `c65edd118dae25678b98307ee0f9f5bc85db7b7a`
+closes the source-level unauthenticated mutation paths found in the vendorable
+kernel module. Wake receipts require a dedicated Bearer secret, a strict 1 KiB
+schema, ±300-second clock skew, and atomic SQLite idempotency. Forced `tick`,
+`start`, and `stop` calls require a separate header-only admin Bearer secret;
+missing server configuration fails closed.
+
+Truth-state successor `4e633b08464afd00f4228b962821bc3f66c361e0`
+closes a separate truth-state defect: the unconnected kernel scaffolds no
+longer claim that they observed, signed, embedded, replayed, or acted on named
+substrates. All non-chain kernels report `did_work=false` and explicit
+`UNAVAILABLE` adapter state; `chain` performs only local Codex hash-chain
+verification.
+
+Credential-separation successor `b0c6c6070caafef7a0e2aa4712a151e5a5d54e0c`
+also rejects a configuration in which the accepted admin and wake token values
+are equal: both mutation gates return `503`. The source accepts only 32–512
+ASCII bytes without whitespace for either token; this is a syntax/length
+boundary, not an entropy measurement.
+
+Current local read-boundary successor
+`99305772172270109f1023da6987a6ca32445847` additionally constrains Codex
+reads to a page size of 1–100 and an offset of 0–10,000, and corrects the route
+registration contract: callers must reserve the organ prefix. At this
+successor, 14 controller tests and 22 dependency-free kernel tests pass (20
+boundary/security plus two five-organ truthfulness tests). The Codex GET route
+is still unauthenticated. Its public authorization, tenant isolation, and
+response data-minimization policy remain open.
+
+This is not a hosted closure. Deployment of the exact successor module
+(SHA-256 `0b045cd3f61d1060d9aafc7340ffe00d6328f9a560cce285867ba85ae62d1c73`), matching secret
+configuration on GitHub and the A11oy Space, client migration, and an
+authorized deny/accept/replay/readback receipt remain unobserved. The staged
+static secret should be replaced by repository/workflow-bound OIDC. Durable
+request rate limiting, a storage quota, and a retention/compaction design that
+preserves the hash chain remain open. SQLite survives a rebuild only when
+`SZL_CODEX_DIR` is backed by a persistent mount, and the fallback signer
+remains explicitly a placeholder rather than cryptographic verification. The
+source-level evidence and exact claim boundary are retained in
+[`audit/A11OY_KERNEL_MUTATION_HARDENING_PROOF_2026-10-05.md`](../../audit/A11OY_KERNEL_MUTATION_HARDENING_PROOF_2026-10-05.md).
+
+### 2026-10-07 A11oy terminal source-launch boundary
+
+The CLI package now includes `a11oy-atelier.ps1`, a repository-local Windows
+source launcher for an already-installed workspace with PowerShell 7.3+ and
+Node 24+. It does not depend on the generated `dist/atelier-cli.js` bin. This
+addresses source-checkout launch ergonomics only: it does not register a global
+command, edit Windows Terminal or PowerShell profiles, start the API, repair
+provider balance/authentication, or establish successful inference. A11oy's
+Partial status and all provider/deployment/security release gaps remain unchanged.
+See `packages/a11oy-cli/README.md` and
+`audit/A11OY_CLI_SOURCE_LAUNCHER_PROOF_20261007.md` for commands and scoped evidence.
+
+### 2026-10-03 A11oy Atelier Proofweave compile-only boundary
+
+The A11oy Atelier source now includes a deterministic Proofweave compiler,
+runtime-API compile route behind the configured API-key guard, explicit
+typed-claim CLI, health disclosure, and operator UI. Local development can run
+without a configured key. An authenticated local browser flow instead uses the
+explicit loopback shared-proxy bridge, which attaches a server-held key and a
+fixed tenant only to Atelier requests. Tenant attribution remains
+caller-declared rather than an authenticated human identity. The compiler
+produces a hash-addressed `PATTERN -> CUT -> STITCH -> FITTING -> LABEL` plan
+with evidence class `SIMULATED` and the separate lifecycle states `DEMO`,
+`COMPILED_NOT_EXECUTED`, and `IN_PROCESS_NOT_STORED`.
+
+The browser transport is local-development only. Production browser health,
+inference, and compile actions fail closed as `BLOCKED`, with runtime evidence
+`UNKNOWN`, because no authenticated server-side session/BFF currently exists.
+Provider keys remain server-side; exposing an API key through a `VITE_*`
+variable or browser request is not an accepted workaround. The loopback bridge
+is a single-operator development transport, not production browser identity.
+
+This closes the compile-contract and source-wiring gap only. The compiler does
+not fetch declared sources, resolve or prove Git revisions, invoke a model,
+execute tools or Workcells, start subagents, run its automated review, grant
+human approval, or durably store the plan. The route requires an audit-metadata
+append, but the backend is configuration-dependent, durable persistence is
+`UNKNOWN`, and tenant attribution has evidence class `DECLARED`. A
+syntactically valid 40-hex revision is an operator declaration, not proof that
+the revision exists, is reachable from the named repository, or binds fetched
+bytes.
+
+Focused local tests and typechecks establish only behavior in the isolated
+local harness. Exact-head hosted CI, protected merge, deployment, production
+health, durable-ledger witness, and external provider behavior remain separate
+evidence states and must not be inferred from a local pass or HTTP response.
 
 ---
 
@@ -249,20 +627,20 @@ target-signer substitution, wrong-key evidence, replay, stale evidence,
 tampering, and broken parent links fail closed. Manifest v1 remains supported
 for existing shared-commit fixtures.
 
-This closes the verifier-model defect; it does not make a live surface
-conformant. The live A11oy deployment still lacks the required root evidence,
-and the three targets remain `0/3 VERIFIED` until exact deployments provide all
-seven gates.
+This closed the verifier-model defect; it did not make a live surface
+conformant. The retained 2026-07-31 observation recorded missing A11oy root
+evidence and `0/3 VERIFIED`. Current conformance remains **UNKNOWN** until exact
+deployments provide all seven gates in a fresh authorized run.
 
 ### 2026-07-31 vertical runtime-contract advance
 
-Killinchu PR #301 merged normally as signed main commit
+**RETAINED 2026-07-31:** Killinchu PR #301 was recorded as merged at signed main commit
 `3af652dbc326e653e4c02c0a879d25188e8bdf6a`. Its governed Hugging Face
 deployment completed source binding, byte and smoke-route attestation, GitHub
 OIDC release attestation `38075818`, receipt publication, and restarted-runtime
 verification. At that deployment, `/healthz`, `/version`, and `/evidence`
 returned JSON 200, `/version.gitSha` equaled the exact main commit, and
-`/api/build-info.receipt_minted` is `true`. A live conformance run with the
+`/api/build-info.receipt_minted` was `true`. That conformance run with the
 exact deployment URL and SHA passed `runtime-endpoints` and `readme-status`
 only, advancing Vessels from `1/7` to `2/7`.
 
@@ -270,7 +648,7 @@ Signed dependency-hardening PR #302 subsequently advanced Killinchu main to
 `305d6aaf67b3d6edd3c4c065a5c8ac90006a1dba`. All `17/17` exact-main
 workflows succeeded, governed deployment run
 <https://github.com/szl-holdings/killinchu/actions/runs/30595522086>
-completed, and the live build now reports that SHA with GitHub OIDC attestation
+completed, and the observed build reported that SHA with GitHub OIDC attestation
 `38078930`. An exact-SHA conformance rerun still passes the same two gates and
 remains `2/7`; the successor changed dependency evidence, not the runtime
 contract result.
@@ -281,14 +659,14 @@ conformance denial receipt, OTel GenAI span set, separately pinned offline
 trust roots, or candidate product manifest was observed. Vessels is therefore
 a runtime **CANDIDATE**, not a conformant surface.
 
-David Leads PR #74 also merged normally as signed main commit
+**RETAINED 2026-07-31:** David Leads PR #74 was recorded as merged at signed main commit
 `e34044cbb2b565ea77421c4ec6dbef19a5d133dc`, with its full 126-test
 operational-safety gate green. The exact-main Neon migration is waiting on the
 protected `david-space-credential-rotation` environment, so the downstream
-deployment has not run and the live `/version` and `/evidence` paths remain
-404. No approval was bypassed or self-issued. Sentra still has no standalone
-public repository or configured canonical deployment. Overall vertical
-conformance remains `0/3 VERIFIED`.
+deployment had not run and the observed `/version` and `/evidence` paths were
+404. No approval was bypassed or self-issued. The same retained observation
+recorded no standalone Sentra repository or configured canonical deployment
+and `0/3 VERIFIED` overall. Current state is **UNKNOWN**.
 
 The immutable runtime-contract evidence is recorded in
 [`VERTICAL_RUNTIME_CONTRACT_PROOF_2026-07-31.md`](../../audit/frontier/VERTICAL_RUNTIME_CONTRACT_PROOF_2026-07-31.md).
@@ -355,18 +733,34 @@ receipt. The remaining gaps are:
 - **Database tables, Lean sorry count, Lambda count, Hugging Face collections,
   and receipt-chain depth:** `UNAVAILABLE` pending an authoritative local source
   or authorized live receipt.
-- **Repository consolidation:** the live organization has `53` public
-  repositories, not the historical target of `9`. Visibility, archival,
-  deletion, and history changes require explicit founder approval and a tested
-  restoration plan.
-- **Hugging Face estate:** `15` models, `26` datasets, and `25` spaces were
-  MEASURED from the public API. No private asset was accessed, exported, or
+- **Repository consolidation:** the retained 2026-07-25 public inventory of
+  `53` repositories is historical and superseded. A cursor-complete,
+  authenticated metadata receipt observed 140 repositories on 2026-10-06,
+  and a cursor-exhaustive read-only aggregate recheck on 2026-10-07 matched:
+  128 public and 12 private, with 111 active and 29 archived across both
+  visibilities. The sanitized receipt does not expose the active-public versus
+  archived-public cross-tab, so that narrower breakdown remains **UNKNOWN**.
+  The target of `9` remains an unapplied disposition decision; visibility,
+  archival, deletion, and history changes require explicit founder approval
+  and a tested restoration plan.
+- **Hugging Face public catalog:** the repository-controlled snapshot at
+  `audit/evidence/huggingface-public-catalog.snapshot.json` records
+  `observedAt=2026-10-07T11:48:26.618Z`, its RFC Link pagination/completeness
+  rule, one page per asset type, and exact IDs for 47 models, 37 datasets, and
+  35 Spaces. For public-catalog counts it supersedes the retained
+  2026-07-25 and 2026-09-29 inventory counts. Collections, private-asset
+  completeness, first-class Kernel inventory, runtime behavior, publication
+  authority, training rights, and readiness remain **UNKNOWN** or
+  `UNAVAILABLE`; the snapshot is not evidence that any asset was exported or
   deployed.
-- **Independent review:** the organization currently has no eligible independent
-  collaborator. Do not manufacture or self-approve reviews. Keep required
-  checks, signed commits, linear history, conversation resolution, and exact-head
-  verification; transition to independent review after the first qualified hire
-  without creating a self-deadlock before then.
+- **Independent review:** current collaborator eligibility and reviewer
+  availability were not observed and remain **UNKNOWN**. The authenticated
+  Platform ruleset receipt records zero required approving reviews plus extra
+  approval for unattributed changes; it does not establish staffing. Do not
+  manufacture or self-approve a review. Preserve the observed required checks,
+  signatures, squash-only history, conversation resolution, and exact-head
+  verification, and change review requirements only from current staffing and
+  ruleset evidence.
 - **Standalone KHIPU receipt semantics:** `@szl/verify` can establish the exact
   DSSE payload type, JSON decoding, Ed25519 or ECDSA P-256 signature validity,
   and an externally pinned signer identity. It does not yet validate portable

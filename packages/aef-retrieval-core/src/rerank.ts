@@ -1,17 +1,17 @@
 import type { NormalizedHit } from './normalize.js';
 
 /**
- * Lightweight CPU cross-encoder approximation.
+ * Deterministic lexical-overlap reranker.
  *
  * Computes a term-overlap relevance score between the query and available
  * textual evidence in each hit's metadata (title, section, text content).
- * In production this is replaced by a proper cross-encoder model via the
- * alloy-rank-worker service. The score is recorded in `rerankerScore` so
+ * The current alloy-rank-worker uses the same evidence-limited class of
+ * lexical scoring; no cross-encoder model is loaded. The score is recorded in `rerankerScore` so
  * downstream citation assembly surfaces it with full provenance.
  *
  * Stage placement: after score normalization, before citation assembly.
  * This means the reranker can override or re-sort the RRF/boosted ranking
- * with semantic relevance signals — the canonical "second-pass" retrieval gate.
+ * with explicit lexical relevance signals — the canonical second-pass retrieval gate.
  */
 export function rerankHits(hits: NormalizedHit[], query: string, topK?: number): NormalizedHit[] {
   if (hits.length === 0) return hits;

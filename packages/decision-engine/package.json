@@ -13,20 +13,28 @@
   },
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./ranker": {
+      "development": "./src/ranker.ts",
+      "workspace": "./src/ranker.ts",
       "types": "./dist/ranker.d.ts",
-      "import": "./src/ranker.ts"
+      "import": "./dist/ranker.js"
     },
     "./scorer": {
+      "development": "./src/scorer.ts",
+      "workspace": "./src/scorer.ts",
       "types": "./dist/scorer.d.ts",
-      "import": "./src/scorer.ts"
+      "import": "./dist/scorer.js"
     }
   },
   "dependencies": {

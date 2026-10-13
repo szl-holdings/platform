@@ -2,7 +2,7 @@
  * Auth API contracts — request/response schemas for authentication endpoints.
  */
 import { z } from 'zod';
-import { paginationQuerySchema, timestampsSchema } from './common';
+import { paginationQuerySchema, timestampsSchema } from './common.js';
 
 export const loginBodySchema = z.object({
   email: z.string().email('Invalid email address'),

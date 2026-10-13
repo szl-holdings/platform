@@ -6,28 +6,40 @@
   "description": "Alloy Embedding Fabric — deterministic, checkpointed workflow state machine. Defines actor roles (IngestionPlanner, SourceNormalizer, ChunkPlanner, PolicyGuard, VectorDispatch, IndexVerifier, RetrievalEvaluator, ApprovalGate), approval interrupt support, resumable execution across restarts, and audit event emission at each step.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./state-machine": {
+      "development": "./src/state-machine.ts",
+      "workspace": "./src/state-machine.ts",
       "types": "./dist/state-machine.d.ts",
-      "import": "./src/state-machine.ts"
+      "import": "./dist/state-machine.js"
     },
     "./actors": {
+      "development": "./src/actors.ts",
+      "workspace": "./src/actors.ts",
       "types": "./dist/actors.d.ts",
-      "import": "./src/actors.ts"
+      "import": "./dist/actors.js"
     },
     "./checkpoint": {
+      "development": "./src/checkpoint.ts",
+      "workspace": "./src/checkpoint.ts",
       "types": "./dist/checkpoint.d.ts",
-      "import": "./src/checkpoint.ts"
+      "import": "./dist/checkpoint.js"
     },
     "./approval": {
+      "development": "./src/approval.ts",
+      "workspace": "./src/approval.ts",
       "types": "./dist/approval.d.ts",
-      "import": "./src/approval.ts"
+      "import": "./dist/approval.js"
     }
   },
   "dependencies": {

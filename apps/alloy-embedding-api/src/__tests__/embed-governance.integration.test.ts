@@ -37,13 +37,15 @@ afterEach(() => {
 
 describe('/v1/embed governance', () => {
   it('returns development vectors with truthful model identity and ledger evidence', async () => {
-    const response = await request(buildApp()).post('/v1/embed').send({
-      requestId: 'req-dev-1',
-      tenantId: 'tenant-1',
-      texts: ['proof before pitch'],
-      normalize: true,
-      metadata: {},
-    });
+    const response = await request(buildApp())
+      .post('/v1/embed')
+      .send({
+        requestId: 'req-dev-1',
+        tenantId: 'tenant-1',
+        texts: ['proof before pitch'],
+        normalize: true,
+        metadata: {},
+      });
 
     expect(response.status).toBe(200);
     expect(response.body.model).toBe('aef-dev-hash');
@@ -66,28 +68,34 @@ describe('/v1/embed governance', () => {
   });
 
   it('rejects caller-supplied model identity spoofing', async () => {
-    const response = await request(buildApp()).post('/v1/embed').send({
-      requestId: 'req-spoof-1',
-      tenantId: 'tenant-1',
-      texts: ['hello'],
-      model: 'pretend/frontier-model',
-      metadata: {},
-    });
+    const response = await request(buildApp())
+      .post('/v1/embed')
+      .send({
+        requestId: 'req-spoof-1',
+        tenantId: 'tenant-1',
+        texts: ['hello'],
+        model: 'pretend/frontier-model',
+        metadata: {},
+      });
 
     expect(response.status).toBe(409);
     expect(response.body.code).toBe('MODEL_ID_NOT_ADMITTED');
   });
 
-  it('fails closed in production when no real backend is configured', async () => {
+  it('holds production before model execution when the evidence ledger is not admitted', async () => {
     process.env.NODE_ENV = 'production';
-    const response = await request(buildApp()).post('/v1/embed').send({
-      requestId: 'req-prod-1',
-      tenantId: 'tenant-1',
-      texts: ['hello'],
-      metadata: {},
-    });
+    const response = await request(buildApp())
+      .post('/v1/embed')
+      .send({
+        requestId: 'req-prod-1',
+        tenantId: 'tenant-1',
+        texts: ['hello'],
+        metadata: {},
+      });
 
     expect(response.status).toBe(503);
-    expect(response.body.code).toBe('REAL_EMBEDDER_REQUIRED');
+    expect(response.body.code).toBe('EVIDENCE_LEDGER_DURABILITY_REQUIRED');
+    expect(response.body).not.toHaveProperty('evidenceIds');
+    expect(defaultLedgerStore.query({ requestId: 'req-prod-1' })).toHaveLength(0);
   });
 });

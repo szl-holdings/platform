@@ -10,11 +10,11 @@ All components are CPU-runnable without a GPU. GPU and Azure AI Search adapters 
 
 Retrieval quality degrades when domain context is absent. A query about vessel IMO numbers retrieves different signals than a query about court docket IDs, even though both are structured-identifier lookups. AEF solves this by making domain awareness a first-class retrieval primitive rather than an application-layer afterthought.
 
-The second motivation is governance. SZL's core doctrine is that every AI decision must be auditable, reversible, and policy-bounded. AEF applies the same standard to retrieval: every chunk surfaced carries provenance metadata, every retrieval operation is recorded in the evidence ledger, and every cross-tenant access is blocked at the policy layer before results are returned.
+The second motivation is governance. SZL's core doctrine is that every AI decision must be auditable, reversible, and policy-bounded. AEF applies tenant and provenance controls to retrieval, but the checked-in evidence ledger is currently a development/test recorder only. Production evidence-producing routes remain on `EVALUATION_HOLD` until a durable, tamper-evident ledger is implemented and probed.
 
 ## What AEF Is Not
 
-AEF is not an LLM. It does not generate answers. It retrieves the evidence that downstream agents and decision engines use to form responses. This distinction matters because the evidence ledger — not the language model — is the authoritative source of what the system knew at the moment of decision.
+AEF is not an LLM. It does not generate answers. It retrieves evidence that downstream agents and decision engines use to form responses. The intended production authority is a durable evidence ledger; the current in-memory/JSONL implementations are not authoritative production records.
 
 AEF is not a monolith. The fabric is composed of discrete packages that can be deployed together or independently:
 
@@ -22,7 +22,7 @@ AEF is not a monolith. The fabric is composed of discrete packages that can be d
 |---|---|
 | `@workspace/aef-contracts` | Zod schemas and TypeScript contracts for all API shapes |
 | `@workspace/aef-retrieval-core` | Pure retrieval functions: fusion, boost, filter, normalize, citations |
-| `@workspace/aef-evidence-ledger` | Append-only audit store for every retrieval operation |
+| `@workspace/aef-evidence-ledger` | Mutable development/test recorders; production authority is not implemented |
 | `@workspace/aef-policy-guard` | Tenant boundary enforcement, redaction, retention controls |
 | `@workspace/aef-domain-profiles` | Six versioned domain profiles and the model registry |
 | `@workspace/aef-evals` | Retrieval evaluation harness, golden fixtures, and smoke tests |
@@ -46,7 +46,12 @@ Profiles are versioned with semantic versioning. The active profile for a tenant
 
 ### Evidence Ledger
 
-Every retrieval operation appends an entry to the evidence ledger. The entry records the request ID, query, chunks retrieved, chunk scores, boost rules applied, policy decisions, and the profile version active at the time. The ledger is append-only and integrity-checked. It is the primary artifact used in auditability reviews.
+Development/test retrieval appends per-result records to a process-local ledger.
+Those records are useful for contract tests, but they are mutable, disappear on
+restart, and are not hash-chained. They must not be presented as production
+audit evidence. Production evidence-producing routes fail with HTTP 503 and
+`EVIDENCE_LEDGER_DURABILITY_REQUIRED` until a durable, tamper-evident backend
+and integrity probe exist.
 
 ### Policy Guard
 
@@ -64,7 +69,7 @@ The policy guard runs between the retrieval layer and the result assembler. It e
 ```
 packages/
   aef-contracts            — Zod schemas + TypeScript DTOs for all AEF API shapes
-  aef-evidence-ledger      — Append-only evidence ledger (in-memory + fs adapters)
+  aef-evidence-ledger      — Development/test recorders (in-memory + mutable JSONL)
   aef-policy-guard         — Policy engine, tenant boundary, redaction, retention
   aef-retrieval-core       — RRF fusion, boost, filter, citations, adapter interfaces
   aef-domain-profiles      — Versioned ProfileRegistry + 6 domain profiles
@@ -78,7 +83,7 @@ services/
 
 workers/
   alloy-vector-worker      — Dense embedding micro-batch worker (port 4202)
-  alloy-rank-worker        — Cross-encoder reranking worker (port 4203)
+  alloy-rank-worker        — Deterministic lexical-overlap reranking worker (port 4203)
 
 docs/aef/
   ARCHITECTURE.md          — System architecture and Mermaid diagram
@@ -158,20 +163,20 @@ See `.env.example` for the full AEF section. Key variables:
 
 | Variable | Default | Description |
 |---|---|---|
-| `AEF_API_KEY` | `dev-insecure-key` | Bearer token for external callers |
-| `AEF_S2S_SECRET` | `dev-s2s-secret` | Service-to-service bearer token |
+| `AEF_API_KEY` | required | Bearer token for external callers; inject through a secret manager |
+| `AEF_S2S_SECRET` | required | Service-to-service bearer token; inject through a secret manager |
 | `AEF_EMBED_BACKEND` | `local-cpu` | Embedding backend selection |
-| `AEF_RANK_MODE` | `cross-encoder` | Reranking mode |
+| `AEF_RANK_MODE` | `lexical-overlap` | `lexical-overlap` or `score-passthrough`; no cross-encoder model is loaded |
 
 ---
 
 ## Design Principles
 
-1. **Evidence-first** — Every retrieval result is logged to the evidence ledger before being returned. `includeProvenance: true` includes the full ledger entry in the API response.
+1. **Evidence-first target** — development/test records each returned result before responding. Production is held until the same contract is backed by a durable, tamper-evident ledger; `includeProvenance` does not promote the current recorder.
 2. **Tenant isolation** — All storage reads and writes are scoped to `tenantId`. Cross-tenant data access is prevented at the storage adapter layer.
 3. **No silent truncation** — The `truncationPolicy` in each domain profile controls exactly how oversize inputs are handled. No summarize-then-embed is allowed.
 4. **Deterministic workflows** — Every ingestion, rebuild, eval, and profile rotation runs through a checkpointed state machine. Destructive operations require explicit approval before continuing.
-5. **CPU-runnable** — All embedding and reranking defaults to `LocalCpuBackend`. GPU and Azure backends are adapter-seam ready and activate via environment variable.
+5. **CPU-runnable** — Embedding defaults to the revision-pinned `LocalCpuBackend`; reranking is deterministic lexical overlap. GPU, Azure, and real cross-encoder backends remain future adapter targets.
 6. **Profile-driven configuration** — Boost rules, exact-match classes, dense/keyword weights, retention, and provenance requirements are all per-profile, versioned, and rollback-safe.
 
 ## Getting Started

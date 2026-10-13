@@ -55,8 +55,9 @@ export function getCurrentTenantId(): string | undefined {
  * Derive a tenant identifier from an actorId string.
  *
  * Strategy:
- *  - Internal service calls identified as 'api-key:...' or 'anonymous:dev'
- *    are mapped to the 'substrate-gateway' super-tenant (all-domain access).
+ *  - API-key and explicit development-bypass calls use the configured gateway
+ *    tenant when the authentication layer provides one. This function retains
+ *    `substrate-gateway` only as a non-production compatibility fallback.
  *  - Agent delegation calls use the agent name as actor, which will match
  *    their dedicated TENANT_DOMAIN_WHITELIST entry (e.g. 'helmsman',
  *    'sentinel', 'terra', 'lexis', 'beacon').
@@ -64,10 +65,15 @@ export function getCurrentTenantId(): string | undefined {
  *    will deny them by default.
  */
 export function actorIdToTenantId(actorId: string): string {
-  if (actorId.startsWith('api-key:') || actorId.startsWith('anonymous:')) {
-    // Internal / service-level callers get full substrate-gateway access
+  if (
+    actorId.startsWith('api-key:') ||
+    actorId.startsWith('gateway:') ||
+    actorId.startsWith('gateway-dev:') ||
+    actorId === 'anonymous:dev'
+  ) {
     return 'substrate-gateway';
   }
+  if (actorId === 'anonymous') return 'anonymous';
   // Agent names and other identities are used directly for whitelist lookup
   return actorId;
 }

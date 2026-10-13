@@ -5,6 +5,7 @@ const ROOT = resolve(__dirname, '../..');
 
 export default defineConfig({
   resolve: {
+    conditions: ['workspace'],
     // Resolve the observability + env workspace packages to source so the
     // server test exercises the real OTEL pipeline without a prior build,
     // mirroring apps/alloy-runtime-api/vitest.config.ts.
@@ -15,6 +16,11 @@ export default defineConfig({
       },
       { find: '@szl-holdings/env', replacement: resolve(ROOT, 'packages/env/src/index.ts') },
     ],
+  },
+  server: {
+    deps: {
+      inline: [/^@szl-holdings\//, /^@workspace\//],
+    },
   },
   test: {
     environment: 'node',

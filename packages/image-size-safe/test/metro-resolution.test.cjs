@@ -17,12 +17,18 @@ function png(width, height) {
   return buffer;
 }
 
-test('both installed Metro versions resolve the workspace replacement and parse an asset', () => {
+test('every locked Metro version resolves the workspace replacement and parses an asset', () => {
+  const lockfile = fs.readFileSync(path.join(workspaceRoot, 'pnpm-lock.yaml'), 'utf8');
+  const lockedMetroPackages = [
+    ...new Set([...lockfile.matchAll(/^ {2}(metro@\d+\.\d+\.\d+):/gm)].map((match) => match[1])),
+  ].sort();
+  assert.ok(lockedMetroPackages.length > 0, 'Metro must remain in the lockfile');
+
   const metroPackages = fs
     .readdirSync(virtualStore)
-    .filter((name) => /^metro@0\.83\.(?:3|7)$/.test(name))
+    .filter((name) => /^metro@\d+\.\d+\.\d+$/.test(name))
     .sort();
-  assert.deepEqual(metroPackages, ['metro@0.83.3', 'metro@0.83.7']);
+  assert.deepEqual(metroPackages, lockedMetroPackages);
 
   for (const metroPackage of metroPackages) {
     const metroDirectory = path.join(virtualStore, metroPackage, 'node_modules', 'metro');

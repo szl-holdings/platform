@@ -1,0 +1,301 @@
+{
+  "$defs": {
+    "dataRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "revision": {
+          "$ref": "#/$defs/immutableRevision"
+        },
+        "rights_status": {
+          "enum": [
+            "APPROVED",
+            "NOT_APPLICABLE"
+          ]
+        }
+      },
+      "required": [
+        "digest",
+        "id",
+        "revision",
+        "rights_status"
+      ],
+      "type": "object"
+    },
+    "digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "immutableRevision": {
+      "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+      "type": "string"
+    },
+    "modelRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "revision": {
+          "$ref": "#/$defs/immutableRevision"
+        }
+      },
+      "required": [
+        "digest",
+        "id",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "sha256Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "stableObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "image_digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "manifest_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "pattern": "Z$",
+          "type": "string"
+        },
+        "provider_revision": {
+          "$ref": "#/$defs/immutableRevision"
+        },
+        "receipt_digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "source_revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "image_digest",
+        "manifest_digest",
+        "observed_at",
+        "provider_revision",
+        "receipt_digest",
+        "source_revision"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.a11oy.net/vertical-space-release.v2.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Portable declaration schema. The local Python gate validates SOURCE_ONLY structure and never verifies or admits operational readiness.",
+  "properties": {
+    "data_revisions": {
+      "items": {
+        "$ref": "#/$defs/dataRevision"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "evaluation_revision": {
+      "$ref": "#/$defs/digest"
+    },
+    "image_digest": {
+      "$ref": "#/$defs/sha256Digest"
+    },
+    "manifest_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "model_revisions": {
+      "items": {
+        "$ref": "#/$defs/modelRevision"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "observed_at": {
+      "format": "date-time",
+      "pattern": "Z$",
+      "type": "string"
+    },
+    "policy_revision": {
+      "$ref": "#/$defs/digest"
+    },
+    "production_status": {
+      "enum": [
+        "SOURCE_ONLY",
+        "PROTECTED_CANDIDATE",
+        "PUBLIC_DEMO",
+        "PILOT_READY",
+        "PRODUCTION_READY",
+        "BLOCKED",
+        "ROLLED_BACK"
+      ]
+    },
+    "release_evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "access_control_verified": {
+          "type": "boolean"
+        },
+        "authorization_verified": {
+          "type": "boolean"
+        },
+        "backup_verified": {
+          "type": "boolean"
+        },
+        "negative_tests_passed": {
+          "type": "boolean"
+        },
+        "physical_effectors_absent": {
+          "type": "boolean"
+        },
+        "receipt_signature_verified": {
+          "type": "boolean"
+        },
+        "receipts": {
+          "additionalProperties": {
+            "$ref": "#/$defs/sha256Digest"
+          },
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "type": "object"
+        },
+        "restart_recovery_verified": {
+          "type": "boolean"
+        },
+        "rollback_verified": {
+          "type": "boolean"
+        },
+        "tests_passed": {
+          "type": "boolean"
+        },
+        "witness": {
+          "additionalProperties": false,
+          "properties": {
+            "digest": {
+              "$ref": "#/$defs/sha256Digest"
+            }
+          },
+          "required": [
+            "digest"
+          ],
+          "type": "object"
+        },
+        "witness_verified": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "runtime_readback": {
+      "additionalProperties": false,
+      "properties": {
+        "durability_state": {
+          "enum": [
+            "DURABLE",
+            "DURABLE_LOCAL",
+            "UNAVAILABLE"
+          ]
+        },
+        "health_status": {
+          "enum": [
+            "HEALTHY",
+            "UNHEALTHY",
+            "UNAVAILABLE"
+          ]
+        },
+        "identity_converged": {
+          "type": "boolean"
+        },
+        "image_digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "manifest_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "provider_revision": {
+          "$ref": "#/$defs/immutableRevision"
+        },
+        "readiness_status": {
+          "enum": [
+            "READY",
+            "NOT_READY",
+            "UNAVAILABLE"
+          ]
+        },
+        "source_revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "stable_observations": {
+          "items": {
+            "$ref": "#/$defs/stableObservation"
+          },
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "type": "object"
+    },
+    "schema": {
+      "const": "szl.vertical-space-release/v2"
+    },
+    "source_repository": {
+      "pattern": "^https://github\\.com/szl-holdings/[A-Za-z0-9._-]+$",
+      "type": "string"
+    },
+    "source_revision": {
+      "pattern": "^(?!0{40}$)[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "space_id": {
+      "pattern": "^SZLHOLDINGS/[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$",
+      "type": "string"
+    },
+    "vertical_id": {
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "type": "string"
+    },
+    "visibility": {
+      "enum": [
+        "private",
+        "protected",
+        "public"
+      ]
+    }
+  },
+  "required": [
+    "data_revisions",
+    "evaluation_revision",
+    "image_digest",
+    "manifest_digest",
+    "model_revisions",
+    "observed_at",
+    "policy_revision",
+    "production_status",
+    "release_evidence",
+    "runtime_readback",
+    "schema",
+    "source_repository",
+    "source_revision",
+    "space_id",
+    "vertical_id",
+    "visibility"
+  ],
+  "title": "SZL Vertical Space Release v2",
+  "type": "object"
+}

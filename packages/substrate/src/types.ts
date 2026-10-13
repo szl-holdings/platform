@@ -13,6 +13,14 @@ import { z } from 'zod';
 export const ExecutionModeSchema = z.enum(['live', 'dry-run', 'replay', 'counterfactual']);
 export type ExecutionMode = 'live' | 'dry-run' | 'replay' | 'counterfactual';
 
+/** Tenant identity admitted by an authenticated transport boundary. */
+export const TenantIdSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(128)
+  .regex(/^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$/);
+
 // ─── Side Effect Categories ───────────────────────────────────────────────────
 
 export const SideEffectCategorySchema = z.enum([
@@ -37,7 +45,14 @@ export type SideEffectCategory =
 
 // ─── Stage Type / Runtime / Priority ─────────────────────────────────────────
 
-export type StageType = 'Reason' | 'Retrieve' | 'ToolCall' | 'Verify' | 'Decide' | 'ApprovalGate' | 'Sandbox';
+export type StageType =
+  | 'Reason'
+  | 'Retrieve'
+  | 'ToolCall'
+  | 'Verify'
+  | 'Decide'
+  | 'ApprovalGate'
+  | 'Sandbox';
 export const StageTypeSchema = z.enum([
   'Reason',
   'Retrieve',
@@ -429,6 +444,8 @@ export interface PipelineRun {
   counterfactualModelAdapter?: string;
   counterfactualPolicyProfile?: string;
   traceId: string;
+  /** Authenticated tenant propagated by the governed runtime entry point. */
+  tenantId?: string;
   metadata: Record<string, unknown>;
 }
 
@@ -458,6 +475,7 @@ export const PipelineRunSchema = z.object({
   counterfactualModelAdapter: z.string().optional(),
   counterfactualPolicyProfile: z.string().optional(),
   traceId: z.string(),
+  tenantId: TenantIdSchema.optional(),
   metadata: z.record(z.unknown()).default({}),
 });
 
@@ -471,6 +489,8 @@ export interface RuntimeStartOptions {
   replayDiffOnly?: boolean;
   traceId?: string;
   sessionId?: string;
+  /** Authenticated tenant supplied by the governing transport, never request metadata. */
+  tenantId?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -482,6 +502,7 @@ export const RuntimeStartOptionsSchema = z.object({
   replayDiffOnly: z.boolean().default(false),
   traceId: z.string().optional(),
   sessionId: z.string().optional(),
+  tenantId: TenantIdSchema.optional(),
   metadata: z.record(z.unknown()).default({}),
 });
 
@@ -522,6 +543,8 @@ export interface StageExecutorContext {
   policy: PolicyProfile;
   priorEvidence: EvidenceBundle[];
   graph: CompiledGraph;
+  /** Tenant bound to the governed run at its authenticated entry point. */
+  tenantId?: string;
   /**
    * Counterfactual override: when set, Reason/Verify/Decide stages use this
    * adapter ID instead of stage.modelAdapterId. This is how counterfactual
