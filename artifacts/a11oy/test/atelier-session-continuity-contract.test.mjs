@@ -45,3 +45,8 @@ test('labels provider configuration separately from witnessed inference', () => 
   assert.match(source, /<option value="xhigh">Extra high<\/option>/);
   assert.match(source, /health\.evidenceBoundary/);
 });
+
+test('leaves the page-level main landmark to the shared application layout', () => {
+  assert.doesNotMatch(source, /<main\b/);
+  assert.match(source, /<section\s+aria-label="Atelier query workspace"/);
+});

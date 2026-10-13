@@ -5,9 +5,9 @@ export function tenantScopingMiddleware(req: Request, res: Response, next: NextF
   const bodyTenantId = (req.body as Record<string, unknown> | undefined)?.tenantId;
 
   const headerTenant =
-    typeof tenantHeader === 'string' && tenantHeader.length > 0 ? tenantHeader : null;
+    typeof tenantHeader === 'string' && tenantHeader.trim().length > 0 ? tenantHeader.trim() : null;
   const bodyTenant =
-    typeof bodyTenantId === 'string' && bodyTenantId.length > 0 ? bodyTenantId : null;
+    typeof bodyTenantId === 'string' && bodyTenantId.trim().length > 0 ? bodyTenantId.trim() : null;
 
   if (!headerTenant && !bodyTenant) {
     res.status(400).json({
@@ -26,7 +26,17 @@ export function tenantScopingMiddleware(req: Request, res: Response, next: NextF
     return;
   }
 
-  res.locals.tenantId = headerTenant ?? bodyTenant!;
+  const requestedTenant = headerTenant ?? bodyTenant!;
+  const authenticatedTenant = res.locals.authenticatedTenantId as string | undefined;
+  if (authenticatedTenant && requestedTenant !== authenticatedTenant) {
+    res.status(403).json({
+      error: 'credential_tenant_mismatch',
+      message: 'The authenticated credential is not authorized for the requested tenant.',
+    });
+    return;
+  }
+
+  res.locals.tenantId = authenticatedTenant ?? requestedTenant;
   next();
 }
 

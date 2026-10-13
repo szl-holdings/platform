@@ -1,14 +1,22 @@
 #!/usr/bin/env node
 
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export const FOREIGN_LOCKFILES = Object.freeze(['package-lock.json', 'yarn.lock']);
+const rootManifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+export const EXPECTED_PNPM_VERSION =
+  rootManifest.packageManager?.match(/^pnpm@(\d+\.\d+\.\d+)$/)?.[1];
 
-export function assertPnpm(userAgent) {
-  if (!userAgent.startsWith('pnpm/')) {
-    throw new Error('Use pnpm instead. npm and yarn installs are not supported.');
+export function assertPnpm(userAgent, expectedVersion = EXPECTED_PNPM_VERSION) {
+  if (!expectedVersion) {
+    throw new Error('package.json must pin packageManager to an exact pnpm semantic version.');
+  }
+  if (!userAgent.startsWith(`pnpm/${expectedVersion} `)) {
+    throw new Error(
+      `Use pnpm ${expectedVersion} exactly; received ${userAgent || 'no package-manager user agent'}.`,
+    );
   }
 }
 

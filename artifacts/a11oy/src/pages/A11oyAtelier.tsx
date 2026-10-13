@@ -1,3 +1,8 @@
+import {
+  type AtelierProofweaveApiResponse,
+  type AtelierProofweaveRequest,
+  verifyAtelierProofweaveResponse,
+} from '@szl-holdings/a11oy-atelier/proofweave-verifier';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { Layout } from '../components/layout';
 
@@ -93,19 +98,78 @@ async function fingerprintRequest(value: string): Promise<string> {
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
+const BROWSER_ACTIONS_BLOCK_REASON =
+  'Browser actions are disabled outside a loopback-only local development origin because A11oy Atelier does not yet have an authenticated server-side session or BFF. Runtime evidence is UNKNOWN. Provider API keys remain server-side and are never accepted from the browser.';
+
+function isLoopbackHostname(hostname: string): boolean {
+  const normalized = hostname
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, '')
+    .replace(/\.$/, '');
+  if (normalized === 'localhost' || normalized === '::1' || normalized === '0:0:0:0:0:0:0:1') {
+    return true;
+  }
+  const octets = normalized.split('.');
+  return (
+    octets.length === 4 &&
+    octets[0] === '127' &&
+    octets.every((octet) => /^\d{1,3}$/.test(octet) && Number(octet) <= 255)
+  );
+}
+
+export function resolveAtelierBrowserBoundary(
+  localDevelopment: boolean,
+  hostname = typeof window === 'undefined' ? 'localhost' : window.location.hostname,
+) {
+  return localDevelopment && isLoopbackHostname(hostname)
+    ? ({ actionsEnabled: true, scope: 'LOCAL_DEVELOPMENT_ONLY' } as const)
+    : ({
+        actionsEnabled: false,
+        evidenceClass: 'BLOCKED',
+        runtimeEvidenceClass: 'UNKNOWN',
+        reason: BROWSER_ACTIONS_BLOCK_REASON,
+      } as const);
+}
+
+const BROWSER_BOUNDARY = resolveAtelierBrowserBoundary(
+  import.meta.env.DEV,
+  typeof window === 'undefined' ? '' : window.location.hostname,
+);
+
 interface ProviderHealth {
   provider: 'xai' | 'grok-build';
   model: string;
   configured: boolean;
   available: boolean;
   localOnly: boolean;
-  evidenceState: 'OBSERVED' | 'UNAVAILABLE';
+  evidenceState: 'MEASURED' | 'UNAVAILABLE';
   reason: string;
 }
 
 interface HealthResponse {
-  status: 'ready' | 'provider-unavailable';
+  status: 'partial';
   providers: ProviderHealth[];
+  inference: {
+    configurationState: 'CONFIGURED_OR_LOCAL_EXECUTABLE_MEASURED' | 'UNAVAILABLE';
+    runtimeEvidenceClass: 'UNKNOWN';
+  };
+  proofweave?: {
+    compiler: { available: boolean; mode: 'DETERMINISTIC_COMPILE_ONLY' };
+    planExecution: false;
+    planPersistence: 'IN_PROCESS_NOT_STORED';
+    evidenceClass: 'SIMULATED';
+    operationalState: 'DEMO';
+    planExternalWrites: false;
+    providerNativeSubagents: false;
+    providerDurableStorage: false;
+    auditLedger: {
+      appendSideEffect: true;
+      backendState: 'CONFIGURATION_DEPENDENT';
+      durablePersistenceEvidenceClass: 'UNKNOWN';
+      tenantAttributionEvidenceClass: 'DECLARED';
+    };
+  };
   continuity?: {
     backend: string;
     persistenceState:
@@ -115,7 +179,7 @@ interface HealthResponse {
       | 'UNAVAILABLE';
     durable: boolean;
     encryptionState: 'NONE' | 'ENCRYPTED_AT_REST' | 'UNAVAILABLE';
-    evidenceState: 'OBSERVED' | 'UNAVAILABLE';
+    evidenceState: 'MEASURED' | 'UNAVAILABLE';
     retentionHours: number;
   };
   evidenceBoundary: string;
@@ -160,6 +224,21 @@ interface AskResponse {
   replayed?: boolean;
 }
 
+type ProofweaveClaimKind = 'FACT' | 'INFERENCE' | 'RECOMMENDATION';
+type ProofweavePlanResponse = AtelierProofweaveApiResponse;
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+}
+
+export async function validateProofweavePlanResponse(
+  value: unknown,
+  request: AtelierProofweaveRequest,
+  tenantId: string,
+): Promise<ProofweavePlanResponse> {
+  return verifyAtelierProofweaveResponse(value, { request, tenantId });
+}
+
 const palette = {
   bg: '#0a0a0a',
   panel: 'rgba(255,255,255,0.025)',
@@ -168,13 +247,13 @@ const palette = {
   borderStrong: 'rgba(201,183,135,0.35)',
   text: '#f5f5f5',
   dim: '#a0a0a0',
-  muted: '#646464',
+  muted: '#858585',
   gold: '#c9b787',
   teal: '#75b8ad',
   danger: '#ef8e8e',
 };
 
-function StatusDot({ available }: { available: boolean }) {
+function ConfigurationDot({ measured }: { measured: boolean }) {
   return (
     <span
       aria-hidden="true"
@@ -182,8 +261,7 @@ function StatusDot({ available }: { available: boolean }) {
         width: 7,
         height: 7,
         borderRadius: '50%',
-        background: available ? palette.teal : palette.muted,
-        boxShadow: available ? `0 0 10px ${palette.teal}` : 'none',
+        background: measured ? palette.gold : palette.muted,
       }}
     />
   );
@@ -206,7 +284,10 @@ function ReceiptRail({ receipt }: { receipt: AtelierReceipt }) {
     ['Provider', `${receipt.providerLabel} / ${receipt.model}`],
     ['Provider request', receipt.providerRequestId ?? 'UNAVAILABLE'],
     ['Evidence', receipt.evidenceState],
-    ['Proof Ledger', `${receipt.ledgerState} · ${receipt.ledgerEntryId ?? 'UNAVAILABLE'}`],
+    [
+      'Evidence ledger append',
+      `${receipt.ledgerState} · ${receipt.ledgerEntryId ?? 'UNAVAILABLE'}`,
+    ],
     ['Memory', receipt.memoryState],
     ['Runtime', receipt.localOnly ? 'LOCAL-ONLY' : 'API'],
     ['Latency', `${receipt.latencyMs} ms`],
@@ -222,7 +303,14 @@ function ReceiptRail({ receipt }: { receipt: AtelierReceipt }) {
         padding: '1rem',
       }}
     >
-      <div style={{ fontSize: 11, letterSpacing: '0.16em', color: palette.gold, marginBottom: 12 }}>
+      <div
+        style={{
+          fontSize: 11,
+          letterSpacing: '0.16em',
+          color: palette.gold,
+          marginBottom: 12,
+        }}
+      >
         RECEIPT RAIL
       </div>
       {rows.map(([label, value]) => (
@@ -266,6 +354,16 @@ export function A11oyAtelier() {
   const [result, setResult] = useState<AskResponse>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [weaveObjective, setWeaveObjective] = useState('');
+  const [weaveClaim, setWeaveClaim] = useState('');
+  const [weaveClaimKind, setWeaveClaimKind] = useState<ProofweaveClaimKind>('INFERENCE');
+  const [weavePlan, setWeavePlan] = useState<ProofweavePlanResponse>();
+  const [weaveError, setWeaveError] = useState<string>();
+  const [weaveLoading, setWeaveLoading] = useState(false);
+  const browserActionsBlocked = !BROWSER_BOUNDARY.actionsEnabled;
+  const proofweaveSubmitDisabled =
+    browserActionsBlocked || weaveLoading || !weaveObjective.trim() || !weaveClaim.trim();
+  const askSubmitDisabled = browserActionsBlocked || loading || !prompt.trim();
   const pendingRetry = useRef<PendingRetry | undefined>(initialPendingRetry);
 
   useEffect(() => {
@@ -277,6 +375,8 @@ export function A11oyAtelier() {
   }, []);
 
   useEffect(() => {
+    if (!BROWSER_BOUNDARY.actionsEnabled) return;
+
     const controller = new AbortController();
     fetch(`${API}/health`, {
       signal: controller.signal,
@@ -296,6 +396,11 @@ export function A11oyAtelier() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!BROWSER_BOUNDARY.actionsEnabled) {
+      setResult(undefined);
+      setError(`BLOCKED — ${BROWSER_BOUNDARY.reason}`);
+      return;
+    }
     const trimmed = prompt.trim();
     if (!trimmed || loading) return;
     setLoading(true);
@@ -353,7 +458,10 @@ export function A11oyAtelier() {
         },
         body: JSON.stringify({ ...requestBody, idempotencyKey }),
       });
-      const payload = (await response.json()) as AskResponse & { error?: string; code?: string };
+      const payload = (await response.json()) as AskResponse & {
+        error?: string;
+        code?: string;
+      };
       if (!response.ok)
         throw new Error(
           `${payload.error ?? `HTTP ${response.status}`} [${payload.code ?? 'ERROR'}]`,
@@ -376,6 +484,75 @@ export function A11oyAtelier() {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function compileProofweave(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!BROWSER_BOUNDARY.actionsEnabled) {
+      setWeavePlan(undefined);
+      setWeaveError(`BLOCKED — ${BROWSER_BOUNDARY.reason}`);
+      return;
+    }
+    const objective = weaveObjective.trim();
+    const claim = weaveClaim.trim();
+    if (!objective || !claim || weaveLoading) return;
+    setWeaveLoading(true);
+    setWeaveError(undefined);
+    setWeavePlan(undefined);
+    try {
+      const request: AtelierProofweaveRequest = {
+        objective,
+        claims: [{ claimId: 'claim-1', statement: claim, kind: weaveClaimKind }],
+        materials: [],
+        budget: {
+          maxWorkcells: 5,
+          maxProviderCalls: 6,
+          maxSourceFetches: 16,
+          maxTotalTokens: 50_000,
+          maxEstimatedCostUsd: 5,
+          maxWallTimeMs: 300_000,
+        },
+        requestedCapabilities: {
+          readWeb: false,
+          readGitHub: false,
+          externalWrites: false,
+          providerNativeSubagents: false,
+          providerDurableStorage: false,
+        },
+        outputFormat: 'TECHNICAL_REPORT',
+      };
+      const response = await fetch(`${API}/proofweave/compile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Tenant-Id': TENANT_ID,
+        },
+        body: JSON.stringify(request),
+      });
+      const responseText = await response.text();
+      let payload: unknown;
+      try {
+        payload = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error('Invalid JSON response [ATELIER_RESPONSE_INVALID_JSON]');
+      }
+      if (!response.ok) {
+        const errorPayload = asRecord(payload);
+        throw new Error(
+          (typeof errorPayload.error === 'string'
+            ? errorPayload.error
+            : `HTTP ${String(response.status)}`) +
+            ' [' +
+            (typeof errorPayload.code === 'string' ? errorPayload.code : 'ERROR') +
+            ']',
+        );
+      }
+      setWeavePlan(await validateProofweavePlanResponse(payload, request, TENANT_ID));
+    } catch (reason) {
+      setWeaveError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setWeaveLoading(false);
     }
   }
 
@@ -426,8 +603,19 @@ export function A11oyAtelier() {
   return (
     <Layout>
       <div style={{ maxWidth: 1240, margin: '0 auto', color: palette.text }}>
-        <header style={{ padding: '1.5rem 0 2rem', borderBottom: `1px solid ${palette.border}` }}>
-          <div style={{ fontSize: 11, letterSpacing: '0.2em', color: palette.gold }}>
+        <header
+          style={{
+            padding: '1.5rem 0 2rem',
+            borderBottom: `1px solid ${palette.border}`,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: '0.2em',
+              color: palette.gold,
+            }}
+          >
             A11OY · AYLLU · FRONTIER NOW
           </div>
           <h1
@@ -448,7 +636,14 @@ export function A11oyAtelier() {
           >
             Evidence-Bound Intelligence
           </p>
-          <p style={{ maxWidth: 720, color: palette.muted, lineHeight: 1.7, marginTop: '1.25rem' }}>
+          <p
+            style={{
+              maxWidth: 720,
+              color: palette.muted,
+              lineHeight: 1.7,
+              marginTop: '1.25rem',
+            }}
+          >
             Learn the pattern. Rebuild the expression. Receipt every decision. A11oy owns the
             policy, memory, orchestration, and evidence rail; inference providers remain explicit
             and replaceable.
@@ -459,33 +654,51 @@ export function A11oyAtelier() {
           aria-label="Provider health"
           style={{ padding: '1.25rem 0', display: 'grid', gap: 10 }}
         >
-          {(health?.providers ?? []).map((item) => (
+          {browserActionsBlocked ? (
             <div
-              key={item.provider}
+              role="status"
               style={{
                 display: 'grid',
-                gridTemplateColumns: '16px minmax(140px, 0.35fr) minmax(0, 1fr) auto',
-                alignItems: 'center',
-                gap: 10,
-                border: `1px solid ${palette.border}`,
-                background: palette.panel,
-                padding: '0.75rem 0.9rem',
+                gap: 6,
+                border: `1px solid ${palette.borderStrong}`,
+                background: 'rgba(201,183,135,0.035)',
+                padding: '0.9rem',
                 borderRadius: 8,
                 fontSize: 12,
               }}
             >
-              <StatusDot available={item.available} />
-              <strong>
-                {item.provider === 'xai' ? 'xAI API' : 'xAI Grok Build CLI'} · {item.model}
-              </strong>
-              <span style={{ color: palette.muted }}>{item.reason}</span>
-              <span style={{ color: item.available ? palette.teal : palette.muted }}>
-                {item.available ? 'CONFIGURED' : 'UNAVAILABLE'} {item.localOnly ? '· LOCAL' : ''}
-              </span>
+              <strong style={{ color: palette.gold }}>BLOCKED · RUNTIME UNKNOWN</strong>
+              <span style={{ color: palette.muted }}>{BROWSER_BOUNDARY.reason}</span>
             </div>
-          ))}
-          {health ? (
+          ) : null}
+          {!browserActionsBlocked && health ? (
             <>
+              {health.providers.map((item) => (
+                <div
+                  key={item.provider}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '16px minmax(180px, 0.4fr) minmax(0, 1fr) auto',
+                    alignItems: 'center',
+                    gap: 10,
+                    border: `1px solid ${palette.border}`,
+                    background: palette.panel,
+                    padding: '0.75rem 0.9rem',
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
+                >
+                  <ConfigurationDot measured={item.evidenceState === 'MEASURED'} />
+                  <strong>
+                    {item.provider === 'xai' ? 'xAI API' : 'xAI Grok Build CLI'} · {item.model}
+                  </strong>
+                  <span style={{ color: palette.muted }}>{item.reason}</span>
+                  <span style={{ color: item.available ? palette.gold : palette.muted }}>
+                    {item.available ? 'CONFIGURED' : 'UNAVAILABLE'}
+                    {item.localOnly ? ' · LOCAL' : ''}
+                  </span>
+                </div>
+              ))}
               {health.continuity ? (
                 <div
                   style={{
@@ -500,7 +713,7 @@ export function A11oyAtelier() {
                     fontSize: 12,
                   }}
                 >
-                  <StatusDot available={health.continuity.evidenceState === 'OBSERVED'} />
+                  <ConfigurationDot measured={health.continuity.evidenceState === 'MEASURED'} />
                   <strong>A11oy continuity</strong>
                   <span style={{ color: palette.muted }}>
                     {health.continuity.backend} · {health.continuity.encryptionState} ·{' '}
@@ -511,13 +724,357 @@ export function A11oyAtelier() {
                   </span>
                 </div>
               ) : null}
-              <div style={{ fontSize: 11, color: palette.muted }}>{health.evidenceBoundary}</div>
+              <div style={{ fontSize: 11, color: palette.muted, display: 'grid', gap: 4 }}>
+                <span>INFERENCE RUNTIME {health.inference.runtimeEvidenceClass}</span>
+                <span>{health.evidenceBoundary}</span>
+              </div>
             </>
-          ) : (
+          ) : !browserActionsBlocked ? (
             <div style={{ fontSize: 12, color: palette.muted }}>
               Checking provider configuration…
             </div>
-          )}
+          ) : null}
+        </section>
+
+        <section
+          aria-labelledby="proofweave-heading"
+          style={{
+            border: `1px solid ${palette.borderStrong}`,
+            background: 'rgba(201,183,135,0.025)',
+            borderRadius: 12,
+            padding: '1.25rem',
+            marginBottom: 18,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'start',
+              justifyContent: 'space-between',
+              gap: 12,
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: 11,
+                  letterSpacing: '0.16em',
+                  color: palette.gold,
+                }}
+              >
+                ATELIER PROOFWEAVE
+              </div>
+              <h2 id="proofweave-heading" style={{ margin: '0.45rem 0 0', fontSize: '1.5rem' }}>
+                Pattern → Cut → Stitch → Fitting → Label
+              </h2>
+              <p
+                style={{
+                  maxWidth: 760,
+                  color: palette.muted,
+                  lineHeight: 1.65,
+                  margin: '0.65rem 0 0',
+                }}
+              >
+                Compile a bounded research pattern and initial claim graph. Plan compilation does
+                not execute providers, fetch sources, or perform plan-execution writes. The API
+                separately dispatches audit metadata to an EvidenceLedger backend whose durability
+                evidence remains UNKNOWN; automated review is never represented as human approval.
+              </p>
+            </div>
+            <span
+              style={{
+                border: `1px solid ${palette.border}`,
+                borderRadius: 999,
+                color: health?.proofweave?.compiler.available ? palette.teal : palette.muted,
+                padding: '0.45rem 0.75rem',
+                fontSize: 11,
+              }}
+            >
+              {health?.proofweave?.compiler.available
+                ? 'COMPILER MEASURED'
+                : 'COMPILER HEALTH UNAVAILABLE'}
+            </span>
+          </div>
+
+          <form onSubmit={compileProofweave} style={{ marginTop: 18 }}>
+            <label
+              htmlFor="proofweave-objective"
+              style={{
+                display: 'block',
+                fontSize: 12,
+                color: palette.dim,
+                marginBottom: 8,
+              }}
+            >
+              Research or decision objective
+            </label>
+            <textarea
+              id="proofweave-objective"
+              value={weaveObjective}
+              onChange={(event) => setWeaveObjective(event.target.value)}
+              rows={3}
+              maxLength={100_000}
+              placeholder="Define the question, decision, or recommendation the claim graph must examine."
+              style={{
+                width: '100%',
+                resize: 'vertical',
+                border: `1px solid ${palette.border}`,
+                borderRadius: 9,
+                background: palette.bg,
+                color: palette.text,
+                padding: '0.9rem',
+                font: 'inherit',
+                lineHeight: 1.55,
+                boxSizing: 'border-box',
+              }}
+            />
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))',
+                gap: 10,
+                marginTop: 10,
+              }}
+            >
+              <label
+                style={{
+                  display: 'grid',
+                  gap: 6,
+                  fontSize: 12,
+                  color: palette.dim,
+                }}
+              >
+                Claim statement
+                <textarea
+                  id="proofweave-claim"
+                  value={weaveClaim}
+                  onChange={(event) => setWeaveClaim(event.target.value)}
+                  rows={2}
+                  maxLength={100_000}
+                  placeholder="State one proposition to evaluate; keep the objective separate."
+                  style={{
+                    width: '100%',
+                    resize: 'vertical',
+                    border: `1px solid ${palette.border}`,
+                    borderRadius: 9,
+                    background: palette.bg,
+                    color: palette.text,
+                    padding: '0.8rem',
+                    font: 'inherit',
+                    lineHeight: 1.5,
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </label>
+              <label
+                style={{
+                  display: 'grid',
+                  alignContent: 'start',
+                  gap: 6,
+                  fontSize: 12,
+                  color: palette.dim,
+                }}
+              >
+                Claim kind
+                <select
+                  value={weaveClaimKind}
+                  onChange={(event) => setWeaveClaimKind(event.target.value as ProofweaveClaimKind)}
+                  style={{
+                    minHeight: 44,
+                    border: `1px solid ${palette.border}`,
+                    borderRadius: 9,
+                    background: palette.bg,
+                    color: palette.text,
+                    padding: '0.65rem',
+                  }}
+                >
+                  <option value="FACT">Fact</option>
+                  <option value="INFERENCE">Inference</option>
+                  <option value="RECOMMENDATION">Recommendation</option>
+                </select>
+              </label>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: 10,
+                marginTop: 10,
+              }}
+            >
+              <span style={{ color: palette.muted, fontSize: 11 }}>
+                {browserActionsBlocked
+                  ? 'BLOCKED · PRODUCTION BROWSER RUNTIME UNKNOWN'
+                  : 'SIMULATED · COMPILE ONLY · IN-PROCESS NOT STORED'}
+              </span>
+              <button
+                type="submit"
+                disabled={proofweaveSubmitDisabled}
+                style={{
+                  minHeight: 44,
+                  marginLeft: 'auto',
+                  padding: '0.65rem 1.2rem',
+                  borderRadius: 999,
+                  border: 'none',
+                  color: palette.bg,
+                  background: proofweaveSubmitDisabled ? palette.muted : palette.gold,
+                  cursor: proofweaveSubmitDisabled ? 'not-allowed' : 'pointer',
+                  fontWeight: 650,
+                }}
+              >
+                {browserActionsBlocked
+                  ? 'BLOCKED — server session required'
+                  : weaveLoading
+                    ? 'Compiling…'
+                    : 'Compile Proofweave'}
+              </button>
+            </div>
+          </form>
+
+          {weaveError ? (
+            <div
+              role="alert"
+              style={{
+                marginTop: 14,
+                border: `1px solid ${palette.danger}`,
+                color: palette.danger,
+                padding: '0.8rem',
+                borderRadius: 8,
+              }}
+            >
+              {weaveError}
+            </div>
+          ) : null}
+
+          {weavePlan ? (
+            <article aria-live="polite" style={{ marginTop: 20 }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                  gap: 8,
+                }}
+              >
+                {[
+                  ['Evidence class', weavePlan.evidenceClass],
+                  ['Operational', weavePlan.operationalState],
+                  ['Execution', weavePlan.executionState],
+                  ['Plan persistence', weavePlan.persistenceState],
+                  ['Review', `${weavePlan.review.reviewType} · ${weavePlan.review.reviewState}`],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    style={{
+                      border: `1px solid ${palette.border}`,
+                      background: palette.panel,
+                      borderRadius: 8,
+                      padding: '0.75rem',
+                    }}
+                  >
+                    <div style={{ color: palette.muted, fontSize: 10 }}>{label.toUpperCase()}</div>
+                    <div style={{ color: palette.dim, fontSize: 12, marginTop: 4 }}>{value}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                  gap: 8,
+                  marginTop: 10,
+                }}
+              >
+                {weavePlan.stages.map((stage) => (
+                  <div
+                    key={stage.stageId}
+                    style={{
+                      border: `1px solid ${palette.border}`,
+                      background: palette.bg,
+                      borderRadius: 8,
+                      padding: '0.8rem',
+                    }}
+                  >
+                    <div style={{ color: palette.gold, fontSize: 11 }}>
+                      {String(stage.order).padStart(2, '0')} · {stage.name}
+                    </div>
+                    <div
+                      style={{
+                        color: palette.text,
+                        fontSize: 12,
+                        marginTop: 6,
+                      }}
+                    >
+                      {stage.role}
+                    </div>
+                    <div
+                      style={{
+                        color: palette.muted,
+                        fontSize: 10,
+                        marginTop: 5,
+                      }}
+                    >
+                      {stage.executionState}
+                    </div>
+                    <div
+                      style={{
+                        color: palette.muted,
+                        fontSize: 11,
+                        lineHeight: 1.5,
+                        marginTop: 6,
+                      }}
+                    >
+                      {stage.description}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(0, 1fr)',
+                  gap: 6,
+                  borderTop: `1px solid ${palette.border}`,
+                  marginTop: 14,
+                  paddingTop: 12,
+                  fontSize: 11,
+                  color: palette.muted,
+                  overflowWrap: 'anywhere',
+                }}
+              >
+                <span>OBJECTIVE {weavePlan.objective}</span>
+                <span>WEAVE {weavePlan.weaveId}</span>
+                <span>PLAN SHA-256 {weavePlan.planSha256}</span>
+                <span>
+                  EVIDENCE LEDGER APPEND {weavePlan.ledger.appendState} · {weavePlan.ledger.entryId}
+                </span>
+                <span>
+                  LEDGER BACKEND {weavePlan.ledger.backendState} · DURABILITY{' '}
+                  {weavePlan.ledger.durablePersistenceEvidenceClass}
+                </span>
+                <span>TENANT ATTRIBUTION {weavePlan.tenantAttributionEvidenceClass}</span>
+                <span>
+                  HUMAN APPROVAL {weavePlan.review.humanApprovalState} · AUTOMATED REVIEW{' '}
+                  {weavePlan.review.reviewState}
+                </span>
+              </div>
+              <ul
+                style={{
+                  color: palette.muted,
+                  fontSize: 11,
+                  lineHeight: 1.55,
+                  paddingLeft: 18,
+                }}
+              >
+                {weavePlan.limitations.map((limitation) => (
+                  <li key={limitation}>{limitation}</li>
+                ))}
+              </ul>
+            </article>
+          ) : null}
         </section>
 
         <section
@@ -657,11 +1214,12 @@ export function A11oyAtelier() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.6fr) minmax(280px, 0.8fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
             gap: 18,
           }}
         >
-          <main
+          <section
+            aria-label="Atelier query workspace"
             style={{
               border: `1px solid ${palette.border}`,
               background: palette.panel,
@@ -672,7 +1230,12 @@ export function A11oyAtelier() {
             <form onSubmit={submit}>
               <label
                 htmlFor="atelier-prompt"
-                style={{ display: 'block', fontSize: 12, color: palette.dim, marginBottom: 8 }}
+                style={{
+                  display: 'block',
+                  fontSize: 12,
+                  color: palette.dim,
+                  marginBottom: 8,
+                }}
               >
                 Work with A11oy Atelier
               </label>
@@ -705,7 +1268,14 @@ export function A11oyAtelier() {
                   marginTop: 12,
                 }}
               >
-                <label style={{ display: 'grid', gap: 5, fontSize: 11, color: palette.muted }}>
+                <label
+                  style={{
+                    display: 'grid',
+                    gap: 5,
+                    fontSize: 11,
+                    color: palette.muted,
+                  }}
+                >
                   PROVIDER
                   <select
                     value={provider}
@@ -723,7 +1293,14 @@ export function A11oyAtelier() {
                     <option value="xai">xAI API</option>
                   </select>
                 </label>
-                <label style={{ display: 'grid', gap: 5, fontSize: 11, color: palette.muted }}>
+                <label
+                  style={{
+                    display: 'grid',
+                    gap: 5,
+                    fontSize: 11,
+                    color: palette.muted,
+                  }}
+                >
                   REASONING
                   <select
                     value={reasoningEffort}
@@ -746,19 +1323,23 @@ export function A11oyAtelier() {
                 </label>
                 <button
                   type="submit"
-                  disabled={loading || !prompt.trim()}
+                  disabled={askSubmitDisabled}
                   style={{
                     marginLeft: 'auto',
                     padding: '0.65rem 1.2rem',
                     borderRadius: 999,
                     border: 'none',
                     color: palette.bg,
-                    background: loading || !prompt.trim() ? palette.muted : palette.gold,
-                    cursor: loading || !prompt.trim() ? 'not-allowed' : 'pointer',
+                    background: askSubmitDisabled ? palette.muted : palette.gold,
+                    cursor: askSubmitDisabled ? 'not-allowed' : 'pointer',
                     fontWeight: 650,
                   }}
                 >
-                  {loading ? 'Routing…' : 'Ask Atelier'}
+                  {browserActionsBlocked
+                    ? 'BLOCKED — server session required'
+                    : loading
+                      ? 'Routing…'
+                      : 'Ask Atelier'}
                 </button>
               </div>
             </form>
@@ -781,12 +1362,28 @@ export function A11oyAtelier() {
             {result ? (
               <article
                 aria-live="polite"
-                style={{ marginTop: 22, borderTop: `1px solid ${palette.border}`, paddingTop: 20 }}
+                style={{
+                  marginTop: 22,
+                  borderTop: `1px solid ${palette.border}`,
+                  paddingTop: 20,
+                }}
               >
-                <div style={{ fontSize: 11, letterSpacing: '0.16em', color: palette.teal }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    letterSpacing: '0.16em',
+                    color: palette.teal,
+                  }}
+                >
                   {result.replayed ? 'ATELIER RESPONSE · IDEMPOTENT REPLAY' : 'ATELIER RESPONSE'}
                 </div>
-                <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.72, marginTop: 12 }}>
+                <div
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    lineHeight: 1.72,
+                    marginTop: 12,
+                  }}
+                >
                   {result.answer}
                 </div>
                 <div
@@ -803,7 +1400,7 @@ export function A11oyAtelier() {
                 </div>
               </article>
             ) : null}
-          </main>
+          </section>
 
           <div style={{ display: 'grid', alignContent: 'start', gap: 14 }}>
             {result ? (
@@ -825,7 +1422,11 @@ export function A11oyAtelier() {
               </aside>
             )}
             <aside
-              style={{ border: `1px solid ${palette.border}`, borderRadius: 10, padding: '1rem' }}
+              style={{
+                border: `1px solid ${palette.border}`,
+                borderRadius: 10,
+                padding: '1rem',
+              }}
             >
               <div
                 style={{
@@ -852,7 +1453,14 @@ export function A11oyAtelier() {
                   <span style={{ color: palette.muted }}>DENY</span>
                 </div>
               ))}
-              <div style={{ marginTop: 10, color: palette.muted, fontSize: 11, lineHeight: 1.55 }}>
+              <div
+                style={{
+                  marginTop: 10,
+                  color: palette.muted,
+                  fontSize: 11,
+                  lineHeight: 1.55,
+                }}
+              >
                 First release is text-inference only. Future Ayllu council capabilities require
                 explicit reviewed policy.
               </div>

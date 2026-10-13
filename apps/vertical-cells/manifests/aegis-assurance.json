@@ -1,0 +1,102 @@
+{
+  "allowed_actions": [
+    "read",
+    "correlate",
+    "prioritize",
+    "draft remediation",
+    "simulate policy",
+    "request approval",
+    "verify postcondition"
+  ],
+  "buyer": "MSP, MSSP, cloud-security, GRC, and IT operations leaders managing exposure, evidence, remediation, and customer accountability.",
+  "core_workflows": [
+    "asset/identity context",
+    "attack-path and control evidence",
+    "risk triage",
+    "remediation proposal",
+    "approval and change",
+    "verification and closure"
+  ],
+  "data_policy": {
+    "protected": [
+      "customer assets",
+      "vulnerabilities",
+      "identities",
+      "tickets",
+      "evidence"
+    ],
+    "public": [
+      "synthetic cloud/identity graph",
+      "public control mappings"
+    ],
+    "training_use": "no customer security data without explicit governed agreement"
+  },
+  "decision_problem": "Which identity, asset, exposure, control gap, or incident should be acted on, by whom, under which policy and evidence?",
+  "display_name": "Aegis Assurance — MSP Security and Compliance Decision Governance",
+  "formula_bindings": [
+    "F1",
+    "F4",
+    "F7",
+    "F11",
+    "F18",
+    "F19",
+    "F22",
+    "LAMBDA"
+  ],
+  "hf_space_id": "SZLHOLDINGS/aegis-assurance",
+  "human_authority": [
+    "security owner accepts risk",
+    "change owner approves remediation",
+    "customer owner approves cross-tenant or customer-impacting action"
+  ],
+  "leaders": [
+    {
+      "name": "Wiz",
+      "pattern": "code-cloud-runtime security graph and attack-path context",
+      "url": "https://www.wiz.io/"
+    },
+    {
+      "name": "ServiceNow AI Control Tower",
+      "pattern": "discover, observe, govern, secure and measure AI assets and agents",
+      "url": "https://www.servicenow.com/products/ai-control-tower.html"
+    },
+    {
+      "name": "CrowdStrike",
+      "pattern": "runtime threat protection, identity and agent security",
+      "url": "https://www.crowdstrike.com/"
+    },
+    {
+      "name": "Vanta",
+      "pattern": "continuous control evidence and compliance workflows",
+      "url": "https://www.vanta.com/"
+    }
+  ],
+  "negative_tests": [
+    "identity missing blocks action",
+    "customer boundary mismatch denies",
+    "evidence stale escalates",
+    "dangerous command requires explicit approval",
+    "postcondition failure triggers rollback"
+  ],
+  "original_szl_design": "Decision Assurance Graph: asset → identity → exposure → evidence → policy → proposed remediation → approval → action → receipt → verified outcome.",
+  "portfolio_role": "ADJACENT_VERTICAL",
+  "prohibited_actions": [
+    "autonomous destructive remediation",
+    "cross-tenant access",
+    "credential exposure",
+    "silent exception acceptance"
+  ],
+  "public_launch": "BLOCKED_UNTIL_LYTE_TRACTION_AND_SECURITY_GATE",
+  "schema": "szl.vertical-cell/v1",
+  "space_visibility": "protected",
+  "stage": "CUSTOMER_DISCOVERY",
+  "success_metrics": [
+    "time to evidence",
+    "critical attack paths with owners",
+    "false priority rate",
+    "remediation approval latency",
+    "verified closure",
+    "customer control coverage"
+  ],
+  "vertical_id": "aegis-assurance"
+}

@@ -16,8 +16,12 @@ param acrLoginServer string
 @description('Container image name')
 param imageName string = 'szlholdings-api'
 
-@description('Container image tag')
-param imageTag string = 'latest'
+@description('Immutable OCI image digest (sha256 followed by 64 lowercase hexadecimal characters)')
+@minLength(71)
+@maxLength(71)
+param imageDigest string
+
+assert imageDigestUsesSha256 = startsWith(imageDigest, 'sha256:')
 
 @description('Application Insights connection string')
 param appInsightsConnectionString string
@@ -116,7 +120,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       containers: [
         {
           name: 'api-server'
-          image: '${acrLoginServer}/${imageName}:${imageTag}'
+          image: '${acrLoginServer}/${imageName}@${imageDigest}'
           resources: {
             cpu: json('2.0')
             memory: '4Gi'

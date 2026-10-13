@@ -111,3 +111,22 @@ test('root test suite executes the Lighthouse workflow contract regression', () 
 
   assert.match(packageJson.scripts.test, /scripts\/ci\/lighthouse-workflow\.test\.mjs/);
 });
+
+test('axe gate accepts only a successful completed matrix', () => {
+  const workflow = readRepositoryFile('.github/workflows/a11y.yml');
+  const gate = yamlJobBlock(workflow, 'a11y-gate');
+  const enforcement = yamlStepBlock(gate, 'Enforce a11y gate');
+  const script = runScript(enforcement);
+
+  assert.match(gate, /^ {4}needs: a11y-axe$/m);
+  assert.match(gate, /^ {4}if: always\(\)$/m);
+  assert.doesNotMatch(gate, /^\s+continue-on-error:/m);
+  assert.match(script, /^result="\$\{\{ needs\.a11y-axe\.result \}\}"$/m);
+  assert.match(script, /^case "\$result" in$/m);
+  assert.doesNotMatch(shellCaseArm(script, 'success'), /exit 1/);
+  assert.match(shellCaseArm(script, 'failure'), /exit 1/);
+  assert.match(shellCaseArm(script, 'cancelled|skipped'), /exit 1/);
+  assert.match(shellCaseArm(script, '*'), /exit 1/);
+  assert.match(shellCaseArm(script, 'success'), /All axe matrix jobs completed and passed/);
+  assert.match(shellCaseArm(script, 'cancelled|skipped'), /Accessibility evidence is incomplete/);
+});

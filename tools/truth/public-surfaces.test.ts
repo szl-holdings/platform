@@ -182,7 +182,7 @@ const KILLINCHU_BUILD_INFO_BODY = {
   service: 'killinchu',
   build: {
     state: 'OBSERVED',
-    revision: '33e54ffed4723e5dd3d0dcdf69a6052769e69de3',
+    revision: 'a6f6ce97afd09044df36b8ac610e3d42759e8462',
     revision_source: 'env:SZL_GIT_SHA',
   },
   receipt_minted: true,
@@ -190,11 +190,11 @@ const KILLINCHU_BUILD_INFO_BODY = {
   receipt_minted_scope: 'DEPLOYMENT_RELEASE_REFERENCE',
   release_receipt: {
     state: 'GITHUB_OIDC_ATTESTED',
-    source_revision: '33e54ffed4723e5dd3d0dcdf69a6052769e69de3',
+    source_revision: 'a6f6ce97afd09044df36b8ac610e3d42759e8462',
     subject: 'hf-deploy-manifest.json',
-    subject_sha256: '048d19673af818122a068f0fcc0027885f2b04eb8c8ba4626e3407986c7346eb',
-    attestation_id: '53653748',
-    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/53653748',
+    subject_sha256: '72f1e751dd84994e30021d7366ba7bcc10b6b71f81b9dce29cbc4a2e5cd828f3',
+    attestation_id: '55508160',
+    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/55508160',
     verification:
       'Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu',
   },
@@ -298,18 +298,18 @@ test('binds the configured public-surface summary to the reviewed registry', () 
   const manifest = buildPublicSurfaceManifest(CONFIGURED_REGISTRY);
   assert.deepEqual(manifest.summary, {
     declared: 29,
-    customer_facing_products: 1,
-    customer_facing_routes: 15,
+    customer_facing_products: 0,
+    customer_facing_routes: 3,
     by_availability: {
-      REACHABLE: 20,
+      REACHABLE: 8,
       REDIRECTED: 2,
-      UNAVAILABLE: 7,
+      UNAVAILABLE: 19,
     },
     by_mode: {
-      LIVE: 5,
-      MIXED: 10,
-      DOCUMENTATION: 7,
-      UNAVAILABLE: 7,
+      LIVE: 4,
+      MIXED: 0,
+      DOCUMENTATION: 6,
+      UNAVAILABLE: 19,
     },
   });
 });
@@ -672,7 +672,7 @@ test('holds one worker slot across an approved redirect transaction', async () =
     assert.equal(init.redirect, 'manual');
     if (url === unavailable.canonical_url) {
       return {
-        status: 307,
+        status: 301,
         url,
         body: null,
         headers: {
@@ -989,44 +989,82 @@ test('validates the exact Killinchu build-info source-binding body', async () =>
   ]);
 });
 
-test('validates the exact Killinchu readiness body without freezing dynamic depth', async () => {
+test('validates exact ephemeral Killinchu readiness without freezing ledger sizes', async () => {
   const candidate = configuredSurface('killinchu-readiness-api');
   const verify = (payload: unknown) =>
     verifyLivePublicSurfaces(registry([candidate]), async (url) => apiResponse(url, payload));
 
   assert.deepEqual(await verify(KILLINCHU_READINESS_BODY), []);
-  const dynamicDepth = structuredClone(KILLINCHU_READINESS_BODY);
-  dynamicDepth.backend_store_diagnostics.depth = 7;
-  dynamicDepth.ledger.integrity.nodes = 1;
-  dynamicDepth.ledger.integrity.root = 'a'.repeat(64) as never;
-  dynamicDepth.ledger.replay.nodes = 1;
-  assert.deepEqual(await verify(dynamicDepth), []);
+  assert.deepEqual(
+    await verify({
+      ...KILLINCHU_READINESS_BODY,
+      ledger: {
+        ...KILLINCHU_READINESS_BODY.ledger,
+        integrity: {
+          ...KILLINCHU_READINESS_BODY.ledger.integrity,
+          nodes: 7,
+          root: 'a'.repeat(64),
+        },
+        replay: { ...KILLINCHU_READINESS_BODY.ledger.replay, nodes: 7 },
+      },
+      backend_store_diagnostics: {
+        ...KILLINCHU_READINESS_BODY.backend_store_diagnostics,
+        depth: 7,
+      },
+    }),
+    [],
+  );
 
   const missingDoctrine = { ...KILLINCHU_READINESS_BODY } as Record<string, unknown>;
   delete missingDoctrine.doctrine;
-  const unverifiedIntegrity = structuredClone(KILLINCHU_READINESS_BODY);
-  unverifiedIntegrity.ledger.integrity.verified = false;
-  const durableOverclaim = structuredClone(KILLINCHU_READINESS_BODY);
-  durableOverclaim.ledger.production_ready = true;
-  const invalidBackend = structuredClone(KILLINCHU_READINESS_BODY);
-  invalidBackend.backend_store_diagnostics.chain_ok = false;
-  const negativeDepth = structuredClone(KILLINCHU_READINESS_BODY);
-  negativeDepth.backend_store_diagnostics.depth = -1;
-  const unexpectedLedgerField = structuredClone(KILLINCHU_READINESS_BODY) as unknown as {
-    ledger: Record<string, unknown>;
-  };
-  unexpectedLedgerField.ledger.certified = true;
   const contractFailure = [
     'killinchu-readiness-api: API body does not match the exact readiness contract',
   ];
   for (const invalid of [
     missingDoctrine,
     { ...KILLINCHU_READINESS_BODY, unexpected: true },
-    unverifiedIntegrity,
-    durableOverclaim,
-    invalidBackend,
-    negativeDepth,
-    unexpectedLedgerField,
+    {
+      ...KILLINCHU_READINESS_BODY,
+      ledger: { ...KILLINCHU_READINESS_BODY.ledger, durability_state: 'DURABLE_EXTERNAL' },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      ledger: { ...KILLINCHU_READINESS_BODY.ledger, production_ready: true },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      ledger: { ...KILLINCHU_READINESS_BODY.ledger, persistence_scope: 'EXTERNAL_SERVICE' },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      ledger: { ...KILLINCHU_READINESS_BODY.ledger, readiness_probe: 'WRITE_CAPABILITY' },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      ledger: {
+        ...KILLINCHU_READINESS_BODY.ledger,
+        integrity: {
+          ...KILLINCHU_READINESS_BODY.ledger.integrity,
+          nodes: 1,
+          root: null,
+        },
+      },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      backend_store_diagnostics: {
+        ...KILLINCHU_READINESS_BODY.backend_store_diagnostics,
+        depth: -1,
+      },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      backend_store_diagnostics: {
+        ...KILLINCHU_READINESS_BODY.backend_store_diagnostics,
+        production_ready: true,
+      },
+    },
+    { ...KILLINCHU_READINESS_BODY, receipt_minted: true },
     { ...KILLINCHU_READINESS_BODY, doctrine: ['v', String(10)].join('') },
   ]) {
     assert.deepEqual(await verify(invalid), contractFailure);
@@ -1089,8 +1127,8 @@ test('rejects duplicate, trailing, and over-depth JSON before API contract valid
 
   const candidate = configuredSurface('killinchu-build-info-api');
   const duplicateBody = JSON.stringify(KILLINCHU_BUILD_INFO_BODY).replace(
-    '"source_revision":"33e54ffed4723e5dd3d0dcdf69a6052769e69de3"',
-    '"source_revision":"33e54ffed4723e5dd3d0dcdf69a6052769e69de3","source\\u005frevision":"33e54ffed4723e5dd3d0dcdf69a6052769e69de3"',
+    '"source_revision":"a6f6ce97afd09044df36b8ac610e3d42759e8462"',
+    '"source_revision":"a6f6ce97afd09044df36b8ac610e3d42759e8462","source\\u005frevision":"a6f6ce97afd09044df36b8ac610e3d42759e8462"',
   );
   const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
     apiResponse(url, duplicateBody),
@@ -1186,7 +1224,7 @@ test('retries a transient approved redirect final hop while retaining one worker
     requests.push(url);
     if (url === unavailable.canonical_url) {
       return {
-        status: 307,
+        status: 301,
         url,
         body: null,
         headers: {
@@ -1851,4 +1889,18 @@ test('rejects metadata bodies that exceed the bounded read limit', async () => {
     metadataResponse(tooLarge, 'text/plain', [64 * 1024, 64 * 1024, 1]),
   );
   assert.deepEqual(failures, ['a11oy-net-robots-gap: metadata body exceeds 131072 bytes']);
+});
+
+test('rejects a non-301 response from the approved A11oy.net gateway', async () => {
+  const redirected = configuredSurface('a11oy-net-code-gap');
+  const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url) => ({
+    status: 307,
+    url,
+    body: null,
+    headers: { get: () => redirected.observation.final_url },
+  }));
+
+  assert.deepEqual(failures, [
+    'a11oy-net-code-gap: expected HTTP 301 redirect from https://a11oy.net/code, observed 307',
+  ]);
 });

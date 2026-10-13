@@ -77,10 +77,10 @@ const MAX_OBSERVATION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
 const MAX_METADATA_BODY_BYTES = 128 * 1024;
 const JSON_WHITESPACE = new Set([' ', '\t', '\n', '\r']);
-const KILLINCHU_SOURCE_REVISION = '33e54ffed4723e5dd3d0dcdf69a6052769e69de3';
+const KILLINCHU_SOURCE_REVISION = 'a6f6ce97afd09044df36b8ac610e3d42759e8462';
 const KILLINCHU_MANIFEST_SHA256 =
-  '048d19673af818122a068f0fcc0027885f2b04eb8c8ba4626e3407986c7346eb';
-const KILLINCHU_ATTESTATION_ID = '53653748';
+  '72f1e751dd84994e30021d7366ba7bcc10b6b71f81b9dce29cbc4a2e5cd828f3';
+const KILLINCHU_ATTESTATION_ID = '55508160';
 const LIVE_SURFACE_PROBE_CONCURRENCY = 4;
 const LIVE_SURFACE_RETRY_DELAYS_MS = [750, 1_500] as const;
 const TRANSIENT_TRANSPORT_CODES = new Set([
@@ -97,6 +97,7 @@ const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 type ApprovedSurfaceTarget = Readonly<{
   canonicalUrl: string;
   finalUrl: string;
+  redirectStatus?: number;
 }>;
 
 const APPROVED_PUBLIC_SURFACE_TARGETS = {
@@ -123,10 +124,12 @@ const APPROVED_PUBLIC_SURFACE_TARGETS = {
   'a11oy-net-chat-gap': {
     canonicalUrl: 'https://a11oy.net/chat',
     finalUrl: 'https://a11oy.net/chat/',
+    redirectStatus: 301,
   },
   'a11oy-net-code-gap': {
     canonicalUrl: 'https://a11oy.net/code',
     finalUrl: 'https://a11oy.net/code/',
+    redirectStatus: 301,
   },
   'a11oy-net-robots-gap': {
     canonicalUrl: 'https://a11oy.net/robots.txt',
@@ -842,7 +845,7 @@ function isExactKillinchuReadiness(value: unknown): boolean {
   }
 
   const ledger = value.ledger;
-  const backend = value.backend_store_diagnostics;
+  const diagnostics = value.backend_store_diagnostics;
   if (
     !hasExactKeys(ledger, [
       'schema',
@@ -884,28 +887,28 @@ function isExactKillinchuReadiness(value: unknown): boolean {
   const replay = ledger.replay;
   const recovery = ledger.recovery;
   const integrityNodes = integrity.nodes;
-  const integrityRoot = integrity.root;
+  const rootMatchesNodes =
+    (integrityNodes === 0 && integrity.root === null) ||
+    (typeof integrityNodes === 'number' &&
+      integrityNodes > 0 &&
+      typeof integrity.root === 'string' &&
+      /^[a-f0-9]{64}$/.test(integrity.root));
+
   return (
     hasExactKeys(integrity, ['state', 'verified', 'nodes', 'root']) &&
     integrity.state === 'VERIFIED' &&
     integrity.verified === true &&
     Number.isSafeInteger(integrityNodes) &&
     (integrityNodes as number) >= 0 &&
-    ((integrityNodes === 0 && integrityRoot === null) ||
-      ((integrityNodes as number) > 0 &&
-        typeof integrityRoot === 'string' &&
-        /^[a-f0-9]{64}$/.test(integrityRoot))) &&
+    rootMatchesNodes &&
     hasExactKeys(replay, ['state', 'nodes']) &&
     replay.state === 'NOT_APPLICABLE' &&
     Number.isSafeInteger(replay.nodes) &&
     (replay.nodes as number) >= 0 &&
     hasExactKeys(recovery, ['attempts', 'retry_after_s']) &&
-    Number.isSafeInteger(recovery.attempts) &&
-    (recovery.attempts as number) >= 0 &&
-    typeof recovery.retry_after_s === 'number' &&
-    Number.isFinite(recovery.retry_after_s) &&
-    recovery.retry_after_s >= 0 &&
-    hasExactKeys(backend, [
+    recovery.attempts === 0 &&
+    recovery.retry_after_s === 0 &&
+    hasExactKeys(diagnostics, [
       'ledger_role',
       'backend',
       'depth',
@@ -914,14 +917,14 @@ function isExactKillinchuReadiness(value: unknown): boolean {
       'provider_persistence',
       'production_ready',
     ]) &&
-    backend.ledger_role === 'BACKEND_HARDENING_DIAGNOSTIC_STORE' &&
-    backend.backend === 'sqlite' &&
-    Number.isSafeInteger(backend.depth) &&
-    (backend.depth as number) >= 0 &&
-    backend.chain_ok === true &&
-    backend.first_break_seq === -1 &&
-    backend.provider_persistence === 'UNKNOWN' &&
-    backend.production_ready === false
+    diagnostics.ledger_role === 'BACKEND_HARDENING_DIAGNOSTIC_STORE' &&
+    diagnostics.backend === 'sqlite' &&
+    Number.isSafeInteger(diagnostics.depth) &&
+    (diagnostics.depth as number) >= 0 &&
+    diagnostics.chain_ok === true &&
+    diagnostics.first_break_seq === -1 &&
+    diagnostics.provider_persistence === 'UNKNOWN' &&
+    diagnostics.production_ready === false
   );
 }
 
@@ -1322,9 +1325,18 @@ async function verifyLivePublicSurface(
     let response = firstResponse;
     let responseFailures = firstResult.responseFailures;
     if (approvedTarget.canonicalUrl !== approvedTarget.finalUrl) {
-      if (firstResponse.status < 300 || firstResponse.status >= 400) {
+      const expectedRedirectStatus = approvedTarget.redirectStatus;
+      if (
+        expectedRedirectStatus === undefined
+          ? firstResponse.status < 300 || firstResponse.status >= 400
+          : firstResponse.status !== expectedRedirectStatus
+      ) {
         await cancelResponseBody(firstResponse);
-        return [`${surface.id}: expected an approved redirect from ${approvedTarget.canonicalUrl}`];
+        return [
+          `${surface.id}: expected ${
+            expectedRedirectStatus === undefined ? 'an approved' : `HTTP ${expectedRedirectStatus}`
+          } redirect from ${approvedTarget.canonicalUrl}, observed ${firstResponse.status}`,
+        ];
       }
       const location = firstResponse.headers?.get('location');
       let redirectTarget: string | null;

@@ -1,0 +1,703 @@
+{
+  "schema": "szl.public-surface-observation-review/v1",
+  "observed_at": "2026-10-13T18:05:16.093291+00:00",
+  "method": "Normal unauthenticated bounded GET; four workers, 15-second timeout, maximum two hops only to the previously approved final URL; no access-control bypass",
+  "base_source": "15aaf84dd93a62bb70d84cb58d21a4b9e91e21a7",
+  "observations": [
+    {
+      "id": "a11oy-front-door",
+      "canonical_url": "https://a-11-oy.com/",
+      "allowed_final_url": "https://a-11-oy.com/",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/",
+          "observed_at": "2026-10-13T18:04:22.670219+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0445e5bc7f3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-product-introduction",
+      "canonical_url": "https://a-11-oy.com/a11oy/",
+      "allowed_final_url": "https://a-11-oy.com/a11oy/",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/a11oy/",
+          "observed_at": "2026-10-13T18:04:22.671665+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/a11oy/",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0445d9a31f3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-console",
+      "canonical_url": "https://a-11-oy.com/console",
+      "allowed_final_url": "https://a-11-oy.com/console",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/console",
+          "observed_at": "2026-10-13T18:04:22.673061+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/console",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0445e4bb9f3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-docs",
+      "canonical_url": "https://a-11-oy.com/docs",
+      "allowed_final_url": "https://a-11-oy.com/docs",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/docs",
+          "observed_at": "2026-10-13T18:04:22.674325+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/docs",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0445e5be2f3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-trust-center",
+      "canonical_url": "https://a-11-oy.com/trust",
+      "allowed_final_url": "https://a-11-oy.com/trust",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/trust",
+          "observed_at": "2026-10-13T18:04:29.812768+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/trust",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0448f4c3bf3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-receipt-verifier",
+      "canonical_url": "https://a-11-oy.com/verify",
+      "allowed_final_url": "https://a-11-oy.com/verify",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/verify",
+          "observed_at": "2026-10-13T18:04:29.920094+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/verify",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0448fbd2df3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-ecosystem-atlas",
+      "canonical_url": "https://a-11-oy.com/ecosystem",
+      "allowed_final_url": "https://a-11-oy.com/ecosystem",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/ecosystem",
+          "observed_at": "2026-10-13T18:04:29.966035+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/ecosystem",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0448efb5bf3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-observability",
+      "canonical_url": "https://a-11-oy.com/observability",
+      "allowed_final_url": "https://a-11-oy.com/observability",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/observability",
+          "observed_at": "2026-10-13T18:04:30.131069+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/observability",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0448f6c5ff3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-wires",
+      "canonical_url": "https://a-11-oy.com/wires",
+      "allowed_final_url": "https://a-11-oy.com/wires",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/wires",
+          "observed_at": "2026-10-13T18:04:37.647050+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/wires",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a044b63e1cf3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-spaces-registry",
+      "canonical_url": "https://a-11-oy.com/spaces",
+      "allowed_final_url": "https://a-11-oy.com/spaces",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/spaces",
+          "observed_at": "2026-10-13T18:04:37.779811+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/spaces",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a044b69ec9f3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "killinchu-public-console",
+      "canonical_url": "https://a-11-oy.com/killinchu",
+      "allowed_final_url": "https://a-11-oy.com/killinchu",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/killinchu",
+          "observed_at": "2026-10-13T18:04:37.793867+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/killinchu",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a044b6aeeff3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-net-thesis",
+      "canonical_url": "https://a11oy.net/",
+      "allowed_final_url": "https://a11oy.net/",
+      "hops": [
+        {
+          "url": "https://a11oy.net/",
+          "observed_at": "2026-10-13T18:04:37.899031+00:00",
+          "status": 200,
+          "response_url": "https://a11oy.net/",
+          "headers": {
+            "content-type": "text/html; charset=utf-8",
+            "location": null,
+            "server": "GitHub.com",
+            "cf-ray": null
+          },
+          "body_bytes_observed": 120580,
+          "body_truncated": false,
+          "body_sha256": "23570f171f49f186d3642f882ee954a66314b9107eac617d77fd2b2ecb21d6bf"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-build-info-api",
+      "canonical_url": "https://szlholdings-a11oy.hf.space/api/build-info",
+      "allowed_final_url": "https://szlholdings-a11oy.hf.space/api/build-info",
+      "hops": [
+        {
+          "url": "https://szlholdings-a11oy.hf.space/api/build-info",
+          "observed_at": "2026-10-13T18:04:41.892293+00:00",
+          "status": 200,
+          "response_url": "https://szlholdings-a11oy.hf.space/api/build-info",
+          "headers": {
+            "content-type": "application/json",
+            "location": null,
+            "server": "szl",
+            "cf-ray": null
+          },
+          "body_bytes_observed": 415,
+          "body_truncated": false,
+          "body_sha256": "06892ae9c906db47c716e9bda08dd1b1e40518d9f10835cf238c2f61c22eedd6",
+          "body_excerpt": "{\"status\":\"OBSERVED\",\"service\":\"a11oy\",\"build\":{\"state\":\"OBSERVED\",\"revision\":\"3856bf185bb8436be3ce853630ca219fd2ab8767\",\"revision_source\":\"env:SZL_GIT_SHA\",\"version\":null,\"version_source\":\"UNKNOWN\",\"working_tree\":\"UNKNOWN\",\"working_tree_source\":\"UNKNOWN\",\"field_evidence\":{\"revision\":\"OBSERVED\",\"version\":\"UNKNOWN\",\"working_tree\":\"UNKNOWN\"}},\"runtime\":{\"python\":\"3.14.7\",\"platform\":\"linux\"},\"receipt_minted\":false}"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-readiness-api",
+      "canonical_url": "https://szlholdings-a11oy.hf.space/readyz",
+      "allowed_final_url": "https://szlholdings-a11oy.hf.space/readyz",
+      "hops": [
+        {
+          "url": "https://szlholdings-a11oy.hf.space/readyz",
+          "observed_at": "2026-10-13T18:04:43.928230+00:00",
+          "status": 200,
+          "response_url": "https://szlholdings-a11oy.hf.space/readyz",
+          "headers": {
+            "content-type": "application/json",
+            "location": null,
+            "server": "szl",
+            "cf-ray": null
+          },
+          "body_bytes_observed": 162,
+          "body_truncated": false,
+          "body_sha256": "5bf95645d7a9af34444b3635df47f80c39e8361b1a6dc22e135f4a4baf214453",
+          "body_excerpt": "{\"status\":\"ready\",\"organ\":\"a11oy\",\"khipu_backend\":\"sqlite\",\"khipu_durable\":true,\"khipu_depth\":0,\"khipu_chain_ok\":true,\"khipu_first_break_seq\":-1,\"doctrine\":\"v11\"}"
+        }
+      ]
+    },
+    {
+      "id": "killinchu-build-info-api",
+      "canonical_url": "https://szlholdings-killinchu.hf.space/api/build-info",
+      "allowed_final_url": "https://szlholdings-killinchu.hf.space/api/build-info",
+      "hops": [
+        {
+          "url": "https://szlholdings-killinchu.hf.space/api/build-info",
+          "observed_at": "2026-10-13T18:04:43.961949+00:00",
+          "status": 200,
+          "response_url": "https://szlholdings-killinchu.hf.space/api/build-info",
+          "headers": {
+            "content-type": "application/json",
+            "location": null,
+            "server": null,
+            "cf-ray": null
+          },
+          "body_bytes_observed": 779,
+          "body_truncated": false,
+          "body_sha256": "8b5f34a350c27c2375b748e91d82bf646d966d9eb63a32f738fcef012274dc64",
+          "body_excerpt": "{\"status\":\"OBSERVED\",\"service\":\"killinchu\",\"build\":{\"state\":\"OBSERVED\",\"revision\":\"a6f6ce97afd09044df36b8ac610e3d42759e8462\",\"revision_source\":\"env:SZL_GIT_SHA\"},\"receipt_minted\":true,\"receipt_minted_on_request\":false,\"receipt_minted_scope\":\"DEPLOYMENT_RELEASE_REFERENCE\",\"release_receipt\":{\"state\":\"GITHUB_OIDC_ATTESTED\",\"source_revision\":\"a6f6ce97afd09044df36b8ac610e3d42759e8462\",\"subject\":\"hf-deploy-manifest.json\",\"subject_sha256\":\"72f1e751dd84994e30021d7366ba7bcc10b6b71f81b9dce29cbc4a2e5cd828f3\",\"attestation_id\":\"55508160\",\"attestation_url\":\"https://github.com/szl-holdings/killinchu/attestations/55508160\",\"verification\":\"Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu\"}}"
+        }
+      ]
+    },
+    {
+      "id": "killinchu-readiness-api",
+      "canonical_url": "https://szlholdings-killinchu.hf.space/readyz",
+      "allowed_final_url": "https://szlholdings-killinchu.hf.space/readyz",
+      "hops": [
+        {
+          "url": "https://szlholdings-killinchu.hf.space/readyz",
+          "observed_at": "2026-10-13T18:04:43.976147+00:00",
+          "status": 200,
+          "response_url": "https://szlholdings-killinchu.hf.space/readyz",
+          "headers": {
+            "content-type": "application/json",
+            "location": null,
+            "server": null,
+            "cf-ray": null
+          },
+          "body_bytes_observed": 967,
+          "body_truncated": false,
+          "body_sha256": "d0c55c62c93bc9c3092e3b79784e3ee797b93a8ebd42c3f0509370fa54f4c372",
+          "body_excerpt": "{\"status\":\"ready\",\"organ\":\"killinchu\",\"doctrine\":\"v11\",\"ledger\":{\"schema\":\"szl.killinchu.ledger-readiness/v1\",\"durability_state\":\"EPHEMERAL\",\"requested_mode\":\"EPHEMERAL\",\"ready\":true,\"production_ready\":false,\"production_readiness_basis\":\"NOT_APPLICABLE\",\"readiness_probe\":\"READ_ONLY\",\"persistence_scope\":\"PROCESS_MEMORY\",\"startup_state\":\"READY\",\"adapter_configured\":false,\"adapter_state\":\"NOT_APPLICABLE\",\"integrity\":{\"state\":\"VERIFIED\",\"verified\":true,\"nodes\":169,\"root\":\"d736842ab6aa145521d833d206316cfa67e01f3090d78123a2a0a6308ee61575\"},\"replay\":{\"state\":\"NOT_APPLICABLE\",\"nodes\":168},\"recovery\":{\"attempts\":0,\"retry_after_s\":0.0},\"reason\":\"ephemeral ledger is available for this process only\"},\"ledger_role\":\"CANONICAL_RECEIPT_LEDGER\",\"backend_store_diagnostics\":{\"ledger_role\":\"BACKEND_HARDENING_DIAGNOSTIC_STORE\",\"backend\":\"sqlite\",\"depth\":0,\"chain_ok\":true,\"first_break_seq\":-1,\"provider_persistence\":\"UNKNOWN\",\"production_ready\":false},\"receipt_minted\":false}"
+        }
+      ]
+    },
+    {
+      "id": "legacy-lyte-route",
+      "canonical_url": "https://a-11-oy.com/lyte/",
+      "allowed_final_url": "https://a-11-oy.com/lyte/",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/lyte/",
+          "observed_at": "2026-10-13T18:04:47.620936+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/lyte/",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a044f67edbf3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "legacy-aegis-route",
+      "canonical_url": "https://a-11-oy.com/aegis/",
+      "allowed_final_url": "https://a-11-oy.com/aegis/",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/aegis/",
+          "observed_at": "2026-10-13T18:04:47.642171+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/aegis/",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a044f68ef1f3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "legacy-vessels-route",
+      "canonical_url": "https://a-11-oy.com/vessels/",
+      "allowed_final_url": "https://a-11-oy.com/vessels/",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/vessels/",
+          "observed_at": "2026-10-13T18:04:49.969014+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/vessels/",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a044f67ee6f3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "legacy-terra-route",
+      "canonical_url": "https://a-11-oy.com/terra/",
+      "allowed_final_url": "https://a-11-oy.com/terra/",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/terra/",
+          "observed_at": "2026-10-13T18:04:50.014373+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/terra/",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a044f67edcf3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "legacy-counsel-route",
+      "canonical_url": "https://a-11-oy.com/counsel/",
+      "allowed_final_url": "https://a-11-oy.com/counsel/",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/counsel/",
+          "observed_at": "2026-10-13T18:04:54.171432+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/counsel/",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0451e891df3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "legacy-carlota-jo-route",
+      "canonical_url": "https://a-11-oy.com/carlota-jo/",
+      "allowed_final_url": "https://a-11-oy.com/carlota-jo/",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/carlota-jo/",
+          "observed_at": "2026-10-13T18:04:54.191399+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/carlota-jo/",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0451ed9a4f3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "legacy-command-route",
+      "canonical_url": "https://a-11-oy.com/command/",
+      "allowed_final_url": "https://a-11-oy.com/command/",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/command/",
+          "observed_at": "2026-10-13T18:04:54.203500+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/command/",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0451ed9b0f3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "legacy-pulse-route",
+      "canonical_url": "https://a-11-oy.com/pulse/",
+      "allowed_final_url": "https://a-11-oy.com/pulse/",
+      "hops": [
+        {
+          "url": "https://a-11-oy.com/pulse/",
+          "observed_at": "2026-10-13T18:04:54.354142+00:00",
+          "status": 403,
+          "response_url": "https://a-11-oy.com/pulse/",
+          "headers": {
+            "content-type": "text/plain; charset=UTF-8",
+            "location": null,
+            "server": "cloudflare",
+            "cf-ray": "a4a0451ee9c3f3f7-SJC"
+          },
+          "body_bytes_observed": 17,
+          "body_truncated": false,
+          "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+          "body_excerpt": "error code: 1010\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-net-chat-gap",
+      "canonical_url": "https://a11oy.net/chat",
+      "allowed_final_url": "https://a11oy.net/chat/",
+      "hops": [
+        {
+          "url": "https://a11oy.net/chat",
+          "observed_at": "2026-10-13T18:05:00.588206+00:00",
+          "status": 301,
+          "response_url": "https://a11oy.net/chat",
+          "headers": {
+            "content-type": "text/html",
+            "location": "https://a11oy.net/chat/",
+            "server": "GitHub.com",
+            "cf-ray": null
+          },
+          "body_bytes_observed": 162,
+          "body_truncated": false,
+          "body_sha256": "9e17cb15dd75bbbd5dbb984eda674863c3b10ab72613cf8a39a00c3e11a8492a",
+          "body_excerpt": "<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved Permanently</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+        },
+        {
+          "url": "https://a11oy.net/chat/",
+          "observed_at": "2026-10-13T18:05:08.340069+00:00",
+          "status": 200,
+          "response_url": "https://a11oy.net/chat/",
+          "headers": {
+            "content-type": "text/html; charset=utf-8",
+            "location": null,
+            "server": "GitHub.com",
+            "cf-ray": null
+          },
+          "body_bytes_observed": 7875,
+          "body_truncated": false,
+          "body_sha256": "a36766af1d464c1c8591cd1604f1204f79135f6a1a7935778e069bc08d7b3f48"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-net-code-gap",
+      "canonical_url": "https://a11oy.net/code",
+      "allowed_final_url": "https://a11oy.net/code/",
+      "hops": [
+        {
+          "url": "https://a11oy.net/code",
+          "observed_at": "2026-10-13T18:05:00.625904+00:00",
+          "status": 301,
+          "response_url": "https://a11oy.net/code",
+          "headers": {
+            "content-type": "text/html",
+            "location": "https://a11oy.net/code/",
+            "server": "GitHub.com",
+            "cf-ray": null
+          },
+          "body_bytes_observed": 162,
+          "body_truncated": false,
+          "body_sha256": "9e17cb15dd75bbbd5dbb984eda674863c3b10ab72613cf8a39a00c3e11a8492a",
+          "body_excerpt": "<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301 Moved Permanently</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"
+        },
+        {
+          "url": "https://a11oy.net/code/",
+          "observed_at": "2026-10-13T18:05:08.357756+00:00",
+          "status": 200,
+          "response_url": "https://a11oy.net/code/",
+          "headers": {
+            "content-type": "text/html; charset=utf-8",
+            "location": null,
+            "server": "GitHub.com",
+            "cf-ray": null
+          },
+          "body_bytes_observed": 7925,
+          "body_truncated": false,
+          "body_sha256": "40121f002fecdc0c10d0ca9e2a4fb4ac68cf0f4f384843ab24094ec4b3059ff8"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-net-robots-gap",
+      "canonical_url": "https://a11oy.net/robots.txt",
+      "allowed_final_url": "https://a11oy.net/robots.txt",
+      "hops": [
+        {
+          "url": "https://a11oy.net/robots.txt",
+          "observed_at": "2026-10-13T18:05:00.641423+00:00",
+          "status": 200,
+          "response_url": "https://a11oy.net/robots.txt",
+          "headers": {
+            "content-type": "text/plain; charset=utf-8",
+            "location": null,
+            "server": "GitHub.com",
+            "cf-ray": null
+          },
+          "body_bytes_observed": 63,
+          "body_truncated": false,
+          "body_sha256": "48f152dadd3276901f002252e978432a08c80dba3ac5866906333a8242a7b76d",
+          "body_excerpt": "User-agent: *\nAllow: /\n\nSitemap: https://a11oy.net/sitemap.xml\n"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-net-sitemap-gap",
+      "canonical_url": "https://a11oy.net/sitemap.xml",
+      "allowed_final_url": "https://a11oy.net/sitemap.xml",
+      "hops": [
+        {
+          "url": "https://a11oy.net/sitemap.xml",
+          "observed_at": "2026-10-13T18:05:00.649200+00:00",
+          "status": 200,
+          "response_url": "https://a11oy.net/sitemap.xml",
+          "headers": {
+            "content-type": "application/xml",
+            "location": null,
+            "server": "GitHub.com",
+            "cf-ray": null
+          },
+          "body_bytes_observed": 4610,
+          "body_truncated": false,
+          "body_sha256": "7077e329cc1cf8816c1eefdfba4938356c70c3dac619aa4842843247b995cedb"
+        }
+      ]
+    },
+    {
+      "id": "a11oy-net-webmanifest-gap",
+      "canonical_url": "https://a11oy.net/manifest.webmanifest",
+      "allowed_final_url": "https://a11oy.net/manifest.webmanifest",
+      "hops": [
+        {
+          "url": "https://a11oy.net/manifest.webmanifest",
+          "observed_at": "2026-10-13T18:05:09.137868+00:00",
+          "status": 200,
+          "response_url": "https://a11oy.net/manifest.webmanifest",
+          "headers": {
+            "content-type": "application/manifest+json; charset=utf-8",
+            "location": null,
+            "server": "GitHub.com",
+            "cf-ray": null
+          },
+          "body_bytes_observed": 435,
+          "body_truncated": false,
+          "body_sha256": "ceaf5d9c40cfb772691093bb4d1adf98fb971a25717f736f2e9e9bd087cfce6d",
+          "body_excerpt": "{\n  \"id\": \"/\",\n  \"name\": \"a11oy Proof Registry\",\n  \"short_name\": \"a11oy.net\",\n  \"description\": \"The separately hosted first-party public proof registry for a11oy.\",\n  \"start_url\": \"/\",\n  \"scope\": \"/\",\n  \"display\": \"minimal-ui\",\n  \"background_color\": \"#080b12\",\n  \"theme_color\": \"#080b12\",\n  \"icons\": [\n    {\n      \"src\": \"/assets/a11oy-mark.svg\",\n      \"sizes\": \"any\",\n      \"type\": \"image/svg+xml\",\n      \"purpose\": \"any\"\n    }\n  ]\n}\n"
+        }
+      ]
+    }
+  ]
+}

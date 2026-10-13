@@ -17,7 +17,6 @@
  * exporter/span path; the structured access log (logger.ts) is separate.
  */
 import { randomUUID } from 'node:crypto';
-import type { NextFunction, Request, Response } from 'express';
 import { parseEnv } from '@szl-holdings/env';
 import {
   getOtelConfig,
@@ -26,6 +25,7 @@ import {
   isOtelInitialized,
   shutdownTracer,
 } from '@szl-holdings/observability';
+import type { NextFunction, Request, Response } from 'express';
 
 /**
  * Initialize the OpenTelemetry SDK from environment configuration. Idempotent:
@@ -37,12 +37,10 @@ export async function initOrchestratorOtel(): Promise<ReturnType<typeof getOtelC
     await initializeOpenTelemetry({
       serviceName: env.OTEL_SERVICE_NAME,
       ...(env.BUILD_VERSION ? { serviceVersion: env.BUILD_VERSION } : {}),
-      ...(env.OTEL_EXPORTER_OTLP_ENDPOINT ?? env.OTLP_ENDPOINT
+      ...((env.OTEL_EXPORTER_OTLP_ENDPOINT ?? env.OTLP_ENDPOINT)
         ? { otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT ?? env.OTLP_ENDPOINT }
         : {}),
-      ...(env.OTEL_EXPORTER_OTLP_HEADERS
-        ? { otlpHeaders: env.OTEL_EXPORTER_OTLP_HEADERS }
-        : {}),
+      ...(env.OTEL_EXPORTER_OTLP_HEADERS ? { otlpHeaders: env.OTEL_EXPORTER_OTLP_HEADERS } : {}),
     });
   }
   return getOtelConfig();
