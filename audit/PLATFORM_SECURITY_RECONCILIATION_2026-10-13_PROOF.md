@@ -174,6 +174,48 @@ addition to the existing no-overflow assertions. This source edit requires a
 fresh matrix: the earlier images are historical observations, not final-source
 qualification. The native Playwright loader still lists all 25 cases.
 
+### Current source-bound presentation evidence
+
+The corrected source passed all **41 A11oy Chromium cases**, including all 25
+supplemental workflow/hold/viewport combinations, in 52.3 seconds without
+retries: run [38459759355](https://github.com/szl-holdings/platform/actions/runs/38459759355),
+job `115511571380`. Artifact `11844483448` is a 3,080,671-byte ZIP with SHA-256
+`001870a335137dcbd7187a0e6476ade90fe73b0c3fa9a911561111f598bf1131`.
+The original 25 PNGs and sidecars are copied byte-for-byte into
+`docs/assets/screenshots/current/` and individually listed in
+[`screenshot-catalog.md`](screenshot-catalog.md). The earlier October 11
+security-agent screenshot is superseded; its separate home capture is unchanged.
+
+The exact captured source is `b7395c21efe499ed0045e7a11c49490bea0a062f`.
+Its independently retrieved Git tree is
+`d8ffd29ba0128fcd8092fbdfbb8eed038ac241e7`, identical to candidate
+`405dc195373746ea856d423ef475f4dd88c8cff3`. The build witness SHA-256 is
+`22ef7c71701b053d9371f4077791c4b4818c2f1fb9ddd83ab03b89a2438c996d`;
+the output manifest SHA-256 is
+`a0bef9ad9e40446c2be45e3dc2c15283241265dda459a52418f03b8a240262e2`.
+[`A11OY_SECURITY_BROWSER_RECEIPT_2026-10-13.json`](A11OY_SECURITY_BROWSER_RECEIPT_2026-10-13.json)
+records every committed image/sidecar digest, viewport, route, selection, source
+and artifact identity; the original build witness is stored alongside it.
+All served-response hashes matched that witness, and all page/console-error
+arrays were empty. The single-line status and no-horizontal-overflow assertions
+passed at all five sizes. Owner and independent visual review confirmed the
+modeled/unavailable claims and both publication holds; the mobile label remains
+readable after correction. No image was edited or generated.
+
+This follow-up records **proof level 4 for source presentation and claim
+boundaries only**. It supersedes the earlier pending screenshot status, while
+retaining the recorded failures and original source identities above. The next
+commit changes only image/sidecar/audit/catalog/gap evidence; it preserves the
+captured application, test, build and dependency source. It does not relabel the
+captured SHA as that later documentation commit. Full final-head CI and normal
+protected squash remain required. At capture review the security gate and
+dependency scan passed; full typecheck, unit, reproducibility and runtime audit
+were still running, so no all-CI-pass claim is made for that intermediate moment.
+
+GitHub Advanced Security automatically marked the repaired source-reader
+thread `PRRT_kwDORxaH7M6rPCPC` resolved/outdated after fresh analysis. All five
+review threads are resolved; no alert was manually dismissed or baseline relaxed.
+
 ## Original proposal disposition
 
 All original files remain accessible under the immutable source above.

@@ -1303,3 +1303,12 @@ routes, actual security operations or customer evidence. Full hosted checks,
 normal protected squash, provider publication and outside runtime witnesses are
 separate gates. Earlier October receipts retain their original source and failures.
 Proof: [`PLATFORM_SECURITY_RECONCILIATION_2026-10-13_PROOF.md`](../../audit/PLATFORM_SECURITY_RECONCILIATION_2026-10-13_PROOF.md).
+
+Source-presentation follow-up: native run `38459759355` passed 41 A11oy browser
+cases, including 25 fresh workflow/hold/viewport captures without retries. All
+image, sidecar, source-tree, build and served-response bindings were checked;
+the corrected mobile status labels stay readable. Original images and the
+source-bound receipt are cataloged under the same proof packet. This closes the
+fresh local-presentation evidence gap only. Publication holds, unavailable live
+security controls, provider/signing admission and deployed-domain observations
+retain the separate limitations above.
