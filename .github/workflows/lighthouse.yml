@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with: { node-version: '24', cache: 'pnpm' }
 
       - name: Install dependencies without optional ONNX CUDA binaries
@@ -67,18 +67,17 @@ jobs:
           ONNXRUNTIME_NODE_INSTALL: skip
 
       - name: Build ${{ matrix.app.name }}
-        run: pnpm --filter ${{ matrix.app.filter }} run build
+        # Include workspace dependencies whose package exports require compiled dist files.
+        # Preserve BASE_PATH and rebuild rather than restoring a production-base cache.
+        run: pnpm exec turbo run build --filter='${{ matrix.app.filter }}...' --env-mode=loose --force
         env:
           # Build with root base so the standalone `serve` at localhost:<port>/
           # resolves assets. Production serves each app under /<app>/ via BASE_PATH.
           BASE_PATH: /
 
-      - name: Install static file server
-        run: npm install -g serve
-
       - name: Serve ${{ matrix.app.name }} on port ${{ matrix.app.port }}
         run: |
-          serve ${{ matrix.app.dist }} -l ${{ matrix.app.port }} &
+          pnpm exec serve ${{ matrix.app.dist }} -l ${{ matrix.app.port }} &
           sleep 3
         shell: bash
 

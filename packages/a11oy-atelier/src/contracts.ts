@@ -64,7 +64,7 @@ export interface AtelierReceipt {
   responseSha256: string;
   policyEffect: 'allow' | 'audit_only';
   policyEvaluationId: string;
-  evidenceState: 'OBSERVED';
+  evidenceState: 'MEASURED';
   ledgerEntryId: string | null;
   ledgerState: 'PENDING_API_APPEND' | 'IN_PROCESS_APPEND_ACCEPTED';
   memoryState: 'PENDING_API_COMMIT' | 'COMMITTED_IN_PROCESS' | 'COMMITTED_ENCRYPTED_LOCAL';
@@ -103,6 +103,6 @@ export interface AtelierProviderHealth {
   configured: boolean;
   available: boolean;
   localOnly: boolean;
-  evidenceState: 'OBSERVED' | 'UNAVAILABLE';
+  evidenceState: 'MEASURED' | 'UNAVAILABLE';
   reason: string;
 }

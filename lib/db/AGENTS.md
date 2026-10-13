@@ -9,21 +9,22 @@
 ## Before You Change Anything
 
 1. Understand the migration strategy: **forward-only**. There are no rollback migrations.
-   - **Preferred path: `pnpm --filter @szl-holdings/db migrate`** — runs the
-     `scripts/backfill-migrations.mjs` backfill (idempotent, see below) and
-     then `drizzle-kit migrate` against the SQL files in `lib/db/drizzle/`.
-     This is fully non-interactive and safe for workflows / CI.
-   - The historical migrations (every entry in `drizzle/meta/_journal.json`)
-     were applied via `drizzle-kit push` long before a tracking table existed.
-     The backfill script seeds `drizzle.__drizzle_migrations` with the
-     `(sha256(sql), folderMillis)` rows drizzle would have written if those
-     migrations had been applied through `drizzle-kit migrate`. Running it
-     again is a no-op — it skips any `created_at` already in the table.
-   - Use `pnpm --filter @szl-holdings/db migrate:apply` if you want to run
-     just `drizzle-kit migrate` (skipping the backfill). Use
-     `pnpm --filter @szl-holdings/db migrate:backfill` to run only the
-     backfill (e.g. when bootstrapping a fresh database that already has the
-     schema from a `pg_dump` restore).
+   - **Preferred path: `pnpm --filter @szl-holdings/db migrate`** — first
+     performs a read-only checksum preflight for hand-authored migrations,
+     then runs `drizzle-kit migrate` against `lib/db/drizzle/`, and finally
+     applies the separately tracked hand-authored migrations. It never infers
+     that current journal entries were already applied.
+   - Some historical environments were populated with `drizzle-kit push`
+     before a tracker existed. `migrate:backfill` remains available only as an
+     explicit recovery command for a database whose schema and backup were
+     independently verified. It computes rows from the current journal and
+     can conceal unapplied SQL, so it is not part of normal deploy or CI.
+   - Use `pnpm --filter @szl-holdings/db migrate:apply` to apply only the
+     Drizzle journal. Use `migrate:manual:dry` to inspect the manual tracker
+     and pending files without creating or mutating database objects.
+   - If an existing schema lacks `drizzle.__drizzle_migrations`, stop the
+     deployment. Establishing the correct fixed legacy baseline remains an
+     operator-reviewed reconciliation task; do not auto-seed the current tail.
    - **Legacy path:** `pnpm migrate` from the repo root still wraps
      `drizzle-kit push --force` via `scripts/non-interactive-migrate.mjs`
      for emergencies where you need to push a schema diff without first

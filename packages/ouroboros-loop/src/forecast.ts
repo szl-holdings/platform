@@ -26,10 +26,7 @@ export interface ForecastResult {
  *
  * tolerance defaults to 1.0 (residual ≥ 1 = divergent).
  */
-export function gaussForecast(
-  history: ReadonlyArray<number>,
-  tolerance = 1.0,
-): ForecastResult {
+export function gaussForecast(history: ReadonlyArray<number>, tolerance = 1.0): ForecastResult {
   const n = history.length;
   if (n < 2) {
     return {
@@ -46,7 +43,7 @@ export function gaussForecast(
   const xs: number[] = [];
   const ys: number[] = [];
   for (let i = 0; i < n; i++) {
-    const v = Math.max(history[i], eps);
+    const v = Math.max(history[i]!, eps);
     xs.push(i);
     ys.push(Math.log(v));
   }
@@ -54,19 +51,25 @@ export function gaussForecast(
   const sumY = ys.reduce((a, b) => a + b, 0);
   const meanX = sumX / n;
   const meanY = sumY / n;
-  let num = 0, den = 0;
+  let num = 0,
+    den = 0;
   for (let i = 0; i < n; i++) {
-    num += (xs[i] - meanX) * (ys[i] - meanY);
-    den += (xs[i] - meanX) ** 2;
+    const x = xs[i]!;
+    const y = ys[i]!;
+    num += (x - meanX) * (y - meanY);
+    den += (x - meanX) ** 2;
   }
   const slope = den === 0 ? 0 : num / den;
   const intercept = meanY - slope * meanX;
   // R²
-  let ssRes = 0, ssTot = 0;
+  let ssRes = 0,
+    ssTot = 0;
   for (let i = 0; i < n; i++) {
-    const yHat = slope * xs[i] + intercept;
-    ssRes += (ys[i] - yHat) ** 2;
-    ssTot += (ys[i] - meanY) ** 2;
+    const x = xs[i]!;
+    const y = ys[i]!;
+    const yHat = slope * x + intercept;
+    ssRes += (y - yHat) ** 2;
+    ssTot += (y - meanY) ** 2;
   }
   const rSquared = ssTot === 0 ? 1 : Math.max(0, 1 - ssRes / ssTot);
   const predictedResidual = Math.exp(slope * n + intercept);

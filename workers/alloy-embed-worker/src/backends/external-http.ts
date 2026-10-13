@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import type { PromotionState } from '@workspace/aef-contracts';
+import { z } from 'zod';
 import { readBoundedJson, sanitizedTransportMessage, UpstreamProtocolError } from '../http-json.js';
 import type {
   EmbeddingBackend,
@@ -9,6 +9,8 @@ import type {
 } from './interface.js';
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/i);
+const NORMALIZED_VECTOR_TOLERANCE = 1e-3;
+const TENANT_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,127}$/;
 const UpstreamEmbedResponseSchema = z.object({
   vectors: z.array(z.array(z.number().refine(Number.isFinite))),
   model: z.string().min(1),
@@ -20,9 +22,7 @@ const UpstreamEmbedResponseSchema = z.object({
   runtime_id: z.string().min(1).optional(),
   runtime_version: z.string().min(1).optional(),
   normalized: z.boolean().optional(),
-  promotion_state: z
-    .enum(['DEVELOPMENT', 'EVALUATION_HOLD', 'QUALIFIED', 'REVOKED'])
-    .optional(),
+  promotion_state: z.enum(['DEVELOPMENT', 'EVALUATION_HOLD', 'QUALIFIED', 'REVOKED']).optional(),
 });
 
 export interface ExternalHttpBackendConfig {
@@ -32,10 +32,12 @@ export interface ExternalHttpBackendConfig {
   embedPath?: string;
   healthPath?: string;
   apiKey?: string;
+  tenantId?: string;
   model: string;
   modelRevision?: string;
   artifactSetDigest?: string;
   promotionState?: PromotionState;
+  requirePromotionStateProof?: boolean;
   dimensions: number;
   maxTokens: number;
   timeoutMs?: number;
@@ -46,9 +48,11 @@ type ResolvedConfig = ExternalHttpBackendConfig & {
   embedPath: string;
   healthPath: string;
   apiKey: string;
+  tenantId: string;
   modelRevision: string;
   artifactSetDigest: string;
   promotionState: PromotionState;
+  requirePromotionStateProof: boolean;
   timeoutMs: number;
   maxResponseBytes: number;
 };
@@ -59,20 +63,41 @@ export class ExternalHttpEmbeddingBackend implements EmbeddingBackend {
 
   constructor(config: ExternalHttpBackendConfig) {
     const baseUrl = new URL(config.baseUrl);
-    if (!['http:', 'https:'].includes(baseUrl.protocol) || baseUrl.username || baseUrl.password) {
-      throw new Error('External embedding baseUrl must be an HTTP(S) origin without credentials');
+    if (
+      !['http:', 'https:'].includes(baseUrl.protocol) ||
+      baseUrl.username ||
+      baseUrl.password ||
+      baseUrl.search ||
+      baseUrl.hash
+    ) {
+      throw new Error(
+        'External embedding baseUrl must be HTTP(S) without credentials, a query, or a fragment',
+      );
+    }
+    for (const [name, path] of [
+      ['embedPath', config.embedPath],
+      ['healthPath', config.healthPath],
+    ] as const) {
+      if (path !== undefined && (!path.startsWith('/') || path.startsWith('//'))) {
+        throw new Error(`External embedding ${name} must be an absolute URL path`);
+      }
+    }
+    if (config.tenantId !== undefined && !TENANT_ID_PATTERN.test(config.tenantId.trim())) {
+      throw new Error('External embedding tenantId must contain a valid tenant identity');
     }
 
     this.cfg = {
       embedPath: '/embed',
       healthPath: '/health',
-      apiKey: '',
       modelRevision: '',
       artifactSetDigest: '',
       promotionState: 'DEVELOPMENT',
+      requirePromotionStateProof: false,
       timeoutMs: 120_000,
       maxResponseBytes: 32 * 1024 * 1024,
       ...config,
+      apiKey: config.apiKey?.trim() ?? '',
+      tenantId: config.tenantId?.trim() ?? '',
       baseUrl: baseUrl.toString().replace(/\/$/, ''),
     };
     this.descriptor = {
@@ -102,6 +127,7 @@ export class ExternalHttpEmbeddingBackend implements EmbeddingBackend {
     const url = `${this.cfg.baseUrl}${this.cfg.embedPath}`;
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (this.cfg.apiKey) headers.Authorization = `Bearer ${this.cfg.apiKey}`;
+    if (this.cfg.tenantId) headers['X-Tenant-ID'] = this.cfg.tenantId;
 
     let response: Response;
     try {
@@ -165,6 +191,13 @@ export class ExternalHttpEmbeddingBackend implements EmbeddingBackend {
         response.status,
       );
     }
+    if (this.cfg.requirePromotionStateProof && data.promotion_state !== this.cfg.promotionState) {
+      throw new UpstreamProtocolError(
+        'UPSTREAM_PROMOTION_STATE_MISMATCH',
+        `Embedding backend '${this.cfg.backendId}' did not prove the admitted promotion state`,
+        response.status,
+      );
+    }
     if (data.vectors.length !== req.texts.length) {
       throw new UpstreamProtocolError(
         'UPSTREAM_CARDINALITY_MISMATCH',
@@ -190,6 +223,19 @@ export class ExternalHttpEmbeddingBackend implements EmbeddingBackend {
       throw new UpstreamProtocolError(
         'UPSTREAM_NORMALIZATION_MISMATCH',
         `Embedding backend '${this.cfg.backendId}' returned unnormalized vectors`,
+        response.status,
+      );
+    }
+    if (
+      req.normalize &&
+      data.vectors.some((vector) => {
+        const norm = Math.sqrt(vector.reduce((sum, value) => sum + value * value, 0));
+        return !Number.isFinite(norm) || Math.abs(norm - 1) > NORMALIZED_VECTOR_TOLERANCE;
+      })
+    ) {
+      throw new UpstreamProtocolError(
+        'UPSTREAM_NORMALIZATION_MISMATCH',
+        `Embedding backend '${this.cfg.backendId}' returned vectors outside the unit-norm tolerance`,
         response.status,
       );
     }
@@ -221,7 +267,13 @@ export class ExternalHttpEmbeddingBackend implements EmbeddingBackend {
     const start = Date.now();
     try {
       const response = await fetch(`${this.cfg.baseUrl}${this.cfg.healthPath}`, {
-        headers: this.cfg.apiKey ? { Authorization: `Bearer ${this.cfg.apiKey}` } : undefined,
+        headers:
+          this.cfg.apiKey || this.cfg.tenantId
+            ? {
+                ...(this.cfg.apiKey ? { Authorization: `Bearer ${this.cfg.apiKey}` } : {}),
+                ...(this.cfg.tenantId ? { 'X-Tenant-ID': this.cfg.tenantId } : {}),
+              }
+            : undefined,
         signal: AbortSignal.timeout(Math.min(this.cfg.timeoutMs, 3_000)),
       });
       return {

@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "AEEP Alloy Runtime API — unified v1 surface for tasks, memory, and workflow execution.",
+  "description": "AEEP Alloy Runtime API development surface. Production remains on HOLD until durable tenant stores, qualified execution backends, and a durable evidence ledger are wired.",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "node --conditions=workspace --import tsx --watch src/server.ts",
     "start": "node --enable-source-maps dist/server.js",
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit --customConditions workspace",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
@@ -18,12 +18,12 @@
     "@szl-holdings/agent-core": "workspace:*",
     "@szl-holdings/shared-contracts": "workspace:*",
     "@szl-holdings/evidence-ledger": "workspace:*",
-    "@szl-holdings/policy-guard": "workspace:*",
     "@szl-holdings/env": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
     "@workspace/ouroboros-integrations": "workspace:*",
     "@workspace/ouroboros-invariant": "workspace:*",
     "@workspace/a11oy-runtime": "workspace:*",
+    "@workspace/aef-contracts": "workspace:*",
     "express": "^5",
     "express-rate-limit": "^8.5.2",
     "zod": "catalog:"

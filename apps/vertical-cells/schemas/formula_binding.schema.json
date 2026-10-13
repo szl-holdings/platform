@@ -1,0 +1,60 @@
+{
+  "$id": "https://schemas.a11oy.net/formula-binding.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allowed_runtime_binding": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "formula_id": {
+      "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*$",
+      "type": "string"
+    },
+    "grants_authority": {
+      "const": false
+    },
+    "name": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "prohibited_claim": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "proof_class": {
+      "enum": [
+        "LOCKED-PROVEN",
+        "SEMANTIC-VERIFIED",
+        "CONJECTURE/ADVISORY"
+      ]
+    },
+    "required_binding_evidence": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_url": {
+      "format": "uri",
+      "pattern": "^https://",
+      "type": "string"
+    },
+    "verticals": {
+      "minLength": 1,
+      "pattern": "^(?:all|[a-z0-9]+(?:-[a-z0-9]+)*(?:,[a-z0-9]+(?:-[a-z0-9]+)*)*)$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "formula_id",
+    "name",
+    "proof_class",
+    "source_url",
+    "allowed_runtime_binding",
+    "prohibited_claim",
+    "required_binding_evidence",
+    "verticals",
+    "grants_authority"
+  ],
+  "title": "SZL Formula Binding",
+  "type": "object"
+}

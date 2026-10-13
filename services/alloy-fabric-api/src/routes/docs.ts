@@ -1,15 +1,22 @@
 import type { IRouter, Request, Response } from 'express';
+import { buildFabricProductionHold, isFabricProduction } from '../production-readiness.js';
 
 const API_DOCS = {
   openapi: '3.1.0',
   info: {
     title: 'Counsel Embedding Fabric API',
-    description: 'Governed, multi-tenant, evidence-first retrieval layer for SZL Holdings.',
+    description:
+      'Development contract surface. Production execution is on HOLD until durable, qualified backends are wired.',
     version: '1.0.0',
+  },
+  availability: {
+    development: 'Contract and local integration testing only.',
+    production:
+      'HOLD — protected routes return HTTP 503 before accepting work. These endpoint shapes are target contracts, not deployed capability evidence.',
   },
   paths: {
     '/v1/embed': { post: { summary: 'Dense text embedding' } },
-    '/v1/rerank': { post: { summary: 'Cross-encoder reranking' } },
+    '/v1/rerank': { post: { summary: 'Deterministic lexical-overlap reranking' } },
     '/v1/hybrid-search': { post: { summary: 'Hybrid RRF retrieval' } },
     '/v1/ingest': { post: { summary: 'Document ingestion' } },
     '/v1/index/rebuild': { post: { summary: 'Index rebuild workflow' } },
@@ -40,7 +47,7 @@ const API_DOCS = {
     {
       method: 'POST',
       path: '/v1/rerank',
-      description: 'Cross-encoder reranking of candidate chunks against a query.',
+      description: 'Deterministic lexical-overlap reranking of candidate chunks against a query.',
       auth: 'Bearer token',
       body: {
         requestId: 'string (required)',
@@ -48,7 +55,7 @@ const API_DOCS = {
         query: 'string (required)',
         candidates: 'Array<{id, text, score?, metadata?}>',
         topK: 'number (default: 10)',
-        model: 'string (optional, default: aef-rerank-cpu-v1)',
+        model: 'optional literal: lexical-overlap-v1 (all other labels are rejected)',
       },
     },
     {
@@ -132,6 +139,9 @@ const API_DOCS = {
 
 export function registerDocsRoute(router: IRouter): void {
   router.get('/docs', (_req: Request, res: Response) => {
-    res.json(API_DOCS);
+    res.json({
+      ...API_DOCS,
+      productionState: isFabricProduction() ? buildFabricProductionHold() : null,
+    });
   });
 }

@@ -6,24 +6,34 @@
   "description": "Alloy Embedding Fabric — typed SDK client for AEF native API. Provides embed(), rerank(), hybridSearch(), and ingest() with centralized bearer-token + tenant header management, automatic retry with exponential backoff, OpenTelemetry trace propagation, and React hooks for query-bound usage.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./client": {
+      "development": "./src/client.ts",
+      "workspace": "./src/client.ts",
       "types": "./dist/client.d.ts",
-      "import": "./src/client.ts"
+      "import": "./dist/client.js"
     },
     "./hooks": {
+      "development": "./src/hooks.ts",
+      "workspace": "./src/hooks.ts",
       "types": "./dist/hooks.d.ts",
-      "import": "./src/hooks.ts"
+      "import": "./dist/hooks.js"
     },
     "./errors": {
+      "development": "./src/errors.ts",
+      "workspace": "./src/errors.ts",
       "types": "./dist/errors.d.ts",
-      "import": "./src/errors.ts"
+      "import": "./dist/errors.js"
     },
     "./config": {
+      "development": "./src/config.ts",
+      "workspace": "./src/config.ts",
       "types": "./dist/config.d.ts",
-      "import": "./src/config.ts"
+      "import": "./dist/config.js"
     }
   },
   "dependencies": {
