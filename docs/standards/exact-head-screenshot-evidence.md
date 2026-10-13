@@ -76,14 +76,18 @@ Candidate dependencies are resolved without lifecycle scripts or a candidate
 pnpmfile, after rejecting tracked symbolic links and submodules. Browser tooling
 and the controller are installed first from the immutable protected workflow SHA
 on `main`, verified, and made read-only. The SHA-pinned pnpm setup action writes
-its standalone runtime to a per-run `runner.temp` root; its declared destination
-and binary outputs must agree with that root after symlink resolution. The root is
-made readable and executable, but not group- or world-writable, before the
-dedicated candidate identity can use the exact admitted executable. The
+its standalone runtime to a per-run protected-workspace sibling of the controller
+and candidate checkouts. Its declared destination and binary outputs must agree
+with that root after symlink resolution. The workspace parent must be traversable,
+and it and every lexical and resolved ancestor must be non-writable by the
+dedicated candidate identity. The runtime tree is made readable and executable,
+but not group- or world-writable, before that identity can use the exact
+admitted executable. The
 controller does not rediscover pnpm from an ambient candidate `PATH`.
 Dependency resolution and the candidate server then run as that dedicated
-unprivileged OS identity with a minimal environment, private home, and
-command-line-forced pnpm cache, store, modules, and virtual-store locations.
+unprivileged OS identity with a minimal environment, private home under the same
+protected workspace, and command-line-forced pnpm cache, store, modules, and
+virtual-store locations.
 Within the protected source/controller/evidence boundary, the candidate identity
 can write only those enumerated dependency directories before lockdown and
 bounded Vite caches afterward. The screenshot, packet, catalog, and upload tree
