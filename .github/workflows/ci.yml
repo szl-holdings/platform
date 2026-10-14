@@ -41,6 +41,31 @@ jobs:
       - name: Legacy report compatibility and scoring regressions (offline)
         run: python tools/test_estate_auditor.py
 
+  customer-portal:
+    name: Customer portal contracts (Python 3.14, offline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Match the service Dockerfile's Python minor version.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: |
+            services/customer-portal/requirements.txt
+            services/customer-portal/requirements-dev.txt
+      - name: Install customer-portal runtime and test dependencies
+        run: python -m pip install --disable-pip-version-check -r services/customer-portal/requirements-dev.txt
+      - name: Run customer-portal tests (local test keys, stubbed JWKS, no network)
+        run: python -m pytest services/customer-portal/tests -q -ra -p no:cacheprovider
+
   clean-clone:
     name: Clean clone (${{ matrix.os }})
     strategy:
