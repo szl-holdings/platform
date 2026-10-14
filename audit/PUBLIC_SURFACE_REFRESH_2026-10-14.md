@@ -1,7 +1,13 @@
 # Public surface observation refresh — 2026-10-14
 
-Workcell: `platform-public-surface-refresh-20261014`  
-Agent: Codex  
+Workcell: `platform-public-surface-refresh-20261014`
+
+Agent and recorded by: Codex
+
+Recorded at: 2026-10-14T03:43:00Z
+
+Proof level: 2 (source and evidence correction; no UI or runtime change)
+
 Evidence: **MEASURED**, scoped to the commands and observations below.
 
 ## Plan and change
