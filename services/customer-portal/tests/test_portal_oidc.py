@@ -229,7 +229,8 @@ def test_verified_subject_cannot_touch_another_accounts_keys_or_audit(portal_app
     assert {row["account_id"] for row in alice_export} == {accounts[f"{ISSUER}#alice"]}
 
     # And Alice can revoke her own key.
-    assert portal_app.client.delete(f"/v1/keys/{alice_key_id}", headers=alice).status_code == 200
+    revoke_response = portal_app.client.delete(f"/v1/keys/{alice_key_id}", headers=alice)
+    assert revoke_response.status_code == 200
 
 
 # --- missing or broken OIDC configuration fails closed ---------------------
