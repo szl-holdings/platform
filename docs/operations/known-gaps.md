@@ -1206,6 +1206,21 @@ The historical application register is preserved as superseded; hosted
 capture, deployment and runtime qualification still require fresh evidence.
 
 
+## 2026-10-14 public-surface observation refresh
+
+The fresh bounded readback in `audit/PUBLIC_SURFACE_READBACK_2026-10-14.json`
+supersedes the October 13 HTTP 403 observations for the 19 product-domain
+entries. Twelve now return HTTP 200 and retain their reviewed mixed,
+documentation or live route classifications; seven retired routes return
+HTTP 404 and remain `UNAVAILABLE`. This closes the observed 403 route gap
+only. It does not establish authenticated workflows, external effects,
+storage durability or aggregate readiness.
+
+`audit/PUBLIC_SURFACE_REFRESH_2026-10-14.md` records verification of the
+immutable Killinchu publisher manifest, exact workflow/source attestation,
+and current endpoint binding. The strict status, body and identity checks
+remain enforced. Previous evidence and failures remain dated history.
+
 ## 2026-10-13 public-surface observation and verifier reconciliation
 
 The fresh bounded readback in `audit/PUBLIC_SURFACE_READBACK_2026-10-13.json`
