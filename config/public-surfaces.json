@@ -1,17 +1,14 @@
 {
   "schema": "szl.public-surfaces.registry/v1",
-  "observed_at": "2026-10-13T18:05:16.093291+00:00",
+  "observed_at": "2026-10-14T03:13:32.319378+00:00",
   "surfaces": [
     {
       "id": "a11oy-front-door",
       "name": "SZL Holdings and A11oy front door",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["INVESTOR", "DEVELOPER"],
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -20,21 +17,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "a11oy-product-introduction",
       "name": "A11oy product introduction",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["INVESTOR", "DEVELOPER"],
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/a11oy/",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -43,22 +37,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/a11oy/"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "a11oy-console",
       "name": "A11oy operator console",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER",
-        "OPERATOR"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/console",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -67,21 +57,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/console"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "a11oy-docs",
       "name": "A11oy public documentation",
       "kind": "WEB",
-      "audience": [
-        "DEVELOPER",
-        "INVESTOR"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["DEVELOPER", "INVESTOR"],
+      "mode": "DOCUMENTATION",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/docs",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -90,21 +77,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/docs"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "a11oy-trust-center",
       "name": "A11oy trust center",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["INVESTOR", "DEVELOPER"],
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/trust",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -113,22 +97,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/trust"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "a11oy-receipt-verifier",
       "name": "A11oy public receipt verifier",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER",
-        "OPERATOR"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
+      "mode": "LIVE",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/verify",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -137,21 +117,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/verify"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "a11oy-ecosystem-atlas",
       "name": "SZL ecosystem atlas",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["INVESTOR", "DEVELOPER"],
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/ecosystem",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -160,22 +137,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/ecosystem"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "a11oy-observability",
       "name": "A11oy observability surface",
       "kind": "WEB",
-      "audience": [
-        "DEVELOPER",
-        "OPERATOR",
-        "INVESTOR"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["DEVELOPER", "OPERATOR", "INVESTOR"],
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/observability",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -184,22 +157,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/observability"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "a11oy-wires",
       "name": "A11oy cross-organ wires",
       "kind": "WEB",
-      "audience": [
-        "DEVELOPER",
-        "OPERATOR",
-        "INVESTOR"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["DEVELOPER", "OPERATOR", "INVESTOR"],
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/wires",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -208,21 +177,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/wires"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "a11oy-spaces-registry",
       "name": "Hugging Face Spaces registry",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["INVESTOR", "DEVELOPER"],
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/spaces",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -231,22 +197,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/spaces"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "killinchu-public-console",
       "name": "Killinchu public status page",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER",
-        "OPERATOR"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["INVESTOR", "DEVELOPER", "OPERATOR"],
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/killinchu",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -255,19 +217,16 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/killinchu"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "a11oy-net-thesis",
       "name": "A11oy technical thesis",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
+      "audience": ["INVESTOR", "DEVELOPER"],
       "mode": "DOCUMENTATION",
       "availability": "REACHABLE",
       "canonical_url": "https://a11oy.net/",
@@ -287,10 +246,7 @@
       "id": "a11oy-build-info-api",
       "name": "A11oy source-binding API",
       "kind": "API",
-      "audience": [
-        "DEVELOPER",
-        "OPERATOR"
-      ],
+      "audience": ["DEVELOPER", "OPERATOR"],
       "mode": "LIVE",
       "availability": "REACHABLE",
       "canonical_url": "https://szlholdings-a11oy.hf.space/api/build-info",
@@ -304,16 +260,13 @@
         "status": 200,
         "final_url": "https://szlholdings-a11oy.hf.space/api/build-info"
       },
-      "note": "MEASURED: a bounded JSON read reported A11oy source 3856bf185bb8436be3ce853630ca219fd2ab8767 and receipt_minted false. That source commit has a verified GitHub signature. The endpoint report does not establish HF content-revision equality, runtime qualification, durable storage or availability through a-11-oy.com."
+      "note": "MEASURED: a bounded JSON read reported A11oy source 6db6ef7a108f246042b82b95d5514308c46e922e and receipt_minted false. This is endpoint-reported source identity; it does not independently establish HF content-revision equality, deployment provenance, runtime qualification, durable storage or authorization."
     },
     {
       "id": "a11oy-readiness-api",
       "name": "A11oy readiness API",
       "kind": "API",
-      "audience": [
-        "DEVELOPER",
-        "OPERATOR"
-      ],
+      "audience": ["DEVELOPER", "OPERATOR"],
       "mode": "LIVE",
       "availability": "REACHABLE",
       "canonical_url": "https://szlholdings-a11oy.hf.space/readyz",
@@ -333,10 +286,7 @@
       "id": "killinchu-build-info-api",
       "name": "Killinchu source-binding API",
       "kind": "API",
-      "audience": [
-        "DEVELOPER",
-        "OPERATOR"
-      ],
+      "audience": ["DEVELOPER", "OPERATOR"],
       "mode": "LIVE",
       "availability": "REACHABLE",
       "canonical_url": "https://szlholdings-killinchu.hf.space/api/build-info",
@@ -350,16 +300,13 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "MEASURED: a bounded exact JSON read reported Killinchu source a6f6ce97afd09044df36b8ac610e3d42759e8462, manifest sha256:72f1e751dd84994e30021d7366ba7bcc10b6b71f81b9dce29cbc4a2e5cd828f3 and deployment-release attestation reference 55508160. The source matched protected main with a verified GitHub commit signature when checked. This row records the endpoint reference, not independently verified attestation contents or aggregate health/authorization."
+      "note": "MEASURED: a bounded exact JSON read reported Killinchu source d80753e8c951c1a1753f31d163a1b82aecb63782, manifest sha256:a6a48b63bcc420149fe440d2dae4a92b3ed800fe13dfb4087d2b94858d32e9b1 and deployment-release attestation reference 55637681. The immutable manifest from publisher run 38488127035 passed gh attestation verify with the exact hf-sync.yml signer workflow, refs/heads/main and source digest. GET minted no receipt. This verifies the referenced publisher evidence and response contract, not aggregate readiness or authorization."
     },
     {
       "id": "killinchu-readiness-api",
       "name": "Killinchu readiness API",
       "kind": "API",
-      "audience": [
-        "DEVELOPER",
-        "OPERATOR"
-      ],
+      "audience": ["DEVELOPER", "OPERATOR"],
       "mode": "LIVE",
       "availability": "REACHABLE",
       "canonical_url": "https://szlholdings-killinchu.hf.space/readyz",
@@ -379,10 +326,7 @@
       "id": "legacy-lyte-route",
       "name": "Historical KORA route claim",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
+      "audience": ["INVESTOR", "DEVELOPER"],
       "mode": "UNAVAILABLE",
       "availability": "UNAVAILABLE",
       "canonical_url": "https://a-11-oy.com/lyte/",
@@ -393,19 +337,16 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 404,
         "final_url": "https://a-11-oy.com/lyte/"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 404 from the approved URL. This retired route remains UNAVAILABLE; its absence does not establish a deployment or an operational product."
     },
     {
       "id": "legacy-aegis-route",
       "name": "Historical PARAGON route claim",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
+      "audience": ["INVESTOR", "DEVELOPER"],
       "mode": "UNAVAILABLE",
       "availability": "UNAVAILABLE",
       "canonical_url": "https://a-11-oy.com/aegis/",
@@ -416,19 +357,16 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 404,
         "final_url": "https://a-11-oy.com/aegis/"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 404 from the approved URL. This retired route remains UNAVAILABLE; its absence does not establish a deployment or an operational product."
     },
     {
       "id": "legacy-vessels-route",
       "name": "Historical SEXTANT route claim",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
+      "audience": ["INVESTOR", "DEVELOPER"],
       "mode": "UNAVAILABLE",
       "availability": "UNAVAILABLE",
       "canonical_url": "https://a-11-oy.com/vessels/",
@@ -439,19 +377,16 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 404,
         "final_url": "https://a-11-oy.com/vessels/"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 404 from the approved URL. This retired route remains UNAVAILABLE; its absence does not establish a deployment or an operational product."
     },
     {
       "id": "legacy-terra-route",
       "name": "Historical DOMAINE route claim",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
+      "audience": ["INVESTOR", "DEVELOPER"],
       "mode": "UNAVAILABLE",
       "availability": "UNAVAILABLE",
       "canonical_url": "https://a-11-oy.com/terra/",
@@ -462,19 +397,16 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 404,
         "final_url": "https://a-11-oy.com/terra/"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 404 from the approved URL. This retired route remains UNAVAILABLE; its absence does not establish a deployment or an operational product."
     },
     {
       "id": "legacy-counsel-route",
       "name": "Historical Counsel route claim",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
+      "audience": ["INVESTOR", "DEVELOPER"],
       "mode": "UNAVAILABLE",
       "availability": "UNAVAILABLE",
       "canonical_url": "https://a-11-oy.com/counsel/",
@@ -485,19 +417,16 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 404,
         "final_url": "https://a-11-oy.com/counsel/"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 404 from the approved URL. This retired route remains UNAVAILABLE; its absence does not establish a deployment or an operational product."
     },
     {
       "id": "legacy-carlota-jo-route",
       "name": "Historical Carlota Jo route claim",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
+      "audience": ["INVESTOR", "DEVELOPER"],
       "mode": "UNAVAILABLE",
       "availability": "UNAVAILABLE",
       "canonical_url": "https://a-11-oy.com/carlota-jo/",
@@ -508,21 +437,18 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 404,
         "final_url": "https://a-11-oy.com/carlota-jo/"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 404 from the approved URL. This retired route remains UNAVAILABLE; its absence does not establish a deployment or an operational product."
     },
     {
       "id": "legacy-command-route",
       "name": "A11oy Command page",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
-      "mode": "UNAVAILABLE",
-      "availability": "UNAVAILABLE",
+      "audience": ["INVESTOR", "DEVELOPER"],
+      "mode": "MIXED",
+      "availability": "REACHABLE",
       "canonical_url": "https://a-11-oy.com/command/",
       "source_owner": {
         "repository": "szl-holdings/a11oy",
@@ -531,19 +457,16 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 200,
         "final_url": "https://a-11-oy.com/command/"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 200 from the approved URL. The earlier Cloudflare 403 observation is superseded for this route. Reachability does not establish authenticated workflows, external effects, deployment identity, storage durability, production readiness or authorization. Existing mixed or documentation boundaries remain."
     },
     {
       "id": "legacy-pulse-route",
       "name": "Historical LUMINA route claim",
       "kind": "WEB",
-      "audience": [
-        "INVESTOR",
-        "DEVELOPER"
-      ],
+      "audience": ["INVESTOR", "DEVELOPER"],
       "mode": "UNAVAILABLE",
       "availability": "UNAVAILABLE",
       "canonical_url": "https://a-11-oy.com/pulse/",
@@ -554,19 +477,16 @@
       },
       "observation": {
         "method": "GET",
-        "status": 403,
+        "status": 404,
         "final_url": "https://a-11-oy.com/pulse/"
       },
-      "note": "MEASURED: the bounded unauthenticated observation path received Cloudflare HTTP 403 / error 1010 before origin content was available. This row records observation-route unavailability, not a global product outage. Domain source identity, receipt verification and runtime readiness remain UNVERIFIED; upstream HF health cannot qualify this domain. See audit/PUBLIC_SURFACE_READBACK_2026-10-13.json."
+      "note": "MEASURED: a bounded anonymous GET returned HTTP 404 from the approved URL. This retired route remains UNAVAILABLE; its absence does not establish a deployment or an operational product."
     },
     {
       "id": "a11oy-net-chat-gap",
       "name": "A11oy.net chat gateway",
       "kind": "WEB",
-      "audience": [
-        "DEVELOPER",
-        "INVESTOR"
-      ],
+      "audience": ["DEVELOPER", "INVESTOR"],
       "mode": "DOCUMENTATION",
       "availability": "REDIRECTED",
       "canonical_url": "https://a11oy.net/chat",
@@ -586,10 +506,7 @@
       "id": "a11oy-net-code-gap",
       "name": "A11oy.net code gateway",
       "kind": "WEB",
-      "audience": [
-        "DEVELOPER",
-        "INVESTOR"
-      ],
+      "audience": ["DEVELOPER", "INVESTOR"],
       "mode": "DOCUMENTATION",
       "availability": "REDIRECTED",
       "canonical_url": "https://a11oy.net/code",
@@ -609,9 +526,7 @@
       "id": "a11oy-net-robots-gap",
       "name": "A11oy.net robots metadata",
       "kind": "METADATA",
-      "audience": [
-        "MACHINE"
-      ],
+      "audience": ["MACHINE"],
       "mode": "DOCUMENTATION",
       "availability": "REACHABLE",
       "canonical_url": "https://a11oy.net/robots.txt",
@@ -631,9 +546,7 @@
       "id": "a11oy-net-sitemap-gap",
       "name": "A11oy.net sitemap metadata",
       "kind": "METADATA",
-      "audience": [
-        "MACHINE"
-      ],
+      "audience": ["MACHINE"],
       "mode": "DOCUMENTATION",
       "availability": "REACHABLE",
       "canonical_url": "https://a11oy.net/sitemap.xml",
@@ -653,9 +566,7 @@
       "id": "a11oy-net-webmanifest-gap",
       "name": "A11oy.net web app manifest",
       "kind": "METADATA",
-      "audience": [
-        "MACHINE"
-      ],
+      "audience": ["MACHINE"],
       "mode": "DOCUMENTATION",
       "availability": "REACHABLE",
       "canonical_url": "https://a11oy.net/manifest.webmanifest",
