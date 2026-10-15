@@ -9,8 +9,6 @@ name: CodeQL
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'replit-sync/**'
   pull_request:
     branches: [main]
   schedule:
