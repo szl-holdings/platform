@@ -941,6 +941,19 @@ The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so 
 | Workcell / proof / status | `SZL-READINESS-20261002` / Level 3 local UI source proof / `current` |
 | Boundary | Real public Hub receipts rendered as `UNVERIFIED`; not a provider-write, deployment, or runtime-readiness proof. |
 
+## SZL readiness matrix — 2026-10-15 local unsigned-claim witness
+
+| Field | Value |
+| --- | --- |
+| Filename | [szl-readiness-matrix-2026-10-15.png](../docs/assets/screenshots/current/szl-readiness-matrix-2026-10-15.png) |
+| Route / surface | `http://127.0.0.1:35885/dashboard.html` / SZL Production-Readiness Matrix |
+| Capture date / agent | `2026-10-15T11:46:37.375806+00:00` / Codex PixelProof role |
+| Environment / source | `local-exact-head` / `d70282985d7b4358cf405fbedc74628bb9475bbf` |
+| Command | Python Playwright helper reproduced in the [metadata sidecar](../docs/assets/screenshots/current/szl-readiness-matrix-2026-10-15.metadata.md) |
+| Viewport / SHA-256 | `1366x900` / `008e14f510d177410892146dcc25aa922b0e063aa00ea50cbce780faab9ae98e` |
+| Workcell / proof / status | `SZL-ORG-PR-20261015` / Level 3 local UI source proof / `current` |
+| Boundary | `SIMULATED_LOCAL_RENDERED_UI`: eight locally supplied unsigned claims stay UNVERIFIED; zero external traffic; no provider, signature, deployment or runtime-readiness proof. |
+
 ## A11oy Workcell Proof Coverage Inspector — 2026-10-02 superseded exact-source local proof
 
 The two captures below are **LOCAL_NON_AUTHORITATIVE** evidence from source
