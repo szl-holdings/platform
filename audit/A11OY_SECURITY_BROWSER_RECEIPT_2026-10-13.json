@@ -24,7 +24,10 @@
       "screenshot_sha256": "8cc6c54a435ac8a249423d117aacead992c0c462963663aeafca52352d6fd5ad",
       "sidecar_sha256": "3ac6653d1cad6ef99aadaac1be66cff3bd7d6516da4c2cbf7c8c176f99c5e82b",
       "bytes": 67279,
-      "dimensions": [768, 1082],
+      "dimensions": [
+        768,
+        1082
+      ],
       "capture_date": "2026-10-13T20:06:13.590Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/cyber-resilience",
@@ -42,7 +45,10 @@
       "screenshot_sha256": "3a1ab6c279d199cde8e94bdf65e6fe4ba955625b68312717ed50154baa543511",
       "sidecar_sha256": "cba8a2c203b99af6be04c3793fe95e01c95135780c0d5bc84355c8c02d7b1d35",
       "bytes": 71951,
-      "dimensions": [1920, 1120],
+      "dimensions": [
+        1920,
+        1120
+      ],
       "capture_date": "2026-10-13T20:06:15.547Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/cyber-resilience",
@@ -60,7 +66,10 @@
       "screenshot_sha256": "cb7978246d84432732e26e3adc6d37f20e239abab302b542dd480b408ecfdefc",
       "sidecar_sha256": "efee3db5a508680353cf1ba89c34461b39675bbba44bfc87b8835b03365d17e1",
       "bytes": 68538,
-      "dimensions": [390, 950],
+      "dimensions": [
+        390,
+        950
+      ],
       "capture_date": "2026-10-13T20:06:12.647Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/cyber-resilience",
@@ -78,7 +87,10 @@
       "screenshot_sha256": "a6c9db46533194966cb14cf3e4d1624fab93bb4ba66170428c4ba4b574c7c7fe",
       "sidecar_sha256": "b75d31c04d4b193a02d62d5b3a0d2b3182645ebaf4ce49226a6240933480320f",
       "bytes": 69714,
-      "dimensions": [1440, 1140],
+      "dimensions": [
+        1440,
+        1140
+      ],
       "capture_date": "2026-10-13T20:06:14.555Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/cyber-resilience",
@@ -96,7 +108,10 @@
       "screenshot_sha256": "0185e27d3aff5d08215016d926d6db1b631aba4479f81b8740cb825766817245",
       "sidecar_sha256": "bd5315147343895d897ea18d1ba45fb52d029bb461361939a4c04adddba3f152",
       "bytes": 77827,
-      "dimensions": [2560, 1480],
+      "dimensions": [
+        2560,
+        1480
+      ],
       "capture_date": "2026-10-13T20:06:16.594Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/cyber-resilience",
@@ -114,7 +129,10 @@
       "screenshot_sha256": "99bc50744dffefce2e9cc30da6d5366cc803cdfc67590d9f6418fa53bbb1036f",
       "sidecar_sha256": "66191650dce0ea65b83cb01112696671ccca0d25466e91c7243d1f09819db781",
       "bytes": 69999,
-      "dimensions": [1440, 1140],
+      "dimensions": [
+        1440,
+        1140
+      ],
       "capture_date": "2026-10-13T20:06:19.503Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-compliance",
@@ -132,7 +150,10 @@
       "screenshot_sha256": "f7fcae1887e383ef72c8951eeda56c43d9d6ef8cce0e2660ee3332bff2934cf5",
       "sidecar_sha256": "150072dc22ece5eb5de2037f2f5dff486f9ea49f7d5affc7d1f810edabb723c8",
       "bytes": 72229,
-      "dimensions": [1920, 1120],
+      "dimensions": [
+        1920,
+        1120
+      ],
       "capture_date": "2026-10-13T20:06:20.514Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-compliance",
@@ -150,7 +171,10 @@
       "screenshot_sha256": "1c4a03de64ece68d88ae1ace6ff9b684da654844f169fbd9378fa1070373ac5d",
       "sidecar_sha256": "ba4e1795b24e87c68f7a4dfa0155064dfbe277739b07cf6736f227b216a3cbdb",
       "bytes": 67540,
-      "dimensions": [768, 1082],
+      "dimensions": [
+        768,
+        1082
+      ],
       "capture_date": "2026-10-13T20:06:18.522Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-compliance",
@@ -168,7 +192,10 @@
       "screenshot_sha256": "4ed577d0e3334de786e985539a52990854f4a6ff455cace4db2a4327353577a2",
       "sidecar_sha256": "602bbf47ad5f82925e9802d9d91d916c789d5a2c54c02f4c3e63a68f8e9aa5a8",
       "bytes": 68974,
-      "dimensions": [390, 978],
+      "dimensions": [
+        390,
+        978
+      ],
       "capture_date": "2026-10-13T20:06:17.581Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-compliance",
@@ -186,7 +213,10 @@
       "screenshot_sha256": "2d7f7126d49008880b37b268039422137ffbcfd2d0e2b2a616f94a156e22c908",
       "sidecar_sha256": "e3fb5bab41a5643cacc2116940f713cda84247292254eb331c504871bc0740cb",
       "bytes": 78074,
-      "dimensions": [2560, 1480],
+      "dimensions": [
+        2560,
+        1480
+      ],
       "capture_date": "2026-10-13T20:06:21.555Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-compliance",
@@ -204,7 +234,10 @@
       "screenshot_sha256": "9b450b5d9eab79b63190aa87a33d95bc885dc6c682968fb541fe08b05df8ae71",
       "sidecar_sha256": "01a29cbc6c33e6b71b873c2ec196947dbbc738e7cb3f583b4756fe5fe3632dfa",
       "bytes": 166502,
-      "dimensions": [390, 2256],
+      "dimensions": [
+        390,
+        2256
+      ],
       "capture_date": "2026-10-13T20:05:55.832Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -222,7 +255,10 @@
       "screenshot_sha256": "79b09b167026ed33ef8f3292018ebbb0febeb80e3f2415c708551f25313db1b8",
       "sidecar_sha256": "fc76c7a7435770b1af1569f190ddbf1eb7cf8cf338560fa8dac46be57a6e8d3c",
       "bytes": 165688,
-      "dimensions": [1440, 1140],
+      "dimensions": [
+        1440,
+        1140
+      ],
       "capture_date": "2026-10-13T20:05:58.081Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -240,7 +276,10 @@
       "screenshot_sha256": "387e1bcbd655c6e62c2872df63da4fab537fbdd7884efcecd83a42f77b1c926c",
       "sidecar_sha256": "6e1b42f376169956a7a5bb305257bcc8b07d82675d21e6fc2741db4188f27686",
       "bytes": 174243,
-      "dimensions": [768, 1775],
+      "dimensions": [
+        768,
+        1775
+      ],
       "capture_date": "2026-10-13T20:06:08.225Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -258,7 +297,10 @@
       "screenshot_sha256": "731cf4c852da9b0314a9c57c8d8e11a1c902038077bea07892b965376c17450d",
       "sidecar_sha256": "1e04baa147cff07e6c4b170c466f2a4277470d6811fc88ec6607b035fd3515b4",
       "bytes": 174638,
-      "dimensions": [768, 1775],
+      "dimensions": [
+        768,
+        1775
+      ],
       "capture_date": "2026-10-13T20:05:56.960Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -276,7 +318,10 @@
       "screenshot_sha256": "b425bfe2eac9a4e85e70e77779461f5a51728ce7af9ac96de0988dfff2bfdc11",
       "sidecar_sha256": "b83a1d64b9e2622308cee1463284dd59984901867c065c02b407acb7ce8709cf",
       "bytes": 168671,
-      "dimensions": [1920, 1120],
+      "dimensions": [
+        1920,
+        1120
+      ],
       "capture_date": "2026-10-13T20:06:10.422Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -294,7 +339,10 @@
       "screenshot_sha256": "10d1fdbaac945399d54d0e63df214c8049c886407b27769404020ccb0861e5d4",
       "sidecar_sha256": "5b78dabd1ea02079b4e436743888ebfb09ab038250bd4e304594a1fcc3770f69",
       "bytes": 170571,
-      "dimensions": [1920, 1120],
+      "dimensions": [
+        1920,
+        1120
+      ],
       "capture_date": "2026-10-13T20:06:04.863Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -312,7 +360,10 @@
       "screenshot_sha256": "0c1620706ea034b4f89cff415e3d564a9a63595042c409806c89f2f94c003628",
       "sidecar_sha256": "36b1eda2de3c41f8f4be9ab284a99d7150d1e7532cbc4f6c9fb2d1c6cd8256cf",
       "bytes": 175745,
-      "dimensions": [2560, 1480],
+      "dimensions": [
+        2560,
+        1480
+      ],
       "capture_date": "2026-10-13T20:06:00.430Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -330,7 +381,10 @@
       "screenshot_sha256": "a01051c53c65f0c965fc52a0889d1a832c11926208f703da65840e4f7fb70567",
       "sidecar_sha256": "0dc16c0acd454ce936da66dc90bd09ddb894aa8a756932d1482ef9faafe52656",
       "bytes": 177692,
-      "dimensions": [2560, 1480],
+      "dimensions": [
+        2560,
+        1480
+      ],
       "capture_date": "2026-10-13T20:06:06.036Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -348,7 +402,10 @@
       "screenshot_sha256": "986a9a583811dc83f0bf9ad0111b95bc09e0294794a52b62c1b929747833d39f",
       "sidecar_sha256": "a09239edddcbebec487c1ae151316d0ce01fc3f96ffe580d6598b691eeed543c",
       "bytes": 168085,
-      "dimensions": [390, 2256],
+      "dimensions": [
+        390,
+        2256
+      ],
       "capture_date": "2026-10-13T20:06:01.562Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -366,7 +423,10 @@
       "screenshot_sha256": "8dee2678b94ba7b85a9f7023c66837709f829e393bc4e2f950d5d2b2c7bf2ef7",
       "sidecar_sha256": "bdbe990d5298df0ef41b155ed4232addcaf32dfe721c77705b53a6a40628c1a1",
       "bytes": 165522,
-      "dimensions": [1440, 1140],
+      "dimensions": [
+        1440,
+        1140
+      ],
       "capture_date": "2026-10-13T20:06:09.294Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -384,7 +444,10 @@
       "screenshot_sha256": "85470a0b571f9fc95a0e2c1926c56bbb90665bee18bb790cf7d53b4e0454b7e4",
       "sidecar_sha256": "3ee21c22c70389defdc449919de28bc502a33a72223a039829c3a64e8dee993e",
       "bytes": 166881,
-      "dimensions": [1440, 1140],
+      "dimensions": [
+        1440,
+        1140
+      ],
       "capture_date": "2026-10-13T20:06:03.716Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -402,7 +465,10 @@
       "screenshot_sha256": "17a4100056746ae47fe08d0fab60ccca6f41fd024f59f495abcb35944e687c80",
       "sidecar_sha256": "9d0277a67d1e0c9c8b028a7eefbaf8ed3359f3898543c34bb2810d7cb9281504",
       "bytes": 164627,
-      "dimensions": [390, 2240],
+      "dimensions": [
+        390,
+        2240
+      ],
       "capture_date": "2026-10-13T20:06:07.158Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -420,7 +486,10 @@
       "screenshot_sha256": "60d30f61c7869a5988697b7e6dbcd68a8985c06c1ed77ea7b89c75c6f75afce5",
       "sidecar_sha256": "aaa9c6b51721d3a758f3f4f338ef4e174c6f1372fa779570bac4fb49c15f766e",
       "bytes": 175699,
-      "dimensions": [2560, 1480],
+      "dimensions": [
+        2560,
+        1480
+      ],
       "capture_date": "2026-10-13T20:06:11.629Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -438,7 +507,10 @@
       "screenshot_sha256": "4c66c6e74cf1f36a7776236b7c12d3e4127da5d8a745f06ba60503e00a2aaacf",
       "sidecar_sha256": "61bac52ce42b478572a3246fe7efd6b88cc9057aadb27bf0e51567a648049d6a",
       "bytes": 176571,
-      "dimensions": [768, 1775],
+      "dimensions": [
+        768,
+        1775
+      ],
       "capture_date": "2026-10-13T20:06:02.623Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",
@@ -456,7 +528,10 @@
       "screenshot_sha256": "2d87b92f7c03a1c8a7edc118c81a2f6dea26e9c9dba4f24f3699db6b13d6a752",
       "sidecar_sha256": "323d73f75b3b0c4c991a32a650a9b309abee00662ac96613ba0a9b525658f8e8",
       "bytes": 168757,
-      "dimensions": [1920, 1120],
+      "dimensions": [
+        1920,
+        1120
+      ],
       "capture_date": "2026-10-13T20:05:59.229Z",
       "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
       "route": "/security-agents",

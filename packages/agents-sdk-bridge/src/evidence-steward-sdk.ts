@@ -136,8 +136,7 @@ export function createEvidenceStewardTools(steward: EvidenceSteward) {
       parameters: assetSchema,
       strict: true,
       errorFunction: null,
-      execute: (input: unknown) =>
-        JSON.stringify(steward.inspectAsset(assetIdArgument(input, allowed))),
+      execute: (input: unknown) => JSON.stringify(steward.inspectAsset(assetIdArgument(input, allowed))),
     }),
     tool({
       name: 'assess_evidence_gaps',

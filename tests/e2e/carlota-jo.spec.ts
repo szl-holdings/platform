@@ -38,12 +38,9 @@ async function mountWorkflowPanel(page: Page, responses: Record<string, unknown>
     });
   });
   await page.goto(`${CARLOTA_PATH}/governed-cockpit`);
-  const panel = page
-    .locator('div.rounded-lg')
-    .filter({
-      has: page.getByText('White-Glove Task Routing', { exact: true }),
-    })
-    .first();
+  const panel = page.locator('div.rounded-lg').filter({
+    has: page.getByText('White-Glove Task Routing', { exact: true }),
+  }).first();
   await expect(panel).toBeVisible();
   return { panel, requests };
 }
@@ -64,11 +61,9 @@ async function captureWorkflowPanel(
     'tests/e2e/carlota-jo.spec.ts',
   ];
   execFileSync('git', ['diff', '--exit-code', 'HEAD', '--', ...sourcePaths]);
-  const revision = (args: string[]) =>
-    execFileSync('git', args, {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    }).trim();
+  const revision = (args: string[]) => execFileSync('git', args, {
+    encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
   let candidateCommit: string | null = null;
   if (process.env.GITHUB_EVENT_PATH) {
     const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
@@ -97,35 +92,24 @@ async function captureWorkflowPanel(
     fixtureOnly: true,
     authority: 'HOSTED_SYNTHETIC_UI',
     screenshotSha256: createHash('sha256').update(screenshot).digest('hex'),
-    sourceHashes: Object.fromEntries(
-      sourcePaths.map((path) => [
-        path,
-        createHash('sha256').update(readFileSync(path)).digest('hex'),
-      ]),
-    ),
+    sourceHashes: Object.fromEntries(sourcePaths.map((path) => [
+      path, createHash('sha256').update(readFileSync(path)).digest('hex'),
+    ])),
   };
   const metadataPath = screenshotPath.replace(/\.png$/, '.json');
   writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
-  await testInfo.attach(`substrate-${scenario}`, {
-    path: screenshotPath,
-    contentType: 'image/png',
-  });
+  await testInfo.attach(`substrate-${scenario}`, { path: screenshotPath, contentType: 'image/png' });
   await testInfo.attach(`substrate-${scenario}-source`, {
-    path: metadataPath,
-    contentType: 'application/json',
+    path: metadataPath, contentType: 'application/json',
   });
 }
 
 test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
   for (const mode of ['dry-run', 'live'] as const) {
     test(`a returned ${mode} running run keeps controls locked`, async ({ page }, testInfo) => {
-      const { panel, requests } = await mountWorkflowPanel(page, [
-        {
-          runId: `fixture-running-${mode}`,
-          status: 'running',
-          mode,
-        },
-      ]);
+      const { panel, requests } = await mountWorkflowPanel(page, [{
+        runId: `fixture-running-${mode}`, status: 'running', mode,
+      }]);
       await panel.locator('select').selectOption(mode);
       await panel.getByRole('button', { name: 'Run on Substrate' }).click();
       await expect(panel.getByText(`fixture-running-${mode}`, { exact: true })).toBeVisible();
@@ -160,16 +144,11 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
       await captureWorkflowPanel(panel, page, testInfo, `running-missing-identity-${mode}`);
     });
 
-    test(`${mode} completion without a run identity remains unverified`, async ({
-      page,
-    }, testInfo) => {
-      const { panel } = await mountWorkflowPanel(page, [
-        {
-          status: mode === 'live' ? 'completed' : 'dry-run-complete',
-          mode,
-          ...(mode === 'live' ? { runId: '   ' } : {}),
-        },
-      ]);
+    test(`${mode} completion without a run identity remains unverified`, async ({ page }, testInfo) => {
+      const { panel } = await mountWorkflowPanel(page, [{
+        status: mode === 'live' ? 'completed' : 'dry-run-complete', mode,
+        ...(mode === 'live' ? { runId: '   ' } : {}),
+      }]);
       await panel.locator('select').selectOption(mode);
       await panel.getByRole('button', { name: 'Run on Substrate' }).click();
       await expect(panel.getByText('STATE UNVERIFIED', { exact: true })).toBeVisible();
@@ -179,20 +158,12 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
     });
   }
 
-  test('an interrupted submission stays locked until failure then permits an identified retry', async ({
-    page,
-  }) => {
-    const { panel, requests } = await mountWorkflowPanel(page, [
-      {
-        runId: 'fixture-recovered',
-        status: 'completed',
-        mode: 'live',
-      },
-    ]);
+  test('an interrupted submission stays locked until failure then permits an identified retry', async ({ page }) => {
+    const { panel, requests } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-recovered', status: 'completed', mode: 'live',
+    }]);
     let interrupt!: () => void;
-    const interrupted = new Promise<void>((resolve) => {
-      interrupt = resolve;
-    });
+    const interrupted = new Promise<void>((resolve) => { interrupt = resolve; });
     let submissions = 0;
     const interruptRequest = async (route: Route) => {
       submissions += 1;
@@ -221,17 +192,11 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
   });
 
   test('a held submission suppresses repeated keyboard activation', async ({ page }) => {
-    const { panel, requests } = await mountWorkflowPanel(page, [
-      {
-        runId: 'fixture-keyboard-released',
-        status: 'completed',
-        mode: 'live',
-      },
-    ]);
+    const { panel, requests } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-keyboard-released', status: 'completed', mode: 'live',
+    }]);
     let release!: () => void;
-    const held = new Promise<void>((resolve) => {
-      release = resolve;
-    });
+    const held = new Promise<void>((resolve) => { release = resolve; });
     let submissions = 0;
     const holdRequest = async (route: Route) => {
       submissions += 1;
@@ -290,18 +255,13 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
   }) => {
     const { panel, requests } = await mountWorkflowPanel(page, [
       {
-        status: 'running',
-        mode: 'live',
-        finalConfidence: 0.37,
+        status: 'running', mode: 'live', finalConfidence: 0.37,
         error: 'Synthetic stale diagnostic',
         stageResults: [{ stageId: 'fixture-stale-stage', status: 'running', confidence: 0.37 }],
       },
       {
-        runId: 'fixture-retry-failed',
-        status: 'failed',
-        mode: 'live',
-        error: 'Synthetic retry failed',
-        stageResults: [],
+        runId: 'fixture-retry-failed', status: 'failed', mode: 'live',
+        error: 'Synthetic retry failed', stageResults: [],
       },
     ]);
     await panel.locator('select').selectOption('live');
@@ -327,23 +287,16 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
   });
 
   test('dry-run confidence escalation remains pending human review', async ({ page }, testInfo) => {
-    const { panel, requests } = await mountWorkflowPanel(page, [
-      {
-        runId: 'fixture-dry-pending',
-        status: 'pending-approval',
-        mode: 'dry-run',
-        stageResults: [
-          {
-            stageId: 'retrieve-client-context',
-            stageType: 'Retrieve',
-            status: 'pending-approval',
-            confidence: 0.2,
-            routingDecision: 'escalated-human',
-            approvalId: 'fixture-approval',
-          },
-        ],
-      },
-    ]);
+    const { panel, requests } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-dry-pending',
+      status: 'pending-approval',
+      mode: 'dry-run',
+      stageResults: [{
+        stageId: 'retrieve-client-context', stageType: 'Retrieve',
+        status: 'pending-approval', confidence: 0.2,
+        routingDecision: 'escalated-human', approvalId: 'fixture-approval',
+      }],
+    }]);
     await panel.getByRole('button', { name: 'Run on Substrate' }).click();
     await expect(panel.getByText('fixture-dry-pending', { exact: true })).toBeVisible();
     await expect(panel.getByText('DEMO · PENDING APPROVAL', { exact: true })).toBeVisible();
@@ -359,14 +312,9 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
   test('live completion reports missing confidence without SLA or signature claims', async ({
     page,
   }, testInfo) => {
-    const { panel } = await mountWorkflowPanel(page, [
-      {
-        runId: 'fixture-live-completed',
-        status: 'completed',
-        mode: 'live',
-        stageResults: [],
-      },
-    ]);
+    const { panel } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-live-completed', status: 'completed', mode: 'live', stageResults: [],
+    }]);
     await panel.locator('select').selectOption('live');
     await panel.getByRole('button', { name: 'Run on Substrate' }).click();
     await expect(panel.getByText('fixture-live-completed', { exact: true })).toBeVisible();
@@ -384,14 +332,12 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
     { status: 'unrecognised', label: 'STATE UNVERIFIED' },
   ]) {
     test(`HTTP-success ${outcome.status} is not shown as completed`, async ({ page }, testInfo) => {
-      const { panel } = await mountWorkflowPanel(page, [
-        {
-          runId: `fixture-${outcome.status}`,
-          status: outcome.status,
-          mode: 'live',
-          ...(outcome.status === 'failed' ? { error: 'Synthetic verifier failed' } : {}),
-        },
-      ]);
+      const { panel } = await mountWorkflowPanel(page, [{
+        runId: `fixture-${outcome.status}`,
+        status: outcome.status,
+        mode: 'live',
+        ...(outcome.status === 'failed' ? { error: 'Synthetic verifier failed' } : {}),
+      }]);
       await panel.locator('select').selectOption('live');
       await panel.getByRole('button', { name: 'Run on Substrate' }).click();
       await expect(panel.getByText(`fixture-${outcome.status}`, { exact: true })).toBeVisible();
@@ -407,13 +353,9 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
   }
 
   test('a mismatched response mode leaves completion unverified', async ({ page }, testInfo) => {
-    const { panel } = await mountWorkflowPanel(page, [
-      {
-        runId: 'fixture-mode-mismatch',
-        status: 'completed',
-        mode: 'live',
-      },
-    ]);
+    const { panel } = await mountWorkflowPanel(page, [{
+      runId: 'fixture-mode-mismatch', status: 'completed', mode: 'live',
+    }]);
     await panel.getByRole('button', { name: 'Run on Substrate' }).click();
     await expect(panel.getByText('fixture-mode-mismatch', { exact: true })).toBeVisible();
     await expect(panel.getByText('STATE UNVERIFIED', { exact: true })).toBeVisible();
@@ -421,15 +363,10 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
     await captureWorkflowPanel(panel, page, testInfo, 'mode-mismatch');
   });
 
-  test('repeated Run clears prior data and retains each result mode', async ({
-    page,
-  }, testInfo) => {
+  test('repeated Run clears prior data and retains each result mode', async ({ page }, testInfo) => {
     const { panel, requests } = await mountWorkflowPanel(page, [
       {
-        runId: 'fixture-first',
-        status: 'dry-run-complete',
-        mode: 'dry-run',
-        finalConfidence: 0.81,
+        runId: 'fixture-first', status: 'dry-run-complete', mode: 'dry-run', finalConfidence: 0.81,
         stageResults: [{ stageId: 'fixture-old-stage', status: 'completed', confidence: 0.81 }],
       },
       { runId: 'fixture-second', status: 'completed', mode: 'live', stageResults: [] },
@@ -448,9 +385,7 @@ test.describe('Carlota Jo — SubstrateWorkflowPanel results', () => {
     await expect(panel.getByText('fixture-old-stage', { exact: true })).toHaveCount(0);
     await expect(panel.getByText(/DRY-RUN/)).toHaveCount(0);
     expect(requests.map((request) => request.mode)).toEqual(['dry-run', 'live']);
-    expect(requests.every((request) => request.workflowId === 'carlota-jo-task-routing')).toBe(
-      true,
-    );
+    expect(requests.every((request) => request.workflowId === 'carlota-jo-task-routing')).toBe(true);
     await captureWorkflowPanel(panel, page, testInfo, 'repeated-live');
   });
 });
@@ -461,10 +396,7 @@ test.beforeAll(async ({ browser }) => {
   const deadline = Date.now() + 45_000;
   while (Date.now() < deadline) {
     try {
-      const resp = await page.goto(CARLOTA_PATH || '/', {
-        timeout: 10000,
-        waitUntil: 'domcontentloaded',
-      });
+      const resp = await page.goto(CARLOTA_PATH || '/', { timeout: 10000, waitUntil: 'domcontentloaded' });
       if (resp && resp.status() < 500) {
         appAvailable = true;
         break;
@@ -690,9 +622,7 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
 
     // Count only visible nav links — hidden mobile-menu duplicates are excluded.
     const navLinkCount = await nav.locator('a:visible').count();
-    expect(navLinkCount, 'Main navigation must contain at least one visible <a>').toBeGreaterThan(
-      0,
-    );
+    expect(navLinkCount, 'Main navigation must contain at least one visible <a>').toBeGreaterThan(0);
 
     // Establish keyboard focus at the header brand link (the <a> immediately
     // before the nav), then Tab through the primary nav. Tabbing keeps focus
@@ -778,9 +708,7 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
       }
     }
 
-    expect(activated, `Keyboard Enter on nav link "${targetHref}" did not change the route`).toBe(
-      true,
-    );
+    expect(activated, `Keyboard Enter on nav link "${targetHref}" did not change the route`).toBe(true);
   });
 
   test('contact form can be filled and submitted entirely by keyboard', async ({ page }) => {
@@ -790,10 +718,7 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
     const form = page.locator('form').first();
     // Hard-assert the contact form is present — its removal/breakage is exactly
     // the kind of regression these smoke tests must catch automatically.
-    await expect(
-      form,
-      'Carlota Jo contact page must render a <form> for keyboard testing',
-    ).toBeVisible({ timeout: 10000 });
+    await expect(form, 'Carlota Jo contact page must render a <form> for keyboard testing').toBeVisible({ timeout: 10000 });
 
     // Start keyboard traversal from the page's main content region so the walk
     // exercises the contact form itself rather than the global chrome (the
@@ -808,10 +733,7 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
         if (!el) return null;
         return { tag: el.tagName.toLowerCase(), isInForm: !!el.closest('form') };
       });
-      if (
-        info?.isInForm &&
-        (info.tag === 'input' || info.tag === 'textarea' || info.tag === 'select')
-      ) {
+      if (info?.isInForm && (info.tag === 'input' || info.tag === 'textarea' || info.tag === 'select')) {
         reachedForm = true;
         break;
       }
@@ -860,23 +782,16 @@ test.describe('Carlota Jo — Keyboard Navigation', () => {
       await page.keyboard.press('Tab');
     }
 
-    expect(
-      fieldFills.length,
-      'At least one form field must be filled via keyboard',
-    ).toBeGreaterThan(0);
-    expect(submitted, 'Keyboard navigation must reach and activate the form submit control').toBe(
-      true,
-    );
+    expect(fieldFills.length, 'At least one form field must be filled via keyboard').toBeGreaterThan(0);
+    expect(submitted, 'Keyboard navigation must reach and activate the form submit control').toBe(true);
 
     // Wait briefly for any async submission response.
     await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => null);
 
     // Assert a concrete submission outcome: success message, URL change, or form dismissed.
-    const successSignal = page
-      .locator(
-        ":text('thank you'), :text('Thank you'), :text('sent'), :text('success'), :text('received'), :text('we\\'ll be in touch'), :text('message sent')",
-      )
-      .first();
+    const successSignal = page.locator(
+      ":text('thank you'), :text('Thank you'), :text('sent'), :text('success'), :text('received'), :text('we\\'ll be in touch'), :text('message sent')",
+    ).first();
     const urlChanged = !page.url().includes('/contact');
     const formGone = !(await form.isVisible().catch(() => false));
 

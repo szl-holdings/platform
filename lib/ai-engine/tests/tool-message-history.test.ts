@@ -20,16 +20,10 @@ vi.mock('@szl-holdings/db', () => {
 });
 
 const call = (id: string): ToolHistoryMessage => ({
-  role: 'assistant',
-  content: '',
-  toolCallId: id,
-  name: 'lookup',
-  toolArguments: {},
+  role: 'assistant', content: '', toolCallId: id, name: 'lookup', toolArguments: {},
 });
 const result = (id: string): ToolHistoryMessage => ({
-  role: 'tool',
-  content: 'synthetic result',
-  toolCallId: id,
+  role: 'tool', content: 'synthetic result', toolCallId: id,
 });
 
 describe('Anthropic message normalization', () => {
@@ -38,24 +32,18 @@ describe('Anthropic message normalization', () => {
   });
 
   it('keeps every text block even when the first block is non-text', async () => {
-    create.mockResolvedValue({
-      stop_reason: 'end_turn',
-      content: [
-        { type: 'thinking', thinking: 'synthetic', signature: 'synthetic' },
-        { type: 'text', text: 'Hello ' },
-        { type: 'text', text: 'world' },
-      ],
-    });
+    create.mockResolvedValue({ stop_reason: 'end_turn', content: [
+      { type: 'thinking', thinking: 'synthetic', signature: 'synthetic' },
+      { type: 'text', text: 'Hello ' }, { type: 'text', text: 'world' },
+    ] });
     const ai = new AnthropicChatInterface({ messages: { create } } as never);
-    await expect(ai.chatCompletion([{ role: 'user', content: 'hi' }])).resolves.toEqual({
-      content: 'Hello world',
-    });
+    await expect(ai.chatCompletion([{ role: 'user', content: 'hi' }]))
+      .resolves.toEqual({ content: 'Hello world' });
   });
 
   it('retains complete parallel batches across the history window', () => {
     const tail: ToolHistoryMessage[] = Array.from({ length: 18 }, (_, i) => ({
-      role: i % 2 ? 'assistant' : 'user',
-      content: String(i),
+      role: i % 2 ? 'assistant' : 'user', content: String(i),
     }));
     const batch = [call('a'), call('b'), result('b'), result('a')];
     const history: ToolHistoryMessage[] = [{ role: 'user', content: 'old' }, ...batch, ...tail];
@@ -69,50 +57,31 @@ describe('Anthropic message normalization', () => {
     const history: ToolHistoryMessage[] = [
       { role: 'user', content: 'old' },
       ...batch,
-      ...Array.from(
-        { length: 17 },
-        (_, i): ToolHistoryMessage => ({
-          role: i % 2 ? 'assistant' : 'user',
-          content: String(i),
-        }),
-      ),
-    ];
-    messages.push(
-      ...history.map(({ name, ...message }) => ({
-        ...message,
-        ...(name === undefined ? {} : { toolName: name }),
+      ...Array.from({ length: 17 }, (_, i): ToolHistoryMessage => ({
+        role: i % 2 ? 'assistant' : 'user', content: String(i),
       })),
-    );
+    ];
+    messages.push(...history.map(({ name, ...message }) => ({
+      ...message, ...(name === undefined ? {} : { toolName: name }),
+    })));
     const executeTool = vi.fn(async () => {
       throw new Error('Tool execution is disabled in synthetic normalization tests');
     });
-    const runner = new DomainAgentRunner(
-      {
-        name: 'synthetic',
-        systemPrompt: 'system',
-        executeTool,
-        tools: [{ name: 'lookup', description: 'synthetic', parameters: {} }],
-      },
-      { model: 'synthetic', maxCompletionTokens: 64 },
-    );
-    const complete = vi
-      .fn<NonNullable<ChatInterface['chatCompletionWithTools']>>()
+    const runner = new DomainAgentRunner({
+      name: 'synthetic', systemPrompt: 'system', executeTool,
+      tools: [{ name: 'lookup', description: 'synthetic', parameters: {} }],
+    }, { model: 'synthetic', maxCompletionTokens: 64 });
+    const complete = vi.fn<NonNullable<ChatInterface['chatCompletionWithTools']>>()
       .mockResolvedValue({ content: 'done', toolCalls: [], stopReason: 'stop' });
     const ai: ChatInterface = {
-      chatCompletion: vi.fn(),
-      streamChatCompletion: vi.fn(),
-      chatCompletionWithTools: complete,
+      chatCompletion: vi.fn(), streamChatCompletion: vi.fn(), chatCompletionWithTools: complete,
     };
     await expect(runner.chat('current question', id, ai)).resolves.toBe('done');
     const sent = complete.mock.calls[0]![0];
-    expect(
-      sent
-        .filter((message) => message.role === 'assistant' && message.toolCallId)
-        .map((message) => message.toolCallId),
-    ).toEqual(['a', 'b']);
-    expect(
-      sent.filter((message) => message.role === 'tool').map((message) => message.toolCallId),
-    ).toEqual(['b', 'a']);
+    expect(sent.filter((message) => message.role === 'assistant' && message.toolCallId)
+      .map((message) => message.toolCallId)).toEqual(['a', 'b']);
+    expect(sent.filter((message) => message.role === 'tool')
+      .map((message) => message.toolCallId)).toEqual(['b', 'a']);
     expect(executeTool).not.toHaveBeenCalled();
   });
 

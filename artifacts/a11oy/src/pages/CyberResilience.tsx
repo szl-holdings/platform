@@ -3,9 +3,7 @@ import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { CYBER_RESILIENCE_CHECKS } from '../data/darpaResilience';
 
 const T = {
-  text: '#f5f5f5',
-  dim: '#8a8a8a',
-  accent: '#c9b787',
+  text: '#f5f5f5', dim: '#8a8a8a', accent: '#c9b787',
 };
 
 const CAT_COLORS: Record<string, string> = {
@@ -26,30 +24,10 @@ export function CyberResilience() {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
-        <KpiCard
-          label="RUNTIME CHECKS"
-          value="UNAVAILABLE"
-          sub="No bound run evidence"
-          accent={T.accent}
-        />
-        <KpiCard
-          label="POSTURE SCORE"
-          value="UNAVAILABLE"
-          sub="No measured assessment"
-          accent={T.accent}
-        />
-        <KpiCard
-          label="FINDINGS"
-          value="UNAVAILABLE"
-          sub="No verified scan output"
-          accent={T.accent}
-        />
-        <KpiCard
-          label="REMEDIATION"
-          value="UNAVAILABLE"
-          sub="No external action receipt"
-          accent={T.accent}
-        />
+        <KpiCard label="RUNTIME CHECKS" value="UNAVAILABLE" sub="No bound run evidence" accent={T.accent} />
+        <KpiCard label="POSTURE SCORE" value="UNAVAILABLE" sub="No measured assessment" accent={T.accent} />
+        <KpiCard label="FINDINGS" value="UNAVAILABLE" sub="No verified scan output" accent={T.accent} />
+        <KpiCard label="REMEDIATION" value="UNAVAILABLE" sub="No external action receipt" accent={T.accent} />
       </div>
 
       <Card className="mb-6">
@@ -67,46 +45,32 @@ export function CyberResilience() {
             <div className="text-xs font-mono" style={{ color }}>
               {category.replace(/-/g, ' ')}
             </div>
-            <div className="text-xs mt-2" style={{ color: T.dim }}>
-              DEMO CONCEPT
-            </div>
+            <div className="text-xs mt-2" style={{ color: T.dim }}>DEMO CONCEPT</div>
           </Card>
         ))}
       </div>
 
       <SectionTitle>Proposed Security Checks</SectionTitle>
       <div className="space-y-2 mb-8">
-        {CYBER_RESILIENCE_CHECKS.map((check) => (
+        {CYBER_RESILIENCE_CHECKS.map(check => (
           <Card key={check.id} className="p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-mono" style={{ color: T.dim }}>
-                    {check.id}
-                  </span>
+                  <span className="text-xs font-mono" style={{ color: T.dim }}>{check.id}</span>
                   <span
                     className="text-xs font-mono px-2 py-0.5 rounded"
-                    style={{
-                      color: CAT_COLORS[check.category],
-                      backgroundColor: CAT_COLORS[check.category] + '15',
-                    }}
+                    style={{ color: CAT_COLORS[check.category], backgroundColor: CAT_COLORS[check.category] + '15' }}
                   >
                     {check.category.replace(/-/g, ' ')}
                   </span>
                 </div>
-                <div className="text-sm font-medium" style={{ color: T.text }}>
-                  {check.name}
-                </div>
+                <div className="text-sm font-medium" style={{ color: T.text }}>{check.name}</div>
                 <div className="text-xs mt-1" style={{ color: T.dim }}>
                   A source definition only; execution and result evidence are unavailable.
                 </div>
               </div>
-              <span
-                className="text-xs font-mono"
-                style={{ color: T.accent, flexShrink: 0, whiteSpace: 'nowrap' }}
-              >
-                DEMO
-              </span>
+              <span className="text-xs font-mono" style={{ color: T.accent, flexShrink: 0, whiteSpace: 'nowrap' }}>DEMO</span>
             </div>
           </Card>
         ))}

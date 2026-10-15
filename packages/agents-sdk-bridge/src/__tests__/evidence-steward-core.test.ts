@@ -218,9 +218,9 @@ describe('offline Evidence Steward', () => {
     expect(() => verifyEvidenceStewardFixtureBlob('bindings', bytes)).toThrow(
       /SOURCE_BLOB_MISMATCH:bindings/,
     );
-    expect(() => verifyEvidenceStewardFixtureBlob('constructor' as 'catalog', bytes)).toThrow(
-      /FIXTURE_BLOB_ARGS_INVALID/,
-    );
+    expect(() =>
+      verifyEvidenceStewardFixtureBlob('constructor' as 'catalog', bytes),
+    ).toThrow(/FIXTURE_BLOB_ARGS_INVALID/);
   });
 
   it('replays sorted inventory with stable digests and stale evidence', () => {

@@ -33,14 +33,11 @@ export function replayEvidenceSteward() {
   const catalog = readFixture('huggingface-public-catalog.snapshot.json', 'catalog');
   const errors = validateSnapshot(catalog);
   if (errors.length > 0) throw new Error(`TRACKED_CATALOG_INVALID:${errors.join('|')}`);
-  const steward = createEvidenceSteward(
-    {
-      catalog,
-      bindings: readFixture('model-source-bindings.json', 'bindings'),
-      portfolio: readFixture('model_portfolio.json', 'portfolio'),
-    },
-    AS_OF,
-  );
+  const steward = createEvidenceSteward({
+    catalog,
+    bindings: readFixture('model-source-bindings.json', 'bindings'),
+    portfolio: readFixture('model_portfolio.json', 'portfolio'),
+  }, AS_OF);
   const report = {
     schema: 'szl.evidence-steward.fixture-replay/v1',
     mode: 'OFFLINE_SOURCE_ONLY',

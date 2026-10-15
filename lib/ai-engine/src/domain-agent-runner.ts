@@ -1,4 +1,8 @@
-import type { DomainAgentConfig, StructuredToolResult, ToolDefinition } from './types.js';
+import type {
+  DomainAgentConfig,
+  StructuredToolResult,
+  ToolDefinition,
+} from './types.js';
 import { selectToolMessageHistory } from './tool-message-history.js';
 
 export const MAX_TOOL_ROUNDS = 6;

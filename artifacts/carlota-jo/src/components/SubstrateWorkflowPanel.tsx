@@ -261,8 +261,7 @@ export function SubstrateWorkflowPanel({
           )}
           <div className="flex items-center justify-between">
             <span className="text-[9px] font-mono text-amber-400/20">
-              requested:{result.requestedMode} · reported mode:{result.mode} · status:
-              {result.reportedStatus}
+              requested:{result.requestedMode} · reported mode:{result.mode} · status:{result.reportedStatus}
             </span>
           </div>
           {result.error && (
@@ -273,8 +272,7 @@ export function SubstrateWorkflowPanel({
           )}
           {status === 'unknown' && (
             <p className="text-[9px] font-mono text-slate-400">
-              The response did not establish a matching run state. Completion and approval are
-              unverified.
+              The response did not establish a matching run state. Completion and approval are unverified.
             </p>
           )}
           {status === 'dry-run-complete' && (

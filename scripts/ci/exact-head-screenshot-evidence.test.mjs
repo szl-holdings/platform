@@ -879,10 +879,7 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
     workflow,
     /dest: \$\{\{ github\.workspace \}\}\/candidate-pnpm-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/,
   );
-  assert.match(
-    workflow,
-    /SZL_CANDIDATE_HOME_VALUE: \$\{\{ github\.workspace \}\}\/candidate-home-/,
-  );
+  assert.match(workflow, /SZL_CANDIDATE_HOME_VALUE: \$\{\{ github\.workspace \}\}\/candidate-home-/);
   assert.match(workflow, /SZL_EVIDENCE_ROOT_VALUE: \$\{\{ runner\.temp \}\}\/exact-head-evidence-/);
   assert.match(workflow, /steps\.pnpm_setup\.outputs\.dest/);
   assert.match(workflow, /steps\.pnpm_setup\.outputs\.bin_dest/);
@@ -890,7 +887,10 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(workflow, /candidate_pnpm_version/);
   assert.match(workflow, /candidate_node_version/);
   assert.match(workflow, /find "\$resolved_root" ! -type l -perm \/022/);
-  assert.match(workflow, /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/);
+  assert.match(
+    workflow,
+    /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/,
+  );
   assert.match(workflow, /candidate identity can write admitted pnpm runtime/);
   assert.match(workflow, /candidate identity cannot traverse protected workspace/);
   assert.match(workflow, /"\$GITHUB_WORKSPACE" "\$\(realpath -e "\$GITHUB_WORKSPACE"\)"/);

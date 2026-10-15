@@ -286,7 +286,11 @@
           "execution": "NOT_CONFIGURED",
           "autonomous_execution": false
         },
-        "gap_codes": ["CATALOG_STALE", "NOT_PROMOTED", "QUALIFIED_INFERENCE_NOT_ESTABLISHED"],
+        "gap_codes": [
+          "CATALOG_STALE",
+          "NOT_PROMOTED",
+          "QUALIFIED_INFERENCE_NOT_ESTABLISHED"
+        ],
         "evidence": [
           {
             "repository": "szl-holdings/platform",

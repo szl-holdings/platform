@@ -67,16 +67,14 @@ export function parsePipelineRun(value: unknown, requestedMode: RunMode): RunRes
   const rawStages = Array.isArray(run.stageResults) ? run.stageResults.map(asRecord) : [];
   const stages = rawStages
     .filter((stage) => typeof stage.stageId === 'string' && stage.stageId.length > 0)
-    .map(
-      (stage): StageTrace => ({
-        stageId: stage.stageId as string,
-        stageName:
-          typeof stage.stageName === 'string' ? stage.stageName : (stage.stageId as string),
-        stageType: typeof stage.stageType === 'string' ? stage.stageType : 'Stage',
-        status: typeof stage.status === 'string' ? stage.status : 'unknown',
-        confidence: confidence(stage.confidence),
-      }),
-    );
+    .map((stage): StageTrace => ({
+      stageId: stage.stageId as string,
+      stageName:
+        typeof stage.stageName === 'string' ? stage.stageName : (stage.stageId as string),
+      stageType: typeof stage.stageType === 'string' ? stage.stageType : 'Stage',
+      status: typeof stage.status === 'string' ? stage.status : 'unknown',
+      confidence: confidence(stage.confidence),
+    }));
   const retrieve = rawStages.find((stage) => stage.stageType === 'Retrieve');
   const output = asRecord(retrieve?.output);
   const source = output.retrieverSource;
@@ -84,8 +82,7 @@ export function parsePipelineRun(value: unknown, requestedMode: RunMode): RunRes
     typeof source === 'string' && RETRIEVER_SOURCES.has(source as RetrieverSource)
       ? {
           source: source as RetrieverSource,
-          adapterId:
-            typeof output.retrieverAdapterId === 'string' ? output.retrieverAdapterId : null,
+          adapterId: typeof output.retrieverAdapterId === 'string' ? output.retrieverAdapterId : null,
         }
       : null;
 

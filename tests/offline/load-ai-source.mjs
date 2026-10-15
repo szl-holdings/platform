@@ -14,17 +14,11 @@ export async function loadAiSource(root, entry) {
     'lib/ai-engine/src/tool-message-history.ts',
   ]);
   const deniedImports = [];
-  const fail = () => {
-    throw new Error('Real provider execution is disabled in offline tests');
-  };
+  const fail = () => { throw new Error('Real provider execution is disabled in offline tests'); };
   function mock(exports) {
-    return new SyntheticModule(
-      Object.keys(exports),
-      function () {
-        for (const [name, value] of Object.entries(exports)) this.setExport(name, value);
-      },
-      { context },
-    );
+    return new SyntheticModule(Object.keys(exports), function () {
+      for (const [name, value] of Object.entries(exports)) this.setExport(name, value);
+    }, { context });
   }
   async function load(file) {
     const path = relative(resolve(root), file);

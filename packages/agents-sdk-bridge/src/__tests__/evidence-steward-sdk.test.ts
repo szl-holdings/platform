@@ -97,9 +97,9 @@ describe('SZL Evidence Steward SDK tools', () => {
     expect(() => assertEvidenceStewardToolSet([...tools, tools[0]])).toThrow(
       'EVIDENCE_STEWARD_TOOL_SET_INCOMPLETE',
     );
-    expect(() =>
-      assertEvidenceStewardToolSet([{ ...tools[0], strict: false }, ...tools.slice(1)]),
-    ).toThrow('EVIDENCE_STEWARD_TOOL_SCHEMA_INVALID:list_catalog');
+    expect(() => assertEvidenceStewardToolSet([{ ...tools[0], strict: false }, ...tools.slice(1)])).toThrow(
+      'EVIDENCE_STEWARD_TOOL_SCHEMA_INVALID:list_catalog',
+    );
 
     const agent = createEvidenceStewardAgent(steward);
     expect(agent.tools.map((entry) => entry.name)).toEqual([...EVIDENCE_STEWARD_TOOL_NAMES]);
@@ -112,10 +112,7 @@ describe('SZL Evidence Steward SDK tools', () => {
       [],
       ['SZLHOLDINGS/beta-model', 'SZLHOLDINGS/alpha-model'],
       ['SZLHOLDINGS/alpha-model', 'SZLHOLDINGS/alpha-model'],
-      Array.from(
-        { length: 51 },
-        (_, index) => `SZLHOLDINGS/model-${String(index).padStart(2, '0')}`,
-      ),
+      Array.from({ length: 51 }, (_, index) => `SZLHOLDINGS/model-${String(index).padStart(2, '0')}`),
     ]) {
       const steward = { ...makeSteward(), modelIds };
       expect(() => createEvidenceStewardTools(asSteward(steward))).toThrow(
@@ -212,9 +209,7 @@ describe('SZL Evidence Steward SDK tools', () => {
 
     expect(steward.listCatalog).toHaveBeenCalledWith({ asset_type: 'models', limit: 5 });
     expect(steward.inspectAsset).toHaveBeenCalledWith({ asset_id: 'SZLHOLDINGS/alpha-model' });
-    expect(steward.assessEvidenceGaps).toHaveBeenCalledWith({
-      asset_id: 'SZLHOLDINGS/alpha-model',
-    });
+    expect(steward.assessEvidenceGaps).toHaveBeenCalledWith({ asset_id: 'SZLHOLDINGS/alpha-model' });
     expect(steward.proposeNextStep).toHaveBeenCalledWith({ asset_id: 'SZLHOLDINGS/alpha-model' });
     expect(network).not.toHaveBeenCalled();
   });
