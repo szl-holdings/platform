@@ -87,3 +87,76 @@ test('pinned Gitleaks admits exact public revision and rejects identical value o
     rmSync(fixture, { recursive: true, force: true });
   }
 });
+
+test('readiness digest has only one exact historical finding admission', () => {
+  const path = 'platform/agents/readiness/readiness-security/executor.py';
+  const fingerprint = `4d37b956685f6e52fa1ff13ee858416e095ad9e1:${path}:generic-api-key:36`;
+  const entries = readFileSync(new URL('../../.gitleaksignore', import.meta.url), 'utf8')
+    .split(/\r?\n/)
+    .filter((line) => line && !line.startsWith('#') && line.includes(path));
+  assert.deepEqual(entries, [fingerprint]);
+  const source = readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /PLATFORM_SECRET_STEP_SHA256/);
+  assert.match(source, /^PLATFORM_SCANNER_STEP_SHA256 = "[0-9a-f]{64}"$/m);
+  assert.match(source, /hashlib\.sha256\(step\.encode\("utf-8"\)\)\.hexdigest\(\) != PLATFORM_SCANNER_STEP_SHA256/);
+});
+
+test('pinned Gitleaks historical admission cannot suppress a future digest assignment', (context) => {
+  const version = spawnSync('gitleaks', ['version'], { encoding: 'utf8' });
+  if (version.error?.code === 'ENOENT') {
+    if (process.env.GITHUB_ACTIONS === 'true')
+      assert.fail('Gitleaks must be installed before policy tests');
+    context.skip('Pinned Gitleaks unavailable locally; required in hosted workflow');
+    return;
+  }
+  assert.equal(version.status, 0);
+  assert.equal(version.stdout.trim(), '8.21.2');
+  const path = 'platform/agents/readiness/readiness-security/executor.py';
+  const source = readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
+  const renamed = source.split('\n').find((line) => line.startsWith('PLATFORM_SCANNER_STEP_SHA256 ='));
+  assert.ok(renamed);
+  const historical = renamed.replace('PLATFORM_SCANNER_STEP_SHA256', 'PLATFORM_SECRET_STEP_SHA256');
+  const config = new URL('../../.gitleaks.toml', import.meta.url).pathname;
+  const ignored = readFileSync(new URL('../../.gitleaksignore', import.meta.url), 'utf8');
+  const fixture = mkdtempSync(join(tmpdir(), 'gitleaks-readiness-policy-'));
+  const report = join(fixture, 'report.json');
+  const git = (...args) => spawnSync('git', args, { cwd: fixture, encoding: 'utf8' });
+  const scan = () => spawnSync('gitleaks', [
+    'detect', '--source', '.', '--config', config, '--redact', '--exit-code', '1',
+    '--report-format', 'json', '--report-path', report,
+  ], { cwd: fixture, encoding: 'utf8' });
+  try {
+    mkdirSync(join(fixture, 'platform/agents/readiness/readiness-security'), { recursive: true });
+    writeFileSync(join(fixture, path), `${'\n'.repeat(35)}${historical}\n`);
+    writeFileSync(join(fixture, '.gitleaksignore'), ignored);
+    assert.equal(git('init', '-q').status, 0);
+    assert.equal(git('add', path).status, 0);
+    assert.equal(git('-c', 'user.name=Policy fixture', '-c', 'user.email=policy@example.invalid',
+      'commit', '-qm', 'Synthetic public digest fixture').status, 0);
+    const commit = git('rev-parse', 'HEAD').stdout.trim();
+    assert.equal(scan().status, 1, 'A new commit with identical public bytes must remain blocking');
+    const findings = JSON.parse(readFileSync(report, 'utf8'));
+    assert.equal(findings.length, 1);
+    const exact = `${commit}:${path}:generic-api-key:36`;
+    assert.equal(findings[0].Fingerprint, exact);
+    writeFileSync(join(fixture, '.gitleaksignore'), `${exact}\n`);
+    assert.equal(scan().status, 0, 'Only the full exact fingerprint is admitted');
+    const changedCommit = `${commit[0] === 'a' ? 'b' : 'a'}${commit.slice(1)}`;
+    for (const other of [
+      exact.replace(commit, changedCommit),
+      exact.replace(path, `other/${path}`),
+      exact.replace(':generic-api-key:', ':other-rule:'),
+      exact.replace(/:36$/, ':37'),
+    ]) {
+      writeFileSync(join(fixture, '.gitleaksignore'), `${other}\n`);
+      assert.equal(scan().status, 1, 'Changing any fingerprint dimension must remain blocking');
+    }
+    writeFileSync(join(fixture, path), `${'\n'.repeat(35)}${renamed}\n`);
+    const current = spawnSync('gitleaks', [
+      'detect', '--no-git', '--source', '.', '--config', config, '--redact', '--exit-code', '1',
+    ], { cwd: fixture, encoding: 'utf8' });
+    assert.equal(current.status, 0, 'The accurately named public digest is not a credential');
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
+});

@@ -33,7 +33,7 @@ PLATFORM_SECRET_STEP = "Run Gitleaks — detect committed secrets"
 # It binds the environment, detect arguments, nonzero-status capture and final
 # exit propagation. This is source admission, not a general YAML/shell parser;
 # an edited step must be reviewed before its new identity can be admitted.
-PLATFORM_SECRET_STEP_SHA256 = "dd607271606705264ac96c6c855f5c5f60ea0e36f6afd04ac54a61be529599c1"
+PLATFORM_SCANNER_STEP_SHA256 = "dd607271606705264ac96c6c855f5c5f60ea0e36f6afd04ac54a61be529599c1"
 SHA40 = re.compile(r"^[0-9a-fA-F]{40}$")
 CONTACT_EMAIL = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
 PRIVATE_ADVISORY = re.compile(r"https://github\.com/[^\s/]+/[^\s/]+/security/advisories/new\b")
@@ -189,7 +189,7 @@ def _platform_secret_workflow_status(repo: str, head_sha: str, names: list[str])
     # Normalize line endings and trailing separator whitespace only. Retain all
     # step content, including the env mapping and the complete run block.
     step = "\n".join(lines[start:end]).rstrip() + "\n"
-    if hashlib.sha256(step.encode("utf-8")).hexdigest() != PLATFORM_SECRET_STEP_SHA256:
+    if hashlib.sha256(step.encode("utf-8")).hexdigest() != PLATFORM_SCANNER_STEP_SHA256:
         return "MISSING_WORKFLOW"
     return "SUCCESS"
 

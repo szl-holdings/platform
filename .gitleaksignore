@@ -1,7 +1,7 @@
 # Exact reviewed false-positive fingerprints only.
 #
-# Every entry is a full commit:path:rule:line fingerprint observed in exact-main
-# Security Audit runs 30242431089 or 30383771723 and re-inspected on 2026-07-28.
+# The original baseline entries were observed in exact-main Security Audit runs
+# 30242431089 or 30383771723 and re-inspected on 2026-07-28.
 # No path-only, rule-family, commit-range, or future detector match is accepted.
 # A moved line, changed rule, or new commit therefore remains blocking.
 #
@@ -71,3 +71,7 @@ b23db644765f599cb1906affbe9df71eac580592:scripts/qa/scan-secrets.test.js:private
 b23db644765f599cb1906affbe9df71eac580592:scripts/qa/scan-secrets.test.js:private-key:63
 d7b3f1e15dbf79aa655f1af2ce416ddf0df2b719:scripts/qa/scan-secrets.test.js:private-key-bare:63
 d7b3f1e15dbf79aa655f1af2ce416ddf0df2b719:scripts/qa/scan-secrets.test.js:private-key:63
+
+# Public workflow-step SHA-256, not an authentication credential. Exact source
+# and the historical introduction are documented in security/readiness-scan-digest.md.
+4d37b956685f6e52fa1ff13ee858416e095ad9e1:platform/agents/readiness/readiness-security/executor.py:generic-api-key:36

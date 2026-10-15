@@ -39,7 +39,7 @@ The agent emits one Khipu receipt; it does not modify the observed repositories.
    even if an older success is present. The GitHub run query reads at most 100
    branch runs. If the matching current-head
    run is outside that page, the verdict remains `HOLD`.
-   The admitted step identity is recorded in `PLATFORM_SECRET_STEP_SHA256`
+   The admitted step identity is recorded in `PLATFORM_SCANNER_STEP_SHA256`
    from protected source `aaa5417bd9a1fe755a5eaaa4e45bb29c8940370c`.
    It includes the environment bindings, `scan_args` beginning with `detect`
    and `--exit-code 1`, the invocation and nonzero-status capture, and final
