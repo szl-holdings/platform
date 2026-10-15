@@ -47,7 +47,7 @@ Reviewed Git blob identities for the source under test:
 - Workflow: `af7b8a84662b133ede8d0caf1cb57aa291852b15`.
 - Shared publisher: `936d9ba81b5dfaaed5b7d26774229541acd76cd3`.
 - Publisher regression suite: `1c7a9c16aabe2ebf4b84885b23ff8bcd521d7677`.
-- Pinned-SDK regression suite: `fcb9a7626880ef7850f66de1b133a98b7b1e1e25`.
+- Pinned-SDK regression suite: `ac56928ab6152f01f8f205b59e1e058d7c91f760`.
 - Readiness CI: `b6a998b0f903e08e2bf1a058fd24b4401d312bd3`.
 
 ## Validation
@@ -88,6 +88,12 @@ malformed/empty/denied outcome returns a bounded unsuccessful publication and
 constructs no client. Generic discovery, environment, token-file and Colab
 fallback mocks remain uncalled in every case. This verifies SDK control flow,
 not provider authentication.
+
+The first hosted CodeQL scan flagged the optional-dependency setup because it
+could not infer that `self.skipTest` always raises before `version` is used.
+The setup now raises `unittest.SkipTest` explicitly on missing/wrong dependency
+versions. Both the complete pinned-dependency suite and the stdlib skip path
+were rerun successfully after this control-flow correction.
 
 ## Verification and remaining gates
 

@@ -19,9 +19,9 @@ class PinnedOidcSdkTest(unittest.TestCase):
         try:
             version = importlib.metadata.version("huggingface_hub")
         except importlib.metadata.PackageNotFoundError:
-            self.skipTest("requires the pinned huggingface_hub==2.0.0 contract dependency")
+            raise unittest.SkipTest("requires the pinned huggingface_hub==2.0.0 contract dependency")
         if version != "2.0.0":
-            self.skipTest("requires the pinned huggingface_hub==2.0.0 contract dependency")
+            raise unittest.SkipTest("requires the pinned huggingface_hub==2.0.0 contract dependency")
 
     def _publish(self, exchange_result):
         import huggingface_hub as hub
