@@ -26,6 +26,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
@@ -50,7 +51,7 @@ jobs:
 
       - name: Run READINESS-OBSERVABILITY
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_OIDC_RESOURCE: datasets/SZLHOLDINGS/readiness-runs
           KHIPU_SIGNING_KEY_B64: ${{ secrets.KHIPU_SIGNING_KEY_B64 }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           A11OY_URL: ${{ vars.A11OY_URL }}

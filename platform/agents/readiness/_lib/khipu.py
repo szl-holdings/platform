@@ -161,18 +161,53 @@ def receipt_signature_error(agent: str, envelope: dict) -> str | None:
     return None
 
 
+def _publication_error_reason(exc: Exception) -> str:
+    """Classify a failed write without exposing provider or credential text."""
+    try:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+    except Exception:
+        status = None
+    # Do not coerce arbitrary objects, strings, booleans or integer subclasses.
+    # Exception text, class names, response bodies and headers stay private.
+    if type(status) is int:
+        if status in (401, 403):
+            return "publisher authorization unavailable"
+        if status == 404:
+            return "publisher destination unavailable"
+        if status == 429:
+            return "publisher rate limited"
+        if 500 <= status <= 599:
+            return "publisher service unavailable"
+        if 400 <= status <= 499:
+            return "publisher request rejected"
+    return "publisher unavailable"
+
+
 def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict:
     """Append the signed receipt to the runs dataset.
 
     Path: receipts/<agent>/<UTC-date>/<UTC-timestamp>.json
-    Uses HF_TOKEN. Returns a small status dict and never raises itself; the
+    Uses HF_TOKEN, or an exact-target GitHub Actions OIDC grant when
+    HF_OIDC_RESOURCE is set. Returns a small status dict and never raises itself; the
     caller (emit -> require_published) turns a failed publish into a failed
     run, because the dashboard and readiness-audit-rift only see receipts that
     reached the dataset.
     """
     token = os.environ.get("HF_TOKEN")
-    if not token:
-        return {"published": False, "reason": "no HF_TOKEN", "path": "(not created)"}
+    oidc_resource = os.environ.get("HF_OIDC_RESOURCE")
+    if oidc_resource:
+        if oidc_resource != f"datasets/{dataset}":
+            return {"published": False, "reason": "OIDC dataset mismatch", "path": "(not created)"}
+        if token:
+            return {"published": False, "reason": "ambiguous HF_TOKEN and OIDC credentials", "path": "(not created)"}
+        if os.environ.get("GITHUB_ACTIONS") != "true" or not all(
+            os.environ.get(name) for name in (
+                "ACTIONS_ID_TOKEN_REQUEST_URL", "ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+            )
+        ):
+            return {"published": False, "reason": "OIDC request grant unavailable", "path": "(not created)"}
+    elif not token:
+        return {"published": False, "reason": "no HF_TOKEN or OIDC grant", "path": "(not created)"}
     signature_error = receipt_signature_error(agent, envelope)
     if signature_error:
         return {"published": False, "reason": signature_error, "path": "(not created)"}
@@ -182,6 +217,17 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
     try:
         from huggingface_hub import HfApi  # type: ignore
 
+        if oidc_resource:
+            # Use only the pinned SDK's OIDC exchange. Generic token discovery
+            # can fall back to stored credentials after an empty exchange token.
+            from huggingface_hub._oidc import oidc_login  # type: ignore
+
+            exchange = oidc_login(resource=oidc_resource, provider="github")
+            token = exchange.get("access_token") if type(exchange) is dict else None
+            if type(token) is not str or not token or any(
+                char.isspace() or ord(char) < 32 or ord(char) == 127 for char in token
+            ):
+                return {"published": False, "reason": "OIDC access token unavailable", "path": path}
         api = HfApi(token=token)
         api.upload_file(
             path_or_fileobj=json.dumps(envelope, indent=2).encode(),
@@ -192,7 +238,7 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
         )
         return {"published": True, "path": path, "dataset": dataset}
     except Exception as exc:
-        return {"published": False, "reason": f"{type(exc).__name__}: {exc}", "path": path}
+        return {"published": False, "reason": _publication_error_reason(exc), "path": path}
 
 
 def envelope_emitted_date(envelope: dict) -> str:

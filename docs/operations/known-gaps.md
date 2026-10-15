@@ -223,6 +223,22 @@ HTTP 401; this patch neither repairs nor suppresses that provider failure.
 Protected admission and exact-head hosted checks remain required. Evidence
 Steward and estate-auditor PRs are separate; no source files overlap them.
 
+### 2026-10-15 readiness publisher source preparation
+
+PR #904 prepares the observability job for an exact-dataset OIDC publisher and
+retains verified fleet-signature admission. Missing grants, mixed token/OIDC
+credentials, resource mismatches and provider failures remain unsuccessful;
+source acceptance does not qualify the provider. The shared receipt publisher
+now excludes raw exception text from public output and Actions annotations,
+using fixed failure categories from a plain integer HTTP status when available.
+
+The dataset Trusted Publisher binding and a successful signed receipt upload
+have not been observed in this repair. They remain separate operational gates,
+along with the existing signing configuration and flagship probe requirements.
+No publisher dispatch, provider change or secret replacement is part of this
+source repair. Proof:
+[`SZL_READINESS_PR904_OIDC_PREPARATION_2026-10-15.md`](../../audit/SZL_READINESS_PR904_OIDC_PREPARATION_2026-10-15.md).
+
 ## Current Bounded Public Surface Registry — observed 2026-10-07
 
 The generated public-surface manifest distinguishes source-tree product

@@ -22,6 +22,7 @@ import hashlib
 import hmac
 import io
 import itertools
+import json
 import os
 import re
 import sys
@@ -44,10 +45,12 @@ import khipu  # noqa: E402
 
 class _FakeHfApi:
     uploads: list[dict] = []
+    init_tokens: list[str | bool | None] = []
     error: Exception | None = None
 
-    def __init__(self, token: str) -> None:
+    def __init__(self, token: str | bool | None) -> None:
         self.token = token
+        _FakeHfApi.init_tokens.append(token)
 
     def upload_file(self, **kwargs) -> None:
         if _FakeHfApi.error is not None:
@@ -55,8 +58,28 @@ class _FakeHfApi:
         _FakeHfApi.uploads.append(kwargs)
 
 
+class _FakeOidc:
+    calls: list[dict] = []
+    token: object = "synthetic-oidc-grant"
+    error: Exception | None = None
+
+    @staticmethod
+    def login(**kwargs):
+        _FakeOidc.calls.append(kwargs)
+        if _FakeOidc.error is not None:
+            raise _FakeOidc.error
+        return {"access_token": _FakeOidc.token}
+
+
+def _fake_oidc() -> types.ModuleType:
+    module = types.ModuleType("huggingface_hub._oidc")
+    module.oidc_login = _FakeOidc.login
+    return module
+
+
 def _fake_hub() -> types.ModuleType:
     module = types.ModuleType("huggingface_hub")
+    module.__path__ = []
     module.HfApi = _FakeHfApi
     return module
 
@@ -103,10 +126,15 @@ def _fake_nacl() -> tuple[types.ModuleType, types.ModuleType]:
 class EmitFailsClosedTest(unittest.TestCase):
     def setUp(self) -> None:
         _FakeHfApi.uploads = []
+        _FakeHfApi.init_tokens = []
         _FakeHfApi.error = None
+        _FakeOidc.calls = []
+        _FakeOidc.token = "synthetic-oidc-grant"
+        _FakeOidc.error = None
         nacl, signing = _fake_nacl()
         patcher = unittest.mock.patch.dict(sys.modules, {
-            "huggingface_hub": _fake_hub(), "nacl": nacl, "nacl.signing": signing,
+            "huggingface_hub": _fake_hub(), "huggingface_hub._oidc": _fake_oidc(),
+            "nacl": nacl, "nacl.signing": signing,
         })
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -117,6 +145,16 @@ class EmitFailsClosedTest(unittest.TestCase):
             "HF_TOKEN": "test-token",
             "KHIPU_SIGNING_KEY_B64": base64.b64encode(os.urandom(32)).decode(),
         }
+
+    def _oidc_env(self) -> dict:
+        env = self._signed_env()
+        del env["HF_TOKEN"]
+        env.update({
+            "HF_OIDC_RESOURCE": "datasets/SZLHOLDINGS/readiness-runs",
+            "ACTIONS_ID_TOKEN_REQUEST_URL": "https://example.invalid/oidc",
+            "ACTIONS_ID_TOKEN_REQUEST_TOKEN": base64.b64encode(os.urandom(24)).decode(),
+        })
+        return env
 
     def _emit(self, env: dict) -> tuple[str, dict | None, int | None]:
         out = io.StringIO()
@@ -147,15 +185,188 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn('"published": false', text)
         self.assertIn("::error title=readiness publish failed::readiness-test receipt", text)
-        self.assertIn("RuntimeError: Bad request", text)
+        self.assertIn('"reason": "publisher unavailable"', text)
+        self.assertNotIn("Bad request", text)
+        self.assertNotIn("RuntimeError", text)
         self.assertLess(text.index('"receipt"'), text.index("::error"))
+
+    def test_provider_error_text_cannot_leak_or_add_workflow_commands(self) -> None:
+        for credential in ("token", "oidc"):
+            with self.subTest(credential=credential):
+                env = self._signed_env() if credential == "token" else self._oidc_env()
+                marker = "synthetic-credential-" + os.urandom(16).hex()
+                env["HF_TOKEN" if credential == "token" else "ACTIONS_ID_TOKEN_REQUEST_TOKEN"] = marker
+                _FakeHfApi.error = RuntimeError(marker + "\n::notice title=synthetic::injected")
+                text, _result, code = self._emit(env)
+                self.assertEqual(code, 1)
+                result, _end = json.JSONDecoder().raw_decode(text)
+                self.assertFalse(result["publish"]["published"])
+                self.assertEqual(result["publish"]["reason"], "publisher unavailable")
+                self.assertNotIn(marker, text)
+                self.assertNotIn("::notice", text)
+                commands = [line for line in text.splitlines() if line.startswith("::")]
+                self.assertEqual(len(commands), 1)
+                self.assertTrue(commands[0].startswith("::error title=readiness publish failed::"))
+                self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_client_initialization_error_is_bounded_without_oidc_fallback(self) -> None:
+        with unittest.mock.patch(
+            "huggingface_hub.HfApi", side_effect=RuntimeError("synthetic client credential failure")
+        ) as client:
+            text, _result, code = self._emit(self._oidc_env())
+        self.assertEqual(code, 1)
+        self.assertIn('"reason": "publisher unavailable"', text)
+        self.assertNotIn("synthetic client credential failure", text)
+        client.assert_called_once_with(token="synthetic-oidc-grant")
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_http_status_classification_is_bounded(self) -> None:
+        cases = [
+            (401, "publisher authorization unavailable"),
+            (403, "publisher authorization unavailable"),
+            (404, "publisher destination unavailable"),
+            (429, "publisher rate limited"),
+            (500, "publisher service unavailable"),
+            (599, "publisher service unavailable"),
+            (400, "publisher request rejected"),
+            (422, "publisher request rejected"),
+            (200, "publisher unavailable"),
+            (302, "publisher unavailable"),
+            (600, "publisher unavailable"),
+            (None, "publisher unavailable"),
+            ("401", "publisher unavailable"),
+            (True, "publisher unavailable"),
+        ]
+        for status, expected in cases:
+            with self.subTest(status=status):
+                error = RuntimeError("synthetic provider response must stay private")
+                error.response = types.SimpleNamespace(status_code=status)
+                _FakeHfApi.error = error
+                text, _result, code = self._emit(self._signed_env())
+                self.assertEqual(code, 1)
+                result, _end = json.JSONDecoder().raw_decode(text)
+                self.assertEqual(result["publish"]["reason"], expected)
+                self.assertNotIn(str(error), text)
+                self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_unusable_error_metadata_is_never_rendered(self) -> None:
+        class UnrenderableError(Exception):
+            def __str__(self):
+                raise AssertionError("exception text must not be inspected")
+
+        class InaccessibleResponseError(UnrenderableError):
+            @property
+            def response(self):
+                raise RuntimeError("synthetic private response access failure")
+
+        class InaccessibleStatus:
+            @property
+            def status_code(self):
+                raise RuntimeError("synthetic private status access failure")
+
+        class UnsafeInteger(int):
+            def __eq__(self, other):
+                raise AssertionError("status subclasses must not be compared")
+
+        errors = [InaccessibleResponseError(), UnrenderableError(), UnrenderableError()]
+        errors[1].response = InaccessibleStatus()
+        errors[2].response = types.SimpleNamespace(status_code=UnsafeInteger(401))
+        for index, error in enumerate(errors):
+            with self.subTest(index=index):
+                _FakeHfApi.error = error
+                text, _result, code = self._emit(self._signed_env())
+                self.assertEqual(code, 1)
+                self.assertIn('"reason": "publisher unavailable"', text)
+                self.assertNotIn("synthetic private", text)
+                self.assertEqual(_FakeHfApi.uploads, [])
 
     def test_missing_token_fails_the_run_in_actions(self) -> None:
         env = self._signed_env()
         del env["HF_TOKEN"]
         text, _result, code = self._emit(env)
         self.assertEqual(code, 1)
-        self.assertIn("no HF_TOKEN", text)
+        self.assertIn("no HF_TOKEN or OIDC grant", text)
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_exact_dataset_oidc_publishes_verified_signed_receipt(self) -> None:
+        text, result, code = self._emit(self._oidc_env())
+        self.assertIsNone(code)
+        self.assertTrue(result["receipt"]["signed"])
+        self.assertTrue(result["publish"]["published"])
+        self.assertEqual(_FakeHfApi.init_tokens, ["synthetic-oidc-grant"])
+        self.assertEqual(_FakeOidc.calls, [{
+            "resource": "datasets/SZLHOLDINGS/readiness-runs", "provider": "github",
+        }])
+        self.assertEqual(len(_FakeHfApi.uploads), 1)
+        self.assertNotIn("::error", text)
+
+    def test_oidc_resource_mismatch_fails_before_hub_api(self) -> None:
+        env = self._oidc_env()
+        env["HF_OIDC_RESOURCE"] = "datasets/SZLHOLDINGS/another-dataset"
+        text, _result, code = self._emit(env)
+        self.assertEqual(code, 1)
+        self.assertIn("OIDC dataset mismatch", text)
+        self.assertIn('"path": "(not created)"', text)
+        self.assertEqual(_FakeHfApi.init_tokens, [])
+
+    def test_oidc_cannot_fall_back_to_hf_token(self) -> None:
+        env = self._oidc_env()
+        env["HF_TOKEN"] = "test-token"
+        text, _result, code = self._emit(env)
+        self.assertEqual(code, 1)
+        self.assertIn("ambiguous HF_TOKEN and OIDC credentials", text)
+        self.assertEqual(_FakeHfApi.init_tokens, [])
+
+    def test_oidc_publish_failure_fails_without_token_fallback(self) -> None:
+        _FakeHfApi.error = RuntimeError("synthetic Hub denial")
+        text, _result, code = self._emit(self._oidc_env())
+        self.assertEqual(code, 1)
+        self.assertIn('"reason": "publisher unavailable"', text)
+        self.assertNotIn("synthetic Hub denial", text)
+        self.assertEqual(_FakeHfApi.init_tokens, ["synthetic-oidc-grant"])
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_invalid_oidc_exchange_token_cannot_construct_hub_client(self) -> None:
+        class TokenSubclass(str):
+            pass
+
+        for token in ("", None, False, 1, [], " ", "grant\n", "grant\x00", "grant\x7f", TokenSubclass("grant")):
+            with self.subTest(token_type=type(token).__name__):
+                _FakeOidc.token = token
+                text, _result, code = self._emit(self._oidc_env())
+                self.assertEqual(code, 1)
+                self.assertIn("OIDC access token unavailable", text)
+                self.assertEqual(_FakeHfApi.init_tokens, [])
+                self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_oidc_exchange_failure_cannot_construct_hub_client(self) -> None:
+        _FakeOidc.error = RuntimeError("synthetic exchange denial")
+        text, _result, code = self._emit(self._oidc_env())
+        self.assertEqual(code, 1)
+        self.assertIn('"reason": "publisher unavailable"', text)
+        self.assertNotIn("synthetic exchange denial", text)
+        self.assertEqual(_FakeHfApi.init_tokens, [])
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_missing_oidc_request_grant_fails_before_hub_api(self) -> None:
+        for missing in ("ACTIONS_ID_TOKEN_REQUEST_URL", "ACTIONS_ID_TOKEN_REQUEST_TOKEN", "GITHUB_ACTIONS"):
+            with self.subTest(missing=missing):
+                env = self._oidc_env()
+                del env[missing]
+                text, result, code = self._emit(env)
+                self.assertEqual(code, None if missing == "GITHUB_ACTIONS" else 1)
+                if result is not None:
+                    self.assertFalse(result["publish"]["published"])
+                self.assertIn("OIDC request grant unavailable", text)
+                self.assertEqual(_FakeHfApi.init_tokens, [])
+
+    def test_oidc_unsigned_receipt_cannot_invoke_hub_api(self) -> None:
+        env = self._oidc_env()
+        del env["KHIPU_SIGNING_KEY_B64"]
+        text, _result, code = self._emit(env)
+        self.assertEqual(code, 1)
+        self.assertIn("unsigned receipt", text)
+        self.assertEqual(_FakeHfApi.init_tokens, [])
         self.assertEqual(_FakeHfApi.uploads, [])
 
     def test_missing_signing_key_fails_actions_without_upload(self) -> None:
@@ -285,6 +496,12 @@ class FleetWorkflowContractTest(unittest.TestCase):
                 installs = [line for line in text.splitlines() if "pip install" in line]
                 self.assertEqual(len(installs), 1)
                 self.assertRegex(installs[0], rf"(?<![\w-]){re.escape(HUB_PIN)}(?![\w.])")
+
+    def test_observability_oidc_pilot_is_exact_target_and_tokenless(self) -> None:
+        workflow = self.text["readiness-observability"]
+        self.assertIn("id-token: write", workflow)
+        self.assertIn("HF_OIDC_RESOURCE: datasets/SZLHOLDINGS/readiness-runs", workflow)
+        self.assertNotIn("HF_TOKEN:", workflow)
 
     def test_schedules_never_share_a_ten_minute_window(self) -> None:
         slots = []
