@@ -1,0 +1,66 @@
+{
+  "schema": "szl.supplemental-cyber-capture/v1",
+  "scope": "source-presentation-only",
+  "source_sha": "b7395c21efe499ed0045e7a11c49490bea0a062f",
+  "source_tree": "d8ffd29ba0128fcd8092fbdfbb8eed038ac241e7",
+  "build_manifest_sha256": "a0bef9ad9e40446c2be45e3dc2c15283241265dda459a52418f03b8a240262e2",
+  "build_witness_sha256": "22ef7c71701b053d9371f4077791c4b4818c2f1fb9ddd83ab03b89a2438c996d",
+  "workflow_run_id": "38459759355",
+  "workflow_run_attempt": "1",
+  "test_retry": 0,
+  "capture_date": "2026-10-13T20:06:07.158Z",
+  "route": "/security-agents",
+  "resolved_url": "http://localhost:3010/security-agents",
+  "selected_workflow": "Threat Analysis Agent",
+  "expected_state": "MODELED/UNAVAILABLE",
+  "viewport": {
+    "name": "phone",
+    "width": 390,
+    "height": 844
+  },
+  "browser_version": "154.0.8037.0",
+  "screenshot_sha256": "17a4100056746ae47fe08d0fab60ccca6f41fd024f59f495abcb35944e687c80",
+  "screenshot_bytes": 164627,
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/security-agents"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-DqWcQO3i.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-C6TdLUar.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/GovernedSecurityAgents-BfjpEdU6.js"
+    }
+  ],
+  "served_responses": [
+    {
+      "path": "/security-agents",
+      "file": "index.html",
+      "sha256": "4ca85b146baccab3c39e9052ced9358c9b889ae0a665741c8452db3a9b3be667"
+    },
+    {
+      "path": "/assets/index-C6TdLUar.css",
+      "file": "assets/index-C6TdLUar.css",
+      "sha256": "832a1b95be4244145b440908b96830012f86b614189d212eee17e1939909e428"
+    },
+    {
+      "path": "/assets/index-DqWcQO3i.js",
+      "file": "assets/index-DqWcQO3i.js",
+      "sha256": "f8e26c16b19c48eaa8c5556c1a146317658f3a57f3bff511af04d069faadbc8f"
+    },
+    {
+      "path": "/assets/GovernedSecurityAgents-BfjpEdU6.js",
+      "file": "assets/GovernedSecurityAgents-BfjpEdU6.js",
+      "sha256": "44b7bf0ecb84f9233aab3743b33db55dddba12c2c64e590d87d0fc66fc9159e3"
+    }
+  ],
+  "console_or_page_errors": [],
+  "qualification": "Supplemental localhost browser evidence; not canonical-controller admission, deployment, certification, or operational security evidence."
+}

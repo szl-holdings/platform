@@ -1,0 +1,99 @@
+{
+  "allowed_actions": [
+    "validate consent",
+    "triage",
+    "recommend",
+    "draft outreach",
+    "request handoff",
+    "record outcome"
+  ],
+  "buyer": "Carriers, MGAs, brokers, distribution leaders, underwriters, and claims/operations teams.",
+  "core_workflows": [
+    "consent and intake",
+    "eligibility",
+    "risk/lead triage",
+    "knowledge and source grounding",
+    "human handoff",
+    "outcome and fairness monitoring"
+  ],
+  "data_policy": {
+    "protected": [
+      "PII",
+      "policy",
+      "claims",
+      "health/financial attributes where lawful"
+    ],
+    "public": [
+      "synthetic leads/submissions"
+    ],
+    "training_use": "explicit lawful purpose, minimization, consent/contract and fairness review only"
+  },
+  "decision_problem": "Should a lead, submission, eligibility, triage, handoff, underwriting referral, or service action advance under consent, policy, evidence, and human judgment?",
+  "display_name": "Insurance Assurance — Consent and Evidence-Bound Distribution Decisioning",
+  "formula_bindings": [
+    "F1",
+    "F4",
+    "F7",
+    "F11",
+    "F18",
+    "F19",
+    "LAMBDA"
+  ],
+  "hf_space_id": "SZLHOLDINGS/david-leads",
+  "human_authority": [
+    "licensed/authorized insurance professional owns disposition",
+    "privacy/compliance owns use",
+    "customer communication follows approved workflow"
+  ],
+  "leaders": [
+    {
+      "name": "Duck Creek",
+      "pattern": "insurance-native governed agents embedded in underwriting, FNOL and core workflows",
+      "url": "https://www.duckcreek.com/product/agentic-ai-platform/"
+    },
+    {
+      "name": "Guidewire",
+      "pattern": "secure context-aware guidance embedded in policy and claims workflows",
+      "url": "https://www.guidewire.com/"
+    },
+    {
+      "name": "Gradient AI",
+      "pattern": "insurance-specific underwriting and claims decision intelligence with human judgment",
+      "url": "https://www.gradientai.com/ai-for-insurance/"
+    },
+    {
+      "name": "Shift Technology",
+      "pattern": "fraud, claims and risk workflow intelligence",
+      "url": "https://www.shift-technology.com/"
+    }
+  ],
+  "negative_tests": [
+    "missing consent blocks",
+    "protected attribute excluded",
+    "low confidence abstains",
+    "human override recorded",
+    "cross-tenant lead denied"
+  ],
+  "original_szl_design": "Consent and Evidence-Bound Distribution Twin: consent is non-compensatory; source, eligibility, recommendation, human disposition and outcome remain linked.",
+  "portfolio_role": "REFERENCE_VERTICAL",
+  "prohibited_actions": [
+    "automatic binding/denial",
+    "use of prohibited attributes",
+    "silent profiling",
+    "unapproved communication",
+    "David Leads as a separate flagship"
+  ],
+  "public_launch": "PUBLIC_SYNTHETIC_MODULE_ALLOWED_AFTER_REFACTOR",
+  "schema": "szl.vertical-cell/v1",
+  "space_visibility": "protected",
+  "stage": "REFACTOR_EXISTING_DAVID_LEADS",
+  "success_metrics": [
+    "consent completeness",
+    "handoff speed",
+    "qualified conversion",
+    "override/fairness rate",
+    "source coverage",
+    "outcome calibration"
+  ],
+  "vertical_id": "insurance-assurance"
+}

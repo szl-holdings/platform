@@ -1,19 +1,21 @@
 """
 Lyte metrics corpus.
 
-A self-contained snapshot of Lyte service performance metrics, SLO compliance
-states, anomaly findings, capacity trend summaries, and alert digests — shaped
-for retrieval by the Substrate Opportunity Audit and Operational Drift
-workflows.
+A deterministic synthetic fixture of Lyte-shaped service performance metrics,
+SLO compliance states, anomaly findings, capacity trend summaries, and alert
+digests — shaped for development and test retrieval by the Substrate
+Opportunity Audit and Operational Drift workflows.
 
 Each document is a small structured block of natural-language text plus a
 metadata envelope so downstream reasoning stages can cite specific
 service / metric / time-window pairs.
 
-In Phase 2 this loader will be replaced by a query against the real Lyte
-metrics tables (pgvector + Elasticsearch); the document shape returned here
-is the same one the production loader will produce so downstream stages do
-not change.
+These records are not observations from a live Lyte system and must never be
+presented as production evidence. In Phase 2 this loader will be replaced by a
+tenant-scoped query against the real Lyte metrics tables (pgvector +
+Elasticsearch) with a verified source receipt; the document shape returned
+here is the same one the production loader will produce so downstream stages
+do not change.
 """
 
 from __future__ import annotations
@@ -22,9 +24,26 @@ from dataclasses import dataclass, field, asdict
 from typing import Any
 
 
+FIXTURE_CORPUS_ID = "lyte-deterministic-fixture-v1"
+FIXTURE_KIND = "deterministic-synthetic"
+FIXTURE_EVIDENCE_STATE = "SYNTHETIC_FIXTURE"
+
+
+def _fixture_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
+    """Label every bundled record so it cannot be mistaken for live evidence."""
+
+    return {
+        **metadata,
+        "fixture": True,
+        "fixtureKind": FIXTURE_KIND,
+        "fixtureCorpusId": FIXTURE_CORPUS_ID,
+        "evidenceState": FIXTURE_EVIDENCE_STATE,
+    }
+
+
 @dataclass(frozen=True)
 class MetricsDocument:
-    """A single retrievable document in the Lyte metrics corpus."""
+    """A single retrievable document in the deterministic fixture corpus."""
 
     id: str
     content: str
@@ -69,13 +88,13 @@ def _slo_snapshot(service: str, slo_pct: float, target_pct: float) -> MetricsDoc
         ),
         source="lyte-slo-store",
         relevanceScore=0.78 + max(0.0, -delta) * 0.05,
-        metadata={
+        metadata=_fixture_metadata({
             "service": service,
             "kind": "slo-snapshot",
             "slo_pct": slo_pct,
             "target_pct": target_pct,
             "windowDays": 30,
-        },
+        }),
     )
 
 
@@ -92,13 +111,13 @@ def _latency_anomaly(service: str, p99_ms: int, baseline_ms: int) -> MetricsDocu
         ),
         source="lyte-anomaly-detector",
         relevanceScore=0.84,
-        metadata={
+        metadata=_fixture_metadata({
             "service": service,
             "kind": "latency-anomaly",
             "p99_ms": p99_ms,
             "baseline_ms": baseline_ms,
             "windowMinutes": 120,
-        },
+        }),
     )
 
 
@@ -116,12 +135,12 @@ def _throughput_drop(service: str, current_rps: float, baseline_rps: float) -> M
         ),
         source="lyte-metrics-store",
         relevanceScore=0.75,
-        metadata={
+        metadata=_fixture_metadata({
             "service": service,
             "kind": "throughput-degradation",
             "currentRps": current_rps,
             "baselineRps": baseline_rps,
-        },
+        }),
     )
 
 
@@ -139,11 +158,11 @@ def _capacity_trend(service: str, headroom_pct: float) -> MetricsDocument:
         ),
         source="lyte-capacity-planner",
         relevanceScore=0.7,
-        metadata={
+        metadata=_fixture_metadata({
             "service": service,
             "kind": "capacity-trend",
             "headroomPct": headroom_pct,
-        },
+        }),
     )
 
 
@@ -160,13 +179,13 @@ def _alert_digest(service: str, firing: int, resolved: int) -> MetricsDocument:
         ),
         source="lyte-alert-pipeline",
         relevanceScore=0.72,
-        metadata={
+        metadata=_fixture_metadata({
             "service": service,
             "kind": "alert-digest",
             "firing": firing,
             "resolved": resolved,
             "windowHours": 24,
-        },
+        }),
     )
 
 
@@ -182,17 +201,17 @@ def _config_divergence(service: str, expected: str, actual: str) -> MetricsDocum
         ),
         source="lyte-config-snapshot",
         relevanceScore=0.68,
-        metadata={
+        metadata=_fixture_metadata({
             "service": service,
             "kind": "config-divergence",
             "expected": expected,
             "actual": actual,
-        },
+        }),
     )
 
 
 def build_default_corpus() -> list[MetricsDocument]:
-    """Build the default in-memory Lyte metrics corpus."""
+    """Build the deterministic development/test fixture corpus."""
     docs: list[MetricsDocument] = []
 
     # SLO snapshots — mix of healthy + breaching.

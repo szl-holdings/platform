@@ -19,7 +19,7 @@ autoStart = true
 run = "bash -c 'cd /home/runner/workspace/artifacts/vessels && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/vessels", "run", "build" ]
+build = [ "bash", "-c", "source scripts/activate-pnpm.sh && exec pnpm --filter @workspace/vessels run build" ]
 publicDir = "artifacts/vessels/dist/public"
 serve = "static"
 

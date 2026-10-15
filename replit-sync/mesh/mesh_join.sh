@@ -2,7 +2,7 @@
 # mesh_join.sh — SZL Sovereign GPU Mesh node-join + auto-detect probe.
 #
 # WHAT IT DOES (idempotent, safe to re-run):
-#   1. Ensures tailscale is installed and the node is up on the betterwithage tailnet.
+#   1. Requires preinstalled Tailscale and joins the betterwithage tailnet.
 #   2. Probes the GPU with nvidia-smi (handles the NO-GPU case gracefully).
 #   3. Writes a node-capability JSON: hostname, tailscale_ip, gpu_name, vram_mb, role, label.
 #   4. Registers that capability with the coordinator (best-effort; also drops a local copy
@@ -34,18 +34,14 @@ log() { printf '[mesh_join] %s\n' "$*" >&2; }
 
 mkdir -p "$CAP_DIR"
 
-# ---------- 1. tailscale install (idempotent) ----------
+# ---------- 1. tailscale prerequisite ----------
 ensure_tailscale() {
   if command -v tailscale >/dev/null 2>&1; then
     log "tailscale present: $(tailscale version | head -n1)"
     return 0
   fi
-  log "tailscale not found — installing via official script"
-  if command -v curl >/dev/null 2>&1; then
-    curl -fsSL https://tailscale.com/install.sh | sh
-  else
-    log "ERROR: curl missing; install tailscale manually, then re-run." ; return 1
-  fi
+  log "ERROR: Tailscale is not installed; install and verify an OS-managed package before re-running."
+  return 1
 }
 
 # ---------- 1b. tailscale up (idempotent) ----------

@@ -79,23 +79,19 @@ jobs:
       SZL_CANDIDATE_VIRTUAL_STORE: ${{ github.workspace }}/candidate/node_modules/.pnpm
       SZL_CANDIDATE_USER: szl-capture-candidate
     steps:
-      - name: Bind runner-scoped paths
+      - name: Bind isolated controller paths
         shell: bash
         env:
           SZL_EVIDENCE_ROOT_VALUE: ${{ runner.temp }}/exact-head-evidence-${{ github.run_id }}-${{ github.run_attempt }}
-          SZL_CANDIDATE_HOME_VALUE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}
-          SZL_CANDIDATE_CACHE_VALUE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/cache
-          SZL_CANDIDATE_STORE_VALUE: ${{ runner.temp }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/store
-          SZL_PNPM_ROOT_VALUE: ${{ runner.temp }}/candidate-pnpm-${{ github.run_id }}-${{ github.run_attempt }}
+          SZL_CANDIDATE_HOME_VALUE: ${{ github.workspace }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}
+          SZL_CANDIDATE_CACHE_VALUE: ${{ github.workspace }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/cache
+          SZL_CANDIDATE_STORE_VALUE: ${{ github.workspace }}/candidate-home-${{ github.run_id }}-${{ github.run_attempt }}/store
+          SZL_PNPM_ROOT_VALUE: ${{ github.workspace }}/candidate-pnpm-${{ github.run_id }}-${{ github.run_attempt }}
           SZL_DEPENDENCY_DIRS_MANIFEST_VALUE: ${{ runner.temp }}/candidate-dependency-dirs-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
           for runner_path in \
             "$SZL_EVIDENCE_ROOT_VALUE" \
-            "$SZL_CANDIDATE_HOME_VALUE" \
-            "$SZL_CANDIDATE_CACHE_VALUE" \
-            "$SZL_CANDIDATE_STORE_VALUE" \
-            "$SZL_PNPM_ROOT_VALUE" \
             "$SZL_DEPENDENCY_DIRS_MANIFEST_VALUE"; do
             case "$runner_path" in
               "$RUNNER_TEMP"/*) ;;
@@ -105,6 +101,21 @@ jobs:
                 ;;
             esac
           done
+          for workspace_path in \
+            "$SZL_CANDIDATE_HOME_VALUE" \
+            "$SZL_CANDIDATE_CACHE_VALUE" \
+            "$SZL_CANDIDATE_STORE_VALUE" \
+            "$SZL_PNPM_ROOT_VALUE"; do
+            case "$workspace_path" in
+              "$GITHUB_WORKSPACE"/*) ;;
+              *)
+                echo "candidate runtime path escaped protected workspace: ${workspace_path}" >&2
+                exit 1
+                ;;
+            esac
+          done
+          test "$SZL_CANDIDATE_CACHE_VALUE" = "$SZL_CANDIDATE_HOME_VALUE/cache"
+          test "$SZL_CANDIDATE_STORE_VALUE" = "$SZL_CANDIDATE_HOME_VALUE/store"
           {
             printf 'SZL_EVIDENCE_ROOT=%s\n' "$SZL_EVIDENCE_ROOT_VALUE"
             printf 'SZL_CANDIDATE_HOME=%s\n' "$SZL_CANDIDATE_HOME_VALUE"
@@ -180,12 +191,12 @@ jobs:
         id: pnpm_setup
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413
         with:
-          dest: ${{ runner.temp }}/candidate-pnpm-${{ github.run_id }}-${{ github.run_attempt }}
+          dest: ${{ github.workspace }}/candidate-pnpm-${{ github.run_id }}-${{ github.run_attempt }}
           standalone: true
           version: 10.26.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "24"
           cache: pnpm
@@ -276,6 +287,24 @@ jobs:
           sudo useradd --system --no-create-home --home-dir /nonexistent \
             --shell /usr/sbin/nologin "$SZL_CANDIDATE_USER"
           candidate_group="$(id -gn "$SZL_CANDIDATE_USER")"
+          if ! sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -x "$GITHUB_WORKSPACE"; then
+            echo "candidate identity cannot traverse protected workspace" >&2
+            exit 1
+          fi
+          for workspace_location in \
+            "$GITHUB_WORKSPACE" "$(realpath -e "$GITHUB_WORKSPACE")"; do
+            workspace_ancestor="$workspace_location"
+            while :; do
+              if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+                test -w "$workspace_ancestor"; then
+                echo "candidate identity can write protected workspace ancestor: ${workspace_ancestor}" >&2
+                exit 1
+              fi
+              [[ "$workspace_ancestor" == / ]] && break
+              workspace_ancestor="$(dirname "$workspace_ancestor")"
+            done
+          done
           sudo install -d -o "$SZL_CANDIDATE_USER" -g "$candidate_group" -m 0700 \
             "$SZL_CANDIDATE_HOME" \
             "$SZL_CANDIDATE_HOME/bin" \
@@ -287,6 +316,16 @@ jobs:
             "$SZL_CANDIDATE_STORE"
           install -d -m 0700 "$SZL_EVIDENCE_ROOT"
           chmod -R a-w "$SZL_CONTROLLER_ROOT" "$SZL_CANDIDATE_ROOT"
+          if ! sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -r "$SZL_CANDIDATE_ROOT/package.json"; then
+            echo "candidate identity cannot read exact candidate source" >&2
+            exit 1
+          fi
+          if ! sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
+            test -w "$SZL_CANDIDATE_HOME"; then
+            echo "candidate identity cannot write its private home" >&2
+            exit 1
+          fi
 
           dependency_dirs=(
             "$SZL_CANDIDATE_HOME/bin"
@@ -325,10 +364,18 @@ jobs:
           printf '%s\0' "${dependency_dirs[@]}" > "$SZL_DEPENDENCY_DIRS_MANIFEST"
           chmod 0600 "$SZL_DEPENDENCY_DIRS_MANIFEST"
 
-          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
-            test ! -w "$SZL_CONTROLLER_ROOT/package.json"
-          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
-            test ! -w "$SZL_CANDIDATE_ROOT/package.json"
+          assert_candidate_test() {
+            local failure_message="$1"
+            shift
+            if ! sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- test "$@"; then
+              printf '%s\n' "$failure_message" >&2
+              return 1
+            fi
+          }
+          assert_candidate_test 'candidate controller source write-denial assertion failed' \
+            ! -w "$SZL_CONTROLLER_ROOT/package.json"
+          assert_candidate_test 'candidate source write-denial assertion failed' \
+            ! -w "$SZL_CANDIDATE_ROOT/package.json"
           if sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
             test -r "$SZL_EVIDENCE_ROOT"; then
             echo "candidate dependency identity can traverse the evidence root" >&2
@@ -345,14 +392,17 @@ jobs:
               exit 1
             fi
           done
-          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
-            test -x "$SZL_PNPM_EXECUTABLE"
-          sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
-            test ! -w "$SZL_PNPM_EXECUTABLE"
-          candidate_writable_pnpm_entry="$(
+          assert_candidate_test 'candidate identity cannot execute admitted pnpm runtime' \
+            -x "$SZL_PNPM_EXECUTABLE"
+          assert_candidate_test 'candidate pnpm executable write-denial assertion failed' \
+            ! -w "$SZL_PNPM_EXECUTABLE"
+          if ! candidate_writable_pnpm_entry="$(
             sudo --non-interactive --user "$SZL_CANDIDATE_USER" -- \
               find "$SZL_PNPM_ROOT" ! -type l -writable -print -quit
-          )"
+          )"; then
+            echo 'candidate identity cannot inventory admitted pnpm runtime' >&2
+            exit 1
+          fi
           if [[ -n "$candidate_writable_pnpm_entry" ]]; then
             echo "candidate identity can write admitted pnpm runtime: ${candidate_writable_pnpm_entry}" >&2
             exit 1
@@ -579,7 +629,7 @@ jobs:
 
       - name: Upload immutable capture evidence
         id: evidence_upload
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: exact-head-screenshot-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/exact-head-evidence-${{ github.run_id }}-${{ github.run_attempt }}/exact-head-evidence-artifact/

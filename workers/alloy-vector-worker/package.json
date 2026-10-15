@@ -3,15 +3,24 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Alloy Embedding Fabric — vector embedding worker. Runs dense (and optional sparse) embedding on CPU using LocalCpuBackend. Supports micro-batching keyed by (profile, backend, modelRef, inputType) with size+time flush, queue-depth metrics, oversize rejection, and backpressure. Adapter seams for ExternalHttpBackend, FutureGpuBackend, FutureAzureBackend.",
-  "main": "src/index.ts",
+  "description": "Alloy Embedding Fabric vector worker. All production embedding remains on HOLD until an allowlisted model artifact, cache digest/provenance, and qualification receipt can be verified.",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
     "@workspace/aef-contracts": "workspace:*",
     "@workspace/aef-storage-adapters": "workspace:*",
     "express": "^5.0.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "express-rate-limit": "^8.5.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
@@ -22,7 +31,7 @@
   "scripts": {
     "build": "tsc --build",
     "dev": "tsx watch src/server.ts",
-    "start": "tsx src/server.ts",
+    "start": "node --enable-source-maps dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

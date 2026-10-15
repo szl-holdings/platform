@@ -26,7 +26,7 @@
 import { AgentRun } from '@workspace/agents-core/run';
 import { emitStepLog } from '@workspace/agents-core/step-log';
 import { globalCollector } from '@workspace/cognitive-observability';
-import { defaultGateway } from '@workspace/tool-mesh';
+import { defaultGateway } from '@workspace/tool-mesh/gateway';
 import { readdir, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -107,7 +107,8 @@ interface ExecutionPlan {
 const MAX_OBJECTIVE_LEN = 32_768;
 
 function planExecution(objective: string): ExecutionPlan {
-  const capped = objective.length > MAX_OBJECTIVE_LEN ? objective.slice(0, MAX_OBJECTIVE_LEN) : objective;
+  const capped =
+    objective.length > MAX_OBJECTIVE_LEN ? objective.slice(0, MAX_OBJECTIVE_LEN) : objective;
   const trimmed = capped.trim();
 
   // 1. JSON command list

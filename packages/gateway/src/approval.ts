@@ -3,9 +3,10 @@
  * Phase 11 — Agent Gateway
  *
  * When the OPA decision requires human approval, this module starts the
- * Temporal `approvalWorkflow` (defined in
- * platform/temporal/workflows/approval-workflow.ts) and waits for the
- * `approvalDecisionSignal` round trip to resolve the workflow.
+ * Temporal `approvalWorkflow` and waits for the `approvalDecisionSignal`
+ * round trip to resolve the workflow. This repository does not ship that
+ * worker; live startup therefore requires an authenticated deployed
+ * workflow/task-queue round-trip proof.
  *
  * Two modes:
  *   - temporalEndpoint === 'local'  → auto-approves immediately (used by
@@ -16,12 +17,15 @@
  *     `approvalDecisionSignal` is received and counted by the workflow.
  */
 
-import { randomUUID } from 'crypto';
-import { agentOperationType } from './capabilities/operation-type.js';
+import { randomUUID } from 'node:crypto';
+import { enforceApprovalGroupCount } from './approval-readiness.js';
+import { agentOperationType } from './operation-type.js';
+import { isProductionRuntime } from './runtime-environment.js';
 import type {
   AgentActionRequest,
-  ApprovalRequest,
   ApprovalOutcome,
+  ApprovalRequest,
+  ApprovalWorkflowProbeConfig,
   CallerIdentity,
   EvidenceRecord,
   OpaDecision,
@@ -96,6 +100,7 @@ function buildWorkflowInput(
     targetVersion: 'agent-gateway',
     policyId: evidence.policyDecision.policyId,
     initiatedBy: evidence.actor,
+    orgId: caller.orgId,
     requestedApproverGroups: req.requiredGroups,
     requiredApprovalCount: req.requiredApprovals,
     timeoutMs: req.timeoutMs,
@@ -115,11 +120,9 @@ async function requestTemporalApproval(
   evidence: EvidenceRecord,
   request: AgentActionRequest,
   caller: CallerIdentity,
+  workflowConfig: ApprovalWorkflowProbeConfig,
 ): Promise<ApprovalOutcome> {
   const { Connection, Client } = await loadTemporalClient();
-
-  const namespace = process.env['TEMPORAL_NAMESPACE'] ?? 'default';
-  const taskQueue = process.env['TEMPORAL_APPROVAL_TASK_QUEUE'] ?? 'approval-task-queue';
 
   let connection: Awaited<ReturnType<typeof Connection.connect>>;
   try {
@@ -132,11 +135,11 @@ async function requestTemporalApproval(
   }
 
   try {
-    const client = new Client({ connection, namespace });
+    const client = new Client({ connection, namespace: workflowConfig.namespace });
     const workflowId = `agent-approval-${req.approvalId}`;
 
     const handle = await client.workflow.start('approvalWorkflow', {
-      taskQueue,
+      taskQueue: workflowConfig.taskQueue,
       workflowId,
       args: [buildWorkflowInput(req, evidence, request, caller)],
       workflowExecutionTimeout: req.timeoutMs + 60_000,
@@ -146,12 +149,65 @@ async function requestTemporalApproval(
     // `approvalDecisionSignal` (or its internal timeout), so awaiting the
     // result is what makes this an end-to-end signal round trip.
     const result = (await handle.result()) as {
-      outcome: 'approved' | 'rejected' | 'expired';
-      approvals?: Array<{ approverUserId: string; decidedAt: string; notes: string | null }>;
+      outcome?: unknown;
+      approvals?: unknown;
     };
 
+    if (
+      result === null ||
+      typeof result !== 'object' ||
+      (result.outcome !== 'approved' &&
+        result.outcome !== 'rejected' &&
+        result.outcome !== 'expired') ||
+      !Array.isArray(result.approvals)
+    ) {
+      throw new ApprovalError(
+        'Temporal approvalWorkflow returned an invalid result',
+        req.approvalId,
+      );
+    }
+
+    const approvals = result.approvals.map((approval) => {
+      if (approval === null || typeof approval !== 'object' || Array.isArray(approval)) {
+        throw new ApprovalError(
+          'Temporal approvalWorkflow returned a malformed approval record',
+          req.approvalId,
+        );
+      }
+      const record = approval as Record<string, unknown>;
+      if (
+        typeof record.approverUserId !== 'string' ||
+        !Array.isArray(record.approverGroups) ||
+        typeof record.decidedAt !== 'string' ||
+        !Number.isFinite(Date.parse(record.decidedAt)) ||
+        (record.notes !== null && typeof record.notes !== 'string')
+      ) {
+        throw new ApprovalError(
+          'Temporal approvalWorkflow returned a malformed approval record',
+          req.approvalId,
+        );
+      }
+      return {
+        approverUserId: record.approverUserId,
+        approverGroups: record.approverGroups as string[],
+        decidedAt: record.decidedAt,
+        notes: record.notes as string | null,
+      };
+    });
+
     if (result.outcome === 'approved') {
-      const first = result.approvals?.[0];
+      const enforced = enforceApprovalGroupCount(
+        req.requiredApprovals,
+        req.requiredGroups,
+        approvals,
+      );
+      if (enforced.outcome !== 'approved') {
+        throw new ApprovalError(
+          'Temporal approvalWorkflow claimed approval without the required unique group-bound count',
+          req.approvalId,
+        );
+      }
+      const first = approvals[0];
       return {
         approvalId: req.approvalId,
         outcome: 'approved',
@@ -161,7 +217,7 @@ async function requestTemporalApproval(
     }
 
     if (result.outcome === 'rejected') {
-      const first = result.approvals?.[0];
+      const first = approvals[0];
       return {
         approvalId: req.approvalId,
         outcome: 'rejected',
@@ -188,6 +244,7 @@ export async function routeApproval(
   request: AgentActionRequest,
   caller: CallerIdentity,
   temporalEndpoint: string,
+  workflowConfig: ApprovalWorkflowProbeConfig | null,
   approvalTimeoutMs: number,
 ): Promise<ApprovalOutcome> {
   if (decision.requiredApprovals === 0) {
@@ -207,8 +264,21 @@ export async function routeApproval(
   };
 
   if (temporalEndpoint === 'local') {
+    if (isProductionRuntime()) {
+      throw new ApprovalError(
+        'Local auto-approval is forbidden in production; configure live Temporal',
+        req.approvalId,
+      );
+    }
     return approveLocal(req);
   }
 
-  return requestTemporalApproval(temporalEndpoint, req, evidence, request, caller);
+  if (!workflowConfig) {
+    throw new ApprovalError(
+      'Live Temporal approval is on HOLD until the workflow proof configuration is present',
+      req.approvalId,
+    );
+  }
+
+  return requestTemporalApproval(temporalEndpoint, req, evidence, request, caller, workflowConfig);
 }
