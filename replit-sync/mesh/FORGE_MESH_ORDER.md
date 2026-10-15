@@ -17,6 +17,8 @@ key.** 0 runtime CDN.
 ## 0. Pre-flight (do once)
 
 - [ ] Confirm a Tailscale tailnet exists anchored by `betterwithage` (`100.125.77.31`).
+- [ ] Install Tailscale on each node through a reviewed OS package path and verify
+      `tailscale version`; `mesh_join.sh` exits if it is absent and never downloads an installer.
 - [ ] Mint a **Tailscale auth key** (reusable, ephemeral if desired). Hold it in the secret
       store ONLY. Export as `TS_AUTHKEY` per node at join time. **Never** put it in a file.
 - [ ] Pick the coordinator host. **Recommended: `a11oy` (always-on, CPU-only, public).**
@@ -51,7 +53,7 @@ sudo -E bash team/AUDIT/mesh/mesh_join.sh
 ```
 
 What it does on each node (idempotent — safe to re-run after a GPU swap or reboot):
-- [ ] installs/checks tailscale, joins the `betterwithage` tailnet (skips re-auth if already up);
+- [ ] checks preinstalled Tailscale, joins the `betterwithage` tailnet (skips re-auth if already up);
 - [ ] runs `nvidia-smi` probe → sums VRAM, reads compute capability; **no GPU → CPU role,
       handled gracefully** (writes `vram_mb: 0`);
 - [ ] writes `${CAP_DIR}/<hostname>.json` (hostname, tailscale_ip, gpu_name, vram_mb,
