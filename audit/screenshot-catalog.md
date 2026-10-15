@@ -928,6 +928,32 @@ The same-origin /api/a11oy/* endpoints returned deterministic ok:false JSON, so 
 | /a11oy/resources | [320x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-resources-2026-09-30-1728x1000.png) |
 | /a11oy/trust | [320x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-320x900.png) · [390x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-390x900.png) · [768x1024](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-768x1024.png) · [1366x900](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1366x900.png) · [1728x1000](../docs/assets/screenshots/current/a11oy-trust-2026-09-30-1728x1000.png) |
 
+## SZL readiness matrix — 2026-10-02
+
+| Field | Value |
+| --- | --- |
+| Filename | [szl-readiness-matrix-2026-10-02.jpg](../docs/assets/screenshots/current/szl-readiness-matrix-2026-10-02.jpg) |
+| Route / surface | `http://127.0.0.1:19873/dashboard.html` / SZL Production-Readiness Matrix |
+| Capture date / agent | `2026-10-02T22:10:24.326488+00:00` / Codex readiness-contract agent |
+| Environment / source | `local-exact-head` / `453c7f8b018322a1b599bd5eddfdc274e50515b3` |
+| Workflow run or command | Local `python -m http.server 19873 --bind 127.0.0.1` and `python -c $szlCaptureScript`; full script in [metadata sidecar](../docs/assets/screenshots/current/szl-readiness-matrix-2026-10-02.metadata.md) |
+| Viewport / SHA-256 | `1366x900` / `5a98f8286ba994d4c99350be3d3d53f168a08f8e00210d3ec69f71bd8c32af1f` |
+| Workcell / proof / status | `SZL-READINESS-20261002` / Level 3 local UI source proof / `current` |
+| Boundary | Real public Hub receipts rendered as `UNVERIFIED`; not a provider-write, deployment, or runtime-readiness proof. |
+
+## SZL readiness matrix — 2026-10-15 local unsigned-claim witness
+
+| Field | Value |
+| --- | --- |
+| Filename | [szl-readiness-matrix-2026-10-15.png](../docs/assets/screenshots/current/szl-readiness-matrix-2026-10-15.png) |
+| Route / surface | `http://127.0.0.1:35885/dashboard.html` / SZL Production-Readiness Matrix |
+| Capture date / agent | `2026-10-15T11:46:37.375806+00:00` / Codex PixelProof role |
+| Environment / source | `local-exact-head` / `d70282985d7b4358cf405fbedc74628bb9475bbf` |
+| Command | Python Playwright helper reproduced in the [metadata sidecar](../docs/assets/screenshots/current/szl-readiness-matrix-2026-10-15.metadata.md) |
+| Viewport / SHA-256 | `1366x900` / `008e14f510d177410892146dcc25aa922b0e063aa00ea50cbce780faab9ae98e` |
+| Workcell / proof / status | `SZL-ORG-PR-20261015` / Level 3 local UI source proof / `current` |
+| Boundary | `SIMULATED_LOCAL_RENDERED_UI`: eight locally supplied unsigned claims stay UNVERIFIED; zero external traffic; no provider, signature, deployment or runtime-readiness proof. |
+
 ## A11oy Workcell Proof Coverage Inspector — 2026-10-02 superseded exact-source local proof
 
 The two captures below are **LOCAL_NON_AUTHORITATIVE** evidence from source

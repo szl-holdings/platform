@@ -6,6 +6,7 @@ test performs a network request, creates a repository, or uploads evidence.
 from __future__ import annotations
 
 import contextlib
+import base64
 import io
 import json
 import os
@@ -25,6 +26,7 @@ PROVIDER_TEXT = "private-provider-body\n::error::untrusted-command"
 sys.path.insert(0, str(LIB))
 import hf_publish_preflight as preflight  # noqa: E402
 import khipu  # noqa: E402
+from test_khipu_publish import _fake_nacl  # noqa: E402
 
 
 class _ProviderError(Exception):
@@ -239,13 +241,32 @@ class PublishPreflightTest(unittest.TestCase):
 
     def test_successful_preflight_cannot_turn_a_failed_real_publish_green(self) -> None:
         self.assertTrue(self._check()["ready"])
-        with patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}), contextlib.redirect_stdout(io.StringIO()) as out:
+        nacl, signing = _fake_nacl()
+        env = {
+            "GITHUB_ACTIONS": "true",
+            "KHIPU_SIGNING_KEY_B64": base64.b64encode(os.urandom(32)).decode(),
+        }
+        with patch.dict(os.environ, env), \
+                patch.dict(sys.modules, {"nacl": nacl, "nacl.signing": signing}), \
+                contextlib.redirect_stdout(io.StringIO()) as out:
             with self.assertRaises(SystemExit) as caught:
                 khipu.emit("readiness-test", {"synthetic_test": True})
         self.assertEqual(caught.exception.code, 1)
+        self.assertIn('"signed": true', out.getvalue())
         self.assertIn('"published": false', out.getvalue())
         self.assertIn("::error title=readiness publish failed::", out.getvalue())
         self.assertEqual(_FakeHfApi.calls[-1][0], "upload")
+
+    def test_successful_preflight_cannot_authorize_an_unsigned_receipt(self) -> None:
+        self.assertTrue(self._check()["ready"])
+        with patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}), \
+                contextlib.redirect_stdout(io.StringIO()) as out:
+            with self.assertRaises(SystemExit) as caught:
+                khipu.emit("readiness-test", {"synthetic_test": True})
+        self.assertEqual(caught.exception.code, 1)
+        self.assertIn('"signed": false', out.getvalue())
+        self.assertIn('"reason": "unsigned receipt"', out.getvalue())
+        self.assertNotIn("upload", [stage for stage, _ in _FakeHfApi.calls])
 
 
 class SecurityPreflightWorkflowTest(unittest.TestCase):
