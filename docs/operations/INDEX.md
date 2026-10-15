@@ -8,7 +8,7 @@ Runbooks, deployment, incident response, release management, testing, and enviro
 | [deployment-guide.md](deployment-guide.md) | Staging and production deployment procedures |
 | [environment-variables.md](environment-variables.md) | Complete environment variable reference (80+ vars) |
 | [environment-validation.md](environment-validation.md) | Environment validation checklist and automated checks |
-| [known-gaps.md](known-gaps.md) | **Canonical** — Known gaps register rev 7 (Final): security, quality, compliance |
+| [known-gaps.md](known-gaps.md) | **Canonical** — Known gaps register: security, quality, compliance |
 | [audit-findings-register.md](audit-findings-register.md) | All 106 audit findings from Phases 0–13 with status |
 | [out-of-scope-register.md](out-of-scope-register.md) | 20 formally deferred/out-of-scope items with rationale |
 | [incident-response.md](incident-response.md) | Incident response playbook and escalation paths |

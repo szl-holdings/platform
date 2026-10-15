@@ -23,8 +23,11 @@
 :8080 {
 	# ── Stage claims — round-robin with active /ready health checks ─────────
 	handle /claim {
-		reverse_proxy py-worker-1:8090 py-worker-2:8091 py-worker-3:8092 {
+			reverse_proxy py-worker-1:8090 py-worker-2:8091 py-worker-3:8092 {
 			lb_policy round_robin
+			# POST /claim has no durable cross-worker idempotency record. Never
+			# replay an ambiguous request to another upstream automatically.
+			lb_try_duration 0s
 
 			# Active health check: poll /ready every 5s, 2s timeout. A worker
 			# that returns 503 (draining or at capacity) is taken out of
@@ -51,6 +54,8 @@
 			}
 
 			header_up X-Protocol-Version {http.request.header.X-Protocol-Version}
+			header_up Authorization {http.request.header.Authorization}
+			header_up X-Tenant-ID {http.request.header.X-Tenant-ID}
 		}
 	}
 
@@ -75,12 +80,16 @@
 	handle /metrics {
 		reverse_proxy py-worker-1:8090 py-worker-2:8091 py-worker-3:8092 {
 			lb_policy round_robin
+			header_up Authorization {http.request.header.Authorization}
+			header_up X-Tenant-ID {http.request.header.X-Tenant-ID}
 		}
 	}
 
 	handle /workers {
 		reverse_proxy py-worker-1:8090 py-worker-2:8091 py-worker-3:8092 {
 			lb_policy round_robin
+			header_up Authorization {http.request.header.Authorization}
+			header_up X-Tenant-ID {http.request.header.X-Tenant-ID}
 		}
 	}
 }

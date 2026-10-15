@@ -24,8 +24,9 @@ implementation therefore cannot produce a fleet-wide `GREEN` verdict.
 `FLAGGED`, `NO-RECEIPT`, `FETCH-ERROR`, `RESAMPLE-ERROR`, `UNVERIFIED`, and any
 unrecognized status prevent a `GREEN` meta-verdict and appear in `flagged_agents`.
 An unsigned receipt is `UNVERIFIED`; an invalid signature is `FLAGGED`.
-Cryptographic validity is checked against the public key carried in the envelope.
-It does not establish an externally pinned signer identity or receipt freshness.
+Cryptographic validity is checked against the configured fleet signing key;
+the public key carried in the envelope must match that authority. A valid
+signature does not establish receipt freshness or verify the underlying claim.
 
 ## How it runs
 - **Daily** via `.github/workflows/readiness-audit-rift.yml` (cron `10 6 * * *`).

@@ -24,9 +24,11 @@ The GitHub Actions job is prepared for a dataset-scoped Hugging Face Trusted
 Publisher with these exact inputs: `szl-holdings/platform` on `main`, workflow
 filename `readiness-observability.yml` (source path
 `.github/workflows/readiness-observability.yml`), resource
-`datasets/SZLHOLDINGS/readiness-runs`. The provider binding must be read back
-before this job is dispatched; source configuration alone does not grant it.
-Other readiness jobs still use their separate `HF_TOKEN` path.
+`datasets/SZLHOLDINGS/readiness-runs`. Source configuration does not establish
+the provider binding. The scheduled job fails closed if the signing key, OIDC
+grant or provider exchange is unavailable. Provider binding readback and a
+successful signed upload remain required before calling this publisher
+operational. Other readiness jobs still use their separate `HF_TOKEN` path.
 
 ## Output contract
 Every run emits a single Khipu receipt (DSSE envelope) to stdout. A receipt

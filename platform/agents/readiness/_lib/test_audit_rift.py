@@ -29,6 +29,11 @@ def receipt(payload: dict) -> dict:
     return {"file": "offline-fixture.json", "envelope": {}, "body": {"payload": payload}}
 
 
+def operability_payload(count: object = 0) -> dict:
+    return {"flagships": [{"repo": "szl-holdings/platform", "commits_last_7d": count,
+                           "revision": "1" * 40, "observed_at_utc": "2026-10-02T12:34:56+00:00"}]}
+
+
 def readme_response() -> str:
     return json.dumps({"type": "file", "name": "README.md", "encoding": "base64",
                        "content": base64.b64encode(b"# Offline README\n").decode() + "\n"})
@@ -110,8 +115,7 @@ class AuditPeerStateTest(unittest.TestCase):
 
     def test_failed_github_rechecks_are_errors(self) -> None:
         samples = {"readiness-security": self.security(),
-                   "readiness-operability": {"flagships": [{"repo": "szl-holdings/platform",
-                                                              "commits_last_7d": 0}]},
+                   "readiness-operability": operability_payload(),
                    "readiness-docs": {"repos": [{"repo": "szl-holdings/platform",
                                                   "present": {"README.md": True}}]}}
         for agent, payload in samples.items():
@@ -130,15 +134,53 @@ class AuditPeerStateTest(unittest.TestCase):
         self.assertEqual(finding["status"], "RESAMPLE-ERROR")
 
     def test_operability_rejects_non_list_commit_response(self) -> None:
-        payload = {"flagships": [{"repo": "szl-holdings/platform", "commits_last_7d": 1}]}
+        payload = operability_payload(1)
         finding = self.check("readiness-operability", payload, (0, '{"message":"failure"}'))
         self.assertEqual(finding["status"], "RESAMPLE-ERROR")
 
-    def test_operability_maintains_the_existing_count_tolerance(self) -> None:
-        payload = {"flagships": [{"repo": "szl-holdings/platform", "commits_last_7d": 3}]}
+    def test_operability_requires_exact_count_at_identical_revision_and_time(self) -> None:
+        payload = operability_payload(1)
         self.assertEqual(self.check("readiness-operability", payload)["status"], "FLAGGED")
         payload["flagships"][0]["commits_last_7d"] = 0
         self.assertEqual(self.check("readiness-operability", payload)["status"], "VERIFIED")
+
+    def test_operability_exhausts_pages_at_the_reported_revision_and_time(self) -> None:
+        commits = [{"sha": f"{i:040x}"} for i in range(153)]
+        with patch.object(audit, "latest_peer_receipt", return_value=receipt(operability_payload(153))), \
+                patch.object(audit, "gh", side_effect=[(0, json.dumps(commits[:100])), (0, json.dumps(commits[100:]))]) as github:
+            finding = audit.audit_peer("readiness-operability")
+        self.assertEqual(finding["status"], "VERIFIED")
+        self.assertEqual(finding["independent_commits"], 153)
+        self.assertEqual(len(github.call_args_list), 2)
+        for page, call in enumerate(github.call_args_list, 1):
+            self.assertEqual(call.args[0], f"repos/szl-holdings/platform/commits?sha={'1' * 40}&since=2026-09-25T12:34:56Z&until=2026-10-02T12:34:56Z&per_page=100&page={page}")
+
+    def test_operability_legacy_or_invalid_pins_are_unverified_without_requests(self) -> None:
+        for field, value in (("revision", None), ("revision", "main"), ("observed_at_utc", None),
+                             ("observed_at_utc", "invalid"), ("observed_at_utc", "2026-10-02T12:34:56"),
+                             ("observed_at_utc", "2026-10-02T12:34:56+01:00")):
+            with self.subTest(field=field, value=value):
+                payload = operability_payload()
+                payload["flagships"][0][field] = value
+                with patch.object(audit, "latest_peer_receipt", return_value=receipt(payload)), \
+                        patch.object(audit, "gh") as github:
+                    self.assertEqual(audit.audit_peer("readiness-operability")["status"], "UNVERIFIED")
+                github.assert_not_called()
+
+    def test_operability_malformed_duplicate_and_incomplete_pages_are_errors(self) -> None:
+        page = [{"sha": f"{i:040x}"} for i in range(100)]
+        cases = [[(0, json.dumps([{"sha": "not-a-sha"}]))],
+                 [(0, json.dumps([page[0], page[0]]))],
+                 [(0, json.dumps(page)), (0, json.dumps([page[0]]))],
+                 [(0, json.dumps(page)), (1, "unavailable")],
+                 [(0, json.dumps([{"sha": f"{i:040x}"} for i in range(n * 100, (n + 1) * 100)])) for n in range(10)]]
+        for responses in cases:
+            with self.subTest(pages=len(responses)):
+                with patch.object(audit, "latest_peer_receipt", return_value=receipt(operability_payload(1000))), \
+                        patch.object(audit, "gh", side_effect=responses):
+                    finding = audit.audit_peer("readiness-operability")
+                self.assertEqual(finding["status"], "RESAMPLE-ERROR")
+                self.assertNotIn("independent_commits", finding)
 
     def test_operability_does_not_verify_error_sentinels_or_invalid_counts(self) -> None:
         for count in (-1, -99, True, False, 0.0, 0.5, float("nan"), float("inf"), "0", None):

@@ -1,25 +1,28 @@
 import { randomUUID } from 'node:crypto';
-import { EmbedRequestSchema } from '@workspace/aef-contracts';
+import { type EmbeddingExecutionReceipt, EmbedRequestSchema } from '@workspace/aef-contracts';
 import type { PolicyContext } from '@workspace/aef-policy-guard';
-import { type EmbedInput, createDefaultBackend, LocalCpuBackend } from '@workspace/alloy-vector-worker';
+import type { EmbedInput } from '@workspace/alloy-vector-worker';
 import type { Request, Response, Router } from 'express';
 import { defaultLedgerStore, policyEngine, tenantEnforcer } from '../context.js';
+import {
+  areAuthoritativeEmbeddingOutputs,
+  getEmbeddingBackend,
+  verifyEmbeddingBackendReadiness,
+} from '../embedding-backend.js';
 import { logger } from '../logger.js';
+import { createGlobalRateLimit } from '../middleware/rate-limit.js';
 import { getRequestId } from '../middleware/request-id.js';
 import { getTenantId } from '../middleware/tenant.js';
 
-// Select backend based on environment — defaults to LocalCpuBackend on Replit
-const embeddingBackend = createDefaultBackend();
-
 export function registerEmbedRoute(router: Router): void {
-  router.post('/v1/embed', async (req: Request, res: Response) => {
+  router.post('/v1/embed', createGlobalRateLimit(), async (req: Request, res: Response) => {
     const parsed = EmbedRequestSchema.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: 'validation_error', issues: parsed.error.issues });
       return;
     }
 
-    const { requestId, texts, model, profileId } = parsed.data;
+    const { requestId, texts, model, modelRevision, profileId } = parsed.data;
     const tenantId = getTenantId(res);
     const startMs = Date.now();
     const reqId = requestId || getRequestId(req);
@@ -51,10 +54,29 @@ export function registerEmbedRoute(router: Router): void {
       return;
     }
 
-    // Check backend availability; fall back to LocalCpuBackend if needed
-    const isAvailable = await embeddingBackend.isAvailable();
-    const backend = isAvailable ? embeddingBackend : new LocalCpuBackend();
-    const resolvedModel = model ?? backend.modelRef;
+    const backend = getEmbeddingBackend();
+    const activeRevision = /@([0-9a-f]{40})$/i.exec(backend.modelRef)?.[1]?.toLowerCase();
+    if (model && model !== backend.modelRef) {
+      res.status(400).json({
+        error: 'unsupported_model',
+        requestedModel: model,
+        availableModel: backend.modelRef,
+      });
+      return;
+    }
+    if (modelRevision && modelRevision.toLowerCase() !== activeRevision) {
+      res.status(400).json({
+        error: 'unsupported_model_revision',
+        requestedModelRevision: modelRevision,
+        ...(activeRevision ? { availableModelRevision: activeRevision } : {}),
+      });
+      return;
+    }
+    if (!(await verifyEmbeddingBackendReadiness())) {
+      res.status(503).json({ error: 'embedding_backend_unavailable' });
+      return;
+    }
+    const resolvedModel = backend.modelRef;
 
     const inputs: EmbedInput[] = texts.map((text: string, index: number) => ({
       chunkId: `embed-${reqId}-${index}`,
@@ -65,13 +87,25 @@ export function registerEmbedRoute(router: Router): void {
     }));
 
     const outputs = await backend.embed(inputs);
+    if (!areAuthoritativeEmbeddingOutputs(inputs, outputs)) {
+      res.status(502).json({ error: 'invalid_embedding_backend_response' });
+      return;
+    }
 
     const completedAt = new Date().toISOString();
+    const execution: EmbeddingExecutionReceipt = {
+      backendId: `${backend.kind}:${resolvedModel}`,
+      modelId: resolvedModel,
+      ...(activeRevision ? { modelRevision: activeRevision } : {}),
+      dimensions: backend.dimensions,
+      normalized: true,
+      promotionState: 'DEVELOPMENT',
+      supportedModalities: ['text'],
+    };
 
     // Ledger write — every embed operation is governed and auditable
     let ledgerFailures = 0;
-    for (let i = 0; i < outputs.length; i++) {
-      const output = outputs[i]!;
+    for (const output of outputs) {
       try {
         defaultLedgerStore.append({
           entryId: randomUUID(),
@@ -88,7 +122,7 @@ export function registerEmbedRoute(router: Router): void {
           redactedFields: policyDecision.redactions,
           requestedAt,
           completedAt,
-          backendId: `${backend.kind}:${resolvedModel}`,
+          backendId: `${backend.kind}:${output.modelRef}`,
           stageTimings: { embed: output.latencyMs ?? 0 },
           scoreBreakdown: { tokenCount: output.tokenCount ?? 0 },
         });
@@ -115,6 +149,7 @@ export function registerEmbedRoute(router: Router): void {
       tenantId,
       traceId: randomUUID(),
       model: resolvedModel,
+      ...(activeRevision ? { modelRevision: activeRevision } : {}),
       backend: backend.kind,
       dimensions: backend.dimensions,
       vectors: outputs.map((o, index) => ({
@@ -124,6 +159,7 @@ export function registerEmbedRoute(router: Router): void {
         tokenCount: o.tokenCount,
         latencyMs: o.latencyMs,
       })),
+      execution,
       ...(ledgerFailures > 0 ? { ledgerFailures } : {}),
       processingMs: Date.now() - startMs,
     });

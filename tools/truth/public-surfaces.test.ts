@@ -141,22 +141,60 @@ function apiResponse(
   };
 }
 
+function webResponse(url: string, body: string, contentType = 'text/html; charset=utf-8') {
+  return apiResponse(url, body, contentType);
+}
+
+const CHAT_BOUNDARY_META =
+  '<meta name="szl-evidence-boundary" content="szl.public-surface-boundary/v1;surface=a11oy-net-chat;execution=UNAVAILABLE">';
+const CODE_BOUNDARY_META =
+  '<meta name="szl-evidence-boundary" content="szl.public-surface-boundary/v1;surface=a11oy-net-code;execution=UNAVAILABLE">';
+const KILLINCHU_BOUNDARY_META =
+  '<meta name="szl-evidence-boundary" content="szl.public-surface-boundary/v1;surface=killinchu-console;effectors=SIMULATED;authorization=UNAVAILABLE">';
+const COMMAND_BOUNDARY_META =
+  '<meta name="szl-evidence-boundary" content="szl.public-surface-boundary/v1;surface=a11oy-command;origin=MODELED;energy=UNAVAILABLE;signer=UNAVAILABLE">';
+
+const CHAT_GATEWAY_HTML =
+  '<!doctype html><html><head><title>A11oy Chat Gateway | Governed Product Console</title>' +
+  '<link rel="canonical" href="https://a11oy.net/chat/">' +
+  `${CHAT_BOUNDARY_META}</head>` +
+  '<body>This gateway does not execute a prompt.</body></html>';
+const CODE_GATEWAY_HTML =
+  '<!doctype html><html><head><title>A11oy Code Gateway | Governed Run-Loop</title>' +
+  '<link rel="canonical" href="https://a11oy.net/code/">' +
+  `${CODE_BOUNDARY_META}</head>` +
+  '<body>this page does not execute code</body></html>';
+const KILLINCHU_CONSOLE_HTML =
+  '<!doctype html><html><head><title>a11oy · Killinchu</title>' +
+  '<link rel="canonical" href="https://a-11-oy.com/killinchu">' +
+  `${KILLINCHU_BOUNDARY_META}</head>` +
+  '<body>Effectors stay SIMULATED. Awaiting observed state; no runtime claim made.</body></html>';
+const COMMAND_CENTER_HTML =
+  '<!doctype html><html><head><title>a11oy Command Center</title>' +
+  '<link rel="canonical" href="https://a-11-oy.com/command">' +
+  `${COMMAND_BOUNDARY_META}</head>` +
+  '<body>Product origin a-11-oy.com · Proof a11oy.net · Energy UNAVAILABLE in this browser. · ' +
+  'Signer UNSIGNED-honest · No secret values · This surface is MODELED on static origin until ' +
+  'the Space runtime signs a write.</body></html>';
+
 const KILLINCHU_BUILD_INFO_BODY = {
   status: 'OBSERVED',
   service: 'killinchu',
   build: {
     state: 'OBSERVED',
-    revision: '859e26cf27164b38c4e289e40a751ce80d403368',
+    revision: '4a434f8d07feb7badc5a274c89549452f49ff0d1',
     revision_source: 'env:SZL_GIT_SHA',
   },
   receipt_minted: true,
+  receipt_minted_on_request: false,
+  receipt_minted_scope: 'DEPLOYMENT_RELEASE_REFERENCE',
   release_receipt: {
     state: 'GITHUB_OIDC_ATTESTED',
-    source_revision: '859e26cf27164b38c4e289e40a751ce80d403368',
+    source_revision: '4a434f8d07feb7badc5a274c89549452f49ff0d1',
     subject: 'hf-deploy-manifest.json',
-    subject_sha256: '7730a0334485ed3ca4754b38bd288ac004258918f0ede46719e72ae2a2ede960',
-    attestation_id: '39971795',
-    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/39971795',
+    subject_sha256: '38c7d69a6a374afe157f23ab2760bab4b58146efa1beee00bc30519b990216d5',
+    attestation_id: '55856266',
+    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/55856266',
     verification:
       'Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu',
   },
@@ -165,18 +203,55 @@ const KILLINCHU_BUILD_INFO_BODY = {
 const KILLINCHU_READINESS_BODY = {
   status: 'ready',
   organ: 'killinchu',
-  khipu_backend: 'sqlite',
-  khipu_durable: true,
-  khipu_depth: 0,
-  khipu_chain_ok: true,
-  khipu_first_break_seq: -1,
   doctrine: 'v11',
+  ledger: {
+    schema: 'szl.killinchu.ledger-readiness/v1',
+    durability_state: 'EPHEMERAL',
+    requested_mode: 'EPHEMERAL',
+    ready: true,
+    production_ready: false,
+    production_readiness_basis: 'NOT_APPLICABLE',
+    readiness_probe: 'READ_ONLY',
+    persistence_scope: 'PROCESS_MEMORY',
+    startup_state: 'READY',
+    adapter_configured: false,
+    adapter_state: 'NOT_APPLICABLE',
+    integrity: { state: 'VERIFIED', verified: true, nodes: 0, root: null },
+    replay: { state: 'NOT_APPLICABLE', nodes: 0 },
+    recovery: { attempts: 0, retry_after_s: 0 },
+    reason: 'ephemeral ledger is available for this process only',
+  },
+  ledger_role: 'CANONICAL_RECEIPT_LEDGER',
+  backend_store_diagnostics: {
+    ledger_role: 'BACKEND_HARDENING_DIAGNOSTIC_STORE',
+    backend: 'sqlite',
+    depth: 0,
+    chain_ok: true,
+    first_break_seq: -1,
+    provider_persistence: 'UNKNOWN',
+    production_ready: false,
+  },
+  receipt_minted: false,
 };
 
 function configuredSurface(id: string): PublicSurface {
   const candidate = CONFIGURED_REGISTRY.surfaces.find((surface) => surface.id === id);
   assert.ok(candidate, `missing configured surface ${id}`);
   return candidate;
+}
+
+function reachableWebContractSurface(id: string): PublicSurface {
+  const candidate = configuredSurface(id);
+  assert.equal(candidate.kind, 'WEB');
+  return {
+    ...candidate,
+    mode: 'MIXED',
+    availability: 'REACHABLE',
+    observation: {
+      ...candidate.observation,
+      status: 200,
+    },
+  };
 }
 
 test('counts only routed customer-facing web surfaces', () => {
@@ -223,18 +298,18 @@ test('binds the configured public-surface summary to the reviewed registry', () 
   const manifest = buildPublicSurfaceManifest(CONFIGURED_REGISTRY);
   assert.deepEqual(manifest.summary, {
     declared: 29,
-    customer_facing_products: 2,
-    customer_facing_routes: 12,
+    customer_facing_products: 1,
+    customer_facing_routes: 15,
     by_availability: {
-      REACHABLE: 18,
-      REDIRECTED: 1,
-      UNAVAILABLE: 10,
+      REACHABLE: 20,
+      REDIRECTED: 2,
+      UNAVAILABLE: 7,
     },
     by_mode: {
       LIVE: 5,
-      MIXED: 9,
-      DOCUMENTATION: 5,
-      UNAVAILABLE: 10,
+      MIXED: 10,
+      DOCUMENTATION: 7,
+      UNAVAILABLE: 7,
     },
   });
 });
@@ -256,20 +331,20 @@ test('counts routed products independently from pages and excludes unavailable p
         observation: { method: 'GET', status: 200, final_url: 'https://a-11-oy.com/docs' },
       }),
       surface({
-        id: 'killinchu-public-console',
-        name: 'Killinchu public console',
-        canonical_url: 'https://a-11-oy.com/killinchu',
+        id: 'legacy-lyte-route',
+        name: 'Historical Lyte route',
+        canonical_url: 'https://a-11-oy.com/lyte/',
         mode: 'UNAVAILABLE',
         availability: 'UNAVAILABLE',
         source_owner: {
-          repository: 'szl-holdings/killinchu',
-          path: 'web/index.html',
+          repository: 'szl-holdings/example',
+          path: 'README.md',
           role: 'REMEDIATION_OWNER',
         },
         observation: {
           method: 'GET',
-          status: 503,
-          final_url: 'https://szlholdings-killinchu.hf.space/',
+          status: 404,
+          final_url: 'https://a-11-oy.com/lyte/',
         },
       }),
       surface({
@@ -441,6 +516,30 @@ test('wires freshness only to scheduled and explicit manual events', () => {
   assert.doesNotMatch(workItem?.run ?? '', /head -n1/);
 });
 
+test('runs truth contracts inside the required Runtime Audit context', () => {
+  const workflow = YAML.parse(readFileSync('.github/workflows/audit-full.yml', 'utf8')) as {
+    jobs: {
+      audit: {
+        name: string;
+        steps: Array<{
+          name?: string;
+          run?: string;
+          if?: string;
+          'continue-on-error'?: boolean;
+        }>;
+      };
+    };
+  };
+
+  assert.equal(workflow.jobs.audit.name, 'Runtime Audit (audit:full)');
+  const validation = workflow.jobs.audit.steps.find(
+    (step) => step.name === 'Validate claims and public-surface contracts',
+  );
+  assert.equal(validation?.run, 'pnpm claims:validate');
+  assert.equal(validation?.if, undefined);
+  assert.equal(validation?.['continue-on-error'], undefined);
+});
+
 test('rejects a reachable claim backed by an HTTP failure', () => {
   const invalid = registry([
     surface({
@@ -530,20 +629,20 @@ test('caps live verification at four complete surface transactions', async () =>
 
 test('holds one worker slot across an approved redirect transaction', async () => {
   const unavailable = surface({
-    id: 'killinchu-public-console',
-    name: 'Killinchu public console',
-    canonical_url: 'https://a-11-oy.com/killinchu',
+    id: 'a11oy-net-chat-gap',
+    name: 'A11oy.net chat gateway',
+    canonical_url: 'https://a11oy.net/chat',
     mode: 'UNAVAILABLE',
     availability: 'UNAVAILABLE',
     source_owner: {
-      repository: 'szl-holdings/killinchu',
-      path: 'web/index.html',
+      repository: 'szl-holdings/a11oy-net',
+      path: 'chat/index.html',
       role: 'REMEDIATION_OWNER',
     },
     observation: {
       method: 'GET',
       status: 503,
-      final_url: 'https://szlholdings-killinchu.hf.space/',
+      final_url: 'https://a11oy.net/chat/',
     },
   });
   const direct = configuredDirectWebSurfaces(4);
@@ -573,7 +672,7 @@ test('holds one worker slot across an approved redirect transaction', async () =
     assert.equal(init.redirect, 'manual');
     if (url === unavailable.canonical_url) {
       return {
-        status: 307,
+        status: 301,
         url,
         body: null,
         headers: {
@@ -890,13 +989,31 @@ test('validates the exact Killinchu build-info source-binding body', async () =>
   ]);
 });
 
-test('validates the exact Killinchu readiness body without freezing dynamic depth', async () => {
+test('validates exact ephemeral Killinchu readiness without freezing ledger sizes', async () => {
   const candidate = configuredSurface('killinchu-readiness-api');
   const verify = (payload: unknown) =>
     verifyLivePublicSurfaces(registry([candidate]), async (url) => apiResponse(url, payload));
 
   assert.deepEqual(await verify(KILLINCHU_READINESS_BODY), []);
-  assert.deepEqual(await verify({ ...KILLINCHU_READINESS_BODY, khipu_depth: 7 }), []);
+  assert.deepEqual(
+    await verify({
+      ...KILLINCHU_READINESS_BODY,
+      ledger: {
+        ...KILLINCHU_READINESS_BODY.ledger,
+        integrity: {
+          ...KILLINCHU_READINESS_BODY.ledger.integrity,
+          nodes: 7,
+          root: 'a'.repeat(64),
+        },
+        replay: { ...KILLINCHU_READINESS_BODY.ledger.replay, nodes: 7 },
+      },
+      backend_store_diagnostics: {
+        ...KILLINCHU_READINESS_BODY.backend_store_diagnostics,
+        depth: 7,
+      },
+    }),
+    [],
+  );
 
   const missingDoctrine = { ...KILLINCHU_READINESS_BODY } as Record<string, unknown>;
   delete missingDoctrine.doctrine;
@@ -906,10 +1023,48 @@ test('validates the exact Killinchu readiness body without freezing dynamic dept
   for (const invalid of [
     missingDoctrine,
     { ...KILLINCHU_READINESS_BODY, unexpected: true },
-    { ...KILLINCHU_READINESS_BODY, khipu_durable: false },
-    { ...KILLINCHU_READINESS_BODY, khipu_chain_ok: false },
-    { ...KILLINCHU_READINESS_BODY, khipu_depth: -1 },
-    { ...KILLINCHU_READINESS_BODY, khipu_first_break_seq: 0 },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      ledger: { ...KILLINCHU_READINESS_BODY.ledger, durability_state: 'DURABLE_EXTERNAL' },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      ledger: { ...KILLINCHU_READINESS_BODY.ledger, production_ready: true },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      ledger: { ...KILLINCHU_READINESS_BODY.ledger, persistence_scope: 'EXTERNAL_SERVICE' },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      ledger: { ...KILLINCHU_READINESS_BODY.ledger, readiness_probe: 'WRITE_CAPABILITY' },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      ledger: {
+        ...KILLINCHU_READINESS_BODY.ledger,
+        integrity: {
+          ...KILLINCHU_READINESS_BODY.ledger.integrity,
+          nodes: 1,
+          root: null,
+        },
+      },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      backend_store_diagnostics: {
+        ...KILLINCHU_READINESS_BODY.backend_store_diagnostics,
+        depth: -1,
+      },
+    },
+    {
+      ...KILLINCHU_READINESS_BODY,
+      backend_store_diagnostics: {
+        ...KILLINCHU_READINESS_BODY.backend_store_diagnostics,
+        production_ready: true,
+      },
+    },
+    { ...KILLINCHU_READINESS_BODY, receipt_minted: true },
     { ...KILLINCHU_READINESS_BODY, doctrine: ['v', String(10)].join('') },
   ]) {
     assert.deepEqual(await verify(invalid), contractFailure);
@@ -972,8 +1127,8 @@ test('rejects duplicate, trailing, and over-depth JSON before API contract valid
 
   const candidate = configuredSurface('killinchu-build-info-api');
   const duplicateBody = JSON.stringify(KILLINCHU_BUILD_INFO_BODY).replace(
-    '"source_revision":"859e26cf27164b38c4e289e40a751ce80d403368"',
-    '"source_revision":"859e26cf27164b38c4e289e40a751ce80d403368","source\\u005frevision":"859e26cf27164b38c4e289e40a751ce80d403368"',
+    '"source_revision":"4a434f8d07feb7badc5a274c89549452f49ff0d1"',
+    '"source_revision":"4a434f8d07feb7badc5a274c89549452f49ff0d1","source\\u005frevision":"4a434f8d07feb7badc5a274c89549452f49ff0d1"',
   );
   const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
     apiResponse(url, duplicateBody),
@@ -1034,20 +1189,20 @@ test('retries a transient approved redirect final hop while retaining one worker
   timeout: 5_000,
 }, async () => {
   const unavailable = surface({
-    id: 'killinchu-public-console',
-    name: 'Killinchu public console',
-    canonical_url: 'https://a-11-oy.com/killinchu',
+    id: 'a11oy-net-chat-gap',
+    name: 'A11oy.net chat gateway',
+    canonical_url: 'https://a11oy.net/chat',
     mode: 'UNAVAILABLE',
     availability: 'UNAVAILABLE',
     source_owner: {
-      repository: 'szl-holdings/killinchu',
-      path: 'web/index.html',
+      repository: 'szl-holdings/a11oy-net',
+      path: 'chat/index.html',
       role: 'REMEDIATION_OWNER',
     },
     observation: {
       method: 'GET',
       status: 503,
-      final_url: 'https://szlholdings-killinchu.hf.space/',
+      final_url: 'https://a11oy.net/chat/',
     },
   });
   const direct = configuredDirectWebSurfaces(4);
@@ -1069,7 +1224,7 @@ test('retries a transient approved redirect final hop while retaining one worker
     requests.push(url);
     if (url === unavailable.canonical_url) {
       return {
-        status: 307,
+        status: 301,
         url,
         body: null,
         headers: {
@@ -1160,62 +1315,66 @@ test('does not issue a request when file-controlled target validation fails', as
   assert.ok(failures.every((failure) => failure.startsWith('registry: ')));
 });
 
-test('accepts the approved Killinchu redirect and successful final route', async () => {
-  const redirected = surface({
-    id: 'killinchu-public-console',
-    name: 'Killinchu public console',
-    canonical_url: 'https://a-11-oy.com/killinchu',
-    mode: 'MIXED',
-    availability: 'REDIRECTED',
-    source_owner: {
-      repository: 'szl-holdings/killinchu',
-      path: 'web/console.html',
-      role: 'RUNTIME_OWNER',
-    },
-    observation: {
-      method: 'GET',
-      status: 200,
-      final_url: 'https://szlholdings-killinchu.hf.space/',
-    },
-  });
-  const requests: string[] = [];
+test('accepts approved A11oy.net redirects and validates owner-backed final pages', async () => {
+  const cases = [
+    [configuredSurface('a11oy-net-chat-gap'), CHAT_GATEWAY_HTML],
+    [configuredSurface('a11oy-net-code-gap'), CODE_GATEWAY_HTML],
+  ] as const;
 
-  const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url, init) => {
-    requests.push(url);
-    assert.equal(init.redirect, 'manual');
-    if (url === redirected.canonical_url) {
-      return {
-        status: 307,
-        url,
-        body: null,
-        headers: {
-          get: (name: string) => (name === 'location' ? redirected.observation.final_url : null),
-        },
-      };
-    }
-    return { status: 200, url, body: null, headers: { get: () => null } };
-  });
+  for (const [redirected, finalBody] of cases) {
+    const requests: string[] = [];
+    const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url, init) => {
+      requests.push(url);
+      assert.equal(init.redirect, 'manual');
+      if (url === redirected.canonical_url) {
+        return {
+          status: 301,
+          url,
+          body: null,
+          headers: {
+            get: (name: string) =>
+              name.toLowerCase() === 'location' ? redirected.observation.final_url : null,
+          },
+        };
+      }
+      return webResponse(url, finalBody);
+    });
 
-  assert.deepEqual(failures, []);
-  assert.deepEqual(requests, [redirected.canonical_url, redirected.observation.final_url]);
+    assert.deepEqual(failures, []);
+    assert.deepEqual(requests, [redirected.canonical_url, redirected.observation.final_url]);
+  }
 });
 
-test('accepts an explicit unavailable Killinchu redirect with a 503 final', async () => {
+test('validates owner-backed direct A11oy page bodies', async () => {
+  const cases = [
+    [reachableWebContractSurface('killinchu-public-console'), KILLINCHU_CONSOLE_HTML],
+    [reachableWebContractSurface('legacy-command-route'), COMMAND_CENTER_HTML],
+  ] as const;
+
+  for (const [candidate, body] of cases) {
+    const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
+      webResponse(url, body),
+    );
+    assert.deepEqual(failures, []);
+  }
+});
+
+test('accepts an explicit unavailable approved gateway redirect with a 503 final', async () => {
   const unavailable = surface({
-    id: 'killinchu-public-console',
-    name: 'Killinchu public console',
-    canonical_url: 'https://a-11-oy.com/killinchu',
+    id: 'a11oy-net-chat-gap',
+    name: 'A11oy.net chat gateway',
+    canonical_url: 'https://a11oy.net/chat',
     mode: 'UNAVAILABLE',
     availability: 'UNAVAILABLE',
     source_owner: {
-      repository: 'szl-holdings/killinchu',
-      path: 'web/index.html',
+      repository: 'szl-holdings/a11oy-net',
+      path: 'chat/index.html',
       role: 'REMEDIATION_OWNER',
     },
     observation: {
       method: 'GET',
       status: 503,
-      final_url: 'https://szlholdings-killinchu.hf.space/',
+      final_url: 'https://a11oy.net/chat/',
     },
   });
   const requests: string[] = [];
@@ -1223,14 +1382,14 @@ test('accepts an explicit unavailable Killinchu redirect with a 503 final', asyn
   const failures = await verifyLivePublicSurfaces(registry([unavailable]), async (url, init) => {
     requests.push(url);
     assert.equal(init.redirect, 'manual');
-    if (url === 'https://a-11-oy.com/killinchu') {
+    if (url === unavailable.canonical_url) {
       return {
-        status: 307,
+        status: 301,
         url,
         body: null,
         headers: {
           get: (name: string) =>
-            name === 'location' ? 'https://szlholdings-killinchu.hf.space/' : null,
+            name.toLowerCase() === 'location' ? unavailable.observation.final_url : null,
         },
       };
     }
@@ -1238,68 +1397,269 @@ test('accepts an explicit unavailable Killinchu redirect with a 503 final', asyn
   });
 
   assert.deepEqual(failures, []);
-  assert.deepEqual(requests, [
-    'https://a-11-oy.com/killinchu',
-    'https://szlholdings-killinchu.hf.space/',
-  ]);
+  assert.deepEqual(requests, [unavailable.canonical_url, unavailable.observation.final_url]);
 });
 
-test('rejects an unapproved Killinchu redirect target', async () => {
-  const unavailable = surface({
-    id: 'killinchu-public-console',
-    name: 'Killinchu public console',
-    canonical_url: 'https://a-11-oy.com/killinchu',
-    mode: 'UNAVAILABLE',
-    availability: 'UNAVAILABLE',
-    observation: {
-      method: 'GET',
-      status: 503,
-      final_url: 'https://szlholdings-killinchu.hf.space/',
-    },
-  });
+test('rejects an unapproved A11oy.net gateway redirect target', async () => {
+  const redirected = configuredSurface('a11oy-net-chat-gap');
   const requests: string[] = [];
 
-  const failures = await verifyLivePublicSurfaces(registry([unavailable]), async (url) => {
+  const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url) => {
     requests.push(url);
     return {
-      status: 307,
+      status: 301,
       url,
       body: null,
       headers: { get: () => 'https://example.com/unapproved' },
     };
   });
 
-  assert.deepEqual(requests, ['https://a-11-oy.com/killinchu']);
+  assert.deepEqual(requests, [redirected.canonical_url]);
   assert.deepEqual(failures, [
-    'killinchu-public-console: expected redirect to https://szlholdings-killinchu.hf.space/, observed https://example.com/unapproved',
+    'a11oy-net-chat-gap: expected redirect to https://a11oy.net/chat/, observed https://example.com/unapproved',
   ]);
 });
 
+test('rejects identity, canonical, boundary, and content-type drift on owner-backed WEB pages', async () => {
+  const candidate = reachableWebContractSurface('killinchu-public-console');
+  const verify = (body: string, contentType = 'text/html; charset=utf-8') =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) =>
+      webResponse(url, body, contentType),
+    );
+
+  assert.deepEqual(await verify(KILLINCHU_CONSOLE_HTML.replace('a11oy · Killinchu', 'Other')), [
+    'killinchu-public-console: WEB body has an unexpected product identity',
+  ]);
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace('</title>', '</title><title>a11oy · Killinchu</title>'),
+    ),
+    ['killinchu-public-console: WEB body has an unexpected product identity'],
+  );
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        'https://a-11-oy.com/killinchu',
+        'https://example.com/unapproved',
+      ),
+    ),
+    ['killinchu-public-console: WEB body has an unexpected canonical URL'],
+  );
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        '</head>',
+        '<link rel="canonical" href="https://a-11-oy.com/killinchu"></head>',
+      ),
+    ),
+    ['killinchu-public-console: WEB body has an unexpected canonical URL'],
+  );
+  assert.deepEqual(
+    await verify(KILLINCHU_CONSOLE_HTML.replace('effectors=SIMULATED', 'effectors=DECLARED')),
+    ['killinchu-public-console: WEB head lacks its exact evidence-boundary declaration'],
+  );
+  assert.deepEqual(await verify(KILLINCHU_CONSOLE_HTML.replace(KILLINCHU_BOUNDARY_META, '')), [
+    'killinchu-public-console: WEB head lacks its exact evidence-boundary declaration',
+  ]);
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        KILLINCHU_BOUNDARY_META,
+        `${KILLINCHU_BOUNDARY_META}${KILLINCHU_BOUNDARY_META}`,
+      ),
+    ),
+    ['killinchu-public-console: WEB head lacks its exact evidence-boundary declaration'],
+  );
+  assert.deepEqual(await verify(KILLINCHU_CONSOLE_HTML, 'application/json'), [
+    'killinchu-public-console: expected a text/html response, observed application/json',
+  ]);
+});
+
+test('rejects owner-backed WEB evidence that exists only inside HTML comments', async () => {
+  const candidate = reachableWebContractSurface('killinchu-public-console');
+  const verify = (body: string) =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) => webResponse(url, body));
+
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        '<title>a11oy · Killinchu</title>',
+        '<!-- <title>a11oy · Killinchu</title> -->',
+      ),
+    ),
+    ['killinchu-public-console: WEB body has an unexpected product identity'],
+  );
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        '<link rel="canonical" href="https://a-11-oy.com/killinchu">',
+        '<!-- <link rel="canonical" href="https://a-11-oy.com/killinchu"> -->',
+      ),
+    ),
+    ['killinchu-public-console: WEB body has an unexpected canonical URL'],
+  );
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        KILLINCHU_BOUNDARY_META,
+        `<!-- ${KILLINCHU_BOUNDARY_META} -->`,
+      ),
+    ),
+    ['killinchu-public-console: WEB head lacks its exact evidence-boundary declaration'],
+  );
+  assert.deepEqual(
+    await verify(KILLINCHU_CONSOLE_HTML.replace('</body>', '<!-- unterminated</body>')),
+    ['killinchu-public-console: WEB body is not structurally valid HTML'],
+  );
+});
+
+test('does not infer the evidence declaration from presentation-dependent body content', async () => {
+  const candidate = reachableWebContractSurface('killinchu-public-console');
+  const verify = (body: string) =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) => webResponse(url, body));
+  const titleTag = '<title>a11oy · Killinchu</title>';
+  const canonicalTag = '<link rel="canonical" href="https://a-11-oy.com/killinchu">';
+
+  for (const [openTag, closeTag] of [
+    ['<script type="application/json">', '</script>'],
+    ['<template>', '</template>'],
+  ]) {
+    assert.deepEqual(
+      await verify(
+        KILLINCHU_CONSOLE_HTML.replace(
+          titleTag,
+          `<title>Compromised</title>${openTag}${titleTag}${closeTag}`,
+        ),
+      ),
+      ['killinchu-public-console: WEB body has an unexpected product identity'],
+    );
+    assert.deepEqual(
+      await verify(
+        KILLINCHU_CONSOLE_HTML.replace(canonicalTag, `${openTag}${canonicalTag}${closeTag}`),
+      ),
+      ['killinchu-public-console: WEB body has an unexpected canonical URL'],
+    );
+  }
+
+  for (const [openTag, closeTag] of [
+    ['<script type="application/json">', '</script>'],
+    ['<style>', '</style>'],
+    ['<template>', '</template>'],
+    ['<noscript>', '</noscript>'],
+    ['<textarea>', '</textarea>'],
+    ['<xmp>', '</xmp>'],
+    ['<iframe>', '</iframe>'],
+    ['<noembed>', '</noembed>'],
+    ['<noframes>', '</noframes>'],
+    ['<svg><text>', '</text></svg>'],
+  ]) {
+    assert.deepEqual(
+      await verify(
+        KILLINCHU_CONSOLE_HTML.replace(
+          'Effectors stay SIMULATED.',
+          `${openTag}Effectors stay SIMULATED.${closeTag}`,
+        ),
+      ),
+      [],
+    );
+  }
+
+  for (const [openTag, closeTag] of [
+    ['<span hidden>', '</span>'],
+    ['<span aria-hidden="true">', '</span>'],
+    ['<span style="display: none !important">', '</span>'],
+    ['<span style="visibility: hidden">', '</span>'],
+    ['<span style="content-visibility: hidden">', '</span>'],
+  ]) {
+    assert.deepEqual(
+      await verify(
+        KILLINCHU_CONSOLE_HTML.replace(
+          'Effectors stay SIMULATED.',
+          `${openTag}Effectors stay SIMULATED.${closeTag}`,
+        ),
+      ),
+      [],
+    );
+  }
+
+  for (const hiddenMarker of [
+    '<style>.conceal-evidence{display:none}</style><span class="conceal-evidence">Effectors stay SIMULATED.</span>',
+    '<span style="display:/**/none">Effectors stay SIMULATED.</span>',
+    '<span style="--concealed:none;display:var(--concealed)">Effectors stay SIMULATED.</span>',
+    '<span style="opacity:0">Effectors stay SIMULATED.</span>',
+    '<span style="position:absolute;left:-9999px">Effectors stay SIMULATED.</span>',
+    '<span style="font-size:0">Effectors stay SIMULATED.</span>',
+    '<span style="color:transparent">Effectors stay SIMULATED.</span>',
+  ]) {
+    assert.deepEqual(
+      await verify(KILLINCHU_CONSOLE_HTML.replace('Effectors stay SIMULATED.', hiddenMarker)),
+      [],
+    );
+  }
+
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        'Effectors stay SIMULATED.',
+        '<style>.conceal-evidence{display:none}</style>' +
+          '<span class="conceal-evidence">Effectors stay </span>' +
+          '<span class="conceal-evidence">SIMULATED.</span>',
+      ),
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        '</head>',
+        '<link rel="stylesheet" href="/assets/conceal-all-evidence.css"></head>',
+      ).replace('<body>', '<body style="display:none">'),
+    ),
+    [],
+  );
+
+  assert.deepEqual(
+    await verify(
+      KILLINCHU_CONSOLE_HTML.replace(
+        KILLINCHU_BOUNDARY_META,
+        '<meta name="evidence" content="Effectors stay SIMULATED.">',
+      ),
+    ),
+    ['killinchu-public-console: WEB head lacks its exact evidence-boundary declaration'],
+  );
+});
+
+test('does not treat command body presentation as evidence authority', async () => {
+  const candidate = reachableWebContractSurface('legacy-command-route');
+  const verify = (body: string) =>
+    verifyLivePublicSurfaces(registry([candidate]), async (url) => webResponse(url, body));
+
+  for (const [openTag, closeTag] of [
+    ['<script type="application/json">', '</script>'],
+    ['<template>', '</template>'],
+  ]) {
+    assert.deepEqual(
+      await verify(
+        COMMAND_CENTER_HTML.replace('<body>', `<body>${openTag}`).replace(
+          '</body>',
+          `${closeTag}</body>`,
+        ),
+      ),
+      [],
+    );
+  }
+});
+
 test('cancels the redirect response body when Location is malformed', async () => {
-  const unavailable = surface({
-    id: 'killinchu-public-console',
-    name: 'Killinchu public console',
-    canonical_url: 'https://a-11-oy.com/killinchu',
-    mode: 'UNAVAILABLE',
-    availability: 'UNAVAILABLE',
-    source_owner: {
-      repository: 'szl-holdings/killinchu',
-      path: 'web/index.html',
-      role: 'REMEDIATION_OWNER',
-    },
-    observation: {
-      method: 'GET',
-      status: 503,
-      final_url: 'https://szlholdings-killinchu.hf.space/',
-    },
-  });
+  const redirected = configuredSurface('a11oy-net-chat-gap');
   let calls = 0;
   let cancellations = 0;
 
-  const failures = await verifyLivePublicSurfaces(registry([unavailable]), async (url) => {
+  const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url) => {
     calls += 1;
     return {
-      status: 307,
+      status: 301,
       url,
       body: {
         cancel: async () => {
@@ -1313,7 +1673,7 @@ test('cancels the redirect response body when Location is malformed', async () =
   assert.equal(calls, 1);
   assert.equal(cancellations, 1);
   assert.equal(failures.length, 1);
-  assert.match(failures[0] ?? '', /^killinchu-public-console: live probe failed: TypeError:/);
+  assert.match(failures[0] ?? '', /^a11oy-net-chat-gap: live probe failed: TypeError:/);
 });
 
 test('validates bounded robots metadata content rather than status alone', async () => {
@@ -1441,8 +1801,8 @@ test('validates the exact A11oy.net webmanifest contract', async () => {
     },
   });
   const canonicalManifest = {
-    name: 'A11oy Proof Registry',
-    short_name: 'A11oy.net',
+    name: 'a11oy Proof Registry',
+    short_name: 'a11oy.net',
     start_url: '/',
     scope: '/',
     display: 'minimal-ui',
@@ -1455,7 +1815,7 @@ test('validates the exact A11oy.net webmanifest contract', async () => {
 
   assert.deepEqual(await verify(JSON.stringify(canonicalManifest)), []);
   assert.deepEqual(await verify('{'), [
-    'a11oy-net-webmanifest-gap: manifest metadata is not valid JSON',
+    'a11oy-net-webmanifest-gap: manifest metadata is not valid duplicate-free JSON',
   ]);
   assert.deepEqual(await verify('<html>not a manifest</html>', 'text/html'), [
     'a11oy-net-webmanifest-gap: metadata body is an HTML response',
@@ -1469,6 +1829,34 @@ test('validates the exact A11oy.net webmanifest contract', async () => {
   assert.deepEqual(
     await verify(JSON.stringify({ ...canonicalManifest, name: 'Different product' })),
     ['a11oy-net-webmanifest-gap: manifest metadata has an unexpected product identity'],
+  );
+  assert.deepEqual(
+    await verify(
+      JSON.stringify({
+        ...canonicalManifest,
+        name: 'A11oy Proof Registry',
+        short_name: 'A11oy.net',
+      }),
+    ),
+    ['a11oy-net-webmanifest-gap: manifest metadata has an unexpected product identity'],
+  );
+  assert.deepEqual(
+    await verify(
+      JSON.stringify(canonicalManifest).replace(
+        '"name":"a11oy Proof Registry"',
+        '"name":"Different product","name":"a11oy Proof Registry"',
+      ),
+    ),
+    ['a11oy-net-webmanifest-gap: manifest metadata is not valid duplicate-free JSON'],
+  );
+  assert.deepEqual(
+    await verify(
+      JSON.stringify(canonicalManifest).replace(
+        '"short_name":"a11oy.net"',
+        '"short_name":"Different","short\\u005fname":"a11oy.net"',
+      ),
+    ),
+    ['a11oy-net-webmanifest-gap: manifest metadata is not valid duplicate-free JSON'],
   );
   assert.deepEqual(
     await verify(JSON.stringify({ ...canonicalManifest, start_url: 'https://evil.example/' })),
@@ -1501,4 +1889,18 @@ test('rejects metadata bodies that exceed the bounded read limit', async () => {
     metadataResponse(tooLarge, 'text/plain', [64 * 1024, 64 * 1024, 1]),
   );
   assert.deepEqual(failures, ['a11oy-net-robots-gap: metadata body exceeds 131072 bytes']);
+});
+
+test('rejects a non-301 response from the approved A11oy.net gateway', async () => {
+  const redirected = configuredSurface('a11oy-net-code-gap');
+  const failures = await verifyLivePublicSurfaces(registry([redirected]), async (url) => ({
+    status: 307,
+    url,
+    body: null,
+    headers: { get: () => redirected.observation.final_url },
+  }));
+
+  assert.deepEqual(failures, [
+    'a11oy-net-code-gap: expected HTTP 301 redirect from https://a11oy.net/code, observed 307',
+  ]);
 });

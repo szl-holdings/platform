@@ -9,7 +9,7 @@
     },
     "@szl-holdings/estate-contract-release#build": {
       "cache": false,
-      "dependsOn": ["^build", "^codegen"],
+      "dependsOn": ["^build", "^codegen", "@szl-holdings/api-spec#codegen"],
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": []
     },

@@ -41,6 +41,17 @@ The comprehensive governance documentation lives in `docs/github/`:
 
 ---
 
+Both settings references target `main`, re-read as the provider default branch on
+2026-10-13. Their required-check names match the active
+`Protect main - solo-builder exact-head` ruleset (ID `22286649`) at that observation.
+These JSON references are not complete ruleset exports or an instruction to apply
+settings: the live rule also requires signatures, resolved review threads, strict
+current-base checks, and squash-only pull requests. Re-read the live default branch
+and complete ruleset before any provider settings operation. Historical receipts
+under `docs/github/` retain their original state and are not current selectors.
+
+---
+
 ## Start Here
 
 ### Repository Branding

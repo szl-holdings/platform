@@ -1,0 +1,61 @@
+{
+  "$id": "https://schemas.a11oy.net/formula-vertical-aliases.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aliases": {
+      "additionalProperties": false,
+      "properties": {
+        "aegis": {
+          "const": "aegis-assurance"
+        },
+        "counsel": {
+          "const": "counsel-assurance"
+        },
+        "insurance": {
+          "const": "insurance-assurance"
+        },
+        "killinchu": {
+          "const": "killinchu"
+        },
+        "lyte": {
+          "const": "lyte-services"
+        },
+        "terra": {
+          "const": "terra-assurance"
+        },
+        "vessels": {
+          "const": "vessels-assurance"
+        }
+      },
+      "required": [
+        "aegis",
+        "counsel",
+        "insurance",
+        "killinchu",
+        "lyte",
+        "terra",
+        "vessels"
+      ],
+      "type": "object"
+    },
+    "captured_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "global_scope": {
+      "const": "all"
+    },
+    "schema": {
+      "const": "szl.formula-vertical-aliases/v1"
+    }
+  },
+  "required": [
+    "schema",
+    "captured_at",
+    "global_scope",
+    "aliases"
+  ],
+  "title": "SZL Formula Vertical Aliases",
+  "type": "object"
+}

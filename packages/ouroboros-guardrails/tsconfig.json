@@ -8,11 +8,12 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
+    "declarationMap": true,
     "outDir": "dist",
     "rootDir": "src",
+    "types": ["node"],
     "allowImportingTsExtensions": false,
-    "noEmit": true,
     "verbatimModuleSyntax": false
   },
-  "include": ["src/**/*", "tests/**/*"]
+  "include": ["src/**/*"]
 }

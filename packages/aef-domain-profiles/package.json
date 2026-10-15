@@ -6,24 +6,34 @@
   "description": "Alloy Embedding Fabric — versioned domain profiles for Lyte, Vessels, Terra, Aegis, PRISM Counsel, and Carlota Jo. Each profile declares chunking strategy, query and document prompt templates, default metadata filters, rerank toggle, top-k, score thresholds, privacy level, and retention rules. Ships a model registry with active-profile pointer, deprecation, and rollback semantics.",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "workspace": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./schema": {
+      "development": "./src/schema.ts",
+      "workspace": "./src/schema.ts",
       "types": "./dist/schema.d.ts",
-      "import": "./src/schema.ts"
+      "import": "./dist/schema.js"
     },
     "./registry": {
+      "development": "./src/registry.ts",
+      "workspace": "./src/registry.ts",
       "types": "./dist/registry.d.ts",
-      "import": "./src/registry.ts"
+      "import": "./dist/registry.js"
     },
     "./types": {
+      "development": "./src/types.ts",
+      "workspace": "./src/types.ts",
       "types": "./dist/types.d.ts",
-      "import": "./src/types.ts"
+      "import": "./dist/types.js"
     },
     "./profiles": {
+      "development": "./src/profiles/index.ts",
+      "workspace": "./src/profiles/index.ts",
       "types": "./dist/profiles/index.d.ts",
-      "import": "./src/profiles/index.ts"
+      "import": "./dist/profiles/index.js"
     }
   },
   "dependencies": {

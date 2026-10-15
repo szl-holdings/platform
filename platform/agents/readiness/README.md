@@ -69,6 +69,13 @@ run proves transport of a verified signed receipt, not that every runtime
 probe passed. A local run without credentials remains unsigned/unpublished and
 prints a warning.
 
+Provider failures expose only a fixed publication category derived, when
+available, from a plain integer HTTP status. Exception messages, class names,
+response bodies and headers are excluded from receipt output and workflow
+annotations. A bounded failure still records `published:false` and fails the
+GitHub Actions job; it does not establish which stored credential or provider
+binding needs repair.
+
 ## Dashboard
 `dashboard.html` is a static, read-only viewer. It lists the latest receipt for
 each agent from `SZLHOLDINGS/readiness-runs`. Because no trusted public signer

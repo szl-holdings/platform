@@ -1,0 +1,136 @@
+{
+  "observed_at": "2026-10-13T18:02:33.377038+00:00",
+  "scope": "Ordinary public HTTPS GETs from the existing authorized Windows device. No credentials, provider mutation, alternate origin, or access-control bypass. Status reflects this observation route only.",
+  "responses": [
+    {
+      "url": "https://a11oy.net/",
+      "status": 200,
+      "final_url": "https://a11oy.net/",
+      "server": "GitHub.com",
+      "cf_ray": null,
+      "sha256": "23570f171f49f186d3642f882ee954a66314b9107eac617d77fd2b2ecb21d6bf",
+      "bytes": 120580,
+      "headers": {
+        "Content-Security-Policy": null,
+        "Strict-Transport-Security": null,
+        "X-Content-Type-Options": null,
+        "Referrer-Policy": null,
+        "Permissions-Policy": null,
+        "X-Frame-Options": null,
+        "Cross-Origin-Opener-Policy": null,
+        "Cross-Origin-Resource-Policy": null
+      }
+    },
+    {
+      "url": "https://a11oy.net/site.webmanifest",
+      "status": 200,
+      "final_url": "https://a11oy.net/site.webmanifest",
+      "server": "GitHub.com",
+      "cf_ray": null,
+      "sha256": "ceaf5d9c40cfb772691093bb4d1adf98fb971a25717f736f2e9e9bd087cfce6d",
+      "bytes": 435,
+      "headers": {
+        "Content-Security-Policy": null,
+        "Strict-Transport-Security": null,
+        "X-Content-Type-Options": null,
+        "Referrer-Policy": null,
+        "Permissions-Policy": null,
+        "X-Frame-Options": null,
+        "Cross-Origin-Opener-Policy": null,
+        "Cross-Origin-Resource-Policy": null
+      }
+    },
+    {
+      "url": "https://a11oy.net/.well-known/szl-source.json",
+      "status": 200,
+      "final_url": "https://a11oy.net/.well-known/szl-source.json",
+      "server": "GitHub.com",
+      "cf_ray": null,
+      "sha256": "bc61ce88da64f6a3c6d468a710936a7ccfb760f49e1a15a3d4ec4234a9e5bb6e",
+      "bytes": 774,
+      "headers": {
+        "Content-Security-Policy": null,
+        "Strict-Transport-Security": null,
+        "X-Content-Type-Options": null,
+        "Referrer-Policy": null,
+        "Permissions-Policy": null,
+        "X-Frame-Options": null,
+        "Cross-Origin-Opener-Policy": null,
+        "Cross-Origin-Resource-Policy": null
+      },
+      "source_witness": {
+        "schema_version": "a11oy-static-source-witness/v1",
+        "surface": "https://a11oy.net",
+        "source_repository": "https://github.com/szl-holdings/a11oy-net",
+        "source_revision": "2ed4a76edfb8925bf0611f00ee9d9e4943a026c0",
+        "artifact_kind": "STATIC_GITHUB_PAGES",
+        "artifact_binding": "EXACT_SOURCE_REVISION",
+        "witness_semantics": "When this document is served from its canonical URL, source_revision identifies the exact Git commit used to assemble the static Pages artifact. It does not establish application runtime health, product readiness, uptime, signing, or current protected-main status without a fresh control-plane readback.",
+        "product_runtime_readiness": "UNAVAILABLE",
+        "uptime": "UNAVAILABLE",
+        "dsse_live": "UNAVAILABLE",
+        "generated_at_utc": null
+      }
+    },
+    {
+      "url": "https://a-11-oy.com/",
+      "status": 403,
+      "final_url": "https://a-11-oy.com/",
+      "server": "cloudflare",
+      "cf_ray": "a4a041d40be7187f-EWR",
+      "sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "bytes": 17,
+      "headers": {
+        "Content-Security-Policy": null,
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Permissions-Policy": null,
+        "X-Frame-Options": "SAMEORIGIN",
+        "Cross-Origin-Opener-Policy": null,
+        "Cross-Origin-Resource-Policy": null
+      },
+      "body_prefix": "error code: 1010\n"
+    },
+    {
+      "url": "https://a-11-oy.com/command",
+      "status": 403,
+      "final_url": "https://a-11-oy.com/command",
+      "server": "cloudflare",
+      "cf_ray": "a4a041d47c664a5f-EWR",
+      "sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "bytes": 17,
+      "headers": {
+        "Content-Security-Policy": null,
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Permissions-Policy": null,
+        "X-Frame-Options": "SAMEORIGIN",
+        "Cross-Origin-Opener-Policy": null,
+        "Cross-Origin-Resource-Policy": null
+      },
+      "body_prefix": "error code: 1010\n"
+    },
+    {
+      "url": "https://a-11-oy.com/killinchu",
+      "status": 403,
+      "final_url": "https://a-11-oy.com/killinchu",
+      "server": "cloudflare",
+      "cf_ray": "a4a041d509c6f78d-EWR",
+      "sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "bytes": 17,
+      "headers": {
+        "Content-Security-Policy": null,
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "same-origin",
+        "Permissions-Policy": null,
+        "X-Frame-Options": "SAMEORIGIN",
+        "Cross-Origin-Opener-Policy": null,
+        "Cross-Origin-Resource-Policy": null
+      },
+      "body_prefix": "error code: 1010\n"
+    }
+  ]
+}

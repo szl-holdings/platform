@@ -1,6 +1,7 @@
 # SZL customer-portal — FastAPI commercial surface.
 # HF Space (sdk: docker). Sovereign: no external API keys required to boot.
-# OIDC issuer + cosign keymint are optional env (see README). Author: Yachay.
+# /healthz boots without OIDC settings; every /v1 route answers 503 until the
+# SZL_PORTAL_OIDC_* settings are set (see README). cosign keymint is optional env. Author: Yachay.
 # Doctrine v11 LOCKED 749/14/163 locked_at c7c0ba17.
 FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6
 
@@ -13,6 +14,7 @@ COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/app.py ./app/app.py
+COPY app/oidc.py ./app/oidc.py
 COPY app/quota.py ./app/quota.py
 COPY app/verify_key.py ./app/verify_key.py
 COPY app/schema.sql ./app/schema.sql

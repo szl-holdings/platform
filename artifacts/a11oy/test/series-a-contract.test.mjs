@@ -77,12 +77,13 @@ test('keeps Observe, Gate, Act, Prove and the exact six-state vocabulary explici
   assert.doesNotMatch(page, /production[- ]ready|SOC 2 certified|enterprise customers|proven ROI/i);
 });
 
-test('maps both Series A entry points to the same truth-qualified view', () => {
-  assert.match(app, /path=\{`\$\{base\}\/start`\} component=\{SeriesAView\}/);
-  assert.match(app, /path=\{`\$\{base\}\/investor-demo`\} component=\{SeriesAView\}/);
-  assert.doesNotMatch(app, /component=\{InvestorDemo\}|import\('\.\/pages\/InvestorDemo'\)/);
-  assert.match(layout, /href=\{b\('\/start'\)\}/);
-  assert.match(layout, />\s*Series A view\s*</);
+test('keeps Series A source rails offline while the public candidate holds those routes', () => {
+  assert.doesNotMatch(app, /SeriesAView|InvestorDemo|\/start|\/investor-demo|\/series-a/);
+  assert.match(app, /PUBLICATION HOLD · UNREVIEWED ROUTE/);
+  assert.match(app, /<Route component=\{PublicationHoldPage\} \/>/);
+  assert.doesNotMatch(layout, /href=\{b\('\/start'\)\}/);
+  assert.match(layout, /href=\{b\('\/'\)\}/);
+  assert.match(layout, />\s*Candidate home\s*</);
 });
 
 test('provides keyboard-operable tabs and narrow-screen layouts', () => {
@@ -172,8 +173,8 @@ test('resolves the local FlexCache source entrypoints used by the production bun
   assert.match(viteConfig, /lib\/flexcache\/src\/index\.ts/);
 });
 
-test('fails closed when the Omnia network endpoints are absent', () => {
-  assert.match(main, /networkState: 'UNAVAILABLE'/);
+test('omits the Omnia network provider from the public candidate', () => {
+  assert.doesNotMatch(main, /OmniaShellProvider|networkState|\/api\//);
   assert.match(omniaProvider, /config\.networkState === 'UNAVAILABLE'/);
 });
 
@@ -206,15 +207,24 @@ test('resets and verifies scroll origin after tab exercise before full-page capt
   assert.match(captureScript, /scroll_origin: true/);
 });
 
-test('binds hosted provenance and labels local capture as non-authoritative', () => {
-  assert.match(captureScript, /GITHUB_ACTIONS/);
-  assert.match(captureScript, /GITHUB_REPOSITORY/);
-  assert.match(captureScript, /GITHUB_RUN_ID/);
-  assert.match(captureScript, /GITHUB_RUN_ATTEMPT/);
-  assert.match(captureScript, /GITHUB_WORKFLOW_REF/);
-  assert.match(captureScript, /GITHUB_WORKFLOW_SHA/);
-  assert.match(captureScript, /LOCAL_NON_AUTHORITATIVE/);
-  assert.match(captureScript, /VERIFIED_GITHUB_RUNTIME/);
+test('keeps candidate-owned capture provenance unconditionally local', () => {
+  const productionProvenanceSource = captureScript + '\n' + proofHelpers;
+
+  assert.match(captureScript, /const provenance = localCaptureProvenance\(\)/);
+  assert.doesNotMatch(captureScript, /function captureProvenance/);
+  assert.match(captureScript, /function requireRepository\(name\)/);
+  assert.match(captureScript, /const repository = requireRepository\('SOURCE_REPOSITORY'\)/);
+  assert.match(proofHelpers, /const LOCAL_CAPTURE_PROVENANCE = Object\.freeze/);
+  assert.match(proofHelpers, /authority: 'LOCAL_NON_AUTHORITATIVE'/);
+  assert.match(proofHelpers, /provider: 'UNKNOWN'/);
+  assert.doesNotMatch(productionProvenanceSource, /GITHUB_[A-Z0-9_]+/);
+  assert.doesNotMatch(productionProvenanceSource, /VERIFIED_GITHUB_RUNTIME/);
+  assert.doesNotMatch(productionProvenanceSource, /github-actions/);
+  assert.doesNotMatch(productionProvenanceSource, /Hosted metadata binds/);
+  assert.match(captureScript, /hosted_gate_admissible: false/);
+  assert.match(captureScript, /runner_os: process\.platform/);
+  assert.match(captureScript, /runner_arch: process\.arch/);
+  assert.match(captureScript, /if \(initialCheckout\.branch !== sourceRef\)/);
   assert.match(captureScript, /rev-parse', 'HEAD\^\{tree\}'/);
   assert.match(captureScript, /tracked source changed \$\{phase\}/);
   assert.match(captureScript, /untracked or ignored source input exists \$\{phase\}/);

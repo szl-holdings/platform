@@ -17,17 +17,37 @@ export interface Tokenizer {
   readonly modelRef: string;
 }
 
+const DEFAULT_TOKENIZER_MODEL_ID = 'Xenova/all-MiniLM-L6-v2';
+const DEFAULT_TOKENIZER_REVISION = '751bff37182d3f1213fa05d7196b954e230abad9';
+const IMMUTABLE_HF_REVISION = /^[0-9a-f]{40}$/i;
+
 const tokenizerCache = new Map<string, Promise<Tokenizer>>();
 
-export async function loadTokenizer(modelRef = 'Xenova/all-MiniLM-L6-v2'): Promise<Tokenizer> {
-  let pending = tokenizerCache.get(modelRef);
+export async function loadTokenizer(modelRef = DEFAULT_TOKENIZER_MODEL_ID): Promise<Tokenizer> {
+  const separator = modelRef.lastIndexOf('@');
+  const modelId = separator > 0 ? modelRef.slice(0, separator) : modelRef;
+  const requestedRevision = separator > 0 ? modelRef.slice(separator + 1) : undefined;
+  const revision =
+    requestedRevision ??
+    (modelId === DEFAULT_TOKENIZER_MODEL_ID ? DEFAULT_TOKENIZER_REVISION : undefined);
+  if (!revision || !IMMUTABLE_HF_REVISION.test(revision)) {
+    throw new Error(
+      'loadTokenizer: custom Hugging Face model references must end in @<40-hex commit SHA>',
+    );
+  }
+  const pinnedModelRef = `${modelId}@${revision.toLowerCase()}`;
+  let pending = tokenizerCache.get(pinnedModelRef);
   if (!pending) {
     pending = (async () => {
       const tf = await import('@huggingface/transformers');
       const AutoTokenizer = (
-        tf as { AutoTokenizer: { from_pretrained: (m: string) => Promise<unknown> } }
+        tf as {
+          AutoTokenizer: {
+            from_pretrained: (m: string, options?: { revision?: string }) => Promise<unknown>;
+          };
+        }
       ).AutoTokenizer;
-      const raw = (await AutoTokenizer.from_pretrained(modelRef)) as {
+      const raw = (await AutoTokenizer.from_pretrained(modelId, { revision })) as {
         encode: (text: string, opts?: { add_special_tokens?: boolean }) => number[];
         decode: (ids: number[], opts?: { skip_special_tokens?: boolean }) => string;
         model_max_length?: number;
@@ -37,7 +57,7 @@ export async function loadTokenizer(modelRef = 'Xenova/all-MiniLM-L6-v2'): Promi
           ? raw.model_max_length
           : 512;
       return {
-        modelRef,
+        modelRef: pinnedModelRef,
         maxModelTokens,
         encode(text: string): number[] {
           return raw.encode(text, { add_special_tokens: false });
@@ -47,7 +67,7 @@ export async function loadTokenizer(modelRef = 'Xenova/all-MiniLM-L6-v2'): Promi
         },
       } satisfies Tokenizer;
     })();
-    tokenizerCache.set(modelRef, pending);
+    tokenizerCache.set(pinnedModelRef, pending);
   }
   return pending;
 }

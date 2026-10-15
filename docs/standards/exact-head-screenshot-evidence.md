@@ -76,14 +76,18 @@ Candidate dependencies are resolved without lifecycle scripts or a candidate
 pnpmfile, after rejecting tracked symbolic links and submodules. Browser tooling
 and the controller are installed first from the immutable protected workflow SHA
 on `main`, verified, and made read-only. The SHA-pinned pnpm setup action writes
-its standalone runtime to a per-run `runner.temp` root; its declared destination
-and binary outputs must agree with that root after symlink resolution. The root is
-made readable and executable, but not group- or world-writable, before the
-dedicated candidate identity can use the exact admitted executable. The
+its standalone runtime to a per-run protected-workspace sibling of the controller
+and candidate checkouts. Its declared destination and binary outputs must agree
+with that root after symlink resolution. The workspace parent must be traversable,
+and it and every lexical and resolved ancestor must be non-writable by the
+dedicated candidate identity. The runtime tree is made readable and executable,
+but not group- or world-writable, before that identity can use the exact
+admitted executable. The
 controller does not rediscover pnpm from an ambient candidate `PATH`.
 Dependency resolution and the candidate server then run as that dedicated
-unprivileged OS identity with a minimal environment, private home, and
-command-line-forced pnpm cache, store, modules, and virtual-store locations.
+unprivileged OS identity with a minimal environment, private home under the same
+protected workspace, and command-line-forced pnpm cache, store, modules, and
+virtual-store locations.
 Within the protected source/controller/evidence boundary, the candidate identity
 can write only those enumerated dependency directories before lockdown and
 bounded Vite caches afterward. The screenshot, packet, catalog, and upload tree
@@ -92,6 +96,15 @@ so the candidate identity cannot traverse or mutate them. After browser capture,
 the workflow kills every process owned by the candidate identity, rechecks the
 exact `HEAD` and clean tracked tree, verifies every evidence byte, and makes the
 evidence tree read-only before upload.
+
+Candidate preparation emits a named diagnostic when a source write-denial
+predicate fails, the admitted pnpm executable is inaccessible or writable, or
+its read-only runtime inventory fails or finds a writable entry. These messages
+do not change any isolation predicate or permission. A preparation failure is
+BLOCKED before browser capture and cannot produce admissible screenshots.
+Do not infer an ancestor-permission fault from a silent historical exit alone.
+The controller is pinned to protected `main`; diagnostic changes in a candidate
+pull request apply to dispatched capture only after normal protected promotion.
 
 The separate publication job receives issue-write permission only after
 capture, verification, remote revalidation, and immutable artifact upload

@@ -1,0 +1,22 @@
+{
+  "sourceCommit": "b05227630f061298aa547341db914d16e16095c9",
+  "sourceTree": "82d1ffb570422deeb46d365b69c6909a3ad74d87",
+  "candidateCommit": "8bbc1cb65d14f8f188aff2ba211d3a48002de62d",
+  "candidateTree": null,
+  "matchesCandidateTree": null,
+  "route": "/governed-cockpit",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "capturedAt": "2026-10-06T00:58:57.362Z",
+  "scenario": "missing-identity-live",
+  "fixtureOnly": true,
+  "authority": "HOSTED_SYNTHETIC_UI",
+  "screenshotSha256": "c716ac44e9f9e0189661c5f94a198f09486cf762ae30429e92259962e0532b61",
+  "sourceHashes": {
+    "artifacts/carlota-jo/src/components/SubstrateWorkflowPanel.tsx": "fe09b95bc50633bcdfb687015fb3352c1bccb8ea74959fc2070aa913e222d815",
+    "artifacts/carlota-jo/src/components/substrate-run-view.ts": "b3d6a78829303c9adf905b90f8c5232be5dd21eef28370e46d77306397b13465",
+    "tests/e2e/carlota-jo.spec.ts": "3a127fa9d23fbf6eb759a626b81c5e5afd48156699c3198ea43f9b09e3c0f6b8"
+  }
+}

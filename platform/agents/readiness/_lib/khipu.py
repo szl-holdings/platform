@@ -161,6 +161,28 @@ def receipt_signature_error(agent: str, envelope: dict) -> str | None:
     return None
 
 
+def _publication_error_reason(exc: Exception) -> str:
+    """Classify a failed write without exposing provider or credential text."""
+    try:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+    except Exception:
+        status = None
+    # Do not coerce arbitrary objects, strings, booleans or integer subclasses.
+    # Exception text, class names, response bodies and headers stay private.
+    if type(status) is int:
+        if status in (401, 403):
+            return "publisher authorization unavailable"
+        if status == 404:
+            return "publisher destination unavailable"
+        if status == 429:
+            return "publisher rate limited"
+        if 500 <= status <= 599:
+            return "publisher service unavailable"
+        if 400 <= status <= 499:
+            return "publisher request rejected"
+    return "publisher unavailable"
+
+
 def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict:
     """Append the signed receipt to the runs dataset.
 
@@ -207,7 +229,7 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
         )
         return {"published": True, "path": path, "dataset": dataset}
     except Exception as exc:
-        return {"published": False, "reason": f"{type(exc).__name__}: {exc}", "path": path}
+        return {"published": False, "reason": _publication_error_reason(exc), "path": path}
 
 
 def envelope_emitted_date(envelope: dict) -> str:
