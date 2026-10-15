@@ -182,7 +182,7 @@ const KILLINCHU_BUILD_INFO_BODY = {
   service: 'killinchu',
   build: {
     state: 'OBSERVED',
-    revision: 'd80753e8c951c1a1753f31d163a1b82aecb63782',
+    revision: '4a434f8d07feb7badc5a274c89549452f49ff0d1',
     revision_source: 'env:SZL_GIT_SHA',
   },
   receipt_minted: true,
@@ -190,11 +190,11 @@ const KILLINCHU_BUILD_INFO_BODY = {
   receipt_minted_scope: 'DEPLOYMENT_RELEASE_REFERENCE',
   release_receipt: {
     state: 'GITHUB_OIDC_ATTESTED',
-    source_revision: 'd80753e8c951c1a1753f31d163a1b82aecb63782',
+    source_revision: '4a434f8d07feb7badc5a274c89549452f49ff0d1',
     subject: 'hf-deploy-manifest.json',
-    subject_sha256: 'a6a48b63bcc420149fe440d2dae4a92b3ed800fe13dfb4087d2b94858d32e9b1',
-    attestation_id: '55637681',
-    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/55637681',
+    subject_sha256: '38c7d69a6a374afe157f23ab2760bab4b58146efa1beee00bc30519b990216d5',
+    attestation_id: '55856266',
+    attestation_url: 'https://github.com/szl-holdings/killinchu/attestations/55856266',
     verification:
       'Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu',
   },
@@ -1127,8 +1127,8 @@ test('rejects duplicate, trailing, and over-depth JSON before API contract valid
 
   const candidate = configuredSurface('killinchu-build-info-api');
   const duplicateBody = JSON.stringify(KILLINCHU_BUILD_INFO_BODY).replace(
-    '"source_revision":"d80753e8c951c1a1753f31d163a1b82aecb63782"',
-    '"source_revision":"d80753e8c951c1a1753f31d163a1b82aecb63782","source\\u005frevision":"d80753e8c951c1a1753f31d163a1b82aecb63782"',
+    '"source_revision":"4a434f8d07feb7badc5a274c89549452f49ff0d1"',
+    '"source_revision":"4a434f8d07feb7badc5a274c89549452f49ff0d1","source\\u005frevision":"4a434f8d07feb7badc5a274c89549452f49ff0d1"',
   );
   const failures = await verifyLivePublicSurfaces(registry([candidate]), async (url) =>
     apiResponse(url, duplicateBody),
