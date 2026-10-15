@@ -300,7 +300,7 @@
         "status": 200,
         "final_url": "https://szlholdings-killinchu.hf.space/api/build-info"
       },
-      "note": "MEASURED: a bounded exact JSON read reported Killinchu source d80753e8c951c1a1753f31d163a1b82aecb63782, manifest sha256:a6a48b63bcc420149fe440d2dae4a92b3ed800fe13dfb4087d2b94858d32e9b1 and deployment-release attestation reference 55637681. The immutable manifest from publisher run 38488127035 passed gh attestation verify with the exact hf-sync.yml signer workflow, refs/heads/main and source digest. GET minted no receipt. This verifies the referenced publisher evidence and response contract, not aggregate readiness or authorization."
+      "note": "MEASURED at 2026-10-15T01:01:32Z: a bounded exact JSON read reported Killinchu source 4a434f8d07feb7badc5a274c89549452f49ff0d1, manifest sha256:38c7d69a6a374afe157f23ab2760bab4b58146efa1beee00bc30519b990216d5 and deployment-release attestation reference 55856266. The immutable manifest from publisher run 38573192794 passed gh attestation verify with the exact hf-sync.yml signer workflow, refs/heads/main and source digest. GET minted no receipt. This verifies the referenced publisher evidence and response contract, not aggregate readiness or authorization."
     },
     {
       "id": "killinchu-readiness-api",
