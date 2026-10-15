@@ -31,15 +31,20 @@ The intermediate formatter output is not the final source or evidence authority.
 
 ## Validation
 
+These are suite-scoped local observations. The canonical aggregate
+`platform_tests` evidence remains `UNAVAILABLE`; no repository-wide passing
+test count is inferred from these results.
+
 | Command / check | Exit | Result |
 | --- | --- | --- |
 | `pnpm typecheck`, pinned pnpm 10.26.1, initial checkout `cc9fc2bd658241354c381e4fe78a11ba1d09dd3b` | 0 | 232 tasks passed, 231 cached |
 | `pnpm install --frozen-lockfile`, CI environment, Node 24.19.0 / pnpm 10.26.1 | 0 | Exact lockfile installed across 204 workspaces |
 | `pnpm typecheck`, integrated corrected tree | 0 | 232 tasks passed, zero cached |
 | `python -B -m unittest discover -s platform/agents/readiness/_lib -p 'test_*.py'` | 0 | 122 tests, nine expected PyNaCl-dependent skips in stdlib-only environment |
-| Same suite with Python 3.12.14 and PyNaCl 1.6.0 | 0 | All 122 tests passed, including real Ed25519 cases; network and publication mocked |
+| Same suite with Python 3.12.14 and PyNaCl 1.6.0 | 0 | All 122 readiness regression cases passed, including real Ed25519 cases; network and publication mocked |
 | `node --test platform/agents/readiness/_lib/test_dashboard.mjs` | 0 | Three DOM safety and unverified-claim tests passed |
-| Existing vulnerability-report, Grype gate, dependency-patch and license regression suites | 0 | 51 tests passed |
+| Existing vulnerability-report, Grype gate, dependency-patch and license regression suites | 0 | All 51 selected security regression cases passed |
+| `pnpm claims:drift`, `pnpm claims:validate`, and changed-claim scan against protected main | 0 | Suite scopes accepted; all 134 selected truth-validation cases passed; canonical aggregate test evidence remains UNAVAILABLE |
 | Existing audit normalization, version attestation, mitigation verification and blocking policy | 0 | Pinned pnpm verified; zero High/Critical, two Moderate findings, no mitigation errors |
 | `pnpm audit --json` | 1 | Package manager reports the two Moderate findings; existing High/Critical policy remains unchanged |
 | Normal pre-commit and pre-push hooks | 0 | Format/lint, 26 documentation claims, branding and 13 OG cards checked |
@@ -50,6 +55,12 @@ The first unpinned `pnpm typecheck` invocation failed before compilation because
 the environment's default pnpm was 11.19.0; the repository-pinned command above
 resolved that toolchain mismatch. The first noninteractive install required the
 normal CI flag and then completed. Neither failed attempt is counted as a pass.
+
+The initial proof-only hosted truth-drift run rejected two unqualified suite-count
+phrases in this packet. Their wording now names the specific readiness/security
+scope; the counts and underlying results are retained. No validator, canonical
+metric, baseline or allowlist was changed to admit them. A prior ignored local
+Playwright report was preserved outside the source checkout before local scanning.
 
 The original inherited High/Critical failures are not suppressed: protected main
 already contains the dependency repairs. No security thresholds or exclusions
