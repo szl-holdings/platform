@@ -13,5 +13,6 @@ license: apache-2.0
 
 Docker Space wrapper for the FastAPI commercial surface. See repo README for full
 detail. Boots sovereign (no external API keys). Probe target: `GET /healthz`.
+Every `/v1` route answers 503 until the `SZL_PORTAL_OIDC_*` settings in the README are set.
 
 Doctrine v11 LOCKED · 749 / 14 / 163 · locked_at c7c0ba17. Signed Yachay.

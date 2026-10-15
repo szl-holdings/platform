@@ -2,11 +2,11 @@
 Author: Yachay (CTO authority) 2026-06-01. Doctrine v12 / v11 LOCKED preserved verbatim.
 Khipu signature = cosign PLACEHOLDER; chain_verified reflects hash-chain only.
 
-Real endpoints:
+Endpoints (every /v1 route needs a verified OIDC bearer JWT):
   GET  /healthz                          (probe target for status page; no auth)
-  POST /v1/keys                          (issue an API key; OIDC-authenticated user)
+  POST /v1/keys                          (issue an API key; verified OIDC JWT, see oidc.py)
   DELETE /v1/keys/{key_id}               (revoke)
-  POST /v1/keys/{key_id}/rotate          (rotate with 7-day grace)
+  POST /v1/keys/{key_id}/rotate          NOT IMPLEMENTED (design spec only; no route below)
   GET  /v1/usage                         (usage + quota state)
   GET  /v1/audit                         (customer's own action log)
   GET  /v1/audit/export                  (Body-of-Evidence bundle of Khipu receipts)
@@ -15,8 +15,11 @@ Every mutation writes an audit_log row AND a Khipu receipt (continuum_hash chain
 """
 from __future__ import annotations
 import os, sqlite3, uuid, secrets, hashlib, json, base64, subprocess, tempfile, datetime
+from contextlib import closing
 from fastapi import FastAPI, HTTPException, Header, Depends
 from pydantic import BaseModel
+
+from . import oidc
 
 DB = os.environ.get("SZL_PORTAL_DB", "portal.db")
 REPLAY_HASH = "bacf54434f1a3bf2d758b27a62d5fd580ca4c8d3b180693573eeebcaea631fc5"
@@ -81,18 +84,35 @@ def write_audit(conn, account_id: str, action: str, detail: dict):
     return rec
 
 
-def current_account(authorization: str = Header(...)) -> str:
-    """Resolve OIDC subject -> account_id. In prod, validate the bearer JWT against Keycloak JWKS."""
-    if not authorization.lower().startswith("bearer "):
-        raise HTTPException(401, "missing bearer token")
-    sub = authorization.split(" ", 1)[1]      # validated JWT 'sub' in prod
-    conn = db()
-    row = conn.execute("SELECT account_id FROM accounts WHERE oauth_sub=?", (sub,)).fetchone()
-    if not row:
-        aid = str(uuid.uuid4())
-        conn.execute("INSERT INTO accounts(account_id,email,oauth_sub) VALUES(?,?,?)",
-                     (aid, f"{sub}@oidc", sub))
-        conn.commit(); return aid
+def current_account(authorization: str | None = Header(default=None)) -> str:
+    """Resolve a verified OIDC subject to an account_id. Fails closed.
+
+    The bearer must be a JWT whose signature, issuer, audience, expiry and
+    issued-at verified against the configured JWKS (see app/oidc.py). Until
+    that has happened no account row is read or created. Missing or invalid
+    OIDC settings, or an unreachable JWKS, answer 503; a bad token answers 401.
+    """
+    try:
+        config = oidc.load_config()
+    except oidc.OidcConfigError:
+        raise HTTPException(503, "OIDC verification is not configured")
+    try:
+        identity = oidc.verify_bearer(authorization, config)
+    except oidc.OidcUnavailable:
+        raise HTTPException(503, "OIDC key set is unavailable")
+    except oidc.AuthenticationError:
+        raise HTTPException(401, "invalid bearer token",
+                            headers={"WWW-Authenticate": 'Bearer error="invalid_token"'})
+    binding = oidc.account_binding(identity)
+    with closing(db()) as conn:
+        row = conn.execute("SELECT account_id FROM accounts WHERE oauth_sub=?", (binding,)).fetchone()
+        if row is None:
+            conn.execute("INSERT OR IGNORE INTO accounts(account_id,email,oauth_sub) VALUES(?,?,?)",
+                         (str(uuid.uuid4()), oidc.placeholder_email(binding), binding))
+            conn.commit()
+            row = conn.execute("SELECT account_id FROM accounts WHERE oauth_sub=?", (binding,)).fetchone()
+    if row is None:
+        raise HTTPException(503, "account binding failed")
     return row["account_id"]
 
 
@@ -119,58 +139,60 @@ def create_key(req: KeyReq, account_id: str = Depends(current_account)):
     fp = key_hash[:16]
     sig = cosign_fingerprint(fp)
     key_id = str(uuid.uuid4())
-    conn = db()
-    conn.execute("""INSERT INTO api_keys(key_id,account_id,name,key_hash,fingerprint,cosign_sig,
-                    env,scope,flagships) VALUES(?,?,?,?,?,?,?,?,?)""",
-                 (key_id, account_id, req.name, key_hash, fp, sig, req.env, req.scope,
-                  ",".join(req.flagships)))
-    rec = write_audit(conn, account_id, "key.create",
-                      {"key_id": key_id, "scope": req.scope, "flagships": req.flagships})
-    conn.commit()
+    with closing(db()) as conn:
+        conn.execute("""INSERT INTO api_keys(key_id,account_id,name,key_hash,fingerprint,cosign_sig,
+                        env,scope,flagships) VALUES(?,?,?,?,?,?,?,?,?)""",
+                     (key_id, account_id, req.name, key_hash, fp, sig, req.env, req.scope,
+                      ",".join(req.flagships)))
+        rec = write_audit(conn, account_id, "key.create",
+                          {"key_id": key_id, "scope": req.scope, "flagships": req.flagships})
+        conn.commit()
     return {"key_id": key_id, "api_key": raw_key, "shown_once": True, "khipuReceipt": rec}
 
 
 @app.delete("/v1/keys/{key_id}")
 def revoke_key(key_id: str, account_id: str = Depends(current_account)):
-    conn = db()
-    n = conn.execute("UPDATE api_keys SET status='revoked' WHERE key_id=? AND account_id=?",
-                     (key_id, account_id)).rowcount
-    if not n:
-        raise HTTPException(404, "key not found")
-    rec = write_audit(conn, account_id, "key.revoke", {"key_id": key_id})
-    conn.commit()
+    # closing() also ends the write transaction the UPDATE opened when the key
+    # isn't the caller's; a leaked connection would hold the database lock.
+    with closing(db()) as conn:
+        n = conn.execute("UPDATE api_keys SET status='revoked' WHERE key_id=? AND account_id=?",
+                         (key_id, account_id)).rowcount
+        if not n:
+            raise HTTPException(404, "key not found")
+        rec = write_audit(conn, account_id, "key.revoke", {"key_id": key_id})
+        conn.commit()
     return {"revoked": key_id, "khipuReceipt": rec}
 
 
 @app.get("/v1/usage")
 def usage(account_id: str = Depends(current_account)):
-    conn = db()
-    tier = conn.execute("SELECT tier FROM accounts WHERE account_id=?", (account_id,)).fetchone()["tier"]
     period = datetime.datetime.utcnow().strftime("%Y-%m")
-    row = conn.execute("SELECT calls FROM usage_counters WHERE account_id=? AND period=?",
-                       (account_id, period)).fetchone()
+    with closing(db()) as conn:
+        tier = conn.execute("SELECT tier FROM accounts WHERE account_id=?", (account_id,)).fetchone()["tier"]
+        row = conn.execute("SELECT calls FROM usage_counters WHERE account_id=? AND period=?",
+                           (account_id, period)).fetchone()
+        by_flag = {r["flagship"]: r["n"] for r in conn.execute(
+            "SELECT flagship, COUNT(*) n FROM call_receipts WHERE account_id=? GROUP BY flagship",
+            (account_id,))}
     calls = row["calls"] if row else 0
     soft = SOFT.get(tier)
     state = "unlimited" if soft is None else (
         "ok" if calls < soft else "over_quota" if calls < soft * 10 else "hard_ceiling")
-    by_flag = {r["flagship"]: r["n"] for r in conn.execute(
-        "SELECT flagship, COUNT(*) n FROM call_receipts WHERE account_id=? GROUP BY flagship",
-        (account_id,))}
     return {"tier": tier, "calls_this_period": calls, "soft_quota": soft,
             "state": state, "per_flagship": by_flag}
 
 
 @app.get("/v1/audit")
 def audit(account_id: str = Depends(current_account)):
-    conn = db()
-    rows = conn.execute("SELECT action, detail, ts FROM audit_log WHERE account_id=? ORDER BY ts DESC LIMIT 100",
-                        (account_id,)).fetchall()
+    with closing(db()) as conn:
+        rows = conn.execute("SELECT action, detail, ts FROM audit_log WHERE account_id=? ORDER BY ts DESC LIMIT 100",
+                            (account_id,)).fetchall()
     return {"actions": [dict(r) for r in rows]}
 
 
 @app.get("/v1/audit/export")
 def export_boe(account_id: str = Depends(current_account)):
-    conn = db()
-    rows = conn.execute("SELECT * FROM call_receipts WHERE account_id=? ORDER BY ts", (account_id,)).fetchall()
+    with closing(db()) as conn:
+        rows = conn.execute("SELECT * FROM call_receipts WHERE account_id=? ORDER BY ts", (account_id,)).fetchall()
     return {"boe": [dict(r) for r in rows], "replay_hash": REPLAY_HASH,
             "note": "Recompute each continuum_hash from the receipt packet to verify the chain yourself."}

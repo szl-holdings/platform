@@ -1,4 +1,7 @@
 fastapi>=0.141.1
 uvicorn[standard]>=0.52.4
 pydantic>=2.13.5
+# OIDC bearer verification (JWKS signature + iss/aud/exp/iat). Same library the
+# estate pins in lyte-services and szl-safe-stack (PyJWT[crypto]==2.15.1).
+PyJWT[crypto]>=2.15.1
 # cosign is invoked as an external binary (PLACEHOLDER signing); install via your UDS bundle.
