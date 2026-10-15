@@ -13,8 +13,7 @@ describe('Carlota Jo substrate run presentation', () => {
 
   it('keeps dry-run completion separate from live success', () => {
     expect(
-      parsePipelineRun({ runId: 'demo-1', status: 'dry-run-complete', mode: 'dry-run' }, 'dry-run')
-        .status,
+      parsePipelineRun({ runId: 'demo-1', status: 'dry-run-complete', mode: 'dry-run' }, 'dry-run').status,
     ).toBe('dry-run-complete');
     expect(parsePipelineRun({ status: 'completed', mode: 'dry-run' }, 'dry-run').status).toBe(
       'unknown',
@@ -83,16 +82,16 @@ describe('Carlota Jo substrate run presentation', () => {
     expect(identified.runId).toBe('run-identified');
   });
 
-  it.each([
-    'live',
-    'dry-run',
-  ] as const)('keeps an identified %s running run active with its original identity string', (mode) => {
-    const run = parsePipelineRun({ runId: '  run-7\t', status: 'running', mode }, mode);
-    expect(run.status).toBe('running');
-    expect(run.runId).toBe('  run-7\t');
-    expect(run.reportedStatus).toBe('running');
-    expect(run.mode).toBe(mode);
-  });
+  it.each(['live', 'dry-run'] as const)(
+    'keeps an identified %s running run active with its original identity string',
+    (mode) => {
+      const run = parsePipelineRun({ runId: '  run-7\t', status: 'running', mode }, mode);
+      expect(run.status).toBe('running');
+      expect(run.runId).toBe('  run-7\t');
+      expect(run.reportedStatus).toBe('running');
+      expect(run.mode).toBe(mode);
+    },
+  );
 
   it('keeps an identified running run with a mismatched or missing mode unknown', () => {
     const mismatched = parsePipelineRun(
@@ -103,9 +102,8 @@ describe('Carlota Jo substrate run presentation', () => {
     expect(mismatched.runId).toBe('run-1');
     expect(mismatched.mode).toBe('live');
     expect(mismatched.requestedMode).toBe('dry-run');
-    expect(
-      parsePipelineRun({ runId: 'run-1', status: 'running', mode: 'dry-run' }, 'live').status,
-    ).toBe('unknown');
+    expect(parsePipelineRun({ runId: 'run-1', status: 'running', mode: 'dry-run' }, 'live').status)
+      .toBe('unknown');
     expect(parsePipelineRun({ runId: 'run-1', status: 'running' }, 'live').status).toBe('unknown');
   });
 
@@ -144,9 +142,7 @@ describe('Carlota Jo substrate run presentation', () => {
 
   it('treats absent or mismatched modes and malformed responses as unknown', () => {
     expect(parsePipelineRun({ status: 'completed' }, 'live').status).toBe('unknown');
-    expect(parsePipelineRun({ status: 'completed', mode: 'live' }, 'dry-run').status).toBe(
-      'unknown',
-    );
+    expect(parsePipelineRun({ status: 'completed', mode: 'live' }, 'dry-run').status).toBe('unknown');
     expect(parsePipelineRun({ status: 'dry-run-complete', mode: 'live' }, 'live').status).toBe(
       'unknown',
     );

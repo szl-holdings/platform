@@ -209,11 +209,7 @@ export function validateRetiredSigningGraph({ workspaceText, lockText, manifests
     }
     const value = parseSource(manifest.text, manifest.path, true);
     if (value.name !== undefined) {
-      if (
-        typeof value.name !== 'string' ||
-        !value.name.trim() ||
-        value.name !== value.name.trim()
-      ) {
+      if (typeof value.name !== 'string' || !value.name.trim() || value.name !== value.name.trim()) {
         throw new Error(`${manifest.path}/name must be a nonempty package name string`);
       }
       rejectRetired(value.name, `${manifest.path}/name`);
@@ -276,16 +272,10 @@ export function readBoundedRegularSource(root, path) {
     }
     const after = fstatSync(fd, { bigint: true });
     const named = lstatSync(full, { bigint: true });
-    const same = (a, b) =>
-      ['dev', 'ino', 'size', 'mtimeNs', 'ctimeNs', 'mode', 'uid', 'gid'].every(
-        (field) => a[field] === b[field],
-      );
-    if (
-      !same(before, after) ||
-      !named.isFile() ||
-      !same(after, named) ||
-      BigInt(length) !== before.size
-    ) {
+    const same = (a, b) => ['dev', 'ino', 'size', 'mtimeNs', 'ctimeNs', 'mode', 'uid', 'gid']
+      .every((field) => a[field] === b[field]);
+    if (!same(before, after) || !named.isFile() || !same(after, named)
+        || BigInt(length) !== before.size) {
       throw new Error(`source changed during bounded read ${path}`);
     }
     return bytes.subarray(0, length).toString('utf8');

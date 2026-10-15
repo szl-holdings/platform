@@ -3,7 +3,13 @@
   "organization": "SZLHOLDINGS",
   "policy": {
     "license": "apache-2.0",
-    "model_weight_extensions": [".safetensors", ".gguf", ".bin", ".pt", ".pth"],
+    "model_weight_extensions": [
+      ".safetensors",
+      ".gguf",
+      ".bin",
+      ".pt",
+      ".pth"
+    ],
     "claims": [
       "A Hub repository is not a trained model unless qualifying weight bytes exist.",
       "A valid owner signature proves declared-key integrity, not independent model quality.",

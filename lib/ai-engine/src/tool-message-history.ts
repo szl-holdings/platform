@@ -21,9 +21,7 @@ function requireNonEmpty(value: unknown, field: string): asserts value is string
 }
 
 /** Validate native call/result batches without executing or authorizing tools. */
-export function groupToolMessageHistory<T extends ToolHistoryMessage>(
-  messages: readonly T[],
-): T[][] {
+export function groupToolMessageHistory<T extends ToolHistoryMessage>(messages: readonly T[]): T[][] {
   const history = messages.filter((message) => message.role !== 'system');
   const groups: T[][] = [];
   const seenIds = new Set<string>();

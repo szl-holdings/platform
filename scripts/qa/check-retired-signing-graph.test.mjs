@@ -5,11 +5,7 @@ import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { stringify } from 'yaml';
-import {
-  readBoundedRegularSource,
-  SECURE_OVERRIDES,
-  validateRetiredSigningGraph,
-} from './check-retired-signing-graph.mjs';
+import { readBoundedRegularSource, SECURE_OVERRIDES, validateRetiredSigningGraph } from './check-retired-signing-graph.mjs';
 
 function fixture() {
   const overrides = { ...SECURE_OVERRIDES, braces: 'link:packages/braces-safe' };
@@ -297,6 +293,7 @@ test('rejects invalid and duplicate-key JSON manifest source', () => {
     assert.throws(() => validateRetiredSigningGraph(value));
   }
 });
+
 
 test('bounded descriptor reader preserves ordinary source bytes and exact size limit', () => {
   const root = mkdtempSync(join(tmpdir(), 'szl-source-contract-'));

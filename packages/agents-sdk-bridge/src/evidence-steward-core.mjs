@@ -87,17 +87,10 @@ function canonicalDate(value, code) {
 function canonical(value) {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
   if (isObject(value)) {
-    return `{${Object.keys(value)
-      .sort()
-      .map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`)
-      .join(',')}}`;
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`).join(',')}}`;
   }
-  if (
-    value === undefined ||
-    typeof value === 'function' ||
-    (typeof value === 'number' && !Number.isFinite(value))
-  )
-    fail('SOURCE_VALUE_INVALID');
+  if (value === undefined || typeof value === 'function' ||
+      (typeof value === 'number' && !Number.isFinite(value))) fail('SOURCE_VALUE_INVALID');
   return JSON.stringify(value);
 }
 
@@ -107,12 +100,8 @@ function digest(value) {
 
 /** Verify a fixed reviewed source blob without accepting a path or URL. */
 export function verifyEvidenceStewardFixtureBlob(kind, bytes) {
-  if (
-    !Object.hasOwn(FIXTURE_BLOBS, kind) ||
-    !(bytes instanceof Uint8Array) ||
-    bytes.byteLength > 1_048_576
-  )
-    fail('FIXTURE_BLOB_ARGS_INVALID');
+  if (!Object.hasOwn(FIXTURE_BLOBS, kind) || !(bytes instanceof Uint8Array) ||
+      bytes.byteLength > 1_048_576) fail('FIXTURE_BLOB_ARGS_INVALID');
   const actual = createHash('sha1')
     .update(`blob ${bytes.byteLength}\0`)
     .update(bytes)
@@ -133,50 +122,31 @@ function requireAssetId(value, code) {
 
 function requireSafePath(value, code) {
   requireString(value, code, 240);
-  if (
-    !/^[A-Za-z0-9._/-]+$/.test(value) ||
-    value.startsWith('/') ||
-    value.split('/').some((part) => part === '' || part === '.' || part === '..')
-  )
-    fail(code);
+  if (!/^[A-Za-z0-9._/-]+$/.test(value) || value.startsWith('/') ||
+      value.split('/').some((part) => part === '' || part === '.' || part === '..')) fail(code);
 }
 
 function validateCatalog(catalog, asOfMs) {
   requireObject(catalog, 'CATALOG_INVALID');
-  if (
-    catalog.schema !== CATALOG_SCHEMA ||
-    catalog.organization !== ORGANIZATION ||
-    catalog.evidenceLabel !== 'MEASURED'
-  )
-    fail('CATALOG_INVALID');
+  if (catalog.schema !== CATALOG_SCHEMA || catalog.organization !== ORGANIZATION ||
+      catalog.evidenceLabel !== 'MEASURED') fail('CATALOG_INVALID');
   const observedMs = canonicalDate(catalog.observedAt, 'CATALOG_DATE_INVALID');
   if (observedMs > asOfMs) fail('CATALOG_DATE_IN_FUTURE');
   const source = requireObject(catalog.source, 'CATALOG_SOURCE_INVALID');
-  if (
-    source.apiBase !== 'https://huggingface.co/api' ||
-    source.pagination !== 'RFC_LINK_CURSOR' ||
-    source.completenessRule !== COMPLETENESS_RULE ||
-    !Number.isInteger(source.pageSize) ||
-    source.pageSize < 1 ||
-    source.pageSize > 100
-  ) {
+  if (source.apiBase !== 'https://huggingface.co/api' ||
+      source.pagination !== 'RFC_LINK_CURSOR' ||
+      source.completenessRule !== COMPLETENESS_RULE ||
+      !Number.isInteger(source.pageSize) || source.pageSize < 1 || source.pageSize > 100) {
     fail('CATALOG_SOURCE_INVALID');
   }
   const assets = requireObject(catalog.assets, 'CATALOG_ASSETS_INVALID');
-  if (
-    JSON.stringify(Object.keys(assets).sort()) !== JSON.stringify(['datasets', 'models', 'spaces'])
-  ) {
+  if (JSON.stringify(Object.keys(assets).sort()) !== JSON.stringify(['datasets', 'models', 'spaces'])) {
     fail('CATALOG_ASSETS_INVALID');
   }
   for (const type of ['models', 'datasets', 'spaces']) {
     const group = requireObject(assets[type], 'CATALOG_GROUP_INVALID');
-    if (
-      !Array.isArray(group.ids) ||
-      group.ids.length > (type === 'models' ? MAX_MODELS : 256) ||
-      group.count !== group.ids.length ||
-      !Number.isInteger(group.pages) ||
-      group.pages < 1
-    ) {
+    if (!Array.isArray(group.ids) || group.ids.length > (type === 'models' ? MAX_MODELS : 256) ||
+        group.count !== group.ids.length || !Number.isInteger(group.pages) || group.pages < 1) {
       fail('CATALOG_GROUP_INVALID');
     }
     for (const id of group.ids) requireAssetId(id, 'CATALOG_ASSET_ID_INVALID');
@@ -189,27 +159,20 @@ function validateCatalog(catalog, asOfMs) {
 
 function validateBindings(bindings) {
   requireObject(bindings, 'BINDINGS_INVALID');
-  if (
-    bindings.schema !== BINDINGS_SCHEMA ||
-    bindings.source_repository !== 'szl-holdings/szl-forge' ||
-    !Array.isArray(bindings.artifacts) ||
-    bindings.artifacts.length > MAX_MODELS
-  ) {
+  if (bindings.schema !== BINDINGS_SCHEMA ||
+      bindings.source_repository !== 'szl-holdings/szl-forge' ||
+      !Array.isArray(bindings.artifacts) || bindings.artifacts.length > MAX_MODELS) {
     fail('BINDINGS_INVALID');
   }
   const policy = requireObject(bindings.policy, 'BINDINGS_POLICY_INVALID');
-  if (policy.artifact_equivalence !== 'NOT_CLAIMED' || policy.reproducible_build !== 'NOT_CLAIMED')
-    fail('BINDINGS_POLICY_INVALID');
+  if (policy.artifact_equivalence !== 'NOT_CLAIMED' ||
+      policy.reproducible_build !== 'NOT_CLAIMED') fail('BINDINGS_POLICY_INVALID');
   const byId = new Map();
   for (const artifact of bindings.artifacts) {
     requireObject(artifact, 'BINDING_INVALID');
     const id = requireAssetId(artifact.repo_id, 'BINDING_ID_INVALID');
-    if (
-      byId.has(id) ||
-      !BOUND_CLASSES.has(artifact.artifact_class) ||
-      !PROMOTION_STATES.has(artifact.promotion_state)
-    )
-      fail('BINDING_INVALID');
+    if (byId.has(id) || !BOUND_CLASSES.has(artifact.artifact_class) ||
+        !PROMOTION_STATES.has(artifact.promotion_state)) fail('BINDING_INVALID');
     requireSafePath(artifact.source_path, 'BINDING_SOURCE_PATH_INVALID');
     requireString(artifact.maturity, 'BINDING_MATURITY_INVALID', 100);
     requireString(artifact.role, 'BINDING_ROLE_INVALID', 100);
@@ -220,29 +183,19 @@ function validateBindings(bindings) {
     if (!Array.isArray(artifact.required_hub_files) || artifact.required_hub_files.length > 32) {
       fail('BINDING_REQUIRED_FILES_INVALID');
     }
-    for (const path of artifact.required_hub_files)
-      requireSafePath(path, 'BINDING_REQUIRED_FILES_INVALID');
-    const weightHashes = requireObject(
-      artifact.expected_weight_sha256,
-      'BINDING_WEIGHT_HASHES_INVALID',
-    );
+    for (const path of artifact.required_hub_files) requireSafePath(path, 'BINDING_REQUIRED_FILES_INVALID');
+    const weightHashes = requireObject(artifact.expected_weight_sha256, 'BINDING_WEIGHT_HASHES_INVALID');
     if (Object.keys(weightHashes).length > 16) fail('BINDING_WEIGHT_HASHES_INVALID');
     for (const [path, hash] of Object.entries(weightHashes)) {
       requireSafePath(path, 'BINDING_WEIGHT_HASHES_INVALID');
-      if (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash))
-        fail('BINDING_WEIGHT_HASHES_INVALID');
+      if (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash)) fail('BINDING_WEIGHT_HASHES_INVALID');
     }
-    if (
-      !Array.isArray(artifact.limitations) ||
-      artifact.limitations.length > 24 ||
-      artifact.limitations.some((text) => typeof text !== 'string' || text.length > 2_000)
-    ) {
+    if (!Array.isArray(artifact.limitations) || artifact.limitations.length > 24 ||
+        artifact.limitations.some((text) => typeof text !== 'string' || text.length > 2_000)) {
       fail('BINDING_LIMITATIONS_INVALID');
     }
-    if (
-      !isObject(artifact.signed_receipts) ||
-      artifact.signed_receipts.claim_scope !== 'REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY'
-    ) {
+    if (!isObject(artifact.signed_receipts) ||
+        artifact.signed_receipts.claim_scope !== 'REPOSITORY_DECLARED_KEY_CONTINUITY_ONLY') {
       fail('BINDING_RECEIPT_SCOPE_INVALID');
     }
     for (const field of ['public_key', 'training', 'evaluation']) {
@@ -251,11 +204,9 @@ function validateBindings(bindings) {
     if (artifact.signed_receipts.release !== undefined) {
       requireSafePath(artifact.signed_receipts.release, 'BINDING_RECEIPT_PATH_INVALID');
     }
-    if (
-      artifact.autonomy_boundary !== undefined &&
-      (artifact.autonomy_boundary?.autonomous_execution !== false ||
-        artifact.autonomy_boundary?.controller_validation_required !== true)
-    ) {
+    if (artifact.autonomy_boundary !== undefined &&
+        (artifact.autonomy_boundary?.autonomous_execution !== false ||
+         artifact.autonomy_boundary?.controller_validation_required !== true)) {
       fail('BINDING_AUTONOMY_INVALID');
     }
     byId.set(id, artifact);
@@ -265,44 +216,27 @@ function validateBindings(bindings) {
 
 function validatePortfolio(portfolio) {
   requireObject(portfolio, 'PORTFOLIO_INVALID');
-  if (
-    portfolio.schema !== PORTFOLIO_SCHEMA ||
-    portfolio.organization !== ORGANIZATION ||
-    !Array.isArray(portfolio.artifacts) ||
-    portfolio.artifacts.length > MAX_MODELS
-  ) {
+  if (portfolio.schema !== PORTFOLIO_SCHEMA || portfolio.organization !== ORGANIZATION ||
+      !Array.isArray(portfolio.artifacts) || portfolio.artifacts.length > MAX_MODELS) {
     fail('PORTFOLIO_INVALID');
   }
   const byId = new Map();
   for (const artifact of portfolio.artifacts) {
     requireObject(artifact, 'PORTFOLIO_ENTRY_INVALID');
     const id = requireAssetId(artifact.repo_id, 'PORTFOLIO_ID_INVALID');
-    if (byId.has(id) || !PORTFOLIO_KINDS.has(artifact.kind) || artifact.autonomy_eligible !== false)
-      fail('PORTFOLIO_ENTRY_INVALID');
+    if (byId.has(id) || !PORTFOLIO_KINDS.has(artifact.kind) ||
+        artifact.autonomy_eligible !== false) fail('PORTFOLIO_ENTRY_INVALID');
     requireString(artifact.maturity, 'PORTFOLIO_MATURITY_INVALID', 100);
     if (artifact.github_source !== null && artifact.github_source !== undefined) {
       let url;
-      try {
-        url = new URL(artifact.github_source);
-      } catch {
-        fail('PORTFOLIO_SOURCE_INVALID');
-      }
-      if (
-        url.origin !== 'https://github.com' ||
-        !url.pathname.startsWith('/szl-holdings/') ||
-        url.username ||
-        url.password ||
-        url.search ||
-        url.hash
-      )
-        fail('PORTFOLIO_SOURCE_INVALID');
+      try { url = new URL(artifact.github_source); } catch { fail('PORTFOLIO_SOURCE_INVALID'); }
+      if (url.origin !== 'https://github.com' ||
+          !url.pathname.startsWith('/szl-holdings/') || url.username || url.password ||
+          url.search || url.hash) fail('PORTFOLIO_SOURCE_INVALID');
     }
-    if (
-      artifact.limitations !== undefined &&
-      (!Array.isArray(artifact.limitations) ||
-        artifact.limitations.length > 24 ||
-        artifact.limitations.some((text) => typeof text !== 'string' || text.length > 2_000))
-    ) {
+    if (artifact.limitations !== undefined &&
+        (!Array.isArray(artifact.limitations) || artifact.limitations.length > 24 ||
+         artifact.limitations.some((text) => typeof text !== 'string' || text.length > 2_000))) {
       fail('PORTFOLIO_LIMITATIONS_INVALID');
     }
     byId.set(id, artifact);
@@ -312,12 +246,9 @@ function validatePortfolio(portfolio) {
 
 function classify(binding, portfolio) {
   if (portfolio?.kind === 'software_kernel') return binding ? 'UNKNOWN' : 'SOFTWARE';
-  if (
-    binding?.promotion_state === 'NOT_PROMOTED_RESEARCH_ONLY' ||
-    binding?.maturity?.includes('RESEARCH_ONLY') ||
-    portfolio?.maturity?.includes('RESEARCH_ONLY')
-  )
-    return 'RESEARCH_ONLY';
+  if (binding?.promotion_state === 'NOT_PROMOTED_RESEARCH_ONLY' ||
+      binding?.maturity?.includes('RESEARCH_ONLY') ||
+      portfolio?.maturity?.includes('RESEARCH_ONLY')) return 'RESEARCH_ONLY';
   if (binding?.promotion_state?.startsWith('NOT_PROMOTED_')) return 'NOT_PROMOTED';
   return 'UNKNOWN';
 }
@@ -329,32 +260,24 @@ function sourceLinks(refs, names) {
 /** Build one offline, proposal-only steward from fixed, supplied source records. */
 export function createEvidenceSteward(sources, asOf) {
   requireExactKeys(sources, ['catalog', 'bindings', 'portfolio'], 'SOURCES_INVALID');
-  try {
-    sources = structuredClone(sources);
-  } catch {
-    fail('SOURCES_NOT_CLONEABLE');
-  }
+  try { sources = structuredClone(sources); } catch { fail('SOURCES_NOT_CLONEABLE'); }
   const asOfMs = canonicalDate(asOf, 'AS_OF_INVALID');
   const { modelIds: sourceModelIds, observedMs } = validateCatalog(sources.catalog, asOfMs);
   const bindings = validateBindings(sources.bindings);
   const portfolio = validatePortfolio(sources.portfolio);
-  const verifiedDigests = Object.fromEntries(
-    Object.entries(FIXTURE_CANONICAL_DIGESTS).map(([name, expected]) => {
-      const actual = digest(sources[name]);
-      if (actual !== expected) fail(`SOURCE_DIGEST_MISMATCH:${name}`);
-      return [name, actual];
-    }),
-  );
+  const verifiedDigests = Object.fromEntries(Object.entries(FIXTURE_CANONICAL_DIGESTS).map(([name, expected]) => {
+    const actual = digest(sources[name]);
+    if (actual !== expected) fail(`SOURCE_DIGEST_MISMATCH:${name}`);
+    return [name, actual];
+  }));
   const modelIds = [...sourceModelIds];
   const modelIdSet = new Set(modelIds);
   const stale = asOfMs - observedMs > STALE_AFTER_DAYS * DAY_MS;
   const ageDays = Math.floor((asOfMs - observedMs) / DAY_MS);
-  const refs = Object.fromEntries(
-    Object.entries(SOURCE_PATHS).map(([name, location]) => [
-      name,
-      { ...location, canonical_json_sha256: verifiedDigests[name] },
-    ]),
-  );
+  const refs = Object.fromEntries(Object.entries(SOURCE_PATHS).map(([name, location]) => [
+    name,
+    { ...location, canonical_json_sha256: verifiedDigests[name] },
+  ]));
 
   function checkedAssetId(args) {
     requireExactKeys(args, ['asset_id'], 'ASSET_ARGS_INVALID');
@@ -372,8 +295,7 @@ export function createEvidenceSteward(sources, asOf) {
 
   function listCatalog(args) {
     requireExactKeys(args, ['asset_type', 'limit'], 'LIST_ARGS_INVALID');
-    if (args.asset_type !== 'models' || ![5, 10, 25].includes(args.limit))
-      fail('LIST_ARGS_INVALID');
+    if (args.asset_type !== 'models' || ![5, 10, 25].includes(args.limit)) fail('LIST_ARGS_INVALID');
     return withDigest({
       schema: OUTPUT_SCHEMA,
       tool: 'list_catalog',
@@ -408,29 +330,23 @@ export function createEvidenceSteward(sources, asOf) {
       maturity: binding?.maturity ?? item?.maturity ?? 'UNKNOWN',
       promotion_state: binding?.promotion_state ?? 'UNKNOWN',
       role: binding?.role ?? item?.role ?? null,
-      source_binding: binding
-        ? {
-            repository: sources.bindings.source_repository,
-            source_path: binding.source_path,
-            source_files: [...binding.source_files],
-          }
-        : null,
+      source_binding: binding ? {
+        repository: sources.bindings.source_repository,
+        source_path: binding.source_path,
+        source_files: [...binding.source_files],
+      } : null,
       github_source: item?.github_source ?? null,
       expected_weight_sha256: binding ? { ...binding.expected_weight_sha256 } : {},
       signed_receipts: binding ? { ...binding.signed_receipts } : null,
       receipt_claim_scope: binding?.signed_receipts.claim_scope ?? 'NOT_ESTABLISHED',
-      runtime_output_signature:
-        binding && id === 'SZLHOLDINGS/SZL-Khipu-1.5B-GGUF' ? 'UNSIGNED' : 'NOT_ESTABLISHED',
+      runtime_output_signature: binding && id === 'SZLHOLDINGS/SZL-Khipu-1.5B-GGUF'
+        ? 'UNSIGNED' : 'NOT_ESTABLISHED',
       limitations: binding ? [...binding.limitations] : [...(item?.limitations ?? [])],
       qualified_inference: 'NOT_ESTABLISHED',
       autonomous_execution: false,
       lambda_conjecture_1: 'OPEN',
       evidence: [
-        ...sourceLinks(refs, [
-          'catalog',
-          ...(binding ? ['bindings'] : []),
-          ...(item ? ['portfolio'] : []),
-        ]),
+        ...sourceLinks(refs, ['catalog', ...(binding ? ['bindings'] : []), ...(item ? ['portfolio'] : [])]),
         { ...LAMBDA_PROOF },
       ],
     });
@@ -439,54 +355,22 @@ export function createEvidenceSteward(sources, asOf) {
   function gapsFor(id) {
     const { binding, item, classification } = entry(id);
     const gaps = [];
-    const add = (code, detail, names) =>
-      gaps.push({ code, detail, evidence: sourceLinks(refs, names) });
-    if (stale)
-      add('CATALOG_STALE', 'The tracked public catalog is older than 30 days.', ['catalog']);
-    if (!binding)
-      add('CURATED_BINDING_MISSING', 'No curated model source binding covers this asset.', [
-        'bindings',
-      ]);
-    if (!item)
-      add('PORTFOLIO_ENTRY_MISSING', 'The scoped portfolio has no entry for this asset.', [
-        'portfolio',
-      ]);
-    if (item && !item.github_source)
-      add('SOURCE_UNBOUND', 'The portfolio does not identify a GitHub source.', ['portfolio']);
-    if (classification === 'SOFTWARE')
-      add('SOFTWARE_NOT_MODEL', 'This is software, not qualified model inference.', ['portfolio']);
-    if (classification === 'RESEARCH_ONLY')
-      add('RESEARCH_ONLY', 'Research evidence does not qualify autonomous inference.', [
-        'bindings',
-        'portfolio',
-      ]);
-    if (classification === 'UNKNOWN')
-      add('CLASSIFICATION_UNKNOWN', 'Available sources do not establish a qualifying class.', [
-        'catalog',
-        'bindings',
-        'portfolio',
-      ]);
+    const add = (code, detail, names) => gaps.push({ code, detail, evidence: sourceLinks(refs, names) });
+    if (stale) add('CATALOG_STALE', 'The tracked public catalog is older than 30 days.', ['catalog']);
+    if (!binding) add('CURATED_BINDING_MISSING', 'No curated model source binding covers this asset.', ['bindings']);
+    if (!item) add('PORTFOLIO_ENTRY_MISSING', 'The scoped portfolio has no entry for this asset.', ['portfolio']);
+    if (item && !item.github_source) add('SOURCE_UNBOUND', 'The portfolio does not identify a GitHub source.', ['portfolio']);
+    if (classification === 'SOFTWARE') add('SOFTWARE_NOT_MODEL', 'This is software, not qualified model inference.', ['portfolio']);
+    if (classification === 'RESEARCH_ONLY') add('RESEARCH_ONLY', 'Research evidence does not qualify autonomous inference.', ['bindings', 'portfolio']);
+    if (classification === 'UNKNOWN') add('CLASSIFICATION_UNKNOWN', 'Available sources do not establish a qualifying class.', ['catalog', 'bindings', 'portfolio']);
     if (binding && item?.kind === 'software_kernel') {
-      add(
-        'CLASSIFICATION_CONFLICT',
-        'Curated binding and scoped portfolio disagree on artifact class.',
-        ['bindings', 'portfolio'],
-      );
+      add('CLASSIFICATION_CONFLICT', 'Curated binding and scoped portfolio disagree on artifact class.', ['bindings', 'portfolio']);
     }
-    if (binding)
-      add('NOT_PROMOTED', 'The curated binding explicitly blocks promotion.', ['bindings']);
+    if (binding) add('NOT_PROMOTED', 'The curated binding explicitly blocks promotion.', ['bindings']);
     if (binding && id === 'SZLHOLDINGS/SZL-Khipu-1.5B-GGUF') {
-      add(
-        'RUNTIME_OUTPUT_UNSIGNED',
-        'Runtime outputs are unsigned; training and evaluation receipts do not cover them.',
-        ['bindings'],
-      );
+      add('RUNTIME_OUTPUT_UNSIGNED', 'Runtime outputs are unsigned; training and evaluation receipts do not cover them.', ['bindings']);
     }
-    add(
-      'QUALIFIED_INFERENCE_NOT_ESTABLISHED',
-      'Catalog and source records do not establish qualified live inference.',
-      ['catalog', 'bindings', 'portfolio'],
-    );
+    add('QUALIFIED_INFERENCE_NOT_ESTABLISHED', 'Catalog and source records do not establish qualified live inference.', ['catalog', 'bindings', 'portfolio']);
     return gaps;
   }
 
@@ -535,19 +419,9 @@ export function createEvidenceSteward(sources, asOf) {
         autonomous_execution: false,
       },
       gap_codes: gapsFor(id).map((gap) => gap.code),
-      evidence: sourceLinks(refs, [
-        'catalog',
-        ...(binding ? ['bindings'] : []),
-        ...(item ? ['portfolio'] : []),
-      ]),
+      evidence: sourceLinks(refs, ['catalog', ...(binding ? ['bindings'] : []), ...(item ? ['portfolio'] : [])]),
     });
   }
 
-  return {
-    modelIds: [...modelIds],
-    listCatalog,
-    inspectAsset,
-    assessEvidenceGaps,
-    proposeNextStep,
-  };
+  return { modelIds: [...modelIds], listCatalog, inspectAsset, assessEvidenceGaps, proposeNextStep };
 }

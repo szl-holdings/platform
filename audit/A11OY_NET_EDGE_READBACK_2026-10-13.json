@@ -4,7 +4,9 @@
   "observed_at_utc": "2026-10-13T16:43:01Z",
   "expected_protected_source_revision": "2ed4a76edfb8925bf0611f00ee9d9e4943a026c0",
   "result": "FAIL",
-  "failed_controls": ["security_headers"],
+  "failed_controls": [
+    "security_headers"
+  ],
   "probes": {
     "source_control": {
       "status": "PASS",
@@ -25,7 +27,10 @@
       "protected_domain_state": "verified",
       "https_certificate": {
         "state": "approved",
-        "domains": ["a11oy.net", "www.a11oy.net"],
+        "domains": [
+          "a11oy.net",
+          "www.a11oy.net"
+        ],
         "expires_at": "2027-01-11",
         "remaining_days": 89
       },
