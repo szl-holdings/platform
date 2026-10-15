@@ -22,9 +22,19 @@ The workflow grants `id-token: write` and selects only
 `datasets/SZLHOLDINGS/readiness-runs`. Its job no longer supplies `HF_TOKEN`.
 The shared helper rejects mismatched resources, mixed token/OIDC credentials,
 missing GitHub Actions request grants and invalid fleet signatures before
-constructing the Hub client. Explicit `token=True` requests the pinned SDK's
-OIDC exchange; exchange denial does not retry through a token path. The other
-seven readiness workflows retain their existing token path.
+constructing the Hub client. The pinned SDK's OIDC-only exchange is called with
+the exact resource and GitHub provider. Only a plain dictionary containing a
+nonempty plain-string access token without whitespace/control characters can
+construct the client. That explicit token bypasses generic credential discovery.
+The other seven readiness workflows retain their existing token path.
+
+Independent review found that generic `token=True` discovery could fall through
+to another credential source when a nominally successful SDK exchange returned
+an empty token. The initial exception-only SDK check did not cover that case.
+The final source removes generic discovery and adds real pinned-SDK regressions
+for empty, absent, non-string and malformed results as well as thrown denials.
+The existing readiness CI job installs the pinned Hub and PyNaCl dependencies
+so these integration contracts run before protected admission.
 
 Publication failures preserve `published:false`, the attempted receipt path
 and the existing failing Actions exit. The classifier inspects only a plain
@@ -35,8 +45,10 @@ class names, response bodies and headers are never included.
 Reviewed Git blob identities for the source under test:
 
 - Workflow: `af7b8a84662b133ede8d0caf1cb57aa291852b15`.
-- Shared publisher: `17e942a186aae8c088d76bbfcd49aac48017bb0e`.
-- Publisher regression suite: `0559641044f7079d59c4a49301babe0f06b3d3f3`.
+- Shared publisher: `936d9ba81b5dfaaed5b7d26774229541acd76cd3`.
+- Publisher regression suite: `1c7a9c16aabe2ebf4b84885b23ff8bcd521d7677`.
+- Pinned-SDK regression suite: `fcb9a7626880ef7850f66de1b133a98b7b1e1e25`.
+- Readiness CI: `b6a998b0f903e08e2bf1a058fd24b4401d312bd3`.
 
 ## Validation
 
@@ -47,18 +59,19 @@ or runtime qualification is inferred.
 | Command / check | Exit | Result |
 | --- | --- | --- |
 | `pnpm typecheck`, pinned pnpm 10.26.1 / Node 24.19.0, before and after the bounded-error patch | 0 | 232 successful tasks, all cached in both runs |
-| `python -B -m unittest discover -s platform/agents/readiness/_lib -p 'test_*.py'` | 0 | 133 readiness regression cases, nine expected PyNaCl-dependent skips |
-| `uv run --no-project --with pynacl==1.6.0 python -B -m unittest discover -s platform/agents/readiness/_lib -p 'test_*.py'` | 0 | All 133 readiness regression cases completed successfully, including real Ed25519 checks; Hub calls mocked |
-| Pinned `huggingface_hub==2.0.0` offline authentication contract | 0 | Explicit token requirement still selects OIDC with implicit token use disabled; exchange denial raises and does not call environment, file or Colab fallback; zero network requests |
+| `python -B -m unittest discover -s platform/agents/readiness/_lib -p 'test_*.py'` | 0 | 139 readiness regression cases, nine expected PyNaCl-dependent skips and four expected pinned-SDK skips |
+| `uv run --offline --no-project --with huggingface_hub==2.0.0 --with pynacl==1.6.0 python -B -m unittest discover -s platform/agents/readiness/_lib -p 'test_*.py'` | 0 | All 139 readiness regression cases completed successfully, including real Ed25519 and pinned-SDK control flow; provider operations mocked and network connections forbidden |
+| Initial pinned SDK exception-only contract | 0 | Limited result: thrown exchange denials did not fall back; independent review subsequently found the empty-token case this check omitted and the final source/tests address it |
+| `pnpm claims:drift` after ordinary integration | 0 | Unchanged validator accepts the integrated source with its real protected-main ancestor |
 | Final source-delta whitespace check against protected main | 0 | No whitespace errors |
 
 A pre-commit `pnpm claims:drift` invocation exited 1 on inherited historical
 catalog counts while the ordinary merge was still pending. Its immutable
 baseline was the original branch's older merge base
 `f2f8df6f89056e9104587674ccec0855dd5b177a`, because protected main was
-not yet an ancestor of the local HEAD. The committed integration must rerun
-the unchanged check with its real main ancestor; no allowlist or validator is
-changed to admit historical counts.
+not yet an ancestor of the local HEAD. The committed integration reran and
+passed the unchanged check with its real main ancestor; no allowlist or
+validator was changed to admit historical counts.
 
 The negative cases cover synthetic credential text, newline-delimited workflow
 commands, client construction and upload denial, each missing OIDC request
@@ -68,13 +81,13 @@ no successful upload, bounded output and no additional workflow command line.
 All key/token fixtures are generated or explicit synthetic test doubles; no
 real provider exception or stored credential was reproduced.
 
-The pinned-SDK check patches `_get_token_from_oidc` to return a synthetic grant
-and then raise a synthetic exchange denial while independently mocking its
-environment, token-file and Colab fallback functions. Calling
-`_headers.get_token_to_send(True)` with
-`HF_HUB_DISABLE_IMPLICIT_TOKEN=True` succeeds only in the first case; each
-fallback mock remains uncalled. This verifies SDK control flow, not provider
-authentication.
+The final pinned-SDK cases run the real `oidc_login` and header token selector
+with provider minting, exchange and upload mocked. Valid output passes the
+explicit token to the client even when implicit token use is disabled. Every
+malformed/empty/denied outcome returns a bounded unsuccessful publication and
+constructs no client. Generic discovery, environment, token-file and Colab
+fallback mocks remain uncalled in every case. This verifies SDK control flow,
+not provider authentication.
 
 ## Verification and remaining gates
 

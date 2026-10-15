@@ -217,9 +217,18 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
     try:
         from huggingface_hub import HfApi  # type: ignore
 
-        # token=True forces the pinned Hub client to exchange OIDC (or fail)
-        # even when implicit-token use is disabled.
-        api = HfApi(token=True if oidc_resource else token)
+        if oidc_resource:
+            # Use only the pinned SDK's OIDC exchange. Generic token discovery
+            # can fall back to stored credentials after an empty exchange token.
+            from huggingface_hub._oidc import oidc_login  # type: ignore
+
+            exchange = oidc_login(resource=oidc_resource, provider="github")
+            token = exchange.get("access_token") if type(exchange) is dict else None
+            if type(token) is not str or not token or any(
+                char.isspace() or ord(char) < 32 or ord(char) == 127 for char in token
+            ):
+                return {"published": False, "reason": "OIDC access token unavailable", "path": path}
+        api = HfApi(token=token)
         api.upload_file(
             path_or_fileobj=json.dumps(envelope, indent=2).encode(),
             path_in_repo=path,

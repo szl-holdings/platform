@@ -76,6 +76,12 @@ annotations. A bounded failure still records `published:false` and fails the
 GitHub Actions job; it does not establish which stored credential or provider
 binding needs repair.
 
+The OIDC path calls the pinned Hub client's OIDC-only exchange and accepts only
+a nonempty plain-string access token without whitespace or control characters.
+It passes that token explicitly to the uploader. Generic credential discovery
+is not used, including when the exchange response is malformed; CI exercises
+this boundary against the pinned SDK as well as offline doubles.
+
 ## Dashboard
 `dashboard.html` is a static, read-only viewer. It lists the latest receipt for
 each agent from `SZLHOLDINGS/readiness-runs`. Because no trusted public signer

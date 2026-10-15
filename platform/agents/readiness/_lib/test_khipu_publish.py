@@ -58,8 +58,28 @@ class _FakeHfApi:
         _FakeHfApi.uploads.append(kwargs)
 
 
+class _FakeOidc:
+    calls: list[dict] = []
+    token: object = "synthetic-oidc-grant"
+    error: Exception | None = None
+
+    @staticmethod
+    def login(**kwargs):
+        _FakeOidc.calls.append(kwargs)
+        if _FakeOidc.error is not None:
+            raise _FakeOidc.error
+        return {"access_token": _FakeOidc.token}
+
+
+def _fake_oidc() -> types.ModuleType:
+    module = types.ModuleType("huggingface_hub._oidc")
+    module.oidc_login = _FakeOidc.login
+    return module
+
+
 def _fake_hub() -> types.ModuleType:
     module = types.ModuleType("huggingface_hub")
+    module.__path__ = []
     module.HfApi = _FakeHfApi
     return module
 
@@ -108,9 +128,13 @@ class EmitFailsClosedTest(unittest.TestCase):
         _FakeHfApi.uploads = []
         _FakeHfApi.init_tokens = []
         _FakeHfApi.error = None
+        _FakeOidc.calls = []
+        _FakeOidc.token = "synthetic-oidc-grant"
+        _FakeOidc.error = None
         nacl, signing = _fake_nacl()
         patcher = unittest.mock.patch.dict(sys.modules, {
-            "huggingface_hub": _fake_hub(), "nacl": nacl, "nacl.signing": signing,
+            "huggingface_hub": _fake_hub(), "huggingface_hub._oidc": _fake_oidc(),
+            "nacl": nacl, "nacl.signing": signing,
         })
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -193,7 +217,7 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn('"reason": "publisher unavailable"', text)
         self.assertNotIn("synthetic client credential failure", text)
-        client.assert_called_once_with(token=True)
+        client.assert_called_once_with(token="synthetic-oidc-grant")
         self.assertEqual(_FakeHfApi.uploads, [])
 
     def test_http_status_classification_is_bounded(self) -> None:
@@ -269,7 +293,10 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertIsNone(code)
         self.assertTrue(result["receipt"]["signed"])
         self.assertTrue(result["publish"]["published"])
-        self.assertEqual(_FakeHfApi.init_tokens, [True])
+        self.assertEqual(_FakeHfApi.init_tokens, ["synthetic-oidc-grant"])
+        self.assertEqual(_FakeOidc.calls, [{
+            "resource": "datasets/SZLHOLDINGS/readiness-runs", "provider": "github",
+        }])
         self.assertEqual(len(_FakeHfApi.uploads), 1)
         self.assertNotIn("::error", text)
 
@@ -296,7 +323,29 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn('"reason": "publisher unavailable"', text)
         self.assertNotIn("synthetic Hub denial", text)
-        self.assertEqual(_FakeHfApi.init_tokens, [True])
+        self.assertEqual(_FakeHfApi.init_tokens, ["synthetic-oidc-grant"])
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_invalid_oidc_exchange_token_cannot_construct_hub_client(self) -> None:
+        class TokenSubclass(str):
+            pass
+
+        for token in ("", None, False, 1, [], " ", "grant\n", "grant\x00", "grant\x7f", TokenSubclass("grant")):
+            with self.subTest(token_type=type(token).__name__):
+                _FakeOidc.token = token
+                text, _result, code = self._emit(self._oidc_env())
+                self.assertEqual(code, 1)
+                self.assertIn("OIDC access token unavailable", text)
+                self.assertEqual(_FakeHfApi.init_tokens, [])
+                self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_oidc_exchange_failure_cannot_construct_hub_client(self) -> None:
+        _FakeOidc.error = RuntimeError("synthetic exchange denial")
+        text, _result, code = self._emit(self._oidc_env())
+        self.assertEqual(code, 1)
+        self.assertIn('"reason": "publisher unavailable"', text)
+        self.assertNotIn("synthetic exchange denial", text)
+        self.assertEqual(_FakeHfApi.init_tokens, [])
         self.assertEqual(_FakeHfApi.uploads, [])
 
     def test_missing_oidc_request_grant_fails_before_hub_api(self) -> None:
