@@ -5,7 +5,8 @@ import random
 import pytest
 
 from puriq_os.khipu_emit import KhipuLedger
-from puriq_os.loop import Action, LoopStatus
+from puriq_os.hukulla_tripwires import TripwireResult
+from puriq_os.loop import Action, LoopStatus, OrganAgent, TickResult
 from puriq_os.organs import build_all
 from puriq_os.organs.hatun_agent import HatunAgent
 from puriq_os.yuyay_gate import YuyayScores
@@ -467,3 +468,60 @@ def test_hatun_operation_cache_is_not_capped_at_the_adapter_replay_limit():
     assert "op-0" in agent._replay
     assert len(agent._replay) == 33
     assert len(seen) == 33
+
+
+def test_malformed_result_receipt_records_that_the_evaluator_ran():
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or "not-a-dict")
+    result = agent.tick(_world(1))
+    assert len(seen) == 1
+    assert result.receipt.payload["result"]["backend_called"] is True
+    assert result.receipt.payload["backend_called"] is True
+    assert result.receipt.payload["result"]["reason"] == "MALFORMED"
+
+
+def test_missing_parent_receipt_after_a_call_records_the_call(monkeypatch):
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    original = OrganAgent.tick
+
+    def drop_receipt(self, world=None, now=None):
+        original(self, world, now)
+        return TickResult(
+            self.organ,
+            self.tick_count,
+            LoopStatus.ALIVE,
+            "evaluate_proposal",
+            1.0,
+            1.0,
+            TripwireResult(clear=True),
+            None,
+            "ok",
+        )
+
+    monkeypatch.setattr(OrganAgent, "tick", drop_receipt)
+    result = agent.tick(_world(1))
+    assert len(seen) == 1
+    assert result.receipt.payload["reason"] == "MISSING_RECEIPT"
+    assert result.receipt.payload["backend_called"] is True
+    assert result.receipt.payload["evidence"] == []
+
+
+def test_terminal_exception_after_the_evaluator_records_the_call():
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    real = HatunAgent.emit_receipt
+    calls = {"n": 0}
+
+    def fail_once(self, *args, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise RuntimeError("receipt failed")
+        return real(self, *args, **kwargs)
+
+    agent.emit_receipt = fail_once.__get__(agent, HatunAgent)
+    result = agent.tick(_world(1))
+    assert len(seen) == 1
+    assert result.receipt.payload["reason"] == "TERMINAL_EXCEPTION"
+    assert result.receipt.payload["backend_called"] is True
+    assert result.receipt.payload["evidence"] == []

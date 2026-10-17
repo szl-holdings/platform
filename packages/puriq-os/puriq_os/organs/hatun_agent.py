@@ -114,6 +114,7 @@ class HatunAgent(OrganAgent):
         self._evaluator = evaluator
         self._allowed_tenant = allowed_tenant
         self._clock = clock or time.time
+        self._evaluator_called = False
         # Separate from the Second Brain adapter's 32-id table. This cache has
         # no capacity. A future capacity must refuse a new id and must keep
         # every stored result and every in-flight reservation.
@@ -246,6 +247,7 @@ class HatunAgent(OrganAgent):
             closed = _terminal("ABSENT_BACKEND", provenance=provenance, measurability=meas)
             closed["evaluated"] = False
             return self._store_replay(operation, replay_key, closed)
+        self._evaluator_called = True
         try:
             raw = self._evaluator({
                 "proposals": x.get("proposals"),
@@ -295,7 +297,21 @@ class HatunAgent(OrganAgent):
             and not_before <= int(now) < expires_at
         )
 
+    def emit_receipt(self, action_name: str, decision_value: float, yuyay_value: float,
+                     hukulla_clear: bool, payload: Dict[str, Any]) -> Any:
+        if "backend_called" not in payload:
+            result = payload.get("result")
+            if isinstance(result, dict) and isinstance(result.get("backend_called"), bool):
+                called = result["backend_called"]
+            else:
+                called = self._evaluator_called
+            payload = {**payload, "backend_called": called}
+        return super().emit_receipt(
+            action_name, decision_value, yuyay_value, hukulla_clear, payload,
+        )
+
     def tick(self, world: Any = None, now: Optional[float] = None) -> TickResult:
+        self._evaluator_called = False
         before = self.ledger.count()
         try:
             result = super().tick(world, now)
@@ -312,7 +328,7 @@ class HatunAgent(OrganAgent):
                     "reason": "TERMINAL_EXCEPTION",
                     "evidence": [],
                     "terminal": True,
-                    "backend_called": False,
+                    "backend_called": self._evaluator_called,
                 },
             )
             self.status = LoopStatus.PAUSED
@@ -338,7 +354,7 @@ class HatunAgent(OrganAgent):
                     "reason": "MISSING_RECEIPT",
                     "evidence": [],
                     "terminal": True,
-                    "backend_called": False,
+                    "backend_called": self._evaluator_called,
                 },
             )
             self.status = LoopStatus.PAUSED
@@ -375,31 +391,39 @@ def _admit_backend(
         return out
     state = raw.get("state")
     if state == "TIMEOUT":
-        return _terminal("TIMEOUT", provenance=provenance, measurability=measurability)
+        out = _terminal("TIMEOUT", provenance=provenance, measurability=measurability)
+        out["backend_called"] = True
+        return out
     if state in {"UNCERTAIN", "INDETERMINATE"}:
         out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
         out["reason"] = "UNCERTAIN"
+        out["backend_called"] = True
         return out
     if state not in {"AVAILABLE", "ABSTAIN"}:
         out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
         out["reason"] = "UNEXPECTED_STATE"
+        out["backend_called"] = True
         return out
     status, evidence = _evidence(raw.get("evidence", []), allowed_tenant)
     if status == "malformed":
         out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
         out["reason"] = "MALFORMED"
+        out["backend_called"] = True
         return out
     if status == "wrong_tenant":
         out = _terminal("DENIED", provenance=provenance, measurability=measurability)
         out["reason"] = "WRONG_TENANT"
+        out["backend_called"] = True
         return out
     if status == "withdrawn":
         out = _terminal("ABSTAIN", provenance=provenance, measurability=measurability)
         out["reason"] = "WITHDRAWN"
+        out["backend_called"] = True
         return out
     if status == "unbound":
         out = _terminal("ABSTAIN", provenance=provenance, measurability=measurability)
         out["reason"] = "RIGHTS_UNBOUND"
+        out["backend_called"] = True
         return out
     if state == "AVAILABLE" and not evidence:
         state = "ABSTAIN"
