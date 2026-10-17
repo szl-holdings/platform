@@ -1,5 +1,6 @@
 """Hatun must take caller context through the real gate and fail closed."""
 
+import math
 import random
 
 import pytest
@@ -225,3 +226,59 @@ def test_private_world_fields_are_not_evidence():
     encoded = str(result.receipt.payload)
     assert "secret" not in encoded
     assert "hidden" not in encoded
+
+
+@pytest.mark.parametrize("meas", [float("nan"), float("inf"), float("-inf")])
+def test_nonfinite_measurability_is_rejected_before_admission(meas):
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    observed = agent.observe(_world(1, measurability=meas))
+    assert observed["admissible"] is False
+    assert observed["governance_health"] == 0.0
+    assert math.isfinite(observed["governance_health"])
+    result = agent.tick(_world(1, measurability=meas))
+    assert result.chosen is None
+    assert seen == []
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"stop": "STOP", "measurability": None},
+        {"stop": "STOP", "measurability": 0.5},
+        {"stop": "STOP", "measurability": float("nan")},
+        {"stop_directive": True, "authorized": False},
+        {"stop": "STOP", "tenant": "other"},
+        {"stop": "STOP", "expires_at": NOW},
+        {"stop": "STOP", "operation": "policy_evaluate"},
+    ],
+)
+def test_stop_stays_halted_and_a_later_valid_tick_does_not_execute(overrides):
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    stopped = agent.tick(_world(1, **overrides))
+    assert stopped.status == LoopStatus.HALTED
+    assert seen == []
+    later = agent.tick(_world(1))
+    assert later.status == LoopStatus.HALTED
+    assert later.chosen is None
+    assert seen == []
+
+
+def test_validation_failure_after_backend_keeps_the_call_and_request_provenance():
+    seen = []
+
+    def evaluator(payload):
+        seen.append(payload)
+        return {"state": ["UNCERTAIN"], "evidence": [{"node_id": "leak-node", "sha256": "a" * 64}]}
+
+    result = _agent(evaluator).tick(_world(1))
+    assert seen == [{"proposals": 1, "provenance": PROVENANCE, "measurability": 1.0, "tenant": "public"}]
+    assert result.status != LoopStatus.PAUSED
+    assert result.receipt is not None
+    body = result.receipt.payload["result"]
+    assert body["backend_called"] is True
+    assert body["provenance"] == PROVENANCE
+    assert body["evidence"] == []
+    assert body["terminal"] is True
+    assert "leak-node" not in str(body)

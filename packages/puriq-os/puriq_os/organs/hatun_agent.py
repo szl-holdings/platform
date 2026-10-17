@@ -13,6 +13,7 @@ loop constructors do not supply one.
 """
 from __future__ import annotations
 
+import math
 import re
 import time
 from typing import Any, Callable, Dict, List, Optional
@@ -42,7 +43,7 @@ def _number(value: Any) -> Optional[float]:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
     number = float(value)
-    if number < 0.0 or number > 1.0:
+    if not math.isfinite(number) or number < 0.0 or number > 1.0:
         return None
     return number
 
@@ -174,11 +175,19 @@ class HatunAgent(OrganAgent):
             failed = _terminal("EXECUTION_FAILURE", provenance=provenance, measurability=meas)
             failed["backend_called"] = True
             return failed
-        admitted = _admit_backend(raw, provenance=provenance, measurability=meas)
+        try:
+            admitted = _admit_backend(raw, provenance=provenance, measurability=meas)
+        except Exception:
+            failed = _terminal("UNCERTAIN", provenance=provenance, measurability=meas)
+            failed["backend_called"] = True
+            return failed
         admitted["backend_called"] = True
+        if not isinstance(admitted.get("provenance"), str):
+            admitted["provenance"] = provenance if isinstance(provenance, str) else None
         return admitted
 
     def tick(self, world: Any = None, now: Optional[float] = None) -> TickResult:
+        stop = _stop_requested(world)
         before = self.ledger.count()
         try:
             result = super().tick(world, now)
@@ -198,17 +207,20 @@ class HatunAgent(OrganAgent):
                     "backend_called": False,
                 },
             )
-            self.status = LoopStatus.PAUSED
+            status = LoopStatus.HALTED if stop else LoopStatus.PAUSED
+            self.status = status
+            if stop and not self.hukulla.halted:
+                self.hukulla.halt(TripwireResult(clear=False, tripped=["T10"]))
             return TickResult(
                 self.organ,
                 self.tick_count,
-                LoopStatus.PAUSED,
+                status,
                 None,
                 0.0,
                 0.0,
-                TripwireResult(clear=False, tripped=["terminal"]),
+                TripwireResult(clear=False, tripped=["T10"] if stop else ["terminal"]),
                 receipt,
-                "terminal",
+                "halted" if stop else "terminal",
             )
         if result.receipt is None:
             receipt = self.emit_receipt(
@@ -230,27 +242,37 @@ class HatunAgent(OrganAgent):
                 receipt,
                 "terminal",
             )
+        if stop:
+            self.status = LoopStatus.HALTED
+            if not self.hukulla.halted:
+                self.hukulla.halt(result.hukulla)
+            if result.status != LoopStatus.HALTED:
+                result.status = LoopStatus.HALTED
+                result.note = "halted"
         return result
+
+
+def _stop_requested(world: Any) -> bool:
+    return isinstance(world, dict) and (
+        world.get("stop") == "STOP" or world.get("stop_directive") is True
+    )
 
 
 def _admit_backend(raw: Any, *, provenance: Any, measurability: float) -> Dict[str, Any]:
     if not isinstance(raw, dict) or _PRIVATE.intersection(raw):
-        out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
-        out["backend_called"] = True
-        return out
+        return _after_backend("UNCERTAIN", provenance=provenance, measurability=measurability)
     state = raw.get("state")
+    if not isinstance(state, str):
+        return _after_backend("UNCERTAIN", provenance=provenance, measurability=measurability)
     if state == "TIMEOUT":
-        return _terminal("TIMEOUT", provenance=provenance, measurability=measurability)
+        return _after_backend("TIMEOUT", provenance=provenance, measurability=measurability)
     if state in {"UNCERTAIN", "INDETERMINATE"}:
-        out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
-        return out
+        return _after_backend("UNCERTAIN", provenance=provenance, measurability=measurability)
     if state not in {"AVAILABLE", "ABSTAIN"}:
-        out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
-        return out
+        return _after_backend("UNCERTAIN", provenance=provenance, measurability=measurability)
     evidence = _evidence(raw.get("evidence", []))
     if evidence is None:
-        out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
-        return out
+        return _after_backend("UNCERTAIN", provenance=provenance, measurability=measurability)
     if state == "AVAILABLE" and not evidence:
         state = "ABSTAIN"
     return {
@@ -263,3 +285,9 @@ def _admit_backend(raw: Any, *, provenance: Any, measurability: float) -> Dict[s
         "measurability": measurability,
         "execution_authority": "NONE",
     }
+
+
+def _after_backend(state: str, *, provenance: Any, measurability: float) -> Dict[str, Any]:
+    out = _terminal(state, provenance=provenance, measurability=measurability)
+    out["backend_called"] = True
+    return out
