@@ -155,11 +155,45 @@ class OrganAgent(ABC):
         )
         return self.ledger.emit(receipt)
 
+    def _paused_tick_allowed(self, world: Any) -> bool:
+        """PAUSED blocks a new invocation. A subclass may allow a non-invoking tick."""
+        return False
+
+    def _admission_blocked(self, world: Any) -> bool:
+        """Race-safe gate for the common tick path.
+
+        The caller holds the ledger lock. An unresolved transaction blocks a
+        new operation and a replay. PAUSED blocks a fresh invocation and does
+        not resume the loop.
+        """
+        unresolved = getattr(self.ledger, "transaction_unresolved", None)
+        if callable(unresolved) and unresolved():
+            return True
+        if self.status == LoopStatus.PAUSED and not self._paused_tick_allowed(world):
+            return True
+        return False
+
+    def _blocked_tick(self) -> TickResult:
+        return TickResult(
+            self.organ, self.tick_count, self.status, None, 0.0, 0.0,
+            TripwireResult(clear=True), None, "admission-blocked",
+        )
+
     def tick(self, world: Any = None, now: Optional[float] = None) -> TickResult:
         """One cadence step: observe -> score -> select -> execute -> emit_receipt.
-        ALWAYS emits exactly one receipt, even on a halt or no-op."""
+        ALWAYS emits exactly one receipt, even on a halt or no-op, unless
+        admission refuses the invocation before it starts."""
         import time as _t
         now = now if now is not None else _t.time()
+        lock = getattr(self.ledger, "_lock", None)
+        if lock is None:
+            return self._tick_locked(world, now)
+        with lock:
+            return self._tick_locked(world, now)
+
+    def _tick_locked(self, world: Any, now: float) -> TickResult:
+        if self._admission_blocked(world):
+            return self._blocked_tick()
         self.tick_count += 1
         self.last_tick_ts = now
         self.next_tick_ts = now + self.cadence_seconds
@@ -173,7 +207,10 @@ class OrganAgent(ABC):
                               TripwireResult(clear=False, tripped=["latched"]), r,
                               "halted")
 
-        self.status = LoopStatus.ALIVE
+        # A paused replay must not resume the loop. Only a tick that was
+        # already allowed to run, and was not paused, becomes ALIVE.
+        if self.status != LoopStatus.PAUSED:
+            self.status = LoopStatus.ALIVE
         x = self.observe(world)
         actions = self.candidate_actions(x)
         scores, yuyays, trips = self.score(actions, x)
@@ -208,7 +245,7 @@ class OrganAgent(ABC):
             {"x": _jsonable(x), "result": _jsonable(result),
              "state_changing": chosen.state_changing},
         )
-        return TickResult(self.organ, self.tick_count, LoopStatus.ALIVE, chosen.name,
+        return TickResult(self.organ, self.tick_count, self.status, chosen.name,
                           scores[idx], yuyays[idx], trips[idx], r, "ok")
 
     def run(self, ticks: int, world: Any = None) -> List[TickResult]:
