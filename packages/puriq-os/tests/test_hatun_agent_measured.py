@@ -173,6 +173,7 @@ def test_malformed_or_uncertain_backend_is_terminal(payload, state):
     assert body["evidence"] == []
     assert body["terminal"] is True
     assert body["backend_called"] is True
+    assert result.receipt.payload["backend_called"] is True
     assert body["provenance"] == PROVENANCE
     assert "private" not in str(body)
 
@@ -248,6 +249,7 @@ def test_replay_does_not_call_the_evaluator_twice():
     assert first.receipt.payload["result"]["state"] == "AVAILABLE"
     assert second.receipt.payload["result"]["replayed"] is True
     assert second.receipt.payload["result"]["backend_called"] is False
+    assert second.receipt.payload["backend_called"] is False
     assert len(seen) == 1
     conflict = agent.tick(_world(2, operation_id="op-1"))
     assert conflict.receipt.payload["result"]["state"] == "DENIED"
@@ -283,11 +285,16 @@ def test_withdrawn_or_unbound_evidence_is_not_available():
     assert first.receipt.payload["result"]["state"] == "ABSTAIN"
     assert first.receipt.payload["result"]["reason"] == "WITHDRAWN"
     assert first.receipt.payload["result"]["evidence"] == []
+    assert first.receipt.payload["result"]["backend_called"] is True
+    assert first.receipt.payload["backend_called"] is True
     second = _agent(lambda payload: unbound).tick(_world(1))
     assert second.receipt.payload["result"]["reason"] == "RIGHTS_UNBOUND"
+    assert second.receipt.payload["result"]["backend_called"] is True
+    assert second.receipt.payload["backend_called"] is True
     third = _agent(lambda payload: promoted).tick(_world(1))
     assert third.receipt.payload["result"]["state"] == "DENIED"
     assert third.receipt.payload["result"]["reason"] == "AUTHORITY_PROMOTION"
+    assert third.receipt.payload["backend_called"] is True
     assert third.receipt.payload["result"]["execution_authority"] == "NONE"
     assert "EXECUTE" not in str(third.receipt.payload["result"])
 
