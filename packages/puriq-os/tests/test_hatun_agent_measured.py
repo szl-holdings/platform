@@ -36,7 +36,15 @@ def _agent(evaluator=None):
 def _ok(proposals):
     return {
         "state": "AVAILABLE",
-        "evidence": [{"node_id": f"node-{proposals}", "sha256": "c" * 64}],
+        "evidence": [{
+            "node_id": f"node-{proposals}",
+            "source": "public-corpus",
+            "sha256": "c" * 64,
+            "document_revision": "d" * 40,
+            "license": "CC-BY-4.0",
+            "rights": "public_handles",
+            "tenant": "public",
+        }],
     }
 
 
@@ -220,12 +228,131 @@ def test_get_loop_constructor_has_no_external_evaluator():
     assert seen == []
 
 
+def test_get_world_does_not_call_the_evaluator():
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    result = agent.tick(_world(1, method="GET"))
+    assert seen == []
+    assert result.chosen is None
+    assert result.receipt is not None
+
+
+def test_replay_does_not_call_the_evaluator_twice():
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(payload["proposals"]))
+    first = agent.tick(_world(1, operation_id="op-1"))
+    second = agent.tick(_world(1, operation_id="op-1"))
+    assert first.receipt.payload["result"]["state"] == "AVAILABLE"
+    assert second.receipt.payload["result"]["replayed"] is True
+    assert second.receipt.payload["result"]["backend_called"] is False
+    assert len(seen) == 1
+    conflict = agent.tick(_world(2, operation_id="op-1"))
+    assert conflict.receipt.payload["result"]["state"] == "DENIED"
+    assert conflict.receipt.payload["result"]["reason"] == "REPLAY_CONFLICT"
+    assert len(seen) == 1
+
+
+def test_expired_window_is_rechecked_before_the_evaluator():
+    ticks = iter((NOW, NOW + 1000))
+    seen = []
+    agent = HatunAgent(
+        KhipuLedger(),
+        evaluator=lambda payload: seen.append(payload) or _ok(1),
+        clock=lambda: next(ticks),
+    )
+    result = agent.tick(_world(1))
+    assert seen == []
+    assert result.receipt is not None
+    assert result.receipt.payload["result"]["state"] == "DENIED"
+    assert result.receipt.payload["result"]["reason"] == "EXPIRED"
+    assert result.receipt.payload["result"]["backend_called"] is False
+
+
+def test_withdrawn_or_unbound_evidence_is_not_available():
+    withdrawn = _ok(1)
+    withdrawn["evidence"][0]["rights"] = "withdrawn"
+    unbound = _ok(1)
+    unbound["evidence"][0].pop("license")
+    promoted = _ok(1)
+    promoted["execution_authority"] = "EXECUTE"
+    agent = _agent(lambda payload: withdrawn)
+    first = agent.tick(_world(1, operation_id="w"))
+    assert first.receipt.payload["result"]["state"] == "ABSTAIN"
+    assert first.receipt.payload["result"]["reason"] == "WITHDRAWN"
+    assert first.receipt.payload["result"]["evidence"] == []
+    second = _agent(lambda payload: unbound).tick(_world(1))
+    assert second.receipt.payload["result"]["reason"] == "RIGHTS_UNBOUND"
+    third = _agent(lambda payload: promoted).tick(_world(1))
+    assert third.receipt.payload["result"]["state"] == "DENIED"
+    assert third.receipt.payload["result"]["reason"] == "AUTHORITY_PROMOTION"
+    assert third.receipt.payload["result"]["execution_authority"] == "NONE"
+    assert "EXECUTE" not in str(third.receipt.payload["result"])
+
+
 def test_private_world_fields_are_not_evidence():
     agent = _agent(lambda _payload: _ok(1))
     result = agent.tick(_world(1, content="secret", text="hidden"))
     encoded = str(result.receipt.payload)
     assert "secret" not in encoded
     assert "hidden" not in encoded
+
+
+def test_timeout_then_conflicting_operation_does_not_call_again():
+    seen = []
+
+    def evaluator(payload):
+        seen.append(payload)
+        raise TimeoutError("deadline")
+
+    agent = _agent(evaluator)
+    first = agent.tick(_world(1, operation_id="op-t"))
+    assert first.receipt.payload["result"]["state"] == "TIMEOUT"
+    assert first.receipt.payload["result"]["backend_called"] is True
+    assert first.receipt.payload["result"]["evidence"] == []
+    conflict = agent.tick(_world(2, operation_id="op-t"))
+    assert conflict.receipt.payload["result"]["state"] == "DENIED"
+    assert conflict.receipt.payload["result"]["reason"] == "REPLAY_CONFLICT"
+    assert conflict.receipt.payload["result"]["backend_called"] is False
+    assert len(seen) == 1
+
+
+def test_execution_failure_is_replay_conflict_for_a_different_proposal():
+    seen = []
+
+    def evaluator(payload):
+        seen.append(payload)
+        raise RuntimeError("backend exploded")
+
+    agent = _agent(evaluator)
+    first = agent.tick(_world(1, operation_id="op-f"))
+    assert first.receipt.payload["result"]["state"] == "EXECUTION_FAILURE"
+    conflict = agent.tick(_world(2, operation_id="op-f"))
+    assert conflict.receipt.payload["result"]["reason"] == "REPLAY_CONFLICT"
+    assert conflict.receipt.payload["result"]["backend_called"] is False
+    assert len(seen) == 1
+
+
+def test_window_expiring_during_evaluation_releases_nothing():
+    ticks = iter((NOW, NOW, NOW + 1000, NOW, NOW))
+    seen = []
+    agent = HatunAgent(
+        KhipuLedger(),
+        evaluator=lambda payload: seen.append(payload) or _ok(1),
+        clock=lambda: next(ticks),
+    )
+    result = agent.tick(_world(1, operation_id="op-e"))
+    body = result.receipt.payload["result"]
+    assert len(seen) == 1
+    assert body["state"] == "DENIED"
+    assert body["reason"] == "EXPIRED"
+    assert body["evidence"] == []
+    assert body["backend_called"] is True
+    assert body["execution_authority"] == "NONE"
+    conflict = agent.tick(_world(2, operation_id="op-e"))
+    assert conflict.receipt.payload["result"]["state"] == "DENIED"
+    assert conflict.receipt.payload["result"]["reason"] == "REPLAY_CONFLICT"
+    assert conflict.receipt.payload["result"]["backend_called"] is False
+    assert len(seen) == 1
 
 
 @pytest.mark.parametrize("meas", [float("nan"), float("inf"), float("-inf")])
@@ -265,12 +392,13 @@ def test_stop_stays_halted_and_a_later_valid_tick_does_not_execute(overrides):
     assert seen == []
 
 
-def test_validation_failure_after_backend_keeps_the_call_and_request_provenance():
+@pytest.mark.parametrize("state", [["UNCERTAIN"], {"status": "UNCERTAIN"}])
+def test_validation_failure_after_backend_keeps_the_call_and_request_provenance(state):
     seen = []
 
     def evaluator(payload):
         seen.append(payload)
-        return {"state": ["UNCERTAIN"], "evidence": [{"node_id": "leak-node", "sha256": "a" * 64}]}
+        return {"state": state, "evidence": [{"node_id": "leak-node", "sha256": "a" * 64}]}
 
     result = _agent(evaluator).tick(_world(1))
     assert seen == [{"proposals": 1, "provenance": PROVENANCE, "measurability": 1.0, "tenant": "public"}]
