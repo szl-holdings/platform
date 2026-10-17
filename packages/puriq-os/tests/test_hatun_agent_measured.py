@@ -5,8 +5,8 @@ import random
 import pytest
 
 from puriq_os.khipu_emit import KhipuLedger
-from puriq_os.hukulla_tripwires import TripwireResult
-from puriq_os.loop import Action, LoopStatus, OrganAgent, TickResult
+from puriq_os.hukulla_tripwires import HukullaTripwires, TripwireResult
+from puriq_os.loop import Action, LoopStatus
 from puriq_os.organs import build_all
 from puriq_os.organs.hatun_agent import HatunAgent
 from puriq_os.yuyay_gate import YuyayScores
@@ -514,26 +514,38 @@ def _patch_emit(agent, mode):
     agent.emit_receipt = patched.__get__(agent, HatunAgent)
 
 
-def test_malformed_state_and_rights_record_the_call():
-    malformed_state = {"state": ["AVAILABLE"], "evidence": []}
-    malformed_rights = _ok(1)
-    malformed_rights["evidence"][0]["rights"] = {"public": True}
-    bad_digest = _ok(1)
-    bad_digest["evidence"][0]["sha256"] = "not-a-digest"
-    cases = (
-        (malformed_state, "UNEXPECTED_STATE"),
-        (malformed_rights, "RIGHTS_UNBOUND"),
-        (bad_digest, "MALFORMED"),
-    )
-    for payload, reason in cases:
-        seen = []
-        result = _agent(lambda _payload, payload=payload, seen=seen: seen.append(1) or payload).tick(_world(1))
-        assert seen == [1]
-        body = result.receipt.payload["result"]
-        assert body["reason"] == reason
-        assert body["backend_called"] is True
-        assert body["evidence"] == []
-        assert result.receipt.payload["backend_called"] is True
+@pytest.mark.parametrize(
+    "label,payload,reason",
+    [
+        ("list-state", {"state": ["AVAILABLE"], "evidence": []}, "UNEXPECTED_STATE"),
+        ("object-state", {"state": {"name": "AVAILABLE"}, "evidence": []}, "UNEXPECTED_STATE"),
+        ("list-rights", None, "RIGHTS_UNBOUND"),
+        ("object-rights", None, "RIGHTS_UNBOUND"),
+    ],
+)
+def test_container_state_and_rights_record_one_call(label, payload, reason):
+    if label == "list-rights":
+        payload = _ok(1)
+        payload["evidence"][0]["rights"] = ["public_handles"]
+    elif label == "object-rights":
+        payload = _ok(1)
+        payload["evidence"][0]["rights"] = {"public": True}
+    seen = []
+    agent = _agent(lambda _payload, payload=payload, seen=seen: seen.append(1) or payload)
+    result = agent.tick(_world(1, operation_id=f"op-{label}"))
+    assert seen == [1]
+    body = result.receipt.payload["result"]
+    assert body["reason"] == reason
+    assert body["backend_called"] is True
+    assert body["provenance"] == PROVENANCE
+    assert body["evidence"] == []
+    assert result.receipt.payload["backend_called"] is True
+    replay = agent.tick(_world(1, operation_id=f"op-{label}"))
+    assert seen == [1]
+    assert replay.receipt.payload["result"]["replayed"] is True
+    assert replay.receipt.payload["result"]["backend_called"] is False
+    assert replay.receipt.payload["result"]["reason"] == reason
+    assert agent._replay[f"op-{label}"][1]["backend_called"] is True
 
 
 def test_none_before_append_emits_one_replacement():
@@ -676,6 +688,80 @@ def test_uncertain_receipt_failure_does_not_reopen_the_operation():
     assert replay.receipt.payload["result"]["state"] == "UNCERTAIN"
     assert replay.receipt.payload["result"]["backend_called"] is False
     assert agent._replay["op-uncertain-fail"][1]["state"] == "UNCERTAIN"
+
+
+def test_live_terminal_exception_does_not_adopt_a_shared_trip():
+    ledger = KhipuLedger()
+    shared = HukullaTripwires()
+    halted = HatunAgent(ledger, hukulla=shared, clock=lambda: NOW)
+    stopped = halted.tick(_world(1, stop="STOP"))
+    assert stopped.status == LoopStatus.HALTED
+    assert "T10" in stopped.hukulla.tripped
+    assert ledger.count() == 1
+
+    seen = []
+    live = HatunAgent(
+        ledger,
+        hukulla=shared,
+        evaluator=lambda payload: seen.append(payload) or _ok(1),
+        clock=lambda: NOW,
+    )
+    real = HatunAgent.emit_receipt
+    used = {"once": False}
+
+    def fail_before(self, *args, **kwargs):
+        if not used["once"]:
+            used["once"] = True
+            self.hukulla.last_trip = TripwireResult(clear=False, tripped=["T10"])
+            raise RuntimeError("receipt failed before append")
+        return real(self, *args, **kwargs)
+
+    live.emit_receipt = fail_before.__get__(live, HatunAgent)
+    result = live.tick(_world(1, operation_id="op-shared-trip"))
+    assert seen == [_world_call()]
+    assert result.status == LoopStatus.PAUSED
+    assert result.hukulla.tripped == ["terminal"]
+    assert result.receipt.payload["reason"] == "TERMINAL_EXCEPTION"
+    assert result.receipt.payload["backend_called"] is True
+    assert ledger.count() == 2
+    assert halted.status == LoopStatus.HALTED
+    replay = live.tick(_world(1, operation_id="op-shared-trip"))
+    assert len(seen) == 1
+    assert replay.receipt.payload["result"]["replayed"] is True
+    assert replay.receipt.payload["result"]["backend_called"] is False
+    assert ledger.count() == 3
+    assert real is HatunAgent.emit_receipt
+
+
+def test_shared_ledger_does_not_replace_an_appended_receipt():
+    ledger = KhipuLedger()
+    earlier = HatunAgent(
+        ledger,
+        evaluator=lambda payload: _ok(1),
+        clock=lambda: NOW,
+    )
+    earlier.tick(_world(1, operation_id="op-earlier"))
+    assert ledger.count() == 1
+    seen = []
+    live = HatunAgent(
+        ledger,
+        evaluator=lambda payload: seen.append(payload) or _ok(1),
+        clock=lambda: NOW,
+    )
+    _patch_emit(live, "raise-after")
+    with pytest.raises(RuntimeError, match="after append"):
+        live.tick(_world(1, operation_id="op-shared-append"))
+    assert len(seen) == 1
+    assert ledger.count() == 2
+    assert [row["action"] for row in ledger.all_receipts()] == [
+        "evaluate_proposal",
+        "evaluate_proposal",
+    ]
+    replay = live.tick(_world(1, operation_id="op-shared-append"))
+    assert len(seen) == 1
+    assert ledger.count() == 3
+    assert replay.receipt.payload["result"]["replayed"] is True
+    assert replay.receipt.payload["backend_called"] is False
 
 
 def test_terminal_exception_after_the_evaluator_records_the_call():

@@ -358,7 +358,7 @@ class HatunAgent(OrganAgent):
             if self.ledger.count() != before:
                 raise
             trip = self.hukulla.last_trip
-            if not isinstance(trip, TripwireResult):
+            if self.status != LoopStatus.HALTED or not isinstance(trip, TripwireResult):
                 trip = TripwireResult(clear=False, tripped=["terminal"])
             return self._closed_tick(
                 self._replacement_receipt("TERMINAL_EXCEPTION"),
