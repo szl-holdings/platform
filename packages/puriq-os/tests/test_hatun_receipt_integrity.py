@@ -248,6 +248,32 @@ def _receipt(action: str, tick: int) -> KhipuReceipt:
     )
 
 
+def test_absent_operation_id_is_not_a_replay_and_stays_blocked_while_unresolved():
+    calls = []
+    agent = _agent(lambda payload: calls.append(payload) or _ok(1))
+    agent.status = LoopStatus.PAUSED
+    paused = agent.tick(_world(1))
+    assert paused.note == "admission-blocked"
+    assert calls == []
+    assert agent.status == LoopStatus.PAUSED
+
+    agent.status = LoopStatus.INIT
+    _open_transaction(agent)
+    blocked = agent.tick(_world(1))
+    assert blocked.note == "admission-blocked"
+    assert calls == []
+    assert agent.ledger.transaction_unresolved() is True
+    agent.ledger._conn.rollback()
+
+    first = agent.tick(_world(1))
+    second = agent.tick(_world(1))
+    assert first.chosen == "evaluate_proposal"
+    assert second.chosen == "evaluate_proposal"
+    assert len(calls) == 2
+    assert agent.ledger.transaction_unresolved() is False
+    assert agent.ledger.verify_chain() is True
+
+
 def test_nested_append_does_not_commit_or_deadlock():
     agent = _agent(lambda payload: _ok(1))
     ledger = agent.ledger

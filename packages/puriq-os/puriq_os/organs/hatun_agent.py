@@ -248,7 +248,7 @@ class HatunAgent(OrganAgent):
             closed = _terminal("ABSENT_BACKEND", provenance=provenance, measurability=meas)
             closed["evaluated"] = False
             return self._store_replay(operation, replay_key, closed)
-        if self.ledger._unresolved_locked():
+        if self.ledger.transaction_unresolved():
             blocked = _terminal("UNAVAILABLE", provenance=provenance, measurability=meas)
             blocked["reason"] = "LEDGER_UNRESOLVED"
             blocked["backend_called"] = False
@@ -372,20 +372,6 @@ class HatunAgent(OrganAgent):
         return True
 
     def tick(self, world: Any = None, now: Optional[float] = None) -> TickResult:
-        # The scheduler pre-check is not the gate. Hold the ledger lock across
-        # observe, execute, and this tick's own emit. A PAUSED or ALIVE agent
-        # does not call the evaluator or append a receipt while a transaction
-        # this thread does not own is still open. A resolved PAUSED replay
-        # still enters the normal tick.
-        with self.ledger._lock:
-            if self.ledger._unresolved_locked():
-                return TickResult(
-                    self.organ, self.tick_count, self.status, None, 0.0, 0.0,
-                    TripwireResult(clear=True), None, "invocation_blocked",
-                )
-            return self._tick_locked(world, now)
-
-    def _tick_locked(self, world: Any = None, now: Optional[float] = None) -> TickResult:
         self._evaluator_called = False
         before = self.ledger.count()
         try:
