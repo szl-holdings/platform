@@ -171,6 +171,8 @@ def test_malformed_or_uncertain_backend_is_terminal(payload, state):
     assert body["state"] == state
     assert body["evidence"] == []
     assert body["terminal"] is True
+    assert body["backend_called"] is True
+    assert body["provenance"] == PROVENANCE
     assert "private" not in str(body)
 
 
@@ -355,8 +357,41 @@ def test_window_expiring_during_evaluation_releases_nothing():
     assert len(seen) == 1
 
 
+@pytest.mark.parametrize(
+    "label,first",
+    [
+        ("missing", {"measurability": None}),
+        ("low", {"measurability": 0.5}),
+        ("zero-measurement", {"measurability": 0.0}),
+        ("invalid-provenance", {"provenance": "not-a-digest"}),
+        ("missing-provenance", {"provenance": None}),
+        ("expired", {"expires_at": NOW}),
+        ("zero-proposals", {"config_proposals": 0}),
+    ],
+)
+def test_stop_remains_terminal_across_the_measurement_matrix(label, first):
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    stopped = agent.tick(_world(1, stop="STOP", **first))
+    assert label
+    assert stopped.status == LoopStatus.HALTED
+    assert "T10" in stopped.hukulla.tripped
+    assert stopped.receipt.payload["backend_called"] is False
+    assert seen == []
+    followed = agent.tick(_world(1))
+    assert followed.status == LoopStatus.HALTED
+    assert followed.receipt.payload["backend_called"] is False
+    assert followed.receipt.payload.get("result") is None
+    assert seen == []
+
+
 @pytest.mark.parametrize("measurement", [float("nan"), float("inf"), float("-inf")])
 def test_non_finite_measurability_does_not_call_the_backend(measurement):
+    """Reject NaN and both infinities before any backend call.
+
+    The previous range comparison returned NaN. It already rejected positive
+    and negative infinity because those comparisons succeed.
+    """
     seen = []
     agent = _agent(lambda payload: seen.append(payload) or _ok(1))
     result = agent.tick(_world(1, measurability=measurement))
@@ -422,3 +457,13 @@ def test_hatun_operation_cache_is_not_capped_at_the_adapter_replay_limit():
         assert result.receipt.payload["result"].get("reason") != "REPLAY_CAPACITY"
     assert len(seen) == 33
     assert len(agent._replay) == 33
+    stored = agent._replay["op-0"][1]
+    assert stored["backend_called"] is True
+    assert stored["provenance"] == PROVENANCE
+    replay = agent.tick(_world(1, operation_id="op-0"))
+    assert replay.receipt.payload["result"]["replayed"] is True
+    assert replay.receipt.payload["result"]["backend_called"] is False
+    assert replay.receipt.payload["result"]["provenance"] == PROVENANCE
+    assert "op-0" in agent._replay
+    assert len(agent._replay) == 33
+    assert len(seen) == 33

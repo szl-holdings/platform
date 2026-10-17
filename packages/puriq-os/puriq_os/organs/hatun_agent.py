@@ -114,6 +114,9 @@ class HatunAgent(OrganAgent):
         self._evaluator = evaluator
         self._allowed_tenant = allowed_tenant
         self._clock = clock or time.time
+        # Separate from the Second Brain adapter's 32-id table. This cache has
+        # no capacity. A future capacity must refuse a new id and must keep
+        # every stored result and every in-flight reservation.
         self._replay: Dict[str, tuple] = {}
 
     def observe(self, world: Any) -> Dict[str, Any]:
