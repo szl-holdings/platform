@@ -13,6 +13,7 @@ loop constructors do not supply one.
 """
 from __future__ import annotations
 
+import copy
 import re
 import time
 from typing import Any, Callable, Dict, List, Optional
@@ -226,15 +227,22 @@ class HatunAgent(OrganAgent):
                 conflict["reason"] = "REPLAY_CONFLICT"
                 conflict["backend_called"] = False
                 return conflict
-            replayed = dict(prior)
+            if prior is None:
+                inflight = _terminal("UNAVAILABLE", provenance=provenance, measurability=meas)
+                inflight["reason"] = "REPLAY_IN_FLIGHT"
+                inflight["backend_called"] = False
+                return inflight
+            replayed = copy.deepcopy(prior)
             replayed["replayed"] = True
             replayed["backend_called"] = False
             replayed["execution_authority"] = "NONE"
             return replayed
+        if isinstance(operation, str):
+            self._replay[operation] = (replay_key, None)
         if self._evaluator is None:
             closed = _terminal("ABSENT_BACKEND", provenance=provenance, measurability=meas)
             closed["evaluated"] = False
-            return closed
+            return self._store_replay(operation, replay_key, closed)
         try:
             raw = self._evaluator({
                 "proposals": x.get("proposals"),
@@ -245,11 +253,18 @@ class HatunAgent(OrganAgent):
         except TimeoutError:
             failed = _terminal("TIMEOUT", provenance=provenance, measurability=meas)
             failed["backend_called"] = True
-            return failed
+            return self._store_replay(operation, replay_key, failed)
         except Exception:
             failed = _terminal("EXECUTION_FAILURE", provenance=provenance, measurability=meas)
             failed["backend_called"] = True
-            return failed
+            return self._store_replay(operation, replay_key, failed)
+        if not self._window_open(x):
+            denied = _terminal("DENIED", provenance=provenance, measurability=meas)
+            denied["reason"] = "EXPIRED"
+            denied["backend_called"] = True
+            denied["evidence"] = []
+            denied["execution_authority"] = "NONE"
+            return self._store_replay(operation, replay_key, denied)
         admitted = _admit_backend(
             raw,
             provenance=provenance,
@@ -257,9 +272,13 @@ class HatunAgent(OrganAgent):
             allowed_tenant=self._allowed_tenant,
         )
         admitted["backend_called"] = True
-        if isinstance(operation, str) and admitted.get("state") in {"AVAILABLE", "ABSTAIN", "UNCERTAIN", "DENIED"}:
-            self._replay[operation] = (replay_key, dict(admitted))
-        return admitted
+        return self._store_replay(operation, replay_key, admitted)
+
+    def _store_replay(self, operation: Any, replay_key: tuple, admitted: Dict[str, Any]) -> Dict[str, Any]:
+        snapshot = copy.deepcopy(admitted)
+        if isinstance(operation, str):
+            self._replay[operation] = (replay_key, snapshot)
+        return copy.deepcopy(snapshot)
 
     def _window_open(self, x: Dict[str, Any]) -> bool:
         now = self._clock()

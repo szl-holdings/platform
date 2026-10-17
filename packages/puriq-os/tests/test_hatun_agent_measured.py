@@ -294,3 +294,61 @@ def test_private_world_fields_are_not_evidence():
     encoded = str(result.receipt.payload)
     assert "secret" not in encoded
     assert "hidden" not in encoded
+
+
+def test_timeout_then_conflicting_operation_does_not_call_again():
+    seen = []
+
+    def evaluator(payload):
+        seen.append(payload)
+        raise TimeoutError("deadline")
+
+    agent = _agent(evaluator)
+    first = agent.tick(_world(1, operation_id="op-t"))
+    assert first.receipt.payload["result"]["state"] == "TIMEOUT"
+    assert first.receipt.payload["result"]["backend_called"] is True
+    assert first.receipt.payload["result"]["evidence"] == []
+    conflict = agent.tick(_world(2, operation_id="op-t"))
+    assert conflict.receipt.payload["result"]["state"] == "DENIED"
+    assert conflict.receipt.payload["result"]["reason"] == "REPLAY_CONFLICT"
+    assert conflict.receipt.payload["result"]["backend_called"] is False
+    assert len(seen) == 1
+
+
+def test_execution_failure_is_replay_conflict_for_a_different_proposal():
+    seen = []
+
+    def evaluator(payload):
+        seen.append(payload)
+        raise RuntimeError("backend exploded")
+
+    agent = _agent(evaluator)
+    first = agent.tick(_world(1, operation_id="op-f"))
+    assert first.receipt.payload["result"]["state"] == "EXECUTION_FAILURE"
+    conflict = agent.tick(_world(2, operation_id="op-f"))
+    assert conflict.receipt.payload["result"]["reason"] == "REPLAY_CONFLICT"
+    assert conflict.receipt.payload["result"]["backend_called"] is False
+    assert len(seen) == 1
+
+
+def test_window_expiring_during_evaluation_releases_nothing():
+    ticks = iter((NOW, NOW, NOW + 1000, NOW, NOW))
+    seen = []
+    agent = HatunAgent(
+        KhipuLedger(),
+        evaluator=lambda payload: seen.append(payload) or _ok(1),
+        clock=lambda: next(ticks),
+    )
+    result = agent.tick(_world(1, operation_id="op-e"))
+    body = result.receipt.payload["result"]
+    assert len(seen) == 1
+    assert body["state"] == "DENIED"
+    assert body["reason"] == "EXPIRED"
+    assert body["evidence"] == []
+    assert body["backend_called"] is True
+    assert body["execution_authority"] == "NONE"
+    conflict = agent.tick(_world(2, operation_id="op-e"))
+    assert conflict.receipt.payload["result"]["state"] == "DENIED"
+    assert conflict.receipt.payload["result"]["reason"] == "REPLAY_CONFLICT"
+    assert conflict.receipt.payload["result"]["backend_called"] is False
+    assert len(seen) == 1
