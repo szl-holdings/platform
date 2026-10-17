@@ -116,15 +116,24 @@ class HatunAgent(OrganAgent):
                 "state": "DENIED",
                 "governance_health": None,
             }
-        state = "UNAVAILABLE"
-        evidence: List[Any] = []
-        revision = None
-        if isinstance(x, dict):
-            if isinstance(x.get("state"), str):
-                state = x["state"]
-            if isinstance(x.get("evidence"), list):
-                evidence = x["evidence"]
-            revision = x.get("source_revision")
+        if not isinstance(x, dict) or _PRIVATE.intersection(x):
+            denied = _unavailable()
+            denied["evaluated"] = False
+            denied["bounded"] = True
+            if isinstance(x, dict):
+                denied["state"] = "ABSTAIN"
+            return denied
+        evidence = _evidence(x.get("evidence", []))
+        state = x.get("state")
+        if evidence is None or not isinstance(state, str) or state not in _STATES:
+            state = "ABSTAIN"
+            evidence = []
+        revision = x.get("source_revision")
+        revision_out = None
+        if isinstance(revision, str) and _HEX64.fullmatch(revision.lower()) is not None:
+            revision_out = revision.lower()
+        if state == "AVAILABLE" and (not evidence or revision_out is None):
+            state = "ABSTAIN"
         return {
             "evaluated": False,
             "bounded": True,
@@ -133,5 +142,5 @@ class HatunAgent(OrganAgent):
             "governance_health": None,
             "hydrated": False,
             "evidence": evidence,
-            "source_revision": revision,
+            "source_revision": revision_out,
         }

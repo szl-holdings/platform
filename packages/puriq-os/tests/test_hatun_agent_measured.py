@@ -59,6 +59,33 @@ def test_port_failure_is_unavailable():
     assert observed["governance_health"] is None
 
 
+def test_idle_execute_does_not_copy_private_fields():
+    agent = _agent()
+    top = agent.execute(Action(name="idle"), {"state": "AVAILABLE", "content": "secret"})
+    nested = agent.execute(
+        Action(name="idle"),
+        {
+            "state": "AVAILABLE",
+            "evidence": [{"node_id": "node-1", "sha256": "a" * 64, "text": "hidden"}],
+            "source_revision": "b" * 64,
+        },
+    )
+    encoded = str(top) + str(nested)
+    assert "secret" not in encoded
+    assert "hidden" not in encoded
+    assert top["evidence"] == []
+    assert nested["evidence"] == []
+    assert top["state"] == "ABSTAIN"
+    assert nested["state"] == "ABSTAIN"
+    assert top["governance_health"] is None
+
+
+def test_non_dict_port_is_unavailable():
+    observed = _agent(lambda: ["not-a-dict"]).observe({})
+    assert observed["state"] == "UNAVAILABLE"
+    assert observed["governance_health"] is None
+
+
 def test_non_idle_action_is_denied():
     executed = _agent().execute(Action(name="evaluate_proposal", state_changing=True), {})
     assert executed["evaluated"] is False
