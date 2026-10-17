@@ -1,0 +1,2 @@
+# Test runner only. packages/puriq-os has no runtime dependencies.
+pytest>=9.1.1
