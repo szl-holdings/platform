@@ -5,9 +5,10 @@ import random
 import pytest
 
 from puriq_os.khipu_emit import KhipuLedger
-from puriq_os.loop import LoopStatus
+from puriq_os.loop import Action, LoopStatus
 from puriq_os.organs import build_all
 from puriq_os.organs.hatun_agent import HatunAgent
+from puriq_os.yuyay_gate import YuyayScores
 
 NOW = 1_700_000_000
 PROVENANCE = "ab" * 32
@@ -352,3 +353,72 @@ def test_window_expiring_during_evaluation_releases_nothing():
     assert conflict.receipt.payload["result"]["reason"] == "REPLAY_CONFLICT"
     assert conflict.receipt.payload["result"]["backend_called"] is False
     assert len(seen) == 1
+
+
+@pytest.mark.parametrize("measurement", [float("nan"), float("inf"), float("-inf")])
+def test_non_finite_measurability_does_not_call_the_backend(measurement):
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    result = agent.tick(_world(1, measurability=measurement))
+    assert seen == []
+    assert result.chosen is None
+    assert result.receipt is not None
+    observed = result.receipt.payload["x"]
+    assert observed["admissible"] is False
+    assert observed["governance_health"] == 0.0
+    assert observed["measurability"] == 0.0
+    assert result.receipt.payload["backend_called"] is False
+
+
+def test_stop_keeps_zero_health_and_records_that_the_backend_was_not_called():
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    first = agent.tick(_world(1, stop="STOP"))
+    assert first.status == LoopStatus.HALTED
+    assert seen == []
+    assert "T10" in first.hukulla.tripped
+    assert first.receipt.payload["x"]["governance_health"] == 0.0
+    assert first.receipt.payload["x"]["admissible"] is False
+    assert first.receipt.payload["backend_called"] is False
+    second = agent.tick(_world(1, stop="STOP"))
+    assert second.status == LoopStatus.HALTED
+    assert second.receipt.payload["backend_called"] is False
+    assert second.receipt.payload.get("result") is None
+    assert seen == []
+
+
+def test_clear_action_is_not_halted_by_an_unselected_trip():
+    class Probe(HatunAgent):
+        def candidate_actions(self, x):
+            halted = Action(
+                name="halted",
+                yuyay=YuyayScores(),
+                khipu_factors=[0.1],
+                context={"stop_directive": True},
+            )
+            clear = Action(
+                name="clear",
+                yuyay=YuyayScores(),
+                khipu_factors=[1.0],
+                context={"stop_directive": False},
+            )
+            return [halted, clear]
+
+        def execute(self, action, x):
+            return {"ok": action.name}
+
+    result = Probe(KhipuLedger(), clock=lambda: NOW).tick(_world(1))
+    assert result.status == LoopStatus.ALIVE
+    assert result.chosen == "clear"
+
+
+def test_hatun_operation_cache_is_not_capped_at_the_adapter_replay_limit():
+    """The Second Brain adapter refuses a 33rd id. This organ cache does not."""
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    for index in range(33):
+        result = agent.tick(_world(1, operation_id=f"op-{index}"))
+        assert result.receipt.payload["result"]["state"] == "AVAILABLE"
+        assert result.receipt.payload["result"].get("reason") != "REPLAY_CAPACITY"
+    assert len(seen) == 33
+    assert len(agent._replay) == 33

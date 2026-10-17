@@ -6,7 +6,7 @@ hatun_agent.py — Hatun as an autonomous OrganAgent.
 Cadence: 49s (Nyquist-chosen, PURIQ_OS_DOCTRINE.md §2 — integer convenience, not
 mysticism). Proposal counts come only from the caller. The Yuyay gate and the
 Hukulla STOP/provenance predicates see that caller context. A missing or
-nonnumeric measurement is a numeric zero, because the base scorer ignores
+nonnumeric or non-finite measurement is a numeric zero, because the base scorer ignores
 nonnumeric axes and would otherwise stay open. This organ does not open a
 network client. A caller-supplied evaluator is the only backend, and the GET
 loop constructors do not supply one.
@@ -14,6 +14,7 @@ loop constructors do not supply one.
 from __future__ import annotations
 
 import copy
+import math
 import re
 import time
 from typing import Any, Callable, Dict, List, Optional
@@ -48,7 +49,7 @@ def _number(value: Any) -> Optional[float]:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
     number = float(value)
-    if number < 0.0 or number > 1.0:
+    if not math.isfinite(number) or number < 0.0 or number > 1.0:
         return None
     return number
 
@@ -150,13 +151,12 @@ class HatunAgent(OrganAgent):
             and window_ok
             and operation_ok
             and not read_only
+            and not stop
             and world.get("operation", "evaluate_proposal") == "evaluate_proposal"
         )
         # Zero is fail-closed. None would disappear from the base scorer and
-        # leave Lambda on its neutral fallback.
+        # leave Lambda on its neutral fallback. STOP stays at zero.
         health = 0.0 if (not admissible or stop) else meas
-        if stop and admissible and meas is not None:
-            health = meas
         return {
             "proposals": proposals,
             "governance_health": health if health is not None else 0.0,
@@ -330,7 +330,13 @@ class HatunAgent(OrganAgent):
                 0.0,
                 0.0,
                 False,
-                {"state": "UNAVAILABLE", "reason": "MISSING_RECEIPT", "evidence": [], "terminal": True},
+                {
+                    "state": "UNAVAILABLE",
+                    "reason": "MISSING_RECEIPT",
+                    "evidence": [],
+                    "terminal": True,
+                    "backend_called": False,
+                },
             )
             self.status = LoopStatus.PAUSED
             return TickResult(

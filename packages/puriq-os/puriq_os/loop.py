@@ -167,7 +167,7 @@ class OrganAgent(ABC):
         if self.status == LoopStatus.HALTED:
             # Halt-safe: do not act; still record the tick.
             r = self.emit_receipt("__halted__", 0.0, 0.0, False,
-                                  {"reason": "loop halted by HUKLLA"})
+                                  {"reason": "loop halted by HUKLLA", "backend_called": False})
             return TickResult(self.organ, self.tick_count, LoopStatus.HALTED,
                               None, 0.0, 0.0,
                               TripwireResult(clear=False, tripped=["latched"]), r,
@@ -179,9 +179,16 @@ class OrganAgent(ABC):
         scores, yuyays, trips = self.score(actions, x)
         idx = self.select(actions, scores)
 
-        # Halt-safety: if the best candidate tripped a tripwire, latch HALTED.
+        # A selected clear action does not inherit another candidate's halt.
+        # When nothing is selected, a candidate that itself requires a halt
+        # still latches, because select() will not choose a zero-utility trip.
+        halt_trip = None
         if idx is not None and trips[idx].halt_required():
-            self.hukulla.halt(trips[idx])
+            halt_trip = trips[idx]
+        elif idx is None:
+            halt_trip = next((trip for trip in trips if trip.halt_required()), None)
+        if halt_trip is not None:
+            self.hukulla.halt(halt_trip)
             self.status = LoopStatus.HALTED
             idx = None
 
@@ -189,7 +196,8 @@ class OrganAgent(ABC):
             # no-op tick — still a governed, receipted action
             r = self.emit_receipt("__noop__", 0.0, 0.0,
                                   self.status != LoopStatus.HALTED,
-                                  {"x": _jsonable(x), "reason": "no positive-utility action"})
+                                  {"x": _jsonable(x), "reason": "no positive-utility action",
+                                   "backend_called": False})
             return TickResult(self.organ, self.tick_count, self.status, None, 0.0, 0.0,
                               trips[0] if trips else TripwireResult(clear=True), r, "noop")
 
