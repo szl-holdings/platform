@@ -75,17 +75,18 @@ def _evidence(value: Any, allowed_tenant: str) -> tuple[str, List[Dict[str, str]
             return "malformed", []
         if not isinstance(source, str) or not source or len(source) > 256:
             return "malformed", []
-        if rights in _RIGHTS_WITHDRAWN:
+        if isinstance(rights, str) and rights in _RIGHTS_WITHDRAWN:
             hold = "withdrawn"
             continue
         if isinstance(tenant, str) and tenant != allowed_tenant:
             return "wrong_tenant", []
+        rights_ok = isinstance(rights, str) and rights in _RIGHTS_OK
         if (
             not isinstance(revision, str)
             or _REVISION.fullmatch(revision.lower()) is None
             or not isinstance(license_name, str)
             or _LICENSE.fullmatch(license_name) is None
-            or rights not in _RIGHTS_OK
+            or not rights_ok
             or tenant != allowed_tenant
         ):
             hold = "unbound"
@@ -310,64 +311,73 @@ class HatunAgent(OrganAgent):
             action_name, decision_value, yuyay_value, hukulla_clear, payload,
         )
 
+    def _replacement_receipt(self, reason: str):
+        # The flag is the call that already happened. A STOP halt never sets it.
+        return self.emit_receipt(
+            "__terminal__",
+            0.0,
+            0.0,
+            False,
+            {
+                "state": "UNAVAILABLE",
+                "reason": reason,
+                "evidence": [],
+                "terminal": True,
+                "backend_called": self._evaluator_called,
+            },
+        )
+
+    def _closed_tick(self, receipt, *, tick: int, chosen, decision: float,
+                     yuyay: float, hukulla) -> TickResult:
+        # STOP latches HALTED before the noop receipt. A failed receipt must
+        # not resume that latch as PAUSED.
+        halted = self.status == LoopStatus.HALTED
+        if not halted:
+            self.status = LoopStatus.PAUSED
+        return TickResult(
+            self.organ,
+            tick,
+            self.status,
+            chosen,
+            decision,
+            yuyay,
+            hukulla,
+            receipt,
+            "halted" if halted else "terminal",
+        )
+
     def tick(self, world: Any = None, now: Optional[float] = None) -> TickResult:
         self._evaluator_called = False
         before = self.ledger.count()
         try:
             result = super().tick(world, now)
         except Exception:
+            # The ledger append commits before emit returns. A raise after
+            # that append already has its one receipt; minting another would
+            # duplicate it and could reopen the tick.
             if self.ledger.count() != before:
                 raise
-            receipt = self.emit_receipt(
-                "__terminal__",
-                0.0,
-                0.0,
-                False,
-                {
-                    "state": "UNAVAILABLE",
-                    "reason": "TERMINAL_EXCEPTION",
-                    "evidence": [],
-                    "terminal": True,
-                    "backend_called": self._evaluator_called,
-                },
-            )
-            self.status = LoopStatus.PAUSED
-            return TickResult(
-                self.organ,
-                self.tick_count,
-                LoopStatus.PAUSED,
-                None,
-                0.0,
-                0.0,
-                TripwireResult(clear=False, tripped=["terminal"]),
-                receipt,
-                "terminal",
+            trip = self.hukulla.last_trip
+            if not isinstance(trip, TripwireResult):
+                trip = TripwireResult(clear=False, tripped=["terminal"])
+            return self._closed_tick(
+                self._replacement_receipt("TERMINAL_EXCEPTION"),
+                tick=self.tick_count,
+                chosen=None,
+                decision=0.0,
+                yuyay=0.0,
+                hukulla=trip,
             )
         if result.receipt is None:
-            receipt = self.emit_receipt(
-                "__terminal__",
-                0.0,
-                0.0,
-                False,
-                {
-                    "state": "UNAVAILABLE",
-                    "reason": "MISSING_RECEIPT",
-                    "evidence": [],
-                    "terminal": True,
-                    "backend_called": self._evaluator_called,
-                },
-            )
-            self.status = LoopStatus.PAUSED
-            return TickResult(
-                self.organ,
-                result.tick,
-                LoopStatus.PAUSED,
-                result.chosen,
-                result.decision_value,
-                result.yuyay_value,
-                result.hukulla,
-                receipt,
-                "terminal",
+            if self.ledger.count() != before:
+                return result
+            return self._closed_tick(
+                self._replacement_receipt("MISSING_RECEIPT"),
+                tick=result.tick,
+                chosen=result.chosen,
+                decision=result.decision_value,
+                yuyay=result.yuyay_value,
+                hukulla=result.hukulla,
             )
         return result
 
@@ -390,6 +400,11 @@ def _admit_backend(
         out["backend_called"] = True
         return out
     state = raw.get("state")
+    if not isinstance(state, str):
+        out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
+        out["reason"] = "UNEXPECTED_STATE"
+        out["backend_called"] = True
+        return out
     if state == "TIMEOUT":
         out = _terminal("TIMEOUT", provenance=provenance, measurability=measurability)
         out["backend_called"] = True

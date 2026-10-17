@@ -487,31 +487,195 @@ def test_malformed_result_receipt_records_that_the_evaluator_ran():
     assert result.receipt.payload["result"]["reason"] == "MALFORMED"
 
 
-def test_missing_parent_receipt_after_a_call_records_the_call(monkeypatch):
+def _actions(agent):
+    return [row["action"] for row in agent.ledger.all_receipts()]
+
+
+def _patch_emit(agent, mode):
+    """Fail the first receipt once, either before its append or after it."""
+    real = HatunAgent.emit_receipt
+    used = {"once": False}
+
+    def patched(self, *args, **kwargs):
+        if used["once"]:
+            return real(self, *args, **kwargs)
+        used["once"] = True
+        if mode == "none-before":
+            return None
+        if mode == "raise-before":
+            raise RuntimeError("receipt failed before append")
+        receipt = real(self, *args, **kwargs)
+        if mode == "none-after":
+            return None
+        if mode == "raise-after":
+            raise RuntimeError("receipt failed after append")
+        return receipt
+
+    agent.emit_receipt = patched.__get__(agent, HatunAgent)
+
+
+def test_malformed_state_and_rights_record_the_call():
+    malformed_state = {"state": ["AVAILABLE"], "evidence": []}
+    malformed_rights = _ok(1)
+    malformed_rights["evidence"][0]["rights"] = {"public": True}
+    bad_digest = _ok(1)
+    bad_digest["evidence"][0]["sha256"] = "not-a-digest"
+    cases = (
+        (malformed_state, "UNEXPECTED_STATE"),
+        (malformed_rights, "RIGHTS_UNBOUND"),
+        (bad_digest, "MALFORMED"),
+    )
+    for payload, reason in cases:
+        seen = []
+        result = _agent(lambda _payload, payload=payload, seen=seen: seen.append(1) or payload).tick(_world(1))
+        assert seen == [1]
+        body = result.receipt.payload["result"]
+        assert body["reason"] == reason
+        assert body["backend_called"] is True
+        assert body["evidence"] == []
+        assert result.receipt.payload["backend_called"] is True
+
+
+def test_none_before_append_emits_one_replacement():
     seen = []
     agent = _agent(lambda payload: seen.append(payload) or _ok(1))
-    original = OrganAgent.tick
-
-    def drop_receipt(self, world=None, now=None):
-        original(self, world, now)
-        return TickResult(
-            self.organ,
-            self.tick_count,
-            LoopStatus.ALIVE,
-            "evaluate_proposal",
-            1.0,
-            1.0,
-            TripwireResult(clear=True),
-            None,
-            "ok",
-        )
-
-    monkeypatch.setattr(OrganAgent, "tick", drop_receipt)
-    result = agent.tick(_world(1))
-    assert len(seen) == 1
+    _patch_emit(agent, "none-before")
+    result = agent.tick(_world(1, operation_id="op-none-before"))
+    assert seen == [_world_call()]
+    assert agent.ledger.count() == 1
+    assert _actions(agent) == ["__terminal__"]
+    assert result.status == LoopStatus.PAUSED
     assert result.receipt.payload["reason"] == "MISSING_RECEIPT"
     assert result.receipt.payload["backend_called"] is True
     assert result.receipt.payload["evidence"] == []
+    replay = agent.tick(_world(1, operation_id="op-none-before"))
+    assert len(seen) == 1
+    assert agent.ledger.count() == 2
+    assert replay.receipt.payload["result"]["replayed"] is True
+    assert replay.receipt.payload["result"]["backend_called"] is False
+
+
+def _world_call():
+    return {
+        "proposals": 1,
+        "provenance": PROVENANCE,
+        "measurability": 1.0,
+        "tenant": "public",
+    }
+
+
+def test_none_after_append_does_not_emit_a_second_receipt():
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    _patch_emit(agent, "none-after")
+    result = agent.tick(_world(1, operation_id="op-none-after"))
+    assert len(seen) == 1
+    assert result.receipt is None
+    assert result.status == LoopStatus.ALIVE
+    assert agent.ledger.count() == 1
+    assert _actions(agent) == ["evaluate_proposal"]
+    assert agent.ledger.verify_chain()
+    replay = agent.tick(_world(1, operation_id="op-none-after"))
+    assert len(seen) == 1
+    assert agent.ledger.count() == 2
+    assert replay.receipt.payload["result"]["replayed"] is True
+    assert replay.receipt.payload["result"]["backend_called"] is False
+    assert agent._replay["op-none-after"][1] is not None
+
+
+def test_raise_after_append_keeps_the_appended_receipt():
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    _patch_emit(agent, "raise-after")
+    with pytest.raises(RuntimeError, match="after append"):
+        agent.tick(_world(1, operation_id="op-raise-after"))
+    assert len(seen) == 1
+    assert agent.status == LoopStatus.ALIVE
+    assert agent.ledger.count() == 1
+    assert _actions(agent) == ["evaluate_proposal"]
+    replay = agent.tick(_world(1, operation_id="op-raise-after"))
+    assert len(seen) == 1
+    assert agent.ledger.count() == 2
+    assert replay.receipt.payload["result"]["replayed"] is True
+    assert replay.receipt.payload["backend_called"] is False
+
+
+@pytest.mark.parametrize("mode", ["none-before", "raise-before", "none-after", "raise-after"])
+def test_stop_stays_halted_when_the_receipt_fails(mode):
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or _ok(1))
+    _patch_emit(agent, mode)
+    if mode == "raise-after":
+        with pytest.raises(RuntimeError, match="after append"):
+            agent.tick(_world(1, stop="STOP"))
+        assert agent.ledger.count() == 1
+        assert _actions(agent) == ["__noop__"]
+    else:
+        result = agent.tick(_world(1, stop="STOP"))
+        assert result.status == LoopStatus.HALTED
+        assert agent.ledger.count() == 1
+        if mode == "none-after":
+            assert result.receipt is None
+            assert _actions(agent) == ["__noop__"]
+        else:
+            assert result.receipt.payload["backend_called"] is False
+            assert result.receipt.payload["evidence"] == []
+            assert _actions(agent) == ["__terminal__"]
+            assert "T10" in result.hukulla.tripped
+    assert agent.status == LoopStatus.HALTED
+    assert seen == []
+    followed = agent.tick(_world(1))
+    assert followed.status == LoopStatus.HALTED
+    assert followed.receipt.payload["backend_called"] is False
+    assert seen == []
+    assert agent.ledger.count() == 2
+
+
+def test_uncertain_outcome_replays_without_reopening():
+    seen = []
+
+    def evaluator(payload):
+        seen.append(payload)
+        return {"state": "UNCERTAIN", "evidence": [{"rights": "public_handles"}]}
+
+    agent = _agent(evaluator)
+    first = agent.tick(_world(1, operation_id="op-uncertain"))
+    body = first.receipt.payload["result"]
+    assert body["state"] == "UNCERTAIN"
+    assert body["reason"] == "UNCERTAIN"
+    assert body["backend_called"] is True
+    assert body["evidence"] == []
+    assert first.receipt.payload["backend_called"] is True
+    stored = agent._replay["op-uncertain"]
+    assert stored[1] is not None
+    assert stored[1]["state"] == "UNCERTAIN"
+    second = agent.tick(_world(1, operation_id="op-uncertain"))
+    assert len(seen) == 1
+    assert second.receipt.payload["result"]["replayed"] is True
+    assert second.receipt.payload["result"]["state"] == "UNCERTAIN"
+    assert second.receipt.payload["result"]["backend_called"] is False
+    assert second.receipt.payload["backend_called"] is False
+    assert agent._replay["op-uncertain"][1] is not None
+    assert agent._replay["op-uncertain"][1]["reason"] == "UNCERTAIN"
+
+
+def test_uncertain_receipt_failure_does_not_reopen_the_operation():
+    seen = []
+    agent = _agent(lambda payload: seen.append(payload) or {"state": "INDETERMINATE"})
+    _patch_emit(agent, "raise-before")
+    failed = agent.tick(_world(1, operation_id="op-uncertain-fail"))
+    assert len(seen) == 1
+    assert failed.status == LoopStatus.PAUSED
+    assert failed.receipt.payload["reason"] == "TERMINAL_EXCEPTION"
+    assert failed.receipt.payload["backend_called"] is True
+    assert agent._replay["op-uncertain-fail"][1] is not None
+    assert agent._replay["op-uncertain-fail"][1]["state"] == "UNCERTAIN"
+    replay = agent.tick(_world(1, operation_id="op-uncertain-fail"))
+    assert len(seen) == 1
+    assert replay.receipt.payload["result"]["replayed"] is True
+    assert replay.receipt.payload["result"]["state"] == "UNCERTAIN"
+    assert replay.receipt.payload["result"]["backend_called"] is False
+    assert agent._replay["op-uncertain-fail"][1]["state"] == "UNCERTAIN"
 
 
 def test_terminal_exception_after_the_evaluator_records_the_call():
