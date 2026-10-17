@@ -10,7 +10,8 @@ Two run modes:
   - bare while-loop mode (--bare): a single while True that checks each organ's
     next_tick and fires it when due. Explicit, readable, no framework magic.
 
-Halt-safe: a HALTED organ is skipped. SIGTERM/SIGINT stops the loop cleanly.
+A HALTED or PAUSED organ is skipped, and so is every organ while a ledger
+transaction is unresolved. SIGTERM/SIGINT stops the loop cleanly.
 """
 from __future__ import annotations
 
@@ -20,7 +21,7 @@ import time
 
 from .khipu_emit import KhipuLedger
 from .organs import build_all
-from .loop import LoopStatus
+from .scheduler import invocation_blocked
 
 _RUNNING = True
 
@@ -43,8 +44,8 @@ def run_bare(db_path: str, max_seconds: float | None = None) -> None:
     while _RUNNING:
         now = time.time()
         for name, agent in organs.items():
-            if agent.status == LoopStatus.HALTED:
-                continue  # halt-safe
+            if invocation_blocked(agent):
+                continue
             if now >= next_due[name]:
                 res = agent.tick()
                 next_due[name] = now + agent.cadence_seconds
