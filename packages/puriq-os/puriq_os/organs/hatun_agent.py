@@ -4,33 +4,47 @@
 hatun_agent.py — Hatun as an autonomous OrganAgent.
 
 Cadence: 49s (Nyquist-chosen, PURIQ_OS_DOCTRINE.md §2 — integer convenience, not
-mysticism). Hatun reports an injected read-port observation. It does not invent
-governance health, and it does not grant execution.
+mysticism). Proposal counts come only from the caller. The Yuyay gate and the
+Hukulla STOP/provenance predicates see that caller context. A missing or
+nonnumeric measurement is a numeric zero, because the base scorer ignores
+nonnumeric axes and would otherwise stay open. This organ does not open a
+network client. A caller-supplied evaluator is the only backend, and the GET
+loop constructors do not supply one.
 """
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Optional
+import time
+from typing import Any, Callable, Dict, List, Optional
 
-from ..loop import OrganAgent, Action
+from ..hukulla_tripwires import TripwireResult
+from ..loop import Action, LoopStatus, OrganAgent, TickResult
+from ..yuyay_gate import YuyayScores
 
-_HEX64 = re.compile(r"[0-9a-f]{64}\Z")
-_TOKEN = re.compile(r"[A-Z0-9_]{1,64}\Z")
+_PROVENANCE = re.compile(r"[0-9a-f]{40}\Z|[0-9a-f]{64}\Z")
 _PRIVATE = frozenset({"content", "text", "document", "documents", "body", "raw"})
-_STATES = frozenset({"AVAILABLE", "ABSTAIN", "UNAVAILABLE", "DENIED", "TIMEOUT"})
 
 
-def _unavailable() -> Dict[str, Any]:
+def _terminal(state: str, *, provenance: Any = None, measurability: float = 0.0) -> Dict[str, Any]:
     return {
-        "proposals": 0,
-        "governance_health": None,
-        "hydrated": False,
+        "evaluated": False,
+        "backend_called": False,
+        "state": state,
         "evidence": [],
-        "source_revision": None,
-        "state": "UNAVAILABLE",
-        "backend": "UNAVAILABLE",
+        "terminal": True,
+        "provenance": provenance if isinstance(provenance, str) else None,
+        "measurability": measurability,
         "execution_authority": "NONE",
     }
+
+
+def _number(value: Any) -> Optional[float]:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    if number < 0.0 or number > 1.0:
+        return None
+    return number
 
 
 def _evidence(value: Any) -> Optional[List[Dict[str, str]]]:
@@ -44,13 +58,9 @@ def _evidence(value: Any) -> Optional[List[Dict[str, str]]]:
         digest = item.get("sha256")
         if not isinstance(node, str) or not node or len(node) > 256:
             return None
-        if not isinstance(digest, str) or _HEX64.fullmatch(digest.lower()) is None:
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest.lower()) is None:
             return None
-        row = {"node_id": node, "sha256": digest.lower()}
-        source = item.get("source")
-        if isinstance(source, str) and source and len(source) <= 256:
-            row["source"] = source
-        rows.append(row)
+        rows.append({"node_id": node, "sha256": digest.lower()})
     return rows
 
 
@@ -58,89 +68,198 @@ class HatunAgent(OrganAgent):
     organ = "Hatun"
     cadence_seconds = 49
 
-    def __init__(self, ledger, gate=None, hukulla=None, *, read_port=None):
+    def __init__(self, ledger, gate=None, hukulla=None, *, evaluator: Optional[Callable[[Dict[str, Any]], Any]] = None,
+                 allowed_tenant: str = "public", clock: Optional[Callable[[], float]] = None):
         super().__init__(ledger, gate=gate, hukulla=hukulla)
-        self._read_port = read_port
+        self._evaluator = evaluator
+        self._allowed_tenant = allowed_tenant
+        self._clock = clock or time.time
 
     def observe(self, world: Any) -> Dict[str, Any]:
-        # The world dict cannot supply health, proposal counts, or approval.
-        del world
-        if self._read_port is None:
-            return _unavailable()
-        try:
-            measured = self._read_port()
-        except Exception:
-            return _unavailable()
-        if not isinstance(measured, dict) or _PRIVATE.intersection(measured):
-            closed = _unavailable()
-            if isinstance(measured, dict):
-                closed["state"] = "ABSTAIN"
-            return closed
-        evidence = _evidence(measured.get("evidence", []))
-        state = measured.get("state")
-        if not isinstance(state, str) or state not in _STATES:
-            return _unavailable()
-        if evidence is None or (state == "AVAILABLE" and not evidence):
-            state = "ABSTAIN"
-            evidence = []
-        revision = measured.get("source_revision")
-        revision_out = None
-        if isinstance(revision, str) and _HEX64.fullmatch(revision.lower()) is not None:
-            revision_out = revision.lower()
-        if state == "AVAILABLE" and revision_out is None:
-            state = "ABSTAIN"
-        backend = measured.get("backend")
-        if not isinstance(backend, str) or _TOKEN.fullmatch(backend) is None:
-            backend = "UNAVAILABLE"
+        world = world if isinstance(world, dict) else {}
+        stop = world.get("stop") == "STOP" or world.get("stop_directive") is True
+        authorized = world.get("authorized") is True and world.get("tenant") == self._allowed_tenant
+        provenance = world.get("provenance")
+        provenance_ok = isinstance(provenance, str) and _PROVENANCE.fullmatch(provenance.lower()) is not None
+        provenance_out = provenance.lower() if provenance_ok else None
+        if "config_proposals" in world and type(world.get("config_proposals")) is int and world["config_proposals"] >= 0:
+            proposals = world["config_proposals"]
+        else:
+            proposals = 0
+        meas = _number(world.get("measurability"))
+        now = self._clock()
+        expires_at = world.get("expires_at")
+        not_before = world.get("not_before")
+        window_ok = (
+            type(now) is not bool
+            and isinstance(now, (int, float))
+            and type(expires_at) is int
+            and type(not_before) is int
+            and not_before <= int(now) < expires_at
+        )
+        admissible = bool(
+            authorized
+            and provenance_ok
+            and meas is not None
+            and proposals > 0
+            and window_ok
+            and world.get("operation", "evaluate_proposal") == "evaluate_proposal"
+        )
+        # Zero is fail-closed. None would disappear from the base scorer and
+        # leave Lambda on its neutral fallback.
+        health = 0.0 if (not admissible or stop) else meas
+        if stop and admissible and meas is not None:
+            health = meas
         return {
-            "proposals": 0,
-            "governance_health": None,
-            "hydrated": False,
-            "evidence": evidence,
-            "source_revision": revision_out,
-            "state": state,
-            "backend": backend,
-            "execution_authority": "NONE",
+            "proposals": proposals,
+            "governance_health": health if health is not None else 0.0,
+            "measurability": meas if meas is not None else 0.0,
+            "authorized": admissible and not stop,
+            "admissible": admissible,
+            "stop_directive": stop,
+            "provenance_ok": provenance_ok,
+            "provenance": provenance_out,
+            "tenant": self._allowed_tenant if authorized else None,
+            "evidence": [],
         }
 
     def candidate_actions(self, x: Dict[str, Any]) -> List[Action]:
-        del x
-        return [Action(name="idle")]
+        meas = float(x.get("measurability") or 0.0)
+        context = {
+            "stop_directive": x.get("stop_directive") is True,
+            "provenance_ok": x.get("provenance_ok") is True,
+            "provenance": x.get("provenance"),
+            "measurability": meas,
+        }
+        idle = Action(name="idle", yuyay=YuyayScores(measurability_honesty=meas), khipu_factors=[0.5], context=context)
+        if not x.get("admissible"):
+            return [idle]
+        evaluate = Action(
+            name="evaluate_proposal",
+            yuyay=YuyayScores(measurability_honesty=meas),
+            khipu_factors=[1.0],
+            state_changing=True,
+            context=context,
+        )
+        return [idle, evaluate]
 
     def execute(self, action: Action, x: Dict[str, Any]) -> Any:
-        if action.name != "idle":
-            return {
-                "evaluated": False,
-                "bounded": True,
-                "execution_authority": "NONE",
-                "state": "DENIED",
-                "governance_health": None,
-            }
-        if not isinstance(x, dict) or _PRIVATE.intersection(x):
-            denied = _unavailable()
-            denied["evaluated"] = False
-            denied["bounded"] = True
-            if isinstance(x, dict):
-                denied["state"] = "ABSTAIN"
+        provenance = x.get("provenance") if isinstance(x, dict) else None
+        meas = float(x.get("measurability") or 0.0) if isinstance(x, dict) else 0.0
+        if (
+            not isinstance(x, dict)
+            or action.name != "evaluate_proposal"
+            or not x.get("authorized")
+            or x.get("stop_directive")
+        ):
+            denied = _terminal("DENIED", provenance=provenance, measurability=meas)
+            denied["backend_called"] = False
             return denied
-        evidence = _evidence(x.get("evidence", []))
-        state = x.get("state")
-        if evidence is None or not isinstance(state, str) or state not in _STATES:
-            state = "ABSTAIN"
-            evidence = []
-        revision = x.get("source_revision")
-        revision_out = None
-        if isinstance(revision, str) and _HEX64.fullmatch(revision.lower()) is not None:
-            revision_out = revision.lower()
-        if state == "AVAILABLE" and (not evidence or revision_out is None):
-            state = "ABSTAIN"
-        return {
-            "evaluated": False,
-            "bounded": True,
-            "execution_authority": "NONE",
-            "state": state,
-            "governance_health": None,
-            "hydrated": False,
-            "evidence": evidence,
-            "source_revision": revision_out,
-        }
+        if self._evaluator is None:
+            closed = _terminal("ABSENT_BACKEND", provenance=provenance, measurability=meas)
+            closed["evaluated"] = False
+            return closed
+        try:
+            raw = self._evaluator({
+                "proposals": x.get("proposals"),
+                "provenance": provenance,
+                "measurability": meas,
+                "tenant": x.get("tenant"),
+            })
+        except TimeoutError:
+            failed = _terminal("TIMEOUT", provenance=provenance, measurability=meas)
+            failed["backend_called"] = True
+            return failed
+        except Exception:
+            failed = _terminal("EXECUTION_FAILURE", provenance=provenance, measurability=meas)
+            failed["backend_called"] = True
+            return failed
+        admitted = _admit_backend(raw, provenance=provenance, measurability=meas)
+        admitted["backend_called"] = True
+        return admitted
+
+    def tick(self, world: Any = None, now: Optional[float] = None) -> TickResult:
+        before = self.ledger.count()
+        try:
+            result = super().tick(world, now)
+        except Exception:
+            if self.ledger.count() != before:
+                raise
+            receipt = self.emit_receipt(
+                "__terminal__",
+                0.0,
+                0.0,
+                False,
+                {
+                    "state": "UNAVAILABLE",
+                    "reason": "TERMINAL_EXCEPTION",
+                    "evidence": [],
+                    "terminal": True,
+                    "backend_called": False,
+                },
+            )
+            self.status = LoopStatus.PAUSED
+            return TickResult(
+                self.organ,
+                self.tick_count,
+                LoopStatus.PAUSED,
+                None,
+                0.0,
+                0.0,
+                TripwireResult(clear=False, tripped=["terminal"]),
+                receipt,
+                "terminal",
+            )
+        if result.receipt is None:
+            receipt = self.emit_receipt(
+                "__terminal__",
+                0.0,
+                0.0,
+                False,
+                {"state": "UNAVAILABLE", "reason": "MISSING_RECEIPT", "evidence": [], "terminal": True},
+            )
+            self.status = LoopStatus.PAUSED
+            return TickResult(
+                self.organ,
+                result.tick,
+                LoopStatus.PAUSED,
+                result.chosen,
+                result.decision_value,
+                result.yuyay_value,
+                result.hukulla,
+                receipt,
+                "terminal",
+            )
+        return result
+
+
+def _admit_backend(raw: Any, *, provenance: Any, measurability: float) -> Dict[str, Any]:
+    if not isinstance(raw, dict) or _PRIVATE.intersection(raw):
+        out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
+        out["backend_called"] = True
+        return out
+    state = raw.get("state")
+    if state == "TIMEOUT":
+        return _terminal("TIMEOUT", provenance=provenance, measurability=measurability)
+    if state in {"UNCERTAIN", "INDETERMINATE"}:
+        out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
+        return out
+    if state not in {"AVAILABLE", "ABSTAIN"}:
+        out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
+        return out
+    evidence = _evidence(raw.get("evidence", []))
+    if evidence is None:
+        out = _terminal("UNCERTAIN", provenance=provenance, measurability=measurability)
+        return out
+    if state == "AVAILABLE" and not evidence:
+        state = "ABSTAIN"
+    return {
+        "evaluated": state == "AVAILABLE",
+        "backend_called": True,
+        "state": state,
+        "evidence": evidence,
+        "terminal": True,
+        "provenance": provenance if isinstance(provenance, str) else None,
+        "measurability": measurability,
+        "execution_authority": "NONE",
+    }
