@@ -5,7 +5,8 @@ scheduler.py — APScheduler-driven per-organ cadence.
 
 Each OrganAgent gets one scheduler job firing every `cadence_seconds` (chosen via the
 Shannon-Nyquist rule, PURIQ_OS_DOCTRINE.md §2). The scheduler holds each organ's slot;
-a HALTED organ is skipped (halt-safe). No mystical timing — plain APScheduler intervals.
+a HALTED or PAUSED organ is skipped, and so is an organ whose ledger
+transaction is unresolved. No mystical timing — plain APScheduler intervals.
 
 Open-source dep: APScheduler. The scheduler degrades gracefully to a SyntheticClock for
 tests / environments without an event loop (the synthetic clock drives N ticks
@@ -18,6 +19,22 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from .loop import OrganAgent, LoopStatus, TickResult
+
+
+def invocation_blocked(agent: OrganAgent) -> bool:
+    """Refuse a new scheduler operation before it starts.
+
+    HALTED stays skipped. PAUSED is a gated resume, so cadence must not
+    start another operation. An uncommitted ledger transaction blocks
+    every status, including ALIVE.
+    """
+    if agent.status in (LoopStatus.HALTED, LoopStatus.PAUSED):
+        return True
+    ledger = getattr(agent, "ledger", None)
+    unresolved = getattr(ledger, "transaction_unresolved", None)
+    if not callable(unresolved):
+        return False
+    return bool(unresolved())
 
 
 class PuriqScheduler:
@@ -45,8 +62,8 @@ class PuriqScheduler:
 
     def _fire(self, organ: str, world: Any) -> Optional[TickResult]:
         agent = self.agents[organ]
-        if agent.status == LoopStatus.HALTED:
-            return None  # halt-safe: scheduler skips halted organs
+        if invocation_blocked(agent):
+            return None
         return agent.tick(world)
 
     def shutdown(self) -> None:
@@ -67,7 +84,7 @@ class PuriqScheduler:
         while pq and pq[0][0] <= horizon_seconds:
             vt, organ = heapq.heappop(pq)
             agent = self.agents[organ]
-            if agent.status != LoopStatus.HALTED:
+            if not invocation_blocked(agent):
                 results.append(agent.tick(world, now=vt))
             heapq.heappush(pq, (vt + agent.cadence_seconds, organ))
         return results

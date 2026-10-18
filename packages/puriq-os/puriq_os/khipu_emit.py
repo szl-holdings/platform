@@ -95,7 +95,10 @@ class KhipuLedger:
     def __init__(self, db_path: str = ":memory:", hmac_key: bytes = b"puriq-os-local"):
         import threading
         self._key = hmac_key
-        self._lock = threading.Lock()
+        # Re-entrant: an append nested under the admission lock, or under
+        # another append, must not deadlock on the same thread.
+        self._lock = threading.RLock()
+        self._emit_depth = 0
         # check_same_thread=False + a lock: safe for FastAPI's threadpool handlers.
         self._conn = sqlite3.connect(db_path, check_same_thread=False)
         self._conn.execute("""
@@ -107,6 +110,7 @@ class KhipuLedger:
                 signature_b64 TEXT, keyid TEXT, statement TEXT
             )""")
         self._conn.commit()
+        self._txn_unresolved = False
 
     # ---- chain head -------------------------------------------------------
     def head_hash(self) -> str:
@@ -124,23 +128,51 @@ class KhipuLedger:
         sig = hmac.new(self._key, pae, hashlib.sha256).digest()
         return receipt_hash, base64.b64encode(sig).decode()
 
+    def transaction_unresolved(self) -> bool:
+        """True while a receipt write is in progress or a transaction is still open.
+
+        A caller-owned transaction stays unresolved after a nested append.
+        This does not commit it or roll it back. Once the caller ends the
+        transaction, the flag follows the connection.
+        """
+        with self._lock:
+            if self._emit_depth:
+                return True
+            if self._conn.in_transaction:
+                return True
+            self._txn_unresolved = False
+            return False
+
     def emit(self, receipt: KhipuReceipt) -> KhipuReceipt:
         """Sign + append exactly one receipt; chain it to the current head (INV-3)."""
         with self._lock:
             return self._emit_locked(receipt)
 
     def _emit_locked(self, receipt: KhipuReceipt) -> KhipuReceipt:
+        # A transaction already open belongs to the caller. Appending must
+        # leave that outcome untouched: no commit and no rollback.
+        caller_open = self._conn.in_transaction
         receipt.prev_hash = self.head_hash()
         receipt.receipt_hash, receipt.signature_b64 = self._sign(receipt)
-        self._conn.execute(
-            "INSERT INTO khipu (organ,tick,action,decision_value,yuyay_value,"
-            "hukulla_clear,ts,prev_hash,receipt_hash,signature_b64,keyid,statement) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-            (receipt.organ, receipt.tick, receipt.action, receipt.decision_value,
-             receipt.yuyay_value, int(receipt.hukulla_clear), receipt.ts,
-             receipt.prev_hash, receipt.receipt_hash, receipt.signature_b64,
-             receipt.keyid, json.dumps(receipt.statement(), sort_keys=True)))
-        self._conn.commit()
+        self._emit_depth += 1
+        self._txn_unresolved = True
+        try:
+            self._conn.execute(
+                "INSERT INTO khipu (organ,tick,action,decision_value,yuyay_value,"
+                "hukulla_clear,ts,prev_hash,receipt_hash,signature_b64,keyid,statement) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                (receipt.organ, receipt.tick, receipt.action, receipt.decision_value,
+                 receipt.yuyay_value, int(receipt.hukulla_clear), receipt.ts,
+                 receipt.prev_hash, receipt.receipt_hash, receipt.signature_b64,
+                 receipt.keyid, json.dumps(receipt.statement(), sort_keys=True)))
+            if not caller_open:
+                self._conn.commit()
+        except Exception:
+            raise
+        finally:
+            self._emit_depth -= 1
+            if not self._conn.in_transaction:
+                self._txn_unresolved = False
         return receipt
 
     # ---- verification -----------------------------------------------------
