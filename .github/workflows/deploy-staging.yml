@@ -35,68 +35,66 @@ jobs:
 
       - name: Verify staging configuration
         id: verify
+        shell: bash
+        env:
+          REPLIT_APP_ID: ${{ secrets.REPLIT_STAGING_APP_ID }}
+          REPLIT_DEPLOY_TOKEN: ${{ secrets.REPLIT_STAGING_DEPLOY_TOKEN }}
         run: |
-          if [ -z "${{ secrets.REPLIT_STAGING_DEPLOY_TOKEN }}" ]; then
-            echo "::warning::REPLIT_STAGING_DEPLOY_TOKEN not configured — staging deployment skipped"
-            echo "Configure this secret in Settings → Environments → staging"
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Staging deployment configuration verified"
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          if [ -z "$REPLIT_APP_ID" ] || [ -z "$REPLIT_DEPLOY_TOKEN" ]; then
+            echo "::error::BLOCKED: staging app ID or deployment token is not configured; no request sent"
+            exit 1
           fi
+          echo "Required staging configuration is present; provider authority remains unverified"
 
       - name: Trigger staging deployment
-        if: steps.verify.outputs.skip != 'true'
-        # Fail-soft: emit warnings on Replit API failures but never fail the
-        # GitHub Actions job. Staging is best-effort — a 403 from an expired
-        # token should be reported, not block the release pipeline.
+        id: trigger
         shell: bash
+        env:
+          REPLIT_APP_ID: ${{ secrets.REPLIT_STAGING_APP_ID }}
+          REPLIT_DEPLOY_TOKEN: ${{ secrets.REPLIT_STAGING_DEPLOY_TOKEN }}
         run: |
-          set +e
-          echo "Triggering Replit staging deployment..."
-          REPLIT_APP_ID="${{ secrets.REPLIT_STAGING_APP_ID }}"
-          REPLIT_DEPLOY_TOKEN="${{ secrets.REPLIT_STAGING_DEPLOY_TOKEN }}"
-
+          set -euo pipefail
           if [ -z "$REPLIT_APP_ID" ] || [ -z "$REPLIT_DEPLOY_TOKEN" ]; then
-            echo "::warning::REPLIT_STAGING_APP_ID or REPLIT_STAGING_DEPLOY_TOKEN not configured — staging deployment skipped"
-            echo "To enable automated staging deployment, set both secrets in Settings → Environments → staging"
-            exit 0
+            echo "::error::BLOCKED: staging app ID or deployment token is not configured; no request sent"
+            exit 1
           fi
 
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+          # One bounded request; do not retry or follow redirects after rejection.
+          if RESPONSE=$(curl -q --globoff --silent --connect-timeout 10 --max-time 60 \
+            --output /dev/null --write-out "%{http_code}" \
             -X POST \
             -H "Authorization: Bearer $REPLIT_DEPLOY_TOKEN" \
             -H "Content-Type: application/json" \
-            "https://replit.com/api/v1/repls/$REPLIT_APP_ID/deployments" \
-            2>/dev/null)
-          CURL_EXIT=$?
-          # Default RESPONSE to a sentinel if curl produced nothing
-          if [ -z "$RESPONSE" ] || ! [[ "$RESPONSE" =~ ^[0-9]+$ ]]; then
-            RESPONSE="000"
-          fi
-
-          if [ "$CURL_EXIT" -ne 0 ] || [ "$RESPONSE" = "000" ]; then
-            echo "::warning::Could not reach Replit API (curl exit=$CURL_EXIT, http=$RESPONSE) — trigger staging manually if needed"
-            exit 0
-          fi
-
-          if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
-            echo "Staging deployment triggered successfully (HTTP $RESPONSE)"
-            exit 0
-          fi
-
-          if [ "$RESPONSE" = "401" ] || [ "$RESPONSE" = "403" ]; then
-            echo "::warning::Replit staging deployment API returned HTTP $RESPONSE — REPLIT_STAGING_DEPLOY_TOKEN is likely expired. Rotate it in Settings → Environments → staging. (fail-soft, not blocking release)"
+            "https://replit.com/api/v1/repls/$REPLIT_APP_ID/deployments"); then
+            if ! [[ "$RESPONSE" =~ ^[0-9]{3}$ ]]; then
+              echo "::error::Replit staging API returned an invalid HTTP status; request acceptance is unverified"
+              exit 1
+            fi
           else
-            echo "::warning::Replit staging deployment API returned HTTP $RESPONSE — unexpected response, investigate. (fail-soft, not blocking release)"
+            CURL_EXIT=$?
+            echo "::error::Replit staging request failed (curl exit=$CURL_EXIT); request acceptance is unverified"
+            exit 1
           fi
-          exit 0
+
+          if [[ "$RESPONSE" =~ ^2[0-9]{2}$ ]]; then
+            echo "Staging deployment request accepted (HTTP $RESPONSE); deployment readiness is unverified"
+          else
+            echo "::error::Replit staging API returned HTTP $RESPONSE; request rejected or acceptance unverified"
+            exit 1
+          fi
 
       - name: Deployment summary
         if: always()
+        env:
+          CONFIGURATION_OUTCOME: ${{ steps.verify.outcome }}
+          REQUEST_OUTCOME: ${{ steps.trigger.outcome }}
         run: |
           echo "## Staging Deployment Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Configuration check:** $CONFIGURATION_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Deployment request step:** $REQUEST_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Deployment readiness:** UNKNOWN (request acceptance is not runtime verification)" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Environment:** staging" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Commit:** ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Branch:** ${{ github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"

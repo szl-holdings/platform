@@ -29,6 +29,24 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### STAGING-REQUEST-001 — provider acceptance and runtime remain BLOCKED
+
+MEASURED historical observation: Platform staging run
+[39090828464](https://github.com/szl-holdings/platform/actions/runs/39090828464)
+at `fa7cbd0c0cc8b00a1dbf3272530eba45e4da0730` received HTTP 403 in job
+`117567028677` on 2026-10-18 but reported success because its script exited zero.
+This candidate fixes that source behavior: missing configuration, transport
+failure, malformed responses and non-2xx statuses fail. The offline harness
+executes actual Bash with mock responses. HTTP 2xx means request acceptance only;
+the workflow summary keeps runtime readiness UNKNOWN.
+
+The rejection cause and existing endpoint's deployment authorization contract
+remain UNKNOWN. No credential or target change, denied-action retry, deployment
+or runtime verification was performed. A legitimate provider/API contract and
+fresh authorized request plus runtime evidence are still required before any
+staging readiness claim. See the
+[scoped proof packet](../../audit/STAGING_DEPLOY_FAIL_CLOSED_2026-10-18.md).
+
 ### A11OY-PUBLIC-CANDIDATE-001 — hosted promotion remains HOLD
 
 Candidate source now admits only a static boundary home and one deterministic
