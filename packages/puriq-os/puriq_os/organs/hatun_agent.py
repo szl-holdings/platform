@@ -248,6 +248,12 @@ class HatunAgent(OrganAgent):
             closed = _terminal("ABSENT_BACKEND", provenance=provenance, measurability=meas)
             closed["evaluated"] = False
             return self._store_replay(operation, replay_key, closed)
+        if self.ledger.transaction_unresolved():
+            blocked = _terminal("UNAVAILABLE", provenance=provenance, measurability=meas)
+            blocked["reason"] = "LEDGER_UNRESOLVED"
+            blocked["backend_called"] = False
+            blocked["execution_authority"] = "NONE"
+            return blocked
         self._evaluator_called = True
         try:
             raw = self._evaluator({
@@ -346,6 +352,25 @@ class HatunAgent(OrganAgent):
             "halted" if halted else "terminal",
         )
 
+    def _paused_tick_allowed(self, world: Any) -> bool:
+        # PAUSED stays paused for a fresh evaluator call. A replay, conflict,
+        # in-flight id, or pre-call denial does not invoke the evaluator.
+        return not self._would_call_evaluator(world)
+
+    def _would_call_evaluator(self, world: Any) -> bool:
+        if self._evaluator is None or self.status == LoopStatus.HALTED:
+            return False
+        try:
+            observed = self.observe(world)
+        except Exception:
+            return False
+        if not isinstance(observed, dict) or not observed.get("admissible"):
+            return False
+        operation = observed.get("operation_id")
+        if isinstance(operation, str) and operation in self._replay:
+            return False
+        return True
+
     def tick(self, world: Any = None, now: Optional[float] = None) -> TickResult:
         self._evaluator_called = False
         before = self.ledger.count()
@@ -368,6 +393,8 @@ class HatunAgent(OrganAgent):
                 yuyay=0.0,
                 hukulla=trip,
             )
+        if result.note == "admission-blocked":
+            return result
         if result.receipt is None:
             if self.ledger.count() != before:
                 return result
