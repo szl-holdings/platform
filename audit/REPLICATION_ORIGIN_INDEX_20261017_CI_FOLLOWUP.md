@@ -13,8 +13,9 @@ assertions into preceding statements, then asserts their returned values. This
 keeps writes present if Python assertions are disabled. No runtime, migration,
 API, or workflow source changed, and no scanner suppression was added.
 
-Local validation: the same isolated package pytest command passed all 37 tests;
-`git diff --check` passed. Fresh hosted CodeQL and whole-PR checks are pending
+Local validation: the isolated `packages/khipu-lmdb/tests` pytest invocation
+returned `37 passed` (exit 0); `git diff --check` passed. This is a focused
+package result, not a platform-wide test count. Fresh hosted CodeQL and whole-PR checks are pending
 on the follow-up commit; the initial failure is not relabeled as a pass.
 Provider publication, consumer route integration, and outbound activation remain
 outside this draft. The prior pnpm typecheck environment blocker is unchanged.
