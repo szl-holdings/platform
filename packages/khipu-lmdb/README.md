@@ -76,6 +76,49 @@ recovery, durable sender delivery state, or end-to-end replication. Consumers
 must sync the upstream source, replace the separate lookup/append sequence with
 this API, and independently qualify their runtime before enabling outbound work.
 
+## Local replication outbox
+
+`replication_outbound_state(peer_id, binding_sha256)` reads and validates an
+existing delivery record without registering a peer, advancing a cursor, or
+repairing state. An unknown peer returns `None`.
+
+`prepare_replication_batch(peer_id, binding_sha256, limit=100,
+max_bytes=4194304)` binds a peer on its first explicit write and atomically
+persists its next batch. It returns `batch_id` (SHA-256 of `body`), `first_seq`,
+exclusive `next_seq`, and exact canonical JSON `body` bytes, or `None` when
+there are no unsent receipts. A pending batch is replayed byte for byte, even
+if the caller changes limits or new receipts arrive. The batch includes its
+peer, binding, source identity, interval, and unchanged receipt envelopes.
+
+`acknowledge_replication_batch(peer_id, binding_sha256, batch_id)` advances
+only that peer's exact pending interval, recording its final digest and removing
+the pending bytes in the same LMDB transaction. A mismatched or already consumed
+ACK fails without writes. After an uncertain local ACK result, read the durable
+state and prepare again; there is no caller-supplied cursor or skip operation.
+
+The caller defines `binding_sha256` as a lowercase SHA-256 digest of its immutable
+peer/source configuration. The library treats that digest as an opaque binding;
+it does not authenticate configuration, transport, or peer identity. Reusing a
+peer ID with a different binding, source organ, or namespace is rejected. Peer
+IDs contain 1–128 ASCII letters, digits, dots, underscores, or hyphens, starting
+with a letter or digit. There are at most 64 registered peers, 1,000 receipts and
+4 MiB per pending batch, 1 MiB per receipt, and 4 KiB per metadata record. A first
+receipt exceeding a batch limit fails instead of being silently skipped.
+
+The APIs validate canonical finite JSON, receipt payload/envelope hashes,
+contiguous pending chain links, and the acknowledged predecessor. They reject
+missing, conflicting, or malformed state without automatic repair. These checks
+assume a trusted local database; they do not authenticate coordinated arbitrary
+edits of its contents. Existing receipts and receiver indexes are unchanged.
+
+**MEASURED:** the package tests exercise local process crashes, reopening,
+concurrent preparation, corruption rejection, and lost-ACK replay; see the
+[local proof packet](../../audit/REPLICATION_DURABLE_OUTBOX_20261018.md).
+Authenticated transport, durable pause state, hosted storage and snapshot
+admission, cross-host recovery, and worker activation remain **UNAVAILABLE**.
+The installed package includes `outbox.py`; standalone vendored `core.py`
+copies require a governed exporter and consumer update before using these APIs.
+
 ---
 Doctrine v11 — **749 declarations / 14 unique axioms / 163 sorries** (locked `c7c0ba17`).
 Λ = Conjecture 1 (NOT a theorem). SLSA L1 (honest). Reed-Solomon ≠ holographic; event-sourcing ≠ time travel.

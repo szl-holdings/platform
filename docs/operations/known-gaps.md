@@ -1359,3 +1359,17 @@ authenticated peer identity, hosted crash/restart qualification, and cross-host
 recovery remain open. Outbound replication remains blocked pending those gates.
 The local index assumes trusted database bytes; it does not authenticate arbitrary
 on-disk edits. Proof: [replication origin-index packet](../../audit/REPLICATION_ORIGIN_INDEX_20261017.md).
+
+### 2026-10-18 local sender outbox candidate
+
+**MEASURED:** package-level LMDB tests now exercise a peer-bound durable cursor,
+exact persisted pending bytes, and acknowledgement of only the matching pending
+interval, with process-exit and corruption regressions. This closes a local
+library storage gap only; it does not activate a sender or change any consumer.
+The package's new `outbox.py` module also requires a governed exporter update
+before single-file vendored consumers can call its APIs.
+
+Authenticated transport, peer authority, durable pause state, hosted LMDB
+snapshot admission, restart qualification, and cross-host recovery remain
+**UNAVAILABLE**. Outbound runtime activation remains **BLOCKED** pending those
+gates. Proof: [local outbox packet](../../audit/REPLICATION_DURABLE_OUTBOX_20261018.md).
