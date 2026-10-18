@@ -284,6 +284,22 @@ class KhipuLMDB:
             txn.put(b"meta:origin-indexed-count", str(receipt["seq"] + 1).encode())
             return {"receipt": receipt, "duplicate": False}
 
+    def replication_outbound_state(self, peer_id: str, binding_sha256: str):
+        """Read local outbound state without creating or repairing metadata."""
+        from .outbox import read
+        return read(self, peer_id, binding_sha256)
+
+    def prepare_replication_batch(self, peer_id: str, binding_sha256: str, *,
+                                  limit: int = 100, max_bytes: int = 4 * 1024 * 1024):
+        """Persist/replay a bounded batch; does not transmit or authenticate it."""
+        from .outbox import prepare
+        return prepare(self, peer_id, binding_sha256, limit=limit, max_bytes=max_bytes)
+
+    def acknowledge_replication_batch(self, peer_id: str, binding_sha256: str, batch_id: str):
+        """Commit an exact pending ACK; caller must authenticate the peer first."""
+        from .outbox import acknowledge
+        return acknowledge(self, peer_id, binding_sha256, batch_id)
+
     # ---- read -------------------------------------------------------------
     def get_by_seq(self, seq: int) -> Optional[Dict[str, Any]]:
         with self._lock, self._env.begin() as txn:
