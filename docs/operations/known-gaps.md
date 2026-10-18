@@ -1343,3 +1343,19 @@ source-bound receipt are cataloged under the same proof packet. This closes the
 fresh local-presentation evidence gap only. Publication holds, unavailable live
 security controls, provider/signing admission and deployed-domain observations
 retain the separate limitations above.
+
+## 2026-10-17 replication origin-index boundary
+
+The upstream `packages/khipu-lmdb` candidate adds a single-transaction mirror
+append and origin index, bounded historical backfill, strict conflict rejection,
+and local multi-process/reopen/transaction-abort regressions. Existing duplicate
+wrappers remain historical records. This is a local receiver storage capability;
+the A11oy and Killinchu consumers still require a governed source sync and route
+integration before they use it. Their separate lookup/append path is not repaired
+by an upstream library commit alone.
+
+Automatic large-history reconciliation, durable sender cursors and pause state,
+authenticated peer identity, hosted crash/restart qualification, and cross-host
+recovery remain open. Outbound replication remains blocked pending those gates.
+The local index assumes trusted database bytes; it does not authenticate arbitrary
+on-disk edits. Proof: [replication origin-index packet](../../audit/REPLICATION_ORIGIN_INDEX_20261017.md).
