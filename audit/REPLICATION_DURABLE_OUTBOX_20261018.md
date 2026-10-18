@@ -17,7 +17,7 @@ or hosted filesystem qualification is included. There are no UI changes.
 
 ## Verification
 
-Initial inherited candidate: **MEASURED**, 86 package tests passed on Windows
+Initial inherited candidate: **MEASURED**, 86 Khipu LMDB regression cases passed on Windows
 with Python 3.12 and real LMDB in 12.04 seconds. The tests include independent
 process exits before and after commit, concurrent preparers, and lost-ACK replay.
 
@@ -34,7 +34,7 @@ No package-manager installation, configuration change, or unrelated TypeScript
 repair was attempted. The same command after editing stopped with the same
 engine mismatch. Routes and UI are unchanged; route/browser tests are NOT RUN.
 
-Final storage implementation: **MEASURED**, 95 package tests passed on Windows
+Final storage implementation: **MEASURED**, 95 Khipu LMDB regression cases passed on Windows
 in 17.16 seconds and on WSL Ubuntu in 4.94 seconds. The new negative cases check
 malformed and unknown ACKs, exact envelope/comma byte limits, a rehashed receipt
 with a broken predecessor link, and changed pending auxiliary bytes even after
@@ -66,6 +66,25 @@ with Python 3.12, pytest 9.1.1, and LMDB 2.3.0. It will include the new tests on
 the pull request without a workflow change. Hosted CI and secret-scan results
 remain pending until observed on the pushed head. No merge, publication, or
 runtime activation is authorized by this proof packet.
+
+## Scoped evidence wording correction
+
+At `559b63d9e8269dffd5eb43d2c9dccfcb22b6b6c5`, CI job `117561502896`
+correctly rejected ambiguous wording in this packet: the unchanged claims
+checker interpreted the local suite counts as a monorepo package-count claim.
+The two sentences now identify Khipu LMDB regression cases explicitly. Their
+measured counts, commands, timings, and limitations are retained. Canonical
+metrics, claim guards, allowlists, application code, and workflow behavior are
+unchanged. Validation uses the existing checker and committed canonical metrics.
+
+**MEASURED:** the unchanged `claimFailuresForLines` implementation reproduced
+both original findings and returned no findings for the corrected document,
+with no allowlist supplied to that focused invocation. It also confirmed that
+both measured counts remain present. `node tools/truth/claims-drift.ts` returned
+`claims drift: PASS`, exit 0. The sparse checkout's checker, canonical metrics,
+and existing allowlist were materialized byte-for-byte from Git; none changed.
+The check ran on Node v24.19.0 using its native TypeScript support, without a
+dependency installation. `git diff --check` returned exit 0.
 
 ## Release limits
 
