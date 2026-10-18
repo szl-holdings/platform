@@ -46,7 +46,8 @@ def test_append_preserves_existing_canonical_receipt_bytes(mirror, monkeypatch):
     expected = {**body, "payload": payload, "ts": 123.5,
                 "digest": hashlib.sha3_256(canon(body)).hexdigest(),
                 "signature": "DSSE_PLACEHOLDER", "chain_verified": True}
-    assert mirror.append("fixture", payload) == expected
+    actual = mirror.append("fixture", payload)
+    assert actual == expected
     assert contents(mirror)[b"seq:00000000000000000000"] == canon(expected)
 
 
@@ -102,7 +103,8 @@ def test_string_numeric_keys_remain_stable_after_freeze_and_replay(tmp_path, mir
     origin["metadata"] = {"2": "two", "10": "ten"}
     first = mirror.append_replicated(origin)
     before = contents(mirror)
-    assert mirror.append_replicated(copy.deepcopy(origin)) == {
+    replay = mirror.append_replicated(copy.deepcopy(origin))
+    assert replay == {
         "receipt": first["receipt"], "duplicate": True,
     }
     assert contents(mirror) == before
@@ -122,7 +124,8 @@ def test_backfill_retains_historical_duplicates_and_indexes_first(mirror, origin
 def test_backfill_observes_legacy_appends_after_initial_index(mirror, origin):
     mirror.append_replicated(origin)
     mirror.append("replicated", {"origin": origin})
-    assert mirror.append_replicated(origin)["receipt"]["seq"] == 0
+    replay = mirror.append_replicated(origin)
+    assert replay["receipt"]["seq"] == 0
     assert contents(mirror)[b"meta:origin-indexed-count"] == b"2"
 
 
@@ -218,8 +221,10 @@ def test_large_but_admitted_origin_can_be_replayed(tmp_path, mirror):
         origin = producer.append("fixture", {"text": "x" * (core._MAX_ORIGIN_BYTES - 700)})
     finally:
         producer.close()
-    assert mirror.append_replicated(origin)["duplicate"] is False
-    assert mirror.append_replicated(origin)["duplicate"] is True
+    first = mirror.append_replicated(origin)
+    replay = mirror.append_replicated(origin)
+    assert first["duplicate"] is False
+    assert replay["duplicate"] is True
 
 
 def test_oversized_origin_refuses_without_migration(mirror, origin):
@@ -334,8 +339,10 @@ store.append_replicated(json.loads(sys.argv[2]))
     store = KhipuLMDB(path, organ="khipu-repl", ns="fixture")
     try:
         assert contents(store) == before
-        assert store.append_replicated(other)["duplicate"] is False
-        assert store.append_replicated(origin)["duplicate"] is True
+        first = store.append_replicated(other)
+        replay = store.append_replicated(origin)
+        assert first["duplicate"] is False
+        assert replay["duplicate"] is True
         assert store.stats()["entries"] == 2 and store.verify()["ok"] is True
     finally:
         store.close()
