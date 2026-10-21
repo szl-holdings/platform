@@ -50,7 +50,7 @@ directory was placed first on PATH for nested package tasks.
 | Candidate `pnpm audit --json --audit-level=high` | 1 | At `07:09:29Z`: Critical 0, High 0, Moderate 3, Low 0. This pnpm version exits 1 for the remaining Moderate findings. |
 | Unchanged `normalizeAuditJson`, `auditExecutionFailure`, `verifyMitigationManifest`, and `auditBlockingVerdict` applied to the saved real candidate audit | 0 | Parsed `legacy-advisories`, no execution inconsistency, no mitigation entries, High/Critical policy passed. This is a function-level check, not a complete report-generator run. |
 | `node scripts/qa/generate-vuln-report.js` | 1 | BLOCKED on Windows: `spawnSync pnpm ENOENT`. Failed current-run report preserved outside the checkout; tracked report restored byte-for-byte. |
-| `node --test scripts/qa/generate-vuln-report.test.js scripts/qa/dependency-patches.test.mjs scripts/qa/third-party-licenses.test.mjs scripts/qa/security-overrides-compat.test.mjs` | 1 | 47 passed, 1 failed: existing symlink-rejection test cannot create its fixture (`EPERM`) on this Windows host. No test skipped or changed. Linux hosted execution remains required. |
+| `node --test scripts/qa/generate-vuln-report.test.js scripts/qa/dependency-patches.test.mjs scripts/qa/third-party-licenses.test.mjs scripts/qa/security-overrides-compat.test.mjs` | 1 | This four-file security suite failed because its existing symlink-rejection case cannot create the fixture (`EPERM`) on this Windows host. Exact scoped totals are recorded in [the command-bound JSON receipt](DEPENDENCY_ADVISORIES_2026-10-21.json), under `scoped_check_counts`. No case skipped or changed. Linux hosted execution remains required. |
 | `pnpm --filter @szl-holdings/mcp-client typecheck` | 0 | MCP consumer typecheck passed. |
 | Local loopback MCP and Markdown consumer smoke | 0 | Actual repository adapter initialized, listed tools, pinged, called a fixture tool, and closed against patched SDK. Markdown heading/link rendering and default raw-HTML escaping passed. No external effect. First fixture attempt incorrectly reused stateless transport and failed; corrected stateful-session fixture passed. |
 | `pnpm --filter @workspace/a11oy build` | 0 | Vite 8.1.6 built 31 modules; 4-file public candidate bundle contract passed. |
@@ -92,7 +92,7 @@ runtime identity, durable replication, and independent witness remain separate.
 This workcell does not perform a deployment or merge. The inherited staging
 provider rejection remains open.
 
-## Append-only hosted-check correction — 2026-10-21T07:17:34Z
+## Append-only hosted-check correction â€” 2026-10-21T07:17:34Z
 
 MEASURED: hosted security run
 [39560791762](https://github.com/szl-holdings/platform/actions/runs/39560791762)
@@ -121,7 +121,7 @@ the scanner. The audit parser and mitigation policy remain unchanged.
 Fresh exact-head hosted security execution remains required. No merge or
 deployment is performed by this correction.
 
-## Append-only SBOM refresh — 2026-10-21T07:20:13Z
+## Append-only SBOM refresh â€” 2026-10-21T07:20:13Z
 
 MEASURED: hosted security run
 [39561049941](https://github.com/szl-holdings/platform/actions/runs/39561049941)
@@ -145,3 +145,32 @@ pre-existing Windows symbolic-link test skipped by the unchanged suite. The
 current-lock/patch equality assertion and content-addressed-history checks
 passed. No assertion, schema, generator or workflow is changed. A fresh
 exact-head hosted security gate remains required.
+
+## Append-only scope clarification â€” 2026-10-21T07:22:01Z
+
+The local four-file security-suite row above is clarified to distinguish its
+own command result from the unavailable canonical `platform_tests` aggregate.
+The exact command, totals, exit status and source-log SHA-256 are retained in
+`scoped_check_counts` in the companion JSON. The original row remains in
+immutable commit `bdb51d188204fb21a105a3c4494d868f9e4b0654`; the failed local
+log is retained. No truth metric, allowlist or scanner rule changes.
+
+MEASURED hosted security run
+[39561355998](https://github.com/szl-holdings/platform/actions/runs/39561355998)
+at `6556f13364894f8bb706e54c50a6b0f9b04f38df` completed successfully: dependency
+scan, blocking Security Gate, secret scanning, lock integrity and license
+compliance. This observation covers that exact head, prior to this documentation
+clarification; it does not constitute a protected merge or deployment.
+
+## Append-only local completion boundary
+
+MEASURED at 2026-10-21T07:23:40.845125+00:00: the full workspace typecheck exceeded
+the local 600-second harness bound. Its result is UNAVAILABLE, not passed.
+The log was retained. After verifying its exact command-line identity, only
+the owned Turbo PID 51412 and descendants were terminated; the subsequent
+owned compiler inventory was empty. The companion JSON records the timeout
+and output hash. Hosted exact-head Typecheck remains the required complete
+verdict. The scoped MCP typecheck pass remains independently valid.
+
+pnpm claims:drift exited 0 after the local result was explicitly scoped
+in the documentation and JSON. No truth metric or scanner rule changed.
