@@ -120,3 +120,28 @@ the scanner. The audit parser and mitigation policy remain unchanged.
 
 Fresh exact-head hosted security execution remains required. No merge or
 deployment is performed by this correction.
+
+## Append-only SBOM refresh — 2026-10-21T07:20:13Z
+
+MEASURED: hosted security run
+[39561049941](https://github.com/szl-holdings/platform/actions/runs/39561049941)
+at source `a4773e4bee3219a5b4d65cacd237007e9ab62cf8` passed the repaired
+actual-graph contract and the real vulnerability report, but the tracked SBOM
+freshness assertion rejected the old inventory. Secret, license and lockfile
+jobs passed. The security gate correctly remained blocked.
+
+`node scripts/qa/generate-sbom.js` exited 0 and regenerated
+`security/sbom-latest.json` plus its immutable content-addressed history file
+from the unchanged dependency inputs recorded in the companion JSON. Inventory:
+1,810 package components, one verified local patch, official vendored
+CycloneDX 1.4 schema validation. Both files have SHA-256
+`4bf3c4111ecc8588b1fb3f548b3b12bd49c3fc33b31553d7df66b8c61ec2e11a`.
+The new history filename is `sbom-4bf3c4111ecc8588b1fb3f548b3b12bd49c3fc33b31553d7df66b8c61ec2e11a.json`.
+Existing history is preserved. This inventory does not replace the separate
+vulnerability scan.
+
+`node --test scripts/qa/generate-sbom.test.mjs` exited 0: 15 passed, one
+pre-existing Windows symbolic-link test skipped by the unchanged suite. The
+current-lock/patch equality assertion and content-addressed-history checks
+passed. No assertion, schema, generator or workflow is changed. A fresh
+exact-head hosted security gate remains required.
