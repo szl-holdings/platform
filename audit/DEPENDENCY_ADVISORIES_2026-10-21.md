@@ -92,7 +92,7 @@ runtime identity, durable replication, and independent witness remain separate.
 This workcell does not perform a deployment or merge. The inherited staging
 provider rejection remains open.
 
-## Append-only hosted-check correction â€” 2026-10-21T07:17:34Z
+## Append-only hosted-check correction - 2026-10-21T07:17:34Z
 
 MEASURED: hosted security run
 [39560791762](https://github.com/szl-holdings/platform/actions/runs/39560791762)
@@ -121,7 +121,7 @@ the scanner. The audit parser and mitigation policy remain unchanged.
 Fresh exact-head hosted security execution remains required. No merge or
 deployment is performed by this correction.
 
-## Append-only SBOM refresh â€” 2026-10-21T07:20:13Z
+## Append-only SBOM refresh - 2026-10-21T07:20:13Z
 
 MEASURED: hosted security run
 [39561049941](https://github.com/szl-holdings/platform/actions/runs/39561049941)
@@ -146,7 +146,7 @@ current-lock/patch equality assertion and content-addressed-history checks
 passed. No assertion, schema, generator or workflow is changed. A fresh
 exact-head hosted security gate remains required.
 
-## Append-only scope clarification â€” 2026-10-21T07:22:01Z
+## Append-only scope clarification - 2026-10-21T07:22:01Z
 
 The local four-file security-suite row above is clarified to distinguish its
 own command result from the unavailable canonical `platform_tests` aggregate.
