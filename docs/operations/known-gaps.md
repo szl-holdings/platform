@@ -1391,3 +1391,20 @@ Authenticated transport, peer authority, durable pause state, hosted LMDB
 snapshot admission, restart qualification, and cross-host recovery remain
 **UNAVAILABLE**. Outbound runtime activation remains **BLOCKED** pending those
 gates. Proof: [local outbox packet](../../audit/REPLICATION_DURABLE_OUTBOX_20261018.md).
+
+### 2026-10-21 bounded HTTPS delivery candidate
+
+The canonical package now supplies an explicit one-attempt HTTPS sender and an
+authenticated bounded receiver with an atomic source cursor, wrapper and origin
+index commit. The sender advances only on an exact batch ACK; source gaps/forks,
+bad credentials, invalid TLS and invalid responses refuse delivery. The
+[delivery proof packet](../../audit/REPLICATION_HTTPS_DELIVERY_20261021.md)
+records actual local/VM tests separately from deployment.
+
+A11oy and Killinchu's existing routes still export single-file receiver code and
+use the earlier count-only response protocol. Their outbound runtime has no
+configured peers, no durable outbox integration, and no lifecycle worker. A
+governed package export, paired protocol integration, named peer/credential
+configuration, state-store fencing, and hosted snapshot/restart qualification
+remain required before production replication can be enabled. No production
+peer, provider setting or live database is changed by this package candidate.
