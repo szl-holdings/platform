@@ -56,7 +56,7 @@ def _serve(root, mode, port):
 
         def do_POST(self):
             with (root / "requests.jsonl").open("a", encoding="utf-8") as output:
-                output.write(json.dumps({"path": self.path}) + "\n")
+                output.write(json.dumps({"path": self.path, "tls_version": self.connection.version()}) + "\n")
             if self.path != "/replicate":
                 self.send_error(404)
                 return
@@ -102,6 +102,7 @@ def _serve(root, mode, port):
     server = HTTPServer(("127.0.0.1", int(port)), Handler)
     configured = peer(f"https://localhost:{server.server_port}/replicate")
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.load_cert_chain(root / "cert.pem", root / "key.pem")
     server.socket = context.wrap_socket(server.socket, server_side=True)
     print(json.dumps({"endpoint": configured.endpoint}), flush=True)
@@ -198,6 +199,8 @@ def test_https_lost_ack_survives_both_process_restarts(certificates, credential,
         requests = [json.loads(line) for line in (root / "bodies.jsonl").read_text().splitlines()]
         expected_requests = 2 if failure_mode == "lost-ack" else 1
         assert requests == [{"sha256": batch_id}] * expected_requests
+        connections = [json.loads(line) for line in (root / "requests.jsonl").read_text().splitlines()]
+        assert connections and all(item["tls_version"] in ("TLSv1.2", "TLSv1.3") for item in connections)
     finally:
         store.close()
         mirror.close()

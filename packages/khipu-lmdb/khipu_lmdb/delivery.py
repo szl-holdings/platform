@@ -98,6 +98,7 @@ def deliver_once(store, peer, *, timeout=10, ca_file=None, expected_batch_id=Non
         _fail("INVALID_TIMEOUT")
     try:
         context = ssl.create_default_context(cafile=ca_file)
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
     except (OSError, ssl.SSLError):
         _fail("TLS_CONFIGURATION_UNAVAILABLE")
     batch = store.prepare_replication_batch(peer.peer_id, peer.binding_sha256)

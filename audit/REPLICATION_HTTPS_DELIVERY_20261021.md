@@ -122,3 +122,20 @@ The exact required pnpm 10.26.1 was then invoked through an isolated npx cache:
 script but exited 1 because this sparse checkout has no `node_modules`/`turbo`.
 The previous engine mismatch was resolved for this invocation; local typecheck
 remains BLOCKED on missing workspace dependencies. Hosted typecheck is required.
+## Explicit TLS floor follow-up
+
+MEASURED: the client and isolated test receiver now explicitly set TLS 1.2 as
+the minimum protocol. The restart/lost-ACK tests record actual negotiated
+connection versions and require TLS 1.2 or TLS 1.3. This addresses the test
+server's CodeQL weak-protocol annotation without changing certificate or
+hostname verification.
+
+The full native VM command reran all 119 tests in 8.48 seconds (exit 0), in
+`/home/Ubuntu/szl-verification/replication-20261021-c0de217ffd83`, using the same
+isolated task venv. The source archive SHA-256 was
+`90ec22625cdc9deb9e165b594746a8d657fae4aa957814fc5c3e58211cdd2c72`;
+delivery source SHA-256 was
+`4f8bd5e6b9e8c5f37a468c70eab410eec962e7fd918b292e6a283da14b35eec6`.
+Command: `venv/bin/python -B -m pytest -q -p no:cacheprovider --basetemp=<isolated-run>/tests tests`.
+No production services, configured peers, credentials, inference or training
+were changed. Hosted CI and protected merge remain separate release gates.
