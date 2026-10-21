@@ -261,6 +261,27 @@ def test_missing_credential_and_invalid_timeout_never_register(tmp_path, monkeyp
         store.close()
 
 
+def test_checkpointed_batch_cannot_be_replaced_between_prepare_and_send(tmp_path, credential, monkeypatch):
+    import http.client
+    configured = peer("https://localhost/replicate")
+    store = source(tmp_path / "source")
+    try:
+        store.append("fixture", {"index": 0})
+        first = store.prepare_replication_batch(configured.peer_id, configured.binding_sha256)
+        store.acknowledge_replication_batch(configured.peer_id, configured.binding_sha256, first["batch_id"])
+        monkeypatch.setattr(http.client, "HTTPSConnection", lambda *args, **kwargs:
+                            pytest.fail("changed pending batch must not open HTTPS"))
+        with pytest.raises(DeliveryError, match="PREPARED_BATCH_CHANGED"):
+            deliver_once(store, configured, expected_batch_id=first["batch_id"])
+        store.append("fixture", {"index": 1})
+        with pytest.raises(DeliveryError, match="PREPARED_BATCH_CHANGED"):
+            deliver_once(store, configured, expected_batch_id=first["batch_id"])
+        state = store.replication_outbound_state(configured.peer_id, configured.binding_sha256)
+        assert state["next_seq"] == 1 and state["pending"]["next_seq"] == 2
+    finally:
+        store.close()
+
+
 @pytest.mark.parametrize("endpoint", ["http://localhost/replicate", "https://user:pass@localhost/replicate",
     "https://localhost/replicate?token=value", "https://localhost/replicate#fragment", "https://localhost",
     "https://localhost:0/replicate", "https://localhost:/replicate", "https://localhost/\nreplicate",

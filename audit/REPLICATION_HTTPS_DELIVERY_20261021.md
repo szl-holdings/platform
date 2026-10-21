@@ -103,3 +103,22 @@ verified official checksum
 --log-level error` returned exit 0. The complete hosted scan remains a merge
 gate. Source push does not authorize retrying the currently denied Platform
 staging deploy-control request or activating production replication.
+
+## Snapshot admission race correction
+
+Consumer-design review identified that another actor could ACK a checkpointed
+batch before the adapter's internal prepare. `expected_batch_id` now rejects a
+missing or substituted pending batch before opening HTTPS. The consumer must
+still checkpoint that exact batch and fence the full operation. The new focused
+Windows regression passed; the final native VM package run passed all 119 Khipu
+LMDB regression cases in 8.47 seconds, including both empty and substituted
+pending-state races. Receipt: `replication-20261021-56eb8efb391b.json`.
+Archive SHA-256: `e89a691c8c89f74d8a3882bd78fe13f1b5e9e29beee1fa0ace4fedcb3681be89`.
+Final delivery module SHA-256:
+`cacec8ad545c16d36e02926b03000d43a42b052ceb84f4d3a844da001d52ea1a`.
+
+The exact required pnpm 10.26.1 was then invoked through an isolated npx cache:
+`npx --yes --cache <task-cache> pnpm@10.26.1 typecheck`. It reached the repository
+script but exited 1 because this sparse checkout has no `node_modules`/`turbo`.
+The previous engine mismatch was resolved for this invocation; local typecheck
+remains BLOCKED on missing workspace dependencies. Hosted typecheck is required.

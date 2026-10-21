@@ -80,7 +80,7 @@ def _ack(peer, batch_id, first, end):
             "accepted": end - first, "rejected": 0}
 
 
-def deliver_once(store, peer, *, timeout=10, ca_file=None):
+def deliver_once(store, peer, *, timeout=10, ca_file=None, expected_batch_id=None):
     """Send pending bytes once; only a verified exact ACK advances durable state.
 
     Missing credentials fail before registration. Failed/ambiguous delivery leaves
@@ -89,6 +89,9 @@ def deliver_once(store, peer, *, timeout=10, ca_file=None):
     """
     if not isinstance(peer, Peer) or (store.organ, store.ns) != (peer.source_organ, peer.source_ns):
         _fail("SOURCE_BINDING_MISMATCH")
+    if expected_batch_id is not None and (type(expected_batch_id) is not str
+            or not re.fullmatch(r"[0-9a-f]{64}", expected_batch_id)):
+        _fail("INVALID_EXPECTED_BATCH")
     token = _credential(peer)
     if (type(timeout) not in (int, float) or not math.isfinite(timeout)
             or not 0 < timeout <= 30):
@@ -98,6 +101,8 @@ def deliver_once(store, peer, *, timeout=10, ca_file=None):
     except (OSError, ssl.SSLError):
         _fail("TLS_CONFIGURATION_UNAVAILABLE")
     batch = store.prepare_replication_batch(peer.peer_id, peer.binding_sha256)
+    if expected_batch_id is not None and (batch is None or batch["batch_id"] != expected_batch_id):
+        _fail("PREPARED_BATCH_CHANGED")
     if batch is None:
         return {"delivered": 0, "batch_id": None}
     url = urlsplit(peer.endpoint)

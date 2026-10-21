@@ -137,6 +137,9 @@ accepted count advances its cursor. Missing credentials fail before local
 registration. Refused, malformed, oversized or lost responses leave the pending
 batch available for a later explicit call. There is no automatic retry worker,
 environment-based enable switch or in-memory resume flag.
+Snapshot-managed callers pass `expected_batch_id` from their confirmed pending
+snapshot. The adapter checks the actual prepared body against that digest before
+opening HTTPS, so a concurrent ACK cannot substitute an unconfirmed next batch.
 
 The receiving HTTP service calls `accept_batch(mirror, peer, body,
 authorization=header)` with its locally provisioned peer, after enforcing the
