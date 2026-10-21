@@ -11,7 +11,7 @@ export const SECURE_OVERRIDES = Object.freeze({
   'proxy-addr': '2.0.8',
   'source-map-js': '1.2.2',
   compression: '1.8.2',
-  '@modelcontextprotocol/sdk': '1.31.0',
+  '@modelcontextprotocol/sdk': '1.32.0',
   sharp: '0.35.5',
   undici: '>=6.28.1 <7',
   '@grpc/grpc-js': '>=1.14.5',

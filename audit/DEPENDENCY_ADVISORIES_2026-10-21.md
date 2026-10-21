@@ -91,3 +91,32 @@ Source publication, normal protected merge, provider acceptance, deployment,
 runtime identity, durable replication, and independent witness remain separate.
 This workcell does not perform a deployment or merge. The inherited staging
 provider rejection remains open.
+
+## Append-only hosted-check correction — 2026-10-21T07:17:34Z
+
+MEASURED: hosted security run
+[39560791762](https://github.com/szl-holdings/platform/actions/runs/39560791762)
+at source `bdb51d188204fb21a105a3c4494d868f9e4b0654` passed secret scanning,
+license compliance and lockfile integrity, but the dependency scan failed before
+its final conclusion. The retired-signing-graph contract still admitted only
+SDK 1.31.0 and rejected patched 1.32.0. All 206 hosted contract tests passed;
+the subsequent actual-graph check exposed the stale exact pin.
+
+The follow-up advances `SECURE_OVERRIDES['@modelcontextprotocol/sdk']` in
+`scripts/qa/check-retired-signing-graph.mjs` to the same exact patched 1.32.0.
+It adds a regression rejecting formerly admitted 1.31.0 package nodes,
+snapshot nodes, importer resolutions and snapshot edges. The exact-version
+requirement is retained; this does not admit a wider version range or bypass
+the scanner. The audit parser and mitigation policy remain unchanged.
+
+- `node scripts/qa/check-retired-signing-graph.mjs`: exit 0, 207 manifests
+  checked; source/lock contract only, vulnerability scan and installed
+  compatibility explicitly NOT_RUN by this command.
+- `node --test scripts/qa/check-retired-signing-graph.test.mjs`: exit 1;
+  206 passed, including the new old-SDK rejection test; one existing symlink
+  fixture failed with Windows `EPERM`. No test skipped or relaxed.
+- The dependency inputs and their recorded hashes in the companion JSON did
+  not change in this follow-up.
+
+Fresh exact-head hosted security execution remains required. No merge or
+deployment is performed by this correction.
