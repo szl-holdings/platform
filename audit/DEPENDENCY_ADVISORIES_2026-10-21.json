@@ -1,0 +1,71 @@
+{
+  "workcell_id": "security-advisories-20261021",
+  "evidence_class": "MEASURED",
+  "recorded_at": "2026-10-21T07:15:19.093593+00:00",
+  "base_sha": "01e646f294f75b3c82aaa5792c03ffcd7029aa0d",
+  "node": "v24.19.0",
+  "pnpm": "10.26.1",
+  "sources": {
+    "pnpm-workspace.yaml": {
+      "before_sha256": "91c1397a355ef1fc149ac32592f7c478315bf4e3b987fc50a4d4607bb7f1a557",
+      "after_sha256": "4b3b67f0bcfd04b051135f11cadeea63b0b68c39e393bde36962ac53ae487be1"
+    },
+    "pnpm-lock.yaml": {
+      "before_sha256": "3fa8985c42c808a923703bb2d18089f674542ddc73b870ce28c1bf550d88905d",
+      "after_sha256": "80d25a97610b39790d6d65e191c7c3decbfb535082f64f43c694aa5ca76c2023"
+    },
+    "lib/mcp-client/package.json": {
+      "before_sha256": "63253071a68860f10aa1dd6521ea4634780ccb2c26c13314d63e1484b4e4ad47",
+      "after_sha256": "20f7360b0b1bd781dc7495d1e9e4eac07bf0d6bb13d19d7eb7d6e4a1b3a5cbb3"
+    },
+    "packages/storybook/package.json": {
+      "before_sha256": "19999c0713b1ca4c5ae77e4392ecc0a864f183c75ec7999f527b534cda895498",
+      "after_sha256": "b47a267b795e75521a42508864918e05bedc11e98e4244019658ffbc53e57938"
+    },
+    "scripts/package.json": {
+      "before_sha256": "317b72f39a6c345f48f98d1f550d629b41d737621c5c60f9708efcccda967b61",
+      "after_sha256": "4e9a257c00f07ca5832754b14b1a694c69d40730ae1ff3f79eeb33c728da127f"
+    }
+  },
+  "audits": {
+    "baseline": {
+      "local_path": "C:\\Users\\steph\\Documents\\Codex\\2026-09-07\\do-x20\\outputs\\platform957-raw-audit-20261021T070224Z\\audit.json",
+      "sha256": "59542278f0708cd5bfeabeeeb5b50c41c1ae310a1594b3da01468e8b2b73ec68",
+      "counts": {
+        "info": 0,
+        "low": 1,
+        "moderate": 13,
+        "high": 7,
+        "critical": 0
+      }
+    },
+    "candidate": {
+      "local_path": "C:\\Users\\steph\\Documents\\Codex\\2026-09-07\\do-x20\\outputs\\platform-security-candidate-audit-20261021T070926Z\\output.log",
+      "sha256": "5e53b381babef9139b2d8a60c4eb4a90ba17f13fa91fc3d822c9f5e5034b6e16",
+      "counts": {
+        "info": 0,
+        "low": 0,
+        "moderate": 3,
+        "high": 0,
+        "critical": 0
+      }
+    }
+  },
+  "local_check_receipts": [
+    "outputs\\platform-security-a11oy-build-20261021T071241Z\\command.json",
+    "outputs\\platform-security-a11oy-tests-20261021T071316Z\\command.json",
+    "outputs\\platform-security-audit-generator-20261021T071241Z\\command.json",
+    "outputs\\platform-security-audit-policy-20261021T071151Z\\command.json",
+    "outputs\\platform-security-candidate-audit-20261021T070926Z\\command.json",
+    "outputs\\platform-security-consumer-smoke-20261021T071151Z\\command.json",
+    "outputs\\platform-security-consumer-smoke-fixed-fixture-20261021T071221Z\\command.json",
+    "outputs\\platform-security-docs-claims-20261021T071508Z\\command.json",
+    "outputs\\platform-security-mcp-typecheck-20261021T071241Z\\command.json",
+    "outputs\\platform-security-security-tests-20261021T071221Z\\command.json"
+  ],
+  "consumer_fixture": {
+    "local_path": "C:\\Users\\steph\\Documents\\Codex\\2026-09-07\\do-x20\\outputs\\platform-security-consumer-smoke-20261021.mjs",
+    "sha256": "89d18a18427cd92698fbe905f743964593667e80c5bd2a6a85037c80393e8752"
+  },
+  "scope": "Local source/dependency/consumer evidence only; no protected merge or deployment."
+}
