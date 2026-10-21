@@ -29,6 +29,22 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### DEPENDENCY-20261020 — patched High findings; Moderate findings remain
+
+MEASURED candidate audit on 2026-10-21 with repository-pinned pnpm 10.26.1:
+MCP SDK 1.32.0, Vite 8.1.6 and markdown-it 14.3.3 remove the newly disclosed
+High findings from the previous main-branch dependency graph. The candidate
+reports Critical 0, High 0, Moderate 3 and Low 0. Hono 4.13.9 and two
+`sprintf-js` findings remain visible under the unchanged security policy.
+No parser rule, mitigation, required check or threshold is relaxed.
+
+Local MCP consumer typecheck, loopback adapter/Markdown checks, and A11oy
+build/consumer tests passed. Windows symlink and process-launch restrictions
+prevent a complete local security-suite/report-generator pass; exact-head
+Linux CI remains required. These source checks establish no deployment,
+runtime readiness or broader vulnerability-free claim. See the
+[scoped proof packet](../../audit/DEPENDENCY_ADVISORIES_2026-10-21.md).
+
 ### STAGING-REQUEST-001 — provider acceptance and runtime remain BLOCKED
 
 MEASURED historical observation: Platform staging run
