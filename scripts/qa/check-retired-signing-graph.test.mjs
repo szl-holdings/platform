@@ -152,6 +152,23 @@ for (const name of Object.keys(SECURE_OVERRIDES)) {
     }, /secure policy/));
 }
 
+test('rejects previously admitted vulnerable MCP SDK 1.31.0 nodes and edges', () => {
+  const name = '@modelcontextprotocol/sdk';
+  for (const graph of ['packages', 'snapshots']) {
+    blocked((f) => {
+      f.lock[graph][`${name}@1.31.0`] = {};
+    }, /secure policy/);
+  }
+  blocked((f) => {
+    f.lock.importers['.'].dependencies = {
+      [name]: { specifier: SECURE_OVERRIDES[name], version: '1.31.0' },
+    };
+  }, /secure policy/);
+  blocked((f) => {
+    f.lock.snapshots['fixture@1.0.0'] = { dependencies: { [name]: '1.31.0' } };
+  }, /secure policy/);
+});
+
 test('rejects an out-of-policy undici major', () =>
   blocked((f) => {
     f.lock.packages['undici@7.0.0'] = {};
