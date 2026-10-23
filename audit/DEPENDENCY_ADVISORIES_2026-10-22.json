@@ -1,0 +1,69 @@
+{
+  "evidence_class": "MEASURED",
+  "scope": "Platform 957 local dependency and admission repair only; not canonical Platform totals or runtime readiness",
+  "source_before_repair": "df84f130e2df6a7c982bc27a106a8824c7f0fd6b",
+  "initial_repair_commit": "e22c01147951460b258d2f01c78e74ba1ce40cc8",
+  "admission_repair_commit": "716ef2bad6df9cba81badffff76e99e9fe4735cb",
+  "scoped_check_counts": [
+    {
+      "command": "node --test scripts/qa/generate-sbom.test.mjs scripts/qa/generate-vuln-report.test.js scripts/qa/gate-grype-report.test.mjs scripts/qa/third-party-licenses.test.mjs",
+      "observed_cases": 56,
+      "passed_cases": 54,
+      "failed_cases": 1,
+      "skipped_cases": 1,
+      "process_exit": 1,
+      "limitation": "Existing symlink fixture cannot be created on Windows: EPERM"
+    },
+    {
+      "command": "node --test --test-name-pattern='Storybook build contract' scripts/ci/governance-workflows.test.mjs",
+      "observed_cases": 1,
+      "passed_cases": 1,
+      "failed_cases": 0,
+      "skipped_cases": 0,
+      "process_exit": 0
+    },
+    {
+      "command": "node --test scripts/qa/check-retired-signing-graph.test.mjs",
+      "observed_cases": 208,
+      "passed_cases": 207,
+      "failed_cases": 1,
+      "skipped_cases": 0,
+      "process_exit": 1,
+      "limitation": "Existing bounded-reader symlink fixture cannot be created on Windows: EPERM"
+    },
+    {
+      "command": "node --test scripts/qa/third-party-licenses.test.mjs",
+      "observed_cases": 7,
+      "passed_cases": 7,
+      "failed_cases": 0,
+      "skipped_cases": 0,
+      "process_exit": 0
+    }
+  ],
+  "actual_source_graph": {
+    "command": "node scripts/qa/check-retired-signing-graph.mjs",
+    "observed_manifests": 207,
+    "retirement_contract": "PASS",
+    "process_exit": 0,
+    "installed_compatibility": "NOT_RUN"
+  },
+  "audit": {
+    "command": "npx --yes --package pnpm@10.26.1 -- pnpm audit --json --audit-level=high",
+    "process_exit": 1,
+    "raw_json_sha256": "4eac2a0a78f0a7c6516c1f352a69d5f7408d35b99df7e177b1f6d1a892897340",
+    "critical": 0,
+    "high": 0,
+    "moderate": 11,
+    "low": 0,
+    "unchanged_normalizer_execution_failure": null,
+    "unchanged_blocking_verdict_passed": true
+  },
+  "sbom_sha256": "d5e9be42387828c2b8aee920df37d06271bd0b9fc092fb4cf538574dd07946f0",
+  "sbom_components": 1807,
+  "storybook_patch_sha256": "db18ac6524d85465bc10ecabfe24bf0ccdf5dd676a65f6333f5454ec4ed24cbd",
+  "dompurify_tarball_sha256": "056cbdae276897208b88c21d1d779adfa09ad7be488a2f510a28e900d3bbffe7",
+  "dompurify_apache_license_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+  "typecheck_before_and_after": "BLOCKED: isolated checkout lacks Turbo; native hosted check required",
+  "provider_mutation": false,
+  "runtime_readiness": "UNKNOWN"
+}

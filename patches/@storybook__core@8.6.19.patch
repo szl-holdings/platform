@@ -1,0 +1,50 @@
+diff --git a/dist/builder-manager/index.cjs b/dist/builder-manager/index.cjs
+--- a/dist/builder-manager/index.cjs
++++ b/dist/builder-manager/index.cjs
+@@ -1962,7 +1962,9 @@
+     target: ["chrome100", "safari15", "firefox91"],
+     platform: "browser",
+     bundle: !0,
+-    minify: !0,
++    minifySyntax: !0,
++    minifyWhitespace: !0,
++    minifyIdentifiers: !1,
+     sourcemap: !1,
+     conditions: ["browser", "module", "default"],
+     jsxFactory: "React.createElement",
+@@ -2095,7 +2097,9 @@
+   ), h = (0, R.join)(t.outputDir, "sb-manager");
+   ie = await c({
+     ...a,
+-    minify: !0
++    minifySyntax: !0,
++    minifyWhitespace: !0,
++    minifyIdentifiers: !1
+   }), yield;
+   let y = (0, I.cp)(g, h, {
+     filter: /* @__PURE__ */ o((S) => {
+diff --git a/dist/builder-manager/index.js b/dist/builder-manager/index.js
+--- a/dist/builder-manager/index.js
++++ b/dist/builder-manager/index.js
+@@ -1973,7 +1973,9 @@
+     target: ["chrome100", "safari15", "firefox91"],
+     platform: "browser",
+     bundle: !0,
+-    minify: !0,
++    minifySyntax: !0,
++    minifyWhitespace: !0,
++    minifyIdentifiers: !1,
+     sourcemap: !1,
+     conditions: ["browser", "module", "default"],
+     jsxFactory: "React.createElement",
+@@ -2106,7 +2108,9 @@
+   ), h = L(t.outputDir, "sb-manager");
+   G = await c({
+     ...a,
+-    minify: !0
++    minifySyntax: !0,
++    minifyWhitespace: !0,
++    minifyIdentifiers: !1
+   }), yield;
+   let y = ra(g, h, {
+     filter: /* @__PURE__ */ o((P) => {

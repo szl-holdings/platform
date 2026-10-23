@@ -1,5 +1,6 @@
 """Admission must refuse a new Hatun invocation while paused or a receipt write is open."""
 
+import sqlite3
 import threading
 from pathlib import Path
 
@@ -292,3 +293,264 @@ def test_nested_append_does_not_commit_or_deadlock():
     assert ledger.count() == 1
     assert ledger.transaction_unresolved() is False
     assert ledger.verify_chain() is True
+
+
+def test_foreign_thread_cannot_emit_into_caller_owned_transaction():
+    ledger = KhipuLedger()
+    ledger._conn.execute("BEGIN")
+    outcome = {}
+
+    def emit_from_worker():
+        try:
+            ledger.emit(_receipt("foreign", 1))
+        except Exception as exc:
+            outcome["error"] = exc
+
+    worker = threading.Thread(target=emit_from_worker)
+    worker.start()
+    worker.join(5)
+
+    assert not worker.is_alive()
+    assert isinstance(outcome.get("error"), RuntimeError)
+    assert str(outcome["error"]) == "LEDGER_TRANSACTION_UNRESOLVED"
+    assert ledger.count() == 0
+    ledger._conn.rollback()
+    committed = ledger.emit(_receipt("after-rollback", 2))
+    assert committed.receipt_hash
+    assert ledger.count() == 1
+    assert ledger.transaction_unresolved() is False
+    assert ledger.verify_chain() is True
+
+
+def test_foreign_begin_cannot_race_between_emit_check_and_insert():
+    ledger = KhipuLedger()
+    emit_checked = threading.Event()
+    finish_emit = threading.Event()
+    transaction_opened = threading.Event()
+    release_transaction = threading.Event()
+    outcomes = {}
+    original_head_hash = ledger.head_hash
+
+    def paused_head_hash():
+        emit_checked.set()
+        assert finish_emit.wait(5)
+        return original_head_hash()
+
+    def emit_receipt():
+        outcomes["receipt"] = ledger.emit(_receipt("raced", 1))
+
+    def open_transaction():
+        ledger._conn.execute("BEGIN")
+        transaction_opened.set()
+        assert release_transaction.wait(5)
+        ledger._conn.rollback()
+
+    ledger.head_hash = paused_head_hash
+    emitter = threading.Thread(target=emit_receipt)
+    emitter.start()
+    assert emit_checked.wait(5)
+    opener = threading.Thread(target=open_transaction)
+    opener.start()
+    assert transaction_opened.wait(0.1) is False
+    finish_emit.set()
+    emitter.join(5)
+
+    assert not emitter.is_alive()
+    assert outcomes["receipt"].receipt_hash
+    assert transaction_opened.wait(5)
+    release_transaction.set()
+    opener.join(5)
+    assert not opener.is_alive()
+    assert ledger.count() == 1
+    assert ledger.verify_chain() is True
+
+
+def test_cursor_and_executescript_transactions_preserve_same_thread_nesting():
+    for begin, rollback in (
+        (
+            lambda ledger: ledger._conn.cursor().execute("BEGIN"),
+            lambda ledger: ledger._conn.execute("-- resolve\nROLLBACK;"),
+        ),
+        (
+            lambda ledger: ledger._conn.executescript("BEGIN;"),
+            lambda ledger: ledger._conn.execute("/* resolve */ ROLLBACK;"),
+        ),
+    ):
+        ledger = KhipuLedger()
+        begin(ledger)
+        ledger.emit(_receipt("nested", 1))
+        assert ledger.transaction_unresolved() is True
+        assert ledger.count() == 1
+        rollback(ledger)
+        assert ledger.count() == 0
+        assert ledger.transaction_unresolved() is False
+
+
+def test_raw_cursor_factory_and_base_connection_dispatch_cannot_bypass_wrapper():
+    ledger = KhipuLedger()
+    try:
+        ledger._conn.cursor(sqlite3.Cursor)
+    except RuntimeError as exc:
+        assert str(exc) == "LEDGER_CURSOR_FACTORY_UNSUPPORTED"
+    else:
+        raise AssertionError("expected raw cursor factory to fail closed")
+
+    try:
+        sqlite3.Connection.execute(ledger._conn, "BEGIN")
+    except TypeError:
+        pass
+    else:
+        raise AssertionError("expected base connection dispatch to reject the wrapper")
+
+
+def test_sql_transaction_close_clears_owner_before_next_thread_opens():
+    ledger = KhipuLedger()
+    ledger._conn.execute("BEGIN")
+    ledger._conn.execute("COMMIT")
+    worker_opened = threading.Event()
+    release_worker = threading.Event()
+
+    def hold_worker_transaction():
+        ledger._conn.cursor().execute("BEGIN")
+        worker_opened.set()
+        assert release_worker.wait(5)
+        ledger._conn.cursor().execute("ROLLBACK")
+
+    worker = threading.Thread(target=hold_worker_transaction)
+    worker.start()
+    assert worker_opened.wait(5)
+    try:
+        ledger.emit(_receipt("foreign", 1))
+    except RuntimeError as exc:
+        assert str(exc) == "LEDGER_TRANSACTION_UNRESOLVED"
+    else:
+        raise AssertionError("expected foreign transaction ownership to fail closed")
+    release_worker.set()
+    worker.join(5)
+
+    assert not worker.is_alive()
+    assert ledger.count() == 0
+    assert ledger.transaction_unresolved() is False
+    committed = ledger.emit(_receipt("after-worker", 2))
+    assert committed.receipt_hash
+    assert ledger.verify_chain() is True
+
+
+def test_orphan_context_manager_resolves_and_multiline_read_stays_available():
+    ledger = KhipuLedger()
+    opened = threading.Event()
+
+    def abandon_transaction():
+        ledger._conn.execute("BEGIN")
+        opened.set()
+
+    worker = threading.Thread(target=abandon_transaction)
+    worker.start()
+    assert opened.wait(5)
+    worker.join(5)
+    assert not worker.is_alive()
+
+    assert ledger._conn.execute("SELECT\nCOUNT(*) FROM khipu").fetchone()[0] == 0
+    with ledger._conn:
+        pass
+    assert ledger._conn.in_transaction is False
+    assert ledger.transaction_unresolved() is False
+    committed = ledger.emit(_receipt("after-orphan", 1))
+    assert committed.receipt_hash
+    assert ledger.verify_chain() is True
+
+
+def test_self_started_insert_failure_rolls_back_and_recovers():
+    ledger = KhipuLedger()
+    ledger._conn.execute("""
+        CREATE TRIGGER reject_khipu_insert
+        BEFORE INSERT ON khipu
+        BEGIN
+            SELECT RAISE(ABORT, 'boom');
+        END
+    """)
+
+    try:
+        ledger.emit(_receipt("rejected", 1))
+    except sqlite3.IntegrityError as exc:
+        assert str(exc) == "boom"
+    else:
+        raise AssertionError("expected the trigger to reject the receipt")
+
+    assert ledger._conn.in_transaction is False
+    assert ledger.transaction_unresolved() is False
+    assert ledger.count() == 0
+    ledger._conn.execute("DROP TRIGGER reject_khipu_insert")
+    committed = ledger.emit(_receipt("after-failure", 2))
+    assert committed.receipt_hash
+    assert ledger.count() == 1
+    assert ledger.verify_chain() is True
+
+
+def test_self_started_commit_failure_rolls_back_and_recovers():
+    ledger = KhipuLedger()
+    commit = ledger._conn.commit
+
+    def fail_commit():
+        raise sqlite3.OperationalError("forced commit failure")
+
+    ledger._conn.commit = fail_commit
+    try:
+        ledger.emit(_receipt("rejected", 1))
+    except sqlite3.OperationalError as exc:
+        assert str(exc) == "forced commit failure"
+    else:
+        raise AssertionError("expected the forced commit failure")
+    finally:
+        ledger._conn.commit = commit
+
+    assert ledger._conn.in_transaction is False
+    assert ledger.transaction_unresolved() is False
+    assert ledger.count() == 0
+    committed = ledger.emit(_receipt("after-failure", 2))
+    assert committed.receipt_hash
+    assert ledger.count() == 1
+    assert ledger.verify_chain() is True
+
+
+def test_two_ledgers_serialize_chain_heads_on_one_database(tmp_path):
+    database = tmp_path / "shared-khipu.db"
+    first = KhipuLedger(str(database))
+    second = KhipuLedger(str(database))
+    first_reserved = threading.Event()
+    release_first = threading.Event()
+    second_finished = threading.Event()
+    outcomes = {}
+    original_head_hash = first.head_hash
+
+    def paused_head_hash():
+        first_reserved.set()
+        assert release_first.wait(5)
+        return original_head_hash()
+
+    def emit_first():
+        outcomes["first"] = first.emit(_receipt("first", 1))
+
+    def emit_second():
+        outcomes["second"] = second.emit(_receipt("second", 2))
+        second_finished.set()
+
+    first.head_hash = paused_head_hash
+    first_thread = threading.Thread(target=emit_first)
+    second_thread = threading.Thread(target=emit_second)
+    first_thread.start()
+    assert first_reserved.wait(5)
+    second_thread.start()
+    assert second_finished.wait(0.1) is False
+    release_first.set()
+    first_thread.join(5)
+    second_thread.join(5)
+
+    assert not first_thread.is_alive()
+    assert not second_thread.is_alive()
+    assert outcomes["first"].prev_hash == "0" * 64
+    assert outcomes["second"].prev_hash == outcomes["first"].receipt_hash
+    assert first.count() == 2
+    assert second.count() == 2
+    assert first.verify_chain() is True
+    assert second.verify_chain() is True
