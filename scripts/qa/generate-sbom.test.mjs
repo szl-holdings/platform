@@ -741,7 +741,7 @@ test('tracked latest SBOM exactly reflects the current lockfile and verified pat
   const workspaceText = readFileSync(path.join(ROOT, 'pnpm-workspace.yaml'), 'utf8');
   const lockfileText = readFileSync(path.join(ROOT, 'pnpm-lock.yaml'), 'utf8');
   const patches = parsePatchMetadata({ workspaceText, lockfileText, root: ROOT });
-  assert.deepEqual(Object.keys(patches), ['@storybook/core@8.6.18']);
+  assert.deepEqual(Object.keys(patches), ['@storybook/core@8.6.19']);
 
   const latestPath = path.join(ROOT, 'security', 'sbom-latest.json');
   const latestText = readFileSync(latestPath, 'utf8');

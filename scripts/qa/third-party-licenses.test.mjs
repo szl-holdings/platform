@@ -25,6 +25,8 @@ const UPSTREAM_LICENSES = Object.freeze({
     'f63ff0e4e239244aa79280da2dd4811a0469e5e201caf5cbc0d97c3a1dff8e82',
   'patches/licenses/storybook-8.6.18.LICENSE':
     'bc90586179d44dcb313a9a289d687a2f26226303b2066bd21dbefd2378e894e5',
+  'patches/licenses/storybook-8.6.19.LICENSE':
+    'bc90586179d44dcb313a9a289d687a2f26226303b2066bd21dbefd2378e894e5',
   'security/schemas/cyclonedx/LICENSE':
     '6c29f22a4a7385285c6f579ec9f33c5e989f00739d6b257243a0b082ec9447ae',
 });
