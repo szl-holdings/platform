@@ -27,7 +27,7 @@ export const AtlasEventMetadataSchema = z.object({
     .object({
       primaryId: z.string().optional(),
       primaryType: z.string().optional(),
-      relatedIds: z.record(z.string()).optional(),
+      relatedIds: z.record(z.string(), z.string()).optional(),
     })
     .optional(),
 

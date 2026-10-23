@@ -123,7 +123,14 @@ export const AtelierProofweaveBudgetSchema = z
     maxWallTimeMs: z.number().int().min(1_000).max(900_000).default(60_000),
   })
   .strict()
-  .default({});
+  .default({
+    maxWorkcells: 5,
+    maxProviderCalls: 0,
+    maxSourceFetches: 0,
+    maxTotalTokens: 4_096,
+    maxEstimatedCostUsd: 0,
+    maxWallTimeMs: 60_000,
+  });
 
 export const AtelierProofweaveCapabilitiesSchema = z
   .object({
@@ -134,7 +141,13 @@ export const AtelierProofweaveCapabilitiesSchema = z
     providerDurableStorage: z.boolean().default(false),
   })
   .strict()
-  .default({});
+  .default({
+    readWeb: false,
+    readGitHub: false,
+    externalWrites: false,
+    providerNativeSubagents: false,
+    providerDurableStorage: false,
+  });
 
 export const AtelierProofweaveRequestSchema = z
   .object({

@@ -95,7 +95,7 @@ const BaseStageSchema = z.object({
   timeoutMs: z.number().int().positive().default(30_000),
   maxRetries: z.number().int().nonnegative().default(2),
   runtime: StageRuntimeSchema.default('typescript'),
-  otelTags: z.record(z.string()).default({}),
+  otelTags: z.record(z.string(), z.string()).default({}),
   requiredEvidence: z.array(z.string()).default([]),
   rollbackHook: z.string().optional(),
   priority: StagePrioritySchema.default('normal'),
@@ -226,7 +226,7 @@ export const ApprovalGateSchema = BaseStageSchema.extend({
 export const SandboxStageSchema = BaseStageSchema.extend({
   type: z.literal('Sandbox'),
   objective: z.string().min(1),
-  manifest: z.record(z.unknown()).optional(),
+  manifest: z.record(z.string(), z.unknown()).optional(),
   sessionId: z.string().optional(),
   shellTimeoutMs: z.number().int().positive().optional(),
   tenantId: z.string().optional(),
@@ -303,7 +303,7 @@ export const WorkflowDefinitionSchema = z.object({
   stages: z.array(AnyStageSchema).min(1),
   policy: PolicyProfileSchema,
   budget: ConfidenceBudgetSchema,
-  tags: z.record(z.string()).default({}),
+  tags: z.record(z.string(), z.string()).default({}),
 });
 
 // ─── Compiled Graph ───────────────────────────────────────────────────────────
@@ -370,7 +370,7 @@ export const EvidenceBundleSchema = z.object({
   bundleHash: z.string(),
   signature: z.string(),
   createdAt: z.string(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 // ─── Stage Result ─────────────────────────────────────────────────────────────
@@ -476,7 +476,7 @@ export const PipelineRunSchema = z.object({
   counterfactualPolicyProfile: z.string().optional(),
   traceId: z.string(),
   tenantId: TenantIdSchema.optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 // ─── Runtime Start Options ────────────────────────────────────────────────────
@@ -503,7 +503,7 @@ export const RuntimeStartOptionsSchema = z.object({
   traceId: z.string().optional(),
   sessionId: z.string().optional(),
   tenantId: TenantIdSchema.optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 // ─── Hook Set ─────────────────────────────────────────────────────────────────

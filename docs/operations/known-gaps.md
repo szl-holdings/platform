@@ -1440,3 +1440,15 @@ governed package export, paired protocol integration, named peer/credential
 configuration, state-store fencing, and hosted snapshot/restart qualification
 remain required before production replication can be enabled. No production
 peer, provider setting or live database is changed by this package candidate.
+
+### 2026-10-23 Zod 4 source compatibility and security candidate
+
+**MEASURED — PLATFORM-963-ZOD4-20261023:** the isolated PR #963 repair passes
+51 focused schema/route tests with exact Zod 4.6.6 and 35 existing SDK bridge
+tests with Agents 0.2.1. Explicit string record keys and complete denied defaults
+preserve the earlier contracts. Original published dependency ranges admit all
+selected Zod, body-parser and qs versions. The regenerated graph reports zero
+high/critical audit findings; eleven moderate findings remain, and the raw audit
+still exits nonzero. Full native exact-head CI, protected merge, deployment and
+runtime qualification remain **BLOCKED** pending their own gates. See the
+[source proof packet](../../audit/ZOD4_COMPATIBILITY_SECURITY_2026-10-23.md).

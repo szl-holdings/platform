@@ -21,7 +21,7 @@ export const AefEventSchema = z.object({
   tenantId: TenantIdSchema,
   profileId: z.string().optional(),
   occurredAt: z.string().datetime(),
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).default({}),
 });
 export type AefEvent = z.infer<typeof AefEventSchema>;
 

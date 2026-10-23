@@ -30,7 +30,7 @@ export type RubricCriterion = z.infer<typeof RubricCriterionSchema>;
 export const FewShotExampleSchema = z.object({
   id: z.string(),
   description: z.string(),
-  input: z.record(z.unknown()),
+  input: z.record(z.string(), z.unknown()),
   output: z.string(),
   notes: z.string().optional(),
 });

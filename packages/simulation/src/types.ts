@@ -13,7 +13,7 @@ export const SimulationActionSchema = z.object({
   recommendationId: z.string().optional(),
   targetEntityId: z.string().optional(),
   targetEntityType: z.string().optional(),
-  parameters: z.record(z.unknown()).optional(),
+  parameters: z.record(z.string(), z.unknown()).optional(),
 });
 export type SimulationAction = z.infer<typeof SimulationActionSchema>;
 
@@ -72,7 +72,7 @@ export const SimulationRequestSchema = z.object({
   entityType: z.string().optional(),
   domain: z.string(),
   action: SimulationActionSchema,
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 });
 export type SimulationRequest = z.infer<typeof SimulationRequestSchema>;
 

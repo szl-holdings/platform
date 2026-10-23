@@ -19,7 +19,7 @@ export type PolicyRule = z.infer<typeof PolicyRuleSchema>;
 export const RetentionPolicySchema = z.object({
   tenantId: z.string().min(1),
   defaultRetentionDays: z.number().int().positive().default(90),
-  profileOverrides: z.record(z.number().int().positive()).default({}),
+  profileOverrides: z.record(z.string(), z.number().int().positive()).default({}),
   deletionRequired: z.boolean().default(false),
 });
 export type RetentionPolicy = z.infer<typeof RetentionPolicySchema>;

@@ -30,6 +30,6 @@ export const BackendDescriptorSchema = z.object({
   dimensions: z.number().int().positive().optional(),
   baseUrl: z.string().url().optional(),
   healthPath: z.string().default('/health'),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type BackendDescriptor = z.infer<typeof BackendDescriptorSchema>;

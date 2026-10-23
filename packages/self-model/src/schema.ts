@@ -71,15 +71,15 @@ export const LearnedStrategySchema = z.object({
 
 export const ConfidenceProfileSchema = z.object({
   overall: z.number().min(0).max(1),
-  byDomain: z.record(z.number().min(0).max(1)).default({}),
-  byCapability: z.record(z.number().min(0).max(1)).default({}),
+  byDomain: z.record(z.string(), z.number().min(0).max(1)).default({}),
+  byCapability: z.record(z.string(), z.number().min(0).max(1)).default({}),
   trend: z.enum(['rising', 'stable', 'declining']).default('stable'),
   lastAdjustedAt: z.string(),
 });
 
 export const UncertaintyProfileSchema = z.object({
   overall: z.number().min(0).max(1),
-  byDomain: z.record(z.number().min(0).max(1)).default({}),
+  byDomain: z.record(z.string(), z.number().min(0).max(1)).default({}),
   flaggedAreas: z.array(z.string()).default([]),
   lastReviewedAt: z.string(),
 });

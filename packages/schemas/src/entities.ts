@@ -32,7 +32,7 @@ export const auditEventSchema = z.object({
   actionType: z.string(),
   entityType: z.string(),
   entityId: z.string().nullable().optional(),
-  payloadJson: z.record(z.unknown()).nullable().optional(),
+  payloadJson: z.record(z.string(), z.unknown()).nullable().optional(),
   createdAt: z.coerce.date(),
 });
 export type AuditEvent = z.infer<typeof auditEventSchema>;
@@ -56,7 +56,7 @@ export const correlatedEventSchema = z.object({
   requestId: z.string().uuid().optional(),
   orgId: z.number().int().positive().optional(),
   eventType: z.string(),
-  payload: z.record(z.unknown()).optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
   timestamp: z.coerce.date(),
 });
 export type CorrelatedEvent = z.infer<typeof correlatedEventSchema>;

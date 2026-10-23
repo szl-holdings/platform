@@ -35,7 +35,7 @@ export const EvidenceSchema = z.object({
   }),
   confidence: z.number().min(0).max(1),
   weight: z.number().min(0).max(1).default(1),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type Evidence = z.infer<typeof EvidenceSchema>;
 
@@ -94,7 +94,7 @@ export const RunTraceSchema = z.object({
   toolCallCount: z.number().int().default(0),
   approvalCount: z.number().int().default(0),
   evidenceIds: z.array(z.string()).default([]),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type RunTrace = z.infer<typeof RunTraceSchema>;
 
@@ -122,7 +122,7 @@ export const RecommendationResultSchema = z.object({
   autonomyMode: AutonomyModeSchema,
   urgency: z.enum(['routine', 'moderate', 'urgent', 'critical']),
   suggestedAction: z.string().optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type RecommendationResult = z.infer<typeof RecommendationResultSchema>;
 

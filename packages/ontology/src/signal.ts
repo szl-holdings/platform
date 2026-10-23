@@ -78,7 +78,7 @@ export const EntityRefSchema = z.object({
   entityType: z.string(),
   displayName: z.string().optional(),
   domain: SignalDomainSchema.optional(),
-  externalIds: z.record(z.string()).optional(),
+  externalIds: z.record(z.string(), z.string()).optional(),
 });
 export type EntityRef = z.infer<typeof EntityRefSchema>;
 
@@ -116,8 +116,8 @@ export const SignalSchema = z.object({
   tenantId: z.string().optional(),
   sessionId: z.string().optional(),
 
-  rawPayload: z.record(z.unknown()).default({}),
-  normalizedPayload: z.record(z.unknown()).optional(),
+  rawPayload: z.record(z.string(), z.unknown()).default({}),
+  normalizedPayload: z.record(z.string(), z.unknown()).optional(),
 
   tags: z.array(z.string()).default([]),
   provenance: ProvenanceSchema.optional(),

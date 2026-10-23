@@ -63,6 +63,6 @@ export const sanctionsCheckSchema = z.object({
   listName: z.string(),
   status: z.enum(['clear', 'flagged', 'under_review']),
   checkedAt: z.coerce.date(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 export type SanctionsCheck = z.infer<typeof sanctionsCheckSchema>;

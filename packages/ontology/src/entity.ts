@@ -53,8 +53,8 @@ export const EntitySnapshotSchema = z.object({
   riskScore: z.number().min(0).max(100).optional(),
   opportunityScore: z.number().min(0).max(100).optional(),
 
-  attributes: z.record(z.unknown()).default({}),
-  externalIds: z.record(z.string()).default({}),
+  attributes: z.record(z.string(), z.unknown()).default({}),
+  externalIds: z.record(z.string(), z.string()).default({}),
 
   relatedEntityIds: z.array(z.string()).default([]),
   activeSignalIds: z.array(z.string()).default([]),

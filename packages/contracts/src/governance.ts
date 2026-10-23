@@ -12,7 +12,7 @@ export const ApprovalInterruptSpecSchema = z.object({
   /** Human-readable label for the action that needs approval. */
   actionLabel: z.string().min(1).max(256),
   /** Structured payload describing what the action will do. */
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).default({}),
   /** Policy rule ID or short description of why approval is required. */
   policyReason: z.string().min(1).max(512),
   /** Brief summary of supporting evidence for this decision point. */

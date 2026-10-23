@@ -46,7 +46,7 @@ export const NexusToolCallSchema = z.object({
   tool_id: z.string(),
   tool_name: z.string(),
   domain: z.string(),
-  input: z.record(z.unknown()),
+  input: z.record(z.string(), z.unknown()),
   output: z.unknown().optional(),
   status: z.enum(['pending', 'success', 'failed']),
   duration_ms: z.number().optional(),
@@ -130,7 +130,7 @@ export type NexusQueryResponse = z.infer<typeof NexusQueryResponseSchema>;
 
 export const NexusActionRequestSchema = z.object({
   action: z.string().min(1),
-  params: z.record(z.unknown()).default({}),
+  params: z.record(z.string(), z.unknown()).default({}),
   evidence_refs: z.array(z.string()).optional(),
   session_id: z.string().optional(),
   mode: NexusAutonomyModeSchema.default('act'),
@@ -164,7 +164,7 @@ export const NexusCapabilitySchema = z.object({
       id: z.string(),
       name: z.string(),
       description: z.string(),
-      input_schema: z.record(z.unknown()),
+      input_schema: z.record(z.string(), z.unknown()),
     }),
   ),
   actions: z.array(
@@ -173,7 +173,7 @@ export const NexusCapabilitySchema = z.object({
       name: z.string(),
       description: z.string(),
       requires_approval: z.boolean(),
-      params_schema: z.record(z.unknown()),
+      params_schema: z.record(z.string(), z.unknown()),
     }),
   ),
   status: z.enum(['active', 'degraded', 'unavailable']),

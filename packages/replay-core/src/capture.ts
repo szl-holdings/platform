@@ -16,9 +16,9 @@ export const IncidentSnapshotSchema = z.object({
   severity: z.enum(['low', 'medium', 'high', 'critical']),
   title: z.string(),
   description: z.string(),
-  inputContext: z.record(z.unknown()),
-  agentDecision: z.record(z.unknown()).optional(),
-  humanOverride: z.record(z.unknown()).optional(),
+  inputContext: z.record(z.string(), z.unknown()),
+  agentDecision: z.record(z.string(), z.unknown()).optional(),
+  humanOverride: z.record(z.string(), z.unknown()).optional(),
   outcome: z.enum(['resolved', 'escalated', 'overridden', 'failed', 'pending']),
   durationMs: z.number().optional(),
   tokensUsed: z.number().optional(),
@@ -26,7 +26,7 @@ export const IncidentSnapshotSchema = z.object({
   captureContext: CaptureContextSchema,
   sanitized: z.boolean().default(false),
   piiRedacted: z.boolean().default(false),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const FlowSnapshotSchema = z.object({
@@ -40,8 +40,8 @@ export const FlowSnapshotSchema = z.object({
       stepIndex: z.number(),
       stepName: z.string(),
       agentId: z.string().optional(),
-      input: z.record(z.unknown()),
-      output: z.record(z.unknown()),
+      input: z.record(z.string(), z.unknown()),
+      output: z.record(z.string(), z.unknown()),
       durationMs: z.number(),
       tokensUsed: z.number().optional(),
       toolsInvoked: z.array(z.string()).default([]),
@@ -58,7 +58,7 @@ export const FlowSnapshotSchema = z.object({
   captureContext: CaptureContextSchema,
   sanitized: z.boolean().default(false),
   piiRedacted: z.boolean().default(false),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type IncidentSnapshot = z.infer<typeof IncidentSnapshotSchema>;

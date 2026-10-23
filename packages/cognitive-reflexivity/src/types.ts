@@ -71,7 +71,7 @@ export const CognitiveReflexivePayloadSchema = z.object({
     .enum(['lane', 'model', 'retrieval-depth', 'confidence-floor', 'detection-tuning', 'sync-retry', 'memory-tier'])
     .optional(),
   // Free-form structured data
-  data: z.record(z.unknown()).default({}),
+  data: z.record(z.string(), z.unknown()).default({}),
 });
 export type CognitiveReflexivePayload = z.infer<typeof CognitiveReflexivePayloadSchema>;
 
@@ -141,7 +141,7 @@ export const ReflexiveStrategySchema = z.object({
   description: z.string(),
   // Concrete parameters the consumer applies
   // (e.g. {lane:'reasoning', minConfidence:0.7})
-  params: z.record(z.unknown()),
+  params: z.record(z.string(), z.unknown()),
   // Where this strategy applies
   applicableContexts: z.array(z.string()).default([]),
   // Confidence the engine has in this strategy (0..1)
@@ -182,7 +182,7 @@ export const StrategyDecisionTraceSchema = z.object({
     .array(z.enum(['lane', 'model', 'retrieval-depth', 'confidence-floor']))
     .default([]),
   // The actual values applied
-  resolved: z.record(z.unknown()).default({}),
+  resolved: z.record(z.string(), z.unknown()).default({}),
   occurredAt: z.string().datetime(),
 });
 export type StrategyDecisionTrace = z.infer<typeof StrategyDecisionTraceSchema>;

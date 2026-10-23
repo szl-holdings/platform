@@ -5,7 +5,7 @@ import type { ToolManifest } from '../manifest.js';
 
 export const MetricsQueryInputSchema = z.object({
   metric: z.string(),
-  labels: z.record(z.string()).optional(),
+  labels: z.record(z.string(), z.string()).optional(),
   startTime: z.string().datetime().optional(),
   endTime: z.string().datetime().optional(),
   step: z.string().default('5m'),
@@ -101,7 +101,7 @@ export const metricsQueryHandler: ToolHandler = async (input) => {
 
 export const WorkflowTriggerInputSchema = z.object({
   workflowId: z.string(),
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).default({}),
   dryRun: z.boolean().default(false),
 });
 
@@ -255,7 +255,7 @@ export const notificationSendHandler: ToolHandler = async (input) => {
 export const ExternalWebhookCallInputSchema = z.object({
   endpointId: z.string(),
   eventType: z.string(),
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).default({}),
   retryOnFailure: z.boolean().default(true),
 });
 
@@ -323,7 +323,7 @@ export const externalWebhookHandler: ToolHandler = async (input) => {
 
 export const InfraProvisionInputSchema = z.object({
   resourceType: z.enum(['compute', 'storage', 'network', 'database', 'cache']),
-  spec: z.record(z.unknown()),
+  spec: z.record(z.string(), z.unknown()),
   environment: z.enum(['development', 'staging', 'production']),
 });
 

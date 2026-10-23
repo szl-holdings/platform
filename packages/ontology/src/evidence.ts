@@ -188,7 +188,7 @@ export const RecommendationSchema = z.object({
   rationale: z.string(),
 
   suggestedAction: RecommendationActionSchema,
-  actionPayload: z.record(z.unknown()).default({}),
+  actionPayload: z.record(z.string(), z.unknown()).default({}),
 
   confidence: z.number().min(0).max(1),
   freshness: z.number().min(0).max(1),
