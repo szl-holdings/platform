@@ -22,6 +22,7 @@ import hashlib
 import hmac
 import json
 import sqlite3
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -30,6 +31,177 @@ from typing import Any, Dict, List, Optional, Tuple
 DSSE_PAYLOAD_TYPE = "application/vnd.in-toto+json"
 SIG_KEYID = "PLACEHOLDER-HMAC"  # honest: NOT a Fulcio/cosign identity
 GENESIS_PREV = "0" * 64
+
+
+def _sql_keyword(statement: Any) -> str:
+    """Return the leading SQL keyword after whitespace and SQL comments."""
+    if not isinstance(statement, str):
+        return ""
+    remaining = statement.lstrip()
+    while remaining:
+        if remaining.startswith("--"):
+            _, separator, remaining = remaining.partition("\n")
+            if not separator:
+                return ""
+            remaining = remaining.lstrip()
+            continue
+        if remaining.startswith("/*"):
+            end = remaining.find("*/", 2)
+            if end < 0:
+                return ""
+            remaining = remaining[end + 2:].lstrip()
+            continue
+        break
+    return remaining.split(None, 1)[0].rstrip(";").upper() if remaining else ""
+
+
+class _ThreadOwnedCursor:
+    """Cursor whose operations participate in ledger transaction ownership."""
+
+    def __init__(
+        self,
+        cursor: sqlite3.Cursor,
+        connection: "_ThreadOwnedConnection",
+    ):
+        self._cursor = cursor
+        self._owned_connection = connection
+
+    def execute(self, *args: Any, **kwargs: Any) -> "_ThreadOwnedCursor":
+        statement = args[0] if args else kwargs.get("sql", "")
+        keyword = _sql_keyword(statement)
+        self._owned_connection._run_tracked(
+            self._cursor.execute,
+            *args,
+            allow_foreign_read=keyword in {"EXPLAIN", "SELECT"},
+            resolve_orphan=keyword in {"COMMIT", "END", "ROLLBACK"},
+            **kwargs,
+        )
+        return self
+
+    def executemany(self, *args: Any, **kwargs: Any) -> "_ThreadOwnedCursor":
+        self._owned_connection._run_tracked(
+            self._cursor.executemany,
+            *args,
+            **kwargs,
+        )
+        return self
+
+    def executescript(self, *args: Any, **kwargs: Any) -> "_ThreadOwnedCursor":
+        self._owned_connection._run_tracked(
+            self._cursor.executescript,
+            *args,
+            **kwargs,
+        )
+        return self
+
+    def fetchone(self) -> Optional[sqlite3.Row]:
+        with self._owned_connection.transaction_lock:
+            return self._cursor.fetchone()
+
+    def fetchall(self) -> List[sqlite3.Row]:
+        with self._owned_connection.transaction_lock:
+            return self._cursor.fetchall()
+
+
+class _ThreadOwnedConnection:
+    """Serialize sqlite operations and record the thread owning a transaction."""
+
+    def __init__(self, connection: sqlite3.Connection):
+        self.__connection = connection
+        self.transaction_lock = threading.RLock()
+        self.transaction_owner: Optional[threading.Thread] = None
+
+    @property
+    def in_transaction(self) -> bool:
+        return self.__connection.in_transaction
+
+    @property
+    def row_factory(self) -> Any:
+        return self.__connection.row_factory
+
+    @row_factory.setter
+    def row_factory(self, factory: Any) -> None:
+        with self.transaction_lock:
+            self.__connection.row_factory = factory
+
+    def _run_tracked(
+        self,
+        operation: Any,
+        *args: Any,
+        allow_foreign_read: bool = False,
+        resolve_orphan: bool = False,
+        **kwargs: Any,
+    ) -> Any:
+        with self.transaction_lock:
+            current = threading.current_thread()
+            was_open = self.in_transaction
+            owner = self.transaction_owner
+            orphan_resolution = (
+                resolve_orphan
+                and owner is not None
+                and not owner.is_alive()
+            )
+            if (
+                was_open
+                and owner is not current
+                and not allow_foreign_read
+                and not orphan_resolution
+            ):
+                raise RuntimeError("LEDGER_TRANSACTION_UNRESOLVED")
+            try:
+                return operation(*args, **kwargs)
+            finally:
+                if not was_open and self.in_transaction:
+                    self.transaction_owner = current
+                elif was_open and not self.in_transaction:
+                    self.transaction_owner = None
+
+    def cursor(self, factory: Any = None) -> _ThreadOwnedCursor:
+        if factory is not None:
+            raise RuntimeError("LEDGER_CURSOR_FACTORY_UNSUPPORTED")
+        with self.transaction_lock:
+            return _ThreadOwnedCursor(self.__connection.cursor(), self)
+
+    def execute(self, *args: Any, **kwargs: Any) -> _ThreadOwnedCursor:
+        return self.cursor().execute(*args, **kwargs)
+
+    def executemany(self, *args: Any, **kwargs: Any) -> _ThreadOwnedCursor:
+        return self.cursor().executemany(*args, **kwargs)
+
+    def executescript(self, *args: Any, **kwargs: Any) -> _ThreadOwnedCursor:
+        return self.cursor().executescript(*args, **kwargs)
+
+    def commit(self) -> None:
+        self._run_tracked(self.__connection.commit, resolve_orphan=True)
+
+    def rollback(self) -> None:
+        self._run_tracked(self.__connection.rollback, resolve_orphan=True)
+
+    def __enter__(self) -> "_ThreadOwnedConnection":
+        self.transaction_lock.acquire()
+        try:
+            owner = self.transaction_owner
+            if (
+                self.in_transaction
+                and owner is not threading.current_thread()
+                and (owner is None or owner.is_alive())
+            ):
+                raise RuntimeError("LEDGER_TRANSACTION_UNRESOLVED")
+            self.__connection.__enter__()
+        except BaseException:
+            self.transaction_lock.release()
+            raise
+        return self
+
+    def __exit__(self, *args: Any) -> Optional[bool]:
+        try:
+            return self._run_tracked(
+                self.__connection.__exit__,
+                *args,
+                resolve_orphan=True,
+            )
+        finally:
+            self.transaction_lock.release()
 
 
 def _pae(payload_type: str, payload: bytes) -> bytes:
@@ -93,14 +265,14 @@ class KhipuLedger:
     share it so the chain is global and forks are detectable (INV-3)."""
 
     def __init__(self, db_path: str = ":memory:", hmac_key: bytes = b"puriq-os-local"):
-        import threading
         self._key = hmac_key
-        # Re-entrant: an append nested under the admission lock, or under
-        # another append, must not deadlock on the same thread.
-        self._lock = threading.RLock()
         self._emit_depth = 0
-        # check_same_thread=False + a lock: safe for FastAPI's threadpool handlers.
-        self._conn = sqlite3.connect(db_path, check_same_thread=False)
+        # check_same_thread=False + a shared re-entrant lock: safe for FastAPI's
+        # threadpool handlers and caller-owned same-thread transactions.
+        self._conn = _ThreadOwnedConnection(
+            sqlite3.connect(db_path, check_same_thread=False),
+        )
+        self._lock = self._conn.transaction_lock
         self._conn.execute("""
             CREATE TABLE IF NOT EXISTS khipu (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -152,11 +324,21 @@ class KhipuLedger:
         # A transaction already open belongs to the caller. Appending must
         # leave that outcome untouched: no commit and no rollback.
         caller_open = self._conn.in_transaction
-        receipt.prev_hash = self.head_hash()
-        receipt.receipt_hash, receipt.signature_b64 = self._sign(receipt)
+        if (
+            caller_open
+            and self._conn.transaction_owner is not threading.current_thread()
+        ):
+            raise RuntimeError("LEDGER_TRANSACTION_UNRESOLVED")
         self._emit_depth += 1
         self._txn_unresolved = True
         try:
+            # Reserve the write slot before reading the chain head. This makes
+            # independently constructed ledgers on one sqlite file serialize
+            # their normal emit path instead of signing sibling chain heads.
+            if not caller_open:
+                self._conn.execute("BEGIN IMMEDIATE")
+            receipt.prev_hash = self.head_hash()
+            receipt.receipt_hash, receipt.signature_b64 = self._sign(receipt)
             self._conn.execute(
                 "INSERT INTO khipu (organ,tick,action,decision_value,yuyay_value,"
                 "hukulla_clear,ts,prev_hash,receipt_hash,signature_b64,keyid,statement) "
@@ -168,6 +350,8 @@ class KhipuLedger:
             if not caller_open:
                 self._conn.commit()
         except Exception:
+            if not caller_open and self._conn.in_transaction:
+                self._conn.rollback()
             raise
         finally:
             self._emit_depth -= 1
