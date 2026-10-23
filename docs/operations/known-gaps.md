@@ -29,7 +29,23 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
-### DEPENDENCY-20261020 — patched High findings; Moderate findings remain
+### DEPENDENCY-20261022 — Storybook and DOMPurify candidate security update
+
+MEASURED candidate audit with pinned pnpm 10.26.1 removes the newly disclosed
+Storybook 8.6.18 and DOMPurify 3.4.16 High/Critical findings by selecting upstream
+8.6.19 and 3.4.17 respectively. The parsed result is Critical 0, High 0,
+Moderate 11, Low 0; the unchanged severity policy admits the candidate while
+retaining the Moderate findings. This is a point-in-time dependency result.
+
+The exact Storybook reproducibility patch is rebased onto verified 8.6.19
+package bytes, and the canonical lockfile/SBOM are regenerated. Local contract
+execution records 54 passed, one Windows symlink-permission failure and one
+platform skip; baseline and final local typecheck are BLOCKED by missing
+workspace dependencies. Fresh exact-head hosted checks remain required.
+No runtime, provider, fleet-signing, staging or publication readiness is implied.
+See the [scoped proof packet](../../audit/DEPENDENCY_ADVISORIES_2026-10-22.md).
+
+### DEPENDENCY-20261020 — retained prior observation
 
 MEASURED candidate audit on 2026-10-21 with repository-pinned pnpm 10.26.1:
 MCP SDK 1.32.0, Vite 8.1.6 and markdown-it 14.3.3 remove the newly disclosed

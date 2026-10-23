@@ -69,6 +69,28 @@ Modified by SZL Holdings on 2026-10-06 to retain syntax and whitespace
 minification while disabling checkout-path-sensitive identifier minification
 for deterministic static Storybook output.
 
+**Status:** archival/inactive after the 8.6.19 security update below. The old
+patch and upstream license remain available as provenance.
+
+## `@storybook/core@8.6.19`
+
+- Patch: [`@storybook__core@8.6.19.patch`](@storybook__core@8.6.19.patch)
+- Patch SHA-256: `db18ac6524d85465bc10ecabfe24bf0ccdf5dd676a65f6333f5454ec4ed24cbd`
+- npm release metadata: [`https://registry.npmjs.org/@storybook%2fcore/8.6.19`](https://registry.npmjs.org/@storybook%2fcore/8.6.19)
+- npm integrity: `sha512-o9TZn0YxSxjBOxkTlJWq9jFTZn53Wr83HNvX0k8YYxxA5evwt7kWubKs/RMTEIyXbsBKW7XUw7Cq9fLmhgJ3Bg==`
+- Upstream release commit: [`117b95a45b27138796c151b7928ba7956ca6da45`](https://github.com/storybookjs/storybook/tree/117b95a45b27138796c151b7928ba7956ca6da45)
+- License: MIT
+- Preserved upstream license: [`licenses/storybook-8.6.19.LICENSE`](licenses/storybook-8.6.19.LICENSE),
+  SHA-256 `bc90586179d44dcb313a9a289d687a2f26226303b2066bd21dbefd2378e894e5`;
+  [upstream source](https://github.com/storybookjs/storybook/blob/117b95a45b27138796c151b7928ba7956ca6da45/LICENSE)
+
+Rebased by SZL Holdings on 2026-10-22 against integrity-verified npm release
+bytes. The four manager-builder changes have the same behavior as the retained
+8.6.18 patch: syntax and whitespace minification stay enabled; identifier
+minification stays disabled. This patch does not touch the preview origin
+validation fix. The upstream 8.6.19 release, not the local reproducibility
+patch, addresses [GHSA-f2ph-cmg5-wxc8](https://github.com/storybookjs/storybook/security/advisories/GHSA-f2ph-cmg5-wxc8).
+
 The exact active package registration is in `pnpm-workspace.yaml` and
 `pnpm-lock.yaml`. Only the Storybook patch is currently applied by pnpm; it is a
 reproducibility control, not a vulnerability mitigation. The live
