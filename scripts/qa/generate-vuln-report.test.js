@@ -264,6 +264,66 @@ test('normalizes complete legacy advisories and metadata', () => {
   assert.equal(normalized.vulnerabilities.high, 0);
 });
 
+function capturedPnpmAudit() {
+  const raw = readFileSync(
+    join(ROOT, 'scripts/qa/fixtures/pnpm-audit-10.26.1-platform-20261023.json'),
+  );
+  assert.equal(
+    createHash('sha256').update(raw).digest('hex'),
+    '3432124557d5e913e772e8ae89f6d791caad6ac306d4ec5d860477ab51b20d9f',
+  );
+  return parseAuditJson(raw.toString('utf8'));
+}
+
+test('captured pnpm legacy audit counts findings without collapsing advisories or admitting HIGH', () => {
+  const input = capturedPnpmAudit();
+  const normalized = normalizeAuditJson(input);
+  assert.equal(Object.keys(normalized.advisories).length, 7);
+  assert.equal(normalized.vulnerabilities.high, 4);
+  assert.equal(normalized.vulnerabilities.moderate, 11);
+  assert.equal(normalized.detailedCounts.high, 4);
+  assert.equal(normalized.detailedCounts.moderate, 11);
+  for (const advisory of Object.values(normalized.advisories)) {
+    assert.deepEqual(advisory.findings, input.advisories[advisory.audit_source_key].findings);
+  }
+  const verdict = auditBlockingVerdict(normalized);
+  assert.equal(verdict.passed, false);
+  assert.match(verdict.reason, /4 High findings reported; 4 remain unmitigated/);
+  assert.deepEqual(
+    verdict.unmitigated.map(([, advisory]) => [
+      advisory.module_name,
+      advisory.github_advisory_id,
+      advisory.findings.map((finding) => finding.version),
+    ]),
+    [
+      ['zod', 'GHSA-mrhx-c7xc-m3w5', ['3.25.67', '3.25.76', '4.4.3']],
+      ['body-parser', 'GHSA-27r3-jxmh-p828', ['2.3.0']],
+    ],
+  );
+  assert.equal(auditExecutionFailure({ status: 1 }, normalized), null);
+  assert.match(auditExecutionFailure({ status: 0 }, normalized), /despite parsed High/);
+});
+
+test('captured pnpm legacy audit rejects missing detail and understated HIGH metadata', () => {
+  const missingAdvisory = capturedPnpmAudit();
+  delete missingAdvisory.advisories['1243074'];
+  assert.throws(() => normalizeAuditJson(missingAdvisory), /high summary count 4 does not match 3/);
+  const missingFinding = capturedPnpmAudit();
+  missingFinding.advisories['1243066'].findings.pop();
+  assert.throws(() => normalizeAuditJson(missingFinding), /high summary count 4 does not match 3/);
+  const understated = capturedPnpmAudit();
+  understated.metadata.vulnerabilities.high = 2;
+  assert.throws(() => normalizeAuditJson(understated), /high summary count 2 does not match 4/);
+});
+
+test('captured pnpm legacy audit rejects duplicated findings even with matching inflated metadata', () => {
+  const duplicated = capturedPnpmAudit();
+  const zod = duplicated.advisories['1243066'];
+  zod.findings.push(structuredClone(zod.findings[0]));
+  duplicated.metadata.vulnerabilities.high += 1;
+  assert.throws(() => normalizeAuditJson(duplicated), /duplicate finding/);
+});
+
 test('normalizes one advisory across distinct affected packages and rejects true duplicates', () => {
   const sharedAdvisory = {
     advisories: {
@@ -541,6 +601,59 @@ test('a mitigation covers only its exact package record for a shared advisory', 
     assert.equal(target.hostname, 'github.com');
     assert.equal(target.pathname, '/advisories/GHSA-86w9-cpqp-85rv');
     assert.doesNotMatch(row, /legacy:/);
+  } finally {
+    fixture.cleanup();
+  }
+});
+
+test('an exact verified mitigation covers all matching legacy findings and no unmatched records', () => {
+  const fixture = patchFixture();
+  try {
+    const input = {
+      advisories: {
+        1: {
+          github_advisory_id: 'GHSA-86w9-cpqp-85rv',
+          module_name: 'node-forge',
+          severity: 'high',
+          findings: [
+            { version: '1.4.0', paths: ['root-a>node-forge'] },
+            { version: '1.4.0', paths: ['root-b>node-forge'] },
+          ],
+        },
+      },
+      metadata: {
+        totalDependencies: 2,
+        vulnerabilities: { critical: 0, high: 2, moderate: 0, low: 0 },
+      },
+    };
+    const normalized = normalizeAuditJson(input);
+    const options = {
+      now: new Date('2026-10-06T00:00:00Z'),
+      root: fixture.root,
+      patchedDependencies: { 'node-forge@1.4.0': fixture.manifest.mitigations[0].patch },
+      verifiedBehaviors: new Set([NODE_FORGE_VERIFICATION]),
+    };
+    const mitigation = verifyMitigationManifest(normalized, fixture.manifest, options);
+    assert.deepEqual(mitigation.errors, []);
+    assert.equal(mitigation.mitigated.size, 1);
+    assert.equal(auditBlockingVerdict(normalized, null, mitigation).passed, true);
+
+    const unmatched = {
+      mitigated: new Map([['unmatched-a', {}], ['unmatched-b', {}]]),
+      errors: [],
+    };
+    assert.equal(auditBlockingVerdict(normalized, null, unmatched).passed, false);
+    const unverified = verifyMitigationManifest(normalized, fixture.manifest, {
+      ...options,
+      verifiedBehaviors: new Set(),
+    });
+    assert.equal(auditBlockingVerdict(normalized, null, unverified).passed, false);
+
+    input.advisories['1'].findings[1].version = '1.4.1';
+    const mixedVersions = normalizeAuditJson(input);
+    const incompleteMitigation = verifyMitigationManifest(mixedVersions, fixture.manifest, options);
+    assert.match(incompleteMitigation.errors[0], /finding versions do not exactly match/);
+    assert.equal(auditBlockingVerdict(mixedVersions, null, incompleteMitigation).passed, false);
   } finally {
     fixture.cleanup();
   }

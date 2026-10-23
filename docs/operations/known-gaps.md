@@ -29,6 +29,18 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### AUDIT-FINDINGS-20261023 — candidate legacy audit parser repair
+
+MEASURED pinned pnpm 10.26.1 output contains four High finding records grouped
+under two advisories; the old parser counted only advisory entries. The candidate
+counts contained findings while retaining strict High/Critical metadata checks,
+all advisory/version/path detail, and the real High-denial verdict. The captured
+fixture still blocks Zod and body-parser. Local focused regressions pass 4/4;
+the full parser suite is 22 pass / 1 existing Windows symlink-permission failure.
+Dependency remediation, independent review, and exact-head Linux CI remain
+required. This source repair establishes no deployment or runtime readiness.
+See the [scoped proof packet](../../audit/PNPM_AUDIT_FINDINGS_2026-10-23.md).
+
 ### DEPENDENCY-20261022 — Storybook and DOMPurify candidate security update
 
 MEASURED candidate audit with pinned pnpm 10.26.1 removes the newly disclosed

