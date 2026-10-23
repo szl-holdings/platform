@@ -26,7 +26,7 @@ All results below use SIMULATED inputs and injected fake/null inference.
 | Check actually run | Result |
 |---|---|
 | Original package Vitest suite, four files | 47 collected, 47 passed, exit 0 |
-| Original source plus unchanged new acceptance tests | 161 collected, 54 passed, 107 failed, exit 1 |
+| Original source plus the unchanged @workspace/eval-forge acceptance module | 161 collected, 54 passed, 107 failed, exit 1 |
 | Repaired source plus the same acceptance tests, five files | 161 collected, 161 passed, exit 0 |
 | Scoped original-source TypeScript check | exit 0 |
 | Scoped candidate TypeScript check | exit 0 |
