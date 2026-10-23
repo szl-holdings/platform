@@ -29,6 +29,38 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### DEPENDENCY-20261022 — Storybook and DOMPurify candidate security update
+
+MEASURED candidate audit with pinned pnpm 10.26.1 removes the newly disclosed
+Storybook 8.6.18 and DOMPurify 3.4.16 High/Critical findings by selecting upstream
+8.6.19 and 3.4.17 respectively. The parsed result is Critical 0, High 0,
+Moderate 11, Low 0; the unchanged severity policy admits the candidate while
+retaining the Moderate findings. This is a point-in-time dependency result.
+
+The exact Storybook reproducibility patch is rebased onto verified 8.6.19
+package bytes, and the canonical lockfile/SBOM are regenerated. Local contract
+execution records 54 passed, one Windows symlink-permission failure and one
+platform skip; baseline and final local typecheck are BLOCKED by missing
+workspace dependencies. Fresh exact-head hosted checks remain required.
+No runtime, provider, fleet-signing, staging or publication readiness is implied.
+See the [scoped proof packet](../../audit/DEPENDENCY_ADVISORIES_2026-10-22.md).
+
+### DEPENDENCY-20261020 — retained prior observation
+
+MEASURED candidate audit on 2026-10-21 with repository-pinned pnpm 10.26.1:
+MCP SDK 1.32.0, Vite 8.1.6 and markdown-it 14.3.3 remove the newly disclosed
+High findings from the previous main-branch dependency graph. The candidate
+reports Critical 0, High 0, Moderate 3 and Low 0. Hono 4.13.9 and two
+`sprintf-js` findings remain visible under the unchanged security policy.
+No parser rule, mitigation, required check or threshold is relaxed.
+
+Local MCP consumer typecheck, loopback adapter/Markdown checks, and A11oy
+build/consumer tests passed. Windows symlink and process-launch restrictions
+prevent a complete local security-suite/report-generator pass; exact-head
+Linux CI remains required. These source checks establish no deployment,
+runtime readiness or broader vulnerability-free claim. See the
+[scoped proof packet](../../audit/DEPENDENCY_ADVISORIES_2026-10-21.md).
+
 ### STAGING-REQUEST-001 — provider acceptance and runtime remain BLOCKED
 
 MEASURED historical observation: Platform staging run
@@ -1391,3 +1423,20 @@ Authenticated transport, peer authority, durable pause state, hosted LMDB
 snapshot admission, restart qualification, and cross-host recovery remain
 **UNAVAILABLE**. Outbound runtime activation remains **BLOCKED** pending those
 gates. Proof: [local outbox packet](../../audit/REPLICATION_DURABLE_OUTBOX_20261018.md).
+
+### 2026-10-21 bounded HTTPS delivery candidate
+
+The canonical package now supplies an explicit one-attempt HTTPS sender and an
+authenticated bounded receiver with an atomic source cursor, wrapper and origin
+index commit. The sender advances only on an exact batch ACK; source gaps/forks,
+bad credentials, invalid TLS and invalid responses refuse delivery. The
+[delivery proof packet](../../audit/REPLICATION_HTTPS_DELIVERY_20261021.md)
+records actual local/VM tests separately from deployment.
+
+A11oy and Killinchu's existing routes still export single-file receiver code and
+use the earlier count-only response protocol. Their outbound runtime has no
+configured peers, no durable outbox integration, and no lifecycle worker. A
+governed package export, paired protocol integration, named peer/credential
+configuration, state-store fencing, and hosted snapshot/restart qualification
+remain required before production replication can be enabled. No production
+peer, provider setting or live database is changed by this package candidate.
