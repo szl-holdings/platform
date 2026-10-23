@@ -114,10 +114,54 @@ edits of its contents. Existing receipts and receiver indexes are unchanged.
 **MEASURED:** the package tests exercise local process crashes, reopening,
 concurrent preparation, corruption rejection, and lost-ACK replay; see the
 [local proof packet](../../audit/REPLICATION_DURABLE_OUTBOX_20261018.md).
-Authenticated transport, durable pause state, hosted storage and snapshot
-admission, cross-host recovery, and worker activation remain **UNAVAILABLE**.
+That storage-only proof does not cover authenticated transport, durable pause
+state, hosted snapshots, cross-host recovery or worker activation. The explicit
+transport candidate and its remaining runtime limits are described below.
 The installed package includes `outbox.py`; standalone vendored `core.py`
 copies require a governed exporter and consumer update before using these APIs.
+
+### Explicit HTTPS delivery
+
+`khipu_lmdb.delivery.Peer` binds an exact HTTPS endpoint, peer ID, source organ,
+source namespace and credential environment-variable name. `deliver_once(store,
+peer)` reads that credential from the environment and performs one delivery
+attempt. It uses normal certificate and hostname verification, never follows a
+redirect or an environment proxy, and does not log credentials or remote error
+bodies. `ca_file` optionally names an operator-provisioned trust bundle; TLS
+verification cannot be disabled through the API. `timeout` is a per-socket
+operation limit in seconds, greater than zero and at most 30.
+
+Pending request bytes come from the durable outbox. Only a canonical JSON ACK
+matching the exact batch digest, peer/source binding, interval and complete
+accepted count advances its cursor. Missing credentials fail before local
+registration. Refused, malformed, oversized or lost responses leave the pending
+batch available for a later explicit call. There is no automatic retry worker,
+environment-based enable switch or in-memory resume flag.
+Snapshot-managed callers pass `expected_batch_id` from their confirmed pending
+snapshot. The adapter checks the actual prepared body against that digest before
+opening HTTPS, so a concurrent ACK cannot substitute an unconfirmed next batch.
+
+The receiving HTTP service calls `accept_batch(mirror, peer, body,
+authorization=header)` with its locally provisioned peer, after enforcing the
+exact configured route and a bounded request read. The function authenticates
+the bearer credential before parsing or writing. It validates every receipt and
+requires the next contiguous source interval. The receipt wrappers, deduplication
+index and bound receiver cursor commit in one LMDB transaction; a source fork or
+gap is refused. An exact replay of the last committed batch returns the same ACK
+without adding wrappers. Credential rotation keeps the same environment-variable
+name; changing any bound field requires a new peer ID and separately admitted
+reconciliation, not an implicit cursor reset.
+
+This is transport authentication using TLS and a provisioned shared credential,
+not an independent signature or source authorization. Local database integrity
+assumes trusted storage. The API does not qualify a filesystem, provision peers,
+select production destinations, start a worker, or change A11oy/Killinchu routes.
+Those existing single-file consumers do not yet export the package modules or
+implement this batch ACK protocol. Hosted activation stays **BLOCKED** until the
+consumer export, lifecycle fencing and snapshot/restart obligations are met.
+
+The real HTTPS and process-restart test commands and their measured scope are
+recorded in [the delivery proof packet](../../audit/REPLICATION_HTTPS_DELIVERY_20261021.md).
 
 ---
 Doctrine v11 — **749 declarations / 14 unique axioms / 163 sorries** (locked `c7c0ba17`).
