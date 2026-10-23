@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:6957f81d-1f7d-5b39-a68d-d29fcb84dcce",
+  "serialNumber": "urn:uuid:e8a3a469-1467-530d-a244-427de6688ad9",
   "metadata": {
     "tools": [
       {
@@ -35,7 +35,7 @@
       },
       {
         "name": "szl:sbom:component-count",
-        "value": "1810"
+        "value": "1807"
       }
     ]
   },
@@ -2605,126 +2605,114 @@
     {
       "type": "library",
       "name": "@storybook/addon-a11y",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/addon-a11y@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-a11y@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-actions",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/addon-actions@8.6.14"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-actions@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-backgrounds",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/addon-backgrounds@8.6.14"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-backgrounds@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-controls",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/addon-controls@8.6.14"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-controls@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-docs",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/addon-docs@8.6.14"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-docs@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-essentials",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/addon-essentials@8.6.14"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-essentials@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-highlight",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/addon-highlight@8.6.14"
-    },
-    {
-      "type": "library",
-      "name": "@storybook/addon-highlight",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/addon-highlight@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-highlight@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-measure",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/addon-measure@8.6.14"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-measure@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-outline",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/addon-outline@8.6.14"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-outline@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-themes",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/addon-themes@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-themes@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-toolbars",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/addon-toolbars@8.6.14"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-toolbars@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/addon-viewport",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/addon-viewport@8.6.14"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/addon-viewport@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/blocks",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/blocks@8.6.14"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/blocks@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/builder-vite",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/builder-vite@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/builder-vite@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/components",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/components@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/components@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/core",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/core@8.6.18",
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/core@8.6.19",
       "properties": [
         {
           "name": "szl:pnpm:patch:path",
-          "value": "patches/@storybook__core@8.6.18.patch"
+          "value": "patches/@storybook__core@8.6.19.patch"
         },
         {
           "name": "szl:pnpm:patch:sha256",
-          "value": "8174f83b01a84f5769116b174f4b1f2230d4bcb906620f7bd95f0823235f5a8d"
+          "value": "db18ac6524d85465bc10ecabfe24bf0ccdf5dd676a65f6333f5454ec4ed24cbd"
         }
       ]
     },
     {
       "type": "library",
       "name": "@storybook/csf-plugin",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/csf-plugin@8.6.14"
-    },
-    {
-      "type": "library",
-      "name": "@storybook/csf-plugin",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/csf-plugin@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/csf-plugin@8.6.19"
     },
     {
       "type": "library",
@@ -2741,56 +2729,50 @@
     {
       "type": "library",
       "name": "@storybook/instrumenter",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/instrumenter@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/instrumenter@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/manager-api",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/manager-api@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/manager-api@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/preview-api",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/preview-api@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/preview-api@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/react",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/react@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/react@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/react-dom-shim",
-      "version": "8.6.14",
-      "purl": "pkg:npm/%40storybook/react-dom-shim@8.6.14"
-    },
-    {
-      "type": "library",
-      "name": "@storybook/react-dom-shim",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/react-dom-shim@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/react-dom-shim@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/react-vite",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/react-vite@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/react-vite@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/test",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/test@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/test@8.6.19"
     },
     {
       "type": "library",
       "name": "@storybook/theming",
-      "version": "8.6.18",
-      "purl": "pkg:npm/%40storybook/theming@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/%40storybook/theming@8.6.19"
     },
     {
       "type": "library",
@@ -7349,8 +7331,8 @@
     {
       "type": "library",
       "name": "dompurify",
-      "version": "3.4.16",
-      "purl": "pkg:npm/dompurify@3.4.16"
+      "version": "3.4.17",
+      "purl": "pkg:npm/dompurify@3.4.17"
     },
     {
       "type": "library",
@@ -11159,8 +11141,8 @@
     {
       "type": "library",
       "name": "storybook",
-      "version": "8.6.18",
-      "purl": "pkg:npm/storybook@8.6.18"
+      "version": "8.6.19",
+      "purl": "pkg:npm/storybook@8.6.19"
     },
     {
       "type": "library",

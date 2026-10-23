@@ -143,7 +143,7 @@ test('Storybook build contract excludes time and checkout-path variance', () => 
   const config = readRepositoryFile('packages/storybook/.storybook/main.ts');
   const lockfile = readRepositoryFile('pnpm-lock.yaml');
   const workspace = readRepositoryFile('pnpm-workspace.yaml');
-  const patch = readRepositoryFile('patches/@storybook__core@8.6.18.patch');
+  const patch = readRepositoryFile('patches/@storybook__core@8.6.19.patch');
   const patchHash = createHash('sha256').update(patch).digest('hex');
 
   // project.json contains a wall-clock generatedAt value and is not consumed by
@@ -151,18 +151,18 @@ test('Storybook build contract excludes time and checkout-path variance', () => 
   assert.match(config, /core:\s*\{\s*disableProjectJson: true,\s*disableTelemetry: true,\s*\}/s);
   assert.match(
     workspace,
-    /^ {2}'@storybook\/core@8\.6\.18': patches\/@storybook__core@8\.6\.18\.patch$/m,
+    /^ {2}'@storybook\/core@8\.6\.19': patches\/@storybook__core@8\.6\.19\.patch$/m,
   );
   assert.match(
     lockfile,
     new RegExp(
-      `^ {2}'@storybook/core@8\\.6\\.18':\\n {4}hash: ${patchHash}\\n {4}path: patches/@storybook__core@8\\.6\\.18\\.patch$`,
+      `^ {2}'@storybook/core@8\\.6\\.19':\\n {4}hash: ${patchHash}\\n {4}path: patches/@storybook__core@8\\.6\\.19\\.patch$`,
       'm',
     ),
   );
   assert.match(
     lockfile,
-    new RegExp(`^ {2}'@storybook/core@8\\.6\\.18\\(patch_hash=${patchHash}\\)\\(`, 'm'),
+    new RegExp(`^ {2}'@storybook/core@8\\.6\\.19\\(patch_hash=${patchHash}\\)\\(`, 'm'),
   );
 
   // Absolute cache-entry paths affect esbuild's identifier allocation. Keep
