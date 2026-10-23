@@ -16,7 +16,7 @@ export const SECURE_OVERRIDES = Object.freeze({
   undici: '>=6.28.1 <7',
   '@grpc/grpc-js': '>=1.14.5',
   'adm-zip': '>=0.6.1',
-  dompurify: '3.4.16',
+  dompurify: '3.4.17',
   'fast-copy': '4.1.2',
   'postcss-selector-parser': '7.1.6',
   '@opentelemetry/instrumentation-cassandra-driver': '0.66.0',

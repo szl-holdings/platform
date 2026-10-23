@@ -173,6 +173,23 @@ test('rejects an out-of-policy undici major', () =>
   blocked((f) => {
     f.lock.packages['undici@7.0.0'] = {};
   }, /secure policy/));
+
+test('rejects previously admitted vulnerable DOMPurify 3.4.16 nodes and edges', () => {
+  const name = 'dompurify';
+  for (const graph of ['packages', 'snapshots']) {
+    blocked((f) => {
+      f.lock[graph][`${name}@3.4.16`] = {};
+    }, /secure policy/);
+  }
+  blocked((f) => {
+    f.lock.importers['.'].dependencies = {
+      [name]: { specifier: SECURE_OVERRIDES[name], version: '3.4.16' },
+    };
+  }, /secure policy/);
+  blocked((f) => {
+    f.lock.snapshots['fixture@1.0.0'] = { dependencies: { [name]: '3.4.16' } };
+  }, /secure policy/);
+});
 test('rejects an edge with no actual package node', () =>
   blocked((f) => {
     delete f.lock.packages['tar@7.5.21'];

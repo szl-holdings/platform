@@ -67,3 +67,26 @@ Fresh exact-head hosted security, build, typecheck and required checks remain
 the merge gates. No UI route or story content is changed, so a new UI screenshot
 was NOT RUN. No staging request, runtime credential, fleet key, provider setting,
 deployment or publication was changed by these local commands.
+
+## Hosted admission follow-up
+
+Exact-head runs at `e22c01147951460b258d2f01c78e74ba1ce40cc8` exposed three
+remaining source bindings: the dependency-free Storybook contract still named
+8.6.18; the secure dependency graph still admitted exactly DOMPurify 3.4.16;
+and the license inventory had no exact 3.4.17 admission. These gates correctly
+failed. The follow-up keeps their exact identity requirements and updates
+only those bindings, including a negative regression for the formerly admitted
+DOMPurify version across package nodes, snapshots, importer and consumer edges.
+
+The integrity-verified DOMPurify 3.4.17 tarball includes the Apache-2.0 `LICENSE`
+with SHA-256 `cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30`.
+The exact engineering license admission selects that option, requires retaining
+the bundled notices, and retains the prior policy's 2027-04-07 expiry boundary.
+It is not represented as an independent review or legal approval.
+
+MEASURED follow-up commands: the focused Storybook build contract passes 1/1;
+`node scripts/qa/check-retired-signing-graph.mjs` passes against 207 source
+manifests; its contract suite passes 207 tests and fails one existing Windows
+symlink-permission test. License contracts pass 7/7, and direct policy checks
+admit exact 3.4.17 while rejecting an unreviewed version and an expired review.
+New exact-head hosted checks remain required; failed earlier runs are retained.
