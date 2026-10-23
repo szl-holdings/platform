@@ -84,9 +84,12 @@ The exact engineering license admission selects that option, requires retaining
 the bundled notices, and retains the prior policy's 2027-04-07 expiry boundary.
 It is not represented as an independent review or legal approval.
 
-MEASURED follow-up commands: the focused Storybook build contract passes 1/1;
-`node scripts/qa/check-retired-signing-graph.mjs` passes against 207 source
-manifests; its contract suite passes 207 tests and fails one existing Windows
-symlink-permission test. License contracts pass 7/7, and direct policy checks
-admit exact 3.4.17 while rejecting an unreviewed version and an expired review.
-New exact-head hosted checks remain required; failed earlier runs are retained.
+MEASURED follow-up commands: the focused Storybook build contract and the actual
+source-graph checker pass. The graph contract suite retains an existing Windows
+symlink-permission failure. License contracts pass; direct policy checks admit
+the exact reviewed version while rejecting an unreviewed version and an expired
+review. Exact observed counts, command scopes and process exit statuses are
+retained in the [command-bound JSON receipt](DEPENDENCY_ADVISORIES_2026-10-22.json)
+under `scoped_check_counts`. They are local observations, not a canonical total
+for the Platform. New exact-head hosted checks remain required; failed earlier
+runs are retained.
