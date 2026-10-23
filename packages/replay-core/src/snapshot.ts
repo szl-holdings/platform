@@ -6,14 +6,14 @@ export const ReplaySnapshotSchema = z.object({
   label: z.string(),
   domain: z.string(),
   snapshotType: z.enum(['incident', 'flow', 'decision', 'audit']),
-  historicalContext: z.record(z.unknown()),
-  agentInputs: z.array(z.record(z.unknown())),
-  groundTruth: z.record(z.unknown()).optional(),
+  historicalContext: z.record(z.string(), z.unknown()),
+  agentInputs: z.array(z.record(z.string(), z.unknown())),
+  groundTruth: z.record(z.string(), z.unknown()).optional(),
   sanitized: z.boolean().default(true),
   createdAt: z.string().datetime(),
   version: z.string().default('1.0'),
   tags: z.array(z.string()).default([]),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type ReplaySnapshot = z.infer<typeof ReplaySnapshotSchema>;

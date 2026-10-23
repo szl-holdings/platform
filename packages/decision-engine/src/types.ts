@@ -8,7 +8,7 @@ export const SignalSchema = z.object({
   source: z.string(),
   sourceId: z.string().optional(),
   timestamp: z.number(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type Signal = z.infer<typeof SignalSchema>;
@@ -73,7 +73,7 @@ export const SignalBatchSchema = z.object({
   signals: z.array(SignalSchema),
   tenantId: z.string().optional(),
   domain: z.string().optional(),
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type SignalBatch = z.infer<typeof SignalBatchSchema>;

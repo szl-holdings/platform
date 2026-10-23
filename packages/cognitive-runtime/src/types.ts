@@ -45,12 +45,12 @@ export const PhaseResultSchema = z.object({
   output: z.unknown().optional(),
   error: z.string().optional(),
   retryCount: z.number().int().nonnegative().default(0),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type PhaseResult = z.infer<typeof PhaseResultSchema>;
 
 export const PerceiveInputSchema = z.object({
-  rawSignals: z.array(z.record(z.unknown())).default([]),
+  rawSignals: z.array(z.record(z.string(), z.unknown())).default([]),
   eventType: z.string().optional(),
   sourceDomain: z.string().optional(),
   sourceId: z.string().optional(),
@@ -65,7 +65,7 @@ export const WorldModelUpdateSchema = z.object({
       z.object({
         entityId: z.string(),
         entityType: z.string(),
-        attributes: z.record(z.unknown()).default({}),
+        attributes: z.record(z.string(), z.unknown()).default({}),
         confidence: z.number().min(0).max(1).default(0.8),
       }),
     )
@@ -123,7 +123,7 @@ export const CognitiveContextSchema = z.object({
   preferredModel: z.string().optional(),
   promptVersionId: z.string().optional(),
   maxBudgetUsd: z.number().positive().optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type CognitiveContext = z.input<typeof CognitiveContextSchema>;
 export type ResolvedCognitiveContext = z.infer<typeof CognitiveContextSchema>;
@@ -150,7 +150,7 @@ export const CognitiveLoopRunSchema = z.object({
   output: z.unknown().optional(),
   worldModelUpdate: WorldModelUpdateSchema.optional(),
   error: z.string().optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type CognitiveLoopRun = z.infer<typeof CognitiveLoopRunSchema>;
 

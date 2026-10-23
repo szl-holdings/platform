@@ -23,7 +23,7 @@ export const createWorkflowBodySchema = z.object({
   priority: workflowPrioritySchema.optional().default('medium'),
   assignedTo: z.number().int().positive().optional(),
   dueAt: z.coerce.date().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   orgId: z.number().int().positive().optional(),
 });
 export type CreateWorkflowBody = z.infer<typeof createWorkflowBodySchema>;
@@ -42,13 +42,13 @@ export const workflowIdParamSchema = idParamSchema;
 
 export const approveWorkflowBodySchema = z.object({
   comment: z.string().max(1024).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type ApproveWorkflowBody = z.infer<typeof approveWorkflowBodySchema>;
 
 export const rejectWorkflowBodySchema = z.object({
   reason: z.string().min(1).max(1024),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type RejectWorkflowBody = z.infer<typeof rejectWorkflowBodySchema>;
 

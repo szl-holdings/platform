@@ -288,7 +288,7 @@ export const businessSignalSchema = z.object({
   detectedAt: z.string(),
   updatedAt: z.string(),
   tags: z.array(z.string()),
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 export const covenantPolicySchema = z.object({

@@ -6,7 +6,7 @@ export const RerankCandidateSchema = z.object({
   id: z.string().min(1),
   text: z.string().min(1),
   score: z.number().optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type RerankCandidate = z.infer<typeof RerankCandidateSchema>;
 
@@ -40,7 +40,7 @@ export const RerankRequestSchema = z.object({
     ),
   topK: z.number().int().positive().default(10),
   model: z.literal(RERANK_IMPLEMENTATION_ID).optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type RerankRequest = z.infer<typeof RerankRequestSchema>;
 
@@ -49,7 +49,7 @@ export const RerankResultSchema = z.object({
   score: z.number(),
   rank: z.number().int().positive(),
   text: z.string(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type RerankResult = z.infer<typeof RerankResultSchema>;
 

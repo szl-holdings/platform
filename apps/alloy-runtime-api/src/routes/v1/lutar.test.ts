@@ -87,6 +87,23 @@ describe('POST /v1/ouroboros/lutar/evaluate-all', () => {
 });
 
 describe('POST /v1/ouroboros/lutar/v10', () => {
+  it('rejects incomplete artifact evidence', async () => {
+    const res = await client.req('POST', '/v1/ouroboros/lutar/v10', {
+      body: { matrix: [{ layer: 'L1', lambdaValue: 0.8, artifacts: { CODE: true } }] },
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects unknown dimensions and non-boolean artifact evidence', async () => {
+    for (const artifacts of [{ UNKNOWN: true }, { CODE: 'true' }]) {
+      const res = await client.req('POST', '/v1/ouroboros/lutar/v10', {
+        body: { matrix: [{ layer: 'L1', lambdaValue: 0.8, artifacts }] },
+      });
+      expect(res.status).toBe(400);
+      expect(res.json.error).toBe('validation_failed');
+    }
+  });
+
   it('rejects an empty matrix', async () => {
     const res = await client.req('POST', '/v1/ouroboros/lutar/v10', { body: { matrix: [] } });
     expect(res.status).toBe(400);

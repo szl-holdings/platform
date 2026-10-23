@@ -5,7 +5,7 @@ export const EvalQuerySchema = z.object({
   queryId: z.string(),
   query: z.string().min(1),
   relevantChunkIds: z.array(z.string()).min(1),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type EvalQuery = z.infer<typeof EvalQuerySchema>;
 
@@ -17,7 +17,7 @@ export const EvalRunRequestSchema = z.object({
   queries: z.array(EvalQuerySchema).min(1),
   topK: z.number().int().positive().default(10),
   metrics: z.array(z.enum(['ndcg', 'recall', 'precision', 'mrr'])).default(['ndcg', 'recall']),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type EvalRunRequest = z.infer<typeof EvalRunRequestSchema>;
 

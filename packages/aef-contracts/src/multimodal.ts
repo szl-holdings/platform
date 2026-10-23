@@ -77,7 +77,7 @@ export const MultimodalEmbedRequestSchema = z.object({
   dimensions: MultimodalEmbeddingDimensionsSchema.default(2048),
   normalize: z.literal(true).default(true),
   items: z.array(MultimodalEmbedItemSchema).min(1).max(32),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type MultimodalEmbedRequest = z.infer<typeof MultimodalEmbedRequestSchema>;
 

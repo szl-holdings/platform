@@ -107,7 +107,7 @@ export const MemoryEntrySchema = z.object({
    * on a single canonical field.
    */
   domain: MemoryDomainSchema,
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type MemoryType = z.infer<typeof MemoryTypeSchema>;

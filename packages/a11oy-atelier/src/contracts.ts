@@ -13,7 +13,7 @@ export const AtelierCapabilitiesSchema = z
     subagents: z.boolean().default(false),
   })
   .strict()
-  .default({});
+  .default({ tools: false, search: false, durableStorage: false, subagents: false });
 
 export const AtelierAskRequestSchema = z
   .object({

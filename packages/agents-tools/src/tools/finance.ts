@@ -15,7 +15,7 @@ import {
 import { z } from 'zod';
 import { defineTool } from '../typed-tool.js';
 
-const GenericOutputSchema = z.record(z.unknown());
+const GenericOutputSchema = z.record(z.string(), z.unknown());
 
 export const fundTransferTool = defineTool({
   manifest: FUND_TRANSFER_TOOL_MANIFEST,

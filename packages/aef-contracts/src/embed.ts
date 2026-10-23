@@ -10,7 +10,7 @@ export const EmbedRequestSchema = z.object({
   model: z.string().optional(),
   modelRevision: z.string().min(1).optional(),
   normalize: z.boolean().default(true),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type EmbedRequest = z.infer<typeof EmbedRequestSchema>;
 

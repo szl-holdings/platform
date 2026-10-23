@@ -7,7 +7,7 @@ export const workflowStepResultSchema = z.object({
   stepId: z.string(),
   stepType: z.string(),
   status: z.enum(['pending', 'running', 'success', 'failed', 'skipped']),
-  output: z.record(z.unknown()).optional(),
+  output: z.record(z.string(), z.unknown()).optional(),
   error: z.string().optional(),
   durationMs: z.number().int().min(0).optional(),
   startedAt: z.coerce.date().optional(),
@@ -24,7 +24,7 @@ export const agentDecisionSchema = z.object({
   reasoning: z.string().optional(),
   riskLevel: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   requiresApproval: z.boolean(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   createdAt: z.coerce.date(),
 });
 export type AgentDecision = z.infer<typeof agentDecisionSchema>;
@@ -47,8 +47,8 @@ export const skillSchema = z.object({
   name: z.string(),
   description: z.string(),
   domain: z.string(),
-  inputSchema: z.record(z.unknown()).optional(),
-  outputSchema: z.record(z.unknown()).optional(),
+  inputSchema: z.record(z.string(), z.unknown()).optional(),
+  outputSchema: z.record(z.string(), z.unknown()).optional(),
   tags: z.array(z.string()).optional(),
 });
 export type Skill = z.infer<typeof skillSchema>;
@@ -58,7 +58,7 @@ export const jobQueuePayloadSchema = z.object({
   jobType: z.string(),
   correlationId: z.string().optional(),
   orgId: z.number().int().positive().optional(),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   priority: z.enum(['critical', 'high', 'medium', 'low']).optional().default('medium'),
   attempts: z.number().int().min(0).optional().default(0),
   maxAttempts: z.number().int().positive().optional().default(3),

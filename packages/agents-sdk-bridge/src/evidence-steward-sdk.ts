@@ -72,7 +72,7 @@ export function assertEvidenceStewardToolSet(
 }
 
 /**
- * These are raw strict JSON Schemas for the locked @openai/agents 0.0.15 API.
+ * These are raw strict JSON Schemas for the locked @openai/agents 0.2.1 API.
  * That SDK parses raw-schema arguments as JSON without validating the schema,
  * so every execute handler independently rejects extra keys and values.
  */

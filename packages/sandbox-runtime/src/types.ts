@@ -302,7 +302,7 @@ export const ManifestSchema = z.object({
   id: z.string().optional(),
   name: z.string().optional(),
   entries: z.array(ManifestEntrySchema).default([]),
-  environment: z.record(z.string()).optional(),
+  environment: z.record(z.string(), z.string()).optional(),
   outputDirs: z.array(z.string()).optional(),
   blockedCommands: z.array(z.string()).optional(),
   maxDurationMs: z.number().positive().optional(),

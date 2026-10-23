@@ -15,7 +15,7 @@ export const DocumentRetrievalInputSchema = z.object({
   rerankEnabled: z.boolean().default(true),
   denseWeight: z.number().min(0).max(1).default(0.6),
   keywordWeight: z.number().min(0).max(1).default(0.4),
-  filters: z.record(z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])).optional(),
+  filters: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])).optional(),
   tenantId: z.string().optional(),
   includeEvidence: z.boolean().default(true),
 });
