@@ -75,7 +75,7 @@ export const VerifierOutputSchema = z.object({
   requiredFields: z.array(z.string()).optional(),
   /** Field names the output actually provided (non-empty). */
   providedFields: z.array(z.string()).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type VerifierOutput = z.infer<typeof VerifierOutputSchema>;
 
@@ -122,7 +122,7 @@ export const VerifierContextSchema = z.object({
   /** Calibration tolerance — |confidence - historicalAccuracy| above this warns. */
   calibrationTolerance: z.number().min(0).max(1).default(0.25),
   /** Freeform metadata that travels with the verifier result. */
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type VerifierContext = z.infer<typeof VerifierContextSchema>;
 
@@ -153,7 +153,7 @@ export const VerifierDecisionSchema = z.object({
   evaluatedAt: z.number(),
   /** Owning organization id for tenant scoping (null = global / no org). */
   orgId: z.number().int().nullable().optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type VerifierDecision = z.infer<typeof VerifierDecisionSchema>;
 

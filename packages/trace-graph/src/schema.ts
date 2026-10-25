@@ -53,7 +53,7 @@ export const TraceSpanSchema = z.object({
   startedAt: z.string().datetime(),
   endedAt: z.string().datetime().optional(),
   latencyMs: z.number().optional(),
-  attributes: z.record(z.unknown()).default({}),
+  attributes: z.record(z.string(), z.unknown()).default({}),
   status: z.enum(['ok', 'error', 'pending']).default('ok'),
   errorMessage: z.string().optional(),
 });
@@ -64,7 +64,7 @@ export const PlanNodeSchema = z.object({
   nodeType: z.enum(['task', 'decision', 'tool', 'model', 'memory', 'output']).default('task'),
   status: z.enum(['pending', 'running', 'completed', 'failed', 'skipped']).default('pending'),
   dependsOn: z.array(z.string()).default([]),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const PlanGraphSchema = z.object({
@@ -115,7 +115,7 @@ export const RunGradeSchema = z.object({
   gradeId: z.string(),
   gradedBy: z.string(),
   score: z.number().min(0).max(1),
-  rubric: z.record(z.number()).default({}),
+  rubric: z.record(z.string(), z.number()).default({}),
   notes: z.string().optional(),
   gradedAt: z.string().datetime(),
 });
@@ -129,7 +129,7 @@ export const TraceRecordSchema = z.object({
   agentId: z.string().optional(),
 
   objective: z.string().optional(),
-  selfModelSnapshot: z.record(z.unknown()).optional(),
+  selfModelSnapshot: z.record(z.string(), z.unknown()).optional(),
   worldModelSnapshotRef: z.string().optional(),
   planGraph: PlanGraphSchema.optional(),
 
@@ -178,7 +178,7 @@ export const TraceRecordSchema = z.object({
   retries: z.number().int().default(0),
   rollbackId: z.string().optional(),
 
-  output: z.record(z.unknown()).optional(),
+  output: z.record(z.string(), z.unknown()).optional(),
 
   operatorComments: z.array(OperatorCommentSchema).default([]),
   grade: RunGradeSchema.optional(),
@@ -194,7 +194,7 @@ export const TraceRecordSchema = z.object({
   status: z.enum(['running', 'completed', 'failed', 'rolled-back']).default('running'),
   startedAt: z.string().datetime(),
   completedAt: z.string().datetime().optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type ToolCallRecord = z.infer<typeof ToolCallRecordSchema>;

@@ -68,7 +68,7 @@ export const leadScoreSchema = z.object({
   propertyId: z.number().int().positive(),
   score: z.number().min(0).max(100),
   confidence: z.number().min(0).max(1),
-  factors: z.record(z.number()).optional(),
+  factors: z.record(z.string(), z.number()).optional(),
   computedAt: z.coerce.date(),
 });
 export type LeadScore = z.infer<typeof leadScoreSchema>;

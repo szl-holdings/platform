@@ -145,7 +145,7 @@ export const PerPromotionDecisionSchema = z.object({
   governancePassedAll: z.boolean(),
   coverageThresholdMet: z.boolean(),
   rollbackVerified: z.boolean(),
-  evidenceBundle: z.record(z.unknown()).nullable().optional(),
+  evidenceBundle: z.record(z.string(), z.unknown()).nullable().optional(),
   rejectionReason: z.string().nullable().optional(),
   auditChainEventId: z.number().int().nullable().optional(),
   simulated: z.boolean(),

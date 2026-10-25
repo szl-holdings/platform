@@ -82,7 +82,7 @@ const RankWorkerRequestSchema = z.object({
         id: z.string().min(1),
         text: z.string().min(1),
         score: z.number().optional(),
-        metadata: z.record(z.unknown()).default({}),
+        metadata: z.record(z.string(), z.unknown()).default({}),
       }),
     )
     .min(1)

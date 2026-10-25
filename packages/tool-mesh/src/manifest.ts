@@ -41,8 +41,8 @@ export const ToolManifestSchema = z.object({
   allowedEnvironments: z
     .array(z.enum(['development', 'staging', 'production']))
     .default(['development', 'staging', 'production']),
-  inputSchema: z.record(z.unknown()).optional(),
-  outputSchema: z.record(z.unknown()).optional(),
+  inputSchema: z.record(z.string(), z.unknown()).optional(),
+  outputSchema: z.record(z.string(), z.unknown()).optional(),
   rateLimits: z
     .object({
       requestsPerMinute: z.number().positive().optional(),
@@ -60,7 +60,7 @@ export const ToolManifestSchema = z.object({
       emitMetrics: z.boolean().default(true),
       sensitiveFields: z.array(z.string()).default([]),
     })
-    .default({}),
+    .default(() => ({ emitTrace: true, emitMetrics: true, sensitiveFields: [] })),
   enabled: z.boolean().default(true),
   createdAt: z.string().datetime().optional(),
   updatedAt: z.string().datetime().optional(),

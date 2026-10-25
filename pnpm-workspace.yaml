@@ -38,7 +38,7 @@ catalog:
   typescript: ^6.0.3
   vite: ^8.1.6
   vitest: 4.1.11
-  zod: 3.25.76
+  zod: 4.6.6
   zustand: ^5.0.5
 
 minimumReleaseAge: 1440
@@ -123,12 +123,14 @@ overrides:
   fast-xml-parser: ^5.8.0
   postcss: 8.5.23
   uuid: ^14.0.0
-  qs: 6.16.0
+  qs: 6.16.1
   ws: ^8.20.1
   'hono': '^4.13.5'
   '@hono/node-server': 2.1.1
   browserslist: 4.28.7
-  body-parser: 2.3.0
+  body-parser: 2.4.0
+  # GHSA-mrhx-c7xc-m3w5: all Zod consumers admit v4 after the Agents SDK update.
+  zod: 4.6.6
   compression: 1.8.2
   image-size: link:packages/image-size-safe
   shell-quote: 1.11.0

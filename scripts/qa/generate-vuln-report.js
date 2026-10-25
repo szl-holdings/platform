@@ -279,6 +279,7 @@ function validateLegacyAdvisory(advisory, key) {
 
 function legacyFindingFingerprint(advisory, { id, severity, sourceKey }) {
   const records = [];
+  const seenRecords = new Set();
   for (const [findingIndex, finding] of advisory.findings.entries()) {
     const paths = finding.paths === undefined ? [''] : finding.paths;
     if (!Array.isArray(paths) || paths.length === 0) {
@@ -292,7 +293,13 @@ function legacyFindingFingerprint(advisory, { id, severity, sourceKey }) {
           `pnpm audit advisory ${sourceKey} finding ${findingIndex} path ${pathIndex} must be a string`,
         );
       }
-      records.push([finding.version, findingPath]);
+      const record = [finding.version, findingPath];
+      const recordKey = JSON.stringify(record);
+      if (seenRecords.has(recordKey)) {
+        throw new Error(`pnpm audit advisory ${sourceKey} contains a duplicate finding`);
+      }
+      seenRecords.add(recordKey);
+      records.push(record);
     }
   }
   records.sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)));
@@ -314,12 +321,15 @@ function fromLegacyAdvisoryMap(map, metadata) {
     fingerprints.set(fingerprint, key);
     const recordKey = `legacy:${JSON.stringify([id, advisory.module_name, key])}`;
     advisories[recordKey] = { ...advisory, audit_source_key: key };
-    observedCounts[severity] += 1;
+    // The pinned pnpm legacy registry response groups affected installed
+    // findings under each advisory; one advisory can represent several findings.
+    observedCounts[severity] += advisory.findings.length;
   }
   const parsedMetadata = auditMetadata(metadata, observedCounts);
   return {
     advisories,
     vulnerabilities: parsedMetadata.counts,
+    detailedCounts: observedCounts,
     totalDependencies: parsedMetadata.totalDependencies,
     sourceShape: 'legacy-advisories',
   };
@@ -360,6 +370,7 @@ function fromNpmVulnerabilities(map, metadata) {
   return {
     advisories,
     vulnerabilities: parsedMetadata.counts,
+    detailedCounts: observedCounts,
     totalDependencies: parsedMetadata.totalDependencies,
     sourceShape: 'npm-vulnerabilities',
   };
@@ -736,19 +747,25 @@ export function auditBlockingVerdict(
   const unmitigated = parsedBlocking.filter(([fallbackId]) => {
     return !mitigationResult.mitigated.has(fallbackId);
   });
+  const findingCount = ([, advisory]) =>
+    normalized.sourceShape === 'legacy-advisories' ? advisory.findings.length : 1;
+  const mitigated = parsedBlocking.filter(([fallbackId]) => {
+    return mitigationResult.mitigated.has(fallbackId);
+  });
+  const mitigatedFindingCount = mitigated.reduce((total, entry) => total + findingCount(entry), 0);
   const unresolvedCount = Math.max(
-    unmitigated.length,
-    high + critical - mitigationResult.mitigated.size,
+    unmitigated.reduce((total, entry) => total + findingCount(entry), 0),
+    high + critical - mitigatedFindingCount,
   );
   const passed = unresolvedCount === 0;
-  const mitigatedCount = mitigationResult.mitigated.size;
+  const mitigatedCount = mitigated.length;
   return {
     passed,
     reason: passed
       ? mitigatedCount > 0
         ? `no unmitigated parsed High/Critical advisory (${mitigatedCount} exact local patch mitigation(s) verified)`
         : 'no parsed High/Critical advisory'
-      : `${critical} Critical and ${high} High advisories reported; ${unresolvedCount} remain unmitigated`,
+      : `${critical} Critical and ${high} High findings reported; ${unresolvedCount} remain unmitigated`,
     unmitigated,
   };
 }
@@ -939,8 +956,10 @@ async function main() {
       for (const advisory of nonBlocking) report += renderAdvisoryRow(advisory);
       report += '\n';
     }
-    if (nonBlocking.length < nonBlockingCount) {
-      report += `${nonBlockingCount - nonBlocking.length} Moderate/Low finding(s) were present only in pnpm's aggregate metadata for this audit-level response; their missing detail is not inferred.\n\n`;
+    const detailedNonBlockingCount =
+      (normalized?.detailedCounts.moderate ?? 0) + (normalized?.detailedCounts.low ?? 0);
+    if (detailedNonBlockingCount < nonBlockingCount) {
+      report += `${nonBlockingCount - detailedNonBlockingCount} Moderate/Low finding(s) were present only in pnpm's aggregate metadata for this audit-level response; their missing detail is not inferred.\n\n`;
     }
   }
 

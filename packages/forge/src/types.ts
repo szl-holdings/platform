@@ -21,7 +21,7 @@ export const RunConfigSchema = z.object({
   maxSteps: z.number().int().positive().default(50),
   timeoutMs: z.number().positive().default(300000),
   checkpointEnabled: z.boolean().default(true),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export const RunStateSchema = z.object({

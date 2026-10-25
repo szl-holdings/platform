@@ -21,7 +21,7 @@ export const ProfileDescriptorSchema = z.object({
   description: z.string().optional(),
   promptTransformHook: z.string().optional(),
   boostRuleIds: z.array(z.string()).default([]),
-  defaultMetadataFilters: z.record(z.unknown()).default({}),
+  defaultMetadataFilters: z.record(z.string(), z.unknown()).default({}),
   rerankEnabled: z.boolean().default(false),
   maxCandidates: z.number().int().positive().default(100),
   maxResults: z.number().int().positive().default(10),

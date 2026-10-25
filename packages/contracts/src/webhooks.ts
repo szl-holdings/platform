@@ -7,7 +7,7 @@ export const stripeWebhookBodySchema = z.object({
   id: z.string(),
   type: z.string(),
   data: z.object({
-    object: z.record(z.unknown()),
+    object: z.record(z.string(), z.unknown()),
   }),
   created: z.number(),
   livemode: z.boolean().optional(),
@@ -30,7 +30,7 @@ export const alloyEmailIngestBodySchema = z.object({
       }),
     )
     .optional(),
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
 });
 export type AlloyEmailIngestBody = z.infer<typeof alloyEmailIngestBodySchema>;
 
@@ -56,7 +56,7 @@ export const docusignWebhookBodySchema = z.object({
   retryCount: z.number().int().optional(),
   configurationId: z.number().int().optional(),
   apiVersion: z.string().optional(),
-  data: z.record(z.unknown()).optional(),
+  data: z.record(z.string(), z.unknown()).optional(),
 });
 
-export const genericWebhookBodySchema = z.record(z.unknown());
+export const genericWebhookBodySchema = z.record(z.string(), z.unknown());

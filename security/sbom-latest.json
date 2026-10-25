@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:e8a3a469-1467-530d-a244-427de6688ad9",
+  "serialNumber": "urn:uuid:525e0b28-7b64-58c0-915e-92e49d5e5910",
   "metadata": {
     "tools": [
       {
@@ -35,7 +35,7 @@
       },
       {
         "name": "szl:sbom:component-count",
-        "value": "1807"
+        "value": "1806"
       }
     ]
   },
@@ -1075,26 +1075,26 @@
     {
       "type": "library",
       "name": "@openai/agents",
-      "version": "0.0.15",
-      "purl": "pkg:npm/%40openai/agents@0.0.15"
+      "version": "0.2.1",
+      "purl": "pkg:npm/%40openai/agents@0.2.1"
     },
     {
       "type": "library",
       "name": "@openai/agents-core",
-      "version": "0.0.15",
-      "purl": "pkg:npm/%40openai/agents-core@0.0.15"
+      "version": "0.2.1",
+      "purl": "pkg:npm/%40openai/agents-core@0.2.1"
     },
     {
       "type": "library",
       "name": "@openai/agents-openai",
-      "version": "0.0.15",
-      "purl": "pkg:npm/%40openai/agents-openai@0.0.15"
+      "version": "0.2.1",
+      "purl": "pkg:npm/%40openai/agents-openai@0.2.1"
     },
     {
       "type": "library",
       "name": "@openai/agents-realtime",
-      "version": "0.0.15",
-      "purl": "pkg:npm/%40openai/agents-realtime@0.0.15"
+      "version": "0.2.1",
+      "purl": "pkg:npm/%40openai/agents-realtime@0.2.1"
     },
     {
       "type": "library",
@@ -6503,8 +6503,8 @@
     {
       "type": "library",
       "name": "body-parser",
-      "version": "2.3.0",
-      "purl": "pkg:npm/body-parser@2.3.0"
+      "version": "2.4.0",
+      "purl": "pkg:npm/body-parser@2.4.0"
     },
     {
       "type": "library",
@@ -6955,6 +6955,12 @@
       "name": "content-type",
       "version": "2.0.0",
       "purl": "pkg:npm/content-type@2.0.0"
+    },
+    {
+      "type": "library",
+      "name": "content-type",
+      "version": "2.1.0",
+      "purl": "pkg:npm/content-type@2.1.0"
     },
     {
       "type": "library",
@@ -8237,8 +8243,8 @@
     {
       "type": "library",
       "name": "happy-dom",
-      "version": "20.10.2",
-      "purl": "pkg:npm/happy-dom@20.10.2"
+      "version": "21.0.4",
+      "purl": "pkg:npm/happy-dom@21.0.4"
     },
     {
       "type": "library",
@@ -8401,6 +8407,12 @@
       "name": "iconv-lite",
       "version": "0.7.2",
       "purl": "pkg:npm/iconv-lite@0.7.2"
+    },
+    {
+      "type": "library",
+      "name": "iconv-lite",
+      "version": "0.7.3",
+      "purl": "pkg:npm/iconv-lite@0.7.3"
     },
     {
       "type": "library",
@@ -9785,12 +9797,6 @@
     {
       "type": "library",
       "name": "openai",
-      "version": "5.23.2",
-      "purl": "pkg:npm/openai@5.23.2"
-    },
-    {
-      "type": "library",
-      "name": "openai",
       "version": "6.42.0",
       "purl": "pkg:npm/openai@6.42.0"
     },
@@ -10361,8 +10367,8 @@
     {
       "type": "library",
       "name": "qs",
-      "version": "6.16.0",
-      "purl": "pkg:npm/qs@6.16.0"
+      "version": "6.16.1",
+      "purl": "pkg:npm/qs@6.16.1"
     },
     {
       "type": "library",
@@ -12077,20 +12083,8 @@
     {
       "type": "library",
       "name": "zod",
-      "version": "3.25.67",
-      "purl": "pkg:npm/zod@3.25.67"
-    },
-    {
-      "type": "library",
-      "name": "zod",
-      "version": "3.25.76",
-      "purl": "pkg:npm/zod@3.25.76"
-    },
-    {
-      "type": "library",
-      "name": "zod",
-      "version": "4.4.3",
-      "purl": "pkg:npm/zod@4.4.3"
+      "version": "4.6.6",
+      "purl": "pkg:npm/zod@4.6.6"
     },
     {
       "type": "library",

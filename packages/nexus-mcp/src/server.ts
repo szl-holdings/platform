@@ -367,7 +367,7 @@ export class PRAXISMcpServer {
     handler: (args: Record<string, unknown>, ctx: TenantContext) => Promise<unknown>,
   ): void {
     // Build a Zod schema from the raw JSON Schema properties for SDK compatibility
-    const zodShape: ZodRawShape = {};
+    const zodShape: Record<string, z.ZodTypeAny> = {};
     for (const [key, prop] of Object.entries(inputSchema.properties)) {
       const p = prop as Record<string, unknown>;
       const isRequired = (inputSchema.required ?? []).includes(key);

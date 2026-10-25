@@ -12,7 +12,7 @@ export const WorkflowStepSchema = z.object({
   requiresApproval: z.boolean().default(false),
   approverRole: z.string().optional(),
   handler: z.string(),
-  parameters: z.record(z.unknown()).optional(),
+  parameters: z.record(z.string(), z.unknown()).optional(),
   rollbackHandler: z.string().optional(),
   timeoutMs: z.number().int().positive().optional(),
   retryCount: z.number().int().min(0).max(5).default(0),
@@ -31,7 +31,7 @@ export const WorkflowDefinitionSchema = z.object({
   requiresExplicitApproval: z.boolean().default(true),
   estimatedCostUsd: z.number().min(0).optional(),
   rollbackPolicy: z.enum(['none', 'step', 'full']).default('step'),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type WorkflowDefinition = z.input<typeof WorkflowDefinitionSchema>;
 
@@ -41,8 +41,8 @@ export const StepExecutionRecordSchema = z.object({
   startedAt: z.number(),
   completedAt: z.number().optional(),
   status: z.enum(['pending', 'running', 'completed', 'failed', 'skipped', 'rolled_back']),
-  inputs: z.record(z.unknown()).optional(),
-  outputs: z.record(z.unknown()).optional(),
+  inputs: z.record(z.string(), z.unknown()).optional(),
+  outputs: z.record(z.string(), z.unknown()).optional(),
   error: z.string().optional(),
   rollbackedAt: z.number().optional(),
   approvedBy: z.string().optional(),
@@ -89,7 +89,7 @@ export const WorkflowRunSchema = z.object({
   completedAt: z.number().optional(),
   estimatedCostUsd: z.number().optional(),
   actualCostUsd: z.number().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type WorkflowRun = z.infer<typeof WorkflowRunSchema>;
 

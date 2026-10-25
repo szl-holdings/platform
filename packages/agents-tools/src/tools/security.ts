@@ -18,7 +18,7 @@ import {
 import { z } from 'zod';
 import { defineTool } from '../typed-tool.js';
 
-const GenericOutputSchema = z.record(z.unknown());
+const GenericOutputSchema = z.record(z.string(), z.unknown());
 
 export const threatScanTool = defineTool({
   manifest: THREAT_SCAN_TOOL_MANIFEST,

@@ -19,9 +19,9 @@ export const RunContextSchema = z.object({
   maxTurns: z.number().int().positive().default(10),
   currentTurn: z.number().int().nonnegative().default(0),
   currentAgentId: z.string().optional(),
-  evidence: z.array(z.record(z.unknown())).default([]),
-  domainConstraints: z.record(z.unknown()).default({}),
-  metadata: z.record(z.unknown()).default({}),
+  evidence: z.array(z.record(z.string(), z.unknown())).default([]),
+  domainConstraints: z.record(z.string(), z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type RunContextInput = z.input<typeof RunContextSchema>;

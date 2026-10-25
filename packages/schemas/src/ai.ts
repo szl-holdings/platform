@@ -36,8 +36,8 @@ export type AITrace = z.infer<typeof aiTraceSchema>;
 
 export const toolCallSchema = z.object({
   toolName: z.string().min(1),
-  toolArgs: z.record(z.unknown()).optional(),
-  toolResult: z.record(z.unknown()).optional(),
+  toolArgs: z.record(z.string(), z.unknown()).optional(),
+  toolResult: z.record(z.string(), z.unknown()).optional(),
   success: z.boolean(),
   errorMessage: z.string().optional(),
   durationMs: z.number().min(0).optional(),
