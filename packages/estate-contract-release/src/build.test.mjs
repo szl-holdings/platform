@@ -144,6 +144,18 @@ test('exported dependency mutations change the release identity', (t) => {
   );
 });
 
+test('generator coercion helper is part of the source release identity', (t) => {
+  const root = contractFixture(t);
+  const before = buildManifest(root);
+  appendFileSync(resolve(root, 'lib/api-spec/scripts/normalize-zod-coercion.mjs'), '\n// mutation probe\n');
+  const after = buildManifest(root);
+  assert.notEqual(after.release_id, before.release_id);
+  assert.notEqual(
+    after.components.find((component) => component.id === 'api-spec')?.tree_sha256,
+    before.components.find((component) => component.id === 'api-spec')?.tree_sha256,
+  );
+});
+
 test('ignored and untracked files cannot enter the release identity', (t) => {
   const root = contractFixture(t);
   const before = buildManifest(root);

@@ -14,7 +14,10 @@
       "id": "design-system",
       "role": "CANONICAL_SOURCE",
       "package_name": "@szl-holdings/design-system",
-      "inputs": ["packages/design-system/package.json", "packages/design-system/src"],
+      "inputs": [
+        "packages/design-system/package.json",
+        "packages/design-system/src"
+      ],
       "file_count": 100,
       "bytes": 354178,
       "tree_sha256": "b8b84fb54875d976d6ac87db8976156ed49542073f06b32762b17a0f61efc0df",
@@ -525,10 +528,13 @@
       "id": "design-system-forge-type-contract",
       "role": "EXPORTED_SOURCE_DEPENDENCY",
       "package_name": "@workspace/forge/types",
-      "inputs": ["packages/forge/package.json", "packages/forge/src/types.ts"],
+      "inputs": [
+        "packages/forge/package.json",
+        "packages/forge/src/types.ts"
+      ],
       "file_count": 2,
-      "bytes": 4737,
-      "tree_sha256": "39b24e39751abdc8fb69e6f3212f8cec9164db25bf6d59e5a13917dea1cd9566",
+      "bytes": 4749,
+      "tree_sha256": "1cc51ada478789e6d41d46612fbb2768a130058f6885395368f1c51af504cbf6",
       "files": [
         {
           "path": "packages/forge/package.json",
@@ -537,8 +543,8 @@
         },
         {
           "path": "packages/forge/src/types.ts",
-          "bytes": 2916,
-          "sha256": "9bd3493ce114617d1e08be403f99ac72008defc7a52e1077d44b656c84515151"
+          "bytes": 2928,
+          "sha256": "d741bb047a919302b138a5873395aaea8e6726f48f9d04951455862ffd439286"
         }
       ]
     },
@@ -550,11 +556,12 @@
         "lib/api-spec/package.json",
         "lib/api-spec/openapi.yaml",
         "lib/api-spec/orval.config.ts",
-        "lib/api-spec/scripts/codegen.mjs"
+        "lib/api-spec/scripts/codegen.mjs",
+        "lib/api-spec/scripts/normalize-zod-coercion.mjs"
       ],
-      "file_count": 4,
-      "bytes": 2207623,
-      "tree_sha256": "94a688f86de55b290c0c07ecbb70833227699400c3b5df21ecc3c448b5563812",
+      "file_count": 5,
+      "bytes": 2210533,
+      "tree_sha256": "78a8d63046877ee23076e60e56127fd3ca0bad2e580cc52c6ca96f19b0738acf",
       "files": [
         {
           "path": "lib/api-spec/openapi.yaml",
@@ -563,8 +570,8 @@
         },
         {
           "path": "lib/api-spec/orval.config.ts",
-          "bytes": 2094,
-          "sha256": "4376b6a063b7b013b38d1628fd87bc271ff0aab4804fc53a75944ebd9947257e"
+          "bytes": 2300,
+          "sha256": "f42c073044437493dcaa535e79a8e7a3434b354231a87ee33ee4492d153ddf66"
         },
         {
           "path": "lib/api-spec/package.json",
@@ -573,8 +580,13 @@
         },
         {
           "path": "lib/api-spec/scripts/codegen.mjs",
-          "bytes": 1741,
-          "sha256": "248d735a61ad04356335ac60eb94f5445efa300b82724ea2bd379701e5412e69"
+          "bytes": 1914,
+          "sha256": "4517da897d096ff64d94f3d3c8f2bb32d8507b417a8f51ceef837a30890d4121"
+        },
+        {
+          "path": "lib/api-spec/scripts/normalize-zod-coercion.mjs",
+          "bytes": 2531,
+          "sha256": "e3702c52827fde6d78b65c9953afd1657e1d7340aa150b9fb4093dd5eea4163f"
         }
       ]
     },
@@ -629,10 +641,13 @@
       "id": "api-zod",
       "role": "RUNTIME_AND_GENERATED_OUTPUT_PRESENT",
       "package_name": "@szl-holdings/api-zod",
-      "inputs": ["lib/api-zod/package.json", "lib/api-zod/src"],
+      "inputs": [
+        "lib/api-zod/package.json",
+        "lib/api-zod/src"
+      ],
       "file_count": 661,
-      "bytes": 1014791,
-      "tree_sha256": "c3b24c7048d461ff83819e60fc6f0c62a0773e1564a9174affff896b03e0c87b",
+      "bytes": 1014861,
+      "tree_sha256": "5c99c64c5cbdd95092716f8b8c1718125f4c2aec1e2595372b14acc0dd7a65de",
       "files": [
         {
           "path": "lib/api-zod/package.json",
@@ -641,8 +656,8 @@
         },
         {
           "path": "lib/api-zod/src/generated/api.ts",
-          "bytes": 580767,
-          "sha256": "d43dc0ee883230664d5c2d339b4121c167a03d8e74ad163ab2538a8105ca69b6"
+          "bytes": 580777,
+          "sha256": "e92e13ad41576eb5d37171848acd6bada99df068bae233f2483a05ed629463bf"
         },
         {
           "path": "lib/api-zod/src/generated/types/a2AAgentCard.ts",
@@ -3931,13 +3946,13 @@
         },
         {
           "path": "lib/api-zod/src/nexus-v1.ts",
-          "bytes": 8435,
-          "sha256": "414ea43973eff7a285ccb289e783c036a94a1d227d554f2363196a78a693b5f5"
+          "bytes": 8483,
+          "sha256": "9134adda9a966995ff69117708069812d5907489da032f985e5f8695580c3b15"
         },
         {
           "path": "lib/api-zod/src/per.ts",
-          "bytes": 7464,
-          "sha256": "ac3c7bf4afa827b39ff0f857da2a4ad8e87e91b1ae23d39df427b64d89d0c683"
+          "bytes": 7476,
+          "sha256": "f822f99493b3ae8777a29dabb99060c5ed06d1ad5d6866d31bdef27aac5c9074"
         }
       ]
     },
@@ -3945,10 +3960,13 @@
       "id": "shared-contracts",
       "role": "CANONICAL_SOURCE",
       "package_name": "@szl-holdings/shared-contracts",
-      "inputs": ["packages/shared-contracts/package.json", "packages/shared-contracts/src"],
+      "inputs": [
+        "packages/shared-contracts/package.json",
+        "packages/shared-contracts/src"
+      ],
       "file_count": 9,
-      "bytes": 47846,
-      "tree_sha256": "c3f0ed91e4171e69add655cd37dc71000eaaaa903d229de0fa0846335ce65ad1",
+      "bytes": 47858,
+      "tree_sha256": "d647d862846283ce4422225b29db7984fea028b1a8e3afc92268ab76fbd2d604",
       "files": [
         {
           "path": "packages/shared-contracts/package.json",
@@ -3962,8 +3980,8 @@
         },
         {
           "path": "packages/shared-contracts/src/eval-types.ts",
-          "bytes": 10614,
-          "sha256": "b0d2a6fbe508a9abc92ed22efaa170049bd58ca1b12f4d95b72f1dae67070f36"
+          "bytes": 10626,
+          "sha256": "4951c5941acbdd8f9a4fc0d986d4d992a84717ddf95db05ee55b54538a8138f9"
         },
         {
           "path": "packages/shared-contracts/src/evidence-types.ts",
@@ -4013,5 +4031,5 @@
       "claims that hash closure proves registry publication or deployment"
     ]
   },
-  "release_id": "sha256:5589af8dcb6442d07d5d9927e19e679b4fb826ef1ddbadc8b33781bb7350032c"
+  "release_id": "sha256:d432ea30e3287839ac2c3886b99b137f674cc49c7eebf70604fe7bf45e4a03aa"
 }

@@ -1,5 +1,6 @@
 import { defineConfig, type InputTransformerFn } from 'orval';
 import path from 'node:path';
+import { normalizeGeneratedZodCoercionHook } from './scripts/normalize-zod-coercion.mjs';
 
 const root = path.resolve(__dirname, '..', '..');
 const apiClientReactSrc = path.resolve(root, 'lib', 'api-client-react', 'src');
@@ -48,6 +49,9 @@ export default defineConfig({
     },
   },
   zod: {
+    hooks: {
+      afterAllFilesWrite: () => { normalizeGeneratedZodCoercionHook(); },
+    },
     input: {
       target: './openapi.yaml',
       override: {
@@ -64,6 +68,7 @@ export default defineConfig({
       prettier: true,
       override: {
         zod: {
+          version: 4,
           coerce: {
             query: ['boolean', 'number', 'string'],
             param: ['boolean', 'number', 'string'],
