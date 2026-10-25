@@ -1464,3 +1464,12 @@ high/critical audit findings; eleven moderate findings remain, and the raw audit
 still exits nonzero. Full native exact-head CI, protected merge, deployment and
 runtime qualification remain **BLOCKED** pending their own gates. See the
 [source proof packet](../../audit/ZOD4_COMPATIBILITY_SECURITY_2026-10-23.md).
+
+### 2026-10-25 native Zod follow-up candidate
+
+**MEASURED — PLATFORM-963-ZOD4-FOLLOWUP-20261025:** focused local verification
+closes the demonstrated nested-default, MCP readonly builder and governed-call
+shape-access regressions. A factory isolates per-manifest sensitive-field
+arrays. Native current-head CI and protected release remain **BLOCKED** pending
+their own results. No provider/runtime capability is inferred. See the
+[native follow-up proof](../../audit/ZOD4_NATIVE_FOLLOWUP_2026-10-25.md).

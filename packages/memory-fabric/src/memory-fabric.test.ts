@@ -58,6 +58,17 @@ describe('MemoryEntrySchema — defaults', () => {
     expect(entry.sensitivity).toBe('internal');
     expect(entry.linkedTraces).toEqual([]);
     expect(entry.retention.policy).toBe('persistent');
+    expect(entry.retention.pinned).toBe(false);
+  });
+
+  it('preserves retention defaults, overrides and invalid-input rejection', () => {
+    const source = makeEntry('retention', 'session', 'retention');
+    expect(MemoryEntrySchema.parse({ ...source, retention: {} }).retention)
+      .toEqual({ policy: 'persistent', pinned: false });
+    expect(MemoryEntrySchema.parse({ ...source, retention: { pinned: true } }).retention)
+      .toEqual({ policy: 'persistent', pinned: true });
+    expect(MemoryEntrySchema.safeParse({ ...source, retention: { pinned: 'false' } }).success)
+      .toBe(false);
   });
 
   it('sets memoryType equal to tier when not specified', () => {

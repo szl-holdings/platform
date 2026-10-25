@@ -60,7 +60,7 @@ export const ToolManifestSchema = z.object({
       emitMetrics: z.boolean().default(true),
       sensitiveFields: z.array(z.string()).default([]),
     })
-    .default({}),
+    .default(() => ({ emitTrace: true, emitMetrics: true, sensitiveFields: [] })),
   enabled: z.boolean().default(true),
   createdAt: z.string().datetime().optional(),
   updatedAt: z.string().datetime().optional(),

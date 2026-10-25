@@ -53,6 +53,23 @@ function makeGateway(registry: InMemoryToolRegistry) {
 }
 
 describe('ToolManifestSchema', () => {
+  it('preserves observability defaults, overrides and invalid-input rejection', () => {
+    const source = { id: 'local', name: 'Local', description: 'Local schema regression', policyTier: 'advisory-only' };
+    const expected = { emitTrace: true, emitMetrics: true, sensitiveFields: [] };
+    expect(ToolManifestSchema.parse(source).observabilityHooks).toEqual(expected);
+    expect(ToolManifestSchema.parse({ ...source, observabilityHooks: {} }).observabilityHooks)
+      .toEqual(expected);
+    expect(ToolManifestSchema.parse({ ...source, observabilityHooks: { emitTrace: false, sensitiveFields: ['private'] } }).observabilityHooks)
+      .toEqual({ emitTrace: false, emitMetrics: true, sensitiveFields: ['private'] });
+    expect(ToolManifestSchema.safeParse({ ...source, observabilityHooks: { emitMetrics: 'false' } }).success)
+      .toBe(false);
+    const first = ToolManifestSchema.parse(source);
+    const second = ToolManifestSchema.parse(source);
+    first.observabilityHooks.sensitiveFields.push('private');
+    expect(second.observabilityHooks.sensitiveFields).toEqual([]);
+    expect(ToolManifestSchema.parse(source).observabilityHooks.sensitiveFields).toEqual([]);
+  });
+
   it('parses GRAPH_QUERY_TOOL_MANIFEST', () => {
     expect(() => ToolManifestSchema.parse(GRAPH_QUERY_TOOL_MANIFEST)).not.toThrow();
   });

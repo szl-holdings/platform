@@ -92,7 +92,7 @@ export const MemoryEntrySchema = z.object({
       maxAgeDays: z.number().positive().optional(),
       pinned: z.boolean().default(false),
     })
-    .default({ policy: 'persistent' }),
+    .default({ policy: 'persistent', pinned: false }),
   sensitivity: SensitivityLevelSchema.default('internal'),
   linkedEntities: z.array(z.string()).default([]),
   linkedTraces: z.array(z.string()).default([]),

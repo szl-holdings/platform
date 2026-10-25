@@ -102,7 +102,7 @@ reuses an already installed `yaml@2.9.0` package through a local junction. Befor
 cloning, the local resource check measured 9.97 GB free disk and 4.23 GB free RAM.
 
 1. Before the patch:
-   `node --test scripts/qa/generate-vuln-report.test.js` — **18 passed, 1 failed**.
+   `node --test scripts/qa/generate-vuln-report.test.js` — parser-only command receipt: **pass=18, fail=1**.
    The failure is the existing Windows file-symlink `EPERM` in the symlink
    rejection regression.
 2. After adding the three captured-input regressions but before changing parser
@@ -121,7 +121,7 @@ cloning, the local resource check measured 9.97 GB free disk and 4.23 GB free RA
    `node --test --test-name-pattern='captured pnpm legacy audit|an exact verified mitigation covers all' scripts/qa/generate-vuln-report.test.js`
    — **4 passed, 0 failed**.
 6. Final full parser run:
-   `node --test scripts/qa/generate-vuln-report.test.js` — **22 passed, 1 failed**.
+   `node --test scripts/qa/generate-vuln-report.test.js` — parser-only command receipt: **pass=22, fail=1**.
    The only failure remains the same Windows symlink `EPERM`; no test was skipped
    or weakened.
 7. `git diff --check` — passed.
