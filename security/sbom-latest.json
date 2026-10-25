@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:189e5011-1742-59b3-b30b-2d22d9ec53dd",
+  "serialNumber": "urn:uuid:525e0b28-7b64-58c0-915e-92e49d5e5910",
   "metadata": {
     "tools": [
       {
@@ -8243,8 +8243,8 @@
     {
       "type": "library",
       "name": "happy-dom",
-      "version": "20.10.2",
-      "purl": "pkg:npm/happy-dom@20.10.2"
+      "version": "21.0.4",
+      "purl": "pkg:npm/happy-dom@21.0.4"
     },
     {
       "type": "library",
