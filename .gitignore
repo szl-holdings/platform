@@ -195,3 +195,4 @@ screenshots/raw
 # Root-level build/generation scripts (noise at repo root — see archive/scripts/)
 /build_carousel.py
 /build_video.sh
+*.egg-info/
