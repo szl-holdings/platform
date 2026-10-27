@@ -11,7 +11,9 @@ requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Stephen P. Lutar / SZL Holdings", email = "yachay@szlholdings.dev" }]
 keywords = ["szl", "doctrine-v11", "khipu-os"]
-dependencies = []
+dependencies = [
+  "reedsolo>=1.7,<2",
+]
 classifiers = ["Private :: Do Not Upload"]
 
 [project.urls]

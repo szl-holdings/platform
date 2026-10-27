@@ -23,6 +23,8 @@ LOCKED v11 numbers preserved verbatim (see _puriq_compat.LOCKED). NO mysticism.
 from __future__ import annotations
 
 import hashlib
+import json
+import math
 import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
@@ -31,6 +33,90 @@ from ._puriq_compat import (
     OrganAgent, KhipuSigner, KhipuReceipt, YuyayGate, YuyayScores, HukullaTripwires,
     LOCKED,
 )
+
+
+_RECEIPT_SCHEMA = "szl.khipu.receipt/v1"
+_RECEIPT_FIELDS = frozenset({
+    "receipt_id", "organ", "action", "payload", "parents", "ts", "yuyay",
+    "content_hash", "signature", "chain_verified",
+})
+
+
+def _receipt_record(receipt: KhipuReceipt) -> Dict[str, Any]:
+    """Return the versioned, signed receipt record written to the durable store."""
+    return {
+        "receipt_id": receipt.receipt_id,
+        "organ": receipt.organ,
+        "action": receipt.action,
+        "payload": receipt.payload,
+        "parents": list(receipt.parents),
+        "ts": receipt.ts,
+        "yuyay": receipt.yuyay,
+        "content_hash": receipt.content_hash,
+        "signature": receipt.signature,
+        "chain_verified": getattr(receipt, "chain_verified", True),
+    }
+
+
+def _persisted_receipt_blob(receipt: KhipuReceipt) -> bytes:
+    """Serialize the complete signed receipt, including verification material."""
+    return json.dumps(
+        {"schema": _RECEIPT_SCHEMA, "receipt": _receipt_record(receipt)},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def _restore_receipt(blob: bytes, expected_id: str) -> KhipuReceipt:
+    """Decode one durable record and reject legacy or malformed bytes."""
+    try:
+        envelope = json.loads(blob.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError("persisted receipt is not valid UTF-8 JSON") from exc
+    if not isinstance(envelope, dict) or envelope.get("schema") != _RECEIPT_SCHEMA:
+        raise ValueError("unsupported persisted receipt schema")
+    record = envelope.get("receipt")
+    if not isinstance(record, dict) or set(record) != _RECEIPT_FIELDS:
+        raise ValueError("persisted receipt fields are incomplete or unknown")
+    if record["receipt_id"] != expected_id or not isinstance(record["receipt_id"], str):
+        raise ValueError("persisted receipt id does not match its store key")
+    if any(not isinstance(record[key], str) or not record[key]
+           for key in ("organ", "action", "signature")):
+        raise ValueError("persisted receipt identity or signature is malformed")
+    if not isinstance(record["payload"], dict):
+        raise ValueError("persisted receipt payload is not an object")
+    parents = record["parents"]
+    if (not isinstance(parents, list)
+            or any(not isinstance(parent, str) or not parent for parent in parents)
+            or len(set(parents)) != len(parents)):
+        raise ValueError("persisted receipt parents are malformed")
+    if (not isinstance(record["ts"], (int, float))
+            or isinstance(record["ts"], bool) or not math.isfinite(float(record["ts"]))):
+        raise ValueError("persisted receipt timestamp is malformed")
+    if (not isinstance(record["yuyay"], (int, float))
+            or isinstance(record["yuyay"], bool) or not math.isfinite(float(record["yuyay"]))):
+        raise ValueError("persisted receipt yuyay is malformed")
+    if (not isinstance(record["content_hash"], str)
+            or len(record["content_hash"]) != 64
+            or any(char not in "0123456789abcdef" for char in record["content_hash"])):
+        raise ValueError("persisted receipt content hash is malformed")
+    if record["chain_verified"] is not True:
+        raise ValueError("persisted receipt is not chain-verified")
+
+    try:
+        receipt = KhipuReceipt(
+            receipt_id=record["receipt_id"], organ=record["organ"],
+            action=record["action"], payload=record["payload"],
+            parents=list(parents), ts=float(record["ts"]),
+            yuyay=float(record["yuyay"]),
+        )
+    except TypeError as exc:
+        raise ValueError("installed KhipuReceipt type cannot be restored") from exc
+    receipt.content_hash = record["content_hash"]
+    receipt.signature = record["signature"]
+    receipt.chain_verified = True
+    return receipt
 
 
 def merkle_root(leaf_hashes: List[str]) -> str:
@@ -140,6 +226,79 @@ class KhipuDAG(OrganAgent):
         self.subscribers: List[Any] = []  # Wire-B subscribers (notified on T22)
         self.tamper_events: List[Dict[str, Any]] = []
         self.locked = dict(LOCKED)
+        if self.store is not None:
+            try:
+                self._restore_persisted()
+            except Exception:
+                self.store.close()
+                raise
+
+    def _restore_persisted(self) -> None:
+        """Rebuild the in-memory graph from durable signed receipt records.
+
+        Recovery is fail-closed: legacy signing-byte-only rows, malformed records,
+        invalid signatures, missing parents, and cycles stop startup rather than
+        inventing state or silently dropping history.
+        """
+        hot_ids = list(self.store.keys())
+        cold_ids = list(self.store.cold_keys())
+        if set(hot_ids).intersection(cold_ids):
+            raise ValueError("persisted receipt appears in both hot and cold stores")
+        all_ids = hot_ids + cold_ids
+        if len(set(all_ids)) != len(all_ids):
+            raise ValueError("persisted receipt ids are duplicated")
+        restored: Dict[str, KhipuReceipt] = {}
+        for receipt_id in all_ids:
+            blob = self.store.get(receipt_id)
+            if blob is None:
+                raise ValueError(f"persisted receipt bytes missing: {receipt_id}")
+            receipt = _restore_receipt(blob, receipt_id)
+            if not self.signer.verify(receipt):
+                raise ValueError(f"persisted receipt signature invalid: {receipt_id}")
+            restored[receipt_id] = receipt
+
+        for receipt_id, receipt in restored.items():
+            for parent in receipt.parents:
+                if parent not in restored:
+                    raise ValueError(
+                        f"persisted receipt {receipt_id} references missing parent {parent}"
+                    )
+                if parent == receipt_id:
+                    raise ValueError(f"persisted receipt self-cycle: {receipt_id}")
+
+        # Detect cycles independently of insertion order. Children tracks hot
+        # descendants only, matching the pruner's hot/cold projection semantics.
+        visiting: set[str] = set()
+        visited: set[str] = set()
+
+        def visit(receipt_id: str) -> None:
+            if receipt_id in visiting:
+                raise ValueError(f"persisted receipt cycle detected at {receipt_id}")
+            if receipt_id in visited:
+                return
+            visiting.add(receipt_id)
+            for parent in restored[receipt_id].parents:
+                visit(parent)
+            visiting.remove(receipt_id)
+            visited.add(receipt_id)
+
+        for receipt_id in all_ids:
+            visit(receipt_id)
+
+        self.hot = {receipt_id: restored[receipt_id] for receipt_id in hot_ids}
+        self.archived_ids = cold_ids
+        self.children = {receipt_id: [] for receipt_id in all_ids}
+        for receipt_id in hot_ids:
+            for parent in restored[receipt_id].parents:
+                self.children[parent].append(receipt_id)
+        self.receipts = list(self.hot.values())
+        self._seq = max(
+            (int(receipt_id.rsplit("-", 1)[1])
+             for receipt_id in hot_ids + cold_ids
+             if receipt_id.startswith(f"{self.name}-")
+             and receipt_id.rsplit("-", 1)[1].isdigit()),
+            default=0,
+        )
 
     # ---- canonical append-only API (INV-APPEND, INV-DAG) --------------------
     def add_receipt(self, organ: str, action: str, payload: Dict[str, Any],
@@ -157,13 +316,18 @@ class KhipuDAG(OrganAgent):
         self.signer.sign(r)
         if r.receipt_id in self.hot:  # defensive: ids are monotonic, should never collide
             raise ValueError(f"id collision {r.receipt_id} (INV-APPEND violated)")
-        self.hot[r.receipt_id] = r
         if self.store is not None:                       # durable append (INV-APPEND on disk)
-            self.store.put(r.receipt_id, r.signing_bytes(), cold=False)
+            self.store.put(r.receipt_id, _persisted_receipt_blob(r), cold=False)
+        self.hot[r.receipt_id] = r
         self.children.setdefault(r.receipt_id, [])
         for p in parents:
             self.children.setdefault(p, []).append(r.receipt_id)
         return r
+
+    def close(self) -> None:
+        """Close the durable backend without changing the append-only history."""
+        if self.store is not None:
+            self.store.close()
 
     # ---- read helpers --------------------------------------------------------
     def hot_count(self) -> int:

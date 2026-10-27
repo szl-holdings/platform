@@ -18,6 +18,18 @@ Tamper detection is Merkle-hash verification. Reed-Solomon is erasure coding, NO
 pip install -e packages/khipu-os
 ```
 
+## Durable restart recovery
+
+When `KhipuDAG` is created with `persist_path=...`, each receipt is written as a
+versioned `szl.khipu.receipt/v1` envelope containing its payload, parent links,
+content hash, and signature. A new process reconstructs the hot/cold indexes,
+rebuilds child links, verifies every signature, and rejects legacy, malformed,
+missing-parent, duplicate, or cyclic records before exposing the DAG. Recovery
+is fail-closed; it never invents a receipt or silently drops persisted history.
+
+The SQLite and LMDB stores preserve receipt bytes during hot-to-cold projection.
+Call `dag.close()` during orderly shutdown.
+
 ## Provenance
 - Author: Yachay <yachay@szlholdings.dev>
 - Co-Authored-By: Perplexity Computer Agent
