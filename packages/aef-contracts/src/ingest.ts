@@ -9,7 +9,7 @@ export const IngestDocumentSchema = z.object({
   contentType: z
     .enum(['text/plain', 'text/markdown', 'application/pdf', 'text/html'])
     .default('text/plain'),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
   profileId: z.string().optional(),
 });
 export type IngestDocument = z.infer<typeof IngestDocumentSchema>;
@@ -21,7 +21,7 @@ export const IngestRequestSchema = z.object({
   chunkSize: z.number().int().positive().default(512),
   chunkOverlap: z.number().int().nonnegative().default(64),
   model: z.string().optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type IngestRequest = z.infer<typeof IngestRequestSchema>;
 

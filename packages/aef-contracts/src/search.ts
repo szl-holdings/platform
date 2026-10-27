@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { TenantIdSchema } from './tenant.js';
 
 export const MetadataFilterSchema = z.record(
-  z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
+  z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
 );
 export type MetadataFilter = z.infer<typeof MetadataFilterSchema>;
 
@@ -18,7 +18,7 @@ export const HybridSearchRequestSchema = z.object({
   metadataFilter: MetadataFilterSchema.optional(),
   rerankEnabled: z.boolean().default(false),
   includeProvenance: z.boolean().default(true),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type HybridSearchRequest = z.infer<typeof HybridSearchRequestSchema>;
 
@@ -55,7 +55,7 @@ export const SearchHitSchema = z.object({
   rerankerScore: z.number().optional(),
   finalScore: z.number(),
   boostApplied: z.boolean().default(false),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 
   // Governance / evidence-first extension fields
   traceId: z.string().optional(),
@@ -81,7 +81,7 @@ export const HybridSearchResponseSchema = z.object({
   // Evidence / governance envelope
   traceId: z.string(),
   retrievalPath: z.array(z.string()),
-  stageTimings: z.record(z.number()).optional(),
+  stageTimings: z.record(z.string(), z.number()).optional(),
   policyDecision: z
     .object({
       allow: z.boolean(),

@@ -112,7 +112,7 @@ export const BaseEntitySchema = z.object({
   businessImpact: BusinessImpactSchema.optional(),
   policies: z.array(PolicyBindingSchema).optional(),
   tags: z.array(z.string()).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type AtlasBaseEntity = z.infer<typeof BaseEntitySchema>;
 
@@ -140,7 +140,7 @@ export const SignalSchema = BaseEntitySchema.extend({
   relatedEntityIds: z.array(z.string()).optional(),
   workflowId: z.string().optional(),
   prismDimension: z.enum(['pulse', 'risk', 'intelligence', 'signals', 'motion']).optional(),
-  rawPayload: z.record(z.unknown()).optional(),
+  rawPayload: z.record(z.string(), z.unknown()).optional(),
 });
 export type AtlasSignal = z.infer<typeof SignalSchema>;
 
@@ -167,7 +167,7 @@ export const EventSchema = BaseEntitySchema.extend({
   workflowId: z.string().optional(),
   correlationId: z.string().optional(),
   sequenceNumber: z.number().int().nonnegative().optional(),
-  payload: z.record(z.unknown()).optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
   immutable: z.boolean().default(true),
 });
 export type AtlasEvent = z.infer<typeof EventSchema>;
@@ -352,8 +352,8 @@ export const ActionSchema = BaseEntitySchema.extend({
   recommendationId: z.string().optional(),
   targetEntityType: z.string().optional(),
   targetEntityId: z.string().optional(),
-  payload: z.record(z.unknown()).optional(),
-  result: z.record(z.unknown()).optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
+  result: z.record(z.string(), z.unknown()).optional(),
   rollbackAvailable: z.boolean().default(false),
   rolledBackAt: z.string().datetime().optional(),
   rolledBackBy: ActorRefSchema.optional(),
@@ -425,8 +425,8 @@ export const OutcomeSchema = BaseEntitySchema.extend({
   actionId: z.string().optional(),
   recordedBy: ActorRefSchema,
   recordedAt: z.string().datetime(),
-  measuredValues: z.record(z.number()).optional(),
-  targetValues: z.record(z.number()).optional(),
+  measuredValues: z.record(z.string(), z.number()).optional(),
+  targetValues: z.record(z.string(), z.number()).optional(),
   sloMet: z.boolean().optional(),
   lessonLearned: z.string().optional(),
   followUpRequired: z.boolean().default(false),

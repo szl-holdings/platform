@@ -18,7 +18,7 @@ export const ExactMatchFieldClassSchema = z.object({
 export type ExactMatchFieldClass = z.infer<typeof ExactMatchFieldClassSchema>;
 
 export const MetadataPresetSchema = z.record(
-  z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
+  z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
 );
 export type MetadataPreset = z.infer<typeof MetadataPresetSchema>;
 
@@ -52,7 +52,7 @@ export const DomainProfileSchema = z.object({
   retentionDays: z.number().int().positive().default(90),
   provenanceRequired: z.boolean().default(false),
   allowedTenantIds: z.array(z.string()).optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type DomainProfile = z.infer<typeof DomainProfileSchema>;
 

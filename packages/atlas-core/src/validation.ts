@@ -159,6 +159,6 @@ export const CrossDomainRelationshipSchema = z.object({
   ]),
   tenantId: z.string(),
   createdAt: z.string().datetime(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type AtlasCrossDomainRelationship = z.infer<typeof CrossDomainRelationshipSchema>;

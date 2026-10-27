@@ -8,7 +8,7 @@ export const CognitiveMetricSchema = z.object({
   unit: z.string().optional(),
   description: z.string(),
   value: z.number(),
-  labels: z.record(z.union([z.string(), z.number(), z.boolean()]).transform(String)).default({}),
+  labels: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]).transform(String)).default({}),
   timestamp: z.string().datetime(),
 });
 

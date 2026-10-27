@@ -33,7 +33,7 @@ export const WorkflowStepResultSchema = z.object({
   status: z.enum(['success', 'failed', 'skipped', 'waiting']),
   startedAt: z.string().datetime(),
   completedAt: z.string().datetime().optional(),
-  output: z.record(z.unknown()).default({}),
+  output: z.record(z.string(), z.unknown()).default({}),
   error: z.string().optional(),
 });
 export type WorkflowStepResult = z.infer<typeof WorkflowStepResultSchema>;
@@ -58,7 +58,7 @@ export const WorkflowCheckpointSchema = z.object({
     'cancelled',
   ]),
   completedSteps: z.array(WorkflowStepResultSchema).default([]),
-  context: z.record(z.unknown()).default({}),
+  context: z.record(z.string(), z.unknown()).default({}),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   approvalRequestId: z.string().optional(),
@@ -74,7 +74,7 @@ export const ApprovalRequestSchema = z.object({
   decision: z.enum(['pending', 'approved', 'rejected']).default('pending'),
   operatorId: z.string().optional(),
   rationale: z.string().optional(),
-  context: z.record(z.unknown()).default({}),
+  context: z.record(z.string(), z.unknown()).default({}),
 });
 export type ApprovalRequest = z.infer<typeof ApprovalRequestSchema>;
 
@@ -88,7 +88,7 @@ export const AuditEventSchema = z.object({
   profileId: z.string().optional(),
   occurredAt: z.string().datetime(),
   outcome: z.enum(['success', 'failure', 'skipped', 'approval_requested', 'approved', 'rejected']),
-  details: z.record(z.unknown()).default({}),
+  details: z.record(z.string(), z.unknown()).default({}),
 });
 export type AuditEvent = z.infer<typeof AuditEventSchema>;
 

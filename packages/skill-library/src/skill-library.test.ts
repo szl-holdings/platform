@@ -10,7 +10,7 @@ import {
   SkillNotFoundError,
 } from './runner.js';
 import { builtinSkills, seedBuiltinSkills } from './seeds.js';
-import type { SkillDefinition, SkillRun } from './types.js';
+import { type SkillDefinition, type SkillRun, SkillDefinitionSchema } from './types.js';
 
 function makeRegistry() {
   return new InMemorySkillRegistry();
@@ -69,6 +69,16 @@ function sampleSkill(overrides?: Partial<SkillDefinition>): SkillDefinition {
 }
 
 describe('InMemorySkillRegistry', () => {
+  it('preserves performance defaults, overrides and invalid-input rejection', () => {
+    const source = sampleSkill();
+    const expected = { totalRuns: 0, successfulRuns: 0, failedRuns: 0, successRate: 0, avgLatencyMs: 0 };
+    expect(SkillDefinitionSchema.parse({ ...source, performance: undefined }).performance).toEqual(expected);
+    expect(SkillDefinitionSchema.parse({ ...source, performance: {} }).performance).toEqual(expected);
+    expect(SkillDefinitionSchema.parse({ ...source, performance: { totalRuns: 2, successfulRuns: 1, successRate: 0.5 } }).performance)
+      .toEqual({ ...expected, totalRuns: 2, successfulRuns: 1, successRate: 0.5 });
+    expect(SkillDefinitionSchema.safeParse({ ...source, performance: { successRate: 2 } }).success).toBe(false);
+  });
+
   it('registers and retrieves a skill', () => {
     const registry = makeRegistry();
     const skill = sampleSkill();

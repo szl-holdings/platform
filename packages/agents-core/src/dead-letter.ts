@@ -17,7 +17,7 @@ export const DeadLetterEntrySchema = z.object({
   ]),
   errorMessage: z.string(),
   attemptCount: z.number().int().nonnegative(),
-  context: z.record(z.unknown()).default({}),
+  context: z.record(z.string(), z.unknown()).default({}),
   manuallyResolved: z.boolean().default(false),
   resolvedAt: z.number().optional(),
   resolvedBy: z.string().optional(),

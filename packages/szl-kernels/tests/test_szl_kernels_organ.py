@@ -641,7 +641,7 @@ class WakeReceiptEndpointTests(unittest.TestCase):
 
 
 class WakeReceiptWorkflowContractTests(unittest.TestCase):
-    def test_workflow_fails_before_curl_when_dedicated_secret_is_absent(self) -> None:
+    def test_workflow_marks_unknown_before_curl_when_dedicated_secret_is_absent(self) -> None:
         workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
         wake_job = workflow[workflow.index("  wake-receipt:") :]
 
@@ -649,10 +649,13 @@ class WakeReceiptWorkflowContractTests(unittest.TestCase):
             "SZL_WAKE_RECEIPT_TOKEN: ${{ secrets.SZL_WAKE_RECEIPT_TOKEN }}", wake_job
         )
         guard = wake_job.index('if [ -z "${SZL_WAKE_RECEIPT_TOKEN:-}" ]')
-        failure = wake_job.index("exit 1", guard)
-        request = wake_job.index("curl ", failure)
-        self.assertLess(guard, failure)
-        self.assertLess(failure, request)
+        # Missing org secret is honest UNKNOWN (exit 0) so organ-warm success is not
+        # painted false-red; still refuse unauthenticated POST (no curl in the guard path).
+        unknown = wake_job.index("exit 0", guard)
+        request = wake_job.index("curl ", unknown)
+        self.assertLess(guard, unknown)
+        self.assertLess(unknown, request)
+        self.assertIn("wake receipt UNKNOWN", wake_job)
         self.assertIn("authorization: Bearer ${SZL_WAKE_RECEIPT_TOKEN}", wake_job)
         self.assertIn("--max-filesize 4096", wake_job)
         self.assertIn("wake-receipt response contract -> PASS", wake_job)

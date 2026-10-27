@@ -150,7 +150,7 @@ export const SubmitRunRequestSchema = z.object({
   tenantId: z.string().trim().min(1).max(128),
   profileId: z.string().default('default'),
   input: z.unknown(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type SubmitRunRequest = z.infer<typeof SubmitRunRequestSchema>;
 

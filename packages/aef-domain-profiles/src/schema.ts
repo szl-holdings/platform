@@ -71,7 +71,7 @@ export const DomainProfileSchema = z.object({
   queryPromptTemplate: PromptTemplateSchema,
   documentPromptTemplate: PromptTemplateSchema,
 
-  defaultMetadataFilters: z.record(z.unknown()).default({}),
+  defaultMetadataFilters: z.record(z.string(), z.unknown()).default({}),
   exactMatchBoostTerms: z.array(z.string()).min(1),
   boostRuleIds: z.array(z.string()).default([]),
 

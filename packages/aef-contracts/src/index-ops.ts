@@ -7,7 +7,7 @@ export const IndexRebuildRequestSchema = z.object({
   profileId: z.string().optional(),
   fullRebuild: z.boolean().default(false),
   sourceIds: z.array(z.string()).optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
 });
 export type IndexRebuildRequest = z.infer<typeof IndexRebuildRequestSchema>;
 

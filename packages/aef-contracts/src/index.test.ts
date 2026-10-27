@@ -9,6 +9,7 @@ import {
   HybridSearchRequestSchema,
   IndexRebuildRequestSchema,
   IndexVerifyRequestSchema,
+  MetadataFilterSchema,
   IngestRequestSchema,
   OpenAIEmbedRequestSchema,
   OpenAIEmbedResponseSchema,
@@ -18,6 +19,20 @@ import {
   TenantIdentitySchema,
   TenantIdSchema,
 } from './index.js';
+
+describe('string-keyed metadata records', () => {
+  it('preserves sparse string keys and all supported filter values', () => {
+    const filters = { domain: 'maritime', score: 0.75, enabled: false, tags: ['reviewed'] };
+    expect(MetadataFilterSchema.parse(filters)).toEqual(filters);
+    expect(MetadataFilterSchema.parse({})).toEqual({});
+  });
+
+  it('rejects non-record inputs and unsupported filter values', () => {
+    for (const input of [null, [], 'domain', { domain: null }, { score: {} }, { tags: [1] }]) {
+      expect(MetadataFilterSchema.safeParse(input).success).toBe(false);
+    }
+  });
+});
 
 describe('TenantIdSchema', () => {
   it('accepts a non-empty string', () => {

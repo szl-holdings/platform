@@ -39,12 +39,12 @@ export const EvidenceEntrySchema = z.object({
   completedAt: z.string().datetime().optional(),
   operatorAnnotation: z.string().optional(),
   // Governance-depth extensions: per-stage timings, backend attribution, score decomposition, approval artifacts
-  stageTimings: z.record(z.number().nonnegative()).optional(),
+  stageTimings: z.record(z.string(), z.number().nonnegative()).optional(),
   backendId: z.string().optional(),
   approvalDecision: z
     .object({ approvalRequestId: z.string(), verdict: z.string(), decidedAt: z.string() })
     .optional(),
-  scoreBreakdown: z.record(z.number()).optional(),
+  scoreBreakdown: z.record(z.string(), z.number()).optional(),
   // Immutable model/runtime identity. Optional for backward compatibility with
   // historical receipts; new embedding paths populate every available field.
   modelId: z.string().min(1).optional(),

@@ -92,7 +92,7 @@ export const ConstellationNodeSchema = z.object({
   label: z.string(),
   domain: z.string(),
   aliases: z.array(NodeAliasSchema).default([]),
-  properties: z.record(z.unknown()).default({}),
+  properties: z.record(z.string(), z.unknown()).default({}),
   provenance: ProvenanceSchema,
   freshness: z.object({
     lastUpdatedAt: z.string().datetime(),
@@ -129,7 +129,7 @@ export const ConstellationEdgeSchema = z.object({
   confidence: z.number().min(0).max(1).default(1),
   evidenceLinks: z.array(z.string()).default([]),
   activeStatus: z.boolean().default(true),
-  properties: z.record(z.unknown()).default({}),
+  properties: z.record(z.string(), z.unknown()).default({}),
   linkedTraces: z.array(z.string()).default([]),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

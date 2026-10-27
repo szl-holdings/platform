@@ -433,9 +433,9 @@ serverRegistry.register({
 
 const SubmitRunSchema = z.object({
   workflowId: z.string().min(1),
-  input: z.record(z.unknown()).default({}),
+  input: z.record(z.string(), z.unknown()).default({}),
   mode: z.enum(['live', 'dry-run']).default('live'),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const GetRunSchema = z.object({
@@ -1322,7 +1322,7 @@ async function handleDisableServer(rawParams: unknown): Promise<ToolResult> {
 const AgentDelegateSchema = z.object({
   targetAgentId: z.string().min(1),
   taskDescription: z.string().min(1),
-  context: z.record(z.unknown()).optional().default({}),
+  context: z.record(z.string(), z.unknown()).optional().default({}),
   urgency: z.enum(['low', 'medium', 'high', 'critical']).optional().default('medium'),
 });
 

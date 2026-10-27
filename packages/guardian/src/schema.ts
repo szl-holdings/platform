@@ -53,7 +53,7 @@ export const DecisionRequestSchema = z.object({
   environment: z.string().optional(),
   memoryScope: z.string().optional(),
   isExternalComms: z.boolean().optional(),
-  context: z.record(z.unknown()).default({}),
+  context: z.record(z.string(), z.unknown()).default({}),
   requestedAt: z.string().datetime().optional(),
 });
 
@@ -106,7 +106,7 @@ export const ActionRecordSchema = z.object({
   reason: z.string(),
   rollbackRequired: z.boolean().default(false),
   rollbackToken: z.string().optional(),
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).default({}),
   decidedAt: z.string().datetime(),
   executedAt: z.string().datetime().optional(),
   rolledBackAt: z.string().datetime().optional(),
@@ -123,7 +123,7 @@ export const RollbackEventSchema = z.object({
   triggeredBy: z.string(),
   reason: z.string(),
   status: z.enum(['pending', 'in-progress', 'completed', 'failed']),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
   createdAt: z.string().datetime(),
   completedAt: z.string().datetime().optional(),
 });
@@ -151,7 +151,7 @@ export const ApprovalRequestSchema = z.object({
       }),
     )
     .default([]),
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).default({}),
   expiresAt: z.string().datetime().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

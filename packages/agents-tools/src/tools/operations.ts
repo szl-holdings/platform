@@ -18,7 +18,7 @@ import {
 import { z } from 'zod';
 import { defineTool } from '../typed-tool.js';
 
-const GenericOutputSchema = z.record(z.unknown());
+const GenericOutputSchema = z.record(z.string(), z.unknown());
 
 export const metricsQueryTool = defineTool({
   manifest: METRICS_QUERY_TOOL_MANIFEST,

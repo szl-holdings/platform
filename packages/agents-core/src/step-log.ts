@@ -9,7 +9,7 @@ export const StepLogEntrySchema = z.object({
   stepName: z.string(),
   level: StepLogLevelSchema,
   message: z.string(),
-  data: z.record(z.unknown()).optional(),
+  data: z.record(z.string(), z.unknown()).optional(),
   durationMs: z.number().optional(),
   tokenCount: z.number().optional(),
   toolId: z.string().optional(),

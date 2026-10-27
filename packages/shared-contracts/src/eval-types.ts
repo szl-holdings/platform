@@ -226,7 +226,7 @@ export const EvalVerificationRequestSchema = z.object({
   resultId: z.string().uuid(),
   verifyToken: z.string().min(1).max(512),
   /** Executor config to pass to the sandboxed re-run */
-  executorConfig: z.record(z.unknown()).optional(),
+  executorConfig: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type EvalVerificationRequest = z.infer<typeof EvalVerificationRequestSchema>;

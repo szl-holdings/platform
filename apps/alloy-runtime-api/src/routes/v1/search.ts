@@ -78,7 +78,7 @@ const HybridSearchSchema = z.object({
   query: z.string().min(1),
   topK: z.number().int().positive().max(100).default(10),
   candidatePool: z.number().int().positive().default(100).optional(),
-  metadataFilter: z.record(z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])).optional(),
+  metadataFilter: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])).optional(),
   profileId: z.string().optional(),
   scoreThreshold: z.number().min(0).max(1).optional(),
   // AEF fields accepted but not used by keyword-only pipeline
@@ -86,7 +86,7 @@ const HybridSearchSchema = z.object({
   keywordWeight: z.number().min(0).max(1).optional(),
   rerankEnabled: z.boolean().optional(),
   includeProvenance: z.boolean().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 // ─── Canonical retrieval path for keyword-only pipeline ───────────────────────

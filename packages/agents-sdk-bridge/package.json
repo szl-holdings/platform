@@ -51,7 +51,7 @@
     }
   },
   "dependencies": {
-    "@openai/agents": "^0.0.15",
+    "@openai/agents": "0.2.1",
     "@workspace/cognitive-observability": "workspace:*",
     "@workspace/trace-graph": "workspace:*",
     "@workspace/tool-mesh": "workspace:*",

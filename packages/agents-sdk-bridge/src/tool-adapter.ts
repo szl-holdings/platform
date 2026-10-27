@@ -81,7 +81,7 @@ function jsonSchemaNodeToZod(node: JsonSchemaNode): z.ZodTypeAny {
     const required = Array.isArray(node['required']) ? (node['required'] as string[]) : [];
 
     if (!properties || Object.keys(properties).length === 0) {
-      return withDescription(z.record(z.unknown()));
+      return withDescription(z.record(z.string(), z.unknown()));
     }
 
     const shape: Record<string, z.ZodTypeAny> = {};

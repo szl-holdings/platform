@@ -34,6 +34,7 @@ export const COMPONENT_DEFINITIONS = Object.freeze([
       'lib/api-spec/openapi.yaml',
       'lib/api-spec/orval.config.ts',
       'lib/api-spec/scripts/codegen.mjs',
+      'lib/api-spec/scripts/normalize-zod-coercion.mjs',
     ],
   },
   {

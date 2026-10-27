@@ -25,7 +25,7 @@ export const chatBodySchema = z.object({
   sessionId: z.string().optional(),
   model: z.string().optional(),
   systemPrompt: z.string().max(8192).optional(),
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 });
 export type ChatBody = z.infer<typeof chatBodySchema>;
 
@@ -33,7 +33,7 @@ export const analyzeBodySchema = z.object({
   content: z.string().min(1).max(65536),
   analysisType: z.string().min(1).max(64),
   domain: aiDomainSchema.optional(),
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 });
 export type AnalyzeBody = z.infer<typeof analyzeBodySchema>;
 
@@ -41,7 +41,7 @@ export const recommendBodySchema = z.object({
   entityType: z.string().min(1).max(64),
   entityId: z.union([z.string(), z.number()]),
   domain: aiDomainSchema.optional(),
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 });
 export type RecommendBody = z.infer<typeof recommendBodySchema>;
 
