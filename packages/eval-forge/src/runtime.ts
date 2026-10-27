@@ -29,6 +29,18 @@ export function getEvalRunSink(): EvalRunSink | null {
   return evalRunSink;
 }
 
+function executionProvenance(metadata?: Record<string, unknown>) {
+  const source = metadata?.source;
+  const reason = metadata?.reason;
+  return {
+    source: source === 'heuristic-fallback' || source === 'model-infer' ? source : 'unknown',
+    ...(source === 'heuristic-fallback' &&
+      (reason === 'no-infer-fn' || reason === 'json-parse-failed' || reason === 'infer-failed')
+      ? { reason }
+      : {}),
+  };
+}
+
 export async function runEvalSuite(
   suite: EvalSuiteDef,
   executor: EvalExecutor,
@@ -62,8 +74,10 @@ export async function runEvalSuite(
 
   const runOne = async (c: EvalCase): Promise<EvalCaseResult> => {
     const expectedOutcome = c.expectedOutcome ?? 'pass';
+    let provenance = executionProvenance();
     try {
       const result = await executor(c.input, c.id, c.domain);
+      provenance = executionProvenance(result.metadata);
       const trace = traceStore?.get(c.traceId ?? result.traceId ?? '');
       const grader = getGrader(c.graderType);
       const graderResult = await grader({
@@ -103,7 +117,7 @@ export async function runEvalSuite(
         model: result.model,
         traceId: c.traceId ?? result.traceId,
         failureReason: graderResult.failureReason,
-        graderDetails: graderResult.details,
+        graderDetails: { ...graderResult.details, executionProvenance: provenance },
         tags: c.tags,
       };
     } catch (err) {
@@ -123,6 +137,7 @@ export async function runEvalSuite(
         tokensUsed: 0,
         costUsd: 0,
         failureReason: err instanceof Error ? err.message : String(err),
+        graderDetails: { executionProvenance: provenance },
         tags: c.tags,
       };
     }

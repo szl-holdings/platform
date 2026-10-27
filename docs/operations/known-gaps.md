@@ -1465,6 +1465,21 @@ still exits nonzero. Full native exact-head CI, protected merge, deployment and
 runtime qualification remain **BLOCKED** pending their own gates. See the
 [source proof packet](../../audit/ZOD4_COMPATIBILITY_SECURITY_2026-10-23.md).
 
+
+### 2026-10-23 — Eval Forge grading acceptance
+The scoped grading candidate makes requested refusal a separate pass condition,
+rejects invalid supplied normalized scores, and retains selected executor
+fallback provenance in case results. See the
+[local grading evidence packet](../../audit/EVAL_FORGE_GRADING_LOCAL_20261023.md)
+for commands, original-source negative controls and SIMULATED test results.
+This source change does not establish model quality or deployment readiness.
+Required/advisory policy classification remains unresolved. Aggregate metrics
+still consume raw citation accuracy and confidence independently of grader
+validation; report-wide numeric validation remains a separate gap. Full
+monorepo checks, declared dependency-lock qualification, provider inference,
+deployed consumer readback and persistent report storage are not qualified by
+the local grading tests. Historical status registers remain unchanged.
+
 ### 2026-10-25 native Zod follow-up candidate
 
 **MEASURED — PLATFORM-963-ZOD4-FOLLOWUP-20261025:** focused local verification
