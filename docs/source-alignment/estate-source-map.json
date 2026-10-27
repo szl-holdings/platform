@@ -1,0 +1,212 @@
+{
+  "schema": "szl.github-hf-source-alignment/v1",
+  "generated_at": "2026-10-27",
+  "organization": {
+    "github": "szl-holdings",
+    "huggingface": "SZLHOLDINGS"
+  },
+  "policy": {
+    "github_role": "canonical_source",
+    "source_ref": "protected_main",
+    "huggingface_role": "runtime_mirror_or_release_artifact",
+    "required_binding": [
+      "exact_github_sha",
+      "runtime_or_artifact_source_witness"
+    ],
+    "publication_authority": "repository_owned_workflow_only",
+    "prohibited": [
+      "manual_huggingface_source_edits",
+      "copying_secrets",
+      "publishing_unreviewed_weights",
+      "claiming_runtime_readiness_from_http_200"
+    ]
+  },
+  "components": [
+    {
+      "id": "platform",
+      "lifecycle": "active",
+      "github": {
+        "repository": "szl-holdings/platform",
+        "ref": "main",
+        "source_paths": {
+          "backend": [
+            "apps/eval-runner/src/main.py",
+            "apps/verify-api/server.py",
+            "packages"
+          ],
+          "frontend": [
+            "package.json",
+            "apps",
+            "packages"
+          ],
+          "tests": [
+            "tests",
+            "packages/*/tests"
+          ]
+        }
+      },
+      "huggingface": {
+        "targets": [],
+        "role": "shared_source_substrate",
+        "sync_contract": "flagship builds consume pinned package revisions from the monorepo"
+      }
+    },
+    {
+      "id": "a11oy",
+      "lifecycle": "active",
+      "github": {
+        "repository": "szl-holdings/a11oy",
+        "ref": "main",
+        "source_paths": {
+          "backend": [
+            "serve.py",
+            "oro/api.py",
+            "a11oy_markets.py",
+            "requirements-runtime.txt"
+          ],
+          "frontend": [
+            "web",
+            "package.json"
+          ],
+          "tests": [
+            "tests"
+          ]
+        }
+      },
+      "huggingface": {
+        "targets": [
+          {
+            "id": "SZLHOLDINGS/a11oy",
+            "type": "space",
+            "role": "runtime_mirror"
+          },
+          {
+            "id": "SZLHOLDINGS/SZL-Khipu-1.5B",
+            "type": "model",
+            "role": "release_artifact"
+          },
+          {
+            "id": "SZLHOLDINGS/SZL-Forge-1.5B-ReceiptAgent",
+            "type": "model",
+            "role": "release_artifact"
+          },
+          {
+            "id": "SZLHOLDINGS/a11oy-verifiable-corpus",
+            "type": "dataset",
+            "role": "evidence_artifact"
+          },
+          {
+            "id": "SZLHOLDINGS/szl-lake",
+            "type": "dataset",
+            "role": "evidence_artifact"
+          }
+        ],
+        "role": "pinned_runtime_and_release_artifacts",
+        "sync_contract": "publish only from reviewed GitHub revisions with an exact source witness"
+      }
+    },
+    {
+      "id": "david-leads",
+      "lifecycle": "active",
+      "github": {
+        "repository": "szl-holdings/david-leads",
+        "ref": "main",
+        "source_paths": {
+          "backend": [
+            "backend/main.py",
+            "backend/requirements.txt",
+            "app/server.py"
+          ],
+          "frontend": [
+            "app/static",
+            "backend/static",
+            "Dockerfile"
+          ],
+          "tests": [
+            "tests"
+          ]
+        }
+      },
+      "huggingface": {
+        "targets": [
+          {
+            "id": "SZLHOLDINGS/david-leads",
+            "type": "space",
+            "role": "runtime_mirror"
+          },
+          {
+            "id": "SZLHOLDINGS/david-leads-data",
+            "type": "dataset",
+            "role": "bounded_public_data_artifact"
+          }
+        ],
+        "role": "pinned_runtime_and_data_artifact",
+        "sync_contract": "hf-deploy.yml publishes the reviewed GitHub revision and probes the runtime source witness"
+      }
+    },
+    {
+      "id": "szl-frontier",
+      "lifecycle": "active",
+      "github": {
+        "repository": "szl-holdings/szl-frontier",
+        "ref": "main",
+        "source_paths": {
+          "backend": [
+            "python",
+            "pyproject.toml"
+          ],
+          "frontend": [
+            "package.json",
+            "src"
+          ],
+          "tests": [
+            "tests"
+          ]
+        }
+      },
+      "huggingface": {
+        "targets": [
+          {
+            "id": "SZLHOLDINGS/szl-frontier",
+            "type": "space",
+            "role": "runtime_mirror"
+          }
+        ],
+        "role": "pinned_runtime_mirror",
+        "sync_contract": "retain source SHA and runtime readiness labels"
+      }
+    },
+    {
+      "id": "szl-command-lab",
+      "lifecycle": "active",
+      "github": {
+        "repository": "szl-holdings/szl-command-lab",
+        "ref": "main",
+        "source_paths": {
+          "backend": [
+            "server",
+            "gateway.py"
+          ],
+          "frontend": [
+            "package.json",
+            "src"
+          ],
+          "tests": [
+            "tests"
+          ]
+        }
+      },
+      "huggingface": {
+        "targets": [
+          {
+            "id": "SZLHOLDINGS/szl-command-lab",
+            "type": "space",
+            "role": "runtime_mirror"
+          }
+        ],
+        "role": "pinned_runtime_mirror",
+        "sync_contract": "hf-sync publishes from default-branch tip and probes /api/build-info"
+      }
+    }
+  ]
+}
