@@ -42,6 +42,24 @@ _RECEIPT_FIELDS = frozenset({
 })
 
 
+def _receipt_number(value: Any, label: str) -> Any:
+    """Return a ts/yuyay value unchanged, or raise ValueError if it is out of contract.
+
+    Receipts are signed over these values exactly as JSON writes them, so an int must
+    stay an int (``1`` and ``1.0`` hash differently) and a large int must keep every
+    digit. Booleans, non-numbers, NaN/inf and ints beyond float range are refused.
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{label} is malformed")
+    try:
+        finite = math.isfinite(value)
+    except OverflowError:  # int too large to convert to float
+        finite = False
+    if not finite:
+        raise ValueError(f"{label} is malformed")
+    return value
+
+
 def _receipt_record(receipt: KhipuReceipt) -> Dict[str, Any]:
     """Return the versioned, signed receipt record written to the durable store."""
     return {
@@ -91,12 +109,8 @@ def _restore_receipt(blob: bytes, expected_id: str) -> KhipuReceipt:
             or any(not isinstance(parent, str) or not parent for parent in parents)
             or len(set(parents)) != len(parents)):
         raise ValueError("persisted receipt parents are malformed")
-    if (not isinstance(record["ts"], (int, float))
-            or isinstance(record["ts"], bool) or not math.isfinite(float(record["ts"]))):
-        raise ValueError("persisted receipt timestamp is malformed")
-    if (not isinstance(record["yuyay"], (int, float))
-            or isinstance(record["yuyay"], bool) or not math.isfinite(float(record["yuyay"]))):
-        raise ValueError("persisted receipt yuyay is malformed")
+    ts = _receipt_number(record["ts"], "persisted receipt timestamp")
+    yuyay = _receipt_number(record["yuyay"], "persisted receipt yuyay")
     if (not isinstance(record["content_hash"], str)
             or len(record["content_hash"]) != 64
             or any(char not in "0123456789abcdef" for char in record["content_hash"])):
@@ -108,8 +122,7 @@ def _restore_receipt(blob: bytes, expected_id: str) -> KhipuReceipt:
         receipt = KhipuReceipt(
             receipt_id=record["receipt_id"], organ=record["organ"],
             action=record["action"], payload=record["payload"],
-            parents=list(parents), ts=float(record["ts"]),
-            yuyay=float(record["yuyay"]),
+            parents=list(parents), ts=ts, yuyay=yuyay,
         )
     except TypeError as exc:
         raise ValueError("installed KhipuReceipt type cannot be restored") from exc
@@ -307,12 +320,17 @@ class KhipuDAG(OrganAgent):
         """Append a new receipt. Parents must already exist (acyclic, INV-DAG).
         Returns the signed receipt; never overwrites an existing id (INV-APPEND)."""
         parents = parents or []
+        if ts is None:
+            ts = time.time()
+        # refuse values recovery would reject, so append never writes unrestorable history
+        _receipt_number(ts, "receipt timestamp")
+        _receipt_number(yuyay, "receipt yuyay")
         for p in parents:
             if p not in self.hot and p not in self.archived_ids:
                 raise ValueError(f"parent {p} does not exist (forward edge forbidden, INV-DAG)")
         r = KhipuReceipt(receipt_id=self._next_id(), organ=organ, action=action,
                          payload=payload, parents=list(parents), yuyay=yuyay,
-                         ts=ts if ts is not None else time.time())
+                         ts=ts)
         self.signer.sign(r)
         if r.receipt_id in self.hot:  # defensive: ids are monotonic, should never collide
             raise ValueError(f"id collision {r.receipt_id} (INV-APPEND violated)")
