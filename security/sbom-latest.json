@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:525e0b28-7b64-58c0-915e-92e49d5e5910",
+  "serialNumber": "urn:uuid:349415c1-4ff9-56ea-92f3-882ee097cd3f",
   "metadata": {
     "tools": [
       {
@@ -7823,8 +7823,8 @@
     {
       "type": "library",
       "name": "fast-uri",
-      "version": "3.1.8",
-      "purl": "pkg:npm/fast-uri@3.1.8"
+      "version": "3.1.9",
+      "purl": "pkg:npm/fast-uri@3.1.9"
     },
     {
       "type": "library",
