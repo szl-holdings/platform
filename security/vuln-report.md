@@ -1,6 +1,6 @@
 # Dependency Vulnerability Report
 
-**Generated:** 2026-10-11T05:12:20.613Z
+**Generated:** 2026-10-28T18:52:23.380Z
 **Policy:** unmitigated High/Critical advisories block; exact local patches must be registered, digest-bound, behavior-tested, and unexpired; Moderate/Low remain reported
 **Command:** `pnpm audit --json --audit-level=high`
 **Expected package manager:** `pnpm@10.26.1`
@@ -11,7 +11,7 @@
 **Command termination signal:** NONE
 **Audit timeout:** 120000 ms
 **Parsed schema:** legacy-advisories
-**Total dependencies reported by audit:** 1820
+**Total dependencies reported by audit:** 1818
 
 ## Blocking verdict
 
@@ -23,16 +23,18 @@ PASS — no parsed High/Critical advisory.
 |---|---:|
 | Critical | 0 |
 | High | 0 |
-| Moderate | 2 |
-| Low | 0 |
+| Moderate | 10 |
+| Low | 1 |
 
 ## Reported Moderate / Low findings
 
 | Package | Advisory | Severity | Vulnerable range |
 |---|---|---|---|
-| `sprintf-js` | [GHSA-hp3w-g68c-fv3c](https://github.com/advisories/GHSA-hp3w-g68c-fv3c) | MODERATE | `<=1.1.3` |
-
-1 Moderate/Low finding(s) were present only in pnpm's aggregate metadata for this audit-level response; their missing detail is not inferred.
+| `@vitest/mocker` | [GHSA-qxg6-89mg-rqv8](https://github.com/advisories/GHSA-qxg6-89mg-rqv8) | MODERATE | `>=2.1.0-beta.7 <4.1.12` |
+| `@vitest/mocker` | [GHSA-xp26-3454-mjgp](https://github.com/advisories/GHSA-xp26-3454-mjgp) | MODERATE | `>=4.1.11 <4.1.12` |
+| `deepmerge` | [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) | LOW | `>=4.2.0 <=4.3.1` |
+| `hono` | [GHSA-5r4p-p66f-jhc7](https://github.com/advisories/GHSA-5r4p-p66f-jhc7) | MODERATE | `>=4.12.4 <4.13.11` |
+| `ip-address` | [GHSA-rxp7-6hxx-x8q5](https://github.com/advisories/GHSA-rxp7-6hxx-x8q5) | MODERATE | `<=10.7.3` |
 
 ## Workspace overrides
 
@@ -45,9 +47,12 @@ PASS — no parsed High/Critical advisory.
 | `path-to-regexp` | `8.4.2` |
 | `serve-handler>path-to-regexp` | `3.3.0` |
 | `brace-expansion` | `5.0.12` |
+| `minimatch@3>brace-expansion` | `1.1.21` |
+| `minimatch@5>brace-expansion` | `2.1.7` |
+| `minimatch@9>brace-expansion` | `2.1.7` |
 | `braces` | `link:packages/braces-safe` |
 | `fflate` | `0.8.3` |
-| `vite` | `8.0.16` |
+| `vite` | `8.1.6` |
 | `form-data@2` | `2.5.6` |
 | `form-data@4` | `4.0.6` |
 | `lodash` | `4.18.1` |
@@ -62,17 +67,18 @@ PASS — no parsed High/Critical advisory.
 | `fast-xml-parser` | `^5.8.0` |
 | `postcss` | `8.5.23` |
 | `uuid` | `^14.0.0` |
-| `qs` | `6.16.0` |
+| `qs` | `6.16.1` |
 | `ws` | `^8.20.1` |
 | `hono` | `^4.13.5` |
 | `@hono/node-server` | `2.1.1` |
 | `browserslist` | `4.28.7` |
-| `body-parser` | `2.3.0` |
+| `body-parser` | `2.4.0` |
+| `zod` | `4.6.6` |
 | `compression` | `1.8.2` |
 | `image-size` | `link:packages/image-size-safe` |
 | `shell-quote` | `1.11.0` |
 | `source-map-js` | `1.2.2` |
-| `@modelcontextprotocol/sdk` | `1.31.0` |
+| `@modelcontextprotocol/sdk` | `1.32.0` |
 | `tsx>esbuild` | `0.28.1` |
 | `vite>esbuild` | `0.28.1` |
 | `drizzle-kit>esbuild` | `0.28.1` |
@@ -86,12 +92,12 @@ PASS — no parsed High/Critical advisory.
 | `nanoid@<4` | `3.3.18` |
 | `nanoid@>=4 <5.1.16` | `5.1.16` |
 | `ip-address` | `10.7.1` |
-| `fast-uri` | `^3.1.7` |
+| `fast-uri` | `^3.1.9` |
 | `linkify-it` | `5.0.2` |
 | `sharp` | `0.35.5` |
-| `nodemailer` | `10.0.9` |
+| `nodemailer` | `10.1.4` |
 | `@opentelemetry/propagator-jaeger` | `2.9.0` |
-| `dompurify` | `3.4.16` |
+| `dompurify` | `3.4.17` |
 | `fast-copy` | `4.1.2` |
 | `postcss-selector-parser` | `7.1.6` |
 | `@opentelemetry/instrumentation-cassandra-driver` | `0.66.0` |
