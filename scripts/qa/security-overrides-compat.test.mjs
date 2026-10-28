@@ -137,8 +137,24 @@ for (const [importerPath, importer] of rateLimitImporters) {
 test('patched Nodemailer parses addresses and composes mail entirely offline', {
   timeout: 5_000,
 }, async () => {
-  assert.equal(lock.importers?.['.']?.dependencies?.nodemailer?.version, '10.0.9');
-  assert.equal(installedPackage(rootRequire, 'nodemailer').manifest.version, '10.0.9');
+  const version = '10.1.4';
+  const manifest = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
+  const workspace = parseYaml(readFileSync(path.join(root, 'pnpm-workspace.yaml'), 'utf8'));
+  // A manifest-only bump can pass frozen installs while an older override wins.
+  assert.equal(manifest.dependencies.nodemailer, `^${version}`);
+  assert.equal(workspace.overrides.nodemailer, version);
+  assert.equal(lock.overrides.nodemailer, version);
+  assert.deepEqual(lock.importers?.['.']?.dependencies?.nodemailer, {
+    specifier: version,
+    version,
+  });
+  for (const entries of [lock.packages, lock.snapshots]) {
+    assert.deepEqual(
+      Object.keys(entries).filter((key) => key.startsWith('nodemailer@')),
+      [`nodemailer@${version}`],
+    );
+  }
+  assert.equal(installedPackage(rootRequire, 'nodemailer').manifest.version, version);
   const nodemailer = rootRequire('nodemailer');
   const addressparser = rootRequire('nodemailer/lib/addressparser');
   assert.equal(addressparser('Alice <alice@example.com>')[0].address, 'alice@example.com');
