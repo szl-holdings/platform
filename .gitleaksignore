@@ -1,12 +1,14 @@
 # Exact reviewed false-positive fingerprints only.
 #
 # The original baseline entries were observed in exact-main Security Audit runs
-# 30242431089 or 30383771723 and re-inspected on 2026-07-28.
+# 30242431089 or 30383771723 and re-inspected on 2026-07-28. The a2e582f7 ledger
+# entries were observed in exact-main run 40775573504 and re-inspected on
+# 2026-10-28; their flagged lines are byte-identical to the 137b76e5 entries.
 # No path-only, rule-family, commit-range, or future detector match is accepted.
 # A moved line, changed rule, or new commit therefore remains blocking.
 #
 # Two historical deployment documents state that no private material was
-# committed. Forty findings quote non-secret detector examples in the generated
+# committed. Forty-five findings quote non-secret detector examples in the generated
 # allowlist evidence ledger. The final five are public receipt-key identifiers or
 # a Python cryptography type name in historical documentation/source.
 #
@@ -51,6 +53,11 @@ e808c6afac87a340e4f2e4853cd4c236e5a46f53:replit-sync/uds/parity_uds_payload.md:g
 9e7cba144eb1e48dd23665bcd23f9e3110f51f3e:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
 9e7cba144eb1e48dd23665bcd23f9e3110f51f3e:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
 9e7cba144eb1e48dd23665bcd23f9e3110f51f3e:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
+a2e582f73bdd16c4a02deac2f9e0194bc95cd5c6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
+a2e582f73bdd16c4a02deac2f9e0194bc95cd5c6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
+a2e582f73bdd16c4a02deac2f9e0194bc95cd5c6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
+a2e582f73bdd16c4a02deac2f9e0194bc95cd5c6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:67
+a2e582f73bdd16c4a02deac2f9e0194bc95cd5c6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:68
 b9db2d019e2654cbf2b5d2da1ef021024d88aba6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:62
 b9db2d019e2654cbf2b5d2da1ef021024d88aba6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:65
 b9db2d019e2654cbf2b5d2da1ef021024d88aba6:security/ALLOWLIST-JUSTIFICATIONS.md:generic-api-key:66
