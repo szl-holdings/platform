@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:349415c1-4ff9-56ea-92f3-882ee097cd3f",
+  "serialNumber": "urn:uuid:dac3b1f7-947c-59ef-9fe9-83aa9d8ae098",
   "metadata": {
     "tools": [
       {
@@ -9653,8 +9653,8 @@
     {
       "type": "library",
       "name": "nodemailer",
-      "version": "10.0.9",
-      "purl": "pkg:npm/nodemailer@10.0.9"
+      "version": "10.1.4",
+      "purl": "pkg:npm/nodemailer@10.1.4"
     },
     {
       "type": "library",
