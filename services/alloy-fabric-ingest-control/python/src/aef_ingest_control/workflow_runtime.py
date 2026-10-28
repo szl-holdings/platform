@@ -126,14 +126,19 @@ class FileApprovalStore(_FileMapStore):
 
 
 class CheckpointStore(Protocol):
-    def save(self, checkpoint: Record) -> None: ...
-    def load(self, workflow_id: str) -> Record | None: ...
-    def delete(self, workflow_id: str) -> bool: ...
+    def save(self, checkpoint: Record) -> None:
+        pass
+    def load(self, workflow_id: str) -> Record | None:
+        pass
+    def delete(self, workflow_id: str) -> bool:
+        pass
 
 
 class ApprovalStore(Protocol):
-    def create(self, request: Record) -> None: ...
-    def get(self, approval_id: str) -> Record | None: ...
+    def create(self, request: Record) -> None:
+        pass
+    def get(self, approval_id: str) -> Record | None:
+        pass
 
 
 def create_approval_request(workflow_id: str, kind: str, context: Record | None = None) -> Record:
@@ -151,8 +156,10 @@ def create_approval_request(workflow_id: str, kind: str, context: Record | None 
 
 
 class ChunkTokenizer(Protocol):
-    def encode(self, text: str) -> list[int]: ...
-    def decode(self, ids: list[int]) -> str: ...
+    def encode(self, text: str) -> list[int]:
+        pass
+    def decode(self, ids: list[int]) -> str:
+        pass
 
 
 def ingestion_planner(ctx: Record, inp: Record) -> Record:
