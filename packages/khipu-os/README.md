@@ -27,6 +27,14 @@ rebuilds child links, verifies every signature, and rejects legacy, malformed,
 missing-parent, duplicate, or cyclic records before exposing the DAG. Recovery
 is fail-closed; it never invents a receipt or silently drops persisted history.
 
+Append uses the same receipt-shape contract: nonempty string organ/action,
+an object payload, and a list of unique, nonempty string parent IDs. `None`
+and an empty parent list are valid roots. Malformed shapes are rejected before
+allocating an ID, signing, or changing durable/in-memory state. Parent IDs must
+already exist in the hot or cold graph. Numeric fields retain their exact signed
+types and values. This contract does not make arbitrary payload serialization
+or storage failures transactional.
+
 The SQLite and LMDB stores preserve receipt bytes during hot-to-cold projection.
 Call `dag.close()` during orderly shutdown.
 

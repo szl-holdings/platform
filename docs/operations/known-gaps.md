@@ -29,6 +29,19 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### KHIPU-SHAPE-20261029 — candidate append/recovery consistency repair
+
+MEASURED at base `e1a04aa20ecad715921dec6aa4a0c29f6c90d985`: Khipu-OS append
+accepted malformed receipt shapes, including duplicate parents, that restart
+recovery rejects. The candidate shares shape validation before ID allocation,
+signing, persistence, or graph mutation. Local actual-package tests changed from
+50 failing / 62 passing to 112 passing, including SQLite fresh-process recovery
+and unchanged valid signed bytes. This is a bounded source-candidate result.
+Full-monorepo `pnpm typecheck` and exact-head hosted CI remain NOT RUN; arbitrary
+payload serialization/storage transactionality remains outside this repair.
+No runtime, release or production readiness is implied. See the
+[scoped Proof Packet](../../audit/KHIPU_WRITE_RECOVERY_20261029.md).
+
 ### AUDIT-FINDINGS-20261023 — candidate legacy audit parser repair
 
 MEASURED pinned pnpm 10.26.1 output contains four High finding records grouped

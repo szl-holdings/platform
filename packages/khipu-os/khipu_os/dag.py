@@ -60,6 +60,21 @@ def _receipt_number(value: Any, label: str) -> Any:
     return value
 
 
+def _validate_receipt_shape(organ: Any, action: Any, payload: Any,
+                            parents: Any, *, persisted: bool = False) -> None:
+    """Keep append and recovery on the same identity, payload and parent contract."""
+    label = "persisted receipt" if persisted else "receipt"
+    if any(not isinstance(value, str) or not value for value in (organ, action)):
+        identity = "identity or signature" if persisted else "identity"
+        raise ValueError(f"{label} {identity} is malformed")
+    if not isinstance(payload, dict):
+        raise ValueError(f"{label} payload is not an object")
+    if (not isinstance(parents, list)
+            or any(not isinstance(parent, str) or not parent for parent in parents)
+            or len(set(parents)) != len(parents)):
+        raise ValueError(f"{label} parents are malformed")
+
+
 def _receipt_record(receipt: KhipuReceipt) -> Dict[str, Any]:
     """Return the versioned, signed receipt record written to the durable store."""
     return {
@@ -99,16 +114,11 @@ def _restore_receipt(blob: bytes, expected_id: str) -> KhipuReceipt:
         raise ValueError("persisted receipt fields are incomplete or unknown")
     if record["receipt_id"] != expected_id or not isinstance(record["receipt_id"], str):
         raise ValueError("persisted receipt id does not match its store key")
-    if any(not isinstance(record[key], str) or not record[key]
-           for key in ("organ", "action", "signature")):
+    if not isinstance(record["signature"], str) or not record["signature"]:
         raise ValueError("persisted receipt identity or signature is malformed")
-    if not isinstance(record["payload"], dict):
-        raise ValueError("persisted receipt payload is not an object")
     parents = record["parents"]
-    if (not isinstance(parents, list)
-            or any(not isinstance(parent, str) or not parent for parent in parents)
-            or len(set(parents)) != len(parents)):
-        raise ValueError("persisted receipt parents are malformed")
+    _validate_receipt_shape(record["organ"], record["action"], record["payload"],
+                            parents, persisted=True)
     ts = _receipt_number(record["ts"], "persisted receipt timestamp")
     yuyay = _receipt_number(record["yuyay"], "persisted receipt yuyay")
     if (not isinstance(record["content_hash"], str)
@@ -319,10 +329,11 @@ class KhipuDAG(OrganAgent):
                     ts: Optional[float] = None) -> KhipuReceipt:
         """Append a new receipt. Parents must already exist (acyclic, INV-DAG).
         Returns the signed receipt; never overwrites an existing id (INV-APPEND)."""
-        parents = parents or []
+        parents = [] if parents is None else parents
+        _validate_receipt_shape(organ, action, payload, parents)
         if ts is None:
             ts = time.time()
-        # refuse values recovery would reject, so append never writes unrestorable history
+        # Reject invalid numeric fields before allocating an id or signing.
         _receipt_number(ts, "receipt timestamp")
         _receipt_number(yuyay, "receipt yuyay")
         for p in parents:
