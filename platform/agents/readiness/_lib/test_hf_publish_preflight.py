@@ -294,7 +294,11 @@ class SecurityPreflightWorkflowTest(unittest.TestCase):
         self.assertRegex(preflight_step, rf"(?m)^        run: {re.escape(paths[2])}$")
         for step in (preflight_step, executor_step):
             self.assertRegex(step, r"(?m)^          HF_TOKEN: \$\{\{ secrets\.HF_TOKEN \}\}$")
-        self.assertNotRegex(text, r"(?m)^\s*(?:if|continue-on-error):")
+        self.assertNotRegex(text, r"(?m)^\s*continue-on-error:")
+        self.assertEqual(re.findall(r"(?m)^\s*if:.*$", text), ["        if: always()"])
+        retain = text.split("      - name: Retain readiness receipt", 1)[1]
+        self.assertNotIn("HF_TOKEN", retain)
+        self.assertNotIn("secrets.", retain)
 
 
 if __name__ == "__main__":
