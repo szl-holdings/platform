@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { DARPA_MTO_DOMAINS, CYBER_AI_REPOS, type ResearchDomain } from '@/data/darpa-mto-research';
+import { DARPA_WITNESS_BOUNDARY } from '@/data/darpa-witness-boundary';
 
 const STATUS_BADGE: Record<ResearchDomain['status'], { label: string; color: string }> = {
   incubation: { label: 'Incubation', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
@@ -225,6 +226,9 @@ export default function DarpaMtoHub() {
           </div>
           <p className="text-[13px] text-white/35">
             {DARPA_MTO_DOMAINS.length} DARPA Microsystems Technology Office research domains mapped to a11oy cybersecurity applications
+          </p>
+          <p className="text-[12px] text-white/45 mt-2 max-w-3xl">
+            {DARPA_WITNESS_BOUNDARY.sentence}
           </p>
         </div>
         <div className="flex items-center gap-1.5">
