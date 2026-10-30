@@ -26,6 +26,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 import types
 import unittest
 import unittest.mock
@@ -377,6 +378,56 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertIn("unsigned receipt", text)
         self.assertEqual(_FakeHfApi.uploads, [])
 
+    def test_receipt_file_is_opt_in_and_excludes_the_signing_seed(self) -> None:
+        env = self._signed_env()
+        seed = env["KHIPU_SIGNING_KEY_B64"]
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            text, result, code = self._emit(env)
+            self.assertIsNone(code)
+            self.assertTrue(result["receipt"]["signed"])
+            self.assertEqual(list(folder.iterdir()), [])
+            target = folder / "receipt.json"
+            env["READINESS_RECEIPT_PATH"] = str(target)
+            text, result, code = self._emit(env)
+            self.assertIsNone(code)
+            body = target.read_text(encoding="utf-8")
+            self.assertEqual(body, text)
+            self.assertNotIn(seed, body)
+            self.assertNotIn("KHIPU_SIGNING_KEY_B64", body)
+
+    def test_unsigned_receipt_is_retained_before_the_publish_gate(self) -> None:
+        env = {"GITHUB_ACTIONS": "true", "HF_TOKEN": "test-token"}
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "receipt.json"
+            env["READINESS_RECEIPT_PATH"] = str(target)
+            text, _result, code = self._emit(env)
+            self.assertEqual(code, 1)
+            body = target.read_text(encoding="utf-8")
+            self.assertTrue(text.startswith(body))
+            self.assertIn('"signed": false', body)
+            self.assertIn('"reason": "unsigned receipt"', body)
+            self.assertNotIn("::error", body)
+            self.assertIn("::error title=readiness publish failed::", text)
+            self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_receipt_write_error_still_fails_the_publish_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            missing = Path(directory) / "missing" / "receipt.json"
+            env = {
+                "GITHUB_ACTIONS": "true",
+                "HF_TOKEN": "test-token",
+                "READINESS_RECEIPT_PATH": str(missing),
+            }
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                text, _result, code = self._emit(env)
+            self.assertEqual(code, 1)
+            self.assertIn("unsigned receipt", text)
+            self.assertIn("readiness receipt file was not retained", err.getvalue())
+            self.assertNotIn(str(missing), err.getvalue())
+            self.assertFalse(missing.exists())
+
     def test_invalid_signing_key_fails_actions_without_upload(self) -> None:
         env = self._signed_env()
         env["KHIPU_SIGNING_KEY_B64"] = "invalid-base64!"
@@ -513,6 +564,40 @@ class FleetWorkflowContractTest(unittest.TestCase):
             gap = min(abs(a - b), 1440 - abs(a - b))
             if agent_a != agent_b:
                 self.assertGreaterEqual(gap, MIN_GAP_MINUTES, (agent_a, a, agent_b, b))
+
+    def test_named_lanes_retain_the_public_receipt(self) -> None:
+        retained = {
+            "readiness-security",
+            "readiness-compliance",
+            "readiness-reliability",
+            "readiness-observability",
+            "readiness-operability",
+        }
+        for agent, text in self.text.items():
+            with self.subTest(agent=agent):
+                if agent not in retained:
+                    self.assertNotIn("READINESS_RECEIPT_PATH", text)
+                    self.assertNotIn("actions/upload-artifact", text)
+                    continue
+                executor = text.find(f"platform/agents/readiness/{agent}/executor.py")
+                path_at = text.find(
+                    "READINESS_RECEIPT_PATH: ${{ github.workspace }}/readiness-receipt.json"
+                )
+                upload = text.find(
+                    "uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2"
+                )
+                self.assertGreaterEqual(path_at, 0)
+                self.assertLess(path_at, executor)
+                self.assertLess(executor, upload)
+                self.assertIn("actions: write", text)
+                self.assertIn("if: always()", text)
+                self.assertIn("if-no-files-found: warn", text)
+                self.assertIn("retention-days: 14", text)
+                self.assertIn(f"name: {agent}-receipt", text)
+                retain = text.split("      - name: Retain readiness receipt", 1)[1]
+                self.assertNotIn("HF_TOKEN", retain)
+                self.assertNotIn("secrets.", retain)
+                self.assertNotIn("KHIPU", retain)
 
     def test_audit_rift_runs_after_every_daily_agent(self) -> None:
         daily = {}
