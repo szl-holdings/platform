@@ -271,12 +271,32 @@ def require_published(results: list[dict], what: str) -> None:
         raise SystemExit(1)
 
 
+def _write_receipt_copy(text: str) -> None:
+    """Write the public receipt when a workflow sets READINESS_RECEIPT_PATH.
+
+    The copy is the same JSON already printed. It does not include the
+    signing seed. A missing variable writes nothing. An OS error is reported
+    with a fixed sentence so the publish gate still runs.
+    """
+    receipt_path = os.environ.get("READINESS_RECEIPT_PATH")
+    if not receipt_path:
+        return
+    target = os.path.abspath(receipt_path)
+    try:
+        descriptor = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(text)
+    except OSError:
+        print("readiness receipt file was not retained", file=sys.stderr)
+
+
 def emit(agent: str, payload: dict) -> dict:
     """Sign + verify + publish + print; fail Actions if either gate fails."""
     env = sign_khipu_receipt(agent, payload)
     pub = publish_to_hf(agent, env)
     out = {"receipt": env, "publish": pub}
-    json.dump(out, sys.stdout, indent=2)
-    sys.stdout.write("\n")
+    text = json.dumps(out, indent=2) + "\n"
+    sys.stdout.write(text)
+    _write_receipt_copy(text)
     require_published([pub], what=f"{agent} receipt")
     return out
