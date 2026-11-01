@@ -1488,3 +1488,16 @@ shape-access regressions. A factory isolates per-manifest sensitive-field
 arrays. Native current-head CI and protected release remain **BLOCKED** pending
 their own results. No provider/runtime capability is inferred. See the
 [native follow-up proof](../../audit/ZOD4_NATIVE_FOLLOWUP_2026-10-25.md).
+
+### CANONICAL-KEYS-20261101 — state-native own-key integrity candidate
+
+MEASURED local regressions show that an own `__proto__` JSON key was omitted by
+the ordinary-object normalization accumulator, so different request parameters
+could share canonical bytes and receipt verification could ignore an added key.
+The candidate uses a null-prototype accumulator. Four regression expectations
+fail against original source; the patched state-native suite passes 50/50 and
+scoped strict TypeScript compilation passes. Monorepo typecheck remains blocked
+by missing workspace dependencies. Existing artifacts containing such keys need
+reassessment under the corrected digest; no lossy compatibility fallback is
+introduced. Protected review, hosted checks and any deployed verification remain
+outstanding. See the [bounded proof packet](../../audit/STATE_NATIVE_CANONICAL_KEYS_20261101.md).
