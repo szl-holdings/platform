@@ -42,6 +42,7 @@ Changed paths:
 - `packages/a11oy-runtime/test/state-native-receipt-integrity.test.mjs`
 - `docs/operations/known-gaps.md`
 - `CHANGELOG.md` (Unreleased compatibility note, added after contribution review)
+- `audit/STATE_NATIVE_CANONICAL_KEYS_20261101.results.json` (scoped runner record)
 - This proof packet
 
 ## Measured local validation
@@ -56,9 +57,9 @@ monorepo. Tools: Node `24.22.1`, pnpm `10.26.1`, TypeScript `6.0.3`,
 | Initial global `pnpm typecheck` | 1 | Global pnpm 11.25.0 rejected by required 10.26.1 engine |
 | `node toolchain/node_modules/pnpm/bin/pnpm.cjs typecheck`, before and after | 1 | `turbo: not found`; workspace dependencies absent; unchanged environment blocker |
 | `node toolchain/node_modules/typescript/bin/tsc -p evidence/tsconfig.state-native.json`, original and patched source | 0 | Strict compilation of all state-native source files passed |
-| `node --test packages/a11oy-runtime/test/state-native-*.test.mjs`, original tests/source | 0 | 47 passed, 0 failed, 0 skipped |
-| `node --test packages/a11oy-runtime/test/state-native-receipt-integrity.test.mjs`, new tests against original compiled source | 1 | 4 failed, 1 passed; each new integrity expectation reproduced the defect |
-| `node --test packages/a11oy-runtime/test/state-native-*.test.mjs`, patched source | 0 | 50 passed, 0 failed, 0 skipped; repeated after test formatting |
+| `node --test packages/a11oy-runtime/test/state-native-*.test.mjs`, original tests/source | 0 | 47 / 47 state-native cases passed; zero failures or skips |
+| `node --test packages/a11oy-runtime/test/state-native-receipt-integrity.test.mjs`, new tests against original compiled source | 1 | 1 / 5 state-native cases passed; four expected regression failures reproduced the defect |
+| `node --test packages/a11oy-runtime/test/state-native-*.test.mjs`, patched source | 0 | 50 / 50 state-native cases passed; zero failures or skips; repeated after test formatting |
 | Biome format on changed test file, using repository configuration | 0 | Formatted one file |
 | Biome lint on the two changed code files, using repository configuration | 0 | No diagnostics |
 | oxlint on the two changed code files, using repository configuration | 0 | 0 warnings, 0 errors |
@@ -70,6 +71,12 @@ The temporary scoped TypeScript config extends the unchanged runtime
 types in the isolated toolchain. It does not weaken compiler options. The
 remaining workspace-dependent runtime source, Vitest suite, and full monorepo
 build/test/typecheck were not executed. Hosted candidate checks remain required.
+
+The [structured scoped results](STATE_NATIVE_CANONICAL_KEYS_20261101.results.json)
+retain exact counts, commands, runtime versions, source identities and runner
+output digests. These are subsystem results. The canonical `platform_tests`
+metric remains `UNAVAILABLE` with null passed/total values; this repair does
+not update that metric or claim a full platform test pass.
 
 ## Verification and boundaries
 
@@ -110,3 +117,16 @@ the existing main CI/build checks and `Deploy — Staging` workflow. This candid
 does not dispatch, merge, configure or authorize a deployment, change rulesets,
 or claim a verified commit signature. Protected admission and deployment
 authorization remain separate requirements. No human review is claimed.
+
+## Proof-format followup
+
+The original [truth-drift run](https://github.com/szl-holdings/platform/actions/runs/41363904352)
+rejected the unqualified count wording in this table as canonical platform
+test claims. The followup qualifies each result as state-native runner cases
+and supplies the structured command/source/runtime record linked above. The
+unchanged claims guard reports no failures for the changed Markdown when run
+with the actual canonical metrics and original baseline claim identities.
+This is a scoped local guard check; the full hosted workflow must rerun.
+No scanner, allowlist, metric, registry or result classification was changed.
+The known-gap entry was relocated below the current backend-topology boundary
+to avoid conflicting with another candidate's append at the end of the register.

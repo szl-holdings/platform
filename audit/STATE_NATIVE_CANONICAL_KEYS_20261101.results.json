@@ -1,0 +1,191 @@
+{
+  "record_type": "scoped_local_validation",
+  "workcell_id": "CANONICAL-20261101",
+  "recorded_at": "2026-11-01T23:45:21Z",
+  "repository": "szl-holdings/platform",
+  "scope": {
+    "package": "packages/a11oy-runtime",
+    "runtime_sources": "src/state-native/**/*.ts",
+    "test_selector": "test/state-native-*.test.mjs",
+    "execution_environment": "local scoped source materialization; synthetic data and ephemeral generated keys",
+    "excluded": [
+      "full monorepo test/build/typecheck",
+      "workspace-dependent runtime Vitest suite",
+      "deployment",
+      "provider or production execution"
+    ]
+  },
+  "runtime": {
+    "node": "24.22.1",
+    "typescript": "6.0.3",
+    "node_types": "25.3.5",
+    "pnpm": "10.26.1"
+  },
+  "implementation_commit": "21b76edebf8fbbc5a5943a6124272b2aa58971a0",
+  "base_commit": "a465a0aa182f5eb88bdf3131372ca7a9b8199e87",
+  "implementation_blobs": {
+    "packages/a11oy-runtime/src/state-native/canonical.ts": "f372be2048b9c6ccd7738390a4363e96741746f1",
+    "packages/a11oy-runtime/test/state-native-receipt-integrity.test.mjs": "5635d888bd9d8fbb24c351f350238f4ee54ac226"
+  },
+  "canonical_platform_metric": {
+    "file": "artifacts/SOURCE_OF_TRUTH.json",
+    "source_commit": "21b76edebf8fbbc5a5943a6124272b2aa58971a0",
+    "platform_tests": {
+      "passed": null,
+      "total": null,
+      "label": "UNAVAILABLE",
+      "source": "artifacts/test-results.json"
+    },
+    "updated_by_this_record": false
+  },
+  "results": [
+    {
+      "id": "original_state_native_suite",
+      "command": "node --test packages/a11oy-runtime/test/state-native-*.test.mjs",
+      "working_directory": "repository root",
+      "source_commit": "a465a0aa182f5eb88bdf3131372ca7a9b8199e87",
+      "source_boundary": "Original test and runtime source at base.",
+      "exit_code": 0,
+      "outcome": "SCOPED_PASS",
+      "counts": {
+        "total": 47,
+        "passed": 47,
+        "failed": 0,
+        "skipped": 0
+      },
+      "output_sha256": "7ec77a026bc2789fabc466c51ca9fe12333765148e004aa7fdc4c7fb9ca879f7",
+      "runner_summary": [
+        "\u2139 tests 47",
+        "\u2139 suites 0",
+        "\u2139 pass 47",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 510.147014"
+      ]
+    },
+    {
+      "id": "regression_negative_control",
+      "command": "node --test packages/a11oy-runtime/test/state-native-receipt-integrity.test.mjs",
+      "working_directory": "repository root",
+      "source_commit": "a465a0aa182f5eb88bdf3131372ca7a9b8199e87",
+      "source_boundary": "Original compiled runtime with newly added regression assertions before formatting. Expected failure; not a successful runtime result.",
+      "exit_code": 1,
+      "outcome": "EXPECTED_FAILURE",
+      "counts": {
+        "total": 5,
+        "passed": 1,
+        "failed": 4,
+        "skipped": 0
+      },
+      "output_sha256": "a0f540bd3864c4fe3d758f21edfc2a6031622a688e48c7c8e25e33703124fdc0",
+      "runner_summary": [
+        "\u2139 tests 5",
+        "\u2139 suites 0",
+        "\u2139 pass 1",
+        "\u2139 fail 4",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 566.514789"
+      ]
+    },
+    {
+      "id": "patched_state_native_suite",
+      "command": "node --test packages/a11oy-runtime/test/state-native-*.test.mjs",
+      "working_directory": "repository root",
+      "source_commit": "21b76edebf8fbbc5a5943a6124272b2aa58971a0",
+      "source_boundary": "Final formatted regression source and patched runtime; source file blobs verified against implementation commit after publication.",
+      "exit_code": 0,
+      "outcome": "SCOPED_PASS",
+      "counts": {
+        "total": 50,
+        "passed": 50,
+        "failed": 0,
+        "skipped": 0
+      },
+      "output_sha256": "18fab9c39ae8f9a5e7c1019e94b278c7ab73ade8ff0bf1a40780403aade7e06f",
+      "runner_summary": [
+        "\u2139 tests 50",
+        "\u2139 suites 0",
+        "\u2139 pass 50",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 3278.841041"
+      ]
+    }
+  ],
+  "root_typecheck": {
+    "command": "node toolchain/node_modules/pnpm/bin/pnpm.cjs typecheck",
+    "before_exit_code": 1,
+    "after_exit_code": 1,
+    "outcome": "BLOCKED",
+    "reason": "turbo not found; workspace dependencies absent",
+    "canonical_platform_pass_claim": false
+  },
+  "strict_scoped_compile": {
+    "command": "node toolchain/node_modules/typescript/bin/tsc -p evidence/tsconfig.state-native.json",
+    "exit_code": 0,
+    "scope": "state-native source only",
+    "config": {
+      "extends": "../packages/a11oy-runtime/tsconfig.json",
+      "compilerOptions": {
+        "typeRoots": [
+          "../toolchain/node_modules/@types"
+        ]
+      },
+      "include": [
+        "../packages/a11oy-runtime/src/state-native/**/*.ts"
+      ]
+    }
+  },
+  "claim_boundary": "Subsystem execution results only. This record does not replace canonical platform metrics or establish hosted/deployed readiness.",
+  "proof_format_followup": {
+    "source_parent": "21b76edebf8fbbc5a5943a6124272b2aa58971a0",
+    "changes": [
+      "Explicit subsystem scope for Markdown runner counts",
+      "Structured count/source/runtime record",
+      "Relocate known-gap entry to avoid independent EOF append conflict"
+    ],
+    "guard_changed": false,
+    "allowlist_changed": false,
+    "canonical_metrics_changed": false,
+    "checks": [
+      {
+        "command": "node evidence/check-candidate-claims.mjs",
+        "scope": "Changed Markdown only; calls unchanged claimFailuresForLines with actual canonical metrics and original baseline claimIdentitiesForLines",
+        "before_exit_code": 1,
+        "before_failures": [
+          "hardcoded 47; canonical evidence for platform_tests is UNAVAILABLE",
+          "hardcoded 1; canonical evidence for platform_tests is UNAVAILABLE",
+          "hardcoded 50; canonical evidence for platform_tests is UNAVAILABLE"
+        ],
+        "after_exit_code": 0,
+        "after_failures": [],
+        "output_sha256": "5c21c9c0bc3405ca9c8263895ff108d0115277f6a37415231b398492514cb95c"
+      },
+      {
+        "command": "toolchain/node_modules/.bin/tsx --test tools/truth/claims-drift.test.ts",
+        "exit_code": 1,
+        "outcome": "ENVIRONMENT_BLOCKED",
+        "reason": "tsx CLI IPC listen EPERM; unchanged tests subsequently executed through native Node runner plus tsx loader"
+      },
+      {
+        "command": "node --import ./toolchain/node_modules/tsx/dist/loader.mjs --test tools/truth/claims-drift.test.ts",
+        "scope": "Unchanged claims-drift contract suite",
+        "exit_code": 0,
+        "counts": {
+          "total": 69,
+          "passed": 69,
+          "failed": 0,
+          "skipped": 0
+        },
+        "output_sha256": "202fbb0016f488444c8a9163f57a26984b992e3fbb3abf0526285a5830cdfbde"
+      }
+    ],
+    "full_hosted_verdict": "PENDING_RERUN"
+  }
+}
