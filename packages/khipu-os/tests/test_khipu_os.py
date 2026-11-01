@@ -11,6 +11,7 @@ from pathlib import Path
 import khipu_os
 import pytest
 from khipu_os.dag import _persisted_receipt_blob
+from khipu_os.checkpointer import Checkpointer
 
 def _h(x):
     return hashlib.sha256(x).hexdigest()
@@ -30,6 +31,24 @@ def test_merkle_proof_verifies():
 def test_dag_and_erasure_present():
     assert khipu_os.KhipuDAG is not None
     assert khipu_os.ReedSolomonErasure is not None
+
+
+def test_checkpoint_publication_failure_does_not_record_checkpoint_receipt(tmp_path):
+    dag = khipu_os.KhipuDAG(
+        space="checkpoint-failure",
+        signer=khipu_os.KhipuSigner(key=b"checkpoint-failure-key"),
+        persist_path=str(tmp_path / "khipu"),
+        store_backend="sqlite",
+    )
+    checkpointer = Checkpointer(
+        dag,
+        uploader=lambda *_args: {"uploaded": False, "reason": "offline"},
+        cosign_key_path=None,
+    )
+    with pytest.raises(RuntimeError, match="checkpoint publication did not succeed"):
+        checkpointer.run(now=1700000000)
+    assert dag.checkpoints == []
+    assert dag.hot_count() == 0
 
 
 def test_sqlite_recovery_rebuilds_graph_and_signature_state(tmp_path):
