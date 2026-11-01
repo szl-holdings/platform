@@ -1,6 +1,6 @@
 # License Compliance Report
 
-**Generated:** 2026-10-28T18:52:28.988Z
+**Generated:** 2026-11-01T22:30:07.289Z
 **Verdict:** PASS
 **Policy:** `security/license-policy.json` (schema 1; 18 exact review entries)
 **Total unique package/version pairs scanned:** 1525

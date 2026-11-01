@@ -29,6 +29,41 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### PLATFORM-EVIDENCE-20261101 — current bounded CI observations
+
+At main `a465a0aa182f5eb88bdf3131372ca7a9b8199e87`,
+[Security Audit 41357376251](https://github.com/szl-holdings/platform/actions/runs/41357376251)
+passed all four component jobs and its blocking gate. Its generated report
+records 0 Critical, 0 High, 16 Moderate and 1 Low finding. The license report
+records 1,525 unique pairs and no blocking violations. The committed SBOM is
+already byte-identical to this run's 1,806-component inventory. The refreshed
+reports and security-posture dependency section retain this source/run boundary.
+
+The wake-receipt job `125001090205` in
+[warm-flagships 41357560888](https://github.com/szl-holdings/platform/actions/runs/41357560888)
+returned HTTP 200 and passed the response contract. This supersedes the earlier
+404 observation for that transaction only; it is not an independent durability,
+signature, source/runtime identity, or whole-estate readiness attestation.
+
+Staging remains BLOCKED: job `125000246618` in
+[run 41357376270](https://github.com/szl-holdings/platform/actions/runs/41357376270)
+passed configuration presence but received Replit HTTP 403. The cause of the
+provider rejection remains unverified; the deployment owner must establish
+the supported API and credential/target authorization before another attempt.
+
+Fleet publication remains BLOCKED: the latest sampled security, reliability
+and observability runs (`41356749350`, `41355447822`, `41353283038`) used
+`4dadb116cbafc8dbde9ffc9df183db2205dc73ca`, received an empty
+`KHIPU_SIGNING_KEY_B64`, and rejected unsigned receipts. Security's Hugging Face
+identity/access/write preflight passed. The authorized fleet seed must be bound
+through the approved secret manager, then signed publication and independent
+readback must be verified. These sampled runs predate the receipt-artifact
+retention repair merged as #988; they do not test that repair on current main.
+
+See the [scoped proof packet](../../audit/PLATFORM_SECURITY_EVIDENCE_2026-11-01.md)
+for artifact hashes and local validation limits. This entry refreshes only the
+observations named above; other historical entries remain historical.
+
 ### AUDIT-FINDINGS-20261023 — candidate legacy audit parser repair
 
 MEASURED pinned pnpm 10.26.1 output contains four High finding records grouped

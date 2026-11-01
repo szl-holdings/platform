@@ -1,6 +1,6 @@
 # Dependency Vulnerability Report
 
-**Generated:** 2026-10-28T18:52:23.380Z
+**Generated:** 2026-11-01T22:30:09.570Z
 **Policy:** unmitigated High/Critical advisories block; exact local patches must be registered, digest-bound, behavior-tested, and unexpired; Moderate/Low remain reported
 **Command:** `pnpm audit --json --audit-level=high`
 **Expected package manager:** `pnpm@10.26.1`
@@ -23,18 +23,21 @@ PASS — no parsed High/Critical advisory.
 |---|---:|
 | Critical | 0 |
 | High | 0 |
-| Moderate | 10 |
+| Moderate | 16 |
 | Low | 1 |
 
 ## Reported Moderate / Low findings
 
 | Package | Advisory | Severity | Vulnerable range |
 |---|---|---|---|
+| `@hono/node-server` | [GHSA-rmxm-3fg6-px4f](https://github.com/advisories/GHSA-rmxm-3fg6-px4f) | MODERATE | `>=1.19.10 <2.1.3` |
 | `@vitest/mocker` | [GHSA-qxg6-89mg-rqv8](https://github.com/advisories/GHSA-qxg6-89mg-rqv8) | MODERATE | `>=2.1.0-beta.7 <4.1.12` |
 | `@vitest/mocker` | [GHSA-xp26-3454-mjgp](https://github.com/advisories/GHSA-xp26-3454-mjgp) | MODERATE | `>=4.1.11 <4.1.12` |
 | `deepmerge` | [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) | LOW | `>=4.2.0 <=4.3.1` |
+| `glob` | [GHSA-3g3m-2fjr-6pw4](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4) | MODERATE | `>=9.0.0 <=14.0.1` |
 | `hono` | [GHSA-5r4p-p66f-jhc7](https://github.com/advisories/GHSA-5r4p-p66f-jhc7) | MODERATE | `>=4.12.4 <4.13.11` |
 | `ip-address` | [GHSA-rxp7-6hxx-x8q5](https://github.com/advisories/GHSA-rxp7-6hxx-x8q5) | MODERATE | `<=10.7.3` |
+| `minimatch` | [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249) | MODERATE | `<11.0.1` |
 
 ## Workspace overrides
 
