@@ -67,11 +67,15 @@ contract.
 - The digest supplies the same bounded 0–9999 offset shape as the prior code;
   `--seed` remains the additive base and remains the value written to
   `meta.json`.
+- The harness description now scopes reproducibility to generated request
+  payloads under the same seed, harness source, and Python runtime. Live
+  latencies, timestamps, host metadata, and server observations remain live
+  measurements and are not claimed as reproducible bytes.
 - `benchmarks/test_run_benchmarks.py` runs `main()` in subprocesses with
   `PYTHONHASHSEED=1` and `PYTHONHASHSEED=8675309`. Offline doubles capture all
   16 route streams and eight production paired streams, including their first
   measured payloads. The test also locks metadata keys and verifies that a
-  changed CLI seed changes streams and metadata.
+  changed CLI seed changes the projected non-GET payloads and metadata.
 
 The candidate produces route seed 3210 and paired seed 6052 for the same route
 and CLI seed under both observed interpreter hash seeds.

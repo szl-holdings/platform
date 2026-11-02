@@ -188,10 +188,18 @@ class BenchmarkSeedDeterminismTests(unittest.TestCase):
     def test_cli_seed_changes_payload_streams_and_metadata(self) -> None:
         seed_42 = run_probe(42, "1")
         seed_43 = run_probe(43, "1")
+        payloads_42 = [
+            call["payload"] for call in seed_42["calls"]
+            if call["payload"] is not None
+        ]
+        payloads_43 = [
+            call["payload"] for call in seed_43["calls"]
+            if call["payload"] is not None
+        ]
 
         self.assertEqual(seed_42["meta_seed"], 42)
         self.assertEqual(seed_43["meta_seed"], 43)
-        self.assertNotEqual(seed_42["calls"], seed_43["calls"])
+        self.assertNotEqual(payloads_42, payloads_43)
 
     def test_cli_seed_remains_the_additive_base(self) -> None:
         namespace = runpy.run_path(str(HARNESS))

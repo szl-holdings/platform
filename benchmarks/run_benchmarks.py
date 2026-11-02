@@ -17,7 +17,8 @@ Run:
   python3 benchmarks/run_benchmarks.py --reps 1000 --warmup 50
 
 Every measurement is from the live HTTP surface — no mocks, no estimates.
-Output is byte-for-byte reproducible given the same seed and server build.
+Generated request payloads are reproducible for the same seed, harness source,
+and Python runtime.
 """
 from __future__ import annotations
 
