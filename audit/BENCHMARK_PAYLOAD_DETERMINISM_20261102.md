@@ -29,8 +29,15 @@ Before final publication, `main` advanced to signed commit
 `590e0c9f279d7ec2083c31581499825416a647a7` by merging PR #1002. The
 benchmark source remained blob `0e6628f5c99f56507017518d4a8873d6be579138`,
 and the two new candidate paths remained absent. The clean successor branch is
-rooted directly at that exact `main` revision; no history rewrite occurred and
-none of PR #1002's files is changed by this workcell.
+rooted directly at that exact `main` revision.
+
+Before exact-head qualification completed, `main` advanced again to signed
+commit `a41f03e9fa52231f3b2a6b32cea7af57989c0c6d` by merging PR #1001. Its
+benchmark source remained the same `0e6628f5c99f56507017518d4a8873d6be579138`
+blob and the two candidate paths remained absent. The candidate incorporated
+that revision through a normal two-parent merge with a conventional commit
+subject and an expected-head, non-force lease. No history rewrite occurred and
+none of PR #1001's or PR #1002's files is changed by this workcell.
 
 ## Plan summary
 
