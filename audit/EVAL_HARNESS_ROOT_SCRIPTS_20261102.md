@@ -4,6 +4,7 @@
 - `agent`: OpenAI Codex
 - `objective`: Repair the two root eval-harness scripts so they invoke the current checked-in harness and fail visibly if their targets drift.
 - `recorded_at`: `2026-11-02T04:48:04Z`
+- `reconciled_at`: `2026-11-02T05:11:35Z`
 - `recorded_by`: OpenAI Codex
 - `proof_level`: 2 (Standard Proof)
 
@@ -21,6 +22,8 @@
 - Organization code search on 2026-11-02 found `@workspace/eval-harness` only in the two broken root aliases. The current `apps/eval-runner` contains `STANDARD_SUITE`, `test_app_eval.py`, and `test_suite_reproducibility.py`.
 - `@workspace/aef-evals` predates the aliases and is explicitly the Alloy Embedding Fabric retrieval evaluator, so it is not the generic standard-suite harness introduced by PR #138.
 - GitHub main was `21d4ee44d4eb9b3a8fcb30530b02f9de6ff52537` when this work began. The local blobs for `package.json`, the two target tests, and the existing clean-clone regression suite exactly matched that main revision before editing.
+- The published candidate was first based on `590e0c9f279d7ec2083c31581499825416a647a7`, after merged PR #1002. It was then reconciled without rewriting history using prior reviewed head `26d2da8be6ca5a641c80eec0ad2c0ce2982b7a88` and exact current main `a41f03e9fa52231f3b2a6b32cea7af57989c0c6d` as parents.
+- The main advance changed only `scripts/qa/capture-cyber-build-witness.mjs` and its focused test. Neither overlaps this patch, whose current-base diff remains the same five paths.
 
 ## Patch summary
 
@@ -29,7 +32,7 @@
 - `apps/eval-runner/conftest.py`: resolve the eval-runner root to `apps/eval-runner/`, as its comment and `src` imports require.
 - `apps/eval-runner/test_suite_reproducibility.py`: use the same correct root in fresh subprocesses. The previous extra parent traversal inserted `apps/` and failed with `ModuleNotFoundError: src`.
 
-No route, UI, database, workflow, dependency, credential, model, or data changes are included. The changed paths do not overlap the nine files in platform PR #1002.
+No route, UI, database, workflow, dependency, credential, model, or data changes are included. The changed paths do not overlap the nine files in platform PR #1002 or the two files in platform PR #1001.
 
 ## Test results
 
