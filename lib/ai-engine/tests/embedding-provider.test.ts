@@ -49,6 +49,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 describe('EmbeddingPipeline provider output admission', () => {
@@ -151,6 +152,42 @@ describe('EmbeddingPipeline provider output admission', () => {
       consecutiveFailures: 1,
       errorRate: 1,
       latencyMs: null,
+    });
+  });
+
+  it('uses domain dimensions for validation without changing compatible API payloads', async () => {
+    vi.stubEnv('AI_INTEGRATIONS_OPENAI_API_KEY', 'INERT_TEST_KEY');
+    const pipeline = new EmbeddingPipeline();
+    const internals = pipeline as unknown as { providers: TestProvider[] };
+    const compatible = internals.providers.find(
+      (candidate) => candidate.type === 'openai-compatible',
+    );
+    if (!compatible) throw new Error('OpenAI-compatible provider missing from pipeline');
+    internals.providers.splice(0, internals.providers.length, compatible);
+    let requestBody: Record<string, unknown> | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input, init?: RequestInit) => {
+        requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        return {
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          json: async () => ({
+            data: [{ embedding: Array.from({ length: 1536 }, () => 1) }],
+          }),
+        };
+      }),
+    );
+
+    await pipeline.embed('compatible request', {
+      domain: 'general',
+      model: 'text-embedding-ada-002',
+    });
+
+    expect(requestBody).toEqual({
+      model: 'text-embedding-ada-002',
+      input: 'compatible request',
     });
   });
 });
