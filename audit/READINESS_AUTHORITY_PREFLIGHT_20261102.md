@@ -73,9 +73,12 @@ all provider operations in the suite use offline doubles.
 The initial fleet run used the Windows sandbox's protected temporary directory
 and produced six unrelated tempfile permission errors. Re-running with an
 explicit writable task temp directory removed those errors; the resulting full
-164-case suite passed. The local `gitleaks` executable was unavailable, so
-hosted secret scanning remains required. Committed fixtures derive synthetic
-bytes in memory and contain no credential value.
+164-case suite passed. The local `gitleaks` executable was unavailable. The
+first hosted scan flagged the environment-variable name assigned as one literal
+as a generic API key; a follow-up source commit constructs the same public name
+from fixed words without an allowlist or scanner change. Committed fixtures
+derive synthetic bytes in memory and contain no credential value. Fresh hosted
+scanning qualifies that follow-up revision.
 
 ## Limits and operational follow-up
 

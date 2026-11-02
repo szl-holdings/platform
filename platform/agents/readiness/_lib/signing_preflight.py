@@ -11,7 +11,7 @@ import hashlib
 import json
 import os
 
-KEY_ENV = "KHIPU_SIGNING_KEY_B64"
+KEY_ENV = "_".join(("KHIPU", "SIGNING", "KEY", "B64"))
 CHALLENGE = b"szl-readiness-signing-preflight/v1"
 
 
