@@ -1,0 +1,165 @@
+{
+  "schema": "szl.scoped-test-evidence/v1",
+  "workcell_id": "warm-evidence-recovery-20261101",
+  "recorded_at": "2026-11-01",
+  "scope": "Warm flagship and kernel controller tests only; not canonical platform-wide metrics or deployment readiness.",
+  "base_sha": "a465a0aa182f5eb88bdf3131372ca7a9b8199e87",
+  "candidate_sha": "e6d5a16a91bb9f485f8266a581cab21f551827d5",
+  "candidate_source_blobs": {
+    ".github/scripts/warm_flagships.py": "95baff591736bfc9d007634162bcd9aa9dee541c",
+    ".github/scripts/test_warm_flagships.py": "f9df260d6de4983ed687bb3a0179dbb6d18515d4"
+  },
+  "measurements": [
+    {
+      "label": "baseline",
+      "command": "python .github/scripts/test_warm_flagships.py",
+      "source_sha": "a465a0aa182f5eb88bdf3131372ca7a9b8199e87",
+      "environment": "local scoped materialization; synthetic test doubles",
+      "exit_code": 0,
+      "test_count": 14,
+      "passed": 14,
+      "failed": 0,
+      "log_sha256": "a23470e1e9cc2c92a2ce9315968207589a77caf5b7fb3e02d7c3f0b00d9b67a4"
+    },
+    {
+      "label": "candidate",
+      "command": "python .github/scripts/test_warm_flagships.py",
+      "source_sha": "e6d5a16a91bb9f485f8266a581cab21f551827d5",
+      "environment": "local scoped materialization; synthetic test doubles",
+      "exit_code": 0,
+      "test_count": 21,
+      "passed": 21,
+      "failed": 0,
+      "log_sha256": "236e0ed0d35a58a8bb22ed7397208efb5f5b296b77a8af705b2a9b1ce4d2097a"
+    },
+    {
+      "label": "kernel contract",
+      "command": "python packages/szl-kernels/tests/test_szl_kernels_organ.py",
+      "source_sha": "e6d5a16a91bb9f485f8266a581cab21f551827d5",
+      "environment": "local scoped materialization; synthetic test doubles",
+      "exit_code": 0,
+      "test_count": 22,
+      "passed": 22,
+      "failed": 0,
+      "log_sha256": "d4eca5e1afed4409143ab552003ee9b8c529bd92230fa5dc9ce9052aa3140cc2"
+    }
+  ],
+  "negative_control": {
+    "source_sha": "a465a0aa182f5eb88bdf3131372ca7a9b8199e87",
+    "test_set": "first six added evidence-retention test methods",
+    "test_count": 20,
+    "failing_subcases": 13,
+    "exit_code": 1,
+    "log_sha256": "d445e6444c38c442f332b801d9663e4459e84babea828fba0d2ddbc5ba70230a"
+  },
+  "hosted_contract": {
+    "run_id": 41363836557,
+    "job_id": 125019696660,
+    "merge_preview_sha": "d0b1b966428d2b6f90b5579c8a0169a6f3e535d1",
+    "candidate_sha": "e6d5a16a91bb9f485f8266a581cab21f551827d5",
+    "base_sha": "a465a0aa182f5eb88bdf3131372ca7a9b8199e87",
+    "conclusion": "success",
+    "warm_controller_test_count": 21,
+    "kernel_controller_test_count": 22,
+    "url": "https://github.com/szl-holdings/platform/actions/runs/41363836557/job/125019696660",
+    "log_sha256": "ab81e03e8a04352771b17bdd2f990bc34e5ab8e113188eae4705870c06d858d8"
+  },
+  "root_typecheck": {
+    "command": "pnpm@10.26.1 typecheck",
+    "before_exit_code": 1,
+    "after_exit_code": 1,
+    "reason": "turbo not found; workspace dependencies absent",
+    "passed": false
+  },
+  "partial_stream_and_enumeration_followup": {
+    "recorded_at": "2026-11-02",
+    "parent_candidate_sha": "e0ec6283b7dbeb078cb32810c6dbf27ccd230e25",
+    "scope": "Offline controller and kernel regressions only; no deployment or remote issue mutation",
+    "python_version": "3.12.14",
+    "source_blobs": {
+      ".github/scripts/warm_flagships.py": "415688cb466ad813cd1ed5b443ae2594498cafd8",
+      ".github/scripts/test_warm_flagships.py": "3d58820ccf1cadf6241ea0e047aeeb9c60233a12"
+    },
+    "checks": [
+      {
+        "label": "controller",
+        "command": "python .github/scripts/test_warm_flagships.py",
+        "exit_code": 0,
+        "test_count": 32,
+        "log_sha256": "bc9f74268eb791bc74573098464da52990d052aafa00e0b72ca2385b90b0233f"
+      },
+      {
+        "label": "controller_negative_control",
+        "command": "python .github/scripts/test_warm_flagships.py",
+        "exit_code": 1,
+        "test_count": 32,
+        "log_sha256": "c1320df67b649c3b87497715a3255a42774ac7baa0b14f6a7c583ba6b21202da"
+      },
+      {
+        "label": "kernel",
+        "command": "python packages/szl-kernels/tests/test_szl_kernels_organ.py",
+        "exit_code": 0,
+        "test_count": 22,
+        "log_sha256": "2b6496fd079929cb68885cd83a075f3211bf5ee762e802c083c155c22ab3c0c2"
+      },
+      {
+        "label": "compile",
+        "command": "python -m py_compile warm/.github/scripts/warm_flagships.py warm/.github/scripts/test_warm_flagships.py",
+        "exit_code": 0,
+        "test_count": null,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "claims_guard",
+        "command": "node --import ../recovery-platform/toolchain/node_modules/tsx/dist/loader.mjs check-warm-claims.mjs",
+        "exit_code": 0,
+        "test_count": null,
+        "log_sha256": "32bf15b805b11a797d92a314af4af0421e4d4a3e44ecc3fbaa4807f197f64afd"
+      },
+      {
+        "label": "claims_contract",
+        "command": "node --import ../recovery-platform/toolchain/node_modules/tsx/dist/loader.mjs --test warm/tools/truth/claims-drift.test.ts",
+        "exit_code": 0,
+        "test_count": 69,
+        "log_sha256": "7c895b6a9f6fa2a1067068270de667c1b40582529de91f03ed88cfe559ee2b3f"
+      },
+      {
+        "label": "secret_scan",
+        "command": "node ../recovery-warm/scripts/qa/scan-secrets.js secret-scan",
+        "exit_code": 0,
+        "test_count": null,
+        "log_sha256": "cc0aa1280fdcc160864ab51f220fdd2f309371d831b1f4ac0eecb8017efd4655"
+      }
+    ],
+    "negative_control": {
+      "test_methods": 32,
+      "failing_subcases": 25,
+      "errors": 7,
+      "source_sha": "e0ec6283b7dbeb078cb32810c6dbf27ccd230e25"
+    },
+    "root_typecheck": {
+      "command": "pnpm@10.26.1 typecheck",
+      "before_exit_code": 1,
+      "after_exit_code": 1,
+      "reason": "turbo not found; workspace dependencies absent",
+      "before_log_sha256": "c1ad7fe302356aaaca47f5082377fc816162b22eff982f6b071a20806da3547d",
+      "after_log_sha256": "c1ad7fe302356aaaca47f5082377fc816162b22eff982f6b071a20806da3547d"
+    },
+    "claims_scope": "Existing unchanged historical allowlist with parent identities; added text independently checked with no allowlist. Initial no-allowlist whole-file scan reports six unchanged historical diagnostics; no new proof diagnostics.",
+    "canonical_platform_tests": "UNAVAILABLE",
+    "hosted_new_head_checks": "NOT_OBSERVED",
+    "limitations": [
+      "Enumeration is bounded to 10 pages of 100 records; an exhausted bound blocks writes.",
+      "Paginated enumeration is not transactional and does not provide cross-run issue idempotency.",
+      "Writes are never retried; their remote outcome can remain UNKNOWN.",
+      "Local report retention depends on writable storage."
+    ],
+    "final_verification": {
+      "changed_files_secret_scan_exit": 0,
+      "scan_output_sha256": "575136dfbc778aeaf945c2026782ab4ea3cc5417918af131916a25392b2351f0",
+      "diff_check": "No whitespace diagnostics on modified lines; no-index exit 1 records content differences",
+      "diff_check_log_sha256": "b9cd3fe2e10bee93fabfba248c63b572e861c9e572c2189ab9877a693fa657d1",
+      "review": "Separate parent-agent review of runtime patch and test scope; no human approval claimed"
+    }
+  }
+}
