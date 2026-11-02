@@ -35,7 +35,9 @@ The observability executor previously accepted required counter names anywhere
 in a successful metrics response, including HELP comments, unrelated label
 values and longer names. The candidate now requires complete exact-name
 Prometheus text samples with finite nonnegative values, valid label syntax and
-bounded integer timestamps. Offline regressions reproduce the false positives
+bounded integer timestamps. LF alone separates samples, preserving valid
+Unicode label data and rejecting prose separated by other control characters.
+Offline regressions reproduce the false positives
 against the original source and pass against the candidate. This is a source
 evidence repair; it does not establish runtime counter type, freshness or
 monotonicity, trace propagation, configured flagship URLs, a fleet signing

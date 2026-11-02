@@ -61,6 +61,20 @@ class CounterSamplesTest(unittest.TestCase):
         self.assertFalse(self.observe(f'{name} 1')['required_counters'][name])
         self.assertTrue(self.observe(f'{name} 1\n')['required_counters'][name])
 
+    def test_only_lf_separates_metric_samples(self):
+        for separator in ['\r', '\v', '\f', '\x85', '\u2028', '\u2029']:
+            with self.subTest(separator=repr(separator)):
+                body = ''.join(f'prose{separator}{name} 1\n'
+                               for name in observability.REQUIRED_COUNTERS)
+                self.assertFalse(any(self.observe(body)['required_counters'].values()))
+
+    def test_unicode_separators_inside_label_values_are_preserved(self):
+        for separator in ['\u2028', '\u2029']:
+            with self.subTest(separator=repr(separator)):
+                body = ''.join(f'{name}{{label="alpha{separator}beta"}} 1\n'
+                               for name in observability.REQUIRED_COUNTERS)
+                self.assertTrue(all(self.observe(body)['required_counters'].values()))
+
     def test_extremely_long_timestamp_does_not_abort_probe(self):
         name = observability.REQUIRED_COUNTERS[0]
         result = self.observe(f'{name} 1 {"9" * 5000}\n')

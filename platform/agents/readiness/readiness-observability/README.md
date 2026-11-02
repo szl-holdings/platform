@@ -18,7 +18,9 @@ Counter presence requires an exact required name in a complete Prometheus text
 sample, a finite nonnegative value, well-formed labels and, when present, a
 signed 64-bit integer timestamp. Ordinary and quoted metric names are
 supported. HELP/TYPE comments, substrings, label values, malformed samples and
-an unterminated final line cannot establish presence. This bounded check does
+an unterminated final line cannot establish presence. Only LF separates
+samples; Unicode separator characters inside quoted labels remain data.
+This bounded check does
 not establish counter type, freshness, monotonicity or operational readiness;
 unsupported exposition forms remain unproven. Missing collector configuration
 still leaves trace propagation unknown.

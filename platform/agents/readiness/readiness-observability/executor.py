@@ -63,10 +63,10 @@ def observed_counters(body: str) -> dict[str, bool]:
     no positive evidence. A final unterminated line may be a truncated read.
     """
     found = {name: False for name in REQUIRED_COUNTERS}
-    for line in body.splitlines(keepends=True):
-        if not line.endswith('\n'):
-            continue
-        match = _SAMPLE.fullmatch(line[:-1])
+    # Prometheus separates samples with LF only; splitlines() also splits
+    # valid Unicode label characters and can turn embedded prose into samples.
+    for line in body.split('\n')[:-1]:
+        match = _SAMPLE.fullmatch(line)
         if not match:
             continue
         labels = match['labels'] or match['quoted_labels'] or ''
