@@ -19,7 +19,9 @@ Author: Yachay <yachay@szlholdings.dev>
 from __future__ import annotations
 
 import json
+import math
 import os
+import re
 import sys
 import time
 import urllib.request
@@ -36,6 +38,56 @@ REQUIRED_COUNTERS = [
     "gate_decisions_total",
     "http_requests_total",
 ]
+
+# Parse sample lines, not HELP/TYPE comments or arbitrary mentions. These fixed
+# ASCII counter names support both ordinary and quoted Prometheus text syntax.
+_QUOTED = r'"(?:[^"\\\n]|\\[\\"n])*"'
+_LABEL_NAME = rf'(?:[a-zA-Z_][a-zA-Z0-9_]*|{_QUOTED})'
+_LABEL = rf'{_LABEL_NAME}[ \t]*=[ \t]*{_QUOTED}'
+_LABELS = rf'(?:{_LABEL}(?:[ \t]*,[ \t]*{_LABEL})*[ \t]*,?)?'
+_NAMES = '|'.join(re.escape(name) for name in REQUIRED_COUNTERS)
+_NUMBER = r'[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?'
+_SAMPLE = re.compile(
+    rf'[ \t]*(?:(?P<name>{_NAMES})(?:\{{[ \t]*(?P<labels>{_LABELS})[ \t]*\}})?'
+    rf'|\{{[ \t]*"(?P<quoted>{_NAMES})"(?:[ \t]*,[ \t]*(?P<quoted_labels>{_LABELS}))?[ \t]*\}})'
+    rf'[ \t]+(?P<value>{_NUMBER})(?:[ \t]+(?P<timestamp>[+-]?[0-9]+))?[ \t]*'
+)
+_LABEL_PAIR = re.compile(rf'(?P<name>{_LABEL_NAME})[ \t]*=[ \t]*{_QUOTED}')
+
+
+def observed_counters(body: str) -> dict[str, bool]:
+    """Report complete, finite nonnegative samples for required exact names.
+
+    This bounded text check does not establish metric type, freshness,
+    monotonicity or collector continuity. Unsupported/malformed lines provide
+    no positive evidence. A final unterminated line may be a truncated read.
+    """
+    found = {name: False for name in REQUIRED_COUNTERS}
+    for line in body.splitlines(keepends=True):
+        if not line.endswith('\n'):
+            continue
+        match = _SAMPLE.fullmatch(line[:-1])
+        if not match:
+            continue
+        labels = match['labels'] or match['quoted_labels'] or ''
+        label_names = [json.loads(p['name'], strict=False) if p['name'].startswith('"') else p['name']
+                       for p in _LABEL_PAIR.finditer(labels)]
+        if len(label_names) != len(set(label_names)) or '__name__' in label_names:
+            continue
+        value = float(match['value'])
+        if not math.isfinite(value) or value < 0:
+            continue
+        timestamp = match['timestamp']
+        if timestamp is not None:
+            try:
+                if not -(2 ** 63) <= int(timestamp) < 2 ** 63:
+                    continue
+            except ValueError:
+                # Python may reject extremely long integer strings before
+                # conversion. Untrusted exposition must not abort the probe.
+                continue
+        found[match['name'] or match['quoted']] = True
+    return found
 
 
 def _traceparent() -> tuple[str, str]:
@@ -68,7 +120,7 @@ def check_flagship(base: str) -> dict:
                 break
     # metrics counters
     ms, mbody = _get(f"{base}/metrics")
-    counters = {c: (c in mbody) for c in REQUIRED_COUNTERS} if ms == 200 else \
+    counters = observed_counters(mbody) if ms == 200 else \
         {c: False for c in REQUIRED_COUNTERS}
     return {
         "request_status": status,
