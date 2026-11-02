@@ -1501,3 +1501,26 @@ shape-access regressions. A factory isolates per-manifest sensitive-field
 arrays. Native current-head CI and protected release remain **BLOCKED** pending
 their own results. No provider/runtime capability is inferred. See the
 [native follow-up proof](../../audit/ZOD4_NATIVE_FOLLOWUP_2026-10-25.md).
+
+### 2026-11-01 flagship probe evidence retention candidate
+
+Workcell `warm-evidence-recovery-20261101` preserves the collected health
+report when GitHub issue reconciliation fails. The observed Lyte run
+`41361708249` collected three HTTP 200 responses, then an issue-list connection
+closed before the original controller wrote its report. Local regression tests
+now retain the unchanged health classification and attempts, record the issue
+lifecycle outcome as `UNKNOWN`, and fail the process without replaying writes.
+Unexpected exceptions still propagate after report retention.
+
+This closes a source-level evidence-loss gap only. It does not establish issue
+mutation success, durable remote storage, current fleet availability or runtime
+readiness. Protected CI, merge and deployed execution remain separate gates.
+See [the bounded proof packet](../../audit/WARM_EVIDENCE_RECOVERY_20261101.md).
+
+The 2026-11-02 follow-up also retains prior observations when a probe response
+has a truncated body or HTTP protocol error, recording that attempt as UNKNOWN
+with class-only diagnostics. Incident reconciliation now requires a complete,
+bounded paginated read and rejects malformed pages, repeated records or
+ambiguous matching incidents before any write. Local synthetic controller
+regressions establish these source behaviors; current-head hosted checks,
+protected admission and deployed verification remain outstanding.
