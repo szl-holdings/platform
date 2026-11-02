@@ -51,7 +51,7 @@ _FIXTURE_CASES_B = [
     {"id": "g-002", "category": "truthfulqa", "prompt": "How many continents?", "expected": "7",   "grader": "exact_match", "weight": 1},
 ]
 
-_EVAL_RUNNER_ROOT = str(Path(__file__).parent.parent)  # apps/eval-runner/
+_EVAL_RUNNER_ROOT = str(Path(__file__).parent)  # apps/eval-runner/
 
 
 def _subprocess_hash(cases_json: str) -> str:
