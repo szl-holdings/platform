@@ -27,7 +27,7 @@ import json
 import math
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from ._puriq_compat import (
     OrganAgent, KhipuSigner, KhipuReceipt, YuyayGate, YuyayScores, HukullaTripwires,
@@ -209,7 +209,10 @@ class KhipuDAG(OrganAgent):
                  checkpoint_interval_s: float = 12 * 3600,
                  verify_interval_s: float = 5 * 60,
                  signer: Optional[KhipuSigner] = None,
-                 persist_path: Optional[str] = None, store_backend: str = "auto"):
+                 persist_path: Optional[str] = None, store_backend: str = "auto",
+                 checkpoint_uploader: Optional[
+                     Callable[[str, str, str], Dict[str, Any]]
+                 ] = None):
         super().__init__(name=f"khipu-dag::{space}", cadence_s=cadence_s, signer=signer)
         # optional on-disk persistence (LMDB if available, else SQLite — see store.py)
         self.store = None
@@ -220,6 +223,7 @@ class KhipuDAG(OrganAgent):
         self.retain_last = retain_last
         self.stale_days = stale_days
         self.checkpoint_interval_s = checkpoint_interval_s
+        self.checkpoint_uploader = checkpoint_uploader
         self.verify_interval_s = verify_interval_s
 
         # canonical store: receipt_id -> KhipuReceipt (hot set)
@@ -393,9 +397,17 @@ class KhipuDAG(OrganAgent):
 
         # b) self-Merkle-checkpoint (every 12h)
         if now - self._last_checkpoint >= self.checkpoint_interval_s:
-            cp = Checkpointer(self).run(now=now)
-            self._last_checkpoint = now
-            summary["checkpoint"] = cp
+            if self.checkpoint_uploader is None:
+                # Offline operation still verifies and records ticks, but never
+                # records a checkpoint as though it had been published.
+                summary["checkpoint"] = {
+                    "state": "UNAVAILABLE", "uploaded": False,
+                    "reason": "checkpoint uploader not configured",
+                }
+            else:
+                cp = Checkpointer(self, uploader=self.checkpoint_uploader).run(now=now)
+                self._last_checkpoint = now
+                summary["checkpoint"] = cp
 
         # c) self-verify (every 5 min) → on mismatch, self-prosecute
         if now - self._last_verify >= self.verify_interval_s:

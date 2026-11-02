@@ -29,6 +29,19 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### KHIPU-OFFLINE-TICK-20261101 — candidate publication guard and offline continuity
+
+The strict checkpoint publication guard from #991 rejects unsuccessful uploads,
+but the default DAG tick uses an offline uploader and therefore stops before
+verification and its tick receipt. This candidate retains the guard, exposes
+an injectable uploader on KhipuDAG, and labels missing publication UNAVAILABLE
+while continuing offline ticks. No successful checkpoint or checkpoint receipt
+is recorded without a positive acknowledgement. Configured upload failures
+remain errors. Local package tests pass; hosted checks and protected admission
+remain required. Remote publication, signer provisioning and staging readiness
+remain unverified. See the
+[scoped proof](../../audit/KHIPU_OFFLINE_TICK_RECOVERY_20261101.md).
+
 ### AUDIT-FINDINGS-20261023 — candidate legacy audit parser repair
 
 MEASURED pinned pnpm 10.26.1 output contains four High finding records grouped

@@ -30,6 +30,25 @@ is fail-closed; it never invents a receipt or silently drops persisted history.
 The SQLite and LMDB stores preserve receipt bytes during hot-to-cold projection.
 Call `dag.close()` during orderly shutdown.
 
+## Checkpoint publication
+
+The default DAG is offline. A due tick reports checkpoint `state=UNAVAILABLE`
+and `uploaded=false`, continues verification and the local constellation
+buffer, and records its tick receipt. It does not append a checkpoint, emit
+`self_checkpoint`, or advance the successful-checkpoint timestamp.
+
+Applications can pass `checkpoint_uploader=callable` to `KhipuDAG`. The callable
+receives `(dataset_repo, path_in_repo, content)` and must return a dictionary
+whose `uploaded` value is exactly `True` after publication succeeds. Negative
+or malformed acknowledgements and transport exceptions fail the tick without
+recording a successful checkpoint; the next tick may retry. Direct offline
+`Checkpointer.run()` also raises rather than claiming a published checkpoint.
+The existing runner records configured transport failures as errors.
+
+An injected acknowledgement is an application contract, not independent Hub
+readback or signing qualification. This package does not provision an uploader,
+credentials, a production signer, or deployment readiness.
+
 ## Provenance
 - Author: Yachay <yachay@szlholdings.dev>
 - Co-Authored-By: Perplexity Computer Agent
