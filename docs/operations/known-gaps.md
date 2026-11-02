@@ -29,6 +29,18 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### READINESS-RETENTION-20261102 — candidate receipt-copy failure gate
+
+An explicitly requested readiness receipt copy could fail to write while the
+Actions process succeeded after a successful Hub publication. The scoped
+candidate preserves the publication gate and also fails Actions when requested
+local retention fails. Missing copy configuration remains optional; local runs
+keep their warning behavior. Offline source regressions cover the demonstrated
+write and close failures with bounded diagnostics. Hosted exact-head checks,
+protected admission and actual artifact readback remain required. This does
+not provision fleet signing or qualify publication, runtime or staging.
+See the [scoped proof](../../audit/READINESS_RETENTION_20261102.md).
+
 ### KHIPU-OFFLINE-TICK-20261101 — candidate publication guard and offline continuity
 
 The strict checkpoint publication guard from #991 rejects unsuccessful uploads,
