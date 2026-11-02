@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { embeddingAnalytics } from './analytics.js';
 import { type EmbeddingDomain, getDomainModelConfig } from './domain-config.js';
 
@@ -79,12 +80,7 @@ class EmbeddingCache {
   private cache = new Map<string, CacheEntry>();
 
   key(text: string, model: string): string {
-    const h = text.slice(0, 200) + model;
-    let hash = 0;
-    for (let i = 0; i < h.length; i++) {
-      hash = ((hash << 5) - hash + h.charCodeAt(i)) | 0;
-    }
-    return `${hash}-${text.length}`;
+    return createHash('sha256').update(JSON.stringify([model, text])).digest('hex');
   }
 
   get(key: string): EmbeddingResult | null {
