@@ -271,16 +271,17 @@ def require_published(results: list[dict], what: str) -> None:
         raise SystemExit(1)
 
 
-def _write_receipt_copy(text: str) -> None:
+def _write_receipt_copy(text: str) -> bool:
     """Write the public receipt when a workflow sets READINESS_RECEIPT_PATH.
 
     The copy is the same JSON already printed. It does not include the
-    signing seed. A missing variable writes nothing. An OS error is reported
-    with a fixed sentence so the publish gate still runs.
+    signing seed. A missing variable writes nothing and requires no copy.
+    Return False on an OS error, with a fixed diagnostic, so emit can still
+    run the publication gate before failing Actions for missing retention.
     """
     receipt_path = os.environ.get("READINESS_RECEIPT_PATH")
     if not receipt_path:
-        return
+        return True
     target = os.path.abspath(receipt_path)
     try:
         descriptor = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
@@ -288,15 +289,19 @@ def _write_receipt_copy(text: str) -> None:
             handle.write(text)
     except OSError:
         print("readiness receipt file was not retained", file=sys.stderr)
+        return False
+    return True
 
 
 def emit(agent: str, payload: dict) -> dict:
-    """Sign + verify + publish + print; fail Actions if either gate fails."""
+    """Sign, verify, publish and print; fail Actions for any required evidence."""
     env = sign_khipu_receipt(agent, payload)
     pub = publish_to_hf(agent, env)
     out = {"receipt": env, "publish": pub}
     text = json.dumps(out, indent=2) + "\n"
     sys.stdout.write(text)
-    _write_receipt_copy(text)
+    retained = _write_receipt_copy(text)
     require_published([pub], what=f"{agent} receipt")
+    if not retained and os.environ.get("GITHUB_ACTIONS") == "true":
+        raise SystemExit(1)
     return out
