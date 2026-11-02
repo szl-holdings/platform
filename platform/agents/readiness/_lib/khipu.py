@@ -33,14 +33,100 @@ DOCTRINE_STRING = "749/14/163"  # verbatim, LOCKED
 STALE_DOCTRINE_MARKERS = ["626/189/168", "626", "189", "v7", "v9", "v10"]
 
 # --- Registry --------------------------------------------------------------
-# Flagships: the live governed-AI organs. Base URLs are read from env so the
-# same code runs against staging or prod without edits.
+# Runtime probe targets. Base URLs are read from env so the same code runs
+# against staging or prod without edits. Each live target owns an explicit
+# method, path, and response validator: an HTML SPA fallback or a 2xx from the
+# wrong route can never satisfy the readiness contract.
+#
+# Amaru and Rosie are retired capability codenames hosted by a11oy, not
+# standalone services. They remain in receipts as honest SKIPPED slots when
+# their intentionally-unset URL variables are absent. Sentra's legacy public
+# compatibility Space is recorded separately; its health response must assert
+# production readiness, and absent Khipu/metrics contracts keep it RED.
 FLAGSHIPS = [
-    {"name": "a11oy", "repo": "szl-holdings/a11oy", "url_env": "A11OY_URL"},
-    {"name": "amaru", "repo": "szl-holdings/amaru", "url_env": "AMARU_URL"},
-    {"name": "sentra", "repo": "szl-holdings/sentra", "url_env": "SENTRA_URL"},
-    {"name": "killinchu", "repo": "szl-holdings/killinchu", "url_env": "KILLINCHU_URL"},
-    {"name": "rosie", "repo": "szl-holdings/rosie", "url_env": "ROSIE_URL"},
+    {
+        "name": "a11oy",
+        "repo": "szl-holdings/a11oy",
+        "url_env": "A11OY_URL",
+        "lifecycle": "live",
+        "endpoints": {
+            "healthz": {
+                "method": "GET",
+                "path": "/api/a11oy/healthz",
+                "validator": "governed_health",
+            },
+            "khipu_sign": {
+                "method": "POST",
+                "path": "/api/a11oy/khipu/sign",
+                "validator": "khipu_sign",
+            },
+            "khipu_verify": {
+                "method": "POST",
+                "path": "/api/a11oy/khipu/verify",
+                "validator": "khipu_verify",
+            },
+            "metrics": {
+                "method": "GET",
+                "path": "/metrics",
+                "validator": "prometheus",
+            },
+        },
+    },
+    {
+        "name": "amaru",
+        "repo": "szl-holdings/a11oy",
+        "url_env": "AMARU_URL",
+        "lifecycle": "retired-inside-a11oy",
+        "endpoints": {},
+    },
+    {
+        "name": "sentra",
+        "repo": "szl-holdings/a11oy",
+        "url_env": "SENTRA_URL",
+        "lifecycle": "legacy-compatibility",
+        "endpoints": {
+            "healthz": {
+                "method": "GET",
+                "path": "/healthz",
+                "validator": "production_health",
+            },
+        },
+    },
+    {
+        "name": "killinchu",
+        "repo": "szl-holdings/killinchu",
+        "url_env": "KILLINCHU_URL",
+        "lifecycle": "live",
+        "endpoints": {
+            "healthz": {
+                "method": "GET",
+                "path": "/api/killinchu/healthz",
+                "validator": "governed_health",
+            },
+            "khipu_sign": {
+                "method": "POST",
+                "path": "/api/killinchu/khipu/sign",
+                "validator": "khipu_sign",
+            },
+            "khipu_verify": {
+                "method": "POST",
+                "path": "/api/killinchu/khipu/verify",
+                "validator": "khipu_verify",
+            },
+            "metrics": {
+                "method": "GET",
+                "path": "/metrics",
+                "validator": "prometheus",
+            },
+        },
+    },
+    {
+        "name": "rosie",
+        "repo": "szl-holdings/a11oy",
+        "url_env": "ROSIE_URL",
+        "lifecycle": "retired-inside-a11oy",
+        "endpoints": {},
+    },
 ]
 
 # Public org repos the docs/security agents walk. Kept conservative; the

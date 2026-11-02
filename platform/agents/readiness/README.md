@@ -23,6 +23,19 @@ sorries). Author: **Yachay <yachay@szlholdings.dev>**.
 | 7 | [`readiness-dr`](./readiness-dr/) | daily | backup-and-restore proof receipts |
 | 8 | [`readiness-audit-rift`](./readiness-audit-rift/) | daily (last) | meta-audit: flags any over-claiming agent |
 
+### Runtime probe scope
+
+The live deployable flagships are **a11oy** and **killinchu**. Their readiness
+contracts use the namespaced JSON health routes, one bounded synthetic POST
+round trip through the namespaced Khipu sign/verify routes, and Prometheus text
+validation. A 2xx HTML SPA fallback cannot count as success.
+
+The legacy Sentra compatibility Space is recorded separately. Its health JSON
+must explicitly assert `production_ready: true`; because no exact standalone
+Khipu or metrics contract is verified, it remains RED when configured. Memory
+and Operator (the retired internal codenames `amaru` and `rosie`) ship inside
+a11oy and stay visible as SKIPPED receipt slots without standalone URLs.
+
 ### Schedule (UTC)
 - **Hourly**: reliability `0 * * * *`, security `20 * * * *`, observability `40 * * * *`.
 - **Daily**: operability `30 3`, compliance `10 4`, docs `30 4`, dr `10 5`.
@@ -96,7 +109,7 @@ browser secret is needed; it only reads public dataset files.
 pip install huggingface_hub pynacl
 export HF_TOKEN=...                  # to publish receipts
 export KHIPU_SIGNING_KEY_B64=...     # 32-byte ed25519 seed, base64 (to sign)
-export A11OY_URL=... AMARU_URL=... SENTRA_URL=... KILLINCHU_URL=... ROSIE_URL=...
+export A11OY_URL=... SENTRA_URL=... KILLINCHU_URL=...
 export OTEL_COLLECTOR_URL=...        # for observability
 python platform/agents/readiness/readiness-reliability/executor.py
 ```
@@ -112,8 +125,9 @@ GitHub Actions readiness result.
   `readiness-observability.yml`, resource
   `datasets/SZLHOLDINGS/readiness-runs`. Confirm the provider-side binding
   before relying on the source configuration.
-- **Variables**: `A11OY_URL`, `AMARU_URL`, `SENTRA_URL`, `KILLINCHU_URL`,
-  `ROSIE_URL`, `OTEL_COLLECTOR_URL`.
+- **Variables**: `A11OY_URL`, `SENTRA_URL`, `KILLINCHU_URL`, and
+  `OTEL_COLLECTOR_URL`. Leave `AMARU_URL` and `ROSIE_URL` unset: those
+  retired roles ship inside a11oy.
 
 ## Honesty contract
 1. **NO FABRICATION** — missing inputs → `SKIPPED`/`NO-RECEIPT`, not green.
