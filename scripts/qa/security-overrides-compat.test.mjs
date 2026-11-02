@@ -112,12 +112,12 @@ for (const [importerPath, importer] of rateLimitImporters) {
     assert.equal(typeof locked, 'string');
     const snapshot = lock.snapshots[`express-rate-limit@${locked}`];
     assert.ok(snapshot, `missing rate-limit snapshot for ${importerPath}`);
-    assert.equal(snapshot.dependencies?.['ip-address'], '10.7.1');
+    assert.equal(snapshot.dependencies?.['ip-address'], '10.7.4');
     const importerRequire = createRequire(path.join(root, importerPath, 'package.json'));
     const limiter = installedPackage(importerRequire, 'express-rate-limit');
     assert.equal(limiter.manifest.version, locked.split('(')[0]);
     const limiterRequire = createRequire(limiter.entry);
-    assert.equal(installedPackage(limiterRequire, 'ip-address').manifest.version, '10.7.1');
+    assert.equal(installedPackage(limiterRequire, 'ip-address').manifest.version, '10.7.4');
     const { ipKeyGenerator } = importerRequire('express-rate-limit');
     const { Address4, Address6 } = limiterRequire('ip-address');
     assert.equal(ipKeyGenerator('192.0.2.1'), '192.0.2.1');
