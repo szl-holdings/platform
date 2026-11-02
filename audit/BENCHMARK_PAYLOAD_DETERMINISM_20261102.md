@@ -39,6 +39,14 @@ that revision through a normal two-parent merge with a conventional commit
 subject and an expected-head, non-force lease. No history rewrite occurred and
 none of PR #1001's or PR #1002's files is changed by this workcell.
 
+Before the reconciled Runtime Audit completed, `main` advanced to signed
+commit `9b72438f25faa3474a0933a4a775aff46594ed1b` by merging PR #1005. The
+benchmark source was still the same blob and the two candidate paths were
+still absent. The candidate incorporated the dependency, lockfile, and SBOM
+tree through another conventional two-parent merge with an expected-head,
+non-force lease. The current-base diff remains the same three workcell paths;
+none of PR #1005's files is changed by this workcell.
+
 ## Plan summary
 
 1. Reproduce route and paired-stream seed drift under two explicit

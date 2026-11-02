@@ -191,8 +191,8 @@
     "@types/react": "catalog:",
     "@types/supertest": "^7.2.0",
     "@types/ws": "^8.5.14",
-    "@vitest/coverage-v8": "^4.1.7",
-    "@vitest/ui": "^4.1.7",
+    "@vitest/coverage-v8": "^4.1.12",
+    "@vitest/ui": "^4.1.12",
     "cookie-parser": "^1.4.7",
     "drizzle-orm": "catalog:",
     "express": "^5.2.1",
@@ -205,7 +205,7 @@
     "tsx": "catalog:",
     "turbo": "^2.9.14",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.7",
+    "vitest": "^4.1.12",
     "ws": "^8.18.0"
   },
   "dependencies": {
