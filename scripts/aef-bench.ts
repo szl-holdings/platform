@@ -38,6 +38,10 @@ import {
   type RetrievedResult,
 } from '@workspace/aef-evals';
 import { randomUUID } from 'node:crypto';
+import {
+  renderRetrievalBenchmarkReport,
+  type RetrievalBenchmarkRow,
+} from './aef/benchmark-report.ts';
 
 const args = process.argv.slice(2);
 
@@ -74,9 +78,7 @@ function buildLiveAdapter(): RetrievalAdapter {
         }),
       });
       if (!response.ok) {
-        throw new Error(
-          `AEF hybrid-search returned HTTP ${response.status}: ${await response.text()}`,
-        );
+        throw new Error(`AEF hybrid-search returned HTTP ${response.status}`);
       }
       const data = (await response.json()) as {
         hits?: Array<{ chunkId: string; finalScore: number }>;
@@ -123,14 +125,6 @@ function buildMockAdapter(domain: AEFDomain): RetrievalAdapter {
       }));
     },
   };
-}
-
-function fmt(n: number, digits = 2): string {
-  return n.toFixed(digits);
-}
-
-function pad(s: string, width: number): string {
-  return s.padEnd(width);
 }
 
 async function benchDomain(domain: AEFDomain): Promise<{
@@ -185,30 +179,14 @@ async function benchDomain(domain: AEFDomain): Promise<{
 }
 
 async function main(): Promise<void> {
-  const _line = '─'.repeat(100);
-
-  const domainW = 30;
-  const numW = 10;
-  const _header =
-    pad('Domain', domainW) +
-    pad('p50 ms', numW) +
-    pad('p95 ms', numW) +
-    pad('p99 ms', numW) +
-    pad('avg ms', numW) +
-    pad('QPS', numW) +
-    pad('recall@k', numW) +
-    pad('nDCG@k', numW) +
-    'MRR';
-
   const allLatencies: number[] = [];
   let globalRecall = 0;
   let globalNdcg = 0;
   let globalMrr = 0;
+  const rows: RetrievalBenchmarkRow[] = [];
 
   for (const domain of AEF_DOMAIN_PROFILE_DOMAINS) {
-    process.stdout.write(`  benchmarking ${domain}...`);
     const result = await benchDomain(domain);
-    process.stdout.write('\r');
 
     allLatencies.push(...result.rawLatencies);
     globalRecall += result.recall;
@@ -216,35 +194,44 @@ async function main(): Promise<void> {
     globalMrr += result.mrr;
 
     const l = result.latencies;
-    const _row =
-      pad(domain, domainW) +
-      pad(fmt(l.p50Ms), numW) +
-      pad(fmt(l.p95Ms), numW) +
-      pad(fmt(l.p99Ms), numW) +
-      pad(fmt(l.avgMs), numW) +
-      pad(fmt(l.throughputQps, 0), numW) +
-      pad(fmt(result.recall, 3), numW) +
-      pad(fmt(result.ndcg, 3), numW) +
-      fmt(result.mrr, 3);
+    rows.push({
+      domain,
+      p50Ms: l.p50Ms,
+      p95Ms: l.p95Ms,
+      p99Ms: l.p99Ms,
+      avgMs: l.avgMs,
+      throughputQps: l.throughputQps,
+      recall: result.recall,
+      ndcg: result.ndcg,
+      mrr: result.mrr,
+    });
   }
 
   const n = AEF_DOMAIN_PROFILE_DOMAINS.length;
   const overall = computeLatencyPercentiles(allLatencies);
-  const _summaryRow =
-    pad('OVERALL', domainW) +
-    pad(fmt(overall.p50Ms), numW) +
-    pad(fmt(overall.p95Ms), numW) +
-    pad(fmt(overall.p99Ms), numW) +
-    pad(fmt(overall.avgMs), numW) +
-    pad(fmt(overall.throughputQps, 0), numW) +
-    pad(fmt(globalRecall / n, 3), numW) +
-    pad(fmt(globalNdcg / n, 3), numW) +
-    fmt(globalMrr / n, 3);
-  if (LIVE_MODE) {
-  } else {
-  }
+  rows.push({
+    domain: 'OVERALL',
+    p50Ms: overall.p50Ms,
+    p95Ms: overall.p95Ms,
+    p99Ms: overall.p99Ms,
+    avgMs: overall.avgMs,
+    throughputQps: overall.throughputQps,
+    recall: globalRecall / n,
+    ndcg: globalNdcg / n,
+    mrr: globalMrr / n,
+  });
+
+  process.stdout.write(
+    renderRetrievalBenchmarkReport({
+      mode: LIVE_MODE ? 'live' : 'fixture',
+      iterations: ITERATIONS,
+      warmup: WARMUP,
+      rows,
+    }),
+  );
 }
 
 main().catch((_err) => {
-  process.exit(1);
+  process.stderr.write('AEF retrieval benchmark failed\n');
+  process.exitCode = 1;
 });

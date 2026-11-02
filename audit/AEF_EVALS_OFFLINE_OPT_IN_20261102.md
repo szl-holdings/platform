@@ -11,7 +11,7 @@ an exact operator opt-in.
 ## Source boundary
 
 - Reviewed and based the remote candidate on current main:
-  `9b72438f25faa3474a0933a4a775aff46594ed1b`.
+  `0bf3657ecc7aa15ac8372beddfc9421209168fec`.
 - The pre-change test, package manifest, README, and Vitest configuration blobs
   matched the local source snapshot exactly.
 - The prior `beforeAll` constructed `LocalCpuBackend` and called `embed()` before
@@ -23,6 +23,9 @@ an exact operator opt-in.
 - Merged PR #1005 changed the root dependency graph and SBOM/security records,
   including Vitest 4.1.12. This workcell changes none of its six paths; fresh
   exact-head package and hosted checks remain required after reconciliation.
+- Merged PR #1010 changed the test workflow plus AEF benchmark/report sources
+  and documentation. This workcell changes none of its eight paths and retains
+  those updates in its reconciled tree.
 
 ## Change
 
