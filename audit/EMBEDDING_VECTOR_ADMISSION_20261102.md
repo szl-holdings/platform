@@ -25,7 +25,9 @@ NaN, and infinite vectors before provider-health success, cache insertion, or
 analytics success. Expected dimensions remain local to response validation and
 cache identity, so domain configuration does not change compatible-provider
 request payloads. Cached embeddings are copied on write and read so a caller
-cannot corrupt a later cache hit by mutating its returned array.
+cannot corrupt a later cache hit by mutating its returned array. Cache keys use
+SHA-256 over the full cache context and complete text, replacing a truncated
+rolling hash that aliased equal-length texts with the same 200-character prefix.
 
 Batch items are now a discriminated union. Successes carry `ok: true` and an
 embedding; failures carry `ok: false`, input position, text, and error only.
@@ -42,8 +44,8 @@ expose the new item types. A focused Vitest module covers the contract.
 | Candidate `pnpm --filter @szl-holdings/ai-engine typecheck` | 1 | Same pre-execution pnpm engine blocker as baseline. |
 | Candidate `pnpm qa:routes` | 1 | Same pre-execution pnpm engine blocker; route checks did not run. |
 | `COREPACK_HOME=/tmp/corepack corepack pnpm@10.26.1 --version` | 1 | The runner proxy rejected the pinned-package download with HTTP CONNECT 403. |
-| Original-source Node 24 negative-control harness | 0 | Reproduced non-finite/wrong-dimension admission, the 384-zero `error-fallback`, and cache-array aliasing. |
-| Candidate Node 24 runtime harness | 0 | 13 scenarios passed: dimension mismatch, NaN, positive/negative infinity, empty vector, analytics accounting, dimension-aware cache, cache mutation isolation, success/failure batch contracts, real Hugging Face provider-health failure accounting, and compatible API payload preservation. |
+| Original-source Node 24 negative-control harnesses | 0 | Reproduced non-finite/wrong-dimension admission, the 384-zero `error-fallback`, cache-array aliasing, and the full-text cache-key collision. |
+| Candidate Node 24 runtime harness | 0 | 14 scenarios passed: dimension mismatch, NaN, positive/negative infinity, empty vector, analytics accounting, dimension-aware cache, cache mutation isolation, adversarial full-text cache identity, success/failure batch contracts, real Hugging Face provider-health failure accounting, and compatible API payload preservation. |
 | Node 24 TypeScript syntax transform | 0 | All eight changed/new TypeScript files parsed. |
 | `git diff --check` | 0 | No whitespace errors. |
 
@@ -61,7 +63,10 @@ confirms the invalid output increments failure health without recording a
 success latency. An independent source review caught and removed an earlier
 candidate change that forwarded domain-derived dimensions to provider requests;
 the final payload regression preserves the existing compatible API shape.
-Repository and accessible organization default-branch search
+Another independent review reproduced the truncated cache-key collision; the
+final adversarial case uses equal-length texts with an identical 200-character
+prefix and confirms two provider calls and two distinct vectors. Repository and
+accessible organization default-branch search
 found four batch consumers, all in this package; each was updated. No external
 published-package consumer was qualified, so the intentional batch type and API
 response change requires normal review and versioning discipline.
