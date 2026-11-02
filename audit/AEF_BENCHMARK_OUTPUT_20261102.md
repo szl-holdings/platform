@@ -3,26 +3,29 @@
 - Workcell: `AEF-BENCHMARK-OUTPUT-20261102`
 - Date: 2026-11-02
 - Owner: Codex
-- Protected base: `szl-holdings/platform@a41f03e9fa52231f3b2a6b32cea7af57989c0c6d`
+- Protected base: `szl-holdings/platform@9b72438f25faa3474a0933a4a775aff46594ed1b`
 - Local test base: `3e0cbc07a4b4e5f604b982e49443ce247b571fa4`
 
 ## Context
 
 The target blobs for `scripts/aef-bench.ts`, `scripts/aef/benchmark.ts`,
-`docs/aef/LOCAL_DEV.md`, `docs/aef/README.md`, and `package.json` are byte-for-byte
-identical on the protected base and local test base. The local worktree is therefore
-safe for focused verification without incorporating unrelated older changes. The
-publication commit must use the protected base as its parent.
+`docs/aef/LOCAL_DEV.md`, and `docs/aef/README.md` are byte-for-byte identical on the
+protected base and local test base. The local worktree is therefore safe for focused
+dependency-free verification without incorporating unrelated older changes. The
+reconciliation merge must include the protected base as a parent.
 
-Protected `main` advanced through merged PR #1002 and then PR #1001 while this
+Protected `main` advanced through merged PR #1002, PR #1001, and PR #1005 while this
 workcell was in progress. Its AEF target-file Git blobs remain unchanged:
 `scripts/aef-bench.ts`
 `1091ee0c8b370161a5cfd32e14f00170f036af3d`, `scripts/aef/benchmark.ts`
 `73ee1361d67bab2f10ee6c94330fa810abb58e36`, and `docs/aef/LOCAL_DEV.md`
 `4564af7a03565712623d9622db7990efa4742ad2`. PR #1001 changed only
-`scripts/qa/capture-cyber-build-witness.mjs` and its test, so reconciliation is
-disjoint and preserves those current-main blobs. This patch does not touch a file
-changed by PR #1002 or PR #1001.
+`scripts/qa/capture-cyber-build-witness.mjs` and its test. PR #1005 changed the root
+dependency manifests, lockfile, security compatibility test, and generated SBOMs,
+including the Vitest 4.1.12 graph. Neither merge overlaps this patch's eight files,
+so reconciliation is disjoint and preserves those current-main blobs. The hosted
+workflow must still rerun against the changed dependency graph. This patch does not
+touch a file changed by PR #1002, PR #1001, or PR #1005.
 
 Both benchmark entry points calculate rows and summary statistics but discard them.
 `scripts/aef-bench.ts` emits only transient progress text and
@@ -90,6 +93,11 @@ will be downloaded for this workcell.
   two changed witness files, with no overlap. The reconciliation commit uses prior
   reviewed head `476b897c094d50c162bd9de49d0bcbf084763f92` as first parent and exact
   current main `a41f03e9fa52231f3b2a6b32cea7af57989c0c6d` as second parent.
+- Current-main comparison from `a41f03e9` to `9b72438f` — PASS: one commit and six
+  dependency/security evidence files, with no overlap. The latest reconciliation
+  commit uses prior proof-only head `a0d8145b4a84c359c4f88b10c86f08ceb33e14e8`
+  as first parent and exact current main
+  `9b72438f25faa3474a0933a4a775aff46594ed1b` as second parent.
 - Post-change `pnpm typecheck` — BLOCKED before TypeScript execution. The runner
   has pnpm 11.19.0 and the repository requires 10.26.1. The pinned toolchain and
   workspace dependencies were not downloaded because this workcell prohibits
