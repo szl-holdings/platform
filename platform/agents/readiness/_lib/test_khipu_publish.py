@@ -176,7 +176,7 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertEqual(upload["repo_type"], "dataset")
         self.assertRegex(
             upload["path_in_repo"],
-            r"^receipts/readiness-test/\d{4}-\d{2}-\d{2}/\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}Z\.json$",
+            r"^receipts/readiness-test/\d{4}-\d{2}-\d{2}/\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}Z-[0-9a-f]{64}\.json$",
         )
         self.assertNotIn("::error", text)
 

@@ -213,8 +213,13 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
         return {"published": False, "reason": signature_error, "path": "(not created)"}
     date = envelope_emitted_date(envelope)
     ts = utcnow_iso().replace(":", "-")
-    path = f"receipts/{agent}/{date}/{ts}.json"
+    path = "(not created)"
     try:
+        # Bind the name to the exact upload bytes so distinct receipts emitted
+        # in the same second cannot replace one another at the same Hub path.
+        receipt_bytes = json.dumps(envelope, indent=2).encode()
+        receipt_digest = hashlib.sha256(receipt_bytes).hexdigest()
+        path = f"receipts/{agent}/{date}/{ts}-{receipt_digest}.json"
         from huggingface_hub import HfApi  # type: ignore
 
         if oidc_resource:
@@ -230,7 +235,7 @@ def publish_to_hf(agent: str, envelope: dict, dataset: str = HF_DATASET) -> dict
                 return {"published": False, "reason": "OIDC access token unavailable", "path": path}
         api = HfApi(token=token)
         api.upload_file(
-            path_or_fileobj=json.dumps(envelope, indent=2).encode(),
+            path_or_fileobj=receipt_bytes,
             path_in_repo=path,
             repo_id=dataset,
             repo_type="dataset",

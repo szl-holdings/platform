@@ -53,9 +53,24 @@ appended to the runs dataset:
 
 ```
 SZLHOLDINGS/readiness-runs
-  receipts/<agent>/<UTC-date>/<UTC-timestamp>.json
+  receipts/<agent>/<UTC-date>/<UTC-timestamp>-<envelope-sha256>.json
   dr-dumps/<flagship>/<ts>.ndjson      (READINESS-DR backups)
 ```
+
+The digest suffix is SHA-256 of the exact envelope bytes uploaded to the Hub.
+Distinct envelopes published in the same second select distinct filenames;
+identical bytes in that second reuse the same filename. This does not provide
+global deduplication, transactional append, or a provider readback guarantee.
+The directory still uses the signed emission date, while the filename timestamp
+uses publication time. The dashboard and audit-rift readers accept both legacy
+timestamp-only names and suffixed names. They retain lexical timestamp selection;
+ordering among receipts sharing a timestamp is not a causal ordering guarantee.
+
+Offline filename and reader regressions live in
+[`_lib/test_publication_identity.py`](./_lib/test_publication_identity.py) and
+[`_lib/test_dashboard.mjs`](./_lib/test_dashboard.mjs). Qualification evidence and
+remaining operational gates are recorded in the
+[publication identity proof packet](../../../audit/READINESS_PUBLICATION_IDENTITY_20261102.md).
 
 If the signing key is absent or invalid, the envelope is honestly marked
 `signed:false` and is **not uploaded**. A receipt signed by a different key is
