@@ -420,6 +420,22 @@ test('dependency-free governance regression is enforced locally and in CI', () =
   assert.match(dependencyFreeTests, new RegExp(regression));
 });
 
+test('hosted Python tests execute the benchmark payload determinism contract', () => {
+  const workflow = readRepositoryFile('.github/workflows/tests.yml');
+  const readiness = yamlJobBlock(workflow, 'readiness');
+  const benchmarkContract = yamlStepBlock(
+    readiness,
+    'Run benchmark payload determinism contract',
+  );
+
+  assert.match(
+    benchmarkContract,
+    /^ {8}run: python -m unittest discover -s benchmarks -p 'test_run_benchmarks\.py' -v$/m,
+  );
+  assert.doesNotMatch(benchmarkContract, /^\s+continue-on-error:/m);
+  assert.doesNotMatch(benchmarkContract, /^\s+if:/m);
+});
+
 test('legacy source-of-truth entry point delegates only to the canonical validator', () => {
   const wrapper = readRepositoryFile('audit/verify.sh');
 

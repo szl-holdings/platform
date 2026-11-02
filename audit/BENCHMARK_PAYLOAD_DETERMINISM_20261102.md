@@ -21,9 +21,11 @@ the isolated local worktree before editing. The local worktree branch is
 branch is `codex/benchmark-determinism-clean-20261102`.
 
 Open pull requests were reviewed before publication. This candidate does not
-touch any of PR #1002's embedding files. Its benchmark source, regression
-module, and uniquely named proof packet do not overlap the paths declared by
-the other open platform pull requests observed at that time.
+touch any of PR #1002's embedding files. Its hosted wiring shares the Tests
+workflow and workflow-governance contract with draft PR #1010, but uses a
+separate Python-matrix job and assertion. Both additions must be retained when
+either candidate reconciles after the other; the two owners exchanged the exact
+step names, commands, and assertion names before editing.
 
 Before final publication, `main` advanced to signed commit
 `590e0c9f279d7ec2083c31581499825416a647a7` by merging PR #1002. The
@@ -44,8 +46,13 @@ commit `9b72438f25faa3474a0933a4a775aff46594ed1b` by merging PR #1005. The
 benchmark source was still the same blob and the two candidate paths were
 still absent. The candidate incorporated the dependency, lockfile, and SBOM
 tree through another conventional two-parent merge with an expected-head,
-non-force lease. The current-base diff remains the same three workcell paths;
-none of PR #1005's files is changed by this workcell.
+non-force lease. Before hosted qualification, independent review established
+that the new regression was not called by any hosted test entry point. The
+workcell therefore expands to five paths with a fail-closed Tests workflow step
+and dependency-free workflow-governance assertion. The benchmark behavior and
+result schema remain unchanged, and all dependency, lockfile, and SBOM changes
+from PR #1005 remain intact. Only PR #1010 shares the separately coordinated
+workflow/governance paths.
 
 ## Plan summary
 
@@ -57,10 +64,13 @@ none of PR #1005's files is changed by this workcell.
    compare generated payloads across interpreter hash seeds.
 4. Lock the existing metadata schema, CLI seed metadata, additive seed
    behavior, and one digest vector.
+5. Invoke the dependency-free regression from the hosted Python matrix and
+   protect that fail-closed step with a dependency-free governance contract.
 
 Success requires identical route seeds and generated payloads across process
 hash seeds, a changed payload stream when `--seed` changes, unchanged result
-schema keys, focused tests passing, and no live server or provider call.
+schema keys, focused tests passing locally and in hosted Tests, and no live
+server or provider call.
 
 ## Negative control
 
@@ -91,6 +101,10 @@ contract.
   16 route streams and eight production paired streams, including their first
   measured payloads. The test also locks metadata keys and verifies that a
   changed CLI seed changes the projected non-GET payloads and metadata.
+- `.github/workflows/tests.yml` invokes the regression in the existing offline
+  Python 3.11/3.12 readiness matrix without installing another dependency.
+- `scripts/ci/governance-workflows.test.mjs` requires the exact named command
+  and rejects conditional or `continue-on-error` execution.
 
 The candidate produces route seed 3210 and paired seed 6052 for the same route
 and CLI seed under both observed interpreter hash seeds.
@@ -102,6 +116,7 @@ and CLI seed under both observed interpreter hash seeds.
 | `python benchmarks/test_run_benchmarks.py -v` | 0 | Focused benchmark contract suite passed |
 | `python -m unittest discover -s benchmarks -p 'test_*.py' -v` | 0 | The same suite passed through discovery |
 | `python -m py_compile benchmarks/run_benchmarks.py benchmarks/test_run_benchmarks.py` | 0 | Both changed Python files compiled |
+| `node --test scripts/ci/governance-workflows.test.mjs` | 0 | Dependency-free workflow contracts passed |
 | `git diff --check` | 0 | No whitespace errors |
 | `node scripts/qa/scan-secrets.js .` | 0 | CLEAN; no secrets found |
 | `pnpm typecheck` (before patch) | 1 | Blocked before package execution: repository requires pnpm 10.26.1; runner has 11.19.0 |
@@ -119,8 +134,9 @@ boundary.
   entry key sets. It confirms the base CLI seed remains in `meta.seed`.
 - A known vector locks the derivation version:
   `(42, "a11oy.reconcile-handoff", "route") -> 3210`.
-- No API route, UI surface, workflow, dependency, credential, database,
-  deployment, or publication configuration changed.
+- The Tests workflow gains one offline, dependency-free Python command. No API
+  route, UI surface, dependency, credential, database, deployment, permission,
+  or publication configuration changed.
 - No live server was started and no benchmark HTTP request was sent. A real
   exact-head benchmark run remains unobserved and is outside this bounded
   source correction.
