@@ -4,7 +4,7 @@
 - `agent`: OpenAI Codex
 - `objective`: Repair the two root eval-harness scripts so they invoke the current checked-in harness and fail visibly if their targets drift.
 - `recorded_at`: `2026-11-02T04:48:04Z`
-- `reconciled_at`: `2026-11-02T05:11:35Z`
+- `reconciled_at`: `2026-11-02T05:28:19Z`
 - `recorded_by`: OpenAI Codex
 - `proof_level`: 2 (Standard Proof)
 
@@ -24,6 +24,7 @@
 - GitHub main was `21d4ee44d4eb9b3a8fcb30530b02f9de6ff52537` when this work began. The local blobs for `package.json`, the two target tests, and the existing clean-clone regression suite exactly matched that main revision before editing.
 - The published candidate was first based on `590e0c9f279d7ec2083c31581499825416a647a7`, after merged PR #1002. It was then reconciled without rewriting history using prior reviewed head `26d2da8be6ca5a641c80eec0ad2c0ce2982b7a88` and exact current main `a41f03e9fa52231f3b2a6b32cea7af57989c0c6d` as parents.
 - The main advance changed only `scripts/qa/capture-cyber-build-witness.mjs` and its focused test. Neither overlaps this patch, whose current-base diff remains the same five paths.
+- Main then advanced through PR #1005 to `9b72438f25faa3474a0933a4a775aff46594ed1b`, sharing `package.json`. The final non-force reconciliation uses prior head `e5028603c4c7fe874fd93ec8d94aaa5cf8a9bf77` and that exact main as parents, applies only the four intended script hunks to the new manifest, and preserves the Vitest `4.1.12` floors plus the lockfile, workspace overrides, security contract, and SBOM state from #1005.
 
 ## Patch summary
 
@@ -32,7 +33,7 @@
 - `apps/eval-runner/conftest.py`: resolve the eval-runner root to `apps/eval-runner/`, as its comment and `src` imports require.
 - `apps/eval-runner/test_suite_reproducibility.py`: use the same correct root in fresh subprocesses. The previous extra parent traversal inserted `apps/` and failed with `ModuleNotFoundError: src`.
 
-No route, UI, database, workflow, dependency, credential, model, or data changes are included. The changed paths do not overlap the nine files in platform PR #1002 or the two files in platform PR #1001.
+No route, UI, database, workflow, dependency, credential, model, or data changes are included. The changed paths do not overlap the nine files in platform PR #1002 or the two files in platform PR #1001. PR #1005 shares `package.json`; only the two test-list insertions and two eval-alias replacements belong to this patch.
 
 ## Test results
 
