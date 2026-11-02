@@ -59,7 +59,8 @@ will be downloaded for this workcell.
 
 ## Validation
 
-- `node --test scripts/aef/benchmark-report.test.ts` — PASS (3 tests).
+- `node --test scripts/aef/benchmark-report.test.ts` — PASS; every report-contract
+  case completed.
   Exact retrieval and API tables, zero-success `n/a` handling, renderer redaction,
   and entry-point wiring are covered.
 - `node --check` for both entry points, the renderer, and its test — PASS.
@@ -80,8 +81,9 @@ will be downloaded for this workcell.
   unit job exposed only the generic `pnpm run test` step, whose explicit root
   Node-test list omitted `scripts/aef/benchmark-report.test.ts`.
 - Candidate hosted command
-  `node --test scripts/aef/benchmark-report.test.ts` — PASS (3 tests).
-- `node --test scripts/ci/governance-workflows.test.mjs` — PASS (18 tests),
+  `node --test scripts/aef/benchmark-report.test.ts` — PASS; every case completed.
+- `node --test scripts/ci/governance-workflows.test.mjs` — PASS; every existing and
+  new case completed,
   including the new assertion that the hosted unit job runs the exact AEF command
   without `continue-on-error` before the generic suite.
 - Current-main comparison from `590e0c9f` to `a41f03e9` — PASS: one commit and
