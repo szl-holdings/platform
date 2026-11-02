@@ -156,7 +156,7 @@ export async function ingestToVectorStore(
 
     const chunksWithEmbeddings = chunks.map((chunk, i) => {
       const res = batchResult.results[i];
-      if (!res || res.error) return { ...chunk, embedding: null };
+      if (!res?.ok) return { ...chunk, embedding: null };
       if (res.embedding.length !== RAG_DB_DIMENSIONS) {
         return { ...chunk, embedding: null };
       }
