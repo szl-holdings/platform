@@ -428,6 +428,56 @@ class EmitFailsClosedTest(unittest.TestCase):
             self.assertNotIn(str(missing), err.getvalue())
             self.assertFalse(missing.exists())
 
+    def test_requested_receipt_write_error_fails_after_successful_publication(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            missing = Path(directory) / "missing" / "receipt.json"
+            env = self._signed_env()
+            env["READINESS_RECEIPT_PATH"] = str(missing)
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                text, result, code = self._emit(env)
+            self.assertEqual(code, 1)
+            self.assertIsNone(result)
+            receipt = json.loads(text)
+            self.assertTrue(receipt["receipt"]["signed"])
+            self.assertTrue(receipt["publish"]["published"])
+            self.assertEqual(len(_FakeHfApi.uploads), 1)
+            self.assertFalse(missing.exists())
+            self.assertEqual(err.getvalue(), "readiness receipt file was not retained\n")
+            self.assertNotIn(str(missing), text + err.getvalue())
+
+    def test_receipt_close_error_fails_without_exposing_exception_text(self) -> None:
+        env = self._signed_env()
+        env["READINESS_RECEIPT_PATH"] = "receipt.json"
+        marker = "synthetic-private-detail-" + os.urandom(16).hex()
+        err = io.StringIO()
+        handle = unittest.mock.MagicMock()
+        handle.__exit__.side_effect = OSError(marker + "\n::notice::injected")
+        with unittest.mock.patch.object(khipu.os, "open", return_value=123), \
+                unittest.mock.patch.object(khipu.os, "fdopen", return_value=handle), \
+                contextlib.redirect_stderr(err):
+            text, _result, code = self._emit(env)
+        self.assertEqual(code, 1)
+        self.assertTrue(json.loads(text)["publish"]["published"])
+        self.assertEqual(len(_FakeHfApi.uploads), 1)
+        handle.__enter__.return_value.write.assert_called_once_with(text)
+        self.assertEqual(err.getvalue(), "readiness receipt file was not retained\n")
+        self.assertNotIn(marker, text + err.getvalue())
+        self.assertNotIn("::notice", text + err.getvalue())
+
+    def test_requested_receipt_write_error_only_warns_outside_actions(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            env = self._signed_env()
+            del env["GITHUB_ACTIONS"]
+            env["READINESS_RECEIPT_PATH"] = str(Path(directory) / "missing" / "receipt.json")
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                _text, result, code = self._emit(env)
+            self.assertIsNone(code)
+            self.assertTrue(result["publish"]["published"])
+            self.assertEqual(len(_FakeHfApi.uploads), 1)
+            self.assertEqual(err.getvalue(), "readiness receipt file was not retained\n")
+
     def test_invalid_signing_key_fails_actions_without_upload(self) -> None:
         env = self._signed_env()
         env["KHIPU_SIGNING_KEY_B64"] = "invalid-base64!"
