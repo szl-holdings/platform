@@ -120,6 +120,8 @@ jobs:
       - name: Install dependencies (skip ONNXRuntime download to avoid postinstall network flake)
         run: |
           ONNXRUNTIME_NODE_INSTALL=skip pnpm install --frozen-lockfile
+      - name: Run AEF benchmark report contract
+        run: node --test scripts/aef/benchmark-report.test.ts
       - name: Run test suite
         run: pnpm run test
 
