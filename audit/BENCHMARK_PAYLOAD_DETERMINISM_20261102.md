@@ -54,6 +54,16 @@ result schema remain unchanged, and all dependency, lockfile, and SBOM changes
 from PR #1005 remain intact. Only PR #1010 shares the separately coordinated
 workflow/governance paths.
 
+After the benchmark contract passed in both hosted readiness matrix jobs on
+candidate `be2b952666d61c9ea5e25504d3780dc1298c3d6e`, `main` advanced to
+signed commit `0bf3657ecc7aa15ac8372beddfc9421209168fec` by merging PR #1010.
+That merge adds the AEF benchmark report and its named Node contract to the
+unit job, including a governance assertion in the same two shared files. The
+candidate reconciliation preserves every PR #1010 blob and keeps its exact AEF
+step and assertion alongside this workcell's distinct readiness-matrix Python
+step and assertion. The prior head's hosted results no longer qualify the
+reconciled candidate; fresh exact-head checks remain required.
+
 ## Plan summary
 
 1. Reproduce route and paired-stream seed drift under two explicit
