@@ -420,6 +420,24 @@ test('dependency-free governance regression is enforced locally and in CI', () =
   assert.match(dependencyFreeTests, new RegExp(regression));
 });
 
+test('hosted unit tests execute the AEF benchmark report contract', () => {
+  const workflow = readRepositoryFile('.github/workflows/tests.yml');
+  const unit = yamlJobBlock(workflow, 'unit');
+  const benchmarkContract = yamlStepBlock(unit, 'Run AEF benchmark report contract');
+  const fullSuite = yamlStepBlock(unit, 'Run test suite');
+
+  assert.match(
+    benchmarkContract,
+    /^ {8}run: node --test scripts\/aef\/benchmark-report\.test\.ts$/m,
+  );
+  assert.doesNotMatch(benchmarkContract, /continue-on-error/);
+  assert.match(fullSuite, /^ {8}run: pnpm run test$/m);
+  assert.ok(
+    unit.indexOf('      - name: Run AEF benchmark report contract') <
+      unit.indexOf('      - name: Run test suite'),
+  );
+});
+
 test('legacy source-of-truth entry point delegates only to the canonical validator', () => {
   const wrapper = readRepositoryFile('audit/verify.sh');
 

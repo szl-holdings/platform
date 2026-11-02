@@ -34,9 +34,11 @@ pnpm --filter @workspace/aef-evals test
 pnpm -w test
 ```
 
-## Running the Benchmark Script
+## Running the Benchmark Scripts
 
-The benchmark script exercises embed + hybrid search + rerank against the mock corpus without requiring a GPU or external embedding service.
+### Retrieval Quality and Latency
+
+The retrieval benchmark uses the mock corpus by default, so it does not require a GPU or external embedding service.
 
 ```bash
 pnpm tsx scripts/aef-bench.ts
@@ -49,7 +51,34 @@ Optional arguments:
 pnpm tsx scripts/aef-bench.ts --iterations 500 --warmup 50
 ```
 
-The script prints a summary table of p50/p95/p99 latency, average latency, throughput (QPS), and per-domain recall@k, nDCG@k, and MRR.
+After every domain finishes, the script writes one Markdown table to stdout. Rows follow the domain registry order and end with `OVERALL`. The fixed columns are p50/p95/p99 latency, average latency, throughput (QPS), recall@k, nDCG@k, and MRR.
+
+The script does not create a results file. Redirect stdout when you need a durable result:
+
+```bash
+pnpm tsx scripts/aef-bench.ts > aef-retrieval-benchmark.md
+```
+
+Pass `--live` to measure the running hybrid-search endpoint instead of the fixture adapter:
+
+```bash
+AEF_API_URL=http://localhost:5000/alloy-embedding-api \
+  pnpm tsx scripts/aef-bench.ts --live
+```
+
+### Running API Throughput and Latency
+
+The API benchmark measures embed, hybrid-search, and rerank suites against a running AEF API:
+
+```bash
+AEF_API_URL=http://localhost:4200 \
+  BENCH_ROUNDS=20 \
+  pnpm tsx scripts/aef/benchmark.ts
+```
+
+It writes one Markdown table to stdout with successful, failed, and invalid-response counts, latency percentiles, and aggregate sequential throughput. An invalid hybrid-search response is a successful HTTP response whose canonical retrieval path does not contain 13 stages.
+
+Both reports contain only fixed suite or domain labels and aggregate numeric measurements. They do not print endpoint URLs, tenant IDs, API keys, query text, or response bodies. On an unexpected error, the scripts write a fixed failure message to stderr and exit unsuccessfully. Redirect stdout as shown above when a durable report is required.
 
 ## Running the Smoke Tests
 
