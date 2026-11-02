@@ -22,23 +22,26 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /build
 
-# Base runtime deps first (cached layer)
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-# GPU-specific deps — quote specifiers so >= is not treated as shell redirection
-RUN pip install \
-    "torch>=2.14.0" \
-    "transformers>=5.17.0" \
-    "accelerate>=1.2.0" \
-    "safetensors>=0.5.0"
+# Install the complete Python 3.11/CUDA graph from the hash-locked evidence
+# file. Binary-only installation keeps the default image free of implicit
+# source builds and fails closed when the target wheel set is unavailable.
+COPY requirements-gpu.lock .
+RUN python -m pip install \
+    --only-binary=:all: \
+    --require-hashes \
+    -r requirements-gpu.lock
 
 # FlashAttention-2 is optional because the engine can use PyTorch SDPA. Opting
 # in is fail-closed: a requested but failed install fails the image build.
 ARG SUBSTRATE_INSTALL_FLASH_ATTN=0
+COPY requirements-flash-attn.lock .
 RUN case "$SUBSTRATE_INSTALL_FLASH_ATTN" in \
       0) ;; \
-      1) pip install "flash-attn>=2.8.3.post1" --no-build-isolation ;; \
+      1) python -m pip install \
+           --no-build-isolation \
+           --no-deps \
+           --require-hashes \
+           -r requirements-flash-attn.lock ;; \
       *) echo "SUBSTRATE_INSTALL_FLASH_ATTN must be 0 or 1" >&2; exit 2 ;; \
     esac
 
@@ -61,8 +64,11 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app
 
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+COPY requirements-base.lock .
+RUN python -m pip install \
+    --only-binary=:all: \
+    --require-hashes \
+    -r requirements-base.lock
 
 RUN groupadd --gid 1001 substrate && \
     useradd --uid 1001 --gid substrate --no-create-home --shell /usr/sbin/nologin substrate
