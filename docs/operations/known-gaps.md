@@ -29,6 +29,17 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### AEF-EVALS-OFFLINE-20261102 — default real-vector download closed in source
+
+The candidate AEF evaluation suite no longer loads the local CPU backend or
+attempts an ONNX model fetch during the default package test command. Real-vector
+evaluation requires literal `AEF_EVALS_REQUIRE_REAL=1`; an opted-in model error
+fails the run instead of becoming a successful skip. A loader-injection
+regression proves that missing, false-like, or padded values do not import the
+backend. This is a source and test-runner boundary only. It does not qualify the
+model artifacts, retrieval quality, provider availability, deployment, or GPU
+runtime. Exact-head hosted checks and protected review remain separate gates.
+
 ### READINESS-RETENTION-20261102 — candidate receipt-copy failure gate
 
 An explicitly requested readiness receipt copy could fail to write while the
@@ -1531,3 +1542,25 @@ shape-access regressions. A factory isolates per-manifest sensitive-field
 arrays. Native current-head CI and protected release remain **BLOCKED** pending
 their own results. No provider/runtime capability is inferred. See the
 [native follow-up proof](../../audit/ZOD4_NATIVE_FOLLOWUP_2026-10-25.md).
+
+### 2026-11-02 readiness authority preflight candidate
+
+**MEASURED - READINESS-AUTHORITY-PREFLIGHT-20261102:** run `41381694418`
+reached receipt emission with no usable fleet signing authority and correctly
+refused an unsigned publication. The reliability workflow previously discovered
+that condition only after its probe window. The candidate adds a local Ed25519
+sign/verify preflight and runs the existing exact-dataset publisher preflight
+before collection. Offline regressions cover absent, malformed, invalid-length,
+unavailable-client, failed-signing and valid synthetic authority without
+printing secret or exception text. The executor's signature verification and
+real publication gate remain unchanged.
+
+No signer, Hugging Face credential, Replit credential or provider setting was
+available to this source repair. A valid run still requires the existing fleet
+seed in the effective `KHIPU_SIGNING_KEY_B64` Actions secret and dataset-write
+authority in `HF_TOKEN`. Staging run `41375292722` separately received HTTP 403
+from Replit after both configured values were nonempty; the exact application ID
+and its authorized Replit bearer identity must be reconciled outside source.
+Neither external blocker is closed by the candidate. See the
+[source proof](../../audit/READINESS_AUTHORITY_PREFLIGHT_20261102.md) and
+[authority runbook](../../audit/PLATFORM_EXTERNAL_AUTHORITY_BLOCKERS_20261102.md).

@@ -64,6 +64,17 @@ step and assertion alongside this workcell's distinct readiness-matrix Python
 step and assertion. The prior head's hosted results no longer qualify the
 reconciled candidate; fresh exact-head checks remain required.
 
+While that reconciled candidate was qualifying, `main` advanced through PR
+#1008 at `e25305761b2c2ff71aa2d142dec3b404369078b5`, PR #1004 at
+`296fc4720e9a259ea3fdf8e2c8ca6e7feb7caef1`, and PR #1009 at
+`4da31e46272d2da6023af15eb45a91db254067ab`. Those merges respectively add
+offline AEF real-vector controls, readiness authority preflights, and root eval
+harness commands on paths disjoint from this five-file workcell. Publication
+was held until all three landed. The final reconciliation uses the exact latest
+`main` tree, preserves every blob from those merges and the earlier PR #1005 and
+PR #1010 merges, then overlays only the five workcell paths. Both the AEF Node
+and Python determinism hosted steps and governance assertions remain present.
+
 ## Plan summary
 
 1. Reproduce route and paired-stream seed drift under two explicit
