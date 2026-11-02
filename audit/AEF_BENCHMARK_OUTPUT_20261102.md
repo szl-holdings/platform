@@ -3,7 +3,7 @@
 - Workcell: `AEF-BENCHMARK-OUTPUT-20261102`
 - Date: 2026-11-02
 - Owner: Codex
-- Protected base: `szl-holdings/platform@590e0c9f279d7ec2083c31581499825416a647a7`
+- Protected base: `szl-holdings/platform@a41f03e9fa52231f3b2a6b32cea7af57989c0c6d`
 - Local test base: `3e0cbc07a4b4e5f604b982e49443ce247b571fa4`
 
 ## Context
@@ -14,12 +14,15 @@ identical on the protected base and local test base. The local worktree is there
 safe for focused verification without incorporating unrelated older changes. The
 publication commit must use the protected base as its parent.
 
-Protected `main` advanced through merged PR #1002 while this workcell was in
-progress. Its target-file Git blobs remain unchanged: `scripts/aef-bench.ts`
+Protected `main` advanced through merged PR #1002 and then PR #1001 while this
+workcell was in progress. Its AEF target-file Git blobs remain unchanged:
+`scripts/aef-bench.ts`
 `1091ee0c8b370161a5cfd32e14f00170f036af3d`, `scripts/aef/benchmark.ts`
 `73ee1361d67bab2f10ee6c94330fa810abb58e36`, and `docs/aef/LOCAL_DEV.md`
-`4564af7a03565712623d9622db7990efa4742ad2`. This patch does not touch any
-file changed by PR #1002.
+`4564af7a03565712623d9622db7990efa4742ad2`. PR #1001 changed only
+`scripts/qa/capture-cyber-build-witness.mjs` and its test, so reconciliation is
+disjoint and preserves those current-main blobs. This patch does not touch a file
+changed by PR #1002 or PR #1001.
 
 Both benchmark entry points calculate rows and summary statistics but discard them.
 `scripts/aef-bench.ts` emits only transient progress text and
@@ -81,6 +84,10 @@ will be downloaded for this workcell.
 - `node --test scripts/ci/governance-workflows.test.mjs` — PASS (18 tests),
   including the new assertion that the hosted unit job runs the exact AEF command
   without `continue-on-error` before the generic suite.
+- Current-main comparison from `590e0c9f` to `a41f03e9` — PASS: one commit and
+  two changed witness files, with no overlap. The reconciliation commit uses prior
+  reviewed head `476b897c094d50c162bd9de49d0bcbf084763f92` as first parent and exact
+  current main `a41f03e9fa52231f3b2a6b32cea7af57989c0c6d` as second parent.
 - Post-change `pnpm typecheck` — BLOCKED before TypeScript execution. The runner
   has pnpm 11.19.0 and the repository requires 10.26.1. The pinned toolchain and
   workspace dependencies were not downloaded because this workcell prohibits
