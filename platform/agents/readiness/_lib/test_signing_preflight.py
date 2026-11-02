@@ -34,14 +34,14 @@ class SigningPreflightTest(unittest.TestCase):
             "nacl.signing": signing,
         }))
         self.enterContext(patch.dict(os.environ, {
-            preflight.KEY_ENV: ENCODED_SEED,
+            preflight.SIGNER_ENV: ENCODED_SEED,
         }, clear=True))
 
     def _check(self) -> dict:
         result = preflight.check_signing_authority()
         self.assertIs(type(result["ready"]), bool)
         self.assertEqual(result["algorithm"], "ed25519")
-        self.assertEqual(result["key_env"], preflight.KEY_ENV)
+        self.assertEqual(result["key_env"], preflight.SIGNER_ENV)
         self.assertLessEqual(set(result), {
             "ready", "stage", "code", "message", "algorithm", "key_env", "keyid",
         })
@@ -64,7 +64,7 @@ class SigningPreflightTest(unittest.TestCase):
             with self.subTest(value=value):
                 env = {}
                 if value is not None:
-                    env[preflight.KEY_ENV] = value
+                    env[preflight.SIGNER_ENV] = value
                 with patch.dict(os.environ, env, clear=True), patch.dict(
                     sys.modules, {"nacl": None, "nacl.signing": None},
                 ):
@@ -76,7 +76,7 @@ class SigningPreflightTest(unittest.TestCase):
     def test_malformed_key_fails_without_loading_crypto(self) -> None:
         for value in ("not*base64", ENCODED_SEED + "\n", ENCODED_SEED + "\u200b"):
             with self.subTest(value=repr(value)), patch.dict(
-                os.environ, {preflight.KEY_ENV: value}, clear=True,
+                os.environ, {preflight.SIGNER_ENV: value}, clear=True,
             ), patch.dict(sys.modules, {"nacl": None, "nacl.signing": None}):
                 result = self._check()
                 self.assertEqual((result["stage"], result["code"]),
@@ -86,7 +86,7 @@ class SigningPreflightTest(unittest.TestCase):
     def test_decoded_seed_must_be_exactly_32_bytes(self) -> None:
         for length in (1, 31, 33, 64):
             with self.subTest(length=length), patch.dict(os.environ, {
-                preflight.KEY_ENV: base64.b64encode(b"x" * length).decode(),
+                preflight.SIGNER_ENV: base64.b64encode(b"x" * length).decode(),
             }, clear=True):
                 result = self._check()
                 self.assertEqual((result["stage"], result["code"]),
@@ -128,7 +128,7 @@ class SigningPreflightTest(unittest.TestCase):
     def test_cli_emits_safe_actions_annotation_only_on_failure(self) -> None:
         with patch.dict(os.environ, {
             "GITHUB_ACTIONS": "true",
-            preflight.KEY_ENV: "not*base64",
+            preflight.SIGNER_ENV: "not*base64",
         }, clear=True), contextlib.redirect_stdout(io.StringIO()) as out:
             self.assertEqual(preflight.main(), 1)
         lines = out.getvalue().splitlines()
@@ -139,7 +139,7 @@ class SigningPreflightTest(unittest.TestCase):
 
         with patch.dict(os.environ, {
             "GITHUB_ACTIONS": "true",
-            preflight.KEY_ENV: ENCODED_SEED,
+            preflight.SIGNER_ENV: ENCODED_SEED,
         }, clear=True), contextlib.redirect_stdout(io.StringIO()) as out:
             self.assertEqual(preflight.main(), 0)
         self.assertEqual(len(out.getvalue().splitlines()), 1)
