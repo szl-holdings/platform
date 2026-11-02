@@ -17,13 +17,28 @@ export interface EmbeddingResult {
   cached: boolean;
 }
 
+export interface BatchEmbeddingSuccess extends EmbeddingResult {
+  ok: true;
+  text: string;
+  index: number;
+}
+
+export interface BatchEmbeddingFailure {
+  ok: false;
+  text: string;
+  index: number;
+  error: string;
+}
+
+export type BatchEmbeddingItem = BatchEmbeddingSuccess | BatchEmbeddingFailure;
+
 export interface BatchEmbeddingResult {
-  results: Array<EmbeddingResult & { text: string; index: number; error?: string }>;
+  results: BatchEmbeddingItem[];
   totalLatencyMs: number;
   successCount: number;
   errorCount: number;
-  provider: EmbeddingProviderType;
-  model: string;
+  provider: EmbeddingProviderType | null;
+  model: string | null;
 }
 
 export interface EmbedOptions {
@@ -79,7 +94,7 @@ class EmbeddingCache {
       this.cache.delete(key);
       return null;
     }
-    return { ...entry.result, cached: true };
+    return { ...entry.result, embedding: [...entry.result.embedding], cached: true };
   }
 
   set(key: string, result: EmbeddingResult): void {
@@ -87,7 +102,10 @@ class EmbeddingCache {
       const firstKey = this.cache.keys().next().value;
       if (firstKey) this.cache.delete(firstKey);
     }
-    this.cache.set(key, { result, expiry: Date.now() + CACHE_TTL_MS });
+    this.cache.set(key, {
+      result: { ...result, embedding: [...result.embedding] },
+      expiry: Date.now() + CACHE_TTL_MS,
+    });
   }
 
   get size(): number {
@@ -96,6 +114,23 @@ class EmbeddingCache {
 }
 
 const PROVIDER_RECOVERY_COOLDOWN_MS = 60 * 1000;
+
+function assertValidEmbeddingVector(
+  vector: unknown,
+  expectedDimensions: number | null,
+): asserts vector is number[] {
+  if (!Array.isArray(vector) || vector.length === 0) {
+    throw new Error('[embedding-provider] Provider returned an empty or malformed vector');
+  }
+  if (expectedDimensions !== null && vector.length !== expectedDimensions) {
+    throw new Error(
+      `[embedding-provider] Vector has ${vector.length} dimensions; expected ${expectedDimensions}`,
+    );
+  }
+  if (vector.some((value) => typeof value !== 'number' || !Number.isFinite(value))) {
+    throw new Error('[embedding-provider] Provider returned a non-finite vector');
+  }
+}
 
 abstract class BaseEmbeddingProvider {
   abstract readonly type: EmbeddingProviderType;
@@ -140,7 +175,11 @@ abstract class BaseEmbeddingProvider {
     this.health.lastChecked = Date.now();
   }
 
-  abstract embed(text: string, model?: string): Promise<number[]>;
+  abstract embed(
+    text: string,
+    model?: string,
+    expectedDimensions?: number | null,
+  ): Promise<number[]>;
 }
 
 class HuggingFaceEmbeddingProvider extends BaseEmbeddingProvider {
@@ -154,7 +193,11 @@ class HuggingFaceEmbeddingProvider extends BaseEmbeddingProvider {
     this.baseUrl = process.env.HF_INFERENCE_URL || 'https://api-inference.huggingface.co/models';
   }
 
-  async embed(text: string, model?: string): Promise<number[]> {
+  async embed(
+    text: string,
+    model?: string,
+    expectedDimensions: number | null = null,
+  ): Promise<number[]> {
     const targetModel = model || process.env.HF_EMBED_MODEL || 'BAAI/bge-m3';
     const start = Date.now();
 
@@ -186,6 +229,7 @@ class HuggingFaceEmbeddingProvider extends BaseEmbeddingProvider {
         throw new Error('Unexpected HuggingFace embedding response format');
       }
 
+      assertValidEmbeddingVector(vector, expectedDimensions);
       this.recordSuccess(Date.now() - start);
       return vector;
     } catch (err) {
@@ -215,7 +259,11 @@ class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
     }
   }
 
-  async embed(text: string, model?: string): Promise<number[]> {
+  async embed(
+    text: string,
+    model?: string,
+    expectedDimensions: number | null = null,
+  ): Promise<number[]> {
     if (!this.config.apiKey) {
       throw new Error('OpenAI API key not configured');
     }
@@ -236,6 +284,7 @@ class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
         body: JSON.stringify({
           model: targetModel,
           input: text.slice(0, this.config.maxInputLength),
+          ...(expectedDimensions !== null ? { dimensions: expectedDimensions } : {}),
         }),
         signal: controller.signal,
       });
@@ -248,6 +297,7 @@ class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
       const vector = data.data?.[0]?.embedding;
       if (!vector) throw new Error('No embedding in OpenAI response');
 
+      assertValidEmbeddingVector(vector, expectedDimensions);
       this.recordSuccess(Date.now() - start);
       return vector;
     } catch (err) {
@@ -274,7 +324,11 @@ class LocalSentenceTransformersEmbeddingProvider extends BaseEmbeddingProvider {
     }
   }
 
-  async embed(text: string, model?: string): Promise<number[]> {
+  async embed(
+    text: string,
+    model?: string,
+    expectedDimensions: number | null = null,
+  ): Promise<number[]> {
     const targetModel = model || this.defaultModel;
     const start = Date.now();
 
@@ -314,6 +368,7 @@ class LocalSentenceTransformersEmbeddingProvider extends BaseEmbeddingProvider {
         throw new Error('Unexpected local sentence-transformers response format');
       }
 
+      assertValidEmbeddingVector(vector, expectedDimensions);
       this.recordSuccess(Date.now() - start);
       return vector;
     } catch (err) {
@@ -334,7 +389,11 @@ class ReplitAIProxyEmbeddingProvider extends BaseEmbeddingProvider {
     this.defaultModel = process.env.REPLIT_EMBED_MODEL || 'text-embedding-3-small';
   }
 
-  async embed(text: string, model?: string): Promise<number[]> {
+  async embed(
+    text: string,
+    model?: string,
+    expectedDimensions: number | null = null,
+  ): Promise<number[]> {
     const targetModel = model || this.defaultModel;
     const start = Date.now();
 
@@ -343,10 +402,12 @@ class ReplitAIProxyEmbeddingProvider extends BaseEmbeddingProvider {
       const response = await openai.embeddings.create({
         model: targetModel,
         input: text.slice(0, 8000),
+        ...(expectedDimensions !== null ? { dimensions: expectedDimensions } : {}),
       });
       const vector = response.data[0]?.embedding;
       if (!vector) throw new Error('No embedding in Replit proxy response');
 
+      assertValidEmbeddingVector(vector, expectedDimensions);
       this.recordSuccess(Date.now() - start);
       return vector;
     } catch (err) {
@@ -359,11 +420,24 @@ class ReplitAIProxyEmbeddingProvider extends BaseEmbeddingProvider {
 class MockEmbeddingProvider extends BaseEmbeddingProvider {
   readonly type: EmbeddingProviderType = 'mock';
 
-  async embed(_text: string, _model?: string): Promise<number[]> {
-    const dim = 384;
-    const vec = Array.from({ length: dim }, () => (Math.random() - 0.5) * 2);
-    const norm = Math.sqrt(vec.reduce((s, v) => s + v * v, 0));
-    return vec.map((v) => v / norm);
+  async embed(
+    _text: string,
+    _model?: string,
+    expectedDimensions: number | null = null,
+  ): Promise<number[]> {
+    const start = Date.now();
+    try {
+      const dim = 384;
+      const vec = Array.from({ length: dim }, () => (Math.random() - 0.5) * 2);
+      const norm = Math.sqrt(vec.reduce((s, v) => s + v * v, 0));
+      const vector = vec.map((v) => v / norm);
+      assertValidEmbeddingVector(vector, expectedDimensions);
+      this.recordSuccess(Date.now() - start);
+      return vector;
+    } catch (err) {
+      this.recordFailure();
+      throw err;
+    }
   }
 }
 
@@ -400,6 +474,14 @@ export class EmbeddingPipeline {
   async embed(text: string, options: EmbedOptions = {}): Promise<EmbeddingResult> {
     const domainConfig = options.domain ? getDomainModelConfig(options.domain) : null;
     const preferredProvider = domainConfig?.preferredProvider;
+    const expectedDimensions = options.dimensions ?? domainConfig?.dimensions ?? null;
+
+    if (
+      expectedDimensions !== null &&
+      (!Number.isInteger(expectedDimensions) || expectedDimensions <= 0)
+    ) {
+      throw new Error('[embedding-pipeline] dimensions must be a positive integer');
+    }
 
     const orderedProviders = preferredProvider
       ? [
@@ -409,14 +491,15 @@ export class EmbeddingPipeline {
       : this.providers;
 
     const canonicalModel = options.model || domainConfig?.model || 'text-embedding-3-small';
-    const cacheKey = this.cache.key(text, canonicalModel + (options.domain || ''));
+    const cacheKey = this.cache.key(
+      text,
+      `${canonicalModel}:${options.domain || ''}:${expectedDimensions ?? 'any'}`,
+    );
     const cached = this.cache.get(cacheKey);
     if (cached) {
       embeddingAnalytics.recordCacheHit(cached.provider, canonicalModel);
       return cached;
     }
-
-    const expectedDimensions = domainConfig?.dimensions ?? null;
 
     for (const provider of orderedProviders) {
       if (!provider.getHealth().available && provider.type !== 'mock') continue;
@@ -431,11 +514,10 @@ export class EmbeddingPipeline {
             ? domainConfig?.hfModel || process.env.HF_EMBED_MODEL || 'BAAI/bge-m3'
             : domainConfig?.model || 'text-embedding-3-small';
 
-        const vector = await provider.embed(text, modelForProvider);
+        const vector = await provider.embed(text, modelForProvider, expectedDimensions);
         const latencyMs = Date.now() - start;
 
-        if (expectedDimensions !== null && vector.length !== expectedDimensions) {
-        }
+        assertValidEmbeddingVector(vector, expectedDimensions);
 
         const result: EmbeddingResult = {
           embedding: vector,
@@ -485,8 +567,8 @@ export class EmbeddingPipeline {
     const results: BatchEmbeddingResult['results'] = new Array(texts.length);
     let successCount = 0;
     let errorCount = 0;
-    let lastProvider: EmbeddingProviderType = 'mock';
-    let lastModel = 'unknown';
+    let lastProvider: EmbeddingProviderType | null = null;
+    let lastModel: string | null = null;
 
     const queue = texts.map((text, index) => ({ text, index }));
     let completed = 0;
@@ -496,20 +578,13 @@ export class EmbeddingPipeline {
         items.map(async ({ text, index }) => {
           try {
             const result = await this.embed(text, options);
-            results[index] = { ...result, text, index };
+            results[index] = { ...result, ok: true, text, index };
             successCount++;
             lastProvider = result.provider;
             lastModel = result.model;
           } catch (err) {
-            const mockDim = 384;
-            const mockVec = Array.from({ length: mockDim }, () => 0);
             results[index] = {
-              embedding: mockVec,
-              dimensions: mockDim,
-              model: 'error-fallback',
-              provider: 'mock',
-              latencyMs: 0,
-              cached: false,
+              ok: false,
               text,
               index,
               error: err instanceof Error ? err.message : String(err),
