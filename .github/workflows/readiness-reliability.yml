@@ -1,7 +1,7 @@
 name: READINESS-RELIABILITY
 
 # Probes flagship liveness, latency, and signed-receipt success.
-# Doctrine v11 (LOCKED) 749/14/163. Additive readiness agent — read-only.
+# Doctrine v11 (LOCKED) 749/14/163. Bounded diagnostic signing; no durable mutation.
 # Author: Yachay <yachay@szlholdings.dev>
 
 on:
