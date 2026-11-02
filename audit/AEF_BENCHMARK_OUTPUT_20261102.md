@@ -41,6 +41,8 @@ will be downloaded for this workcell.
 4. Add Node built-in tests for exact output shape, empty-success handling, and the
    redaction boundary.
 5. Document stdout-only output and explicit shell redirection for durable results.
+6. Run the contract as a named step in the existing hosted Node 24 unit-test job,
+   with a dependency-free governance assertion that prevents silent removal.
 
 ## Success Criteria
 
@@ -49,6 +51,7 @@ will be downloaded for this workcell.
 - Empty-success suites render `n/a` statistics rather than throwing while formatting.
 - Reports contain no endpoint, credential, tenant, query, or response data.
 - Dependency-free focused tests and syntax checks pass.
+- The hosted Tests workflow executes all three report-contract cases directly.
 - Full typecheck is attempted and any toolchain blocker is recorded exactly.
 
 ## Validation
@@ -68,6 +71,16 @@ will be downloaded for this workcell.
   sentinel value appeared.
 - `node scripts/qa/scan-secrets.js .` — PASS (`CLEAN — no secrets found`).
 - `git diff --check` — PASS.
+- Pre-wiring negative control against `.github/workflows/tests.yml` — EXPECTED
+  FAILURE. The workflow did not contain an AEF benchmark contract step. Hosted
+  Tests run `41390857404` completed successfully on the original PR head, but its
+  unit job exposed only the generic `pnpm run test` step, whose explicit root
+  Node-test list omitted `scripts/aef/benchmark-report.test.ts`.
+- Candidate hosted command
+  `node --test scripts/aef/benchmark-report.test.ts` — PASS (3 tests).
+- `node --test scripts/ci/governance-workflows.test.mjs` — PASS (18 tests),
+  including the new assertion that the hosted unit job runs the exact AEF command
+  without `continue-on-error` before the generic suite.
 - Post-change `pnpm typecheck` — BLOCKED before TypeScript execution. The runner
   has pnpm 11.19.0 and the repository requires 10.26.1. The pinned toolchain and
   workspace dependencies were not downloaded because this workcell prohibits
