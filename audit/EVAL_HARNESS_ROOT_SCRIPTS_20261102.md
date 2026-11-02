@@ -36,13 +36,13 @@ No route, UI, database, workflow, dependency, credential, model, or data changes
 | Command | Exit | Result |
 | --- | ---: | --- |
 | `pnpm typecheck` before and after the patch | 1 | Blocked before TypeScript execution both times: repository requires pnpm `10.26.1`; the runner provides `11.19.0`. No package-manager or dependency installation was performed. |
-| `node --test scripts/ci/eval-harness-scripts.test.mjs` | 0 | 2/2 manifest and target assertions passed. |
-| `node scripts/check-clean-clone.mjs && node --test ... scripts/ci/eval-harness-scripts.test.mjs ...` | 0 | Clean-clone scan verified 10,397 tracked paths and 207 manifests; 54/54 tests passed. |
+| `node --test scripts/ci/eval-harness-scripts.test.mjs` | 0 | Both manifest and target assertions passed. |
+| `node scripts/check-clean-clone.mjs && node --test ... scripts/ci/eval-harness-scripts.test.mjs ...` | 0 | Every selected clean-clone and governance check passed. |
 | Inline stdlib runner over every `Test*::test_*` method in `test_suite_reproducibility.py` before the root fix | 1 | Negative control reproduced `ModuleNotFoundError: No module named 'src'` in the fresh subprocess. |
-| The same inline stdlib reproducibility runner after the root fix | 0 | All 14 reproducibility assertions passed, including independent Python subprocess comparisons. |
-| Inline offline `STANDARD_SUITE` scoring and hash assertions | 0 | All 5 standard cases scored correctly; suite hash matched a fresh canonical hash. |
+| The same inline stdlib reproducibility runner after the root fix | 0 | Every existing reproducibility assertion passed, including independent Python subprocess comparisons. |
+| Inline offline `STANDARD_SUITE` scoring and hash assertions | 0 | Every standard case scored correctly; suite hash matched a fresh canonical hash. |
 | `node ops/python/run-python.mjs -m py_compile ...` for the eval-runner configuration, tests, and source modules | 0 | Python syntax and launcher path handling passed. |
-| `node ops/python/run-python.mjs -m pytest -q apps/eval-runner/test_suite_reproducibility.py` | 1 | The selected runner has no `pytest` module. The task forbids installing dependencies; the harness README documents pytest as a test prerequisite. The underlying 14 assertions were executed with the stdlib runner above. |
+| `node ops/python/run-python.mjs -m pytest -q apps/eval-runner/test_suite_reproducibility.py` | 1 | The selected runner has no `pytest` module. The task forbids installing dependencies; the harness README documents pytest as a test prerequisite. The underlying assertions were executed with the stdlib runner above. |
 | `git diff --check` | 0 | No whitespace errors. |
 
 ## Verification notes
