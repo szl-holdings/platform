@@ -1,5 +1,5 @@
 # ─── Stage 1: dependency builder ────────────────────────────────────────────
-FROM nvidia/cuda:13.4.2-cudnn-devel-ubuntu22.04@sha256:d9e285e3bb16630c577e71070ea73f7b37ea2a2928c64902e340507c640b9618 AS builder
+FROM nvidia/cuda:13.4.3-cudnn-devel-ubuntu22.04@sha256:a67ac14e3947e63ad5ea4c46b0ee1b75fa621b9b5cced0b0b64cd2bc359f8d44 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
@@ -85,7 +85,7 @@ LABEL org.opencontainers.image.title="substrate-inference-cpu-stub" \
 CMD ["python", "-m", "src.main"]
 
 # ─── Stage 2: slim GPU runtime ────────────────────────────────────────────
-FROM nvidia/cuda:13.4.2-cudnn-runtime-ubuntu22.04@sha256:d5982da4024f00929ce8297a901f2c962b9fb06e3b9df2fdca35ecbdcd6754ee AS runtime
+FROM nvidia/cuda:13.4.3-cudnn-runtime-ubuntu22.04@sha256:5b4f4ff403744604db148c4e562f998b97047a3a02ebfaab42be73932daf4848 AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
