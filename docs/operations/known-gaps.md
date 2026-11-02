@@ -29,6 +29,24 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### HATUN-CHAIN-GATE-20261102 — candidate pre-execution integrity gate
+
+The non-canonical Hatun MCP copy previously verified its in-memory Khipu chain
+only after awaiting the backend and hard-coded `chain_verified=true` on every
+new receipt. A corrupt pre-existing chain could therefore coexist with an
+already executed backend side effect and a falsely positive receipt field. The
+scoped candidate verifies before every backend call, declines with `T01`, closes
+the unawaited coroutine, derives the receipt field from the actual pre-append
+state, and binds that field into the receipt hash. Focused local regressions pass
+3/3.
+
+This is a source repair in the Platform repository's explicitly non-canonical
+copy. It does not modify or verify the separate canonical `hatun-mcp` repository,
+prove deployment, add durable persistence, provide an independent witness, or
+resolve the package's missing declared MCP SDK dependency. Those boundaries
+remain **UNKNOWN / HOLD**. See the
+[scoped proof packet](../../audit/PLATFORM_HATUN_CHAIN_GATE_20261102.md).
+
 ### READINESS-RETENTION-20261102 — candidate receipt-copy failure gate
 
 An explicitly requested readiness receipt copy could fail to write while the
