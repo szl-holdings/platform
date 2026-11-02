@@ -107,16 +107,24 @@ export async function createEmbeddingAnalyticsRouter(): Promise<ExpressRouter> {
         errorCount: batchResult.errorCount,
         provider: batchResult.provider,
         model: batchResult.model,
-        results: batchResult.results.map((r) => ({
-          index: r.index,
-          dimensions: r.dimensions,
-          model: r.model,
-          provider: r.provider,
-          latencyMs: r.latencyMs,
-          cached: r.cached,
-          error: r.error ?? null,
-          embedding: r.error ? null : r.embedding,
-        })),
+        results: batchResult.results.map((r) =>
+          r.ok
+            ? {
+                ok: true,
+                index: r.index,
+                dimensions: r.dimensions,
+                model: r.model,
+                provider: r.provider,
+                latencyMs: r.latencyMs,
+                cached: r.cached,
+                embedding: r.embedding,
+              }
+            : {
+                ok: false,
+                index: r.index,
+                error: r.error,
+              },
+        ),
       });
     } catch (err) {
       res.status(500).json({
