@@ -53,6 +53,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           KHIPU_SIGNING_KEY_B64: ${{ secrets.KHIPU_SIGNING_KEY_B64 }}
+          READINESS_OPERATOR_TOKEN: ${{ secrets.READINESS_OPERATOR_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           A11OY_URL: ${{ vars.A11OY_URL }}
           AMARU_URL: ${{ vars.AMARU_URL }}
