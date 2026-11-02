@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:dac3b1f7-947c-59ef-9fe9-83aa9d8ae098",
+  "serialNumber": "urn:uuid:4276b21e-6c3c-5875-a192-6d6f61aa2308",
   "metadata": {
     "tools": [
       {
@@ -35,7 +35,7 @@
       },
       {
         "name": "szl:sbom:component-count",
-        "value": "1806"
+        "value": "1805"
       }
     ]
   },
@@ -231,12 +231,6 @@
       "name": "@babel/parser",
       "version": "7.29.7",
       "purl": "pkg:npm/%40babel/parser@7.29.7"
-    },
-    {
-      "type": "library",
-      "name": "@babel/parser",
-      "version": "7.29.8",
-      "purl": "pkg:npm/%40babel/parser@7.29.8"
     },
     {
       "type": "library",
@@ -727,8 +721,8 @@
     {
       "type": "library",
       "name": "@hono/node-server",
-      "version": "2.1.1",
-      "purl": "pkg:npm/%40hono/node-server@2.1.1"
+      "version": "2.1.3",
+      "purl": "pkg:npm/%40hono/node-server@2.1.3"
     },
     {
       "type": "library",
@@ -4769,8 +4763,8 @@
     {
       "type": "library",
       "name": "@vitest/coverage-v8",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/coverage-v8@4.1.11"
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/coverage-v8@4.1.12"
     },
     {
       "type": "library",
@@ -4781,14 +4775,14 @@
     {
       "type": "library",
       "name": "@vitest/expect",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/expect@4.1.11"
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/expect@4.1.12"
     },
     {
       "type": "library",
       "name": "@vitest/mocker",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/mocker@4.1.11"
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/mocker@4.1.12"
     },
     {
       "type": "library",
@@ -4805,20 +4799,20 @@
     {
       "type": "library",
       "name": "@vitest/pretty-format",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/pretty-format@4.1.11"
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/pretty-format@4.1.12"
     },
     {
       "type": "library",
       "name": "@vitest/runner",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/runner@4.1.11"
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/runner@4.1.12"
     },
     {
       "type": "library",
       "name": "@vitest/snapshot",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/snapshot@4.1.11"
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/snapshot@4.1.12"
     },
     {
       "type": "library",
@@ -4829,14 +4823,14 @@
     {
       "type": "library",
       "name": "@vitest/spy",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/spy@4.1.11"
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/spy@4.1.12"
     },
     {
       "type": "library",
       "name": "@vitest/ui",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/ui@4.1.11"
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/ui@4.1.12"
     },
     {
       "type": "library",
@@ -4853,8 +4847,8 @@
     {
       "type": "library",
       "name": "@vitest/utils",
-      "version": "4.1.11",
-      "purl": "pkg:npm/%40vitest/utils@4.1.11"
+      "version": "4.1.12",
+      "purl": "pkg:npm/%40vitest/utils@4.1.12"
     },
     {
       "type": "application",
@@ -8327,8 +8321,8 @@
     {
       "type": "library",
       "name": "hono",
-      "version": "4.13.9",
-      "purl": "pkg:npm/hono@4.13.9"
+      "version": "4.13.13",
+      "purl": "pkg:npm/hono@4.13.13"
     },
     {
       "type": "library",
@@ -8531,8 +8525,8 @@
     {
       "type": "library",
       "name": "ip-address",
-      "version": "10.7.1",
-      "purl": "pkg:npm/ip-address@10.7.1"
+      "version": "10.7.4",
+      "purl": "pkg:npm/ip-address@10.7.4"
     },
     {
       "type": "library",
@@ -11819,8 +11813,8 @@
     {
       "type": "library",
       "name": "vitest",
-      "version": "4.1.11",
-      "purl": "pkg:npm/vitest@4.1.11"
+      "version": "4.1.12",
+      "purl": "pkg:npm/vitest@4.1.12"
     },
     {
       "type": "library",
