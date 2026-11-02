@@ -113,6 +113,10 @@ class Checkpointer:
         env = self.build_envelope(now)
         path = f"checkpoints/{self.dag.space}/{int(now)}_{env['payload']['merkle_root'][:12]}.json"
         up = self.uploader(self.dataset_repo, path, json.dumps(env, sort_keys=True))
+        if not isinstance(up, dict) or up.get("uploaded") is not True:
+            raise RuntimeError(
+                "checkpoint publication did not succeed; no checkpoint receipt recorded"
+            )
         snapshot = {"root": env["payload"]["merkle_root"], "ts": now, "path": path,
                     "leaf_count": env["payload"]["leaf_count"], "upload": up}
         self.dag.checkpoints.append(snapshot)
