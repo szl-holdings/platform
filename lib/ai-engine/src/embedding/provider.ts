@@ -284,7 +284,6 @@ class OpenAICompatibleEmbeddingProvider extends BaseEmbeddingProvider {
         body: JSON.stringify({
           model: targetModel,
           input: text.slice(0, this.config.maxInputLength),
-          ...(expectedDimensions !== null ? { dimensions: expectedDimensions } : {}),
         }),
         signal: controller.signal,
       });
@@ -402,7 +401,6 @@ class ReplitAIProxyEmbeddingProvider extends BaseEmbeddingProvider {
       const response = await openai.embeddings.create({
         model: targetModel,
         input: text.slice(0, 8000),
-        ...(expectedDimensions !== null ? { dimensions: expectedDimensions } : {}),
       });
       const vector = response.data[0]?.embedding;
       if (!vector) throw new Error('No embedding in Replit proxy response');
