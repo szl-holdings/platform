@@ -51,7 +51,10 @@ export {
   RAG_DB_DIMENSIONS,
 } from './embedding/domain-config.js';
 export {
+  type BatchEmbeddingFailure,
+  type BatchEmbeddingItem,
   type BatchEmbeddingResult,
+  type BatchEmbeddingSuccess,
   type BatchEmbedOptions,
   EmbeddingPipeline,
   type EmbeddingProviderType,
