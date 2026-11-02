@@ -11,13 +11,15 @@ an exact operator opt-in.
 ## Source boundary
 
 - Reviewed and based the remote candidate on current main:
-  `590e0c9f279d7ec2083c31581499825416a647a7`.
+  `a41f03e9fa52231f3b2a6b32cea7af57989c0c6d`.
 - The pre-change test, package manifest, README, and Vitest configuration blobs
   matched the local source snapshot exactly.
 - The prior `beforeAll` constructed `LocalCpuBackend` and called `embed()` before
   deciding whether a model-fetch failure should be skipped.
 - Merged PR #1002 changed nine `lib/ai-engine` and proof files; this workcell
   changes none of those paths.
+- Merged PR #1001 changed two cyber build-witness script paths; this workcell
+  changes neither path.
 
 ## Change
 
