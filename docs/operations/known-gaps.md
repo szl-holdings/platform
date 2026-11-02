@@ -41,6 +41,24 @@ protected admission and actual artifact readback remain required. This does
 not provision fleet signing or qualify publication, runtime or staging.
 See the [scoped proof](../../audit/READINESS_RETENTION_20261102.md).
 
+### READINESS-PUBLICATION-IDENTITY-20261102 — candidate same-second overwrite repair
+
+The readiness publisher previously selected one timestamp-only filename per
+agent, signed emission date and publication second. Distinct envelopes in that
+second could replace the same remote object. The candidate appends SHA-256 of
+the exact uploaded envelope bytes to the existing timestamp. Offline regression
+tests reproduce the collision against the original source and preserve both
+objects with the candidate; mixed legacy and suffixed filenames remain readable
+by the dashboard and audit-rift consumers.
+
+This is a local source qualification. Global deduplication, concurrent remote
+commit behavior and provider readback are not established. Hosted checks,
+independent review, protected admission, valid signing and provider bindings,
+and live signed publication evidence remain required. Merged PR #996 separately addresses
+requested local receipt retention; this candidate preserves that repair. No runtime
+or staging readiness is implied. See the
+[scoped proof](../../audit/READINESS_PUBLICATION_IDENTITY_20261102.md).
+
 ### KHIPU-OFFLINE-TICK-20261101 — candidate publication guard and offline continuity
 
 The strict checkpoint publication guard from #991 rejects unsuccessful uploads,

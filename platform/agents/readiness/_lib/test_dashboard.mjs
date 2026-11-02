@@ -45,12 +45,13 @@ function element(tagName) {
   return node;
 }
 
-async function render({ receipt, unavailable = false }) {
+async function render({ receipt, unavailable = false, files = null }) {
   const dataset = element('input');
   dataset.value = 'SZLHOLDINGS/readiness-runs';
   const rows = element('tbody');
   const status = element('span');
   const nodes = { dataset, rows, status };
+  const downloads = [];
   const document = {
     getElementById(id) {
       return nodes[id];
@@ -65,18 +66,19 @@ async function render({ receipt, unavailable = false }) {
         ok: true,
         json: async () =>
           match && receipt
-            ? [{ type: 'file', path: 'receipts/readiness-reliability/latest.json' }]
+            ? (files ?? [{ type: 'file', path: 'receipts/readiness-reliability/latest.json' }])
             : [],
       };
     }
     if (url.includes('/resolve/main/')) {
+      downloads.push(url);
       return { ok: true, json: async () => receipt };
     }
     throw new Error(`Unexpected fetch URL: ${url}`);
   };
   const atob = (value) => Buffer.from(value, 'base64').toString('binary');
   await vm.runInNewContext(script, { document, fetch, atob });
-  return { rows, status };
+  return { rows, status, downloads };
 }
 
 function envelope(body, signed = true) {
@@ -117,4 +119,25 @@ test('Hub fetch failure is not presented as no receipts', async () => {
   assert.equal(rows.children.length, 8);
   assert.ok(rows.children.every((row) => row.children[1].textContent === 'FETCH-ERROR'));
   assert.match(status.textContent, /8 fetch error/);
+});
+
+test('receipt reader accepts legacy and digest filenames without changing time order', async () => {
+  const prefix = 'receipts/readiness-reliability/2026-11-02/';
+  const legacy = `${prefix}2026-11-02T01-00-00Z.json`;
+  const suffixed = `${prefix}2026-11-02T01-00-01Z-${'a'.repeat(64)}.json`;
+  const laterLegacy = `${prefix}2026-11-02T01-00-02Z.json`;
+  for (const [paths, expected] of [
+    [[legacy], legacy],
+    [[suffixed, legacy], suffixed],
+    [[laterLegacy, suffixed, legacy], laterLegacy],
+  ]) {
+    const { downloads, rows } = await render({
+      receipt: envelope({ payload: {} }),
+      files: paths.map((path) => ({ type: 'file', path })),
+    });
+    assert.deepEqual(downloads, [
+      `https://huggingface.co/datasets/SZLHOLDINGS/readiness-runs/resolve/main/${expected}`,
+    ]);
+    assert.equal(rows.children[0].children[1].textContent, 'UNVERIFIED');
+  }
 });
