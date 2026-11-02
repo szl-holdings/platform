@@ -24,6 +24,14 @@ touch any of PR #1002's embedding files. Its benchmark source, regression
 module, and uniquely named proof packet do not overlap the paths declared by
 the other open platform pull requests observed at that time.
 
+While the first candidate commit was being attached, `main` advanced to signed
+commit `590e0c9f279d7ec2083c31581499825416a647a7` by merging PR #1002. The
+benchmark source remained blob `0e6628f5c99f56507017518d4a8873d6be579138`,
+and the two new candidate paths remained absent. The branch then incorporated
+that exact `main` revision with a normal two-parent merge whose tree was built
+from `main`; no history rewrite occurred and none of PR #1002's files was
+changed by this workcell.
+
 ## Plan summary
 
 1. Reproduce route and paired-stream seed drift under two explicit
