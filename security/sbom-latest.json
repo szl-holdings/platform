@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:4276b21e-6c3c-5875-a192-6d6f61aa2308",
+  "serialNumber": "urn:uuid:1df985a0-0a52-5d39-8f4a-0a7cc2c9a187",
   "metadata": {
     "tools": [
       {
@@ -8321,8 +8321,8 @@
     {
       "type": "library",
       "name": "hono",
-      "version": "4.13.13",
-      "purl": "pkg:npm/hono@4.13.13"
+      "version": "4.13.11",
+      "purl": "pkg:npm/hono@4.13.11"
     },
     {
       "type": "library",
