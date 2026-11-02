@@ -4,7 +4,7 @@
 - `agent`: OpenAI Codex
 - `objective`: Repair the two root eval-harness scripts so they invoke the current checked-in harness and fail visibly if their targets drift.
 - `recorded_at`: `2026-11-02T04:48:04Z`
-- `reconciled_at`: `2026-11-02T05:49:00Z`
+- `reconciled_at`: `2026-11-02T06:08:00Z`
 - `recorded_by`: OpenAI Codex
 - `proof_level`: 2 (Standard Proof)
 
@@ -25,7 +25,8 @@
 - The published candidate was first based on `590e0c9f279d7ec2083c31581499825416a647a7`, after merged PR #1002. It was then reconciled without rewriting history using prior reviewed head `26d2da8be6ca5a641c80eec0ad2c0ce2982b7a88` and exact current main `a41f03e9fa52231f3b2a6b32cea7af57989c0c6d` as parents.
 - The main advance changed only `scripts/qa/capture-cyber-build-witness.mjs` and its focused test. Neither overlaps this patch, whose current-base diff remains the same five paths.
 - Main then advanced through PR #1005 to `9b72438f25faa3474a0933a4a775aff46594ed1b`, sharing `package.json`. The second non-force reconciliation uses prior head `e5028603c4c7fe874fd93ec8d94aaa5cf8a9bf77` and that exact main as parents, applies only the four intended script hunks to the new manifest, and preserves the Vitest `4.1.12` floors plus the lockfile, workspace overrides, security contract, and SBOM state from #1005.
-- Main then advanced through PR #1010 to `0bf3657ecc7aa15ac8372beddfc9421209168fec`. That merge changes eight AEF benchmark workflow, report, documentation, implementation, and governance paths, all disjoint from this patch. The latest non-force reconciliation uses prior head `737ebe34ece8de1b70cc6e3114a91d143724cd01` and that exact main as parents, preserving every #1010 blob while retaining the #1005 dependency, lockfile, security-contract, and SBOM state.
+- Main then advanced through PR #1010 to `0bf3657ecc7aa15ac8372beddfc9421209168fec`. That merge changes eight AEF benchmark workflow, report, documentation, implementation, and governance paths, all disjoint from this patch. The third non-force reconciliation uses prior head `737ebe34ece8de1b70cc6e3114a91d143724cd01` and that exact main as parents, preserving every #1010 blob while retaining the #1005 dependency, lockfile, security-contract, and SBOM state.
+- Main then advanced through PR #1008 to `e25305761b2c2ff71aa2d142dec3b404369078b5`. That merge changes six AEF offline-opt-in source, test, documentation, known-gap, and proof paths, all disjoint from this patch. The latest non-force reconciliation uses prior head `d35b27e2f1ed4bb12dd7e8118490856894715003` and that exact main as parents, preserving every #1008 and #1010 blob plus the #1005 dependency and evidence state.
 
 ## Patch summary
 
@@ -34,7 +35,7 @@
 - `apps/eval-runner/conftest.py`: resolve the eval-runner root to `apps/eval-runner/`, as its comment and `src` imports require.
 - `apps/eval-runner/test_suite_reproducibility.py`: use the same correct root in fresh subprocesses. The previous extra parent traversal inserted `apps/` and failed with `ModuleNotFoundError: src`.
 
-No route, UI, database, workflow, dependency, credential, model, or data changes are included. The changed paths do not overlap the nine files in platform PR #1002, the two files in platform PR #1001, or the eight files in platform PR #1010. PR #1005 shares `package.json`; only the two test-list insertions and two eval-alias replacements belong to this patch.
+No route, UI, database, workflow, dependency, credential, model, or data changes are included. The changed paths do not overlap the nine files in platform PR #1002, the two files in platform PR #1001, the eight files in platform PR #1010, or the six files in platform PR #1008. PR #1005 shares `package.json`; only the two test-list insertions and two eval-alias replacements belong to this patch.
 
 ## Test results
 

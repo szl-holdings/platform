@@ -29,6 +29,17 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### AEF-EVALS-OFFLINE-20261102 — default real-vector download closed in source
+
+The candidate AEF evaluation suite no longer loads the local CPU backend or
+attempts an ONNX model fetch during the default package test command. Real-vector
+evaluation requires literal `AEF_EVALS_REQUIRE_REAL=1`; an opted-in model error
+fails the run instead of becoming a successful skip. A loader-injection
+regression proves that missing, false-like, or padded values do not import the
+backend. This is a source and test-runner boundary only. It does not qualify the
+model artifacts, retrieval quality, provider availability, deployment, or GPU
+runtime. Exact-head hosted checks and protected review remain separate gates.
+
 ### READINESS-RETENTION-20261102 — candidate receipt-copy failure gate
 
 An explicitly requested readiness receipt copy could fail to write while the
