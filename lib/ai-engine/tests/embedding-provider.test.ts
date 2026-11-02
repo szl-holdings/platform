@@ -18,10 +18,12 @@ interface TestProvider {
 
 function provider(
   type: EmbeddingProviderType,
-  vector: number[] | ((expectedDimensions: number | null | undefined) => number[]),
+  vector:
+    | number[]
+    | ((expectedDimensions: number | null | undefined, text: string) => number[]),
 ) {
-  const embed: TestProvider['embed'] = async (_text, _model, expectedDimensions) =>
-    typeof vector === 'function' ? vector(expectedDimensions) : vector;
+  const embed: TestProvider['embed'] = async (text, _model, expectedDimensions) =>
+    typeof vector === 'function' ? vector(expectedDimensions, text) : vector;
 
   return {
     type,
@@ -123,6 +125,27 @@ describe('EmbeddingPipeline provider output admission', () => {
     expect(cached.cached).toBe(true);
     expect(cached.embedding).toEqual([0.6, 0.8]);
     expect(valid.embed).toHaveBeenCalledOnce();
+  });
+
+  it('does not alias same-length texts that share the first 200 characters', async () => {
+    const commonPrefix = 'x'.repeat(200);
+    const distinct = provider('mock', (_expectedDimensions, text) =>
+      text.endsWith('a') ? [1, 0] : [0, 1],
+    );
+    const pipeline = pipelineWith(distinct);
+
+    const first = await pipeline.embed(`${commonPrefix}a`, {
+      model: 'test-model',
+      dimensions: 2,
+    });
+    const second = await pipeline.embed(`${commonPrefix}b`, {
+      model: 'test-model',
+      dimensions: 2,
+    });
+
+    expect(first.embedding).toEqual([1, 0]);
+    expect(second.embedding).toEqual([0, 1]);
+    expect(distinct.embed).toHaveBeenCalledTimes(2);
   });
 
   it('records a wrong-dimension provider response as a provider failure', async () => {
