@@ -84,6 +84,13 @@ run proves transport of a verified signed receipt, not that every runtime
 probe passed. A local run without credentials remains unsigned/unpublished and
 prints a warning.
 
+The hourly reliability workflow performs two read-only authority checks before
+its probe window: a fixed local Ed25519 sign/verify challenge using the effective
+`KHIPU_SIGNING_KEY_B64`, followed by the existing exact-dataset `HF_TOKEN`
+preflight. These checks fail early with bounded categories and expose no secret,
+signature, provider body, or exception text. They do not replace the executor's
+receipt verification, real upload, or fail-closed publication gate.
+
 Provider failures expose only a fixed publication category derived, when
 available, from a plain integer HTTP status. Exception messages, class names,
 response bodies and headers are excluded from receipt output and workflow
