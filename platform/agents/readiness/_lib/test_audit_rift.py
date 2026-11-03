@@ -240,6 +240,11 @@ class Ed25519VerificationTest(unittest.TestCase):
         patcher = patch.dict(os.environ, key_env)
         patcher.start()
         self.addCleanup(patcher.stop)
+        # Pin this synthetic fleet key, as fleet_signer.json pins the real one.
+        pin = patch.object(audit.khipu, "_pinned_fleet_public_key",
+                           return_value=bytes(self.fleet_key.verify_key))
+        pin.start()
+        self.addCleanup(pin.stop)
 
     def signed_receipt(self, payload: dict, agent: str = "readiness-docs",
                        signer: SigningKey | None = None) -> dict:
@@ -256,6 +261,12 @@ class Ed25519VerificationTest(unittest.TestCase):
     def test_foreign_self_signed_receipt_is_not_fleet_authenticated(self) -> None:
         rec = self.signed_receipt({}, signer=SigningKey.generate())
         self.assertIs(audit.reverify_signature("readiness-docs", rec["envelope"]), False)
+
+    def test_fleet_signed_receipt_from_an_unpinned_key_is_not_authenticated(self) -> None:
+        rec = self.signed_receipt({})
+        other = bytes(SigningKey.generate().verify_key)
+        with patch.object(audit.khipu, "_pinned_fleet_public_key", return_value=other):
+            self.assertIs(audit.reverify_signature("readiness-docs", rec["envelope"]), False)
 
     def test_missing_fleet_key_is_unverified(self) -> None:
         rec = self.signed_receipt({})
