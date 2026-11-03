@@ -1564,3 +1564,16 @@ and its authorized Replit bearer identity must be reconciled outside source.
 Neither external blocker is closed by the candidate. See the
 [source proof](../../audit/READINESS_AUTHORITY_PREFLIGHT_20261102.md) and
 [authority runbook](../../audit/PLATFORM_EXTERNAL_AUTHORITY_BLOCKERS_20261102.md).
+
+### 2026-11-03 readiness authority preflight in every lane
+
+**MEASURED - READINESS-LANE-PREFLIGHT-20261103:** the seven other scheduled
+readiness lanes still failed only in their collection step, reporting
+`unsigned receipt; path (not created)` (for example READINESS-AUDIT-RIFT run
+`41589711144`). The candidate runs the same signing preflight before collection
+in audit-rift, compliance, docs, dr, observability, operability and security,
+and adds the existing `HF_TOKEN` publisher preflight to the five of those lanes
+that publish with `HF_TOKEN` and lacked it. Security already ran that check;
+observability publishes through HF OIDC. A workflow-contract regression covers
+step order and credential bindings in all seven lanes. Neither external blocker
+above is closed by this change.

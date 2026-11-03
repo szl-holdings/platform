@@ -184,5 +184,52 @@ class ReliabilityPreflightWorkflowTest(unittest.TestCase):
         self.assertEqual(re.findall(r"(?m)^\s*if:.*$", text), ["        if: always()"])
 
 
+class LanePreflightWorkflowTest(unittest.TestCase):
+    # Lanes whose executor publishes with HF_TOKEN also run the publisher
+    # preflight; observability publishes through HF OIDC, so only signing applies.
+    TOKEN_LANES = ("audit-rift", "compliance", "docs", "dr", "operability", "security")
+    OIDC_LANES = ("observability",)
+
+    def test_signing_preflight_blocks_collection_in_every_lane(self) -> None:
+        for lane in self.TOKEN_LANES + self.OIDC_LANES:
+            with self.subTest(lane=lane):
+                text = (ROOT / f".github/workflows/readiness-{lane}.yml").read_text(encoding="utf-8")
+                steps = re.split(r"(?m)^      - name: ", text)[1:]
+                commands = [
+                    'pip install --no-cache-dir huggingface_hub==2.0.0 pynacl',
+                    'python platform/agents/readiness/_lib/signing_preflight.py',
+                ]
+                if lane in self.TOKEN_LANES:
+                    commands.append('python platform/agents/readiness/_lib/hf_publish_preflight.py')
+                commands.append(f'python platform/agents/readiness/readiness-{lane}/executor.py')
+                indices = []
+                selected = []
+                for command in commands:
+                    matching = [(index, step) for index, step in enumerate(steps) if command in step]
+                    self.assertEqual(len(matching), 1, command)
+                    index, step = matching[0]
+                    indices.append(index)
+                    selected.append(step)
+                self.assertEqual(indices, sorted(indices))
+                self.assertEqual(len(set(indices)), len(commands))
+
+                signing_step, executor_step = selected[1], selected[-1]
+                self.assertRegex(signing_step, r"(?m)^        timeout-minutes: 1$")
+                self.assertRegex(signing_step,
+                                 r"(?m)^          KHIPU_SIGNING_KEY_B64: \$\{\{ secrets\.KHIPU_SIGNING_KEY_B64 \}\}$")
+                self.assertNotIn("HF_TOKEN", signing_step)
+                self.assertIn("KHIPU_SIGNING_KEY_B64: ${{ secrets.KHIPU_SIGNING_KEY_B64 }}", executor_step)
+                if lane in self.TOKEN_LANES:
+                    publisher_step = selected[2]
+                    self.assertRegex(publisher_step, r"(?m)^        timeout-minutes: 2$")
+                    self.assertRegex(publisher_step,
+                                     r"(?m)^          HF_TOKEN: \$\{\{ secrets\.HF_TOKEN \}\}$")
+                    self.assertIn("HF_TOKEN: ${{ secrets.HF_TOKEN }}", executor_step)
+                else:
+                    self.assertNotIn("hf_publish_preflight.py", text)
+                    self.assertIn("HF_OIDC_RESOURCE: datasets/SZLHOLDINGS/readiness-runs", executor_step)
+                self.assertNotRegex(text, r"(?m)^\s*continue-on-error:")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
