@@ -58,7 +58,7 @@ were rerun on the recorded exact base.
 |---|---:|---|
 | `corepack pnpm exec turbo run typecheck --concurrency=2 --output-logs=errors-only`, unmodified dependency parent `9b72438...` | 0 | 232/232 Turbo tasks passed in 13m0.552s; cold run with 0 cache hits |
 | New Stripe suite against the original verifier | 1, expected | 8 failed and 9 passed; missing configuration, missing signature, malformed timestamp/digest, duplicate timestamp, and non-object roots reproduced |
-| `corepack pnpm --filter @szl-holdings/services test`, candidate | 0 | 2 files and 35/35 tests passed, including 17 Stripe cases |
+| `corepack pnpm --filter @szl-holdings/services test`, candidate | 0 | focused `@szl-holdings/services` suite passed, including the Stripe cases; canonical `platform_tests` remains `UNAVAILABLE` |
 | `corepack pnpm --filter @szl-holdings/services typecheck` | 0 | TypeScript check passed |
 | `corepack pnpm --filter @szl-holdings/services lint` | 0 | No errors; 141 pre-existing package warnings reported |
 | Changed-file Biome lint | 0 | No errors; one pre-existing non-null warning at `stripe.ts:213` |
