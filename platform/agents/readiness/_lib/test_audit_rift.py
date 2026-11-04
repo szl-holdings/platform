@@ -78,7 +78,7 @@ class AuditPeerStateTest(unittest.TestCase):
         self.assertEqual(finding["status"], "UNVERIFIED")
         github.assert_not_called()
 
-    def test_structural_only_peers_are_unverified(self) -> None:
+    def test_peers_without_positive_claims_are_unverified(self) -> None:
         for agent in ("readiness-reliability", "readiness-observability",
                       "readiness-compliance", "readiness-dr"):
             with self.subTest(agent=agent):
@@ -200,6 +200,276 @@ class AuditPeerStateTest(unittest.TestCase):
         for response in responses:
             with self.subTest(response=response):
                 self.assertEqual(self.check("readiness-docs", payload, (0, response))["status"], "RESAMPLE-ERROR")
+
+
+class ClaimRecheckTest(unittest.TestCase):
+    """Independent rechecks of one positive claim per peer; all network and Hub I/O mocked."""
+
+    A11OY = "https://a11oy.example.invalid"
+    RUN = {"sbom": {"status": "SUCCESS", "run_id": 41686367296, "run_head_sha": "5" * 40}}
+    METRICS = (b"# HELP http_requests_total Requests served\n# TYPE http_requests_total counter\n"
+               b'http_requests_total{route="/healthz"} 7\n')
+    DUMP = b'{"key":"a","value":1}\n{"key":"b","value":{"x":[1,2]}}\n'
+    DUMP_PATH = "dr-dumps/a11oy/2026-11-03T12-58-48Z.ndjson"
+
+    def setUp(self) -> None:
+        signature = patch.object(audit, "reverify_signature", return_value=True)
+        signature.start()
+        self.addCleanup(signature.stop)
+        urls = patch.dict(os.environ, {"A11OY_URL": self.A11OY})
+        urls.start()
+        self.addCleanup(urls.stop)
+
+    def run_audit(self, agent: str, payload: dict, github=None, web=None, dataset=None):
+        with patch.object(audit, "latest_peer_receipt", return_value=receipt(payload)), \
+                patch.object(audit, "gh", side_effect=github) as gh_mock, \
+                patch.object(audit, "http_get", side_effect=web) as http_mock, \
+                patch.object(audit, "fetch_dataset_file", side_effect=dataset) as hub_mock:
+            finding = audit.audit_peer(agent)
+        return finding, gh_mock, http_mock, hub_mock
+
+    @staticmethod
+    def listing(*names: str) -> tuple[int, str]:
+        return 0, json.dumps([{"name": name, "type": "file"} for name in names])
+
+    @staticmethod
+    def red_security(controls: dict | None = None, present: dict | None = None) -> dict:
+        return {"repos": [{"repo": "szl-holdings/platform", "verdict": "RED",
+                           "workflows": {"present": present or {"sbom": True},
+                                         "controls": controls or {}}}]}
+
+    @staticmethod
+    def reliability(rate: object = 1.0, flagship: str = "a11oy") -> dict:
+        return {"pass_criteria": {"success_min": 0.995, "p99_max_ms": 800.0},
+                "flagships": [{"flagship": flagship, "verdict": "RED", "endpoints": {
+                    "healthz": {"success_rate": rate, "p99_ms": 94.5, "samples": 92},
+                    "khipu_sign": {"success_rate": 0.0, "p99_ms": 89.9, "samples": 92}}}]}
+
+    @staticmethod
+    def observability(counters: dict | None = None, status: object = 200) -> dict:
+        if counters is None:
+            counters = {"gate_decisions_total": False, "http_requests_total": True}
+        return {"required_counters": sorted(counters),
+                "trace_continuity_matrix": [{"flagship": "a11oy", "metrics_status": status,
+                                             "required_counters": counters}]}
+
+    @staticmethod
+    def compliance(has: object = True) -> dict:
+        return {"doctrine_consistency": [{"repo": "szl-holdings/a11oy", "has_v11_numbers": has,
+                                          "stale_markers": []}]}
+
+    @staticmethod
+    def readme(text: str) -> tuple[int, str]:
+        return 0, json.dumps({"type": "file", "name": "README.md", "encoding": "base64",
+                              "content": base64.b64encode(text.encode()).decode() + "\n"})
+
+    def dr(self, rows: object = 2, path: object = None, verdict: str = "GREEN",
+           uploaded: object = True) -> dict:
+        return {"flagships": [{"flagship": "a11oy", "verdict": verdict, "readable": True,
+                               "restore_proof": {"restored": True, "rows": rows},
+                               "upload": {"uploaded": uploaded,
+                                          "path": self.DUMP_PATH if path is None else path}}]}
+
+    def test_security_samples_a_present_control_when_no_repo_is_green(self) -> None:
+        finding, github, _, _ = self.run_audit("readiness-security", self.red_security(),
+                                               github=[self.listing("sbom.yml")])
+        self.assertEqual(finding["status"], "VERIFIED")
+        self.assertEqual(finding["resampled_repo"], "szl-holdings/platform")
+        self.assertEqual(finding["sampled_control"], "sbom")
+        self.assertEqual(github.call_count, 1)
+
+    def test_security_prefers_green_then_amber_repositories(self) -> None:
+        payload = {"repos": [
+            {"repo": "szl-holdings/red", "verdict": "RED", "workflows": {"present": {"sbom": True}}},
+            {"repo": "szl-holdings/amber", "verdict": "AMBER", "workflows": {"present": {"trivy": True}}}]}
+        finding, github, _, _ = self.run_audit("readiness-security", payload,
+                                               github=[self.listing("trivy.yml")])
+        self.assertEqual(finding["status"], "VERIFIED")
+        self.assertEqual(github.call_args.args[0], "repos/szl-holdings/amber/contents/.github/workflows")
+
+    def test_security_rechecks_the_cited_successful_run(self) -> None:
+        good = {"id": 41686367296, "conclusion": "success", "head_sha": "5" * 40}
+        cases = ((good, "VERIFIED"), ({**good, "conclusion": "failure"}, "FLAGGED"),
+                 ({**good, "conclusion": None}, "FLAGGED"), ({**good, "head_sha": "6" * 40}, "FLAGGED"))
+        for run, status in cases:
+            with self.subTest(run=run):
+                finding, github, _, _ = self.run_audit(
+                    "readiness-security", self.red_security(self.RUN),
+                    github=[self.listing("sbom.yml"), (0, json.dumps(run))])
+                self.assertEqual(finding["status"], status)
+                self.assertEqual(github.call_args_list[1].args[0],
+                                 "repos/szl-holdings/platform/actions/runs/41686367296")
+
+    def test_security_listing_mismatch_is_flagged_before_the_run_is_fetched(self) -> None:
+        finding, github, _, _ = self.run_audit("readiness-security", self.red_security(self.RUN),
+                                               github=[self.listing("unrelated.yml")])
+        self.assertEqual(finding["status"], "FLAGGED")
+        self.assertEqual(github.call_count, 1)
+
+    def test_security_run_recheck_failures_are_resample_errors(self) -> None:
+        other = {"id": 7, "conclusion": "success", "head_sha": "5" * 40}
+        for response in ((1, "unavailable"), (0, "not json"), (0, json.dumps(other)), (0, "[]")):
+            with self.subTest(response=response):
+                finding, _, _, _ = self.run_audit("readiness-security", self.red_security(self.RUN),
+                                                  github=[self.listing("sbom.yml"), response])
+                self.assertEqual(finding["status"], "RESAMPLE-ERROR")
+
+    def test_security_invalid_run_claims_are_unverified_without_requests(self) -> None:
+        sha = "5" * 40
+        for detail in ({"status": "SUCCESS"},
+                       {"status": "SUCCESS", "run_id": "41686367296", "run_head_sha": sha},
+                       {"status": "SUCCESS", "run_id": True, "run_head_sha": sha},
+                       {"status": "SUCCESS", "run_id": 0, "run_head_sha": sha},
+                       {"status": "SUCCESS", "run_id": 41686367296, "run_head_sha": "main"}):
+            with self.subTest(detail=detail):
+                finding, github, _, _ = self.run_audit("readiness-security",
+                                                       self.red_security({"sbom": detail}))
+                self.assertEqual(finding["status"], "UNVERIFIED")
+                github.assert_not_called()
+
+    def test_reliability_reprobes_the_claimed_healthz(self) -> None:
+        finding, _, web, _ = self.run_audit("readiness-reliability", self.reliability(),
+                                            web=[(200, b"ok")])
+        self.assertEqual(finding["status"], "VERIFIED")
+        self.assertEqual(finding["resampled_flagship"], "a11oy")
+        web.assert_called_once_with(f"{self.A11OY}/healthz")
+
+    def test_reliability_retries_transient_failures(self) -> None:
+        finding, _, web, _ = self.run_audit("readiness-reliability", self.reliability(),
+                                            web=[(None, b""), (503, b""), (204, b"")])
+        self.assertEqual(finding["status"], "VERIFIED")
+        self.assertEqual(finding["resampled_statuses"], [None, 503, 204])
+        self.assertEqual(web.call_count, 3)
+
+    def test_reliability_http_errors_contradict_the_claim(self) -> None:
+        finding, _, web, _ = self.run_audit("readiness-reliability", self.reliability(),
+                                            web=[(503, b""), (None, b""), (500, b"")])
+        self.assertEqual(finding["status"], "FLAGGED")
+        self.assertEqual(web.call_count, 3)
+
+    def test_reliability_unreachable_flagship_is_a_resample_error(self) -> None:
+        finding, _, _, _ = self.run_audit("readiness-reliability", self.reliability(),
+                                          web=[(None, b"")] * 3)
+        self.assertEqual(finding["status"], "RESAMPLE-ERROR")
+
+    def test_reliability_without_a_healthy_claim_is_unverified_without_requests(self) -> None:
+        for rate in (0.99, 0.0, True, "1.0", None, float("nan"), 1.5):
+            with self.subTest(rate=rate):
+                finding, _, web, _ = self.run_audit("readiness-reliability", self.reliability(rate))
+                self.assertEqual(finding["status"], "UNVERIFIED")
+                web.assert_not_called()
+
+    def test_live_rechecks_need_a_configured_http_url(self) -> None:
+        cases = {"readiness-reliability": self.reliability(),
+                 "readiness-observability": self.observability()}
+        for url in ("", "file:///etc/passwd", "ftp://a11oy.example.invalid"):
+            for agent, payload in cases.items():
+                with self.subTest(agent=agent, url=url), patch.dict(os.environ, {"A11OY_URL": url}):
+                    finding, _, web, _ = self.run_audit(agent, payload)
+                    self.assertEqual(finding["status"], "UNVERIFIED")
+                    web.assert_not_called()
+        finding, _, web, _ = self.run_audit("readiness-reliability", self.reliability(flagship="unknown"))
+        self.assertEqual(finding["status"], "UNVERIFIED")
+        web.assert_not_called()
+
+    def test_observability_requires_a_real_sample_line(self) -> None:
+        finding, _, web, _ = self.run_audit("readiness-observability", self.observability(),
+                                            web=[(200, self.METRICS)])
+        self.assertEqual(finding["status"], "VERIFIED")
+        self.assertEqual(finding["sampled_counter"], "http_requests_total")
+        web.assert_called_once_with(f"{self.A11OY}/metrics")
+        for body in (b"http_requests_total 0\n", b'http_requests_total{a="b"} 1 1700000000\n'):
+            with self.subTest(body=body):
+                finding, _, _, _ = self.run_audit("readiness-observability", self.observability(),
+                                                  web=[(200, body)])
+                self.assertEqual(finding["status"], "VERIFIED")
+
+    def test_observability_comments_prefixes_and_lookalikes_are_flagged(self) -> None:
+        for body in (b"# HELP http_requests_total Requests\n# TYPE http_requests_total counter\n",
+                     b"http_requests_total_created 1\n", b"xhttp_requests_total 1\n",
+                     b"http_requests_total\n", b""):
+            with self.subTest(body=body):
+                finding, _, _, _ = self.run_audit("readiness-observability", self.observability(),
+                                                  web=[(200, body)])
+                self.assertEqual(finding["status"], "FLAGGED")
+
+    def test_observability_non_2xx_is_flagged_and_unreachable_is_an_error(self) -> None:
+        finding, _, _, _ = self.run_audit("readiness-observability", self.observability(),
+                                          web=[(404, b"")] * 3)
+        self.assertEqual(finding["status"], "FLAGGED")
+        finding, _, _, _ = self.run_audit("readiness-observability", self.observability(),
+                                          web=[(None, b"")] * 3)
+        self.assertEqual(finding["status"], "RESAMPLE-ERROR")
+
+    def test_observability_without_a_present_counter_is_unverified_without_requests(self) -> None:
+        for payload in (self.observability({"http_requests_total": False}),
+                        self.observability(status=500), self.observability(status=None),
+                        self.observability({"bad name": True}),
+                        self.observability({"http_requests_total": 1})):
+            with self.subTest(payload=payload):
+                finding, _, web, _ = self.run_audit("readiness-observability", payload)
+                self.assertEqual(finding["status"], "UNVERIFIED")
+                web.assert_not_called()
+
+    def test_compliance_refetches_the_readme_for_the_claimed_doctrine(self) -> None:
+        finding, github, _, _ = self.run_audit(
+            "readiness-compliance", self.compliance(),
+            github=[self.readme(f"Doctrine {audit.khipu.DOCTRINE_STRING}\n")])
+        self.assertEqual(finding["status"], "VERIFIED")
+        github.assert_called_once_with("repos/szl-holdings/a11oy/contents/README.md")
+
+    def test_compliance_missing_doctrine_is_flagged(self) -> None:
+        finding, _, _, _ = self.run_audit("readiness-compliance", self.compliance(),
+                                          github=[self.readme("Doctrine 626/189/168\n")])
+        self.assertEqual(finding["status"], "FLAGGED")
+
+    def test_compliance_unreadable_readme_is_a_resample_error(self) -> None:
+        for response in ((1, "unavailable"), (0, '{"type":"dir","name":"README.md"}'),
+                         (0, '{"type":"file","name":"README.md","encoding":"base64","content":"!!!"}')):
+            with self.subTest(response=response):
+                finding, _, _, _ = self.run_audit("readiness-compliance", self.compliance(),
+                                                  github=[response])
+                self.assertEqual(finding["status"], "RESAMPLE-ERROR")
+
+    def test_compliance_without_a_positive_claim_is_unverified_without_requests(self) -> None:
+        for has in (False, None, "true", 1):
+            with self.subTest(has=has):
+                finding, github, _, _ = self.run_audit("readiness-compliance", self.compliance(has))
+                self.assertEqual(finding["status"], "UNVERIFIED")
+                github.assert_not_called()
+
+    def test_dr_restores_the_uploaded_dump_independently(self) -> None:
+        finding, _, _, hub = self.run_audit("readiness-dr", self.dr(), dataset=[self.DUMP])
+        self.assertEqual(finding["status"], "VERIFIED")
+        self.assertEqual(finding["independent_rows"], 2)
+        hub.assert_called_once_with(self.DUMP_PATH)
+
+    def test_dr_row_mismatch_or_unrestorable_dump_is_flagged(self) -> None:
+        finding, _, _, _ = self.run_audit("readiness-dr", self.dr(rows=3), dataset=[self.DUMP])
+        self.assertEqual(finding["status"], "FLAGGED")
+        for dump in (b"", b"\n\n", b"not json\n", b"\xff\n",
+                     b'{"key":"a","value":1}\n{"key":"a","value":2}\n', b'{"key":"a","value":NaN}\n',
+                     b'{"key":"a","key":"b","value":1}\n', b'{"key":"","value":1}\n',
+                     b'{"key":"a"}\n', b'["a",1]\n'):
+            with self.subTest(dump=dump):
+                finding, _, _, _ = self.run_audit("readiness-dr", self.dr(rows=1), dataset=[dump])
+                self.assertEqual(finding["status"], "FLAGGED")
+                self.assertIsNone(finding["independent_rows"])
+
+    def test_dr_dataset_read_failure_is_a_resample_error(self) -> None:
+        finding, _, _, _ = self.run_audit("readiness-dr", self.dr(), dataset=OSError("offline"))
+        self.assertEqual(finding["status"], "RESAMPLE-ERROR")
+
+    def test_dr_without_an_uploaded_restore_claim_is_unverified_without_reads(self) -> None:
+        skipped = {"flagships": [{"flagship": "a11oy", "verdict": "SKIPPED",
+                                  "reason": "no /unay/dump endpoint (not an Unay-backed flagship)"}]}
+        for payload in (skipped, self.dr(verdict="RED"), self.dr(uploaded=False), self.dr(rows=0),
+                        self.dr(rows=True), self.dr(path="../secrets.ndjson"),
+                        self.dr(path="dr-dumps/a11oy/latest.ndjson")):
+            with self.subTest(payload=payload):
+                finding, _, _, hub = self.run_audit("readiness-dr", payload)
+                self.assertEqual(finding["status"], "UNVERIFIED")
+                hub.assert_not_called()
 
 
 class MetaVerdictTest(unittest.TestCase):
