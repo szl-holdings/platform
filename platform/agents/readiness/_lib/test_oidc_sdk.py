@@ -28,14 +28,17 @@ class PinnedOidcSdkTest(unittest.TestCase):
         from huggingface_hub import _oidc, constants
         from huggingface_hub.utils import _auth, _headers
 
+        seed = os.urandom(32)
         env = {
             "GITHUB_ACTIONS": "true",
             "HF_OIDC_RESOURCE": "datasets/SZLHOLDINGS/readiness-runs",
             "ACTIONS_ID_TOKEN_REQUEST_URL": "https://example.invalid/oidc",
             "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "synthetic-request-grant",
-            "KHIPU_SIGNING_KEY_B64": base64.b64encode(os.urandom(32)).decode(),
+            "KHIPU_SIGNING_KEY_B64": base64.b64encode(seed).decode(),
         }
         nacl, signing = _fake_nacl()
+        # Pin the key this synthetic seed derives, so the OIDC exchange path is reached.
+        pinned = bytes(signing.SigningKey(seed).verify_key)
         api_class = hub.HfApi
         selected_tokens = []
 
@@ -47,6 +50,7 @@ class PinnedOidcSdkTest(unittest.TestCase):
 
         with patch.dict(os.environ, env, clear=True), \
                 patch.dict(sys.modules, {"nacl": nacl, "nacl.signing": signing}), \
+                patch.object(khipu, "_pinned_fleet_public_key", return_value=pinned), \
                 patch("socket.socket.connect", side_effect=AssertionError("network forbidden")), \
                 patch.object(constants, "HF_HUB_DISABLE_IMPLICIT_TOKEN", True), \
                 patch.object(_oidc, "get_oidc_token", return_value="synthetic-subject") as mint, \

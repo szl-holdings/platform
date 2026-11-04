@@ -34,14 +34,14 @@ class SigningPreflightTest(unittest.TestCase):
             "nacl.signing": signing,
         }))
         self.enterContext(patch.dict(os.environ, {
-            preflight.KEY_ENV: ENCODED_SEED,
+            preflight.SIGNER_ENV: ENCODED_SEED,
         }, clear=True))
 
     def _check(self) -> dict:
         result = preflight.check_signing_authority()
         self.assertIs(type(result["ready"]), bool)
         self.assertEqual(result["algorithm"], "ed25519")
-        self.assertEqual(result["key_env"], preflight.KEY_ENV)
+        self.assertEqual(result["key_env"], preflight.SIGNER_ENV)
         self.assertLessEqual(set(result), {
             "ready", "stage", "code", "message", "algorithm", "key_env", "keyid",
         })
@@ -64,7 +64,7 @@ class SigningPreflightTest(unittest.TestCase):
             with self.subTest(value=value):
                 env = {}
                 if value is not None:
-                    env[preflight.KEY_ENV] = value
+                    env[preflight.SIGNER_ENV] = value
                 with patch.dict(os.environ, env, clear=True), patch.dict(
                     sys.modules, {"nacl": None, "nacl.signing": None},
                 ):
@@ -76,7 +76,7 @@ class SigningPreflightTest(unittest.TestCase):
     def test_malformed_key_fails_without_loading_crypto(self) -> None:
         for value in ("not*base64", ENCODED_SEED + "\n", ENCODED_SEED + "\u200b"):
             with self.subTest(value=repr(value)), patch.dict(
-                os.environ, {preflight.KEY_ENV: value}, clear=True,
+                os.environ, {preflight.SIGNER_ENV: value}, clear=True,
             ), patch.dict(sys.modules, {"nacl": None, "nacl.signing": None}):
                 result = self._check()
                 self.assertEqual((result["stage"], result["code"]),
@@ -86,7 +86,7 @@ class SigningPreflightTest(unittest.TestCase):
     def test_decoded_seed_must_be_exactly_32_bytes(self) -> None:
         for length in (1, 31, 33, 64):
             with self.subTest(length=length), patch.dict(os.environ, {
-                preflight.KEY_ENV: base64.b64encode(b"x" * length).decode(),
+                preflight.SIGNER_ENV: base64.b64encode(b"x" * length).decode(),
             }, clear=True):
                 result = self._check()
                 self.assertEqual((result["stage"], result["code"]),
@@ -128,7 +128,7 @@ class SigningPreflightTest(unittest.TestCase):
     def test_cli_emits_safe_actions_annotation_only_on_failure(self) -> None:
         with patch.dict(os.environ, {
             "GITHUB_ACTIONS": "true",
-            preflight.KEY_ENV: "not*base64",
+            preflight.SIGNER_ENV: "not*base64",
         }, clear=True), contextlib.redirect_stdout(io.StringIO()) as out:
             self.assertEqual(preflight.main(), 1)
         lines = out.getvalue().splitlines()
@@ -139,7 +139,7 @@ class SigningPreflightTest(unittest.TestCase):
 
         with patch.dict(os.environ, {
             "GITHUB_ACTIONS": "true",
-            preflight.KEY_ENV: ENCODED_SEED,
+            preflight.SIGNER_ENV: ENCODED_SEED,
         }, clear=True), contextlib.redirect_stdout(io.StringIO()) as out:
             self.assertEqual(preflight.main(), 0)
         self.assertEqual(len(out.getvalue().splitlines()), 1)
@@ -182,6 +182,53 @@ class ReliabilityPreflightWorkflowTest(unittest.TestCase):
             self.assertIn(env_line, executor_step)
         self.assertNotRegex(text, r"(?m)^\s*continue-on-error:")
         self.assertEqual(re.findall(r"(?m)^\s*if:.*$", text), ["        if: always()"])
+
+
+class LanePreflightWorkflowTest(unittest.TestCase):
+    # Lanes whose executor publishes with HF_TOKEN also run the publisher
+    # preflight; observability publishes through HF OIDC, so only signing applies.
+    TOKEN_LANES = ("audit-rift", "compliance", "docs", "dr", "operability", "security")
+    OIDC_LANES = ("observability",)
+
+    def test_signing_preflight_blocks_collection_in_every_lane(self) -> None:
+        for lane in self.TOKEN_LANES + self.OIDC_LANES:
+            with self.subTest(lane=lane):
+                text = (ROOT / f".github/workflows/readiness-{lane}.yml").read_text(encoding="utf-8")
+                steps = re.split(r"(?m)^      - name: ", text)[1:]
+                commands = [
+                    'pip install --no-cache-dir huggingface_hub==2.0.0 pynacl',
+                    'python platform/agents/readiness/_lib/signing_preflight.py',
+                ]
+                if lane in self.TOKEN_LANES:
+                    commands.append('python platform/agents/readiness/_lib/hf_publish_preflight.py')
+                commands.append(f'python platform/agents/readiness/readiness-{lane}/executor.py')
+                indices = []
+                selected = []
+                for command in commands:
+                    matching = [(index, step) for index, step in enumerate(steps) if command in step]
+                    self.assertEqual(len(matching), 1, command)
+                    index, step = matching[0]
+                    indices.append(index)
+                    selected.append(step)
+                self.assertEqual(indices, sorted(indices))
+                self.assertEqual(len(set(indices)), len(commands))
+
+                signing_step, executor_step = selected[1], selected[-1]
+                self.assertRegex(signing_step, r"(?m)^        timeout-minutes: 1$")
+                self.assertRegex(signing_step,
+                                 r"(?m)^          KHIPU_SIGNING_KEY_B64: \$\{\{ secrets\.KHIPU_SIGNING_KEY_B64 \}\}$")
+                self.assertNotIn("HF_TOKEN", signing_step)
+                self.assertIn("KHIPU_SIGNING_KEY_B64: ${{ secrets.KHIPU_SIGNING_KEY_B64 }}", executor_step)
+                if lane in self.TOKEN_LANES:
+                    publisher_step = selected[2]
+                    self.assertRegex(publisher_step, r"(?m)^        timeout-minutes: 2$")
+                    self.assertRegex(publisher_step,
+                                     r"(?m)^          HF_TOKEN: \$\{\{ secrets\.HF_TOKEN \}\}$")
+                    self.assertIn("HF_TOKEN: ${{ secrets.HF_TOKEN }}", executor_step)
+                else:
+                    self.assertNotIn("hf_publish_preflight.py", text)
+                    self.assertIn("HF_OIDC_RESOURCE: datasets/SZLHOLDINGS/readiness-runs", executor_step)
+                self.assertNotRegex(text, r"(?m)^\s*continue-on-error:")
 
 
 if __name__ == "__main__":

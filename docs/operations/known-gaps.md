@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-11 (rev 41 — candidate, migration, and Ovis security boundaries)
+**Last updated:** 2026-11-02 (rev 42 — Stripe webhook verifier fail-closed candidate)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -39,6 +39,27 @@ regression proves that missing, false-like, or padded values do not import the
 backend. This is a source and test-runner boundary only. It does not qualify the
 model artifacts, retrieval quality, provider availability, deployment, or GPU
 runtime. Exact-head hosted checks and protected review remain separate gates.
+
+### STRIPE-WEBHOOK-VERIFY-20261102 — candidate verifier fail-closed repair
+
+`StripeAdapter.verifyWebhookPayload` previously returned `verified: true` for
+any parseable JSON when the outbound Stripe API key or webhook secret was
+absent. Candidate source now treats a missing or blank webhook secret and a
+missing signature as verification failures. It authenticates the exact body
+bytes before parsing an event, requires one canonical safe-integer timestamp
+inside the existing five-minute window, rejects malformed digest encodings,
+and preserves multiple `v1` signatures used during secret rotation. Webhook
+verification remains independent of the outbound API key.
+
+The focused security regressions reproduce the original fail-open behavior and
+pass against the candidate; the services package suite and baseline/candidate
+full-workspace typechecks also pass. This closes only the exported
+adapter-level fail-open behavior. Current source has no direct caller, so it
+does not establish an active billing route, Stripe provider transaction,
+live-secret configuration, deployment, or end-to-end delivery.
+`BIL-001`, `FLOW-002`, `TG-001`, and `TG-002` remain open. Hosted exact-head
+checks and protected admission remain required. See the
+[scoped proof](../../audit/STRIPE_WEBHOOK_VERIFY_FAIL_CLOSED_20261102.md).
 
 ### READINESS-RETENTION-20261102 — candidate receipt-copy failure gate
 
@@ -1564,3 +1585,16 @@ and its authorized Replit bearer identity must be reconciled outside source.
 Neither external blocker is closed by the candidate. See the
 [source proof](../../audit/READINESS_AUTHORITY_PREFLIGHT_20261102.md) and
 [authority runbook](../../audit/PLATFORM_EXTERNAL_AUTHORITY_BLOCKERS_20261102.md).
+
+### 2026-11-03 readiness authority preflight in every lane
+
+**MEASURED - READINESS-LANE-PREFLIGHT-20261103:** the seven other scheduled
+readiness lanes still failed only in their collection step, reporting
+`unsigned receipt; path (not created)` (for example READINESS-AUDIT-RIFT run
+`41589711144`). The candidate runs the same signing preflight before collection
+in audit-rift, compliance, docs, dr, observability, operability and security,
+and adds the existing `HF_TOKEN` publisher preflight to the five of those lanes
+that publish with `HF_TOKEN` and lacked it. Security already ran that check;
+observability publishes through HF OIDC. A workflow-contract regression covers
+step order and credential bindings in all seven lanes. Neither external blocker
+above is closed by this change.

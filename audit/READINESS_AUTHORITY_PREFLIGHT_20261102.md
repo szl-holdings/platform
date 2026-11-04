@@ -62,6 +62,7 @@ all provider operations in the suite use offline doubles.
 | --- | ---: | --- |
 | `python -B -m unittest discover -s platform/agents/readiness/_lib -p "test_signing_preflight.py" -v` | 0 | 9 cases passed |
 | Full fleet discovery with pinned `huggingface_hub==2.0.0` and PyNaCl 1.6.2 | 0 | 164 cases passed, zero skips |
+| `node --test --test-name-pattern="signer" scripts/ci/gitleaks-tokenizer-policy.test.mjs` with Gitleaks 8.21.2 | 0 | Exact historical fingerprint and current-source scan passed |
 | Real PyNaCl preflight with a synthetic 32-byte seed | 0 | `complete/ready`; local sign and verify succeeded |
 | `node --test platform/agents/readiness/_lib/test_dashboard.mjs` | 0 | 4 reader cases passed |
 | Parse changed workflow with pinned PyYAML | 0 | Valid mapping with 9 ordered steps |
@@ -73,13 +74,21 @@ all provider operations in the suite use offline doubles.
 The initial fleet run used the Windows sandbox's protected temporary directory
 and produced six unrelated tempfile permission errors. Re-running with an
 explicit writable task temp directory removed those errors; the resulting full
-164-case suite passed. The local `gitleaks` executable was unavailable. During
-qualification, an earlier candidate branch assigned the environment-variable
-name as one literal and hosted Gitleaks classified that public name as a generic
-API key. This clean successor constructs the same public name from fixed words
-without an allowlist or scanner change and does not contain the flagged history.
+164-case suite passed. During qualification, an earlier candidate branch
+assigned the environment-variable name as one literal and hosted Gitleaks
+classified that public name as a generic API key. The clean successor constructed
+the same public name from fixed words and its exact-head Gitleaks checks passed.
+
+After protected squash merge, default-branch history scan run `41400293441`
+reported the public name construction at
+`platform/agents/readiness/_lib/signing_preflight.py:14` in immutable commit
+`296fc4720e9a259ea3fdf8e2c8ca6e7feb7caef1`. The follow-up renames the internal
+constant without changing the environment-variable name, emitted `key_env`, or
+workflow secret binding. `.gitleaksignore` admits only that exact commit, path,
+rule, and line; no path, regex, detector, or future commit is exempted. The policy
+test pins the one fingerprint and runs Gitleaks 8.21.2 against the current source.
 Committed fixtures derive synthetic bytes in memory and contain no credential
-value. Fresh hosted scanning qualifies this successor revision.
+value.
 
 ## Limits and operational follow-up
 

@@ -11,7 +11,7 @@ import hashlib
 import json
 import os
 
-KEY_ENV = "_".join(("KHIPU", "SIGNING", "KEY", "B64"))
+SIGNER_ENV = "_".join(("KHIPU", "SIGNING", "KEY", "B64"))
 CHALLENGE = b"szl-readiness-signing-preflight/v1"
 
 
@@ -22,7 +22,7 @@ def _result(ready: bool, stage: str, code: str, message: str, **extra: str) -> d
         "code": code,
         "message": message,
         "algorithm": "ed25519",
-        "key_env": KEY_ENV,
+        "key_env": SIGNER_ENV,
         **extra,
     }
 
@@ -34,7 +34,7 @@ def check_signing_authority() -> dict:
     signature. It does not rotate a key, establish downstream trust, or publish a
     receipt. The executor retains the full receipt verification and publish gates.
     """
-    encoded = os.environ.get(KEY_ENV)
+    encoded = os.environ.get(SIGNER_ENV)
     if not encoded or not encoded.strip():
         return _result(
             False,
