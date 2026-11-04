@@ -17,12 +17,14 @@ Run:
   python3 benchmarks/run_benchmarks.py --reps 1000 --warmup 50
 
 Every measurement is from the live HTTP surface — no mocks, no estimates.
-Output is byte-for-byte reproducible given the same seed and server build.
+Generated request payloads are reproducible for the same seed, harness source,
+and Python runtime.
 """
 from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import platform
@@ -38,6 +40,21 @@ from typing import Any, Callable, Dict, List, Tuple
 DEFAULT_BASE = "http://localhost:4010"
 DEFAULT_API_KEY = os.environ.get("ALLOY_API_KEY", "bench-key-szl-v11-truth")
 HEX_64 = "0x" + "0123456789abcdef" * 4  # 256-bit hex
+ROUTE_SEED_DOMAIN = b"szl-benchmark-route-seed-v1\x00"
+ROUTE_SEED_OFFSET_MODULUS = 10_000
+
+
+def derive_route_seed(base_seed: int, route_id: str, stream: str) -> int:
+    """Derive a process-stable RNG seed while preserving --seed as the base."""
+    material = (
+        ROUTE_SEED_DOMAIN
+        + stream.encode("utf-8")
+        + b"\x00"
+        + route_id.encode("utf-8")
+    )
+    digest = hashlib.sha256(material).digest()
+    offset = int.from_bytes(digest[:8], byteorder="big")
+    return base_seed + offset % ROUTE_SEED_OFFSET_MODULUS
 
 
 def post(base: str, path: str, body: Dict[str, Any], api_key: str,
@@ -476,7 +493,7 @@ def main() -> int:
               file=sys.stderr, flush=True)
         result = bench_route(args.base, args.api_key, route_id, method, path,
                              payload_fn, args.reps, args.warmup,
-                             args.seed + hash(route_id) % 10000)
+                             derive_route_seed(args.seed, route_id, "route"))
         per_route.append(result)
         print(f"[bench]   p50={result['p50_us']:7.1f}µs "
               f"p99={result['p99_us']:8.1f}µs "
@@ -491,7 +508,7 @@ def main() -> int:
             pair = bench_governed_pair(
                 args.base, args.api_key, route_id, method, path, payload_fn,
                 args.reps, args.warmup,
-                args.seed + hash(route_id + "-paired") % 10000)
+                derive_route_seed(args.seed, route_id, "paired"))
             paired.append(pair)
             print(f"[bench]   base p50={pair['base_p50_ms']:5.3f}ms "
                   f"gov p50={pair['gov_p50_ms']:5.3f}ms "
