@@ -13,7 +13,7 @@ SZL Holdings is pre-revenue. No external funding has been raised. The platform h
 - Full platform ecosystem (5 domain platforms + execution fabric + corporate site + founder site)
 - 16 deployable artifacts, production-grade shared infrastructure
 - Azure Bicep IaC ready for enterprise deployment
-- Stripe billing infrastructure built and ready for activation
+- ~~Stripe billing infrastructure built and ready for activation~~ Stripe billing not implemented (server deleted in `3d6e07381` (2026-05-02, #77); corrected 2026-11-06)
 - Full documentation suite (architecture, trust, investor, buyer)
 
 ---

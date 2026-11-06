@@ -43,7 +43,7 @@ SZL Holdings does not inflate its current state to improve how it presents to in
 
 ### 3. Billing Not Activated
 
-**Gap:** Stripe billing infrastructure is fully implemented but not activated. No payments can be processed.
+**Gap:** ~~Stripe billing infrastructure is fully implemented but not activated.~~ Stripe billing is not implemented: its server was deleted in `3d6e07381` (2026-05-02, #77) (corrected 2026-11-06; see `BILLING.md`). No payments can be processed.
 
 **Path to close:** Configure Stripe API key + price IDs + webhook secrets. This is a 1-day configuration task, not an engineering task.
 
