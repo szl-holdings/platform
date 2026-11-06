@@ -121,7 +121,7 @@ Integrations are prioritized by:
 **Value:** Revenue and billing visibility in internal ops.
 
 **Integration pattern:**
-- Stripe SDK already integrated (billing infrastructure built)
+- ~~Stripe SDK already integrated (billing infrastructure built)~~ Stripe billing is not implemented: the server was deleted in `3d6e07381` (2026-05-02, #77); only an uncalled adapter remains (`lib/services/src/adapters/stripe.ts`)
 - Activation: configure price IDs and Stripe secret key
 
 **Effort estimate:** 1–2 days for activation. Infrastructure is built.

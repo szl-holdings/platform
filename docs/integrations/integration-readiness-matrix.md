@@ -37,7 +37,7 @@
 |-----------|-------------|-------|-------|
 | Stripe API (server) | `STRIPE_SECRET_KEY` | OPTIONAL/INACTIVE | Billing endpoint implemented and wired. Returns mock acknowledgments without live key. |
 | Stripe (client) | `STRIPE_PUBLISHABLE_KEY` | OPTIONAL/INACTIVE | Client-side checkout. No-ops without key. |
-| Stripe Webhooks | `STRIPE_WEBHOOK_SECRET` | OPTIONAL/INACTIVE | HMAC-SHA256 signature verification implemented. Inactive without secret. |
+| Stripe Webhooks | `STRIPE_WEBHOOK_SECRET` | OPTIONAL/INACTIVE | HMAC-SHA256 signature verification implemented in the adapter only; no route calls it since the webhook route was deleted in `3d6e07381` (2026-05-02, #77) (corrected 2026-11-06). |
 | Stripe Price IDs | `STRIPE_PRICE_*` (10 slots) | OPTIONAL/INACTIVE | Per-product pricing. Required once revenue launch occurs. |
 
 > **Status:** Fully implemented. Live keys not yet configured. No real charges processed. Required before first paid transaction (GAP-005).

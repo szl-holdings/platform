@@ -90,7 +90,7 @@
 |-------|-------|
 | **Severity** | HIGH (before revenue launch) |
 | **Area** | Billing — production readiness |
-| **Finding** | Stripe integration is fully implemented but requires live `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`. Currently in test/demo mode — no real charges processed. |
+| **Finding** | ~~Stripe integration is fully implemented but requires live `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.~~ Stripe integration is not implemented: its server was deleted in `3d6e07381` (2026-05-02, #77) (corrected 2026-11-06). Currently in test/demo mode — no real charges processed. |
 | **Risk** | No revenue can be collected until live keys are configured. |
 | **Owner** | Founder / Finance |
 | **Target** | Before first paid transaction |

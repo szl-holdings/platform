@@ -69,7 +69,7 @@
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Stripe integration present | ✅ PASS | Code complete |
+| Stripe integration present | ~~✅ PASS~~ ❌ FAIL (corrected 2026-11-06) | ~~Code complete~~ Server deleted in `3d6e07381` (2026-05-02, #77) |
 | Stripe in live mode | ❌ FAIL | Test keys only — GAP-005 |
 | Webhook receiver present | ✅ PASS | Signature verification code confirmed |
 | Subscription management | ❌ FAIL | No customer-facing UI |

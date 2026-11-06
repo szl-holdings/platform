@@ -163,7 +163,7 @@
 
 | Route Path | File | Class | Notes |
 |------------|------|-------|-------|
-| `/api/billing/*` | `billing.ts` | PARTIAL | Stripe fully implemented; test keys only; webhook signature verification present |
+| `/api/billing/*` | ~~`billing.ts`~~ (deleted) | ~~PARTIAL~~ ABSENT | ~~Stripe fully implemented; test keys only; webhook signature verification present~~ Route file deleted in `3d6e07381` (2026-05-02, #77); no handler serves `/api/billing/*` (corrected 2026-11-06) |
 | `/api/scim/*` | `scim.ts` | WIRED | SCIM 2.0 (RFC 7643/7644) provisioning |
 | `/api/notifications/*` | `notifications.ts` | WIRED | Notification management |
 | `/api/onboarding/*` | `onboarding.ts` | WIRED | User onboarding flows |

@@ -86,7 +86,7 @@ The following capabilities are **fully built** but blocked by credentials or acc
 | CORTEX TestFlight Alpha | Full Expo app, EAS profiles, release docs | Apple Developer account ($99/year), App Store Connect record, Firebase project credentials | 1 day setup |
 | Push notifications (real) | expo-notifications framework, channel config, backend dispatch | Firebase Admin SDK credentials (`FIREBASE_SERVICE_ACCOUNT_JSON`) | 2 hours |
 | CORTEX Google Play Alpha | Build profiles configured | Google Play Console account ($25 one-time), Play Console app record | 1 day setup |
-| Stripe billing activation | Full billing infrastructure implemented | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, price IDs | 1 day configuration |
+| Stripe billing activation | ~~Full billing infrastructure implemented~~ Not implemented: the billing server was deleted in `3d6e07381` (2026-05-02, #77); see `BILLING.md` | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, price IDs | ~~1 day configuration~~ engineering first, then configuration |
 | Live AIS data (Vessels) | Full AIS data ingestion layer | AIS provider subscription (MarineTraffic, AISHub, or Spire) | $15–40K/year subscription |
 | Live SIEM connector (Aegis) | STIX/TAXII client code present | SIEM provider credentials; real feed endpoint | Varies by provider |
 | Mapbox (Terra, Vessels maps) | Map components built, token configuration present | Mapbox API token | 30 minutes |

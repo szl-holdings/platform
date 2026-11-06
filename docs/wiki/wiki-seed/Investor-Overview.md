@@ -64,7 +64,7 @@ The core differentiator is the Alloy execution fabric: workflow orchestration an
 | Mobile apps (all 7) | Functional alpha |
 | API server | Production-grade |
 | Auth (OIDC/PKCE/RBAC) | Production-grade |
-| Stripe billing | Infrastructure complete |
+| Stripe billing | ~~Infrastructure complete~~ Not implemented (server deleted in `3d6e07381` (2026-05-02, #77)) |
 | Azure deployment | IaC complete, not yet deployed |
 
 ---
