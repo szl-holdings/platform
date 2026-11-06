@@ -115,9 +115,12 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the full monorepo orien
 
 ### Verify
 
-These are the repository's own gates; each exits non-zero on failure.
+These are the repository's own gates; each exits non-zero on failure. CI raises the
+Node heap for builds and tests; without it, building the generated API client runs out
+of memory at the default heap size.
 
 ```bash
+export NODE_OPTIONS=--max-old-space-size=6144   # the heap size CI uses
 pnpm claims:validate             # truth snapshot, allowlist coverage and truth-tool tests
 pnpm run test:gateway-security   # gateway security suite (vitest)
 pnpm test                        # root contract tests, then every workspace package via turbo
