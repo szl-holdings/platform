@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/exact-head-screenshot-evidence.yml
+      - .github/workflows/truth-drift.yml
       - docs/standards/exact-head-screenshot-evidence.md
       - scripts/ci/capture-series-a-exact-head.mjs
       - scripts/ci/exact-head-screenshot-evidence.test.mjs

@@ -815,6 +815,18 @@ test('truth refresh work item fails closed and names every duplicate', {
   assert.equal(calls.length, 1, 'no issue may be created or commented on');
 });
 
+test('truth refresh work-item tests rerun when the truth-drift workflow changes', async () => {
+  // These tests drive truth-drift.yml, but only this workflow's capture contract runs them.
+  const workflow = await readFile(
+    new URL('../../.github/workflows/exact-head-screenshot-evidence.yml', import.meta.url),
+    'utf8',
+  );
+  assert.match(
+    workflow,
+    /\n {2}pull_request:\r?\n {4}paths:\r?\n(?: {6}- \S+\r?\n)* {6}- \.github\/workflows\/truth-drift\.yml\r?\n/,
+  );
+});
+
 test('unsafe tracked Git entries fail before candidate tooling can run', {
   skip: process.platform === 'win32',
 }, async (t) => {
