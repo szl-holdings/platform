@@ -121,7 +121,7 @@ These items are not blockers for current demonstrations but would significantly 
 | Salesforce CRM connector (KORA) | Removes pipeline data caveat; enables live RevOps demos | Medium |
 | SIEM connector (PARAGON) | Enables prospect-connected security demos | Medium |
 | Live AIS alert replay | Shows a real dark-vessel event from historical AIS data | Small |
-| Stripe billing activation | Converts demo interest to commercial pilots | Small — infrastructure built, activation required |
+| Stripe billing activation | Converts demo interest to commercial pilots | ~~Small — infrastructure built, activation required~~ Not small: the billing server was deleted in `3d6e07381` (2026-05-02, #77) and must be rebuilt (corrected 2026-11-06) |
 
 ### P3 — Platform Completeness
 

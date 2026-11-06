@@ -54,8 +54,8 @@
 **Manifest ID:** CAP-008  
 **Product:** API Server / All billing-capable products  
 **Status in Manifest:** `partial`  
-**Feature Flag:** `live_stripe_billing_enabled` (default OFF) — registered in `platform-flags.ts`. Enable this flag AND configure the secret to activate live billing without any code change.  
-**Risk:** Revenue infrastructure is built (Checkout, Subscriptions, Invoicing, Customer Portal) but STRIPE_SECRET_KEY is test-mode only. No real transaction can be processed.  
+**Feature Flag:** ~~`live_stripe_billing_enabled` (default OFF) — registered in `platform-flags.ts`. Enable this flag AND configure the secret to activate live billing without any code change.~~ No such flag exists in the code (corrected 2026-11-06).  
+**Risk:** ~~Revenue infrastructure is built (Checkout, Subscriptions, Invoicing, Customer Portal) but STRIPE_SECRET_KEY is test-mode only.~~ The revenue infrastructure (Checkout, Subscriptions, Invoicing, Customer Portal) was deleted in `3d6e07381` (2026-05-02, #77); see `BILLING.md`. No real transaction can be processed.  
 **Revenue Impact:** Directly blocks any monetization. Critical path to first dollar of ARR.  
 **Blocking Dependencies:** STRIPE_SECRET_KEY (live sk_live_...), STRIPE_WEBHOOK_SECRET, Stripe product/price IDs per tier configured.  
 **Owner:** Founder / Platform Engineering  
