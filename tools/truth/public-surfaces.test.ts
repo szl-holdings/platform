@@ -514,6 +514,17 @@ test('wires freshness only to scheduled and explicit manual events', () => {
   assert.match(workItem?.run ?? '', /Multiple open protected refresh work items/);
   assert.doesNotMatch(workItem?.run ?? '', /mapfile -t numbers < <\(gh/);
   assert.doesNotMatch(workItem?.run ?? '', /head -n1/);
+  // The title contains parentheses, which advanced issue-search syntax treats as grouping;
+  // the exact-title lookup must therefore use the REST issue listing, never a search query.
+  assert.doesNotMatch(workItem?.run ?? '', /--search/);
+  assert.match(
+    workItem?.run ?? '',
+    /gh api --paginate \\\n\s+"repos\/\$\{GITHUB_REPOSITORY\}\/issues\?state=open&per_page=100"/,
+  );
+  assert.match(
+    workItem?.run ?? '',
+    /select\(\.pull_request == null and \.title == \\"\$\{title\}\\"\)/,
+  );
 });
 
 test('runs truth contracts inside the required Runtime Audit context', () => {

@@ -283,18 +283,19 @@ jobs:
           pull-request events do not trigger the protected check suite.
           EOF
           )"
+          # Match the exact title over the REST issue listing, not issue search:
+          # the title contains parentheses, which GitHub's advanced issue-search
+          # syntax parses as grouping, so a search lookup matched nothing and a
+          # duplicate work item was opened on every scheduled run.
           number_output="$(
-            gh issue list \
-              --repo "$GITHUB_REPOSITORY" \
-              --state open \
-              --limit 1000 \
-              --search "${title} in:title" \
-              --json number,title \
-              --jq ".[] | select(.title == \"${title}\") | .number"
+            gh api --paginate \
+              "repos/${GITHUB_REPOSITORY}/issues?state=open&per_page=100" \
+              --jq ".[] | select(.pull_request == null and .title == \"${title}\") | .number"
           )"
           mapfile -t numbers < <(printf '%s' "$number_output")
           if [ "${#numbers[@]}" -gt 1 ]; then
-            echo "::error::Multiple open protected refresh work items have the exact title."
+            echo "::error::Multiple open protected refresh work items have the exact title:" \
+              "$(printf '#%s ' "${numbers[@]}")- close all but one, then rerun."
             exit 1
           elif [ "${#numbers[@]}" -eq 1 ]; then
             gh issue comment "${numbers[0]}" --repo "$GITHUB_REPOSITORY" --body "$body"
