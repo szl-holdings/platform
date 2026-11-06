@@ -50,6 +50,8 @@ PASS — no parsed High/Critical advisory.
 | `minimatch@3>brace-expansion` | `1.1.21` |
 | `minimatch@5>brace-expansion` | `2.1.7` |
 | `minimatch@9>brace-expansion` | `2.1.7` |
+| `minimatch@>=7.0.0 <11.0.1` | `11.0.4` |
+| `glob@>=9.0.0 <14.0.2` | `14.0.3` |
 | `braces` | `link:packages/braces-safe` |
 | `fflate` | `0.8.3` |
 | `vite` | `8.1.6` |

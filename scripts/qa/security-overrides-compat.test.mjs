@@ -14,6 +14,8 @@ const braceByMinimatchMajor = new Map([
   [5, '2.1.7'],
   [9, '2.1.7'],
   [10, '5.0.12'],
+  // minimatch 11 (GHSA-g3hv-75wg-m249 override) depends on brace-expansion ^5.
+  [11, '5.0.12'],
 ]);
 
 // Select only current lockfile snapshots, never stale versions left in .pnpm.
@@ -52,7 +54,7 @@ test('lockfile contains every covered consumer and only patched brace releases',
   }
   assert.deepEqual(
     [...observedMajors].sort((a, b) => a - b),
-    [3, 5, 9, 10],
+    [3, 5, 11],
   );
   const braceVersions = Object.keys(lock.packages ?? {})
     .filter((key) => key.startsWith('brace-expansion@'))
@@ -98,7 +100,8 @@ for (const [snapshotKey, snapshot] of minimatchSnapshots) {
     const brace = installedPackage(consumerRequire, 'brace-expansion');
     assert.equal(brace.manifest.version, expectedBrace);
     const braceModule = consumerRequire('brace-expansion');
-    const expand = major === 10 ? braceModule.expand : braceModule;
+    // brace-expansion v5 (minimatch >= 10) exposes a named `expand` export.
+    const expand = expectedBrace.startsWith('5.') ? braceModule.expand : braceModule;
     assert.equal(typeof expand, 'function');
     assert.deepEqual(expand('{a,{b,c}}'), ['a', 'b', 'c']);
     assert.deepEqual(expand('item-{1..3}'), ['item-1', 'item-2', 'item-3']);
