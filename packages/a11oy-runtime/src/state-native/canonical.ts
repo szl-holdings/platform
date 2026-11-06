@@ -45,7 +45,7 @@ function normalize(value: unknown, stack: Set<object>): CanonicalJsonValue {
     }
     stack.add(object);
 
-    const result: Record<string, CanonicalJsonValue> = {};
+    const result: Record<string, CanonicalJsonValue> = Object.create(null);
     for (const key of Object.keys(object).sort()) {
       const item = object[key];
       if (item === undefined) {
