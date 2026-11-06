@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-11-02 (rev 42 — Stripe webhook verifier fail-closed candidate)
+**Last updated:** 2026-11-06 (staging deploy request headers; provider acceptance still blocked)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -159,11 +159,13 @@ failure, malformed responses and non-2xx statuses fail. The offline harness
 executes actual Bash with mock responses. HTTP 2xx means request acceptance only;
 the workflow summary keeps runtime readiness UNKNOWN.
 
-The rejection cause and existing endpoint's deployment authorization contract
-remain UNKNOWN. No credential or target change, denied-action retry, deployment
-or runtime verification was performed. A legitimate provider/API contract and
-fresh authorized request plus runtime evidence are still required before any
-staging readiness claim. See the
+The October 18 response body was not retained. The same request shape, measured
+on 2026-11-06, is rejected with HTTP 403 `Expected X-Requested-With header`
+before bearer evaluation. See
+[STAGING-REQUEST-002](#staging-request-002--pre-auth-403-was-a-missing-request-header).
+No credential or target change, denied-action retry, deployment, or runtime
+verification was performed for the October repair. Provider acceptance and
+runtime evidence are still required before any staging readiness claim. See the
 [scoped proof packet](../../audit/STAGING_DEPLOY_FAIL_CLOSED_2026-10-18.md).
 
 ### A11OY-PUBLIC-CANDIDATE-001 — hosted promotion remains HOLD
@@ -1580,8 +1582,10 @@ No signer, Hugging Face credential, Replit credential or provider setting was
 available to this source repair. A valid run still requires the existing fleet
 seed in the effective `KHIPU_SIGNING_KEY_B64` Actions secret and dataset-write
 authority in `HF_TOKEN`. Staging run `41375292722` separately received HTTP 403
-from Replit after both configured values were nonempty; the exact application ID
-and its authorized Replit bearer identity must be reconciled outside source.
+from Replit after both configured values were nonempty. That run discarded the
+response body. The same request shape is the pre-auth header gate in
+[STAGING-REQUEST-002](#staging-request-002--pre-auth-403-was-a-missing-request-header);
+it does not by itself show that the configured bearer was evaluated.
 Neither external blocker is closed by the candidate. See the
 [source proof](../../audit/READINESS_AUTHORITY_PREFLIGHT_20261102.md) and
 [authority runbook](../../audit/PLATFORM_EXTERNAL_AUTHORITY_BLOCKERS_20261102.md).
@@ -1598,3 +1602,31 @@ that publish with `HF_TOKEN` and lacked it. Security already ran that check;
 observability publishes through HF OIDC. A workflow-contract regression covers
 step order and credential bindings in all seven lanes. Neither external blocker
 above is closed by this change.
+
+### STAGING-REQUEST-002 — pre-auth 403 was a missing request header
+
+**MEASURED - STAGING-REQUEST-HEADERS-20261106:** push run
+[42134629935](https://github.com/szl-holdings/platform/actions/runs/42134629935)
+at `d3e5178743e139a547e6b79ec6beb52deda49e10` checked out that commit, passed
+"Verify staging configuration" (both `REPLIT_STAGING_APP_ID` and
+`REPLIT_STAGING_DEPLOY_TOKEN` were nonempty), and failed "Trigger staging
+deployment" in the same second with `Replit staging API returned HTTP 403`.
+The workflow discards the response body, so the Actions log does not contain
+the 403 text. The `staging` environment has no protection rules. The push
+trigger matched: the commit is outside `replit-sync/**`.
+
+An unauthenticated POST of that same URL, with a nonexistent repl id and no
+repository secret, returned HTTP 403 `Expected X-Requested-With header`.
+Adding only `X-Requested-With: XMLHttpRequest` returned HTTP 403
+`Expected referrer, referer, or origin header`. Adding `Origin: https://replit.com`
+(or `Referer: https://replit.com/`) with a dummy bearer returned HTTP 401
+`{"message":"repl-identity-token-invalid"}`, including an empty body. A foreign
+Origin stayed HTTP 403 `Invalid referrer`. The route therefore exists, and the
+Actions 403 was the provider's browser-contract gate, evaluated before identity.
+
+The workflow now sends `X-Requested-With: XMLHttpRequest` and
+`Origin: https://replit.com` on the same single bounded POST. Those headers do
+not authenticate the call. The configured identity token's authority, deployment
+acceptance, and runtime readiness remain **BLOCKED** until a hosted 2xx is
+observed. No secret was read, printed, or changed. See the
+[source proof](../../audit/STAGING_DEPLOY_REQUEST_HEADERS_2026-11-06.md).
