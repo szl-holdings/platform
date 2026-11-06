@@ -113,6 +113,19 @@ pnpm run dev
 
 See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the full monorepo orientation.
 
+### Verify
+
+These are the repository's own gates; each exits non-zero on failure.
+
+```bash
+pnpm claims:validate             # truth snapshot, allowlist coverage and truth-tool tests
+pnpm run test:gateway-security   # gateway security suite (vitest)
+pnpm test                        # root contract tests, then every workspace package via turbo
+```
+
+`pnpm surfaces:check` additionally probes the live public surfaces, so it needs network
+access to them; the scheduled **Truth drift** workflow runs it.
+
 ---
 
 ## Domain verticals
