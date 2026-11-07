@@ -514,6 +514,17 @@ test('wires freshness only to scheduled and explicit manual events', () => {
   assert.match(workItem?.run ?? '', /Multiple open protected refresh work items/);
   assert.doesNotMatch(workItem?.run ?? '', /mapfile -t numbers < <\(gh/);
   assert.doesNotMatch(workItem?.run ?? '', /head -n1/);
+  // The title contains parentheses, which advanced issue-search syntax treats as grouping;
+  // the exact-title lookup must therefore use the REST issue listing, never a search query.
+  assert.doesNotMatch(workItem?.run ?? '', /--search/);
+  assert.match(
+    workItem?.run ?? '',
+    /gh api --paginate \\\n\s+"repos\/\$\{GITHUB_REPOSITORY\}\/issues\?state=open&per_page=100"/,
+  );
+  assert.match(
+    workItem?.run ?? '',
+    /select\(\.pull_request == null and \.title == \\"\$\{title\}\\"\)/,
+  );
 });
 
 test('runs truth contracts inside the required Runtime Audit context', () => {
@@ -589,6 +600,61 @@ test('live verification fails closed on status or redirect drift', async () => {
     'a11oy-front-door: expected HTTP 200, observed 503',
     'a11oy-front-door: expected final URL https://a-11-oy.com/, observed https://a-11-oy.com/maintenance',
   ]);
+});
+
+function edgeResponse(url: string, status: number, headers: Record<string, string>) {
+  return {
+    status,
+    url,
+    body: null,
+    headers: { get: (name: string) => headers[name.toLowerCase()] ?? null },
+  };
+}
+
+test('attributes status drift to the edge only when response headers show it', async () => {
+  const verifyWith = (status: number, headers: Record<string, string>) =>
+    verifyLivePublicSurfaces(registry(), async (url) => edgeResponse(url, status, headers));
+
+  assert.deepEqual(await verifyWith(402, { 'payment-required': 'eyJ4NDAyVmVyc2lvbiI6Mn0=' }), [
+    'a11oy-front-door: expected HTTP 200, observed 402; edge returned 402 (x402 paywall)',
+  ]);
+  assert.deepEqual(
+    await verifyWith(403, {
+      'cf-mitigated': 'challenge',
+      'cf-ray': '8f0c0f2b1a2b3c4d-IAD',
+      server: 'cloudflare',
+    }),
+    [
+      'a11oy-front-door: expected HTTP 200, observed 403; edge returned 403 ' +
+        '(Cloudflare challenge, cf-mitigated: challenge, cf-ray 8f0c0f2b1a2b3c4d-IAD)',
+    ],
+  );
+  // A malformed ray identifier is never echoed into the failure message.
+  assert.deepEqual(
+    await verifyWith(403, { server: 'cloudflare', 'cf-ray': 'x\n::error::forged' }),
+    [
+      'a11oy-front-door: expected HTTP 200, observed 403; served through Cloudflare ' +
+        '(server: cloudflare); check its security events',
+    ],
+  );
+  assert.deepEqual(await verifyWith(402, {}), [
+    'a11oy-front-door: expected HTTP 200, observed 402',
+  ]);
+  assert.deepEqual(await verifyWith(403, { server: 'nginx' }), [
+    'a11oy-front-door: expected HTTP 200, observed 403',
+  ]);
+  assert.deepEqual(await verifyWith(200, { 'cf-mitigated': 'challenge' }), []);
+
+  const redirected = configuredSurface('a11oy-net-code-gap');
+  assert.deepEqual(
+    await verifyLivePublicSurfaces(registry([redirected]), async (url) =>
+      edgeResponse(url, 403, { 'cf-mitigated': 'challenge' }),
+    ),
+    [
+      'a11oy-net-code-gap: expected HTTP 301 redirect from https://a11oy.net/code, observed 403; ' +
+        'edge returned 403 (Cloudflare challenge, cf-mitigated: challenge)',
+    ],
+  );
 });
 
 test('caps live verification at four complete surface transactions', async () => {
@@ -979,6 +1045,32 @@ test('validates the exact Killinchu build-info source-binding body', async () =>
   ];
 
   for (const invalid of [missingAttestation, mismatchedSource, unexpectedField, unrelatedBody]) {
+    assert.deepEqual(await verify(invalid), contractFailure);
+  }
+
+  // A consistent redeploy keeps failing, but names the reported and verified releases.
+  const redeployed = structuredClone(KILLINCHU_BUILD_INFO_BODY);
+  redeployed.build.revision = 'b'.repeat(40);
+  redeployed.release_receipt.source_revision = 'b'.repeat(40);
+  redeployed.release_receipt.subject_sha256 = 'c'.repeat(64);
+  redeployed.release_receipt.attestation_id = '61234567';
+  redeployed.release_receipt.attestation_url =
+    'https://github.com/szl-holdings/killinchu/attestations/61234567';
+  assert.deepEqual(await verify(redeployed), [
+    'killinchu-build-info-api: API body does not match the exact source-binding contract: ' +
+      `the runtime reports release ${'b'.repeat(40)} (attestation 61234567), not the verified ` +
+      'release 4a434f8d07feb7badc5a274c89549452f49ff0d1 (attestation 55856266); verify the new ' +
+      'release attestation before rebinding the registry',
+  ]);
+
+  // Inconsistent or malformed identities are never echoed and keep the generic failure.
+  const inconsistentRedeploy = structuredClone(redeployed);
+  inconsistentRedeploy.release_receipt.attestation_url =
+    'https://github.com/szl-holdings/killinchu/attestations/55856266';
+  const malformedRevision = structuredClone(redeployed);
+  malformedRevision.build.revision = `${'b'.repeat(39)}\n`;
+  malformedRevision.release_receipt.source_revision = `${'b'.repeat(39)}\n`;
+  for (const invalid of [inconsistentRedeploy, malformedRevision]) {
     assert.deepEqual(await verify(invalid), contractFailure);
   }
   assert.deepEqual(await verify('{"status":', 'application/json'), [

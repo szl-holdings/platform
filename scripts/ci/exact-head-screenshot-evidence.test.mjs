@@ -709,7 +709,7 @@ test('truth refresh heredoc renders Markdown literally without command substitut
   );
   const run = workflowStepRun(workflow, 'Open or update the protected refresh work item');
   const ghStub = `gh() {
-    if [[ "$1 $2" == "issue list" ]]; then
+    if [[ "$1 $2" == "api --paginate" ]]; then
       return 0
     fi
     local previous=''
@@ -744,6 +744,87 @@ test('truth refresh heredoc renders Markdown literally without command substitut
   assert.match(body, /generated path: `artifacts\/SOURCE_OF_TRUTH\.json`/);
   assert.ok(body.includes(`package SHA-256: \`${packageSha}\``));
   assert.match(body, /with `GITHUB_TOKEN`/);
+});
+
+async function runTruthRefreshWorkItemStep(t, lookupOutput) {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'szl-truth-work-item-test-'));
+  const invocations = path.join(root, 'invocations.txt');
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const workflow = await readFile(
+    new URL('../../.github/workflows/truth-drift.yml', import.meta.url),
+    'utf8',
+  );
+  const run = workflowStepRun(workflow, 'Open or update the protected refresh work item');
+  const ghStub = `gh() {
+    printf '%s\\n' "$1 $2 $3" >> "$INVOCATIONS"
+    if [[ "$1 $2" == "api --paginate" ]]; then
+      printf '%s' "$LOOKUP_OUTPUT"
+      return 0
+    fi
+    if [[ "$1 $2" == "issue comment" || "$1 $2" == "issue create" ]]; then
+      return 0
+    fi
+    printf 'unexpected gh invocation\\n' >&2
+    return 1
+  }`;
+  const result = spawnSync('/bin/bash', ['-c', `${ghStub}\n${run}`], {
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      INVOCATIONS: invocations,
+      LOOKUP_OUTPUT: lookupOutput,
+      GITHUB_RUN_ID: '42',
+      GITHUB_REPOSITORY: repository,
+      GITHUB_SERVER_URL: 'https://github.com',
+      PACKAGE_SHA256: 'b'.repeat(64),
+      SOURCE_SHA: 'a'.repeat(40),
+    },
+  });
+  const calls = (await readFile(invocations, 'utf8')).trim().split('\n');
+  return { result, calls };
+}
+
+test('truth refresh work item is looked up by exact title over the REST issue listing', {
+  skip: process.platform === 'win32',
+}, async (t) => {
+  const { result, calls } = await runTruthRefreshWorkItemStep(t, '');
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.deepEqual(calls, [
+    `api --paginate repos/${repository}/issues?state=open&per_page=100`,
+    'issue create --repo',
+  ]);
+});
+
+test('truth refresh work item comments on the single open exact-title issue', {
+  skip: process.platform === 'win32',
+}, async (t) => {
+  const { result, calls } = await runTruthRefreshWorkItemStep(t, '1034\n');
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.deepEqual(calls.slice(1), ['issue comment 1034']);
+});
+
+test('truth refresh work item fails closed and names every duplicate', {
+  skip: process.platform === 'win32',
+}, async (t) => {
+  const { result, calls } = await runTruthRefreshWorkItemStep(t, '1029\n1034\n');
+  assert.equal(result.status, 1);
+  assert.match(
+    result.stdout,
+    /::error::Multiple open protected refresh work items have the exact title: #1029 #1034 - close all but one, then rerun\./,
+  );
+  assert.equal(calls.length, 1, 'no issue may be created or commented on');
+});
+
+test('truth refresh work-item tests rerun when the truth-drift workflow changes', async () => {
+  // These tests drive truth-drift.yml, but only this workflow's capture contract runs them.
+  const workflow = await readFile(
+    new URL('../../.github/workflows/exact-head-screenshot-evidence.yml', import.meta.url),
+    'utf8',
+  );
+  assert.match(
+    workflow,
+    /\n {2}pull_request:\r?\n {4}paths:\r?\n(?: {6}- \S+\r?\n)* {6}- \.github\/workflows\/truth-drift\.yml\r?\n/,
+  );
 });
 
 test('unsafe tracked Git entries fail before candidate tooling can run', {
@@ -879,7 +960,10 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
     workflow,
     /dest: \$\{\{ github\.workspace \}\}\/candidate-pnpm-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/,
   );
-  assert.match(workflow, /SZL_CANDIDATE_HOME_VALUE: \$\{\{ github\.workspace \}\}\/candidate-home-/);
+  assert.match(
+    workflow,
+    /SZL_CANDIDATE_HOME_VALUE: \$\{\{ github\.workspace \}\}\/candidate-home-/,
+  );
   assert.match(workflow, /SZL_EVIDENCE_ROOT_VALUE: \$\{\{ runner\.temp \}\}\/exact-head-evidence-/);
   assert.match(workflow, /steps\.pnpm_setup\.outputs\.dest/);
   assert.match(workflow, /steps\.pnpm_setup\.outputs\.bin_dest/);
@@ -887,10 +971,7 @@ test('workflow binds PR, branch, permissions, publication, and artifact contract
   assert.match(workflow, /candidate_pnpm_version/);
   assert.match(workflow, /candidate_node_version/);
   assert.match(workflow, /find "\$resolved_root" ! -type l -perm \/022/);
-  assert.match(
-    workflow,
-    /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/,
-  );
+  assert.match(workflow, /find "\$SZL_PNPM_ROOT" ! -type l -writable -print -quit/);
   assert.match(workflow, /candidate identity can write admitted pnpm runtime/);
   assert.match(workflow, /candidate identity cannot traverse protected workspace/);
   assert.match(workflow, /"\$GITHUB_WORKSPACE" "\$\(realpath -e "\$GITHUB_WORKSPACE"\)"/);
