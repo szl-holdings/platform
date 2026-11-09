@@ -237,7 +237,7 @@ export class AlloyRetrievalEngine {
     );
     for (let i = 0; i < newChunks.length; i++) {
       const res = batchResult.results[i];
-      if (res && !res.error && newChunks[i]) {
+      if (res?.ok && newChunks[i]) {
         this.setEmbedding(newChunks[i]?.id, res.embedding);
       }
     }

@@ -29,7 +29,7 @@ jobs:
       actions: write
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:
           egress-policy: audit
 
@@ -48,6 +48,18 @@ jobs:
 
       - name: Install deps
         run: pip install --no-cache-dir huggingface_hub==2.0.0 pynacl
+
+      - name: Verify receipt signing authority
+        timeout-minutes: 1
+        env:
+          KHIPU_SIGNING_KEY_B64: ${{ secrets.KHIPU_SIGNING_KEY_B64 }}
+        run: python platform/agents/readiness/_lib/signing_preflight.py
+
+      - name: Verify receipt publication authority
+        timeout-minutes: 2
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python platform/agents/readiness/_lib/hf_publish_preflight.py
 
       - name: Run READINESS-RELIABILITY
         env:

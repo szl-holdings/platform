@@ -1,0 +1,109 @@
+# AEF Benchmark Output Proof Packet
+
+- Workcell: `AEF-BENCHMARK-OUTPUT-20261102`
+- Date: 2026-11-02
+- Owner: Codex
+- Protected base: `szl-holdings/platform@9b72438f25faa3474a0933a4a775aff46594ed1b`
+- Local test base: `3e0cbc07a4b4e5f604b982e49443ce247b571fa4`
+
+## Context
+
+The target blobs for `scripts/aef-bench.ts`, `scripts/aef/benchmark.ts`,
+`docs/aef/LOCAL_DEV.md`, and `docs/aef/README.md` are byte-for-byte identical on the
+protected base and local test base. The local worktree is therefore safe for focused
+dependency-free verification without incorporating unrelated older changes. The
+reconciliation merge must include the protected base as a parent.
+
+Protected `main` advanced through merged PR #1002, PR #1001, and PR #1005 while this
+workcell was in progress. Its AEF target-file Git blobs remain unchanged:
+`scripts/aef-bench.ts`
+`1091ee0c8b370161a5cfd32e14f00170f036af3d`, `scripts/aef/benchmark.ts`
+`73ee1361d67bab2f10ee6c94330fa810abb58e36`, and `docs/aef/LOCAL_DEV.md`
+`4564af7a03565712623d9622db7990efa4742ad2`. PR #1001 changed only
+`scripts/qa/capture-cyber-build-witness.mjs` and its test. PR #1005 changed the root
+dependency manifests, lockfile, security compatibility test, and generated SBOMs,
+including the Vitest 4.1.12 graph. Neither merge overlaps this patch's eight files,
+so reconciliation is disjoint and preserves those current-main blobs. The hosted
+workflow must still rerun against the changed dependency graph. This patch does not
+touch a file changed by PR #1002, PR #1001, or PR #1005.
+
+Both benchmark entry points calculate rows and summary statistics but discard them.
+`scripts/aef-bench.ts` emits only transient progress text and
+`scripts/aef/benchmark.ts` emits no report. This contradicts the local-development
+guide, which promises a summary table, and leaves no stable stdout stream that can be
+redirected to a durable record.
+
+Baseline `pnpm typecheck` did not start TypeScript because the runner has pnpm
+11.19.0 while the repository requires pnpm 10.26.1. No dependencies or toolchains
+will be downloaded for this workcell.
+
+## Plan
+
+1. Add one dependency-free report renderer with fixed table headings and numeric
+   formatting.
+2. Make both benchmark entry points emit exactly one report after measurements finish.
+3. Keep secrets and request/response content outside the report data model, and emit
+   only a fixed failure message on stderr.
+4. Add Node built-in tests for exact output shape, empty-success handling, and the
+   redaction boundary.
+5. Document stdout-only output and explicit shell redirection for durable results.
+6. Run the contract as a named step in the existing hosted Node 24 unit-test job,
+   with a dependency-free governance assertion that prevents silent removal.
+
+## Success Criteria
+
+- Fixture and live retrieval runs emit ordered domain rows plus an overall row.
+- API runs emit embed, hybrid-search, and rerank rows with success/failure counts.
+- Empty-success suites render `n/a` statistics rather than throwing while formatting.
+- Reports contain no endpoint, credential, tenant, query, or response data.
+- Dependency-free focused tests and syntax checks pass.
+- The hosted Tests workflow executes all three report-contract cases directly.
+- Full typecheck is attempted and any toolchain blocker is recorded exactly.
+
+## Validation
+
+- `node --test scripts/aef/benchmark-report.test.ts` — PASS; every report-contract
+  case completed.
+  Exact retrieval and API tables, zero-success `n/a` handling, renderer redaction,
+  and entry-point wiring are covered.
+- `node --check` for both entry points, the renderer, and its test — PASS.
+- Mocked entry-point run for `scripts/aef-bench.ts --iterations 2 --warmup 0` —
+  PASS. It emitted two ordered domain rows and `OVERALL`.
+- Mocked entry-point run for `scripts/aef/benchmark.ts` with two rounds — PASS.
+  It emitted embed, hybrid-search, and rerank rows.
+- API run with sentinel endpoint, key, and tenant values — PASS. None appeared in
+  stdout.
+- API health-failure run with a sentinel response body — PASS. Stdout was empty,
+  stderr was exactly `AEF API benchmark failed`, the process exited 1, and no
+  sentinel value appeared.
+- `node scripts/qa/scan-secrets.js .` — PASS (`CLEAN — no secrets found`).
+- `git diff --check` — PASS.
+- Pre-wiring negative control against `.github/workflows/tests.yml` — EXPECTED
+  FAILURE. The workflow did not contain an AEF benchmark contract step. Hosted
+  Tests run `41390857404` completed successfully on the original PR head, but its
+  unit job exposed only the generic `pnpm run test` step, whose explicit root
+  Node-test list omitted `scripts/aef/benchmark-report.test.ts`.
+- Candidate hosted command
+  `node --test scripts/aef/benchmark-report.test.ts` — PASS; every case completed.
+- `node --test scripts/ci/governance-workflows.test.mjs` — PASS; every existing and
+  new case completed,
+  including the new assertion that the hosted unit job runs the exact AEF command
+  without `continue-on-error` before the generic suite.
+- Current-main comparison from `590e0c9f` to `a41f03e9` — PASS: one commit and
+  two changed witness files, with no overlap. The reconciliation commit uses prior
+  reviewed head `476b897c094d50c162bd9de49d0bcbf084763f92` as first parent and exact
+  current main `a41f03e9fa52231f3b2a6b32cea7af57989c0c6d` as second parent.
+- Current-main comparison from `a41f03e9` to `9b72438f` — PASS: one commit and six
+  dependency/security evidence files, with no overlap. The latest reconciliation
+  commit uses prior proof-only head `a0d8145b4a84c359c4f88b10c86f08ceb33e14e8`
+  as first parent and exact current main
+  `9b72438f25faa3474a0933a4a775aff46594ed1b` as second parent.
+- Post-change `pnpm typecheck` — BLOCKED before TypeScript execution. The runner
+  has pnpm 11.19.0 and the repository requires 10.26.1. The pinned toolchain and
+  workspace dependencies were not downloaded because this workcell prohibits
+  external artifact downloads.
+
+The real fixture corpus run was not available without installed workspace
+dependencies. The dependency-free renderer tests and stubbed entry-point runs cover
+the output contract; protected-branch CI remains responsible for the repository-wide
+typecheck. Screenshot verification is not applicable because this change has no UI.

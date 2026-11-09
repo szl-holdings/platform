@@ -38,6 +38,18 @@ printEvalResult(result);
 
 ## Running
 
+The default package suite is offline. It does not import the local CPU backend
+or attempt to fetch ONNX model weights:
+
 ```bash
 pnpm --filter @workspace/aef-evals vitest run
+```
+
+Real-vector evaluation is a separate, explicit operation. It may download the
+immutable model revision through the vector worker and fails if that model is
+unavailable; it never attempts a download and then converts the failure into a
+successful skip:
+
+```bash
+AEF_EVALS_REQUIRE_REAL=1 pnpm --filter @workspace/aef-evals exec vitest run src/eval-real-vectors.test.ts
 ```
