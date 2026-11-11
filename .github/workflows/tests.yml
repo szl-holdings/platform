@@ -63,6 +63,8 @@ jobs:
         run: pip install --no-cache-dir huggingface_hub==2.0.0 pynacl==1.6.0
       - name: Run readiness regression tests without external services
         run: python -m unittest discover -s platform/agents/readiness/_lib -p 'test_*.py'
+      - name: Run Agentic-GPU probe contracts with loopback HTTP only
+        run: python -m unittest discover -s apps/agentic-gpu -p 'test_vllm_backend.py' -v
       - name: Run benchmark payload determinism contract
         run: python -m unittest discover -s benchmarks -p 'test_run_benchmarks.py' -v
       - name: Check readiness dashboard DOM safety
@@ -198,3 +200,4 @@ jobs:
         run: python -m pip install --disable-pip-version-check pytest==9.1.1 reedsolo==1.7.0 lmdb==2.3.0
       - name: Run Khipu OS tests without a signer service or network
         run: python -m pytest packages/khipu-os/tests -q -p no:cacheprovider
+

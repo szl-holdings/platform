@@ -1,5 +1,22 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
+### AGENTIC-PROBE-20261111 — candidate endpoint-liveness correction
+
+- Status: source candidate; deployment and inference readiness remain unverified.
+- The Agentic-GPU backend adapter counted HTTP errors as live, followed redirects,
+  accepted a model listing after explicit engine-health failure, and could change
+  a router-fallback selection into local-serving posture without reselection.
+- Candidate repair requires direct 2xx probes, limits the vLLM models fallback
+  to missing/unsupported health routes (404/405), and keeps router fallback false
+  until explicit reselection. Integration failures now fail the module self-test.
+- Nine stdlib tests exercise real loopback HTTP, fallback posture and failure
+  propagation; the Tests workflow runs them on Python 3.11 and 3.12.
+- Remaining boundary: legacy LAN/no-key endpoint configuration, authenticated
+  production transport, actual inference, and box deployment are not established
+  by these liveness tests. Root TypeScript checks require the repository toolchain;
+  the local attempt is blocked by pnpm 11.25.0 versus required 10.26.1.
+- Proof: `audit/AGENTIC-PROBE-20261111.md`.
+
 **Last updated:** 2026-11-06 (staging deploy request headers; provider acceptance still blocked)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
@@ -1630,3 +1647,4 @@ not authenticate the call. The configured identity token's authority, deployment
 acceptance, and runtime readiness remain **BLOCKED** until a hosted 2xx is
 observed. No secret was read, printed, or changed. See the
 [source proof](../../audit/STAGING_DEPLOY_REQUEST_HEADERS_2026-11-06.md).
+

@@ -112,6 +112,20 @@ swap. The control-plane side of the flip is already coded here:
   daemon = ResidentDaemon(endpoint=kw["endpoint"], probe=kw["probe"])
   ```
 
+  Health probes require a direct successful HTTP response; errors and redirects
+  do not qualify. A missing `/health` route (404/405) can fall back to `/v1/models`,
+  but an unhealthy engine or authentication failure cannot. Ollama must answer
+  `/v1/models` successfully. A router-fallback selection keeps its probe false
+  until the caller explicitly runs `select_backend()` again and rebuilds the
+  daemon inputs. These checks attest endpoint liveness, not model quality,
+  inference completion, endpoint ownership, or a production security profile.
+  The legacy LAN URLs and no-key configuration still require a separate
+  authenticated transport/deployment contract before production use.
+
+  Regression command (stdlib only; loopback HTTP, no external server or GPU):
+  `python3 -m unittest discover -s apps/agentic-gpu -p test_vllm_backend.py -v`
+  from the repository root. The Tests workflow runs this on Python 3.11 and 3.12.
+
 - **`vllm_metrics.py`** turns vLLM's `/metrics` into a slack signal the
   scheduler polls (`slack_signal_fn()`), so proactive piggybacking only fires
   when there is real GPU headroom and no queue backpressure. Off-box it returns
@@ -188,3 +202,4 @@ box (systemd unit, vLLM upgrade, wiring the real Chaski ingress + the
 STRANDED_ENERGY power signal + receipt emission) is a separate **Forge/box
 step** — see `AGENTIC_GPU_ENGINE.md` evolution STEP 1–4. Forge owns the box
 deployment; **do not** infer box access from this PR.
+
