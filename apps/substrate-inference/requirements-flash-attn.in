@@ -1,0 +1,4 @@
+# Optional delta installed after requirements-gpu.lock. flash-attn declares
+# torch and einops; torch is supplied by the default GPU lock.
+flash-attn>=2.8.3.post1
+einops

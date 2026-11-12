@@ -45,7 +45,7 @@ cd apps/substrate-inference
 pip install -e engine/ollm
 
 # 3. Install Substrate service dependencies:
-pip install -r requirements.txt
+python -m pip install --require-hashes -r requirements-gpu.lock
 
 # 4. Start the service:
 python -m src.main
@@ -106,10 +106,10 @@ the repository's `LicenseRef-SZL-Proprietary` license.
 
 ## Release packaging hold
 
-The Python dependency files currently contain version ranges and there is no
-committed, hashed lock for the base or GPU dependency graph. The Dockerfile also
-installs that unresolved graph. Treat the image as non-reproducible and keep
-production promotion on HOLD until CI installs an exact locked graph and proves
-a clean rebuild digest and SBOM. An exact Hub commit alone does not verify the
+The base, GPU, and optional FlashAttention dependency graphs are committed as
+exact hash locks, and the Dockerfile installs them with `--require-hashes`.
+Dependency CI verifies lock consistency and publishes deterministic CycloneDX
+documents plus their digests. Keep production promotion on HOLD until a clean
+image rebuild digest is captured. An exact Hub commit alone does not verify the
 downloaded model artifact set; promotion also requires file-digest verification
 and a real model/GPU execution receipt from that exact image.
