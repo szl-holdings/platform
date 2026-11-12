@@ -24,7 +24,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "_lib"))
 import khipu  # noqa: E402
 
 AGENT = "readiness-security"
-REQUIRED_WORKFLOWS = {"sbom": ["sbom"], "trivy": ["trivy"], "gitleaks": ["gitleaks", "secret"]}
+REQUIRED_WORKFLOWS = {"sbom": ["sbom"], "trivy": ["trivy"], "gitleaks": ["gitleaks"]}
+# Generic secret health, availability, rotation and reader audits are not
+# committed-secret scanners. Outside Platform this remains filename discovery,
+# not verification of arbitrary workflow contents or scanner execution.
+SECRET_SCANNER_NAME = re.compile(r"(?:^|[-_.])(?:gitleaks|secrets?[-_]scan(?:ning)?)(?:[-_.]|$)")
+API_PAGE_SIZE = 100
+API_LIST_LIMIT = 1000
 PLATFORM_REPO = "szl-holdings/platform"
 PLATFORM_SECRET_WORKFLOW = "security.yml"
 PLATFORM_SECRET_JOB = "Secret Scan (Gitleaks)"
@@ -194,21 +200,59 @@ def _platform_secret_workflow_status(repo: str, head_sha: str, names: list[str])
     return "SUCCESS"
 
 
+def _paged_github_list(endpoint: str, key: str, prefix: str) -> tuple[str, list[dict]]:
+    """Read a bounded, complete list; never return affirmative partial evidence.
+
+    Actions filtered run queries expose at most 1,000 results. Reaching that
+    ceiling is ambiguous, even if total_count is exactly the ceiling. Stable
+    counts and unique IDs also detect common concurrent pagination drift.
+    """
+    rows: list[dict] = []
+    seen: set[int] = set()
+    expected = None
+    for page in range(1, API_LIST_LIMIT // API_PAGE_SIZE + 1):
+        url = endpoint if page == 1 else f"{endpoint}&page={page}"
+        rc, out = gh(url)
+        if rc != 0:
+            return ("RATE_LIMITED" if out == "RATE_LIMITED" else "READ_FAILED"), []
+        try:
+            response = json.loads(out)
+            batch = response[key]
+            count = response["total_count"]
+            if (type(count) is not int or count < 0 or not isinstance(batch, list)
+                    or len(batch) > API_PAGE_SIZE
+                    or any(not isinstance(row, dict) or type(row.get("id")) is not int
+                           or row["id"] <= 0 for row in batch)):
+                raise ValueError("invalid page")
+            if expected is not None and count != expected:
+                return f"{prefix}_CHANGED", []
+            expected = count
+            if count >= API_LIST_LIMIT:
+                return f"{prefix}_LIMIT_REACHED", []
+            for row in batch:
+                if row["id"] in seen:
+                    return f"{prefix}_DUPLICATE", []
+                seen.add(row["id"])
+            rows.extend(batch)
+            if len(rows) > count:
+                raise ValueError("page exceeds total count")
+            if len(rows) == count:
+                return "OBSERVED", rows
+            if len(batch) != API_PAGE_SIZE:
+                return f"{prefix}_INCOMPLETE", []
+        except (KeyError, TypeError, ValueError):
+            return "INVALID_RESPONSE", []
+    return f"{prefix}_LIMIT_REACHED", []
+
+
 def _platform_secret_job_status(repo: str, run_id: int) -> tuple[str, dict]:
     """Require the named Gitleaks job and its scan step to finish successfully."""
-    rc, out = gh(f"repos/{repo}/actions/runs/{run_id}/jobs?per_page=100")
-    if rc != 0:
-        return ("RATE_LIMITED" if out == "RATE_LIMITED" else "READ_FAILED"), {}
+    status, jobs = _paged_github_list(
+        f"repos/{repo}/actions/runs/{run_id}/jobs?per_page={API_PAGE_SIZE}",
+        "jobs", "JOB_LIST")
+    if status != "OBSERVED":
+        return status, {}
     try:
-        response = json.loads(out)
-        jobs = response["jobs"]
-        count = response["total_count"]
-        if not isinstance(jobs, list) or any(not isinstance(job, dict) for job in jobs):
-            raise ValueError("invalid jobs list")
-        if type(count) is not int or count < len(jobs):
-            raise ValueError("invalid job count")
-        if count > len(jobs):
-            return "JOB_LIST_INCOMPLETE", {}
         matching = [job for job in jobs if job.get("name") == PLATFORM_SECRET_JOB]
         if not matching:
             return "MISSING_JOB", {}
@@ -246,6 +290,7 @@ def workflow_status(repo: str, branch: str, head_sha: str) -> dict:
 
     files = {ctrl: [name for name in names if any(n in name for n in needles)]
              for ctrl, needles in REQUIRED_WORKFLOWS.items()}
+    files["gitleaks"] = [name for name in names if SECRET_SCANNER_NAME.search(name)]
     discovery_status = {ctrl: "SUCCESS" if matches else "MISSING_WORKFLOW"
                         for ctrl, matches in files.items()}
     if repo.lower() == PLATFORM_REPO:
@@ -254,9 +299,10 @@ def workflow_status(repo: str, branch: str, head_sha: str) -> dict:
     present = {ctrl: (True if discovery_status[ctrl] == "SUCCESS" else
                       False if discovery_status[ctrl] == "MISSING_WORKFLOW" else None)
                for ctrl in REQUIRED_WORKFLOWS}
-    rc, out = gh(f"repos/{repo}/actions/runs?branch={quote(branch, safe='')}&per_page=100")
-    if rc != 0:
-        read_status = "RATE_LIMITED" if out == "RATE_LIMITED" else "READ_FAILED"
+    read_status, runs = _paged_github_list(
+        f"repos/{repo}/actions/runs?branch={quote(branch, safe='')}&head_sha={head_sha}"
+        f"&per_page={API_PAGE_SIZE}", "workflow_runs", "RUN_LIST")
+    if read_status != "OBSERVED":
         return {
             "listing_status": "OBSERVED", "runs_status": read_status, "present": present,
             "recent_success": {ctrl: None for ctrl in REQUIRED_WORKFLOWS},
@@ -264,21 +310,6 @@ def workflow_status(repo: str, branch: str, head_sha: str) -> dict:
                                 else discovery_status[ctrl],
                                 "workflow_files": files[ctrl]} for ctrl in REQUIRED_WORKFLOWS},
         }
-    try:
-        runs = json.loads(out)["workflow_runs"]
-        if not isinstance(runs, list) or any(not isinstance(run, dict) for run in runs):
-            raise ValueError("invalid workflow runs")
-    except (KeyError, TypeError, ValueError):
-        unavailable = _unavailable_workflows("INVALID_RESPONSE")
-        unavailable.update({"listing_status": "OBSERVED", "runs_status": "INVALID_RESPONSE",
-                            "present": present})
-        unavailable["controls"] = {
-            ctrl: {"status": "INVALID_RESPONSE" if discovery_status[ctrl] == "SUCCESS"
-                   else discovery_status[ctrl],
-                   "workflow_files": files[ctrl]} for ctrl in REQUIRED_WORKFLOWS
-        }
-        return unavailable
-
     controls = {}
     recent_ok = {}
     for ctrl, workflow_files in files.items():
