@@ -1,6 +1,6 @@
 # License Compliance Report
 
-**Generated:** 2026-11-06T16:31:48.591Z
+**Generated:** 2026-11-12T23:57:58.989Z
 **Verdict:** PASS
 **Policy:** `security/license-policy.json` (schema 1; 18 exact review entries)
 **Total unique package/version pairs scanned:** 1519
@@ -161,7 +161,7 @@
 | `@graphql-typed-document-node/core` | 3.2.0 | MIT | OK | PERMISSIVE |
 | `@grpc/grpc-js` | 1.14.5 | Apache-2.0 | OK | PERMISSIVE |
 | `@grpc/proto-loader` | 0.8.1 | Apache-2.0 | OK | PERMISSIVE |
-| `@hono/node-server` | 2.1.3 | MIT | OK | PERMISSIVE |
+| `@hono/node-server` | 2.1.7 | MIT | OK | PERMISSIVE |
 | `@huggingface/jinja` | 0.5.9 | MIT | OK | PERMISSIVE |
 | `@huggingface/tokenizers` | 0.1.3 | Apache-2.0 | OK | PERMISSIVE |
 | `@huggingface/transformers` | 4.2.0 | Apache-2.0 | OK | PERMISSIVE |
