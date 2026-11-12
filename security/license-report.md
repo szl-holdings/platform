@@ -1,21 +1,21 @@
 # License Compliance Report
 
-**Generated:** 2026-10-28T18:52:28.988Z
+**Generated:** 2026-11-06T16:31:48.591Z
 **Verdict:** PASS
 **Policy:** `security/license-policy.json` (schema 1; 18 exact review entries)
-**Total unique package/version pairs scanned:** 1525
+**Total unique package/version pairs scanned:** 1519
 **Manifest parse errors:** 0
 
 ## Summary
 
 | Category | Count |
 |---|---:|
-| Permissive — OK | 1511 |
+| Permissive — OK | 1505 |
 | Copyleft/restrictive — REVIEW | 8 |
 | Unknown/non-standard — CHECK | 6 |
 | Exact reviewed admissions | 14 |
 | Blocking policy/inventory violations | 0 |
-| **Total** | **1525** |
+| **Total** | **1519** |
 
 `REVIEW` and `CHECK` findings block unless package, version, exact license string, and classification match an unexpired entry in the reviewed policy registry. Manifest parse failures always block. A registry entry is a narrow engineering admission, not a blanket license-family approval or legal opinion.
 
@@ -92,7 +92,6 @@
 | `@babel/helpers` | 7.29.7 | MIT | OK | PERMISSIVE |
 | `@babel/highlight` | 7.25.9 | MIT | OK | PERMISSIVE |
 | `@babel/parser` | 7.29.7 | MIT | OK | PERMISSIVE |
-| `@babel/parser` | 7.29.8 | MIT | OK | PERMISSIVE |
 | `@babel/parser` | 7.29.9 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-async-generators` | 7.8.4 | MIT | OK | PERMISSIVE |
 | `@babel/plugin-syntax-bigint` | 7.8.3 | MIT | OK | PERMISSIVE |
@@ -162,14 +161,14 @@
 | `@graphql-typed-document-node/core` | 3.2.0 | MIT | OK | PERMISSIVE |
 | `@grpc/grpc-js` | 1.14.5 | Apache-2.0 | OK | PERMISSIVE |
 | `@grpc/proto-loader` | 0.8.1 | Apache-2.0 | OK | PERMISSIVE |
-| `@hono/node-server` | 2.1.1 | MIT | OK | PERMISSIVE |
+| `@hono/node-server` | 2.1.3 | MIT | OK | PERMISSIVE |
 | `@huggingface/jinja` | 0.5.9 | MIT | OK | PERMISSIVE |
 | `@huggingface/tokenizers` | 0.1.3 | Apache-2.0 | OK | PERMISSIVE |
 | `@huggingface/transformers` | 4.2.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@ide/backoff` | 1.0.0 | MIT | OK | PERMISSIVE |
 | `@img/colour` | 1.1.0 | MIT | OK | PERMISSIVE |
 | `@img/sharp-linux-x64` | 0.35.5 | Apache-2.0 | OK | PERMISSIVE |
-| `@isaacs/cliui` | 8.0.2 | ISC | OK | PERMISSIVE |
+| `@isaacs/nonrecursive-glob-match` | 1.0.3 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `@isaacs/ttlcache` | 1.4.1 | ISC | OK | PERMISSIVE |
 | `@istanbuljs/load-nyc-config` | 1.1.0 | ISC | OK | PERMISSIVE |
 | `@istanbuljs/schema` | 0.1.6 | MIT | OK | PERMISSIVE |
@@ -307,7 +306,6 @@
 | `@oxlint/binding-linux-x64-gnu` | 1.69.0 | MIT | OK | PERMISSIVE |
 | `@paralleldrive/cuid2` | 2.3.1 | MIT | OK | PERMISSIVE |
 | `@pinojs/redact` | 0.4.0 | MIT | OK | PERMISSIVE |
-| `@pkgjs/parseargs` | 0.11.0 | MIT | OK | PERMISSIVE |
 | `@playwright/test` | 1.60.0 | Apache-2.0 | OK | PERMISSIVE |
 | `@polka/url` | 1.0.0-next.29 | MIT | OK | PERMISSIVE |
 | `@posthog/core` | 1.32.3 | MIT | OK | PERMISSIVE |
@@ -562,21 +560,21 @@
 | `@urql/core` | 6.0.3 | MIT | OK | PERMISSIVE |
 | `@urql/exchange-graphcache` | 9.0.1 | MIT | OK | PERMISSIVE |
 | `@vitejs/plugin-react` | 6.0.2 | MIT | OK | PERMISSIVE |
-| `@vitest/coverage-v8` | 4.1.11 | MIT | OK | PERMISSIVE |
+| `@vitest/coverage-v8` | 4.1.12 | MIT | OK | PERMISSIVE |
 | `@vitest/expect` | 2.0.5 | MIT | OK | PERMISSIVE |
-| `@vitest/expect` | 4.1.11 | MIT | OK | PERMISSIVE |
-| `@vitest/mocker` | 4.1.11 | MIT | OK | PERMISSIVE |
+| `@vitest/expect` | 4.1.12 | MIT | OK | PERMISSIVE |
+| `@vitest/mocker` | 4.1.12 | MIT | OK | PERMISSIVE |
 | `@vitest/pretty-format` | 2.0.5 | MIT | OK | PERMISSIVE |
 | `@vitest/pretty-format` | 2.1.9 | MIT | OK | PERMISSIVE |
-| `@vitest/pretty-format` | 4.1.11 | MIT | OK | PERMISSIVE |
-| `@vitest/runner` | 4.1.11 | MIT | OK | PERMISSIVE |
-| `@vitest/snapshot` | 4.1.11 | MIT | OK | PERMISSIVE |
+| `@vitest/pretty-format` | 4.1.12 | MIT | OK | PERMISSIVE |
+| `@vitest/runner` | 4.1.12 | MIT | OK | PERMISSIVE |
+| `@vitest/snapshot` | 4.1.12 | MIT | OK | PERMISSIVE |
 | `@vitest/spy` | 2.0.5 | MIT | OK | PERMISSIVE |
-| `@vitest/spy` | 4.1.11 | MIT | OK | PERMISSIVE |
-| `@vitest/ui` | 4.1.11 | MIT | OK | PERMISSIVE |
+| `@vitest/spy` | 4.1.12 | MIT | OK | PERMISSIVE |
+| `@vitest/ui` | 4.1.12 | MIT | OK | PERMISSIVE |
 | `@vitest/utils` | 2.0.5 | MIT | OK | PERMISSIVE |
 | `@vitest/utils` | 2.1.9 | MIT | OK | PERMISSIVE |
-| `@vitest/utils` | 4.1.11 | MIT | OK | PERMISSIVE |
+| `@vitest/utils` | 4.1.12 | MIT | OK | PERMISSIVE |
 | `@wry/caches` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `@wry/context` | 0.7.4 | MIT | OK | PERMISSIVE |
 | `@wry/equality` | 0.5.7 | MIT | OK | PERMISSIVE |
@@ -888,7 +886,6 @@
 | `flow-enums-runtime` | 0.0.6 | MIT | OK | PERMISSIVE |
 | `fontkit` | 2.0.4 | MIT | OK | PERMISSIVE |
 | `for-each` | 0.3.5 | MIT | OK | PERMISSIVE |
-| `foreground-child` | 3.3.1 | ISC | OK | PERMISSIVE |
 | `form-data` | 2.5.6 | MIT | OK | PERMISSIVE |
 | `form-data` | 4.0.6 | MIT | OK | PERMISSIVE |
 | `formdata-polyfill` | 4.0.10 | MIT | OK | PERMISSIVE |
@@ -920,7 +917,7 @@
 | `get-tsconfig` | 4.14.3 | MIT | OK | PERMISSIVE |
 | `getenv` | 2.0.0 | MIT | OK | PERMISSIVE |
 | `git-raw-commits` | 4.0.0 | MIT | OK | PERMISSIVE |
-| `glob` | 10.5.0 | ISC | OK | PERMISSIVE |
+| `glob` | 14.0.3 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `glob` | 7.2.3 | ISC | OK | PERMISSIVE |
 | `global-agent` | 3.0.0 | BSD-3-Clause | OK | PERMISSIVE |
 | `global-directory` | 4.0.1 | MIT | OK | PERMISSIVE |
@@ -950,7 +947,7 @@
 | `hermes-parser` | 0.29.1 | MIT | OK | PERMISSIVE |
 | `hermes-parser` | 0.35.0 | MIT | OK | PERMISSIVE |
 | `hoist-non-react-statics` | 3.3.2 | BSD-3-Clause | OK | PERMISSIVE |
-| `hono` | 4.13.9 | MIT | OK | PERMISSIVE |
+| `hono` | 4.13.11 | MIT | OK | PERMISSIVE |
 | `html-entities` | 2.6.0 | MIT | OK | PERMISSIVE |
 | `html-escaper` | 2.0.2 | MIT | OK | PERMISSIVE |
 | `html-parse-stringify` | 3.0.1 | MIT | OK | PERMISSIVE |
@@ -983,7 +980,7 @@
 | `internmap` | 2.0.3 | ISC | OK | PERMISSIVE |
 | `invariant` | 2.2.4 | MIT | OK | PERMISSIVE |
 | `iobuffer` | 5.4.0 | MIT | OK | PERMISSIVE |
-| `ip-address` | 10.7.1 | MIT | OK | PERMISSIVE |
+| `ip-address` | 10.7.4 | MIT | OK | PERMISSIVE |
 | `ipaddr.js` | 1.9.1 | MIT | OK | PERMISSIVE |
 | `is-arguments` | 1.2.0 | MIT | OK | PERMISSIVE |
 | `is-arrayish` | 0.2.1 | MIT | OK | PERMISSIVE |
@@ -1016,7 +1013,6 @@
 | `istanbul-lib-instrument` | 5.2.1 | BSD-3-Clause | OK | PERMISSIVE |
 | `istanbul-lib-report` | 3.0.1 | BSD-3-Clause | OK | PERMISSIVE |
 | `istanbul-reports` | 3.2.0 | BSD-3-Clause | OK | PERMISSIVE |
-| `jackspeak` | 3.4.3 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `jest-environment-node` | 29.7.0 | MIT | OK | PERMISSIVE |
 | `jest-get-type` | 29.6.3 | MIT | OK | PERMISSIVE |
 | `jest-haste-map` | 29.7.0 | MIT | OK | PERMISSIVE |
@@ -1083,7 +1079,6 @@
 | `long` | 5.3.2 | Apache-2.0 | OK | PERMISSIVE |
 | `loose-envify` | 1.4.0 | MIT | OK | PERMISSIVE |
 | `loupe` | 3.2.1 | MIT | OK | PERMISSIVE |
-| `lru-cache` | 10.4.3 | ISC | OK | PERMISSIVE |
 | `lru-cache` | 11.5.1 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `lru-cache` | 5.1.1 | ISC | OK | PERMISSIVE |
 | `lucide-react` | 0.545.0 | ISC | OK | PERMISSIVE |
@@ -1138,9 +1133,9 @@
 | `min-indent` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `minimalistic-assert` | 1.0.1 | ISC | OK | PERMISSIVE |
 | `minimatch` | 10.2.6 | BlueOak-1.0.0 | OK | PERMISSIVE |
+| `minimatch` | 11.0.4 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `minimatch` | 3.1.5 | ISC | OK | PERMISSIVE |
 | `minimatch` | 5.1.9 | ISC | OK | PERMISSIVE |
-| `minimatch` | 9.0.9 | ISC | OK | PERMISSIVE |
 | `minimist` | 1.2.8 | MIT | OK | PERMISSIVE |
 | `minipass` | 7.1.3 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `mitt` | 3.0.1 | MIT | OK | PERMISSIVE |
@@ -1208,7 +1203,6 @@
 | `p-retry` | 7.1.1 | MIT | OK | PERMISSIVE |
 | `p-timeout` | 6.1.4 | MIT | OK | PERMISSIVE |
 | `p-try` | 2.2.0 | MIT | OK | PERMISSIVE |
-| `package-json-from-dist` | 1.0.1 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `pako` | 0.2.9 | MIT | OK | PERMISSIVE |
 | `pako` | 1.0.11 | (MIT AND Zlib) | OK | PERMISSIVE |
 | `pako` | 2.2.0 | (MIT AND Zlib) | OK | PERMISSIVE |
@@ -1226,7 +1220,7 @@
 | `path-key` | 3.1.1 | MIT | OK | PERMISSIVE |
 | `path-key` | 4.0.0 | MIT | OK | PERMISSIVE |
 | `path-parse` | 1.0.7 | MIT | OK | PERMISSIVE |
-| `path-scurry` | 1.11.1 | BlueOak-1.0.0 | OK | PERMISSIVE |
+| `path-scurry` | 3.0.0 | BlueOak-1.0.0 | OK | PERMISSIVE |
 | `path-to-regexp` | 3.3.0 | MIT | OK | PERMISSIVE |
 | `path-to-regexp` | 8.4.2 | MIT | OK | PERMISSIVE |
 | `pathe` | 2.0.3 | MIT | OK | PERMISSIVE |
@@ -1524,7 +1518,7 @@
 | `vaul` | 1.1.2 | MIT | OK | PERMISSIVE |
 | `victory-vendor` | 36.9.2 | MIT AND ISC | OK | PERMISSIVE |
 | `vite` | 8.1.6 | MIT | OK | PERMISSIVE |
-| `vitest` | 4.1.11 | MIT | OK | PERMISSIVE |
+| `vitest` | 4.1.12 | MIT | OK | PERMISSIVE |
 | `vlq` | 1.0.1 | MIT | OK | PERMISSIVE |
 | `void-elements` | 3.1.0 | MIT | OK | PERMISSIVE |
 | `walker` | 1.0.8 | Apache-2.0 | OK | PERMISSIVE |
