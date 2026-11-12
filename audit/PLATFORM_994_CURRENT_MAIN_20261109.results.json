@@ -1,0 +1,93 @@
+{
+  "schema": "szl.scoped-test-evidence/v1",
+  "workcell_id": "PLATFORM-994-CURRENT-MAIN-20261109",
+  "recorded_at": "2026-11-09",
+  "feature_parent": "5ac7fe0ec44be6b85cd736aeb887f281d7fd8650",
+  "main_parent": "bb206ef01765af2e6cf1628ced0634142ed61543",
+  "scope": "Offline warm/kernel controller, readiness emission and source guard contracts only. No canonical platform-wide count or runtime qualification.",
+  "source_blobs": {
+    ".github/scripts/warm_flagships.py": "415688cb466ad813cd1ed5b443ae2594498cafd8",
+    ".github/scripts/test_warm_flagships.py": "3d58820ccf1cadf6241ea0e047aeeb9c60233a12",
+    "packages/szl-kernels/deploy/szl_kernels_organ.py": "523f4325f8d67bbd79a5d4e8b224be1d8de865ef",
+    "packages/szl-kernels/tests/test_szl_kernels_organ.py": "b7959adf736b29783de6607fc354f75d101b4bdf",
+    "platform/agents/readiness/_lib/khipu.py": "79f9fa3e3696ddaf52cb5ff8856e9101e010817c",
+    "platform/agents/readiness/_lib/test_khipu_publish.py": "e2efc1e98982f5900f43117f13d3b614c8b2c7b5",
+    "scripts/ci/governance-workflows.test.mjs": "f1d6fba796d9035c9ea377d6d3518feb540f8ca2",
+    "tools/truth/claims-drift.ts": "10b022c82e5b7a11be0a064bd752fe6a9777d63b",
+    "tools/truth/claims-drift.test.ts": "c29ee155723377ae997bd13daa41370a06fefcda"
+  },
+  "measurements": [
+    {
+      "label": "warm controller",
+      "exit_code": 0,
+      "scoped_case_count": 32,
+      "log_sha256": "e5947749e1d3148c8ab8ff416f6063490e8a53f4f46d0b24969e60e947c0654c"
+    },
+    {
+      "label": "kernel controller",
+      "exit_code": 0,
+      "scoped_case_count": 22,
+      "log_sha256": "a7df01ef7807be57f70d04fa1a38c5ef087bac32e3649c7b6aa537a9f3ac92f2"
+    },
+    {
+      "label": "readiness emission",
+      "exit_code": 0,
+      "scoped_case_count": 31,
+      "log_sha256": "e688c9fa136468463f9c7190489be4098b91d188496677df5766076eae9abdb4"
+    },
+    {
+      "label": "Python syntax",
+      "exit_code": 0,
+      "scoped_case_count": null,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "claims guard",
+      "exit_code": 0,
+      "scoped_case_count": 69,
+      "log_sha256": "b006a2843e0c89839acf722810454823925268ee9e3dd061d7474168a3659a84"
+    },
+    {
+      "label": "governance source",
+      "exit_code": 0,
+      "scoped_case_count": 19,
+      "log_sha256": "8227b465ecbff33a62b28a3a97c326952eee11d5b9d7f0a50d299d7e52ae3bec"
+    },
+    {
+      "label": "PR995 patch compatibility",
+      "exit_code": 0,
+      "scoped_case_count": null,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "main typecheck",
+      "exit_code": 1,
+      "scoped_case_count": null,
+      "log_sha256": "bb0a72c09f431a1503515ed0882c0e44c01d2376328a11d7f9c6c9f51883bcbb"
+    },
+    {
+      "label": "candidate typecheck",
+      "exit_code": 1,
+      "scoped_case_count": null,
+      "log_sha256": "13225863917db752a9fbf6d43789855bb6b9d625e2e70e67dd4092c4a7b4c344"
+    },
+    {
+      "label": "main root test",
+      "exit_code": 1,
+      "scoped_case_count": null,
+      "log_sha256": "ce3ec1551bd983b250de19bd96635948d140580c85c11f400cfa8f1522ef003d"
+    },
+    {
+      "label": "candidate root test",
+      "exit_code": 1,
+      "scoped_case_count": null,
+      "log_sha256": "028fd4fb7108104dfbf06313398a85948bcd22868e7677462995dd1f7c1127b9"
+    }
+  ],
+  "platform_tests": "UNAVAILABLE",
+  "hosted_candidate_checks": "NOT_YET_OBSERVED",
+  "deployment": "NOT_PERFORMED",
+  "screenshots": "NOT_APPLICABLE_NO_UI_CHANGE",
+  "pr995_head": "35662070db7ae7f42dc5c990639d00a1c4b45259",
+  "pr995_mutated": false
+}

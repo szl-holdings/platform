@@ -9,6 +9,7 @@ reconcile only the matching GitHub availability incident.
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import os
 import socket
@@ -26,6 +27,8 @@ ISSUE_MARKER_PREFIX = "szl-flagship-health"
 HEALTHY = "HEALTHY"
 UNHEALTHY = "UNHEALTHY"
 UNKNOWN = "UNKNOWN"
+ISSUE_PAGE_SIZE = 100
+ISSUE_MAX_PAGES = 10
 
 # Canonical monitored product and capability identities. Vessels is no longer a
 # standalone Space: its compatibility health contract is served by Killinchu.
@@ -92,10 +95,10 @@ def probe_once(url: str, *, number: int, timeout: float) -> Attempt:
         return Attempt(number, utc_now(), int(exc.code), exc.geturl(),
                        int((time.monotonic() - started) * 1000),
                        _safe_text(raw.decode("utf-8", errors="replace")), None, None)
-    except (urllib.error.URLError, TimeoutError, socket.timeout, OSError) as exc:
+    except (urllib.error.URLError, TimeoutError, socket.timeout, OSError, http.client.HTTPException) as exc:
         return Attempt(number, utc_now(), None, None,
                        int((time.monotonic() - started) * 1000), "",
-                       type(exc).__name__, _safe_text(exc, limit=300))
+                       type(exc).__name__, None)
 
 
 def classify_attempts(attempts: Sequence[Attempt], *, confirmations: int = 2) -> str:
@@ -143,12 +146,30 @@ def _github_request(method: str, path: str, *, token: str,
 
 def find_open_issue(repository: str, *, organ: str, token: str) -> dict[str, Any] | None:
     owner, name = repository.split("/", 1)
-    issues = _github_request("GET", f"/repos/{owner}/{name}/issues?state=open&labels=flagship,availability&per_page=100", token=token)
     title = issue_title(organ)
-    for item in issues if isinstance(issues, list) else []:
-        if isinstance(item, dict) and item.get("title") == title and "pull_request" not in item:
-            return item
-    return None
+    matching: dict[str, Any] | None = None
+    seen: set[int] = set()
+    for page in range(1, ISSUE_MAX_PAGES + 1):
+        issues = _github_request(
+            "GET", f"/repos/{owner}/{name}/issues?state=open&labels=flagship,availability"
+                   f"&sort=created&direction=asc&per_page={ISSUE_PAGE_SIZE}&page={page}", token=token)
+        if not isinstance(issues, list) or len(issues) > ISSUE_PAGE_SIZE:
+            raise RuntimeError("GitHub issue enumeration returned an invalid page")
+        for item in issues:
+            if (not isinstance(item, dict) or type(item.get("number")) is not int
+                    or item["number"] < 1 or not isinstance(item.get("title"), str)):
+                raise RuntimeError("GitHub issue enumeration returned an invalid record")
+            if item["number"] in seen:
+                raise RuntimeError("GitHub issue enumeration repeated a record")
+            seen.add(item["number"])
+            if item["title"] == title and "pull_request" not in item:
+                if matching is not None:
+                    raise RuntimeError("Multiple matching open flagship incidents are ambiguous")
+                matching = item
+        # Do not return an early match: another page may contain a duplicate.
+        if len(issues) < ISSUE_PAGE_SIZE:
+            return matching
+    raise RuntimeError("GitHub issue enumeration exceeded its page limit")
 
 
 def issue_body(report: Mapping[str, Any]) -> str:
@@ -237,19 +258,33 @@ def main() -> int:
         parser.error("--confirmations must be between 1 and --attempts")
     report = run_probe(args.organ, url=args.probe_url or ROSTER[args.organ], attempts_count=args.attempts,
                        confirmations=args.confirmations, timeout=args.timeout, interval=args.interval)
-    mutation: dict[str, Any] = {"requested": args.mutate_issues, "action": "NONE"}
-    if args.mutate_issues:
-        repository = os.environ.get("GITHUB_REPOSITORY") or ""
-        token = os.environ.get("GITHUB_TOKEN") or ""
-        if not repository or "/" not in repository:
-            raise RuntimeError("GITHUB_REPOSITORY is required for issue mutation")
-        mutation.update(apply_issue_action(report, repository=repository, token=token))
+    mutation: dict[str, Any] = {"requested": args.mutate_issues, "action": "NONE", "status": "NOT_REQUESTED"}
     report["issue_lifecycle"] = mutation
-    output = Path(args.report)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    exit_code = 0
+    try:
+        if args.mutate_issues:
+            # A failed response can follow an applied write. Do not claim NONE
+            # or replay issue writes when their remote outcome is unknown.
+            mutation.update({"action": "UNKNOWN", "status": "UNKNOWN"})
+            repository = os.environ.get("GITHUB_REPOSITORY") or ""
+            token = os.environ.get("GITHUB_TOKEN") or ""
+            if not repository or "/" not in repository:
+                raise RuntimeError("GITHUB_REPOSITORY is required for issue mutation")
+            mutation.update(apply_issue_action(report, repository=repository, token=token))
+            mutation["status"] = "COMPLETED"
+    except (OSError, http.client.HTTPException, RuntimeError, ValueError) as exc:
+        # Preserve only the class: API bodies and exception details may contain
+        # credentials. The failed job remains visible independently of health.
+        mutation["error_class"] = type(exc).__name__
+        exit_code = 1
+    finally:
+        # Retain probe evidence even if reconciliation or unexpected code fails.
+        # A report write failure must still propagate and fail the job.
+        output = Path(args.report)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({"organ": args.organ, "state": report["state"], **mutation}))
-    return 0
+    return exit_code
 
 
 if __name__ == "__main__":
