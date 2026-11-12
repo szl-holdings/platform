@@ -27,7 +27,7 @@
 [![CodeQL](https://github.com/szl-holdings/platform/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/codeql.yml)
 [![SBOM](https://github.com/szl-holdings/platform/actions/workflows/sbom.yml/badge.svg?branch=main)](https://github.com/szl-holdings/platform/actions/workflows/sbom.yml)
 [![SLSA L1](https://img.shields.io/badge/SLSA-L1%20honest-22c55e?style=flat-square)](https://slsa.dev/spec/v1.0/levels)
-[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-0B1F3A.svg?style=flat-square)](./LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-0B1F3A.svg?style=flat-square)](./LICENSE)
 [![Doctrine v11](https://img.shields.io/badge/Doctrine-v11_LOCKED-3b82f6?style=flat-square)](https://github.com/szl-holdings/.github/tree/main/doctrine)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20434276.svg)](https://doi.org/10.5281/zenodo.20434276)
 
@@ -112,6 +112,22 @@ pnpm run dev
 ```
 
 See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the full monorepo orientation.
+
+### Verify
+
+These are the repository's own gates; each exits non-zero on failure. CI raises the
+Node heap for builds and tests; without it, building the generated API client runs out
+of memory at the default heap size.
+
+```bash
+export NODE_OPTIONS=--max-old-space-size=6144   # the heap size CI uses
+pnpm claims:validate             # truth snapshot, allowlist coverage and truth-tool tests
+pnpm run test:gateway-security   # gateway security suite (vitest)
+pnpm test                        # root contract tests, then every workspace package via turbo
+```
+
+`pnpm surfaces:check` additionally probes the live public surfaces, so it needs network
+access to them; the scheduled **Truth drift** workflow runs it.
 
 ---
 

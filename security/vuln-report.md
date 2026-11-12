@@ -1,6 +1,6 @@
 # Dependency Vulnerability Report
 
-**Generated:** 2026-10-28T18:52:23.380Z
+**Generated:** 2026-11-06T16:32:09.030Z
 **Policy:** unmitigated High/Critical advisories block; exact local patches must be registered, digest-bound, behavior-tested, and unexpired; Moderate/Low remain reported
 **Command:** `pnpm audit --json --audit-level=high`
 **Expected package manager:** `pnpm@10.26.1`
@@ -11,7 +11,7 @@
 **Command termination signal:** NONE
 **Audit timeout:** 120000 ms
 **Parsed schema:** legacy-advisories
-**Total dependencies reported by audit:** 1818
+**Total dependencies reported by audit:** 1812
 
 ## Blocking verdict
 
@@ -23,18 +23,15 @@ PASS — no parsed High/Critical advisory.
 |---|---:|
 | Critical | 0 |
 | High | 0 |
-| Moderate | 10 |
+| Moderate | 1 |
 | Low | 1 |
 
 ## Reported Moderate / Low findings
 
 | Package | Advisory | Severity | Vulnerable range |
 |---|---|---|---|
-| `@vitest/mocker` | [GHSA-qxg6-89mg-rqv8](https://github.com/advisories/GHSA-qxg6-89mg-rqv8) | MODERATE | `>=2.1.0-beta.7 <4.1.12` |
-| `@vitest/mocker` | [GHSA-xp26-3454-mjgp](https://github.com/advisories/GHSA-xp26-3454-mjgp) | MODERATE | `>=4.1.11 <4.1.12` |
 | `deepmerge` | [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) | LOW | `>=4.2.0 <=4.3.1` |
-| `hono` | [GHSA-5r4p-p66f-jhc7](https://github.com/advisories/GHSA-5r4p-p66f-jhc7) | MODERATE | `>=4.12.4 <4.13.11` |
-| `ip-address` | [GHSA-rxp7-6hxx-x8q5](https://github.com/advisories/GHSA-rxp7-6hxx-x8q5) | MODERATE | `<=10.7.3` |
+| `minimatch` | [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249) | MODERATE | `>=7.0.0 <11.0.1` |
 
 ## Workspace overrides
 
@@ -50,6 +47,7 @@ PASS — no parsed High/Critical advisory.
 | `minimatch@3>brace-expansion` | `1.1.21` |
 | `minimatch@5>brace-expansion` | `2.1.7` |
 | `minimatch@9>brace-expansion` | `2.1.7` |
+| `glob@>=9.0.0 <14.0.2` | `14.0.3` |
 | `braces` | `link:packages/braces-safe` |
 | `fflate` | `0.8.3` |
 | `vite` | `8.1.6` |
@@ -69,8 +67,8 @@ PASS — no parsed High/Critical advisory.
 | `uuid` | `^14.0.0` |
 | `qs` | `6.16.1` |
 | `ws` | `^8.20.1` |
-| `hono` | `^4.13.5` |
-| `@hono/node-server` | `2.1.1` |
+| `hono` | `4.13.11` |
+| `@hono/node-server` | `2.1.3` |
 | `browserslist` | `4.28.7` |
 | `body-parser` | `2.4.0` |
 | `zod` | `4.6.6` |
@@ -91,7 +89,7 @@ PASS — no parsed High/Critical advisory.
 | `js-yaml@>=3.0.0 <4.0.0` | `3.15.2` |
 | `nanoid@<4` | `3.3.18` |
 | `nanoid@>=4 <5.1.16` | `5.1.16` |
-| `ip-address` | `10.7.1` |
+| `ip-address` | `10.7.4` |
 | `fast-uri` | `^3.1.9` |
 | `linkify-it` | `5.0.2` |
 | `sharp` | `0.35.5` |
@@ -185,7 +183,7 @@ PASS — no parsed High/Critical advisory.
 | `rollup>@rollup/rollup-win32-arm64-msvc` | `-` |
 | `rollup>@rollup/rollup-win32-ia32-msvc` | `-` |
 | `rollup>@rollup/rollup-win32-x64-gnu` | `-` |
-| `vitest` | `^4.1.11` |
-| `@vitest/mocker` | `^4.1.11` |
+| `vitest` | `^4.1.12` |
+| `@vitest/mocker` | `^4.1.12` |
 
 _CI fails closed on unmitigated High/Critical findings, expired or mismatched local patch evidence, and audit execution/parser failure. Moderate/Low findings remain visible and non-promotional._

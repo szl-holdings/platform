@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:1df985a0-0a52-5d39-8f4a-0a7cc2c9a187",
+  "serialNumber": "urn:uuid:50314de3-8ec2-582c-b667-070c097e36bf",
   "metadata": {
     "tools": [
       {
@@ -35,7 +35,7 @@
       },
       {
         "name": "szl:sbom:component-count",
-        "value": "1805"
+        "value": "1800"
       }
     ]
   },
@@ -912,9 +912,9 @@
     },
     {
       "type": "library",
-      "name": "@isaacs/cliui",
-      "version": "8.0.2",
-      "purl": "pkg:npm/%40isaacs/cliui@8.0.2"
+      "name": "@isaacs/nonrecursive-glob-match",
+      "version": "1.0.3",
+      "purl": "pkg:npm/%40isaacs/nonrecursive-glob-match@1.0.3"
     },
     {
       "type": "library",
@@ -1851,12 +1851,6 @@
       "name": "@pinojs/redact",
       "version": "0.4.0",
       "purl": "pkg:npm/%40pinojs/redact@0.4.0"
-    },
-    {
-      "type": "library",
-      "name": "@pkgjs/parseargs",
-      "version": "0.11.0",
-      "purl": "pkg:npm/%40pkgjs/parseargs@0.11.0"
     },
     {
       "type": "library",
@@ -7936,12 +7930,6 @@
     },
     {
       "type": "library",
-      "name": "foreground-child",
-      "version": "3.3.1",
-      "purl": "pkg:npm/foreground-child@3.3.1"
-    },
-    {
-      "type": "library",
       "name": "form-data",
       "version": "2.5.6",
       "purl": "pkg:npm/form-data@2.5.6"
@@ -8141,8 +8129,8 @@
     {
       "type": "library",
       "name": "glob",
-      "version": "10.5.0",
-      "purl": "pkg:npm/glob@10.5.0"
+      "version": "14.0.3",
+      "purl": "pkg:npm/glob@14.0.3"
     },
     {
       "type": "library",
@@ -8722,12 +8710,6 @@
     },
     {
       "type": "library",
-      "name": "jackspeak",
-      "version": "3.4.3",
-      "purl": "pkg:npm/jackspeak@3.4.3"
-    },
-    {
-      "type": "library",
       "name": "jest-environment-node",
       "version": "29.7.0",
       "purl": "pkg:npm/jest-environment-node@29.7.0"
@@ -9143,12 +9125,6 @@
     {
       "type": "library",
       "name": "lru-cache",
-      "version": "10.4.3",
-      "purl": "pkg:npm/lru-cache@10.4.3"
-    },
-    {
-      "type": "library",
-      "name": "lru-cache",
       "version": "11.5.1",
       "purl": "pkg:npm/lru-cache@11.5.1"
     },
@@ -9479,6 +9455,12 @@
     {
       "type": "library",
       "name": "minimatch",
+      "version": "11.0.4",
+      "purl": "pkg:npm/minimatch@11.0.4"
+    },
+    {
+      "type": "library",
+      "name": "minimatch",
       "version": "3.1.5",
       "purl": "pkg:npm/minimatch@3.1.5"
     },
@@ -9487,12 +9469,6 @@
       "name": "minimatch",
       "version": "5.1.9",
       "purl": "pkg:npm/minimatch@5.1.9"
-    },
-    {
-      "type": "library",
-      "name": "minimatch",
-      "version": "9.0.9",
-      "purl": "pkg:npm/minimatch@9.0.9"
     },
     {
       "type": "library",
@@ -9898,12 +9874,6 @@
     },
     {
       "type": "library",
-      "name": "package-json-from-dist",
-      "version": "1.0.1",
-      "purl": "pkg:npm/package-json-from-dist@1.0.1"
-    },
-    {
-      "type": "library",
       "name": "pako",
       "version": "0.2.9",
       "purl": "pkg:npm/pako@0.2.9"
@@ -10007,8 +9977,8 @@
     {
       "type": "library",
       "name": "path-scurry",
-      "version": "1.11.1",
-      "purl": "pkg:npm/path-scurry@1.11.1"
+      "version": "3.0.0",
+      "purl": "pkg:npm/path-scurry@3.0.0"
     },
     {
       "type": "library",
