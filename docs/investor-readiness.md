@@ -119,7 +119,7 @@ SZL Holdings (szlholdings.com)
 | Risk Area | Mitigation |
 |-----------|-----------|
 | Data state in demos | Demo mode banners and data state badges on all platforms |
-| Billing not yet live | Stripe infrastructure built; activation is configuration, not engineering |
+| Billing not yet live | ~~Stripe infrastructure built; activation is configuration, not engineering~~ Stripe billing is not implemented: its server was deleted in `3d6e07381` (2026-05-02, #77), so activation needs engineering (corrected 2026-11-06) |
 | Single-region deployment | Multi-region roadmapped for Phase 4 |
 
 ---

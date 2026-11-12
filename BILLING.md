@@ -1,5 +1,16 @@
 # Billing System Runbook
 
+> **Status: NOT IMPLEMENTED. Archived design, corrected 2026-11-06.** Nothing on this page runs in
+> this repository. The routes, Stripe webhook handler and Stripe gate it documents
+> (`artifacts/api-server/src/routes/billing.ts`, `src/lib/billing-webhook.ts`,
+> `src/lib/stripe-gate.ts`, the metering routes and their tests) were deleted in
+> `3d6e07381` (2026-05-02, #77) and have not been restored. `artifacts/api-server` is now a stub
+> package whose `src/` holds only `middlewares/global-auth-enforcer.ts` and `routes/ouroboros.ts`.
+> The Stripe adapter in `lib/services/src/adapters/stripe.ts` is exported and registered but no
+> route calls it (`audit/STRIPE_WEBHOOK_VERIFY_FAIL_CLOSED_20261102.md`). Setting the Stripe
+> secrets listed below therefore collects no payment. The page is kept as the design record:
+> reviving it is new engineering plus a pricing decision, not configuration.
+
 ## Overview
 
 This system provides a unified Stripe-based payment infrastructure across all 9 SZL Holdings web products:

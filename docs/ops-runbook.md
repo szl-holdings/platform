@@ -371,7 +371,7 @@ The API server checks for `AI_INTEGRATIONS_OPENAI_BASE_URL || OPENAI_API_KEY` to
 | `STRIPE_PRICE_COMMAND_PRO_MONTHLY` | Command — Pro (Monthly) |
 | `STRIPE_PRICE_COMMAND_PRO_ANNUAL` | Command — Pro (Annual) |
 
-Source: `artifacts/api-server/src/routes/billing.ts`. All Stripe vars are optional — billing features degrade gracefully when absent.
+Source: ~~`artifacts/api-server/src/routes/billing.ts`~~ none. That file was deleted in `3d6e07381` (2026-05-02, #77), so no route reads these variables today (corrected 2026-11-06; see `BILLING.md`).
 
 ### Third-Party Data & Map Services
 

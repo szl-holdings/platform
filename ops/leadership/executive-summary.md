@@ -47,7 +47,7 @@ The path is documented in `BUYER_PERSONAS.md`, `SALES_NARRATIVE.md`, `OBJECTION_
 | Discovery | Founder-led 30-minute call using talk track | Talk track ready |
 | Demo | Canonical demo flow (8-12 min) showing nine-step loop | Live (`docs/buyer/canonical-demo.md`) |
 | Pilot | 90-day design partner program with founder access | Playbook ready (`PILOT_PLAYBOOK.md`) |
-| Commercial | Per-seat + platform fee, domain packs priced separately | Stripe built; activation pending |
+| Commercial | Per-seat + platform fee, domain packs priced separately | ~~Stripe built; activation pending~~ Stripe not implemented (server deleted in `3d6e07381` (2026-05-02, #77)) |
 
 **Gap:** No paying customers yet. The path is repeatable in design but not yet commercially proven. Three design partners is the next milestone.
 
@@ -123,7 +123,7 @@ The pilot playbook exists (`PILOT_PLAYBOOK.md`) and covers:
 | Audit trail | Immutable proof chain across all products | Live |
 | AI governance | Covenant Policy + assertExportSafe enforced in libraries | Live |
 | Mobile | CORTEX (180+ TS files) in TestFlight prep | Functional alpha |
-| Billing | Stripe infrastructure built | Activation pending (config, not engineering) |
+| Billing | ~~Stripe infrastructure built~~ Not implemented: server deleted in `3d6e07381` (2026-05-02, #77) | ~~Activation pending (config, not engineering)~~ Needs engineering before configuration |
 | Compliance | GDPR/CCPA frameworks; SOC 2 not started | Post-funding (6-9 month track) |
 | Session store | In-memory; Redis IaC ready | Activate at first commercial customer |
 | Test coverage | ~16% (27 tests / 173 routes) | Active remediation task in flight |

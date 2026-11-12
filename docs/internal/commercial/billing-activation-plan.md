@@ -1,6 +1,6 @@
 # Billing Activation Plan — Lyte Pilot Commercial Flow
 
-**Status**: Infrastructure complete, pending Stripe credentials  
+**Status**: ARCHIVED, not implemented (corrected 2026-11-06). ~~Infrastructure complete, pending Stripe credentials~~: the billing server this plan calls was deleted in `3d6e07381` (2026-05-02, #77); see `BILLING.md`.  
 **Primary Product**: Lyte — AIOps Command  
 **Date**: April 2026
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-This document describes the canonical commercial flow for the Lyte pilot contract path. The system is built to collect revenue as soon as Stripe credentials are configured.
+This document describes the canonical commercial flow for the Lyte pilot contract path. ~~The system is built to collect revenue as soon as Stripe credentials are configured.~~ It is not: none of the endpoints below exists in this repository, so configuring Stripe credentials collects nothing.
 
 ---
 
