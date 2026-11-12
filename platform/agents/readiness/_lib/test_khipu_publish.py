@@ -139,6 +139,13 @@ class EmitFailsClosedTest(unittest.TestCase):
         })
         patcher.start()
         self.addCleanup(patcher.stop)
+        # Existing cases pin the key their own random seed derives; the pin cases override it.
+        pin = unittest.mock.patch.object(
+            khipu, "_pinned_fleet_public_key",
+            side_effect=lambda: hashlib.sha256(base64.b64decode(
+                os.environ["KHIPU_SIGNING_KEY_B64"], validate=True)).digest())
+        pin.start()
+        self.addCleanup(pin.stop)
 
     def _signed_env(self) -> dict:
         return {
@@ -176,7 +183,7 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertEqual(upload["repo_type"], "dataset")
         self.assertRegex(
             upload["path_in_repo"],
-            r"^receipts/readiness-test/\d{4}-\d{2}-\d{2}/\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}Z\.json$",
+            r"^receipts/readiness-test/\d{4}-\d{2}-\d{2}/\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}Z-[0-9a-f]{64}\.json$",
         )
         self.assertNotIn("::error", text)
 
@@ -528,6 +535,26 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertEqual(result["reason"], "no KHIPU_SIGNING_KEY_B64")
         self.assertEqual(_FakeHfApi.uploads, [])
 
+    def test_missing_pinned_fleet_key_rejects_signed_receipt(self) -> None:
+        with unittest.mock.patch.dict(os.environ, self._signed_env(), clear=True), \
+                unittest.mock.patch.object(khipu, "_pinned_fleet_public_key", return_value=None):
+            receipt = khipu.sign_khipu_receipt("readiness-test", {"ok": True})
+            result = khipu.publish_to_hf("readiness-test", receipt)
+        self.assertTrue(receipt["signed"])
+        self.assertFalse(result["published"])
+        self.assertEqual(result["reason"], "no pinned fleet public key")
+        self.assertEqual(_FakeHfApi.uploads, [])
+
+    def test_secret_that_does_not_derive_the_pinned_key_cannot_upload(self) -> None:
+        with unittest.mock.patch.dict(os.environ, self._signed_env(), clear=True), \
+                unittest.mock.patch.object(khipu, "_pinned_fleet_public_key", return_value=b"\x01" * 32):
+            receipt = khipu.sign_khipu_receipt("readiness-test", {"ok": True})
+            result = khipu.publish_to_hf("readiness-test", receipt)
+        self.assertTrue(receipt["signed"])
+        self.assertFalse(result["published"])
+        self.assertEqual(result["reason"], "configured signer does not match pinned fleet key")
+        self.assertEqual(_FakeHfApi.uploads, [])
+
     def test_local_run_without_token_only_warns(self) -> None:
         text, result, code = self._emit({})
         self.assertIsNone(code)
@@ -549,6 +576,47 @@ class EmitFailsClosedTest(unittest.TestCase):
         self.assertIn("DR dump not published", out.getvalue())
         with unittest.mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True):
             khipu.require_published([{"uploaded": True}, {"published": True}], what="x")
+
+
+class FleetSignerPinTest(unittest.TestCase):
+    # The committed pin is the reviewed fleet key; anything malformed fails closed.
+
+    def test_committed_pin_is_a_wellformed_ed25519_key(self) -> None:
+        with open(khipu.FLEET_SIGNER_PIN, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        key = base64.b64decode(doc["public_key_b64"], validate=True)
+        self.assertEqual(doc["alg"], "ed25519")
+        self.assertEqual(len(key), 32)
+        self.assertEqual(doc["keyid"], hashlib.sha256(key).hexdigest()[:16])
+        self.assertEqual(khipu._pinned_fleet_public_key(), key)
+
+    def test_missing_or_malformed_pin_fails_closed(self) -> None:
+        key = b"\x02" * 32
+        good = base64.b64encode(key).decode()
+        keyid = hashlib.sha256(key).hexdigest()[:16]
+        cases = [
+            None, "", "[]", "{}",
+            json.dumps({"alg": "rsa", "public_key_b64": good, "keyid": keyid}),
+            json.dumps({"alg": "ed25519", "public_key_b64": "not base64!", "keyid": keyid}),
+            json.dumps({"alg": "ed25519", "public_key_b64": base64.b64encode(key[:31]).decode(),
+                        "keyid": hashlib.sha256(key[:31]).hexdigest()[:16]}),
+            json.dumps({"alg": "ed25519", "public_key_b64": good, "keyid": "0" * 16}),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "fleet_signer.json")
+            for content in cases:
+                with self.subTest(content=content):
+                    if os.path.exists(path):
+                        os.remove(path)
+                    if content is not None:
+                        with open(path, "w", encoding="utf-8") as fh:
+                            fh.write(content)
+                    with unittest.mock.patch.object(khipu, "FLEET_SIGNER_PIN", path):
+                        self.assertIsNone(khipu._pinned_fleet_public_key())
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(json.dumps({"alg": "ed25519", "public_key_b64": good, "keyid": keyid}))
+            with unittest.mock.patch.object(khipu, "FLEET_SIGNER_PIN", path):
+                self.assertEqual(khipu._pinned_fleet_public_key(), key)
 
 
 def _agents() -> list[str]:

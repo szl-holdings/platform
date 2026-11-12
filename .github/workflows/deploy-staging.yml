@@ -61,11 +61,17 @@ jobs:
           fi
 
           # One bounded request; do not retry or follow redirects after rejection.
+          # Replit returns HTTP 403 "Expected X-Requested-With header", then
+          # "Expected referrer, referer, or origin header", before it evaluates
+          # the bearer. Origin must be https://replit.com; a foreign Origin is
+          # "Invalid referrer". These headers do not authenticate the request.
           if RESPONSE=$(curl -q --globoff --silent --connect-timeout 10 --max-time 60 \
             --output /dev/null --write-out "%{http_code}" \
             -X POST \
             -H "Authorization: Bearer $REPLIT_DEPLOY_TOKEN" \
             -H "Content-Type: application/json" \
+            -H "X-Requested-With: XMLHttpRequest" \
+            -H "Origin: https://replit.com" \
             "https://replit.com/api/v1/repls/$REPLIT_APP_ID/deployments"); then
             if ! [[ "$RESPONSE" =~ ^[0-9]{3}$ ]]; then
               echo "::error::Replit staging API returned an invalid HTTP status; request acceptance is unverified"

@@ -1,6 +1,6 @@
 # Code of Conduct
 
-> [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Security](./SECURITY.md) | [Contributing](./CONTRIBUTING.md) | [Contact](https://szlholdings.com)
+> [Platform Repo](https://github.com/szl-holdings/platform) | [Security](./SECURITY.md) | [Contributing](./CONTRIBUTING.md) | [Contact](https://szlholdings.com)
 
 ## Our Pledge
 

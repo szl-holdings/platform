@@ -1,6 +1,6 @@
 # SZL Holdings — Known Gaps Register (Security & Operations)
 
-**Last updated:** 2026-10-11 (rev 41 — candidate, migration, and Ovis security boundaries)
+**Last updated:** 2026-11-06 (staging deploy request headers; provider acceptance still blocked)
 **Owner:** Engineering / DevOps  
 **Audience:** Enterprise architects, Series A technical advisors, incoming VP Engineering
 
@@ -29,6 +29,38 @@ This document is the canonical reference for known security, quality, and compli
 > Older dated entries below that name a large `artifacts/api-server` route tree
 > describe their historical source state, not the current stub.
 
+### AEF-EVALS-OFFLINE-20261102 — default real-vector download closed in source
+
+The candidate AEF evaluation suite no longer loads the local CPU backend or
+attempts an ONNX model fetch during the default package test command. Real-vector
+evaluation requires literal `AEF_EVALS_REQUIRE_REAL=1`; an opted-in model error
+fails the run instead of becoming a successful skip. A loader-injection
+regression proves that missing, false-like, or padded values do not import the
+backend. This is a source and test-runner boundary only. It does not qualify the
+model artifacts, retrieval quality, provider availability, deployment, or GPU
+runtime. Exact-head hosted checks and protected review remain separate gates.
+
+### STRIPE-WEBHOOK-VERIFY-20261102 — candidate verifier fail-closed repair
+
+`StripeAdapter.verifyWebhookPayload` previously returned `verified: true` for
+any parseable JSON when the outbound Stripe API key or webhook secret was
+absent. Candidate source now treats a missing or blank webhook secret and a
+missing signature as verification failures. It authenticates the exact body
+bytes before parsing an event, requires one canonical safe-integer timestamp
+inside the existing five-minute window, rejects malformed digest encodings,
+and preserves multiple `v1` signatures used during secret rotation. Webhook
+verification remains independent of the outbound API key.
+
+The focused security regressions reproduce the original fail-open behavior and
+pass against the candidate; the services package suite and baseline/candidate
+full-workspace typechecks also pass. This closes only the exported
+adapter-level fail-open behavior. Current source has no direct caller, so it
+does not establish an active billing route, Stripe provider transaction,
+live-secret configuration, deployment, or end-to-end delivery.
+`BIL-001`, `FLOW-002`, `TG-001`, and `TG-002` remain open. Hosted exact-head
+checks and protected admission remain required. See the
+[scoped proof](../../audit/STRIPE_WEBHOOK_VERIFY_FAIL_CLOSED_20261102.md).
+
 ### READINESS-RETENTION-20261102 — candidate receipt-copy failure gate
 
 An explicitly requested readiness receipt copy could fail to write while the
@@ -40,6 +72,24 @@ write and close failures with bounded diagnostics. Hosted exact-head checks,
 protected admission and actual artifact readback remain required. This does
 not provision fleet signing or qualify publication, runtime or staging.
 See the [scoped proof](../../audit/READINESS_RETENTION_20261102.md).
+
+### READINESS-PUBLICATION-IDENTITY-20261102 — candidate same-second overwrite repair
+
+The readiness publisher previously selected one timestamp-only filename per
+agent, signed emission date and publication second. Distinct envelopes in that
+second could replace the same remote object. The candidate appends SHA-256 of
+the exact uploaded envelope bytes to the existing timestamp. Offline regression
+tests reproduce the collision against the original source and preserve both
+objects with the candidate; mixed legacy and suffixed filenames remain readable
+by the dashboard and audit-rift consumers.
+
+This is a local source qualification. Global deduplication, concurrent remote
+commit behavior and provider readback are not established. Hosted checks,
+independent review, protected admission, valid signing and provider bindings,
+and live signed publication evidence remain required. Merged PR #996 separately addresses
+requested local receipt retention; this candidate preserves that repair. No runtime
+or staging readiness is implied. See the
+[scoped proof](../../audit/READINESS_PUBLICATION_IDENTITY_20261102.md).
 
 ### KHIPU-OFFLINE-TICK-20261101 — candidate publication guard and offline continuity
 
@@ -122,11 +172,13 @@ failure, malformed responses and non-2xx statuses fail. The offline harness
 executes actual Bash with mock responses. HTTP 2xx means request acceptance only;
 the workflow summary keeps runtime readiness UNKNOWN.
 
-The rejection cause and existing endpoint's deployment authorization contract
-remain UNKNOWN. No credential or target change, denied-action retry, deployment
-or runtime verification was performed. A legitimate provider/API contract and
-fresh authorized request plus runtime evidence are still required before any
-staging readiness claim. See the
+The October 18 response body was not retained. The same request shape, measured
+on 2026-11-06, is rejected with HTTP 403 `Expected X-Requested-With header`
+before bearer evaluation. See
+[STAGING-REQUEST-002](#staging-request-002--pre-auth-403-was-a-missing-request-header).
+No credential or target change, denied-action retry, deployment, or runtime
+verification was performed for the October repair. Provider acceptance and
+runtime evidence are still required before any staging readiness claim. See the
 [scoped proof packet](../../audit/STAGING_DEPLOY_FAIL_CLOSED_2026-10-18.md).
 
 ### A11OY-PUBLIC-CANDIDATE-001 — hosted promotion remains HOLD
@@ -1526,3 +1578,68 @@ shape-access regressions. A factory isolates per-manifest sensitive-field
 arrays. Native current-head CI and protected release remain **BLOCKED** pending
 their own results. No provider/runtime capability is inferred. See the
 [native follow-up proof](../../audit/ZOD4_NATIVE_FOLLOWUP_2026-10-25.md).
+
+### 2026-11-02 readiness authority preflight candidate
+
+**MEASURED - READINESS-AUTHORITY-PREFLIGHT-20261102:** run `41381694418`
+reached receipt emission with no usable fleet signing authority and correctly
+refused an unsigned publication. The reliability workflow previously discovered
+that condition only after its probe window. The candidate adds a local Ed25519
+sign/verify preflight and runs the existing exact-dataset publisher preflight
+before collection. Offline regressions cover absent, malformed, invalid-length,
+unavailable-client, failed-signing and valid synthetic authority without
+printing secret or exception text. The executor's signature verification and
+real publication gate remain unchanged.
+
+No signer, Hugging Face credential, Replit credential or provider setting was
+available to this source repair. A valid run still requires the existing fleet
+seed in the effective `KHIPU_SIGNING_KEY_B64` Actions secret and dataset-write
+authority in `HF_TOKEN`. Staging run `41375292722` separately received HTTP 403
+from Replit after both configured values were nonempty. That run discarded the
+response body. The same request shape is the pre-auth header gate in
+[STAGING-REQUEST-002](#staging-request-002--pre-auth-403-was-a-missing-request-header);
+it does not by itself show that the configured bearer was evaluated.
+Neither external blocker is closed by the candidate. See the
+[source proof](../../audit/READINESS_AUTHORITY_PREFLIGHT_20261102.md) and
+[authority runbook](../../audit/PLATFORM_EXTERNAL_AUTHORITY_BLOCKERS_20261102.md).
+
+### 2026-11-03 readiness authority preflight in every lane
+
+**MEASURED - READINESS-LANE-PREFLIGHT-20261103:** the seven other scheduled
+readiness lanes still failed only in their collection step, reporting
+`unsigned receipt; path (not created)` (for example READINESS-AUDIT-RIFT run
+`41589711144`). The candidate runs the same signing preflight before collection
+in audit-rift, compliance, docs, dr, observability, operability and security,
+and adds the existing `HF_TOKEN` publisher preflight to the five of those lanes
+that publish with `HF_TOKEN` and lacked it. Security already ran that check;
+observability publishes through HF OIDC. A workflow-contract regression covers
+step order and credential bindings in all seven lanes. Neither external blocker
+above is closed by this change.
+
+### STAGING-REQUEST-002 — pre-auth 403 was a missing request header
+
+**MEASURED - STAGING-REQUEST-HEADERS-20261106:** push run
+[42134629935](https://github.com/szl-holdings/platform/actions/runs/42134629935)
+at `d3e5178743e139a547e6b79ec6beb52deda49e10` checked out that commit, passed
+"Verify staging configuration" (both `REPLIT_STAGING_APP_ID` and
+`REPLIT_STAGING_DEPLOY_TOKEN` were nonempty), and failed "Trigger staging
+deployment" in the same second with `Replit staging API returned HTTP 403`.
+The workflow discards the response body, so the Actions log does not contain
+the 403 text. The `staging` environment has no protection rules. The push
+trigger matched: the commit is outside `replit-sync/**`.
+
+An unauthenticated POST of that same URL, with a nonexistent repl id and no
+repository secret, returned HTTP 403 `Expected X-Requested-With header`.
+Adding only `X-Requested-With: XMLHttpRequest` returned HTTP 403
+`Expected referrer, referer, or origin header`. Adding `Origin: https://replit.com`
+(or `Referer: https://replit.com/`) with a dummy bearer returned HTTP 401
+`{"message":"repl-identity-token-invalid"}`, including an empty body. A foreign
+Origin stayed HTTP 403 `Invalid referrer`. The route therefore exists, and the
+Actions 403 was the provider's browser-contract gate, evaluated before identity.
+
+The workflow now sends `X-Requested-With: XMLHttpRequest` and
+`Origin: https://replit.com` on the same single bounded POST. Those headers do
+not authenticate the call. The configured identity token's authority, deployment
+acceptance, and runtime readiness remain **BLOCKED** until a hosted 2xx is
+observed. No secret was read, printed, or changed. See the
+[source proof](../../audit/STAGING_DEPLOY_REQUEST_HEADERS_2026-11-06.md).
