@@ -60,7 +60,7 @@ At the database query layer. Every query includes an org_id WHERE clause. This i
 
 **Q: Is SOC 2 certification in progress?**
 
-SOC 2 Type II is on the Phase 3 roadmap. The architecture is designed to comply — audit trail, access controls, and data handling meet SOC 2 requirements. Formal audit process requires production deployment and revenue activation first.
+No. SZL Holdings has no SOC 2 report and no auditor engagement. A SOC 2 Type II is planned; see [SENTRA-01-soc2-type-2-plan.md](../../trust/SENTRA-01-soc2-type-2-plan.md). This is a status disclosure, not a certification or legal advice, and it does not claim that current data handling meets SOC 2 requirements.
 
 ---
 
