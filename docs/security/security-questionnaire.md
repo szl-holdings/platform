@@ -142,7 +142,7 @@ See [AI_GOVERNANCE.md](../architecture/ai-governance.md) for the complete AI gov
 ## 8. Compliance and Certifications
 
 **Q: Is the product SOC 2 Type II certified?**  
-Audit in progress. SZL Holdings signed a SOC 2 Type II engagement letter with A-LIGN Compliance and Security on 2026-04-19. The observation period runs 2026-05-01 through 2026-10-31. A SOC 2 Type I bridge report is targeted for 2026-07-31, with the Type II report targeted for 2027-01-31. Bridge letters will be issued quarterly between the two reports. The engagement letter and any current bridge letter are available to enterprise evaluators under NDA at security@szlholdings.com. See [SOC2_AUDIT_ENGAGEMENT.md](soc2-audit.md) for scope, observation period, and evidence sources. [In Progress — Type II observation window open]
+No. SZL Holdings has no SOC 2 report and no auditor engagement. A SOC 2 Type II is planned; see [soc2-audit.md](soc2-audit.md) and [SENTRA-01-soc2-type-2-plan.md](../trust/SENTRA-01-soc2-type-2-plan.md). This is a status disclosure, not a certification or legal advice. [Planned — no engagement]
 
 **Q: Is the product ISO 27001 certified?**  
 Not yet. ISO 27001 is on the roadmap for Phase 3. [Planned — Phase 3]
