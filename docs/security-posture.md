@@ -1,7 +1,7 @@
 # SZL Holdings — Security Posture
 
-**Version:** 1.2
-**Date:** 2026-10-11
+**Version:** 1.3
+**Date:** 2026-11-01 (dependency evidence refresh; other boundaries retained)
 **Classification:** Public — source posture, not a deployment attestation
 **Status labels:** SOURCE-CONFIRMED · PARTIAL · UNVERIFIED · BROKEN
 
@@ -71,13 +71,22 @@ security fact.
 
 ## Dependency and CI controls
 
+The dependency observations below are bound to main commit
+`a465a0aa182f5eb88bdf3131372ca7a9b8199e87` and
+[Security Audit run 41357376251](https://github.com/szl-holdings/platform/actions/runs/41357376251)
+on 2026-11-01. All four component jobs and `Security Gate (blocking)` passed.
+The report files are exact copies of that run's digest-verified artifacts.
+This updates dependency evidence only; it does not refresh the dated ruleset
+observation or establish deployment, Python-service coverage, or fleet readiness.
+
 | Control | Current source/observed state |
 |---|---|
 | CodeQL | `.github/workflows/codeql.yml` analyzes JavaScript/TypeScript and Python; the exact-PR-ref `severity-gate` was live-required in the dated repository ruleset read |
 | Dependency review | `.github/workflows/dependency-review.yml` reviews pull-request dependency changes; it was not in the dated live-required list |
 | Secret scanning | `.github/workflows/security.yml` runs Gitleaks plus the project-specific scanner on PR, default-branch, scheduled, and manual paths |
-| Package-manager audit | The 2026-10-11 candidate `security/vuln-report.md` records pinned `pnpm@10.26.1`, 0 Critical / 0 High / 2 Moderate / 0 Low findings across 1,820 reported dependencies. The live local-patch mitigation registry is empty. `braces` consumers resolve to the private, source-attributed `@szl-holdings/braces-safe@0.2.0` fork, whose override identity and adversarial recursion/cycle/stateful-input behavior are tested; `node-forge@1.4.0` is absent from the lockfile. The one detailed Moderate is `sprintf-js` GHSA-hp3w-g68c-fv3c and one Moderate is aggregate-only. Hosted exact-head success remains required. |
-| License admission | Candidate `security.yml` makes the license-report job a dependency of `Security Gate (blocking)`; exact package/version/license/classification reviews expire and parse errors block. The 2026-10-11 clean-install local report scans 1,522 unique pairs, matches all 8 REVIEW and 6 CHECK findings to 14 exact admissions from a 17-entry registry, and records 0 parse errors and 0 violations; hosted exact-head success remains unobserved. |
+| Package-manager audit | The 2026-11-01 hosted `security/vuln-report.md` attests `pnpm@10.26.1` and reports 0 Critical / 0 High / 16 Moderate / 1 Low findings across 1,818 reported dependencies. The unchanged High/Critical gate passes; Moderate/Low findings remain open. The report lists eight advisory IDs across seven packages; finding counts are not unique-advisory counts. |
+| License admission | `security.yml` makes the license-report job a dependency of `Security Gate (blocking)`; exact package/version/license/classification reviews expire and parse errors block. The 2026-11-01 hosted report scans 1,525 unique pairs, matches 8 REVIEW and 6 CHECK findings to 14 exact admissions from an 18-entry registry, and records 0 parse errors and 0 violations. This is an engineering policy result, not a legal certification. |
+| SBOM inventory | The committed `security/sbom-latest.json` is byte-identical to the SBOM artifact from run `41357376251`: 1,806 CycloneDX 1.4 components; SHA-256 `6574ac9d5338f9b30884bed904fa006076f9f34b1a99f3104c5f09613c4770d9`. It is inventory-only; vulnerability evidence is the separate package-manager report. No SBOM rewrite was needed. |
 | Python dependency coverage | **HOLD** — the pnpm SBOM, vulnerability, and license reports do not cover the three deployable Python services. Their declarations remain ranged and unhashed, with no resolved lock, Python SBOM/vulnerability/license evidence, or reproducible image proof. |
 | Filesystem/SCA scan | `.github/workflows/trivy.yml` retains raw, digest-sealed Grype JSON and fails closed on unadmitted High/Critical findings; hosted success and live-required status were not established by the dated read |
 | Reproducibility | `.github/workflows/repro-check.yml` compares two clean builds of one SHA; hosted success and live-required status were not established by the dated read |
@@ -89,11 +98,14 @@ not an active pnpm `patchedDependencies` entry. The current fork tests include
 stateful Proxy, cycle, depth, breadth, parent-chain, and consumer-resolution
 regressions. Replace the fork with an official fixed release only after source,
 compatibility, and advisory review. Moderate and Low findings remain
-nonblocking but visible. The current report
-renders the one detailed `sprintf-js` Moderate and explicitly preserves one
-aggregate-only Moderate whose package detail pnpm omitted at the selected audit
-level. Track an upstream fix for `sprintf-js`; absence of a patched release is
-not permission to apply an incompatible override or suppress the advisory.
+nonblocking but visible. The current report lists `@hono/node-server`,
+`@vitest/mocker`, `glob`, `hono`, `ip-address`, and `minimatch` Moderate
+advisories plus one `deepmerge` Low advisory. These findings require separate
+upstream-fix and consumer-compatibility review; a green High/Critical gate does
+not resolve them. Do not apply incompatible overrides or suppress advisories
+to make the count disappear. Artifact identities, verification, and the
+remaining operational blockers are recorded in the
+[scoped proof packet](../audit/PLATFORM_SECURITY_EVIDENCE_2026-11-01.md).
 
 ## Secrets and credential management
 
