@@ -70,11 +70,11 @@ Pass rate: 91.2% of claims reviewed passed or were successfully softened.
 
 ### Finding 5 — Investor docs: "SOC 2 engagement signed"
 
-**File:** `docs/operations/known-gaps.md` line citing SOC 2 engagement  
+**File:** `docs/operations/known-gaps.md` (RD-001) and related public security docs  
 **Claim:** "Engagement letter signed with A-LIGN Compliance and Security on 2026-04-19."  
-**Risk:** If this claim appeared in marketing copy, it could be read as SOC 2 certified. However, this appears in the known-gaps register, not public marketing copy.  
-**Action:** No change — this is a factual statement in the internal operations register. If surfaced externally, it should be qualified as "SOC 2 Type II audit in progress (observation period 2026-05-01 → 2026-10-31)."  
-**Verdict:** ✅ Pass in current context (internal docs); flag for external use.
+**Risk:** The claim is unsupported. No signed engagement letter, statement of work, invoice, or auditor correspondence was found. Other SZL documents already said SOC 2 was not in place. Left in public docs, it could be read as an audit in progress or as certification.  
+**Action:** Corrected 2026-11-13. Public wording now states that SZL Holdings has no SOC 2 report and no auditor engagement, and that a Type II is planned (see `docs/trust/SENTRA-01-soc2-type-2-plan.md`).  
+**Verdict:** ❌ Previously treated as factual; withdrawn and corrected.
 
 ---
 
@@ -98,7 +98,7 @@ Pass rate: 91.2% of claims reviewed passed or were successfully softened.
 
 1. **Add "(active prototype)" qualifier** to the artifact inventory Status column header in `README.md` to remove any ambiguity about production deployment status.
 
-2. **If investor docs are shared externally**, add the following qualifier to any reference to the SOC 2 engagement: "SOC 2 Type II audit initiated (observation period 2026-05-01 to 2026-10-31; report expected 2027-Q1)."
+2. **Do not describe a SOC 2 engagement or observation period as current.** SZL Holdings has no SOC 2 report and no auditor engagement. Point readers to `docs/security/soc2-audit.md` and `docs/trust/SENTRA-01-soc2-type-2-plan.md`.
 
 3. **APEX mobile** — the README describes "APEX — Unified mobile command app (iOS and Android)" as a product. The current artifact (`artifacts/szl-holdings-mobile`) is in "Deferred — after APEX ships" status. If APEX is referenced in investor materials as a current product, it should be qualified as "APEX — roadmap mobile product; current mobile coverage via the CORTEX prototype."
 

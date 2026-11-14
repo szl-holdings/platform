@@ -1,133 +1,71 @@
-# SOC 2 Type II Audit Engagement — SZL Holdings Platform
+# SOC 2 status — SZL Holdings Platform
 
-> Status of the SOC 2 Type II audit engagement, observation window, readiness
-> assessment, and the documents auditors and enterprise evaluators should
-> reference. This document is the single source of truth for the audit's status
-> and supersedes earlier roadmap-only language elsewhere in the repo.
->
-> **Status:** Engagement letter signed — observation period in progress
-> **Last Updated:** 2026-04-19
-> **Owner:** Stephen Lutar (stephen@szlholdings.com)
-> **Internal accountable:** Founder / Security
-> **External auditor:** A-LIGN Compliance and Security, Inc. (licensed CPA firm,
-> AICPA peer-reviewed) — selected after evaluation against Prescient Assurance
-> and Sensiba LLP on (1) prior coverage of multi-tenant SaaS, (2) experience
-> with AI/agentic platforms, (3) ability to issue a combined Type I bridge
-> letter ahead of the Type II report, and (4) timeline fit for a Q1 2027
-> report delivery.
+> Status of SZL Holdings' SOC 2 work. This is a status disclosure only.
+> It is not legal advice, and it is not a certification, accreditation,
+> audit opinion, or attestation.
+
+**Status:** SZL Holdings has no SOC 2 report and no auditor engagement.
+**Last Updated:** 2026-11-13
+**Owner:** Stephen Lutar (stephen@szlholdings.com)
+**Internal accountable:** Founder / Security
 
 ---
 
-## 1. Engagement Summary
+## 1. Current posture
 
-| Field | Value |
-|-------|-------|
-| Audit firm | A-LIGN Compliance and Security, Inc. |
-| Engagement letter signed | 2026-04-19 |
-| Trust Service Criteria in scope | Security (CC1–CC9), Availability (A series), Confidentiality (C series), Processing Integrity (PI series), Privacy (P series) |
-| Systems in scope | All production artifacts in this monorepo: `artifacts/api-server`, `artifacts/szl-holdings`, `artifacts/aegis`, `artifacts/vessels`, `artifacts/terra`, `artifacts/prism-counsel`, `artifacts/lyte-command-center`, `artifacts/sentra`, `artifacts/pulse`, `artifacts/counsel`, `artifacts/command`, `artifacts/szl-holdings-mobile`, plus the shared libraries in `lib/*` and the production database (Azure PostgreSQL Flexible Server) |
-| Type I bridge report | Target issuance 2026-07-31 (covers controls design as of 2026-06-30) |
-| Type II observation period start | 2026-05-01 |
-| Type II observation period end | 2026-10-31 (6-month minimum window) |
-| Type II report target delivery | 2027-01-31 |
-| Bridge letter cadence | Quarterly between Type I issuance and Type II report |
-| Subservice organisations carved out | Microsoft Azure (infra), Stripe (payments), HuggingFace / OpenAI / Anthropic / Gemini (AI inference) |
-| Internal control owners | Founder / Security (Stephen Lutar), Engineering Lead (acting), External legal counsel (TBD per LB-007) |
+SZL Holdings does not have a SOC 2 Type I report or a SOC 2 Type II report.
+It does not have a signed SOC 2 audit engagement, engagement letter,
+statement of work, or invoice with A-LIGN Compliance and Security, Inc.,
+or with any other SOC 2 auditor.
 
----
+An earlier version of this file, last updated 2026-04-19, stated that an
+engagement letter had been signed with A-LIGN on 2026-04-19 and that a
+Type II observation period was in progress from 2026-05-01 through
+2026-10-31. That statement is withdrawn. No signed engagement letter,
+bridge letter, auditor correspondence, or invoice was found to support
+it. The claimed Type I bridge-report date of 2026-07-31 and the claimed
+observation window have both already passed, still without a report or
+engagement record.
 
-## 2. Internal Compliance Readiness Assessment (April 2026)
+This file no longer supersedes other documents that said SOC 2 was not
+in place. Those documents were the accurate ones.
 
-The internal readiness assessment was performed against the existing
-[infra/docs/SOC2_CHECKLIST.md](../../infra/docs/SOC2_CHECKLIST.md) (originally a Type
-I alignment review). It has been re-scored against the additional Type II
-operating-effectiveness requirements that A-LIGN flagged in the kickoff.
+A SOC 2 Type II is planned. The public plan, including intended scope and
+auditor-selection criteria, is [SENTRA-01-soc2-type-2-plan.md](../trust/SENTRA-01-soc2-type-2-plan.md).
+That plan is a plan only. It does not name a selected firm and it is not
+an engagement.
 
-### Trust Service Criteria coverage (carry-over from SOC2_CHECKLIST.md)
+Related internal readiness notes remain in
+[infra/docs/SOC2_CHECKLIST.md](../../infra/docs/SOC2_CHECKLIST.md). Those
+notes are a self-assessment, not an auditor report.
 
-| Criterion | Design controls in place | Operating evidence required for Type II |
-|-----------|--------------------------|------------------------------------------|
-| CC1 — Control Environment | Code of conduct, role definitions, ownership assignments | Need recorded board/security review meetings during observation window |
-| CC2 — Communication | `SECURITY.md`, Trust Center, vulnerability disclosure | Need quarterly evidence of policy distribution and acknowledgement |
-| CC3 — Risk Assessment | OWASP review, severity model, dependency scanning | Need quarterly risk-register snapshots during observation window |
-| CC4 — Monitoring | Audit log on every consequential action, alerting middleware | Need exported alert review logs and ticket trail |
-| CC5 — Control Activities | Zod validation, CSRF, Helmet, rate limiting, idempotency | Operating throughout window — covered by CI proofs |
-| CC6 — Logical Access | OIDC + PKCE, SCIM 2.0, RBAC, deny-by-default global enforcer | Need quarterly access reviews on file |
-| CC7 — System Operations | Health endpoints, APM, incident runbook | Need at least one tabletop incident exercise during window |
-| CC8 — Change Management | PR review, rollback runbook, feature flags | Already operating — pull change ticket samples |
-| CC9 — Risk Mitigation | Backup runbook, DPA template (in flight), vendor risk list | Need first vendor risk review completed during window |
-| Availability | Health endpoints, autoscale, backup verification | Need uptime monitor evidence (status page rollout in progress) |
-| Confidentiality | Multi-tenant isolation, TLS 1.3, encryption at rest | Operating throughout window |
-| Processing Integrity | Input validation, AI labelling, human-in-the-loop on agent execution | Operating throughout window |
-| Privacy | Privacy policy, GDPR/CCPA workflows, IP hashing in audit logs | Need legal review of policy text (LB-007 dependency) |
+## 2. Buyer-facing statement
 
-### Pre-audit remediation backlog (carried into the observation window)
+Use only the wording below, or a shorter excerpt of it, until an actual
+engagement exists and the owner has approved an update:
 
-These items remain open from `infra/docs/SOC2_CHECKLIST.md` §Priority Gaps and
-are owned by the founder during the observation window. Each is being tracked
-in `KNOWN-GAPS.md` and the platform task system rather than duplicated here.
+> SZL Holdings has no SOC 2 report and no auditor engagement. We have not
+> been audited by A-LIGN or by any other SOC 2 auditor. A SOC 2 Type II
+> is planned; see [SENTRA-01-soc2-type-2-plan.md](../trust/SENTRA-01-soc2-type-2-plan.md).
+> This is a status disclosure, not legal advice and not a certification.
 
-1. Formal risk register published and reviewed quarterly.
-2. Quarterly access reviews documented (privileged + organisation membership).
-3. Dedicated SAST scanner result review on file (CodeQL already wired via
-   `dependency-review.yml` per KG012; require quarterly review evidence).
-4. External penetration test executed and findings closed
-   (see `docs/internal/security/pentest-scope-2026-04.md`).
-5. Public status page live with historical uptime.
-6. Customer Data Processing Agreement template approved by counsel
-   (depends on `LAUNCH_BLOCKERS.md` LB-007).
-7. Quarterly security review meetings recorded with action items.
+Do not offer an engagement letter or a bridge letter under NDA. None is
+on file. If a future engagement is signed, update this document only
+after the owner approves, and keep the letter itself private.
 
-### Readiness verdict
+## 3. What this file is not
 
-The platform's design controls are sufficient for SOC 2 Type II observation to
-begin on the planned date. The seven remediation items above are operational
-and policy items, not architecture rebuilds, and each has a named owner and a
-deadline that lands inside the observation window.
+This document does not give legal advice. It does not certify, accredit,
+or attest anything about SZL's controls. It does not start, resume, or
+describe an audit in progress. It records only that no SOC 2 report and
+no SOC 2 engagement are in evidence as of the date above.
 
----
+A later update may describe a real engagement only after a signed letter
+or contract is on file and the owner has approved the change.
 
-## 3. Evidence Sources for Auditors
-
-The auditors have been given read access to the documents below. Engineering
-should not duplicate this content into auditor-only artefacts; instead, keep
-these documents accurate and let the auditor read from source.
-
-| Source | Contents |
-|--------|----------|
-| [TECHNICAL_DILIGENCE_PACKET.md](../investor/technical-diligence-packet.md) | Architecture, tenancy, governance, AI, observability, known gaps |
-| [SECURITY_QUESTIONNAIRE_PACK.md](security-questionnaire.md) | Pre-answered enterprise security questions |
-| [TRUST_CENTER_INDEX.md](trust-center-index.md) | Buyer-facing trust hub |
-| [ACCESS-CONTROL-MATRIX.md](access-control-matrix.md) | 11-role RBAC and per-route permissions |
-| [SHARED_RESPONSIBILITY_MODEL.md](shared-responsibility.md) | Platform vs customer responsibility |
-| [PRIVACY_OVERVIEW.md](privacy-overview.md) | Privacy framework and GDPR/CCPA workflows |
-| [KNOWN-GAPS.md](../operations/known-gaps.md) | Honest gap register, including RD-001 |
-| [infra/docs/SOC2_CHECKLIST.md](../../infra/docs/SOC2_CHECKLIST.md) | Per-control readiness assessment |
-| [infra/docs/OWASP_CHECKLIST.md](../../infra/docs/OWASP_CHECKLIST.md) | OWASP Top 10 alignment |
-| [content/trust/compliance-roadmap.md](../../content/trust/compliance-roadmap.md) | Forward-looking certification roadmap |
-
----
-
-## 4. Buyer-Facing Status
-
-The status this document records is the only status that should appear in
-buyer-facing materials. When asked, the platform's posture is:
-
-> SOC 2 Type II audit engagement signed with A-LIGN on April 19, 2026.
-> Observation period began May 1, 2026 and runs through October 31, 2026.
-> Type I bridge report is targeted for July 31, 2026; Type II report is
-> targeted for January 31, 2027. Bridge letters will be issued quarterly
-> between the two reports. Enterprise evaluators may request the engagement
-> letter and a current bridge letter under NDA at security@szlholdings.com.
-
-If you are updating buyer-facing copy, link to this document and the
-[Trust Center](trust-center-index.md) instead of restating dates inline so the
-authoritative source stays in one place.
-
----
-
-## 5. Change Log
+## 4. Change log
 
 | Date | Change |
 |------|--------|
-| 2026-04-19 | Engagement letter with A-LIGN signed. Observation period start, Type I bridge target, and Type II target dates locked in. Internal readiness assessment published. KNOWN-GAPS.md RD-001, TRUST_CENTER_INDEX.md §Trust Summary and §Section 7, and SECURITY_QUESTIONNAIRE_PACK.md §8 updated to point at this document. |
+| 2026-04-19 | Earlier text claimed an A-LIGN engagement letter was signed and an observation period had started. That text is withdrawn. |
+| 2026-11-13 | Correction: SZL Holdings has no SOC 2 report and no auditor engagement. A Type II is planned; see SENTRA-01. Not a certification and not legal advice. |
