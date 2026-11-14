@@ -55,7 +55,7 @@ As of Q2 2026, SZL Holdings has:
 - **6 domain packs** fully implemented with seeded/demo data and role-aware dashboards (Aegis, Sentra, Vessels, Terra, Counsel, Carlota Jo)
 - **906 database tables** across 165 schema files, 82 domain packages — verified 2026-04-21 (see `audit/source-of-truth.json`)
 - **Azure Bicep IaC** — enterprise deployment architecture ready
-- **Stripe billing infrastructure** — built and pending activation
+- **Stripe billing infrastructure** — ~~built and pending activation~~ not implemented (server deleted in `3d6e07381` (2026-05-02, #77); see `BILLING.md`)
 - **OpenAPI 3.1 specification** — full API documentation
 - **Marketplace packages** — Salesforce AppExchange and Jira Marketplace (Atlassian Connect) stubs
 
@@ -75,7 +75,7 @@ As of Q2 2026, SZL Holdings has:
 | Usage-Based | Lyte / Alloy | AI inference and workflow execution units |
 | Enterprise Contracts | All | Custom pricing, SLA, dedicated infrastructure |
 
-Stripe billing infrastructure is built. Activation requires API key configuration and price ID setup — a configuration task, not an engineering task.
+~~Stripe billing infrastructure is built. Activation requires API key configuration and price ID setup — a configuration task, not an engineering task.~~ **Corrected 2026-11-06:** Stripe billing is not implemented; its server was deleted in `3d6e07381` (2026-05-02, #77), so activation is an engineering task (see `BILLING.md`).
 
 ---
 

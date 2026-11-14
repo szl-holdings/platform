@@ -35,7 +35,7 @@
 | `/api/counsel/*` / `/api/prism-counsel-*` | PostgreSQL | PARTIAL | KEEP-REAL | Matter CRUD real; court filing stubs (`prism-counsel-court.ts`) not active |
 | `/api/aegis/*` | PostgreSQL (seeded) | SEED | KEEP-SEED | SIEM events seeded; SOAR webhook stubs exist |
 | `/api/alloy/*` | PostgreSQL + AI gateway | PARTIAL | KEEP-REAL | Chat, KB, approvals real; policy LLM wired to AI gateway |
-| `/api/billing/*` | Stripe (test mode) | PARTIAL | KEEP-FLAG | Flag: `live_stripe_billing_enabled=false`; test-mode Stripe wired |
+| `/api/billing/*` | ~~Stripe (test mode)~~ none | ~~PARTIAL~~ ABSENT | KEEP-FLAG | ~~Flag: `live_stripe_billing_enabled=false`; test-mode Stripe wired~~ Route files deleted in `3d6e07381` (2026-05-02, #77); no such flag exists in the code (corrected 2026-11-06) |
 | `/api/booking/*` | PostgreSQL | REAL | KEEP-REAL | Carlota Jo time-tracking and invoicing real |
 | `/api/agent-mesh/*` | PostgreSQL | REAL | KEEP-REAL | Mesh telemetry read-only; scan endpoints public |
 | `/api/geo-intel/*` | PostgreSQL | REAL | KEEP-REAL | Live-mutating GeoPin data |

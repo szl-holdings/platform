@@ -1,6 +1,15 @@
 name: SBOM — CycloneDX via Syft
 
 on:
+  pull_request:
+    paths:
+      - "apps/substrate-inference/Dockerfile"
+      - "apps/substrate-inference/pyproject.toml"
+      - "apps/substrate-inference/requirements*"
+      - "apps/substrate-inference/scripts/emit_lock_sbom.py"
+      - "apps/substrate-inference/scripts/verify_dependency_locks.py"
+      - "apps/substrate-inference/tests/test_dependency_locks.py"
+      - ".github/workflows/sbom.yml"
   push:
     branches: [main]
     paths-ignore:
@@ -16,6 +25,7 @@ permissions:
 jobs:
   sbom:
     name: Generate SBOM
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -40,3 +50,46 @@ jobs:
       contents: write
       packages: read
       id-token: write
+
+  substrate-dependency-evidence:
+    name: Verify locks and emit SBOM digests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+
+      - name: Verify declaration, lock, hash, and Docker consistency
+        run: python apps/substrate-inference/scripts/verify_dependency_locks.py
+
+      - name: Emit deterministic CycloneDX evidence
+        run: |
+          mkdir -p artifacts/substrate-inference-dependency-evidence
+          python apps/substrate-inference/scripts/emit_lock_sbom.py \
+            --variant gpu \
+            --lock apps/substrate-inference/requirements-gpu.lock \
+            --output artifacts/substrate-inference-dependency-evidence/gpu.cdx.json
+          python apps/substrate-inference/scripts/emit_lock_sbom.py \
+            --variant gpu-flash-attn \
+            --lock apps/substrate-inference/requirements-gpu.lock \
+            --lock apps/substrate-inference/requirements-flash-attn.lock \
+            --output artifacts/substrate-inference-dependency-evidence/gpu-flash-attn.cdx.json
+
+      - name: Record reproducible SBOM digests
+        working-directory: artifacts/substrate-inference-dependency-evidence
+        run: |
+          sha256sum gpu.cdx.json gpu-flash-attn.cdx.json > sbom.sha256
+          sha256sum --check sbom.sha256
+          cat sbom.sha256
+
+      - name: Upload dependency evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: substrate-inference-dependency-evidence-${{ github.sha }}
+          path: artifacts/substrate-inference-dependency-evidence/
+          if-no-files-found: error
+          retention-days: 90

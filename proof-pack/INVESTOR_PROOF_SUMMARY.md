@@ -38,7 +38,7 @@ This is an honest, no-overclaiming inventory of the SZL Holdings platform as of 
 | **A11oy agent execution** | Workcells, signals, outcomes are seed data (in-memory); mutation endpoints return 501 Not Implemented in Phase 1 |
 | **Intelligence feeds** — AIS vessel positions, legal feed, sanctions, STIX | Feed adapters exist; live data requires API keys configured in production secrets |
 | **Email notifications** | Nodemailer + Resend adapter; falls back to silent drop in demo mode |
-| **Stripe billing** | Integration complete; requires Stripe keys; demo surfaces show UI without processing real payments |
+| **Stripe billing** | ~~Integration complete; requires Stripe keys~~ **Not implemented** (corrected 2026-11-06): the billing server was deleted in `3d6e07381` (2026-05-02, #77) and not restored; demo surfaces show UI without processing real payments |
 | **Azure enterprise integrations** — Key Vault, Storage, Redis, Document Intelligence | Adapters built; require Azure credentials in production |
 | **Real-time WebSocket** | HMAC-signed ticket system built; requires running API server + database |
 | **Proof screenshot captures** | 95 A11oy screenshots captured; all show demo seed data |

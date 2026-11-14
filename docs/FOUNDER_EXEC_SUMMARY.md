@@ -84,7 +84,7 @@ If you're evaluating SZL Holdings, I'm happy to open the codebase, walk through 
 | Billing infrastructure | Built; awaiting live activation |
 | First enterprise customer | Pre-pipeline; Series A funds GTM |
 | Team | Founder + advisors; Series A funds first hires |
-| Revenue | Pre-revenue by choice — billing activation is configuration, not engineering |
+| Revenue | Pre-revenue by choice — ~~billing activation is configuration, not engineering~~ billing is not implemented (server deleted in `3d6e07381` (2026-05-02, #77)), so activation needs engineering (corrected 2026-11-06) |
 
 ---
 
