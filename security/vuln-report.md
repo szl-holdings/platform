@@ -1,6 +1,6 @@
 # Dependency Vulnerability Report
 
-**Generated:** 2026-11-06T16:32:09.030Z
+**Generated:** 2026-11-12T23:57:55.788Z
 **Policy:** unmitigated High/Critical advisories block; exact local patches must be registered, digest-bound, behavior-tested, and unexpired; Moderate/Low remain reported
 **Command:** `pnpm audit --json --audit-level=high`
 **Expected package manager:** `pnpm@10.26.1`
@@ -24,13 +24,14 @@ PASS — no parsed High/Critical advisory.
 | Critical | 0 |
 | High | 0 |
 | Moderate | 1 |
-| Low | 1 |
+| Low | 2 |
 
 ## Reported Moderate / Low findings
 
 | Package | Advisory | Severity | Vulnerable range |
 |---|---|---|---|
 | `deepmerge` | [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) | LOW | `>=4.2.0 <=4.3.1` |
+| `fast-xml-parser` | [GHSA-474x-hrwr-fgx4](https://github.com/advisories/GHSA-474x-hrwr-fgx4) | LOW | `<=5.11.2` |
 | `minimatch` | [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249) | MODERATE | `>=7.0.0 <11.0.1` |
 
 ## Workspace overrides
@@ -68,7 +69,7 @@ PASS — no parsed High/Critical advisory.
 | `qs` | `6.16.1` |
 | `ws` | `^8.20.1` |
 | `hono` | `4.13.11` |
-| `@hono/node-server` | `2.1.3` |
+| `@hono/node-server` | `2.1.7` |
 | `browserslist` | `4.28.7` |
 | `body-parser` | `2.4.0` |
 | `zod` | `4.6.6` |

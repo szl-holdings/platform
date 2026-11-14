@@ -53,6 +53,18 @@ function installedPackage(requireFrom, name) {
   }
 }
 
+test('@hono/node-server override is the patched release Dependabot could not install', () => {
+  const workspace = parseYaml(readFileSync(path.join(root, 'pnpm-workspace.yaml'), 'utf8'));
+  assert.equal(workspace.overrides['@hono/node-server'], '2.1.7');
+  assert.equal(lock.overrides['@hono/node-server'], '2.1.7');
+  assert.equal(lock.packages['@hono/node-server@2.1.7']?.peerDependencies?.hono, '4.13.11');
+  assert.equal(
+    lock.snapshots['@modelcontextprotocol/sdk@1.32.0']?.dependencies?.['@hono/node-server'],
+    '2.1.7(hono@4.13.11)',
+  );
+  assert.equal(lock.packages['@hono/node-server@2.1.3'], undefined);
+});
+
 test('lockfile contains every covered consumer and only patched brace releases', () => {
   assert.ok(minimatchSnapshots.length > 0, 'missing minimatch snapshots');
   const observedMajors = new Set();
