@@ -104,6 +104,19 @@ remain required. Remote publication, signer provisioning and staging readiness
 remain unverified. See the
 [scoped proof](../../audit/KHIPU_OFFLINE_TICK_RECOVERY_20261101.md).
 
+### CANONICAL-KEYS-20261101 — state-native own-key integrity candidate
+
+MEASURED local regressions show that an own `__proto__` JSON key was omitted by
+the ordinary-object normalization accumulator, so different request parameters
+could share canonical bytes and receipt verification could ignore an added key.
+The candidate uses a null-prototype accumulator. Four regression expectations
+fail against original source; the patched state-native suite passes 50/50 and
+scoped strict TypeScript compilation passes. Monorepo typecheck remains blocked
+by missing workspace dependencies. Existing artifacts containing such keys need
+reassessment under the corrected digest; no lossy compatibility fallback is
+introduced. Protected review, hosted checks and any deployed verification remain
+outstanding. See the [bounded proof packet](../../audit/STATE_NATIVE_CANONICAL_KEYS_20261101.md).
+
 ### AUDIT-FINDINGS-20261023 — candidate legacy audit parser repair
 
 MEASURED pinned pnpm 10.26.1 output contains four High finding records grouped
