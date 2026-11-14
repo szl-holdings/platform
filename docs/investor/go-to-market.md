@@ -65,7 +65,7 @@ Premium pricing. SZL platforms are built for operators who make high-stakes deci
 - Professional: Organization-wide, custom integrations
 - Enterprise: Custom pricing, dedicated infrastructure, SLA
 
-Stripe billing infrastructure is built and ready for activation. No engineering work required to go live — only configuration and commercial terms.
+~~Stripe billing infrastructure is built and ready for activation. No engineering work required to go live — only configuration and commercial terms.~~ **Corrected 2026-11-06:** Stripe billing is not implemented. Its server was deleted in `3d6e07381` (2026-05-02, #77), so going live needs engineering as well as configuration and commercial terms (see `BILLING.md`).
 
 ---
 

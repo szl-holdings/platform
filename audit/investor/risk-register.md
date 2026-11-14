@@ -84,7 +84,7 @@
 
 ### O-01: Revenue Activation Incomplete (High)
 
-**Description:** Stripe billing is live for a subset of domain packs (Vessels, Lyte, Terra, Carlota Jo) but is not fully activated across all surfaces. The platform does not yet have recurring revenue from paying customers.
+**Description:** ~~Stripe billing is live for a subset of domain packs (Vessels, Lyte, Terra, Carlota Jo) but is not fully activated across all surfaces.~~ **Corrected 2026-11-06:** Stripe billing is not live anywhere: the billing server was deleted in `3d6e07381` (2026-05-02, #77) and not restored (see `BILLING.md`). The platform does not yet have recurring revenue from paying customers.
 
 **Impact:** Pre-revenue status is the most material fact for a Series A investor. The platform is investor-funded and founder-operated at this stage.
 
