@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- State-native canonicalization preserves own `__proto__` JSON keys in request
+  and receipt digests. Previously issued artifacts containing those keys need
+  reassessment and governed reissuance; the verifier does not accept the prior
+  lossy representation as a compatibility fallback.
+
 ---
 
 ## [1.0.0] — 2026-06-09
