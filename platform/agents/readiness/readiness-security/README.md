@@ -23,7 +23,13 @@ The agent emits one Khipu receipt; it does not modify the observed repositories.
    source without `continue-on-error`, then requires both the job and
    scan step to report success in the matching workflow run. A missing or
    unreadable file, job, step, or jobs API response cannot pass. Other repos
-   retain filename-based Gitleaks/secret discovery. The most recent matching run
+   retain filename-based discovery for a delimited `gitleaks`, `secret-scan`,
+   `secrets-scan`, `secret_scanning`, or equivalent scan token. Generic secret
+   health, configuration, rotation and reader workflow names are not scanner
+   evidence. In particular, `.github/workflows/secret-health.yml` in
+   `szl-holdings/.github` audits required Actions secret names, not committed
+   secrets. Filename discovery outside Platform remains a heuristic and does
+   not establish scanner source or step execution. The most recent matching run
    must have the same branch and SHA and `status=completed`. For the Platform
    Gitleaks control, a successful job and scan step can pass even when an
    unrelated job makes the whole `security.yml` run fail; the overall run
@@ -36,9 +42,17 @@ The agent emits one Khipu receipt; it does not modify the observed repositories.
    `RUN_IN_PROGRESS`/`HOLD`; a failed required workflow or Gitleaks job yields
    `RED`.
    Any invalid timestamp on a matching current-head run holds that control,
-   even if an older success is present. The GitHub run query reads at most 100
-   branch runs. If the matching current-head
-   run is outside that page, the verdict remains `HOLD`.
+   even if an older success is present. The GitHub run query filters by both
+   branch and observed head SHA, then reads pages of 100. The Platform jobs
+   query also follows pages. Collection requires stable nonnegative integer
+   `total_count`, unique positive integer IDs, and complete pages. Read errors,
+   rate limits, malformed pages, duplicate IDs, changing counts and short
+   incomplete pages discard partial results and leave required evidence `HOLD`.
+   A count reaching 1,000 is `RUN_LIST_LIMIT_REACHED` or
+   `JOB_LIST_LIMIT_REACHED`/`HOLD`; the filtered Actions API ceiling must not be
+   confused with a complete result. Count/ID checks detect common page drift,
+   but do not create an atomic API snapshot or prove that no run changed after
+   observation. No previous-head success is substituted for missing evidence.
    The admitted step identity is recorded in `PLATFORM_SCANNER_STEP_SHA256`
    from protected source `aaa5417bd9a1fe755a5eaaa4e45bb29c8940370c`.
    It includes the environment bindings, `scan_args` beginning with `detect`
