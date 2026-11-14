@@ -163,7 +163,7 @@ For the full gap register with detailed remediation tracking, see `docs/audit/se
 | **Item** | Configure live `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` for production billing |
 | **Location** | `artifacts/api-server/src/routes/billing.ts` |
 | **Why deferred** | Pre-commercial — no revenue to collect yet |
-| **Current State** | Stripe integration fully implemented. Test/demo mode only. No live charges. |
+| **Current State** | ~~Stripe integration fully implemented.~~ Stripe integration is not implemented: its server was deleted in `3d6e07381` (2026-05-02, #77) (corrected 2026-11-06). Test/demo mode only. No live charges. |
 | **Severity** | High (GAP-005) |
 | **Recommended Action** | Configure live Stripe keys before first paid transaction |
 | **Bring In Scope?** | Yes — before first paying customer |

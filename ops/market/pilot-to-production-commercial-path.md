@@ -107,7 +107,7 @@ Production billing runs through Stripe. Activation steps:
 4. Send first invoice (or set up auto-billing for annual upfront)
 5. Confirm payment method on file
 
-**Current status:** Stripe billing infrastructure is built. Activation requires price ID setup and Stripe API key configuration. This is a configuration task, not an engineering task.
+**Current status (corrected 2026-11-06):** Stripe billing is not implemented. ~~Stripe billing infrastructure is built. Activation requires price ID setup and Stripe API key configuration. This is a configuration task, not an engineering task.~~ The billing server was deleted in `3d6e07381` (2026-05-02, #77); activation is an engineering task (see `BILLING.md`).
 
 ---
 
