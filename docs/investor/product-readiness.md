@@ -170,7 +170,7 @@
 | Analytics instrumentation | ✅ Operational | Core events: signup, login, dashboard view, signal view, approval decisions, billing events |
 | Admin diagnostics | ✅ Operational | Real-time system health at /command/admin/diagnostics (Command is the canonical admin surface) |
 | OpenTelemetry | ✅ Integrated | Traces, metrics, configurable OTLP endpoint |
-| Stripe billing | 🔧 Built, not activated | Needs API key + price IDs configured |
+| Stripe billing | ~~🔧 Built, not activated~~ Not implemented (server deleted in `3d6e07381` (2026-05-02, #77)) | Needs the billing server rebuilt, then API key + price IDs configured |
 | Email (Resend/SendGrid) | 🔧 Built, not activated | Needs API key configured |
 | AI integration | ✅ Active | Via Replit AI integration proxies |
 | Mapbox (Terra, Vessels) | 🔧 Built, not activated | Needs Mapbox token |

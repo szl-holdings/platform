@@ -224,7 +224,7 @@ SZL Holdings (corporate surface)
 | Capability | Status | Effort |
 |---|---|---|
 | Live AIS feed (Vessels) | Not connected | Commercial agreement + 2 weeks integration |
-| Stripe live mode | Keys not configured | Hours — infrastructure built |
+| Stripe live mode | Keys not configured | ~~Hours — infrastructure built~~ Engineering first: the billing server was deleted in `3d6e07381` (2026-05-02, #77) (corrected 2026-11-06) |
 | SCIM provisioning | Endpoint built; needs IdP config per tenant | Per-tenant hours |
 | Azure AD SSO | Code built; needs tenant admin consent | Per-tenant hours |
 | Email delivery | Graceful fallback; no RESEND_API_KEY | Hours — configure key |
