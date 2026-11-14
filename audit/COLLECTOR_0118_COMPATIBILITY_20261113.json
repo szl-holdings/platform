@@ -1,0 +1,76 @@
+{
+  "schema": "szl.collector-compatibility-observation/v1",
+  "source_repository": "szl-holdings/platform",
+  "base_revision": "1fe1d0c75c57a674ec3d1c03ad05da99a643fe9b",
+  "config_candidate_commit": "fb8b1d7e196e53c89f97a60e22b2dc545fa5b0b1",
+  "path": "ops/observability/otel-collector-config.yaml",
+  "execution_device": "BETTERWITHAGE",
+  "execution_method": "Owner-authorized Desktop Commander; Docker binary validation with synthetic environment values",
+  "image": "otel/opentelemetry-collector-contrib@sha256:3f6274fe609da4f9964fbc2ef36b83d08d47964fbb11629251393590d3924072",
+  "documented_image_version": "0.118.0",
+  "deployed_collector_version": "NOT_OBSERVED",
+  "network_mode": "none",
+  "read_only_root_filesystem": true,
+  "linux_capabilities": "ALL_DROPPED",
+  "no_new_privileges": true,
+  "memory_limit": "768m",
+  "cpu_limit": 1,
+  "pid_limit": 128,
+  "secrets_used": false,
+  "validation_argv": ["validate", "--config=/config.yaml"],
+  "synthetic_environment": {
+    "AZURE_MONITOR_CONNECTION_STRING": "InstrumentationKey=00000000-0000-0000-0000-000000000001",
+    "GRAFANA_OTLP_ENDPOINT": "127.0.0.1:4317",
+    "GRAFANA_API_TOKEN": "synthetic-unused",
+    "AZURE_PROMETHEUS_REMOTE_WRITE_URL": "http://127.0.0.1:9090/api/v1/write",
+    "AZURE_PROMETHEUS_TOKEN": "synthetic-unused"
+  },
+  "observations": [
+    {
+      "condition": "canonical_base",
+      "observed_at": "2026-11-13T21:19:27.372348+00:00",
+      "config_sha256": "f4287e7429b51cc7a129e5aad668a63d862a6beb3ac06b3c39e76f68ecb75cd3",
+      "exit_code": 1,
+      "verdict": "FAIL",
+      "diagnostic": "error decoding 'exporters': the logging exporter has been deprecated, use the debug exporter instead"
+    },
+    {
+      "condition": "candidate",
+      "observed_at": "2026-11-13T21:19:28.093545+00:00",
+      "config_sha256": "28f17076dc0821c13714cb717ceddefe26677fa37358c8d490683ea95a5ea43a",
+      "exit_code": 0,
+      "verdict": "PASS",
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "parsed_semantic_comparison": {
+    "status": "PASS",
+    "expected_change": "Replace logging exporter with debug using the former logging verbosity and sampling values; substitute logging with debug in the three signal pipelines.",
+    "all_other_parsed_configuration_equal": true,
+    "batch_processor_unchanged": true,
+    "processor_order_unchanged": true,
+    "redaction_configuration_unchanged": true,
+    "external_destinations_unchanged": true,
+    "optional_grafana_exporter_still_not_connected": true
+  },
+  "overlap_review": {
+    "open_prs_reviewed": [1047, 1046, 1045, 994, 1038, 1044, 995, 1043, 1042, 1041, 1000, 1007, 999, 998, 992],
+    "method": "Paginated native GitHub changed-filename reads for all 15 observed open pull requests",
+    "overlapping_ops_observability_paths": []
+  },
+  "delivery_replay": "NOT_RUN",
+  "delivery_replay_blocker": "Desktop Commander became unresponsive after binary validation. A replay script write timed out; neither script execution nor replay completion is claimed.",
+  "production_qualification": false,
+  "execution_authorized": false,
+  "signature_verification_of_observation": "NOT_PERFORMED",
+  "independent_witness": "NOT_ESTABLISHED",
+  "remaining_limits": [
+    "Configuration acceptance is not proof of telemetry delivery, backpressure, restart persistence, redaction behavior or shutdown flush.",
+    "Actual deployed Collector version and overlays were not discovered.",
+    "Azure Monitor, Prometheus remote write and Grafana availability were not probed.",
+    "Debug output exposure and existing diagnostic listeners require deployment-specific review.",
+    "This does not migrate the batch processor or authorize production rollout.",
+    "No deployment, workflow, credential, branch-protection or production-service change was performed."
+  ]
+}
