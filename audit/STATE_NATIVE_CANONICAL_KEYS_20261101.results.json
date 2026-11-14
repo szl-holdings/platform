@@ -133,13 +133,9 @@
     "config": {
       "extends": "../packages/a11oy-runtime/tsconfig.json",
       "compilerOptions": {
-        "typeRoots": [
-          "../toolchain/node_modules/@types"
-        ]
+        "typeRoots": ["../toolchain/node_modules/@types"]
       },
-      "include": [
-        "../packages/a11oy-runtime/src/state-native/**/*.ts"
-      ]
+      "include": ["../packages/a11oy-runtime/src/state-native/**/*.ts"]
     }
   },
   "claim_boundary": "Subsystem execution results only. This record does not replace canonical platform metrics or establish hosted/deployed readiness.",
