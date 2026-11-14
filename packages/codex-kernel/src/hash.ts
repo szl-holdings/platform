@@ -35,7 +35,8 @@ function sortKeysDeep(value: Json): Json {
   if (value === null || typeof value !== 'object') return value;
   if (Array.isArray(value)) return value.map(sortKeysDeep);
   const keys = Object.keys(value).sort();
-  const out: Record<string, Json> = {};
+  // Null-prototype target so a "__proto__" key is hashed, not dropped.
+  const out: Record<string, Json> = Object.create(null);
   for (const k of keys) out[k] = sortKeysDeep(value[k] as Json);
   return out;
 }
