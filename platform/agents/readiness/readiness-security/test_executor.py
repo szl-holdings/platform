@@ -48,8 +48,8 @@ def github_reads(runs: list[dict], repo: str = REPO,
                  workflow_files: list[dict] = WORKFLOW_FILES) -> dict[str, tuple[int, str]]:
     return {
         f"repos/{repo}/contents/.github/workflows?ref={HEAD}": (0, json.dumps(workflow_files)),
-        f"repos/{repo}/actions/runs?branch=main&per_page=100":
-            (0, json.dumps({"workflow_runs": runs})),
+        f"repos/{repo}/actions/runs?branch=main&head_sha={HEAD}&per_page=100":
+            (0, json.dumps({"total_count": len(runs), "workflow_runs": runs})),
     }
 
 
@@ -115,15 +115,15 @@ class SecurityReadinessTest(unittest.TestCase):
         self.assertTrue(all(value is None for value in observed["present"].values()))
 
         responses = github_reads([])
-        responses[f"repos/{REPO}/actions/runs?branch=main&per_page=100"] = (1, "HTTP 500")
+        responses[f"repos/{REPO}/actions/runs?branch=main&head_sha={HEAD}&per_page=100"] = (1, "HTTP 500")
         with patch.object(security, "gh", side_effect=fake_gh(responses)):
             observed = security.workflow_status(REPO, "main", HEAD)
         self.assertEqual(observed["runs_status"], "READ_FAILED")
         self.assertTrue(all(value is None for value in observed["recent_success"].values()))
 
     def test_old_head_success_does_not_satisfy_current_head(self) -> None:
-        responses = github_reads([run(file, OLD) for file in
-                                  ("sbom.yml", "trivy.yml", "secret-scan.yml")])
+        responses = github_reads([run(file, OLD, run_id=i) for i, file in enumerate(
+                                  ("sbom.yml", "trivy.yml", "secret-scan.yml"), 1)])
         with patch.object(security, "gh", side_effect=fake_gh(responses)):
             observed = security.workflow_status(REPO, "main", HEAD)
         self.assertTrue(all(control["status"] == "WRONG_HEAD_RUN"
@@ -146,7 +146,7 @@ class SecurityReadinessTest(unittest.TestCase):
     def test_exact_head_success_must_be_within_30_days(self) -> None:
         stale = run("sbom.yml")
         stale["created_at"] = "2026-09-02T00:00:00Z"
-        boundary = run("trivy.yml")
+        boundary = run("trivy.yml", run_id=2)
         boundary["created_at"] = "2026-09-03T00:00:00Z"
         with patch.object(security, "gh", side_effect=fake_gh(github_reads([stale, boundary]))):
             observed = security.workflow_status(REPO, "main", HEAD)
@@ -340,8 +340,8 @@ class SecurityReadinessTest(unittest.TestCase):
 
     def test_platform_security_workflow_wrong_head_cannot_use_successful_job(self) -> None:
         responses = platform_reads()
-        runs_endpoint = f"repos/{PLATFORM}/actions/runs?branch=main&per_page=100"
-        responses[runs_endpoint] = (0, json.dumps({"workflow_runs": [
+        runs_endpoint = f"repos/{PLATFORM}/actions/runs?branch=main&head_sha={HEAD}&per_page=100"
+        responses[runs_endpoint] = (0, json.dumps({"total_count": 3, "workflow_runs": [
             run("sbom.yml", run_id=1), run("trivy.yml", run_id=2),
             run("security.yml", OLD, run_id=3)]}))
         with patch.object(security, "gh", side_effect=fake_gh(responses)) as provider:
@@ -352,10 +352,10 @@ class SecurityReadinessTest(unittest.TestCase):
 
     def test_platform_security_workflow_stale_run_cannot_use_successful_job(self) -> None:
         responses = platform_reads(workflow_conclusion="failure")
-        runs_endpoint = f"repos/{PLATFORM}/actions/runs?branch=main&per_page=100"
+        runs_endpoint = f"repos/{PLATFORM}/actions/runs?branch=main&head_sha={HEAD}&per_page=100"
         stale = run("security.yml", conclusion="failure", run_id=3)
         stale["created_at"] = "2026-09-02T00:00:00Z"
-        responses[runs_endpoint] = (0, json.dumps({"workflow_runs": [
+        responses[runs_endpoint] = (0, json.dumps({"total_count": 3, "workflow_runs": [
             run("sbom.yml", run_id=1), run("trivy.yml", run_id=2), stale]}))
         with patch.object(security, "gh", side_effect=fake_gh(responses)) as provider:
             observed = security.workflow_status(PLATFORM, "main", HEAD)
