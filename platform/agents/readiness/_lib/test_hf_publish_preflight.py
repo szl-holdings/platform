@@ -242,12 +242,16 @@ class PublishPreflightTest(unittest.TestCase):
     def test_successful_preflight_cannot_turn_a_failed_real_publish_green(self) -> None:
         self.assertTrue(self._check()["ready"])
         nacl, signing = _fake_nacl()
+        seed = os.urandom(32)
         env = {
             "GITHUB_ACTIONS": "true",
-            "KHIPU_SIGNING_KEY_B64": base64.b64encode(os.urandom(32)).decode(),
+            "KHIPU_SIGNING_KEY_B64": base64.b64encode(seed).decode(),
         }
+        # Pin the key this synthetic seed derives, so the real-publish failure path is reached.
+        pinned = bytes(signing.SigningKey(seed).verify_key)
         with patch.dict(os.environ, env), \
                 patch.dict(sys.modules, {"nacl": nacl, "nacl.signing": signing}), \
+                patch.object(khipu, "_pinned_fleet_public_key", return_value=pinned), \
                 contextlib.redirect_stdout(io.StringIO()) as out:
             with self.assertRaises(SystemExit) as caught:
                 khipu.emit("readiness-test", {"synthetic_test": True})

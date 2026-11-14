@@ -70,7 +70,14 @@ test('failed build propagates its error and removes any earlier successful witne
 test('dirty source is refused before invoking the build', async () => fixture(async ({ root }) => {
   await writeFile(path.join(root, 'artifacts/a11oy/source.txt'), 'unreviewed');
   let invoked = false;
-  await assert.rejects(captureBuild(root, { BASE_PATH: '/' }, () => { invoked = true; }), /not clean/);
+  await assert.rejects(
+    captureBuild(root, { BASE_PATH: '/' }, () => { invoked = true; }),
+    error => {
+      assert.match(error.message, /source checkout is not clean/);
+      assert.match(error.message, /\n M artifacts\/a11oy\/source\.txt/);
+      return true;
+    },
+  );
   assert.equal(invoked, false);
 }));
 

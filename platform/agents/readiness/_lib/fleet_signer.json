@@ -1,0 +1,6 @@
+{
+  "alg": "ed25519",
+  "keyid": "8c8ebdd35be1a571",
+  "public_key_b64": "5b6citX4vyj1JPYCPxPXqNbkzeSXPET+VxKNsbR6w+o=",
+  "note": "Reviewed public half of the readiness fleet signer (repo secret KHIPU_SIGNING_KEY_B64, provisioned 2026-11-03). Public data, not a secret. Rotating the secret requires a reviewed change to this file."
+}

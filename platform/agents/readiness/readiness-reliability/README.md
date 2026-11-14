@@ -16,6 +16,10 @@ curl /healthz, /khipu/sign, /khipu/verify, /metrics on each flagship for a 60s w
 
 ## How it runs
 - **Nightly/hourly** via `.github/workflows/readiness-reliability.yml` (cron `0 * * * *`).
+- **Authority preflight**: before collection, the workflow proves that its
+  effective fleet seed can sign and locally verify a fixed challenge, then
+  verifies the `HF_TOKEN` identity, destination, and dataset-write permission.
+  Neither preflight publishes a receipt, and the executor retains both gates.
 - **Manually**: `python platform/agents/readiness/readiness-reliability/executor.py`
   (set the relevant `*_URL`, `OTEL_COLLECTOR_URL`, `HF_TOKEN`, and
   `KHIPU_SIGNING_KEY_B64` env vars first).
@@ -29,6 +33,8 @@ Every run emits a single Khipu receipt (DSSE envelope) to stdout and, when
 ## Honesty
 This agent never fabricates a green. Missing inputs produce `SKIPPED` /
 `NO-RECEIPT` / honest failure states, surfaced verbatim on the dashboard.
+Scheduled runs with missing or malformed signer or publisher authority now stop
+before the probe window with a bounded workflow annotation.
 
 ---
 Doctrine v11 (LOCKED) · 749/14/163 · Author: Yachay <yachay@szlholdings.dev>

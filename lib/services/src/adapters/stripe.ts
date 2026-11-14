@@ -970,61 +970,82 @@ export class StripeAdapter extends ServiceAdapter {
     payload: string | Buffer,
     signature: string | undefined,
   ): Promise<{ verified: boolean; event: Record<string, unknown> | null }> {
-    const body = typeof payload === "string" ? payload : payload.toString("utf8");
-    let event: Record<string, unknown>;
-    try {
-      event = JSON.parse(body);
-    } catch {
+    const bodyBytes =
+      typeof payload === "string"
+        ? Buffer.from(payload, "utf8")
+        : Buffer.from(payload);
+    const body = bodyBytes.toString("utf8");
+    const webhookSecret = this.webhookSecret;
+
+    if (!webhookSecret || webhookSecret.trim() === "" || !signature) {
       return { verified: false, event: null };
     }
 
-    if (!this.isLive || !this.webhookSecret) {
-      return { verified: true, event };
+    const parts = signature.split(",").map((part) => part.trim());
+    const timestampParts = parts.filter((part) => part.startsWith("t="));
+    const signatureParts = parts.filter((part) => part.startsWith("v1="));
+
+    if (timestampParts.length !== 1 || signatureParts.length === 0) {
+      return { verified: false, event: null };
     }
 
-    if (!signature) {
+    const timestamp = timestampParts[0]?.slice(2) ?? "";
+    if (!/^\d+$/.test(timestamp)) {
+      return { verified: false, event: null };
+    }
+
+    const timestampSeconds = Number(timestamp);
+    if (
+      !Number.isSafeInteger(timestampSeconds) ||
+      String(timestampSeconds) !== timestamp
+    ) {
+      return { verified: false, event: null };
+    }
+
+    const tolerance = 300;
+    const now = Math.floor(Date.now() / 1000);
+    if (Math.abs(now - timestampSeconds) > tolerance) {
       return { verified: false, event: null };
     }
 
     const crypto = await import("node:crypto");
-    const parts = signature.split(",");
-    const timestampPart = parts.find((p: string) => p.startsWith("t="));
-    const sigParts = parts.filter((p: string) => p.startsWith("v1="));
+    const expectedSignature = crypto
+      .createHmac("sha256", webhookSecret)
+      .update(`${timestamp}.`, "utf8")
+      .update(bodyBytes)
+      .digest();
 
-    if (!timestampPart || sigParts.length === 0) {
-      return { verified: false, event: null };
-    }
-
-    const timestamp = timestampPart.split("=")[1] ?? "";
-    const signedPayload = `${timestamp}.${body}`;
-    const expectedSig = crypto
-      .createHmac("sha256", this.webhookSecret)
-      .update(signedPayload)
-      .digest("hex");
-
-    const verified = sigParts.some((s: string) => {
-      const sig = s.split("=")[1] ?? "";
-      try {
-        return crypto.timingSafeEqual(
-          Buffer.from(expectedSig, "hex"),
-          Buffer.from(sig, "hex"),
-        );
-      } catch {
+    const verified = signatureParts.some((part) => {
+      const candidate = part.slice(3);
+      if (!/^[0-9a-f]{64}$/.test(candidate)) {
         return false;
       }
+
+      return crypto.timingSafeEqual(
+        expectedSignature,
+        Buffer.from(candidate, "hex"),
+      );
     });
 
     if (!verified) {
       return { verified: false, event: null };
     }
 
-    const tolerance = 300;
-    const now = Math.floor(Date.now() / 1000);
-    if (Math.abs(now - parseInt(timestamp, 10)) > tolerance) {
+    let event: unknown;
+    try {
+      event = JSON.parse(body);
+    } catch {
       return { verified: false, event: null };
     }
 
-    return { verified, event };
+    if (event === null || typeof event !== "object" || Array.isArray(event)) {
+      return { verified: false, event: null };
+    }
+
+    return {
+      verified: true,
+      event: event as Record<string, unknown>,
+    };
   }
 
   /**

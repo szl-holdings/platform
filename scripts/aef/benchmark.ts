@@ -16,6 +16,12 @@
  *   TENANT_ID     — tenant to use (default: smoke-test-tenant)
  */
 
+import {
+  renderApiBenchmarkReport,
+  type ApiBenchmarkRow,
+  type ApiLatencyStats,
+} from './benchmark-report.ts';
+
 const BASE_URL = process.env.AEF_API_URL ?? 'http://localhost:4200';
 const API_KEY = process.env.AEF_API_KEY ?? '';
 const ROUNDS = parseInt(process.env.BENCH_ROUNDS ?? '20', 10);
@@ -36,14 +42,8 @@ function percentile(sorted: number[], p: number): number {
   return sorted[Math.max(0, idx)]!;
 }
 
-function stats(samples: number[]): {
-  min: number;
-  p50: number;
-  p95: number;
-  p99: number;
-  max: number;
-  avg: number;
-} {
+function stats(samples: number[]): ApiLatencyStats | null {
+  if (samples.length === 0) return null;
   const sorted = [...samples].sort((a, b) => a - b);
   const avg = samples.reduce((s, v) => s + v, 0) / samples.length;
   return {
@@ -66,19 +66,21 @@ async function post(
     headers,
     body: JSON.stringify(body),
   });
-  const json = await res.json();
+  const json = await res.json().catch(() => null);
   return { statusCode: res.status, json, elapsedMs: Date.now() - t0 };
 }
 
-function _row(label: string, s: ReturnType<typeof stats>, unit = 'ms'): string {
-  return `  ${label.padEnd(22)} min=${s.min}${unit}  p50=${s.p50}${unit}  p95=${s.p95}${unit}  p99=${s.p99}${unit}  max=${s.max}${unit}  avg=${s.avg}${unit}`;
+function throughput(samples: number[], operationsPerRequest = 1): number | null {
+  const totalMs = samples.reduce((sum, sample) => sum + sample, 0);
+  if (samples.length === 0 || totalMs === 0) return null;
+  return Math.round((samples.length * operationsPerRequest * 1000) / totalMs);
 }
 
 // ---------------------------------------------------------------------------
 // Benchmark suites
 // ---------------------------------------------------------------------------
 
-async function benchEmbed(): Promise<void> {
+async function benchEmbed(): Promise<ApiBenchmarkRow> {
   const INPUTS = [
     'Quarterly risk summary for maritime shipping lanes',
     'DORA compliance gap analysis for financial institutions',
@@ -100,15 +102,17 @@ async function benchEmbed(): Promise<void> {
     }
   }
 
-  const _s = stats(latencies);
-  if (failures > 0) {}
-  const _throughput = Math.round(
-    (ROUNDS * INPUTS.length * 1000) / latencies.reduce((a, b) => a + b, 0),
-  );
+  return {
+    suite: 'embed',
+    succeeded: latencies.length,
+    failed: failures,
+    invalid: 0,
+    latency: stats(latencies),
+    throughputPerSecond: throughput(latencies, INPUTS.length),
+  };
 }
 
-async function benchSearch(): Promise<void> {
-
+async function benchSearch(): Promise<ApiBenchmarkRow> {
   const QUERIES = [
     'container vessel detention risk Red Sea',
     'cyber incident response playbook zero-day',
@@ -119,6 +123,7 @@ async function benchSearch(): Promise<void> {
 
   const latencies: number[] = [];
   let failures = 0;
+  let invalid = 0;
 
   for (let i = 0; i < ROUNDS; i++) {
     const q = QUERIES[i % QUERIES.length]!;
@@ -131,21 +136,27 @@ async function benchSearch(): Promise<void> {
     });
     if (statusCode === 200) {
       latencies.push(elapsedMs);
-      const resp = json as { retrievalPath?: string[] };
+      const resp = json as { retrievalPath?: string[] } | null;
       // Validate 13-stage canonical pipeline is present
-      if (resp.retrievalPath?.length !== 13) {
+      if (resp?.retrievalPath?.length !== 13) {
+        invalid++;
       }
     } else {
       failures++;
     }
   }
 
-  const _s = stats(latencies);
-  if (failures > 0) {}
+  return {
+    suite: 'hybrid-search',
+    succeeded: latencies.length,
+    failed: failures,
+    invalid,
+    latency: stats(latencies),
+    throughputPerSecond: throughput(latencies),
+  };
 }
 
-async function benchRerank(): Promise<void> {
-
+async function benchRerank(): Promise<ApiBenchmarkRow> {
   const CANDIDATES = [
     { id: 'c1', text: 'Tanker detention at Suez Canal due to revised IMO SOLAS requirements' },
     { id: 'c2', text: 'Compliance audit findings for AIS transponder reporting regulations' },
@@ -170,8 +181,14 @@ async function benchRerank(): Promise<void> {
     }
   }
 
-  const _s = stats(latencies);
-  if (failures > 0) {}
+  return {
+    suite: 'rerank',
+    succeeded: latencies.length,
+    failed: failures,
+    invalid: 0,
+    latency: stats(latencies),
+    throughputPerSecond: throughput(latencies),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -179,18 +196,17 @@ async function benchRerank(): Promise<void> {
 // ---------------------------------------------------------------------------
 
 async function main(): Promise<void> {
-
   // Health check before benchmarking
   const health = await fetch(`${BASE_URL}/health`, { headers });
   if (!health.ok) {
-    process.exit(1);
+    throw new Error('AEF benchmark health check failed');
   }
 
-  await benchEmbed();
-  await benchSearch();
-  await benchRerank();
+  const rows = [await benchEmbed(), await benchSearch(), await benchRerank()];
+  process.stdout.write(renderApiBenchmarkReport({ roundsPerSuite: ROUNDS, rows }));
 }
 
 main().catch((_err) => {
-  process.exit(1);
+  process.stderr.write('AEF API benchmark failed\n');
+  process.exitCode = 1;
 });

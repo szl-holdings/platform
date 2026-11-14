@@ -67,6 +67,27 @@ def _canonical(obj: Any) -> bytes:
     return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode()
 
 
+FLEET_SIGNER_PIN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fleet_signer.json")
+
+
+def _pinned_fleet_public_key() -> bytes | None:
+    # The reviewed fleet Ed25519 public key committed beside this module. It is public
+    # data reviewed through a pull request, not a secret. A missing, unreadable or
+    # malformed pin returns None, so receipts fail closed. The configured signing
+    # secret must derive exactly this key.
+    try:
+        with open(FLEET_SIGNER_PIN, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        key = base64.b64decode(doc["public_key_b64"], validate=True)
+    except Exception:
+        return None
+    if not isinstance(doc, dict) or doc.get("alg") != "ed25519" or len(key) != 32:
+        return None
+    if doc.get("keyid") != hashlib.sha256(key).hexdigest()[:16]:
+        return None
+    return key
+
+
 def sign_khipu_receipt(agent: str, payload: dict) -> dict:
     """Build a Khipu receipt and DSSE-wrap it.
 
@@ -117,8 +138,9 @@ def receipt_signature_error(agent: str, envelope: dict) -> str | None:
     """Return a bounded reason when a receipt cannot be trusted for upload.
 
     The envelope's signed flag is a claim, not proof. Verify the payload hash,
-    signer metadata, and Ed25519 signature against the configured fleet key
-    before it can leave this process. The envelope's public key is untrusted.
+    signer metadata, and Ed25519 signature against the reviewed fleet key pinned
+    in fleet_signer.json before it can leave this process. The configured secret
+    must derive that pinned key. The envelope's public key is untrusted.
     """
     if envelope.get("signed") is not True:
         return "unsigned receipt"
@@ -136,6 +158,11 @@ def receipt_signature_error(agent: str, envelope: dict) -> str | None:
 
         seed = base64.b64decode(seed_b64, validate=True)
         expected_public_key = bytes(SigningKey(seed).verify_key)
+        pinned_public_key = _pinned_fleet_public_key()
+        if pinned_public_key is None:
+            return "no pinned fleet public key"
+        if expected_public_key != pinned_public_key:
+            return "configured signer does not match pinned fleet key"
         body_bytes = base64.b64decode(envelope["payload"], validate=True)
         public_key = base64.b64decode(envelope["publicKeyB64"], validate=True)
         sig_bytes = base64.b64decode(signature["sig"], validate=True)

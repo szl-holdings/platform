@@ -1,6 +1,10 @@
-import { LocalCpuBackend } from '@workspace/alloy-vector-worker';
+import type { LocalCpuBackend } from '@workspace/alloy-vector-worker';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ALL_FIXTURE_SETS } from './fixtures/index.js';
+import {
+  loadRealVectorBackendModule,
+  realVectorEvalsEnabled,
+} from './real-vector-opt-in.js';
 import { runEval } from './runner.js';
 import type { GoldenFixtureSet, RetrievalAdapter, RetrievalResult } from './types.js';
 
@@ -67,42 +71,35 @@ async function buildAdapter(
   };
 }
 
-describe('aef-evals — golden fixtures with real ONNX vectors', () => {
+const describeRealVectorEvals = realVectorEvalsEnabled() ? describe : describe.skip;
+
+describeRealVectorEvals('aef-evals — golden fixtures with real ONNX vectors', () => {
   let backend: LocalCpuBackend;
-  // The real ONNX weights are fetched from HuggingFace on first embed(). In a
-  // sandboxed / rate-limited CI runner that fetch can fail (e.g. HTTP 429) with
-  // no code defect. Treat an unreachable model as a skip (importorskip-style)
-  // rather than a hard failure — unless AEF_EVALS_REQUIRE_REAL=1 forces a real
-  // run, in which case the network failure is surfaced as a real error.
-  let modelUnavailable: string | null = null;
 
   beforeAll(async () => {
-    backend = new LocalCpuBackend();
-    // Warm the model so per-fixture timing is more representative.
-    try {
-      await backend.embed([
-        {
-          chunkId: 'warm',
-          text: 'warm-up',
-          modelRef: backend.modelRef,
-          profileId: 'warm',
-          inputType: 'passage',
-        },
-      ]);
-    } catch (err) {
-      if (process.env.AEF_EVALS_REQUIRE_REAL === '1') throw err;
-      modelUnavailable = err instanceof Error ? err.message : String(err);
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[aef-evals] real ONNX model unavailable, skipping real-vector evals: ${modelUnavailable}\n` +
-          'Set AEF_EVALS_REQUIRE_REAL=1 to force these to fail instead of skip.',
-      );
+    const vectorWorker = await loadRealVectorBackendModule(
+      () => import('@workspace/alloy-vector-worker'),
+    );
+    if (!vectorWorker) {
+      throw new Error('real-vector backend loaded without AEF_EVALS_REQUIRE_REAL=1');
     }
+    backend = new vectorWorker.LocalCpuBackend();
+    // Warm the model so per-fixture timing is more representative. An opted-in
+    // run fails if the immutable model cannot be loaded; it never downgrades to
+    // a successful skipped run after attempting network access.
+    await backend.embed([
+      {
+        chunkId: 'warm',
+        text: 'warm-up',
+        modelRef: backend.modelRef,
+        profileId: 'warm',
+        inputType: 'passage',
+      },
+    ]);
   }, 240_000);
 
   for (const fixtureSet of ALL_FIXTURE_SETS) {
-    it(`${fixtureSet.profileId}: nDCG@${TOP_K} >= ${MIN_NDCG}`, async (ctx) => {
-      if (modelUnavailable) ctx.skip();
+    it(`${fixtureSet.profileId}: nDCG@${TOP_K} >= ${MIN_NDCG}`, async () => {
       const adapter = await buildAdapter(backend, fixtureSet);
       const result = await runEval(fixtureSet, adapter, {
         topK: TOP_K,

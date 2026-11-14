@@ -142,15 +142,13 @@ exporters:
     resource_to_telemetry_conversion:
       enabled: true
 
-  # Logging exporter — debug output only; disable in production
-  logging:
+  # Console diagnostics use the supported debug exporter (logging was removed in 0.111).
+  # Normal verbosity and sampling preserve the former logging-exporter settings.
+  # Production overlays must explicitly review console telemetry exposure.
+  debug:
     verbosity: normal
     sampling_initial: 5
     sampling_thereafter: 200
-
-  # Debug exporter — structured JSON to stdout for local dev
-  debug:
-    verbosity: detailed
 
 # ---------------------------------------------------------------------------
 # Extensions — collector operational endpoints
@@ -179,19 +177,19 @@ service:
     traces:
       receivers:  [otlp]
       processors: [memory_limiter, resourcedetection, resource, attributes/redact, filter/health_probes, transform/span_names, batch]
-      exporters:  [azuremonitor, logging]
+      exporters:  [azuremonitor, debug]
 
     # Metrics pipeline
     metrics:
       receivers:  [otlp, prometheus, hostmetrics]
       processors: [memory_limiter, resourcedetection, resource, batch]
-      exporters:  [prometheusremotewrite, azuremonitor, logging]
+      exporters:  [prometheusremotewrite, azuremonitor, debug]
 
     # Logs pipeline
     logs:
       receivers:  [otlp]
       processors: [memory_limiter, resourcedetection, resource, attributes/redact, batch]
-      exporters:  [azuremonitor, logging]
+      exporters:  [azuremonitor, debug]
 
   # Collector self-telemetry
   telemetry:

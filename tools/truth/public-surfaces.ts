@@ -77,10 +77,22 @@ const MAX_OBSERVATION_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
 const MAX_METADATA_BODY_BYTES = 128 * 1024;
 const JSON_WHITESPACE = new Set([' ', '\t', '\n', '\r']);
-const KILLINCHU_SOURCE_REVISION = '4a434f8d07feb7badc5a274c89549452f49ff0d1';
-const KILLINCHU_MANIFEST_SHA256 =
-  '38c7d69a6a374afe157f23ab2760bab4b58146efa1beee00bc30519b990216d5';
-const KILLINCHU_ATTESTATION_ID = '55856266';
+type KillinchuReleaseIdentity = Readonly<{
+  revision: string;
+  manifestSha256: string;
+  attestationId: string;
+}>;
+
+// The release whose GitHub OIDC attestation was verified and recorded for this registry.
+const PINNED_KILLINCHU_RELEASE: KillinchuReleaseIdentity = {
+  revision: '4a434f8d07feb7badc5a274c89549452f49ff0d1',
+  manifestSha256: '38c7d69a6a374afe157f23ab2760bab4b58146efa1beee00bc30519b990216d5',
+  attestationId: '55856266',
+};
+const GIT_REVISION_PATTERN = /^[0-9a-f]{40}$/;
+const SHA256_HEX_PATTERN = /^[0-9a-f]{64}$/;
+const ATTESTATION_ID_PATTERN = /^[1-9][0-9]{0,19}$/;
+const CLOUDFLARE_RAY_PATTERN = /^[0-9a-f]{16}(?:-[A-Z]{3,4})?$/i;
 const LIVE_SURFACE_PROBE_CONCURRENCY = 4;
 const LIVE_SURFACE_RETRY_DELAYS_MS = [750, 1_500] as const;
 const TRANSIENT_TRANSPORT_CODES = new Set([
@@ -578,6 +590,31 @@ async function cancelResponseBody(response: SurfaceFetchResponse): Promise<void>
   await response.body?.cancel();
 }
 
+/**
+ * Attributes an unexpected status to the edge when the response headers show edge policy
+ * answered (an x402 paywall or a Cloudflare challenge) or the response came through
+ * Cloudflare, so operators can tell edge configuration from origin drift. It only appends
+ * context to an existing failure and never changes a verdict.
+ */
+function edgeContext(response: SurfaceFetchResponse): string {
+  const header = (name: string): string | null => {
+    const value = response.headers?.get(name);
+    return typeof value === 'string' ? value.trim() : null;
+  };
+  if (response.status === 402 && header('payment-required') !== null) {
+    return '; edge returned 402 (x402 paywall)';
+  }
+  const ray = header('cf-ray');
+  const rayLabel = ray !== null && CLOUDFLARE_RAY_PATTERN.test(ray) ? `, cf-ray ${ray}` : '';
+  if (header('cf-mitigated')?.toLowerCase() === 'challenge') {
+    return `; edge returned ${response.status} (Cloudflare challenge, cf-mitigated: challenge${rayLabel})`;
+  }
+  if (header('server')?.toLowerCase() === 'cloudflare') {
+    return `; served through Cloudflare (server: cloudflare${rayLabel}); check its security events`;
+  }
+  return '';
+}
+
 async function readBoundedResponseBody(
   surfaceId: string,
   response: SurfaceFetchResponse,
@@ -770,7 +807,10 @@ function hasExactKeys(value: Record<string, unknown>, expected: readonly string[
   );
 }
 
-function isExactKillinchuBuildInfo(value: unknown): boolean {
+function isExactKillinchuBuildInfo(
+  value: unknown,
+  release: KillinchuReleaseIdentity = PINNED_KILLINCHU_RELEASE,
+): boolean {
   if (!isObject(value)) return false;
   if (
     !hasExactKeys(value, [
@@ -798,7 +838,7 @@ function isExactKillinchuBuildInfo(value: unknown): boolean {
   return (
     hasExactKeys(build, ['state', 'revision', 'revision_source']) &&
     build.state === 'OBSERVED' &&
-    build.revision === KILLINCHU_SOURCE_REVISION &&
+    build.revision === release.revision &&
     build.revision_source === 'env:SZL_GIT_SHA' &&
     hasExactKeys(receipt, [
       'state',
@@ -810,14 +850,49 @@ function isExactKillinchuBuildInfo(value: unknown): boolean {
       'verification',
     ]) &&
     receipt.state === 'GITHUB_OIDC_ATTESTED' &&
-    receipt.source_revision === KILLINCHU_SOURCE_REVISION &&
+    receipt.source_revision === release.revision &&
     receipt.subject === 'hf-deploy-manifest.json' &&
-    receipt.subject_sha256 === KILLINCHU_MANIFEST_SHA256 &&
-    receipt.attestation_id === KILLINCHU_ATTESTATION_ID &&
+    receipt.subject_sha256 === release.manifestSha256 &&
+    receipt.attestation_id === release.attestationId &&
     receipt.attestation_url ===
-      `https://github.com/szl-holdings/killinchu/attestations/${KILLINCHU_ATTESTATION_ID}` &&
+      `https://github.com/szl-holdings/killinchu/attestations/${release.attestationId}` &&
     receipt.verification ===
       'Download hf-deploy-manifest.json from the matching deployment run and run gh attestation verify hf-deploy-manifest.json -R szl-holdings/killinchu'
+  );
+}
+
+/**
+ * Explains a Killinchu build-info contract failure without loosening the contract. When the
+ * body would satisfy the exact contract for the well-formed release identity it reports, the
+ * runtime was redeployed from a release this registry has not verified; the reported identity
+ * is echoed only after it matches the strict revision, digest and attestation-id formats.
+ */
+function describeKillinchuBuildInfoDrift(value: unknown): string {
+  const base = 'API body does not match the exact source-binding contract';
+  if (!isObject(value) || !isObject(value.build) || !isObject(value.release_receipt)) {
+    return base;
+  }
+  const reported = {
+    revision: value.build.revision,
+    manifestSha256: value.release_receipt.subject_sha256,
+    attestationId: value.release_receipt.attestation_id,
+  };
+  if (
+    typeof reported.revision !== 'string' ||
+    typeof reported.manifestSha256 !== 'string' ||
+    typeof reported.attestationId !== 'string' ||
+    !GIT_REVISION_PATTERN.test(reported.revision) ||
+    !SHA256_HEX_PATTERN.test(reported.manifestSha256) ||
+    !ATTESTATION_ID_PATTERN.test(reported.attestationId) ||
+    !isExactKillinchuBuildInfo(value, reported as KillinchuReleaseIdentity)
+  ) {
+    return base;
+  }
+  return (
+    `${base}: the runtime reports release ${reported.revision} (attestation ` +
+    `${reported.attestationId}), not the verified release ${PINNED_KILLINCHU_RELEASE.revision} ` +
+    `(attestation ${PINNED_KILLINCHU_RELEASE.attestationId}); verify the new release ` +
+    'attestation before rebinding the registry'
   );
 }
 
@@ -949,7 +1024,7 @@ async function validatePublicApiResponse(
   if (surfaceId === 'killinchu-build-info-api') {
     return isExactKillinchuBuildInfo(payload)
       ? []
-      : [`${surfaceId}: API body does not match the exact source-binding contract`];
+      : [`${surfaceId}: ${describeKillinchuBuildInfoDrift(payload)}`];
   }
   if (surfaceId === 'killinchu-readiness-api') {
     return isExactKillinchuReadiness(payload)
@@ -1335,7 +1410,9 @@ async function verifyLivePublicSurface(
         return [
           `${surface.id}: expected ${
             expectedRedirectStatus === undefined ? 'an approved' : `HTTP ${expectedRedirectStatus}`
-          } redirect from ${approvedTarget.canonicalUrl}, observed ${firstResponse.status}`,
+          } redirect from ${approvedTarget.canonicalUrl}, observed ${firstResponse.status}${edgeContext(
+            firstResponse,
+          )}`,
         ];
       }
       const location = firstResponse.headers?.get('location');
@@ -1367,7 +1444,9 @@ async function verifyLivePublicSurface(
     const failures: string[] = [];
     if (response.status !== surface.observation.status) {
       failures.push(
-        `${surface.id}: expected HTTP ${surface.observation.status}, observed ${response.status}`,
+        `${surface.id}: expected HTTP ${surface.observation.status}, observed ${response.status}${edgeContext(
+          response,
+        )}`,
       );
     }
     const finalUrl = normalizedUrl(response.url);

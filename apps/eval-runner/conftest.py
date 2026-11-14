@@ -24,7 +24,7 @@ os.environ["LM_EVAL_CACHE_PATH"] = "/tmp/lm_eval_test_cache"
 # ── Set up package path ───────────────────────────────────────────────────────
 # Add the eval-runner root so `import src.suites` works as a package import.
 # This mirrors what run.py does at start-up and preserves relative imports.
-_ROOT = os.path.dirname(os.path.dirname(__file__))  # apps/eval-runner/
+_ROOT = os.path.dirname(__file__)  # apps/eval-runner/
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 

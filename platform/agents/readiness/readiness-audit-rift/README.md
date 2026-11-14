@@ -12,14 +12,25 @@ The verifier of verifiers — independently re-checks the other 7.
 | **Receipt sink** | `SZLHOLDINGS/readiness-runs` → `receipts/readiness-audit-rift/<date>/<ts>.json` |
 
 ## What it does
-Re-verifies receipt signatures and independently samples security workflow presence,
-operability commit counts, and docs README presence. Security samples a reported
-control by name, rather than treating the workflow directory alone as proof.
+Re-verifies each peer's receipt signature against the configured fleet key, then
+independently re-checks one positive claim per peer:
 
-Reliability, observability, compliance, and DR currently have structural-only
-checks. They remain `UNVERIFIED` until independent claim rechecks are implemented;
-receipt structure alone does not establish the underlying claim. The current
-implementation therefore cannot produce a fleet-wide `GREEN` verdict.
+| Peer | Independent recheck |
+|---|---|
+| security | Re-lists the workflows of one repo (GREEN first, then AMBER, then any verdict) for a control the receipt reports present. When the receipt cites a successful run for that control, re-fetches the run and requires `success` at the cited head. |
+| reliability | Re-probes `/healthz` (up to 3 attempts) on one flagship whose receipt reports a healthz success rate at or above its pass criterion. |
+| observability | Re-fetches `/metrics` on one flagship and requires a Prometheus sample line (not a `# HELP`/`# TYPE` comment or a longer metric name) for a counter the receipt reports present. |
+| operability | Re-counts commits at the reported revision and time window. |
+| compliance | Re-fetches one README the receipt reports as carrying the doctrine numbers and requires them. |
+| docs | Re-fetches one README the receipt reports present. |
+| dr | Re-downloads one dump the receipt reports uploaded and restored, and requires it to restore to the reported row count in fresh SQLite. |
+
+A recheck whose answer contradicts the claim is `FLAGGED`. A recheck that cannot
+reach its source (no HTTP answer, a GitHub or Hub failure, a malformed response)
+is `RESAMPLE-ERROR`. A peer with no positive claim to sample, a malformed claim,
+or a flagship without a configured `http(s)` URL is `UNVERIFIED`. Rechecks are
+point in time: a source that changed after the peer ran can produce `FLAGGED` or
+`RESAMPLE-ERROR`, so read the finding before acting on it.
 
 `FLAGGED`, `NO-RECEIPT`, `FETCH-ERROR`, `RESAMPLE-ERROR`, `UNVERIFIED`, and any
 unrecognized status prevent a `GREEN` meta-verdict and appear in `flagged_agents`.

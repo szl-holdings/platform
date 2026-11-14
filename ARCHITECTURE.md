@@ -106,6 +106,6 @@ All surfaces share these primitives — none can be disabled per-tenant:
 ---
 
 *For the full architecture reference see [`docs/architecture/architecture.md`](docs/architecture/architecture.md).*
-*For platform primitives specification see [`docs/platform/platform-primitives.md`](docs/platform/platform-primitives.md).*
+*For platform primitives specification see [`docs/architecture/platform-primitives.md`](docs/architecture/platform-primitives.md).*
 *Counts verified 2026-04-25 by Moonshot Phase 1 audit. Source: `audit/source-of-truth.json` v1.3.0.*
 *Route-file count corrected 2026-05-30: the prior figure of "357 route files" did not match the repository. The true count is 30 files under `*/routes/` directories — `git ls-tree -r --name-only HEAD | grep -E '/routes?/.*\.(ts|js)$' | grep -v node_modules | wc -l` returns 30 (8 in `apps/alloy-embedding-api`, 2 in `apps/alloy-ingestion-orchestrator`, 9 in `apps/alloy-runtime-api`, 10 in `services/alloy-fabric-api`, 1 in `artifacts/api-server`). The `artifacts/api-server/src/routes/` directory contains a single file (`ouroboros.ts`).*

@@ -12,12 +12,13 @@ export const BUILD_ARGS = ['exec', 'turbo', 'run', 'build', '--filter=@workspace
 export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 
 export function sourceIdentity(root) {
-  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
+  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trimEnd();
   if (path.resolve(git('rev-parse', '--show-toplevel')) !== path.resolve(root)) {
     throw new Error('run from the checkout root');
   }
-  if (git('status', '--porcelain=v1', '--untracked-files=all')) {
-    throw new Error('source checkout is not clean');
+  const status = git('status', '--porcelain=v1', '--untracked-files=all');
+  if (status) {
+    throw new Error(`source checkout is not clean:\n${status}`);
   }
   const source_sha = git('rev-parse', 'HEAD');
   const source_tree = git('rev-parse', 'HEAD^{tree}');

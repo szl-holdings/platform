@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 test('only the exact public tokenizer revision assignment is exempted from generic-api-key', () => {
   const config = readFileSync(new URL('../../.gitleaks.toml', import.meta.url), 'utf8');
@@ -58,7 +59,7 @@ test('pinned Gitleaks admits exact public revision and rejects identical value o
   }
   assert.equal(version.status, 0);
   assert.equal(version.stdout.trim(), '8.21.2');
-  const config = new URL('../../.gitleaks.toml', import.meta.url).pathname;
+  const config = fileURLToPath(new URL('../../.gitleaks.toml', import.meta.url));
   const source = readFileSync(
     new URL('../../workers/alloy-vector-worker/src/tokenizer.ts', import.meta.url),
     'utf8',
@@ -98,7 +99,52 @@ test('readiness digest has only one exact historical finding admission', () => {
   const source = readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
   assert.doesNotMatch(source, /PLATFORM_SECRET_STEP_SHA256/);
   assert.match(source, /^PLATFORM_SCANNER_STEP_SHA256 = "[0-9a-f]{64}"$/m);
-  assert.match(source, /hashlib\.sha256\(step\.encode\("utf-8"\)\)\.hexdigest\(\) != PLATFORM_SCANNER_STEP_SHA256/);
+  assert.match(
+    source,
+    /hashlib\.sha256\(step\.encode\("utf-8"\)\)\.hexdigest\(\) != PLATFORM_SCANNER_STEP_SHA256/,
+  );
+});
+
+test('readiness signer env name has only one exact historical finding admission', () => {
+  const path = 'platform/agents/readiness/_lib/signing_preflight.py';
+  const fingerprint = `296fc4720e9a259ea3fdf8e2c8ca6e7feb7caef1:${path}:generic-api-key:14`;
+  const entries = readFileSync(new URL('../../.gitleaksignore', import.meta.url), 'utf8')
+    .split(/\r?\n/)
+    .filter((line) => line && !line.startsWith('#') && line.includes(path));
+  assert.deepEqual(entries, [fingerprint]);
+  const source = readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /^KEY_ENV\s*=/m);
+  assert.match(source, /^SIGNER_ENV = "_"\.join\(\("KHIPU", "SIGNING", "KEY", "B64"\)\)$/m);
+});
+
+test('pinned Gitleaks admits the current signer symbol', (context) => {
+  const version = spawnSync('gitleaks', ['version'], { encoding: 'utf8' });
+  if (version.error?.code === 'ENOENT') {
+    if (process.env.GITHUB_ACTIONS === 'true')
+      assert.fail('Gitleaks must be installed before policy tests');
+    context.skip('Pinned Gitleaks unavailable locally; required in hosted workflow');
+    return;
+  }
+  assert.equal(version.status, 0);
+  assert.equal(version.stdout.trim(), '8.21.2');
+  const path = 'platform/agents/readiness/_lib/signing_preflight.py';
+  const source = readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
+  const config = fileURLToPath(new URL('../../.gitleaks.toml', import.meta.url));
+  const fixture = mkdtempSync(join(tmpdir(), 'gitleaks-readiness-signer-policy-'));
+  const directory = join(fixture, 'platform/agents/readiness/_lib');
+  const scan = () =>
+    spawnSync(
+      'gitleaks',
+      ['detect', '--no-git', '--source', '.', '--config', config, '--redact', '--exit-code', '1'],
+      { cwd: fixture, encoding: 'utf8' },
+    );
+  try {
+    mkdirSync(directory, { recursive: true });
+    writeFileSync(join(fixture, path), source);
+    assert.equal(scan().status, 0, 'The current public signer env name must not match');
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
 });
 
 test('pinned Gitleaks historical admission cannot suppress a future digest assignment', (context) => {
@@ -113,26 +159,55 @@ test('pinned Gitleaks historical admission cannot suppress a future digest assig
   assert.equal(version.stdout.trim(), '8.21.2');
   const path = 'platform/agents/readiness/readiness-security/executor.py';
   const source = readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
-  const renamed = source.split('\n').find((line) => line.startsWith('PLATFORM_SCANNER_STEP_SHA256 ='));
+  const renamed = source
+    .split('\n')
+    .find((line) => line.startsWith('PLATFORM_SCANNER_STEP_SHA256 ='));
   assert.ok(renamed);
   const historical = renamed.replace('PLATFORM_SCANNER_STEP_SHA256', 'PLATFORM_SECRET_STEP_SHA256');
-  const config = new URL('../../.gitleaks.toml', import.meta.url).pathname;
+  const config = fileURLToPath(new URL('../../.gitleaks.toml', import.meta.url));
   const ignored = readFileSync(new URL('../../.gitleaksignore', import.meta.url), 'utf8');
   const fixture = mkdtempSync(join(tmpdir(), 'gitleaks-readiness-policy-'));
   const report = join(fixture, 'report.json');
   const git = (...args) => spawnSync('git', args, { cwd: fixture, encoding: 'utf8' });
-  const scan = () => spawnSync('gitleaks', [
-    'detect', '--source', '.', '--config', config, '--redact', '--exit-code', '1',
-    '--report-format', 'json', '--report-path', report,
-  ], { cwd: fixture, encoding: 'utf8' });
+  const scan = () =>
+    spawnSync(
+      'gitleaks',
+      [
+        'detect',
+        '--source',
+        '.',
+        '--config',
+        config,
+        '--redact',
+        '--exit-code',
+        '1',
+        '--report-format',
+        'json',
+        '--report-path',
+        report,
+      ],
+      { cwd: fixture, encoding: 'utf8' },
+    );
   try {
     mkdirSync(join(fixture, 'platform/agents/readiness/readiness-security'), { recursive: true });
     writeFileSync(join(fixture, path), `${'\n'.repeat(35)}${historical}\n`);
     writeFileSync(join(fixture, '.gitleaksignore'), ignored);
     assert.equal(git('init', '-q').status, 0);
     assert.equal(git('add', path).status, 0);
-    assert.equal(git('-c', 'user.name=Policy fixture', '-c', 'user.email=policy@example.invalid',
-      'commit', '-qm', 'Synthetic public digest fixture').status, 0);
+    assert.equal(
+      git(
+        '-c',
+        'user.name=Policy fixture',
+        '-c',
+        'user.email=policy@example.invalid',
+        '-c',
+        'commit.gpgsign=false',
+        'commit',
+        '-qm',
+        'Synthetic public digest fixture',
+      ).status,
+      0,
+    );
     const commit = git('rev-parse', 'HEAD').stdout.trim();
     assert.equal(scan().status, 1, 'A new commit with identical public bytes must remain blocking');
     const findings = JSON.parse(readFileSync(report, 'utf8'));
@@ -152,9 +227,11 @@ test('pinned Gitleaks historical admission cannot suppress a future digest assig
       assert.equal(scan().status, 1, 'Changing any fingerprint dimension must remain blocking');
     }
     writeFileSync(join(fixture, path), `${'\n'.repeat(35)}${renamed}\n`);
-    const current = spawnSync('gitleaks', [
-      'detect', '--no-git', '--source', '.', '--config', config, '--redact', '--exit-code', '1',
-    ], { cwd: fixture, encoding: 'utf8' });
+    const current = spawnSync(
+      'gitleaks',
+      ['detect', '--no-git', '--source', '.', '--config', config, '--redact', '--exit-code', '1'],
+      { cwd: fixture, encoding: 'utf8' },
+    );
     assert.equal(current.status, 0, 'The accurately named public digest is not a credential');
   } finally {
     rmSync(fixture, { recursive: true, force: true });

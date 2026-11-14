@@ -65,4 +65,4 @@
 ---
 
 *For full schema documentation see [`docs/architecture/data-model.md`](docs/architecture/data-model.md).*
-*For domain-level schema audit see [`docs/architecture/schema-audit-2025-04.md`](docs/architecture/schema-audit-2025-04.md).*
+*For domain-level schema audit see [`docs/schema-audit-2025-04.md`](docs/schema-audit-2025-04.md).*

@@ -2,7 +2,7 @@
 
 > [Platform Repo](https://github.com/szl-holdings/platform) | [Security](./SECURITY.md) | [Code of Conduct](./CODE_OF_CONDUCT.md) | [Architecture](./docs/architecture/architecture.md) | [Contact](https://szlholdings.com)
 
-The SZL Holdings platform is a **proprietary, founder-led governed decision infrastructure platform**. This repository is a public mirror for evaluation, transparency, and technical review purposes — not an open-source project accepting community contributions.
+The SZL Holdings platform is a **founder-led governed decision infrastructure platform**. This repository is published under the [Apache License 2.0](./LICENSE) as a public mirror for evaluation, transparency, and technical review purposes — it is not run as a community project and does not accept unsolicited contributions.
 
 All participants in SZL Holdings spaces are expected to follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
@@ -149,7 +149,7 @@ Every contributor remains responsible for contributing only material they wrote 
 
 ## Licensing
 
-All content in this repository is proprietary. See [LICENSE](./LICENSE).
+This repository is licensed under the Apache License 2.0. See [LICENSE](./LICENSE) and [NOTICE](./NOTICE); trademarks are not licensed.
 
 ---
 

@@ -82,3 +82,9 @@ d7b3f1e15dbf79aa655f1af2ce416ddf0df2b719:scripts/qa/scan-secrets.test.js:private
 # Public workflow-step SHA-256, not an authentication credential. Exact source
 # and the historical introduction are documented in security/readiness-scan-digest.md.
 4d37b956685f6e52fa1ff13ee858416e095ad9e1:platform/agents/readiness/readiness-security/executor.py:generic-api-key:36
+
+# Public signing environment-variable name construction, not credential material.
+# The current symbol no longer contains the generic detector keyword; admit only
+# the immutable squash commit, exact source path, rule, and line reported by run
+# 41400293441. No path, regex, detector, or future commit is exempted.
+296fc4720e9a259ea3fdf8e2c8ca6e7feb7caef1:platform/agents/readiness/_lib/signing_preflight.py:generic-api-key:14

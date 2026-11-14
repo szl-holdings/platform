@@ -82,6 +82,8 @@ class StagingDeploymentTests(unittest.TestCase):
                 "--output", "/dev/null", "--write-out", "%{http_code}",
                 "-X", "POST", "-H", f"Authorization: Bearer {TOKEN}",
                 "-H", "Content-Type: application/json",
+                "-H", "X-Requested-With: XMLHttpRequest",
+                "-H", "Origin: https://replit.com",
                 f"https://replit.com/api/v1/repls/{APP_ID}/deployments",
             ],
         )
