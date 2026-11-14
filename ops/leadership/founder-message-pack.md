@@ -54,7 +54,9 @@ These are not scripts to read. They are the language patterns the message has be
 >
 > *Two — we have shipped six fully-implemented domain packs on one shared governance substrate: security, maritime, real estate, legal, advisory, cloud. Plus a unified mobile command surface (CORTEX) that reflects the same loop on the device. This is approximately 18-24 months of a 3-4 person engineering team's output, delivered by a single founder with AI assistance over the last 12 months.*
 >
-> *Three — we are pre-revenue by design. The current phase is design partner program. Three design partners before billing activation. Stripe is built and ready; activation is configuration, not engineering.*
+> *Three — we are pre-revenue by design. The current phase is design partner program. Three design partners before billing activation. ~~Stripe is built and ready; activation is configuration, not engineering.~~*
+>
+> **Corrected 2026-11-06:** do not use the struck sentence. Stripe billing is not implemented: its server was deleted in `3d6e07381` (2026-05-02, #77), so activation needs engineering first (see `BILLING.md`).
 >
 > *What would you want to validate?"*
 
