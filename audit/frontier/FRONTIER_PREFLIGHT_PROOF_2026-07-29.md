@@ -59,7 +59,7 @@ the focused Node tests above.
 The read-only run at `2026-07-29T16:05:27.991Z` observed:
 
 - npm: both exact `0.1.0` registry documents returned HTTP 404;
-- DOI: concept DOI `10.5281/zenodo.19944926` still resolved to the Ouroboros
+- DOI: concept DOI `10.5281/zenodo.24239896` still resolved to the Ouroboros
   Thesis v21 series, with record DOI `10.5281/zenodo.20490218`;
 - verticals: `0/3` verified; Sentra passed `1/7` gates, Vessels passed `1/7`,
   and Insurance passed `0/7`;
