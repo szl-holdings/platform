@@ -103,7 +103,7 @@ Source of truth: [PROVEN_STATE_CANONICAL.md](./PROVEN_STATE_CANONICAL.md), [luta
 | Dual-witness disjoint A4 | `dualWitnessDisjointness` | ρ-closure requires `witness_1_id ≠ witness_2_id` (registry-enforced at write time). | **Proven** (registry invariant) | knowledge.json axiom A4 |
 | ρ-closure production (TH_L4) | `rho_closure_production` | 100% ρ-closure on 8,000/8,000 paired calls under the v11 platform (measured, not a theorem). | **Measured** | ouroboros v6.3.0 · DOI [10.5281/zenodo.20119582](https://doi.org/10.5281/zenodo.20119582) |
 | Ingest discipline A8 | `ingestDiscipline` | Every ingest requires source_url + content_hash + license (allow-list) + ORCID. | **Defined** | knowledge.json axiom A8 · thesis §7 |
-| Bekenstein chain bound A7 | `bekensteinBound` (TH_L3 `bekenstein_soundness`) | Receipt-chain entropy bounded by an information-theoretic limit; indicator fires at 49.5% under uniform seed (measured). Formal proof pending. | **Conjecture / Measured** | knowledge.json axiom A7 · DOI [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926) |
+| Bekenstein chain bound A7 | `bekensteinBound` (TH_L3 `bekenstein_soundness`) | Receipt-chain entropy bounded by an information-theoretic limit; indicator fires at 49.5% under uniform seed (measured). Formal proof pending. | **Conjecture / Measured** | knowledge.json axiom A7 · DOI [10.5281/zenodo.24239896](https://doi.org/10.5281/zenodo.24239896) |
 
 ---
 
