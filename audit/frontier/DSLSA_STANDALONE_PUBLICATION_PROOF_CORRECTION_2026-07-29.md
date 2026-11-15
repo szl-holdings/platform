@@ -80,7 +80,7 @@ recorded below.
     [Exact public-endpoint commands](#exact-public-endpoint-commands): exit
     `0`, HTTP `200`; the response identified Ouroboros Thesis v21, DOI
     `10.5281/zenodo.20490218`, and concept DOI
-    `10.5281/zenodo.19944926`.
+    `10.5281/zenodo.24239896`.
   - Post-change documentation, field-presence, secret-scan, and diff checks are
     recorded in [Post-change verification](#post-change-verification).
 - `screenshot_refs`: `N/A`; this correction and the original publication patch
@@ -186,7 +186,7 @@ parsers exited `0` with these relevant outputs:
 {"private":false,"visibility":"public","default_branch":"main","license":"Apache-2.0"}
 {"sha":"71ab3b8a4538a106fe0a24146785456fcc8bbe1f","verified":true,"reason":"valid"}
 README_ASSERTIONS=2/2
-{"id":20490218,"title":"SZL Holdings Ouroboros Thesis v21 — The PURIQ-OS Substrate: an Honest, Audit-Ready Cybernetic Runtime for Verifiable Agentic AI","version":"21.0.0","doi":"10.5281/zenodo.20490218","conceptdoi":"10.5281/zenodo.19944926"}
+{"id":20490218,"title":"SZL Holdings Ouroboros Thesis v21 — The PURIQ-OS Substrate: an Honest, Audit-Ready Cybernetic Runtime for Verifiable Agentic AI","version":"21.0.0","doi":"10.5281/zenodo.20490218","conceptdoi":"10.5281/zenodo.24239896"}
 ```
 
 ## Exact TypeScript invocation
