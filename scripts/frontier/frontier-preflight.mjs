@@ -51,7 +51,7 @@ export const FRONTIER_TARGETS = Object.freeze({
   ],
   doi: {
     expectedTitlePattern: /decision[\s-]*slsa/i,
-    conceptDoi: '10.5281/zenodo.19944926',
+    conceptDoi: '10.5281/zenodo.24239896',
     recordUrl: 'https://zenodo.org/api/records/20490218',
   },
   surfaces: [
