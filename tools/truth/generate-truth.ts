@@ -26,7 +26,7 @@ const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const OUTPUT = path.join(ROOT, 'artifacts', 'SOURCE_OF_TRUTH.json');
 export const TRUTH_SCHEMA = 'szl.truth/v1';
 export const TRUTH_DOI = {
-  concept: '10.5281/zenodo.19944926',
+  concept: '10.5281/zenodo.24239896',
   latest: '10.5281/zenodo.20195368',
 } as const;
 const VERIFY_LOCAL_MODE =
