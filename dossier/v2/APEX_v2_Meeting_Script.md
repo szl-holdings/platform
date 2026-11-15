@@ -132,7 +132,7 @@ First is the Ouroboros Runtime. Open-source code — the bounded-loop runtime th
 
 *Open: `github.com/szl-holdings/ouroboros`*
 
-"Second is the Ouroboros Thesis. The canonical, latest paper is v11 — *Applied Λ: Measured Per-Request Overhead of the Audit-Closure Operator* — under per-version DOI `10.5281/zenodo.20119582`, concept DOI `10.5281/zenodo.19944926`. v3 in the same series is *The Lutar Invariant* (DOI `10.5281/zenodo.19983066`), the axiomatic trust aggregator. All papers are CC-BY-4.0. Together they are the formal proof spine for the bounded loop the runtime implements."
+"Second is the Ouroboros Thesis. The canonical, latest paper is v11 — *Applied Λ: Measured Per-Request Overhead of the Audit-Closure Operator* — under per-version DOI `10.5281/zenodo.20119582`, concept DOI `10.5281/zenodo.24239896`. v3 in the same series is *The Lutar Invariant* (DOI `10.5281/zenodo.19983066`), the axiomatic trust aggregator. All papers are CC-BY-4.0. Together they are the formal proof spine for the bounded loop the runtime implements."
 
 *Open: `github.com/szl-holdings/ouroboros-thesis`*
 
@@ -144,7 +144,7 @@ I want to note one thing about the publishing record. The May 2 release was an a
 
 - Ouroboros Runtime: `github.com/szl-holdings/ouroboros` (v6.2.0)
 - Ouroboros Thesis: `github.com/szl-holdings/ouroboros-thesis` (paper-v3-2.0.0, paper-v9-1.0.0, paper-v10-1.0.0)
-- DOI v3: `10.5281/zenodo.19944926`
+- DOI v3: `10.5281/zenodo.24239896`
 - ORCID: `0009-0001-0110-4173`
 - License: CC-BY-4.0
 
