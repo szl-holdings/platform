@@ -6,7 +6,7 @@ Founder ask: can Replit/Forge help push the conjecture toward proven? Here is EV
 - **Lean repo:** `szl-holdings/lutar-lean` — 262 .lean files. Root `Lutar.lean`; axioms in `Lutar/Axioms.lean`; key results across `Lutar/{Composition,DP,DPI,CodingTheory,Banach,Calibration,Correlator,Coder,Crt,...}`. Build: `lakefile.lean` + `lake-manifest.json` (pinned Lean/Mathlib toolchain). CI: `.github/workflows/lake-build.yml`.
 - **Mathlib:** pinned via lake-manifest; all proofs build against it. `#print axioms` of every locked result ⊆ {propext, Classical.choice, Quot.sound}.
 - **The Lake (receipt/proof store):** `szl-holdings/szl-lake` (DSSE receipts + proof artifacts) + HF dataset mirrors (see HF_ASSET_MANIFEST.json: lean-proofs dataset).
-- **Thesis:** `szl-holdings/szl-papers/thesis/ouroboros/` — v22/v23/v24 (PDF+TeX+MD). v23 contains `maxAgg_counterexample.md` (the Λ-uniqueness FALSITY proof) + `cauchy_nd_progress.md`. v24.1 = latest (Zenodo DOI concept 10.5281/zenodo.19944926).
+- **Thesis:** `szl-holdings/szl-papers/thesis/ouroboros/` — v22/v23/v24 (PDF+TeX+MD). v23 contains `maxAgg_counterexample.md` (the Λ-uniqueness FALSITY proof) + `cauchy_nd_progress.md`. v24.1 = latest (Zenodo DOI concept 10.5281/zenodo.24239896).
 
 ## PROVEN STATE (honest tiers — see PROVEN_STATE_CANONICAL.md)
 - **LOCKED (unconditional, kernel-frozen) = EXACTLY 5**: F1, F11, F12, F18, F19 @ kernel c7c0ba17. Never inflate. (F12/F19 = additive fragment only — stated honestly.)
