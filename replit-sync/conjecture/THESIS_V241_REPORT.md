@@ -12,7 +12,7 @@
 thesis-v24.1.0
 ```
 
-Cutting a GitHub Release on this tag triggers the Zenodo DOI mint (concept DOI `10.5281/zenodo.19944926`). The pushed `.zenodo.json` carries `"version": "24.1.0"`.
+Cutting a GitHub Release on this tag triggers the Zenodo DOI mint (concept DOI `10.5281/zenodo.24239896`). The pushed `.zenodo.json` carries `"version": "24.1.0"`.
 
 ---
 
@@ -72,7 +72,7 @@ Mirrors all of the above: title v24.1; abstract CUT-1 paragraph; honesty note; i
 v24 → **v24.1**; added a **CUT-1 closed-on-hypotheses badge** and updated SLSA badge; new "**The v24.1 advance: CUT-1**" section with per-wave bullets; verification-tier table gains a CUT-1 row and updates pins to `ba1050b7` (~185 thms); honesty doctrine block adds CUT-1 scoping; verify block uses `git checkout ba1050b7` + `maxAgg_ne_Lambda`; **Cite** tag `thesis-v24.0.0` → **`thesis-v24.1.0`**; files table lists `.zenodo.json`.
 
 ### .zenodo.json (created — did not previously exist in thesis_v24/)
-`"version": "24.1.0"`, `upload_type: publication / preprint`, Apache-2.0, author Stephen P. Lutar Jr. (ORCID 0009-0001-0110-4173, SZL Holdings), concept DOI `10.5281/zenodo.19944926` as `isVersionOf`, BKS arXiv IDs as `references`. Full description embeds the headline + CUT-1 advance + the binding honesty doctrine. Valid JSON (parsed).
+`"version": "24.1.0"`, `upload_type: publication / preprint`, Apache-2.0, author Stephen P. Lutar Jr. (ORCID 0009-0001-0110-4173, SZL Holdings), concept DOI `10.5281/zenodo.24239896` as `isVersionOf`, BKS arXiv IDs as `references`. Full description embeds the headline + CUT-1 advance + the binding honesty doctrine. Valid JSON (parsed).
 
 ---
 
