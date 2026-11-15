@@ -4,7 +4,7 @@ Founder/CEO Stephen P. Lutar Jr. Target: Defense Unicorns **Warhacker** (June 16
 Walk in with a **working artifact**, not slides. Everything below is the standard to hit.
 
 ## The architecture (paper → receipt) — from the live diagram
-Ouroboros Thesis (Zenodo DOIs, v14→v20, concept 10.5281/zenodo.19944926, v18 master 20434276)
+Ouroboros Thesis (Zenodo DOIs, v14→v20, concept 10.5281/zenodo.24239896, v18 master 20434276)
 → **Lutar-Lean** (Lean 4 + Mathlib v4.13.0; locked v11 = 749 decls / 14 axioms / 163 sorries @ `c7c0ba17`)
 → **Ouroboros Runtime** (bounded loops, sub-ms Λ overhead, Apache-2.0)
 → **Λ Audit-Closure operator** on the receipt-bus σ-algebra
