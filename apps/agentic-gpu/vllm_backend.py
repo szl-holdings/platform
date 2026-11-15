@@ -1,48 +1,121 @@
 """
-SZL Agentic-GPU — vllm_backend.py
+SZL Agentic-GPU Ã¢â‚¬â€ vllm_backend.py
 =================================
 The endpoint ADAPTER the resident daemon can flip to when the betterwithage
-RTX 5000 is upgraded from **Ollama** to **vLLM** (Agent.xpu STEP 1 — the
+RTX 5000 is upgraded from **Ollama** to **vLLM** (Agent.xpu STEP 1 Ã¢â‚¬â€ the
 throughput server). It chooses which OpenAI-compatible endpoint the daemon
 talks to and probes liveness honestly, keeping Ollama as a fallback.
 
 Both servers speak the same OpenAI-compatible wire protocol, so the scheduler
-and the daemon's reactive/proactive logic do NOT change — this module only
+and the daemon's reactive/proactive logic do NOT change Ã¢â‚¬â€ this module only
 decides *which base URL* the daemon's injectable `endpoint=`/`probe=` point at:
 
-  - **vLLM**   `http://100.125.77.31:8000/v1`  — preferred when it serves;
-               exposes `/health` (liveness) + `/metrics` (Prometheus slack).
-  - **Ollama** `http://100.125.77.31:11434/v1` — honest fallback; current
-               open-weight, no-key server. Liveness via `GET /v1/models`.
+  - **vLLM**   `$SZL_VLLM_ENDPOINT` (e.g. `https://gpu.example/v1`) Ã¢â‚¬â€ preferred
+               when it serves; exposes `/health` (liveness) + `/metrics`.
+  - **Ollama** `$SZL_OLLAMA_ENDPOINT` Ã¢â‚¬â€ honest fallback; current open-weight,
+               no-key server. Liveness via `GET /v1/models`.
+
+Endpoints are configuration, never source constants. Accepted: `https://`, or
+`http://` to a loopback host. Plaintext `http://` to a private or tailnet IP
+needs `SZL_ALLOW_INSECURE_LAN=1`; plaintext to anything else is refused. An
+unset endpoint is "not configured": it is never probed and cannot serve.
 
 DOCTRINE (v11/v12):
   - **No box access inferred here.** This control plane runs OFF-box today; the
     probes never raise, send no key, and a probe miss is reported honestly (not
-    masked). Real serving + the `vllm serve …` bring-up is a Forge/box step.
+    masked). Real serving + the `vllm serve Ã¢â‚¬Â¦` bring-up is a Forge/box step.
   - **open-weight only; never commit a key.** `qwen2.5-coder:32b` is open; both
     endpoints are no-key on the LAN.
   - **`sovereign:true` ONLY when a local endpoint actually serves.** The adapter
-    reports which endpoint answered (or that NEITHER did → router fallback); it
+    reports which endpoint answered (or that NEITHER did Ã¢â€ â€™ router fallback); it
     never claims sovereignty for an endpoint that didn't respond. The half-state
     (banner sovereign while a router serves) is the only unacceptable outcome.
   - Pure stdlib (urllib). No scheduler change. Reactive is never gated here.
 
-Pattern + motivation: **Agent.xpu** (Han et al., arXiv:2506.24045, 2025) —
+Pattern + motivation: **Agent.xpu** (Han et al., arXiv:2506.24045, 2025) Ã¢â‚¬â€
 keep inference local on the device; vLLM is the throughput-flow server that the
 slack signal (`vllm_metrics.py`) reads to fill idle GPU cycles with proactive
 work without starving reactive turns.
 """
 from __future__ import annotations
 
+import ipaddress
 import json
+import os
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, asdict
-from typing import Callable, Optional
+from typing import Callable, Mapping, Optional
+from urllib.parse import urlsplit
 
-# OpenAI-compatible base URLs on the betterwithage box (LAN, no-key).
-VLLM_ENDPOINT = "http://100.125.77.31:8000/v1"      # vLLM (throughput upgrade)
-OLLAMA_ENDPOINT = "http://100.125.77.31:11434/v1"   # Ollama (honest fallback)
+# OpenAI-compatible base URLs come from the environment (no-key servers).
+VLLM_ENDPOINT_ENV = "SZL_VLLM_ENDPOINT"        # vLLM (throughput upgrade)
+OLLAMA_ENDPOINT_ENV = "SZL_OLLAMA_ENDPOINT"    # Ollama (honest fallback)
+INSECURE_LAN_ENV = "SZL_ALLOW_INSECURE_LAN"    # "1" admits plaintext to private IPs
+
+_TAILNET = ipaddress.ip_network("100.64.0.0/10")
+
+
+def _is_loopback(host: str) -> bool:
+    if host.lower() == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def _is_private_address(host: str) -> bool:
+    """True only for a private or tailnet IP literal; hostnames never qualify."""
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return ip.is_private or (ip.version == 4 and ip in _TAILNET)
+
+
+def _insecure_lan_allowed(environ: Optional[Mapping[str, str]] = None) -> bool:
+    env = os.environ if environ is None else environ
+    return env.get(INSECURE_LAN_ENV, "").strip() == "1"
+
+
+def validate_endpoint(url: str, *, allow_insecure_lan: bool = False) -> str:
+    """Return `url` without a trailing slash, or raise ValueError (fail closed)."""
+    url = url.strip()
+    parts = urlsplit(url)
+    if parts.scheme not in ("https", "http") or not parts.hostname:
+        raise ValueError(f"endpoint must be an https:// or http:// URL with a host: {url!r}")
+    if parts.username is not None or parts.password is not None:
+        raise ValueError("endpoint must not carry credentials in the URL")
+    if parts.scheme == "http" and not _is_loopback(parts.hostname):
+        if not (allow_insecure_lan and _is_private_address(parts.hostname)):
+            raise ValueError(
+                f"plaintext http:// is allowed only to loopback, or to a private IP with "
+                f"{INSECURE_LAN_ENV}=1: {url!r}")
+    return url.rstrip("/")
+
+
+def endpoint_from_env(name: str,
+                      environ: Optional[Mapping[str, str]] = None) -> Optional[str]:
+    """The validated endpoint in env var `name`, None when unset; raises if invalid."""
+    env = os.environ if environ is None else environ
+    raw = env.get(name, "").strip()
+    if not raw:
+        return None
+    return validate_endpoint(raw, allow_insecure_lan=_insecure_lan_allowed(env))
+
+
+def _configured_or_none(name: str) -> Optional[str]:
+    try:
+        return endpoint_from_env(name)
+    except ValueError:
+        return None
+
+
+# Endpoints configured at import, for callers that read them (None when unset or
+# invalid). select_backend() re-reads the environment and raises on bad values.
+VLLM_ENDPOINT = _configured_or_none(VLLM_ENDPOINT_ENV)
+OLLAMA_ENDPOINT = _configured_or_none(OLLAMA_ENDPOINT_ENV)
 
 # Default open-weight model served on the RTX 5000 (no key, open license).
 DEFAULT_MODEL = "qwen2.5-coder:32b"
@@ -78,7 +151,7 @@ def _http_get(url: str, timeout: float) -> Optional[int]:
         return None
 
 
-def probe_vllm_health(base: str = VLLM_ENDPOINT,
+def probe_vllm_health(base: Optional[str] = None,
                       timeout: float = _PROBE_TIMEOUT_S) -> bool:
     """True iff the vLLM server answers liveness on `base`.
 
@@ -86,8 +159,11 @@ def probe_vllm_health(base: str = VLLM_ENDPOINT,
     strip a trailing `/v1` before probing. Only an unavailable `/health` route
     (404/405) falls back to `GET {base}/models`. Authentication failures,
     overload and unhealthy engines must not be masked by a model listing.
-    Only a direct 2xx response counts as live; never raises.
+    Only a direct 2xx response counts as live; never raises. An unconfigured
+    (None) endpoint is never probed.
     """
+    if not base:
+        return False
     base = base.rstrip("/")
     root = base[:-3] if base.endswith("/v1") else base
     status = _http_get(f"{root}/health", timeout)
@@ -96,24 +172,25 @@ def probe_vllm_health(base: str = VLLM_ENDPOINT,
     return status is not None and 200 <= status < 300
 
 
-def probe_ollama(base: str = OLLAMA_ENDPOINT,
+def probe_ollama(base: Optional[str] = None,
                  timeout: float = _PROBE_TIMEOUT_S) -> bool:
     """True iff the Ollama server answers on `base` (via `GET /v1/models`).
 
     Only a direct successful model-list response is live. An unrelated root
-    page, redirect or HTTP error is not evidence of the model API. Never raises.
+    page, redirect or HTTP error is not evidence of the model API. Never
+    raises. An unconfigured (None) endpoint is never probed.
     """
+    if not base:
+        return False
     status = _http_get(f"{base.rstrip('/')}/models", timeout)
     return status is not None and 200 <= status < 300
-
-
 @dataclass
 class BackendChoice:
     """The honestly-resolved serving backend for the daemon to use.
 
     `sovereign` is True ONLY when a LOCAL endpoint actually answered. When both
     probes miss, `backend == "router-fallback"`, `endpoint is None`, and
-    `sovereign is False` — the daemon must then report router fallback, never a
+    `sovereign is False` Ã¢â‚¬â€ the daemon must then report router fallback, never a
     sovereign banner.
     """
     backend: str                 # "vllm" | "ollama" | "router-fallback"
@@ -134,11 +211,12 @@ ProbeFn = Callable[[], bool]
 
 
 def select_backend(prefer_vllm: bool = True,
-                   vllm_base: str = VLLM_ENDPOINT,
-                   ollama_base: str = OLLAMA_ENDPOINT,
+                   vllm_base: Optional[str] = None,
+                   ollama_base: Optional[str] = None,
                    vllm_probe: Optional[ProbeFn] = None,
                    ollama_probe: Optional[ProbeFn] = None,
-                   model: str = DEFAULT_MODEL) -> BackendChoice:
+                   model: str = DEFAULT_MODEL,
+                   environ: Optional[Mapping[str, str]] = None) -> BackendChoice:
     """Pick the serving backend honestly: vLLM if it serves, else Ollama, else
     router fallback.
 
@@ -148,12 +226,21 @@ def select_backend(prefer_vllm: bool = True,
                                 probe=lambda ep: probe_vllm_health(ep))
     Probes are injectable so tests need no network. When `prefer_vllm` is False
     the order flips (Ollama-first), used to pin the current pre-upgrade default.
+
+    Bases default to `$SZL_VLLM_ENDPOINT` / `$SZL_OLLAMA_ENDPOINT` (read from
+    `environ`, else the process environment). An unconfigured base is never
+    probed and cannot serve; an invalid one raises ValueError.
     """
+    lan = _insecure_lan_allowed(environ)
+    vllm_base = (endpoint_from_env(VLLM_ENDPOINT_ENV, environ) if vllm_base is None
+                 else validate_endpoint(vllm_base, allow_insecure_lan=lan))
+    ollama_base = (endpoint_from_env(OLLAMA_ENDPOINT_ENV, environ) if ollama_base is None
+                   else validate_endpoint(ollama_base, allow_insecure_lan=lan))
     v_probe = vllm_probe or (lambda: probe_vllm_health(vllm_base))
     o_probe = ollama_probe or (lambda: probe_ollama(ollama_base))
 
-    vllm_live = bool(v_probe())
-    ollama_live = bool(o_probe())
+    vllm_live = vllm_base is not None and bool(v_probe())
+    ollama_live = ollama_base is not None and bool(o_probe())
 
     order = ["vllm", "ollama"] if prefer_vllm else ["ollama", "vllm"]
     for which in order:
@@ -176,7 +263,7 @@ def select_backend(prefer_vllm: bool = True,
         backend="router-fallback", endpoint=None, sovereign=False,
         vllm_live=vllm_live, ollama_live=ollama_live, model=model,
         has_metrics=False,
-        note=("Neither local endpoint answered — honest router fallback. "
+        note=("Neither local endpoint answered Ã¢â‚¬â€ honest router fallback. "
               "sovereign:false; do NOT show a sovereign banner."))
 
 
@@ -191,6 +278,8 @@ def daemon_kwargs(choice: Optional[BackendChoice] = None,
     (`sovereign:false`) rather than silently claiming a local serve.
     """
     c = choice or select_backend(prefer_vllm=prefer_vllm)
+    target = c.endpoint or endpoint_from_env(VLLM_ENDPOINT_ENV)
+    is_vllm = c.backend == "vllm"
     target = c.endpoint or VLLM_ENDPOINT
     # daemon.ResidentDaemon expects `probe(endpoint) -> bool`; match that arity.
     if c.backend == "vllm":
@@ -206,7 +295,7 @@ def daemon_kwargs(choice: Optional[BackendChoice] = None,
 
 
 # ===========================================================================
-# SELF-TEST — no network. Probes are injected so the resolution logic is
+# SELF-TEST Ã¢â‚¬â€ no network. Probes are injected so the resolution logic is
 # exercised deterministically across all three states.
 #   - vLLM up                  -> backend "vllm", /metrics available, sovereign
 #   - vLLM down, Ollama up      -> backend "ollama" fallback, no /metrics, sovereign
@@ -214,6 +303,10 @@ def daemon_kwargs(choice: Optional[BackendChoice] = None,
 #   - prefer_vllm=False         -> Ollama-first ordering honored
 # Prints {"ok": true} iff every assertion holds.
 # ===========================================================================
+_SELFTEST_VLLM = "http://127.0.0.1:8000/v1"
+_SELFTEST_OLLAMA = "http://127.0.0.1:11434/v1"
+
+
 def _selftest() -> dict:
     out: dict = {"checks": []}
 
@@ -223,34 +316,36 @@ def _selftest() -> dict:
 
     up = lambda: True
     down = lambda: False
+    # Explicit loopback bases: the self-test never depends on the environment.
+    bases = {"vllm_base": _SELFTEST_VLLM, "ollama_base": _SELFTEST_OLLAMA}
 
     # --- vLLM up: preferred, exposes /metrics, sovereign ------------------
-    c_vllm = select_backend(vllm_probe=up, ollama_probe=up)
+    c_vllm = select_backend(vllm_probe=up, ollama_probe=up, **bases)
     check("vllm_preferred_when_up", c_vllm.backend == "vllm")
-    check("vllm_endpoint_is_8000", c_vllm.endpoint == VLLM_ENDPOINT)
+    check("vllm_endpoint_is_8000", c_vllm.endpoint == _SELFTEST_VLLM)
     check("vllm_has_metrics", c_vllm.has_metrics is True)
     check("vllm_sovereign", c_vllm.sovereign is True)
 
     # --- vLLM down, Ollama up: honest fallback, no /metrics, still sovereign
-    c_olla = select_backend(vllm_probe=down, ollama_probe=up)
+    c_olla = select_backend(vllm_probe=down, ollama_probe=up, **bases)
     check("ollama_fallback_when_vllm_down", c_olla.backend == "ollama")
-    check("ollama_endpoint_is_11434", c_olla.endpoint == OLLAMA_ENDPOINT)
+    check("ollama_endpoint_is_11434", c_olla.endpoint == _SELFTEST_OLLAMA)
     check("ollama_no_metrics", c_olla.has_metrics is False)
     check("ollama_sovereign_when_local_serves", c_olla.sovereign is True)
 
     # --- both down: router fallback, NOT sovereign, no endpoint -----------
-    c_none = select_backend(vllm_probe=down, ollama_probe=down)
+    c_none = select_backend(vllm_probe=down, ollama_probe=down, **bases)
     check("router_fallback_when_both_down", c_none.backend == "router-fallback")
     check("no_endpoint_when_both_down", c_none.endpoint is None)
     check("not_sovereign_when_both_down", c_none.sovereign is False)
 
     # --- prefer_vllm=False pins Ollama-first even when vLLM is up ----------
-    c_pin = select_backend(prefer_vllm=False, vllm_probe=up, ollama_probe=up)
+    c_pin = select_backend(prefer_vllm=False, vllm_probe=up, ollama_probe=up, **bases)
     check("ollama_first_when_not_preferring_vllm", c_pin.backend == "ollama")
 
     # --- daemon_kwargs hands back an endpoint + a probe -------------------
     kw = daemon_kwargs(choice=c_vllm)
-    check("daemon_kwargs_endpoint", kw["endpoint"] == VLLM_ENDPOINT)
+    check("daemon_kwargs_endpoint", kw["endpoint"] == _SELFTEST_VLLM)
     check("daemon_kwargs_probe_callable", callable(kw["probe"]))
     kw_none = daemon_kwargs(choice=c_none)
     check("daemon_kwargs_not_sovereign_on_fallback",
@@ -268,15 +363,15 @@ def _selftest() -> dict:
         check("daemon_wiring_skipped_cleanly", True)
     else:
         # Inject a deterministic live probe (no network in the self-test); the
-        # real bring-up uses daemon_kwargs(choice).probe → probe_vllm_health.
+        # real bring-up uses daemon_kwargs(choice).probe Ã¢â€ â€™ probe_vllm_health.
         d = ResidentDaemon(endpoint=c_vllm.endpoint, probe=lambda _ep: True)
         check("daemon_accepts_vllm_endpoint",
-              getattr(d, "endpoint", None) == VLLM_ENDPOINT)
+              getattr(d, "endpoint", None) == _SELFTEST_VLLM)
         d._update_posture()
-        # Posture tracks the probe honestly: live probe → sovereign.
+        # Posture tracks the probe honestly: live probe Ã¢â€ â€™ sovereign.
         check("daemon_posture_sovereign_when_probe_live",
               d.serving_local is True)
-        # And a dead probe → honest router fallback (no fabricated sovereignty).
+        # And a dead probe Ã¢â€ â€™ honest router fallback (no fabricated sovereignty).
         d_dead = ResidentDaemon(endpoint=c_vllm.endpoint, probe=lambda _ep: False)
         d_dead._update_posture()
         check("daemon_posture_fallback_when_probe_dead",
