@@ -38,7 +38,7 @@
 |---|---|
 | Ouroboros Runtime | github.com/szl-holdings/ouroboros (v6.2.0) |
 | Ouroboros Thesis | github.com/szl-holdings/ouroboros-thesis (paper-v3-2.0.0) |
-| Zenodo DOI | 10.5281/zenodo.19944926 |
+| Zenodo DOI | 10.5281/zenodo.24239896 |
 | ORCID | 0009-0001-0110-4173 |
 
 ---
