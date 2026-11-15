@@ -959,7 +959,7 @@ merged through repository PR #2 as current main commit
 
 This publication closes only the standalone-source gap. It does not establish a
 D-SLSA DOI, adoption, independent validation, D3 evidence, or D4 evidence. The
-previously proposed concept DOI `10.5281/zenodo.19944926` resolves to Ouroboros
+previously proposed concept DOI `10.5281/zenodo.24239896` resolves to Ouroboros
 Thesis v21 record `10.5281/zenodo.20490218`; it is not a D-SLSA deposit. A new
 Zenodo deposition and newly minted concept DOI remain required.
 
@@ -1110,7 +1110,7 @@ Operational gaps, process health, test coverage, observability, team ownership.
 | ID | Gap | Area | Resolution / Status |
 |----|-----|------|---------------------|
 | DSLSA-001 | The intended standalone public repository has not been created. | Publication | Resolved â€” `szl-holdings/evidence-doctrine` is public at exact main commit `71ab3b8a4538a106fe0a24146785456fcc8bbe1f`; unauthenticated README retrieval and clean-clone tests were verified. |
-| DSLSA-002 | No D-SLSA Zenodo deposition or concept DOI exists. | Publication | Open â€” proposed concept DOI `10.5281/zenodo.19944926` resolves to unrelated Ouroboros Thesis v21 record `10.5281/zenodo.20490218`. D-SLSA requires a new authenticated deposition and newly minted concept DOI. |
+| DSLSA-002 | No D-SLSA Zenodo deposition or concept DOI exists. | Publication | Open â€” proposed concept DOI `10.5281/zenodo.24239896` resolves to unrelated Ouroboros Thesis v21 record `10.5281/zenodo.20490218`. D-SLSA requires a new authenticated deposition and newly minted concept DOI. |
 | DSLSA-003 | No verified third-party transparency log, byte-identical replay, or offline-verification packet establishes D3 for an estate decision. | Decision evidence | Open â€” the evaluator records absent/unverified evidence and cannot infer D3. |
 | DSLSA-004 | No verified hardware-attested execution establishes D4 for an estate decision. | Decision evidence | Partial â€” `@szl/mcp-governor` now implements a fail-closed, signed RATS Attestation Result admission boundary with action/capability nonce binding, freshness, replay defense, and pinned workload/measurement/policy reference values. Unit tests use synthetic keys and do not establish hardware evidence. D4 remains unavailable until an authorized run produces and preserves a real NRAS, SEV-SNP, TDX, or TPM-backed result. |
 | DSLSA-005 | The merged standalone-publication proof packet omitted the required commands and exit codes, patch summary, task and actor attribution, screenshot disposition, claim and security checks, proof level, and timestamp. | Proof process | Resolved â€” the append-only 2026-07-29 correction records the missing fields and preserves the original immutable entry. |
