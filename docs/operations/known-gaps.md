@@ -129,6 +129,22 @@ live-secret configuration, deployment, or end-to-end delivery.
 checks and protected admission remain required. See the
 [scoped proof](../../audit/STRIPE_WEBHOOK_VERIFY_FAIL_CLOSED_20261102.md).
 
+### OBSERVABILITY-COUNTER-SAMPLES-20261102 — candidate exact sample evidence
+
+The observability executor previously accepted required counter names anywhere
+in a successful metrics response, including HELP comments, unrelated label
+values and longer names. The candidate now requires complete exact-name
+Prometheus text samples with finite nonnegative values, valid label syntax and
+bounded integer timestamps. LF alone separates samples, preserving valid
+Unicode label data and rejecting prose separated by other control characters.
+Offline regressions reproduce the false positives
+against the original source and pass against the candidate. This is a source
+evidence repair; it does not establish runtime counter type, freshness or
+monotonicity, trace propagation, configured flagship URLs, a fleet signing
+binding or successful provider publication. Hosted exact-head checks and
+protected admission remain required. See
+[the scoped proof](../../audit/OBSERVABILITY_COUNTER_SAMPLES_20261102.md).
+
 ### READINESS-RETENTION-20261102 â€” candidate receipt-copy failure gate
 
 An explicitly requested readiness receipt copy could fail to write while the
