@@ -2,7 +2,7 @@
 ## SZL Holdings — Lean 4 / Lake / Mathlib Proving Squad Specification
 **Date:** 2026-06-10  
 **Repo:** [szl-holdings/lutar-lean](https://github.com/szl-holdings/lutar-lean) @ main (Lean v4.18.0, Mathlib)  
-**Zenodo DOI:** [10.5281/zenodo.20434308](https://doi.org/10.5281/zenodo.20434308)  
+**Zenodo DOI:** [10.5281/zenodo.24239654](https://doi.org/10.5281/zenodo.24239654)  
 **Audience:** Proof engineers, defense reviewers, Warhacker narrative team  
 
 ---
