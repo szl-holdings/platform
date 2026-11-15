@@ -45,13 +45,13 @@ function mockFetch(url) {
   if (hostMatches(url, 'zenodo.org')) {
     return json({
       links: {
-        parent_doi: 'https://doi.org/10.5281/zenodo.19944926',
+        parent_doi: 'https://doi.org/10.5281/zenodo.24239896',
       },
       metadata: {
         title: 'Ouroboros Thesis v21 / PURIQ-OS',
         doi: '10.5281/zenodo.20490218',
         relations: {
-          version: [{ parent: { pid_value: '10.5281/zenodo.19944926' } }],
+          version: [{ parent: { pid_value: '10.5281/zenodo.24239896' } }],
         },
       },
     });
