@@ -2,7 +2,7 @@
 
 **Author:** Stephen P. Lutar Jr. — Founder & CEO, SZL Holdings
 **ORCID:** [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)
-**Concept DOI (resolves to latest version):** [`10.5281/zenodo.19944926`](https://doi.org/10.5281/zenodo.19944926)
+**Concept DOI (resolves to latest version):** [`10.5281/zenodo.24239896`](https://doi.org/10.5281/zenodo.24239896)
 **License (all papers):** CC BY 4.0
 **Last verified (every link below resolved by command):** 2026-05-11
 
@@ -50,7 +50,7 @@ Eleven distinct papers (v1–v11), deposited under one Zenodo concept (`19944926
 | **v10** | EXHAUSTIVE-AUDIT — The Audit Closure Operator Λ₁₀, 11 pp. + App. A & B | 2026-05-05 | [`10.5281/zenodo.20053163`](https://doi.org/10.5281/zenodo.20053163) | **canonical (implementation contract)** |
 | **v11** | Applied Λ — empirical companion to v10, 17 pp. + 3 figures + 20-ref bibliography | 2026-05-11 | [`10.5281/zenodo.20119582`](https://doi.org/10.5281/zenodo.20119582) | **canonical (empirical)** & **latest** |
 
-**Concept DOI** [`10.5281/zenodo.19944926`](https://doi.org/10.5281/zenodo.19944926) currently resolves to v11 (verified 2026-05-11). It will follow each future release.
+**Concept DOI** [`10.5281/zenodo.24239896`](https://doi.org/10.5281/zenodo.24239896) currently resolves to v11 (verified 2026-05-11). It will follow each future release.
 
 **Reading order for diligence reviewers:**
 v3 (the Λ object) → v9 (the formalism) → v10 (the implementation contract) → v11 (the empirical measurement). Each paper is independently citeable via its version DOI.
@@ -168,7 +168,7 @@ Current estate measurements come only from
 
 | Metric | Value | Label | Verification source |
 |---|---|---|---|
-| Concept DOI | `10.5281/zenodo.19944926` | REPORTED | Generated truth artifact and [Zenodo](https://doi.org/10.5281/zenodo.19944926) |
+| Concept DOI | `10.5281/zenodo.24239896` | REPORTED | Generated truth artifact and [Zenodo](https://doi.org/10.5281/zenodo.24239896) |
 | Per-version DOIs (v1–v11) | 11 distinct DOIs, listed in §3 | REPORTED | Each paper's `CITATION.cff` / `README.md` |
 | Paper count | 11 (v1–v11) | REPORTED | [`papers/`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers) |
 | Customer-facing product surfaces meeting manifest/health/receipt definition | 0 | MEASURED | `artifacts/SOURCE_OF_TRUTH.json` |
@@ -228,7 +228,7 @@ The earlier a platform is built around audit-by-construction, the harder it is t
 
 **Concept-DOI citation (resolves to latest version, useful for long-lived references):**
 
-> Lutar, S. P. (2026). *The Ouroboros Thesis* (concept). SZL Holdings. Zenodo. [https://doi.org/10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926)
+> Lutar, S. P. (2026). *The Ouroboros Thesis* (concept). SZL Holdings. Zenodo. [https://doi.org/10.5281/zenodo.24239896](https://doi.org/10.5281/zenodo.24239896)
 
 **BibTeX (latest version):**
 
@@ -244,7 +244,7 @@ The earlier a platform is built around audit-by-construction, the harder it is t
   version      = {paper-v11-1.0.0},
   doi          = {10.5281/zenodo.20119582},
   url          = {https://doi.org/10.5281/zenodo.20119582},
-  note         = {Concept DOI 10.5281/zenodo.19944926; CC BY 4.0}
+  note         = {Concept DOI 10.5281/zenodo.24239896; CC BY 4.0}
 }
 ```
 
@@ -264,7 +264,7 @@ The earlier a platform is built around audit-by-construction, the harder it is t
 
 ## 11. Provenance and signatures
 
-- **Concept DOI:** [`10.5281/zenodo.19944926`](https://doi.org/10.5281/zenodo.19944926) (resolves to latest version, currently v11)
+- **Concept DOI:** [`10.5281/zenodo.24239896`](https://doi.org/10.5281/zenodo.24239896) (resolves to latest version, currently v11)
 - **ORCID:** [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)
 - **GitHub org:** [`szl-holdings`](https://github.com/szl-holdings)
 - **Paper directory:** [`szl-holdings/ouroboros-thesis/papers/`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers)
@@ -284,7 +284,7 @@ This document was exhaustively re-verified on 2026-05-11. The following correcti
 | Prior claim | Correction | Source of truth |
 |---|---|---|
 | v3 title was *"The Loop Is the Product"* | v3 is titled *"The Lutar Invariant"* — an axiomatic trust aggregator, not a thesis manifesto. | [`papers/v3/README.md`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers/v3) and [`papers/v3/CITATION.cff`](https://github.com/szl-holdings/ouroboros-thesis/blob/main/papers/v3/CITATION.cff) |
-| Concept DOI resolves to v3 (canonical) | Concept DOI resolves to the **latest** version, currently v11 (published 2026-05-11). v3, v9, v10, v11 each have their own version DOIs. | Direct fetch of [doi.org/10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926) on 2026-05-11 |
+| Concept DOI resolves to v3 (canonical) | Concept DOI resolves to the **latest** version, currently v11 (published 2026-05-11). v3, v9, v10, v11 each have their own version DOIs. | Direct fetch of [doi.org/10.5281/zenodo.24239896](https://doi.org/10.5281/zenodo.24239896) on 2026-05-11 |
 | 13 papers across two release tracks (v1–v11 + v12 Propeller Drive + v13 Ultra Routing) | **11 papers (v1–v11).** No v12 or v13 directories exist in the repo as of 2026-05-11. | [`papers/`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers) listing |
 | All papers cited via concept DOI only | Each paper has its own per-version DOI, now listed in §3 | Each paper's `CITATION.cff` |
 | Reference to a public `szl-holdings/szl-sdk` repo | **No such repo exists.** Reference removed. | `gh api /repos/szl-holdings/szl-sdk` returned 404 |
