@@ -1,7 +1,7 @@
 # SZL Holdings — Standalone Papers
 
 
-[![DOI Concept](https://zenodo.org/badge/DOI/10.5281/zenodo.19944926.svg)](https://doi.org/10.5281/zenodo.19944926) [![DOI Umbrella v21](https://zenodo.org/badge/DOI/10.5281/zenodo.20490218.svg)](https://doi.org/10.5281/zenodo.20490218) [![ORCID](https://img.shields.io/badge/ORCID-0009--0001--0110--4173-A6CE39.svg?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0001-0110-4173) [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0) [![Doctrine](https://img.shields.io/badge/Doctrine-v11_LOCKED-7c5cff?style=flat-square)](https://github.com/szl-holdings/.github/blob/main/doctrine/) [![arXiv](https://img.shields.io/badge/arXiv-pending--endorsement-orange?style=flat-square&logo=arxiv)](https://arxiv.org/auth/need-endorsement)
+[![DOI Concept](https://zenodo.org/badge/DOI/10.5281/zenodo.24239896.svg)](https://doi.org/10.5281/zenodo.24239896) [![DOI Umbrella v21](https://zenodo.org/badge/DOI/10.5281/zenodo.20490218.svg)](https://doi.org/10.5281/zenodo.20490218) [![ORCID](https://img.shields.io/badge/ORCID-0009--0001--0110--4173-A6CE39.svg?style=flat-square&logo=orcid&logoColor=white)](https://orcid.org/0009-0001-0110-4173) [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0) [![Doctrine](https://img.shields.io/badge/Doctrine-v11_LOCKED-7c5cff?style=flat-square)](https://github.com/szl-holdings/.github/blob/main/doctrine/) [![arXiv](https://img.shields.io/badge/arXiv-pending--endorsement-orange?style=flat-square&logo=arxiv)](https://arxiv.org/auth/need-endorsement)
 
 ### Individual paper DOI badges
 
@@ -68,7 +68,7 @@ This corpus follows the established SZL convention used by `szl-holdings/ourobor
 
 1. **`.zenodo.json` per paper** at `papers/arxiv/paper-NN-<slug>/.zenodo.json` — metadata for auto-mint
 2. **`.zenodo.json` at corpus root** at `papers/.zenodo.json` — corpus-level umbrella metadata
-3. **GitHub release** named `papers-v1.0.0` on `szl-holdings/platform` triggers Zenodo to mint a corpus DOI under the concept DOI [10.5281/zenodo.19944926](https://doi.org/10.5281/zenodo.19944926) — **IF the Zenodo↔GitHub webhook is enabled** for this repo
+3. **GitHub release** named `papers-v1.0.0` on `szl-holdings/platform` triggers Zenodo to mint a corpus DOI under the concept DOI [10.5281/zenodo.24239896](https://doi.org/10.5281/zenodo.24239896) — **IF the Zenodo↔GitHub webhook is enabled** for this repo
 4. **Individual paper DOIs** were minted directly via the Zenodo API (Phase 6, 2026-06-01) and are immutable
 
 ### Founder action (one-time, ~2 min) — enable Zenodo auto-mint for `szl-holdings/platform`
@@ -82,7 +82,7 @@ After webhook enabled, run:
 ```bash
 git tag -a papers-v1.0.0 -m "Standalone papers corpus v1.0.0 — 8 papers, 8 sub-DOIs"
 git push origin papers-v1.0.0
-# Zenodo auto-mints a new version DOI under 10.5281/zenodo.19944926
+# Zenodo auto-mints a new version DOI under 10.5281/zenodo.24239896
 ```
 
 ### arXiv submission status
