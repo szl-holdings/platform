@@ -47,7 +47,7 @@ SZL Holdings has built a governed command layer that runs as five continuous sta
 
 **Verify** -- Outcomes are verified against the original intent and recorded into an auditable history that can be replayed.
 
-The convergence properties of this loop are formalized in the Ouroboros Thesis, a peer-style paper published on Zenodo with DOI 10.5281/zenodo.19944926.
+The convergence properties of this loop are formalized in the Ouroboros Thesis, a peer-style paper published on Zenodo with DOI 10.5281/zenodo.24239896.
 
 ---
 
@@ -100,7 +100,7 @@ Two artifacts are public on GitHub today. This is significant for government pro
 **Ouroboros Thesis (DOI-pinned)**
 - Repository: github.com/szl-holdings/ouroboros-thesis
 - Current release: paper-v3-2.0.0
-- DOI: 10.5281/zenodo.19944926
+- DOI: 10.5281/zenodo.24239896
 - License: CC-BY-4.0
 - ORCID: 0009-0001-0110-4173
 
