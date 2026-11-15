@@ -324,13 +324,15 @@ def _selftest() -> dict:
     # --- daemon can pick vLLM vs Ollama endpoint (vllm_backend wiring) -----
     backend_checked = False
     try:
-        from vllm_backend import select_backend, VLLM_ENDPOINT, OLLAMA_ENDPOINT
+        from vllm_backend import select_backend
         up, down = (lambda: True), (lambda: False)
-        c_v = select_backend(vllm_probe=up, ollama_probe=up)
-        check("daemon_picks_vllm_when_up", c_v.endpoint == VLLM_ENDPOINT)
+        bases = {"vllm_base": "http://127.0.0.1:8000/v1",
+                 "ollama_base": "http://127.0.0.1:11434/v1"}
+        c_v = select_backend(vllm_probe=up, ollama_probe=up, **bases)
+        check("daemon_picks_vllm_when_up", c_v.endpoint == bases["vllm_base"])
         check("vllm_choice_has_metrics", c_v.has_metrics is True)
-        c_o = select_backend(vllm_probe=down, ollama_probe=up)
-        check("daemon_falls_back_to_ollama", c_o.endpoint == OLLAMA_ENDPOINT)
+        c_o = select_backend(vllm_probe=down, ollama_probe=up, **bases)
+        check("daemon_falls_back_to_ollama", c_o.endpoint == bases["ollama_base"])
         backend_checked = True
     except Exception:  # noqa: BLE001 - vllm_backend not importable here.
         check("backend_wiring_skipped_cleanly", True)
