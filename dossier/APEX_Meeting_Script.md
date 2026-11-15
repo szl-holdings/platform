@@ -137,7 +137,7 @@ First is the Ouroboros Runtime. This is open-source code -- the bounded-loop run
 
 - Ouroboros Runtime: github.com/szl-holdings/ouroboros (v6.2.0)
 - Ouroboros Thesis: github.com/szl-holdings/ouroboros-thesis (paper-v3-2.0.0)
-- DOI: 10.5281/zenodo.19944926
+- DOI: 10.5281/zenodo.24239896
 - ORCID: 0009-0001-0110-4173
 - License: CC-BY-4.0
 
@@ -260,7 +260,7 @@ Within 24 hours of the meeting:
 | Capability Statement | dossier/SZL_Holdings_Capability_Statement.md | Ready |
 | Government Readiness Audit | docs/audit/szl-government-readiness.md | Ready |
 | Product Screenshots | screenshots/ (9 images) | Ready |
-| Ouroboros Thesis PDF | Zenodo DOI 10.5281/zenodo.19944926 | Published |
+| Ouroboros Thesis PDF | Zenodo DOI 10.5281/zenodo.24239896 | Published |
 
 ---
 
