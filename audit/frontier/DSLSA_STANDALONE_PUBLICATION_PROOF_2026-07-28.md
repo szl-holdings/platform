@@ -46,11 +46,11 @@ The exact public main commit was cloned into a new directory.
 Live Zenodo metadata for record `20490218` reports:
 
 - DOI: `10.5281/zenodo.20490218`
-- concept DOI: `10.5281/zenodo.19944926`
+- concept DOI: `10.5281/zenodo.24239896`
 - title: `SZL Holdings Ouroboros Thesis v21 — The PURIQ-OS Substrate`
 - version: `21.0.0`
 
-Therefore `10.5281/zenodo.19944926` is not and cannot be cited as the D-SLSA
+Therefore `10.5281/zenodo.24239896` is not and cannot be cited as the D-SLSA
 concept DOI. The public repository includes `.zenodo.json` for a future,
 separate deposition. No Zenodo access token or authenticated browser session
 was available, so no deposition or DOI was fabricated.
