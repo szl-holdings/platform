@@ -320,4 +320,4 @@ were committed at any point in this repository's history. No rotation is require
 
 **Description.** `platform/CITATION.cff` referenced the v10 thesis only, in a v14 ecosystem.
 
-**Resolution.** Bumped to v14.0.0; preferred-citation now points at the v14 master thesis DOI (10.5281/zenodo.20195368) with concept DOI 10.5281/zenodo.19944926.
+**Resolution.** Bumped to v14.0.0; preferred-citation now points at the v14 master thesis DOI (10.5281/zenodo.20195368) with concept DOI 10.5281/zenodo.24239896.
