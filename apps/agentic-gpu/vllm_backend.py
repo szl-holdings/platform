@@ -51,18 +51,29 @@ DEFAULT_MODEL = "qwen2.5-coder:32b"
 _PROBE_TIMEOUT_S = 2.0
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """A different resource cannot attest the configured probe's health."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 def _http_get(url: str, timeout: float) -> Optional[int]:
     """GET `url`, return the HTTP status code, or None on any failure.
 
-    Never raises. Sends no auth header. A 4xx still means *something answered*
-    (the server is up), so callers treat any status < 500 as a live signal.
+    Never raises. Sends no auth header and does not follow redirects.
+    Callers distinguish successful probes from errors and unavailable routes.
     """
     try:
         req = urllib.request.Request(url, method="GET")
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        opener = urllib.request.build_opener(_NoRedirect())
+        with opener.open(req, timeout=timeout) as resp:
             return int(resp.status)
     except urllib.error.HTTPError as e:        # answered, but non-2xx
-        return int(e.code)
+        try:
+            return int(e.code)
+        finally:
+            e.close()
     except Exception:                          # noqa: BLE001 - DNS/conn/timeout
         return None
 
@@ -72,30 +83,28 @@ def probe_vllm_health(base: str = VLLM_ENDPOINT,
     """True iff the vLLM server answers liveness on `base`.
 
     vLLM exposes a bare `/health` at the SERVER root (sibling of `/v1`), so we
-    strip a trailing `/v1` before probing. Falls back to `GET {base}/models`
-    (OpenAI-compatible) so this works even if `/health` is renamed. Any answer
-    with status < 500 counts as live; never raises.
+    strip a trailing `/v1` before probing. Only an unavailable `/health` route
+    (404/405) falls back to `GET {base}/models`. Authentication failures,
+    overload and unhealthy engines must not be masked by a model listing.
+    Only a direct 2xx response counts as live; never raises.
     """
-    root = base[:-3] if base.endswith("/v1") else base.rstrip("/")
-    for url in (f"{root}/health", f"{base.rstrip('/')}/models"):
-        status = _http_get(url, timeout)
-        if status is not None and status < 500:
-            return True
-    return False
+    base = base.rstrip("/")
+    root = base[:-3] if base.endswith("/v1") else base
+    status = _http_get(f"{root}/health", timeout)
+    if status in (404, 405):
+        status = _http_get(f"{base}/models", timeout)
+    return status is not None and 200 <= status < 300
 
 
 def probe_ollama(base: str = OLLAMA_ENDPOINT,
                  timeout: float = _PROBE_TIMEOUT_S) -> bool:
     """True iff the Ollama server answers on `base` (via `GET /v1/models`).
 
-    Mirrors `daemon.probe_endpoint`: any answer with status < 500 is live.
-    Never raises.
+    Only a direct successful model-list response is live. An unrelated root
+    page, redirect or HTTP error is not evidence of the model API. Never raises.
     """
-    for url in (f"{base.rstrip('/')}/models", base.rstrip("/")):
-        status = _http_get(url, timeout)
-        if status is not None and status < 500:
-            return True
-    return False
+    status = _http_get(f"{base.rstrip('/')}/models", timeout)
+    return status is not None and 200 <= status < 300
 
 
 @dataclass
@@ -183,10 +192,15 @@ def daemon_kwargs(choice: Optional[BackendChoice] = None,
     """
     c = choice or select_backend(prefer_vllm=prefer_vllm)
     target = c.endpoint or VLLM_ENDPOINT
-    is_vllm = c.backend == "vllm"
     # daemon.ResidentDaemon expects `probe(endpoint) -> bool`; match that arity.
-    probe = (lambda ep: probe_vllm_health(ep)) if is_vllm \
-        else (lambda ep: probe_ollama(ep))
+    if c.backend == "vllm":
+        probe = lambda ep: probe_vllm_health(ep)
+    elif c.backend == "ollama":
+        probe = lambda ep: probe_ollama(ep)
+    else:
+        # Recovery requires a new selection, not an Ollama probe against the
+        # fallback vLLM target that silently changes the selected posture.
+        probe = lambda _ep: False
     return {"endpoint": target, "probe": probe, "_backend": c.backend,
             "_sovereign": c.sovereign}
 
@@ -248,6 +262,11 @@ def _selftest() -> dict:
     daemon_checked = False
     try:
         from daemon import ResidentDaemon  # type: ignore
+    except ModuleNotFoundError as exc:
+        if exc.name != "daemon":
+            raise
+        check("daemon_wiring_skipped_cleanly", True)
+    else:
         # Inject a deterministic live probe (no network in the self-test); the
         # real bring-up uses daemon_kwargs(choice).probe → probe_vllm_health.
         d = ResidentDaemon(endpoint=c_vllm.endpoint, probe=lambda _ep: True)
@@ -263,8 +282,6 @@ def _selftest() -> dict:
         check("daemon_posture_fallback_when_probe_dead",
               d_dead.serving_local is False)
         daemon_checked = True
-    except Exception:  # noqa: BLE001 - daemon not importable here; skip wiring.
-        check("daemon_wiring_skipped_cleanly", True)
 
     out["daemon_integration_exercised"] = daemon_checked
     out["model"] = DEFAULT_MODEL
@@ -278,3 +295,4 @@ def _selftest() -> dict:
 
 if __name__ == "__main__":
     print(json.dumps(_selftest(), indent=2))
+
