@@ -85,7 +85,9 @@ export interface LutarV10AuditReport {
   /** Closure ratio ρ = Λ₁₀ / Σ L_k ∈ [0, 1]. */
   readonly rho: number | null;
   /** True iff every artefact is present and Σ L_k > 0 (ρ = 1 within float tolerance). */
-  readonly auditClosed: boolean;\n  /** Closure classification; zero-sum inputs are indeterminate because ρ is undefined. */\n  readonly closureStatus: "closed" | "open" | "indeterminate";
+  readonly auditClosed: boolean;
+  /** Closure classification; zero-sum inputs are indeterminate because ρ is undefined. */
+  readonly closureStatus: "closed" | "open" | "indeterminate";
   /** All (layer, dimension) cells where M_{k,j} = 0. */
   readonly missingArtifacts: readonly MissingArtifact[];
   /** Per-layer contributions A_k = L_k · ∏_j 𝟙[j_k]. */
