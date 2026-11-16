@@ -24,6 +24,9 @@
  *
  *     ρ = Λ₁₀ / Σ_k L_k.
  *
+ * The theorem assumes Σ_k L_k > 0. A zero-sum matrix has no defined ratio
+ * and is returned as `closureStatus: "indeterminate"` with `rho: null`.
+ *
  * **Closure theorem.** ρ = 1 iff every M_{k,j} = 1 (the artefact matrix
  * has no zero cell). Proof: A_k = L_k · ∏_j M_{k,j}. If every M_{k,j} = 1
  * then ∏ = 1 and A_k = L_k, hence Σ A_k = Σ L_k and ρ = 1. Conversely,
