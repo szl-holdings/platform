@@ -204,7 +204,7 @@ function buildReport(
       weightSumExact,
       minAxis,
       maxAxis,
-      bound: { lower: 0, upper: minAxis },
+      bound: { lower: minAxis, upper: maxAxis },
       formula,
     },
   };
@@ -376,7 +376,7 @@ function buildReport5(
       weightSumExact,
       minAxis,
       maxAxis,
-      bound: { lower: 0, upper: minAxis },
+      bound: { lower: minAxis, upper: maxAxis },
       formula,
     },
   };
