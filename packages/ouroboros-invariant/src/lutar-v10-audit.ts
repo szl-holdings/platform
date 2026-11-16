@@ -80,9 +80,9 @@ export interface LutarV10AuditReport {
   /** Σ L_k (sum of underlying layer values). */
   readonly lambdaSum: number;
   /** Closure ratio ρ = Λ₁₀ / Σ L_k ∈ [0, 1]. */
-  readonly rho: number;
-  /** True iff every artefact present (ρ = 1 within float tolerance). */
-  readonly auditClosed: boolean;
+  readonly rho: number | null;
+  /** True iff every artefact is present and Σ L_k > 0 (ρ = 1 within float tolerance). */
+  readonly auditClosed: boolean;\n  /** Closure classification; zero-sum inputs are indeterminate because ρ is undefined. */\n  readonly closureStatus: "closed" | "open" | "indeterminate";
   /** All (layer, dimension) cells where M_{k,j} = 0. */
   readonly missingArtifacts: readonly MissingArtifact[];
   /** Per-layer contributions A_k = L_k · ∏_j 𝟙[j_k]. */
