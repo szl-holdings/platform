@@ -147,15 +147,22 @@ export function lutarV10Audit(
     perLayerA.push({ layer: row.layer, A, complete: product === 1 });
   }
 
-  const rho = lambdaSum > 0 ? lambda10 / lambdaSum : 0;
+  const rho = lambdaSum > 0 ? lambda10 / lambdaSum : null;
   const eps = 1e-12;
-  const auditClosed = Math.abs(rho - 1) < eps && missing.length === 0;
+  const closureStatus =
+    lambdaSum === 0
+      ? "indeterminate"
+      : Math.abs((rho ?? 0) - 1) < eps && missing.length === 0
+        ? "closed"
+        : "open";
+  const auditClosed = closureStatus === "closed";
 
   return {
     lambda10,
     lambdaSum,
     rho,
     auditClosed,
+    closureStatus,
     missingArtifacts: missing,
     perLayerA,
     matrix,
