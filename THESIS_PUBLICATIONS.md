@@ -1,4 +1,4 @@
-# Thesis Publications — The Complete Innovation Record
+# Thesis Publications — Historical Publication Record
 
 **Author:** Stephen P. Lutar Jr. — Founder & CEO, SZL Holdings
 **ORCID:** [0009-0001-0110-4173](https://orcid.org/0009-0001-0110-4173)
@@ -6,7 +6,9 @@
 **License (all papers):** CC BY 4.0
 **Last verified (every link below resolved by command):** 2026-05-11
 
-> This document is the canonical, exhaustive, audit-defensible record of original work published by SZL Holdings under the Ouroboros Thesis program. Every per-version DOI below was read directly from the corresponding `CITATION.cff` / `README.md` in [`szl-holdings/ouroboros-thesis`](https://github.com/szl-holdings/ouroboros-thesis) on 2026-05-11. Every innovation in §4 is bound to (a) a source file in a public or private SZL Holdings repository, (b) a peer-style paper deposited on Zenodo, or (c) both.
+> **Historical scope:** this publication record preserves reported claims and citations from its dated verification passes. It is not a current deployment audit or proof that every claim below has been independently validated.
+>
+> This document records work published by SZL Holdings under the Ouroboros Thesis program. Every per-version DOI below was read directly from the corresponding `CITATION.cff` / `README.md` in [`szl-holdings/ouroboros-thesis`](https://github.com/szl-holdings/ouroboros-thesis) on 2026-05-11. Every innovation in §4 is bound to (a) a source file in a public or private SZL Holdings repository, (b) a peer-style paper deposited on Zenodo, or (c) both.
 
 ---
 
@@ -14,7 +16,7 @@
 
 Every enterprise AI deployment eventually fails the same diligence question: *"prove what your model decided, why, and that it was within policy."* Most cannot. The Ouroboros Thesis introduces **bounded recursion as a system primitive** — the claim that a properly-bounded AI decision loop is not just executable but *auditable by construction*. Each cycle of the loop emits a hash-chained **proof receipt**. The **Lutar Invariant Λ** — defined in v3 as a weighted geometric mean of nine runtime axes — gives a single scalar in `[0, 1]` whose value is `1` if and only if every axis is satisfied. The audit-closure operator **Λ₁₀** (v10) lifts that scalar to a machine-verifiable contract over the implementation. The result is a runtime whose **receipt is the deliverable** — the audit artifact every regulator, IG, and procurement officer eventually demands.
 
-The math is published. The runtime is shipped. The platform is governed by it.
+The references below bind published mathematics to source implementations. Current service availability, deployment provenance, and operational closure require separate evidence.
 
 ---
 
@@ -23,8 +25,8 @@ The math is published. The runtime is shipped. The platform is governed by it.
 We are claiming five things that, to the author's knowledge as of 2026-05-11, do not appear together in any prior published system or paper:
 
 1. **Bounded recursion as a first-class scheduling primitive**, not as a library or middleware (innovation #1 below).
-2. **A weighted-geometric scalar trust aggregator with Egyptian-fraction inspectable weights** — the Lutar Invariant Λ defined in v3, four axioms (A1–A4), 22 falsifiable assertions, all proofs by explicit numerical witness in the public reference implementation. We do not assert this composition (geometric + Egyptian + four-axiom + public proof) has prior art (innovation #18, papers v3 + v9).
-3. **A computable audit-closure operator** that lifts the v9 invariant family to a single scalar ρ ∈ [0, 1] with `auditClosed = (ρ = 1)`, shipped as an HTTP endpoint (`POST /api/ouroboros/lutar/v10`) — paper v10, measured at p99 ≤ 1.27 ms across 24,800 calls in paper v11.
+2. **A weighted-geometric scalar trust aggregator with Egyptian-fraction inspectable weights** — the Lutar Invariant Λ defined in v3, the historical four-property taxonomy (A1–A4), and 22 falsifiable numerical assertions in the reference implementation. Numerical witnesses are regression evidence, not universal proofs; Lambda uniqueness remains Conjecture 1. We do not assert this composition (geometric + Egyptian + four-axiom + public proof) has prior art (innovation #18, papers v3 + v9).
+3. **A computable audit-closure operator** exposed in source as `POST /api/ouroboros/lutar/v10`. Its current runtime contract requires complete artifact cells and a positive denominator before reporting `closureStatus = closed`; ρ alone cannot establish closure when missing evidence has zero or negligible score. With zero denominator, ρ is `null`; a complete zero-score matrix is indeterminate and any missing cell remains open. Paper v11's reported p99 ≤ 1.27 ms across 24,800 calls is a historical result, not a current benchmark.
 4. **Compile-time enforcement of the approval graph topology.** The substrate compiler runs a Kahn sort over the entire approval DAG at build time and rejects flows containing cycles, self-approvals, or orphan gates — competitors (Sierra, Decagon, Cresta, Harvey) perform this at runtime (innovation #2).
 5. **Content-hash reproducibility as the eval bar**, not `tolerant=true` numeric comparison. The reproducibility harness (paper v11 §3) confirms byte-identical receipts across re-runs of the same commit.
 
@@ -83,7 +85,7 @@ v3 (the Λ object) → v9 (the formalism) → v10 (the implementation contract) 
 
 **9. Content-hash reproducibility.** The eval harness verifies byte-identical `content_hash` values across re-runs of the same commit. Binding: [`apps/eval-runner/test_suite_reproducibility.py`](https://github.com/szl-holdings/platform/pull/138) (PR #138, 281 LOC). Formal: v11 §3.
 
-**10. Lutar-as-a-Service (LaaS).** `POST /api/ouroboros/lutar/v10` runs the v10 audit closure operator against the live shipping repo on every test run. The result is a typed object backing the `lutar_v10` Codex node. Operational binding from paper to production. Formal: v10.
+**10. Lutar-as-a-Service (LaaS).** The source route `POST /api/ouroboros/lutar/v10` evaluates caller-supplied layer values and artifact flags. It returns a typed result with `closureStatus` and a nullable `rho`. The flags do not independently prove artifact authenticity, freshness, completeness of the expected layer set, or deployment status. The route does not scan the repository on each request. Formal reference: v10; runtime contract: `packages/ouroboros-invariant/src/lutar-v10-audit.ts`.
 
 **11. Reproducible reference run with real evidence.** A complete codex-kernel run is preserved at [`szl-trust/runs/E4-codex-kernel-2026-04-29/`](https://github.com/szl-holdings/szl-trust/tree/main/runs/E4-codex-kernel-2026-04-29) — 11 CPS artifacts, `mocked: false`, 12 receipts citing Dresden Codex pp. 24, 46–50 (Venus tables) and the IAU synodic period of Venus (583.92 d). Anyone can clone and read it.
 
@@ -115,11 +117,11 @@ The authoritative source is `API-SPEC.md` in the platform repo (PR #141).
 
 ### 4.4 Performance and engineering
 
-**18. The Lutar Invariant Λ as a weighted-geometric scalar trust aggregator.** Λ(x; w) = Π xᵢ^wᵢ with weights wᵢ drawn from an explicit Egyptian unit-fraction decomposition that is *inspectable* by construction. Four axioms (A1 monotonicity, A2 zero-pinning, A3 Egyptian inspectability, A4 page-curve concavity), each proven by explicit numerical witness. **22 falsifiable assertions** in the public test surface (`packages/ouroboros/src/lutar-invariant-proof.test.ts` in [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros)). To the author's knowledge, the specific composition (weighted-geometric + Egyptian-fraction weights + four-axiom set + public falsifiable test) is novel; related work cited in v3 §6 uses arithmetic aggregation, learned weights, or unaxiomatized scalar metrics. Formal: papers v3 + v9.
+**18. The Lutar Invariant Λ as a weighted-geometric scalar trust aggregator.** Λ(x; w) = Π xᵢ^wᵢ with weights wᵢ drawn from an explicit Egyptian unit-fraction decomposition that is *inspectable* by construction. The historical implementation labels four properties A1 monotonicity, A2 zero-pinning, A3 Egyptian inspectability, and A4 page-curve concavity. Its numerical tests exercise finite witnesses, not universal formal proofs. These labels are distinct from the canonical Lean A1–A5 taxonomy; Lambda uniqueness remains Conjecture 1. **22 falsifiable assertions** in the public witness suite (`packages/ouroboros/src/lutar-invariant-proof.test.ts` in [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros)). To the author's knowledge, the specific composition (weighted-geometric + Egyptian-fraction weights + four-axiom set + public falsifiable test) is novel; related work cited in v3 §6 uses arithmetic aggregation, learned weights, or unaxiomatized scalar metrics. Formal: papers v3 + v9.
 
 **19. Measured Λ₁₀ overhead at production scale.** Paper v11 reports **24,800 HTTP calls** across **8** production routes (A11oy, Amaru, Sentra) × 1,000 iterations × 2 arms (baseline / governed). Median overhead **0.49 – 0.59 ms** per route; p99 **≤ 1.27 ms**; **ρ = 1.000** on 8,000 / 8,000 governed pairs; 0 missing artefacts. Commit pin: `6c5c28366`. **48 / 48 Λ axiom tests** + **13 / 13 Λ adapter tests** passing on the same commit. Source: [`papers/v11/README.md`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers/v11).
 
-**20. 172 / 172 tests passing on the public reference runtime.** The public [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros) runtime (Apache-2.0) ships at v6.2.0 with a full passing suite. The paper-v3 reference implementation is pinned to commit [`5f6ee65`](https://github.com/szl-holdings/ouroboros/commit/5f6ee65).
+**20. Historical reference-runtime test report.** The dated publication record describes the public [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros) runtime (Apache-2.0) at v6.2.0. Its historical passing-suite claim is not a current platform test result; a current result requires the exact revision and its per-test output. The paper-v3 reference implementation is pinned to commit [`5f6ee65`](https://github.com/szl-holdings/ouroboros/commit/5f6ee65).
 
 **21. Codex v11 — the typed knowledge graph.** Every Codex node is bound to a runnable verification command. `lutar_v10` is one such node, populated by the LaaS surface. Node and edge counts are reproduced by command in the platform's `SOURCE_OF_TRUTH.md` (private — diligence reviewers may request access).
 
@@ -258,7 +260,7 @@ The earlier a platform is built around audit-by-construction, the harder it is t
 - **Procurement officer:** §2 (what is new), §4 (the catalog), §5 (the reference run), then APEX v2 in the platform repo.
 - **Investor:** §8 (why it matters), §4 (catalog), §5 (reference run).
 - **Research collaborator:** v9 (the fiber-bundle treatment in L₈ is where cross-disciplinary work most naturally begins).
-- **Builder / integrator:** the public runtime at [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros) (Apache-2.0, 172/172 tests), then the artifacts in [`szl-holdings/szl-trust`](https://github.com/szl-holdings/szl-trust) and [`szl-holdings/szl-cookbook`](https://github.com/szl-holdings/szl-cookbook).
+- **Builder / integrator:** the public runtime at [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros) (Apache-2.0; historical reference), then the artifacts in [`szl-holdings/szl-trust`](https://github.com/szl-holdings/szl-trust) and [`szl-holdings/szl-cookbook`](https://github.com/szl-holdings/szl-cookbook).
 
 ---
 

@@ -5,7 +5,7 @@
  * This file extends the family additively without breaking older APIs:
  *
  *   Λ₆ = C^(1/6) · H^(1/6) · R^(1/6) · F^(1/6) · G^(1/6) · I^(1/6)
- *   Λ₇ = Λ₆ · M^(1/7) factor — 7 axes, each weight 1/7
+ *   Λ₇ = product of all seven axes raised to 1/7 — adds M
  *   Λ₈ = 8 axes, each weight 1/8 — adds B (Socratic ontic grounding)
  *   Λ₉ = 9 axes, each weight 1/9 — adds N (Lara non-measurability honesty)
  *
@@ -20,10 +20,12 @@
  *   B — Being        (Socrates divided-line ontic grounding)
  *   N — Non-measurability honesty (Lara: Jamneshan–Shalom–Tao gap declarations)
  *
- * Each weight is a single Egyptian unit fraction (1/k), preserving the
- * inspectability axiom A3 trivially.
+ * Each weight is a single Egyptian unit fraction (1/k), so its rational
+ * representation is inspectable. This is the historical implementation
+ * property, not the canonical Lean A3 label.
  *
- * Bound theorem unchanged: 0 ≤ Λ_k ≤ min(axes) ≤ max(axes) ≤ 1.
+ * Bounds: 0 ≤ min(axes) ≤ Λ_k ≤ max(axes) ≤ 1, up to floating-point error.
+ * Lambda uniqueness remains Conjecture 1.
  */
 
 import { reconstructFraction } from "@workspace/reconciliation";

@@ -59,6 +59,8 @@ describe("Lutar Invariant v2 — 5-axis with Gauß closure", () => {
     ]) {
       const r = lutarInvariant5(aa);
       expect(verifyLutarBound5(r)).toBe(true);
+      expect(r.proof.bound.lower).toBeCloseTo(Math.min(...Object.values(aa)), 12);
+      expect(r.proof.bound.upper).toBeCloseTo(Math.max(...Object.values(aa)), 12);
     }
   });
 
