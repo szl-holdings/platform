@@ -160,7 +160,8 @@ describe("lutarInvariant — formula and report shape", () => {
       resonance: 0.6,
       frustum: 0.4,
     });
-    expect(r.proof.bound.lower).toBe(0.4);\n    expect(r.proof.bound.upper).toBe(0.9);
+    expect(r.proof.bound.lower).toBe(0.4);
+    expect(r.proof.bound.upper).toBe(0.9);
   });
 });
 
