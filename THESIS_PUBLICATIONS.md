@@ -121,7 +121,7 @@ The authoritative source is `API-SPEC.md` in the platform repo (PR #141).
 
 **19. Measured Λ₁₀ overhead at production scale.** Paper v11 reports **24,800 HTTP calls** across **8** production routes (A11oy, Amaru, Sentra) × 1,000 iterations × 2 arms (baseline / governed). Median overhead **0.49 – 0.59 ms** per route; p99 **≤ 1.27 ms**; **ρ = 1.000** on 8,000 / 8,000 governed pairs; 0 missing artefacts. Commit pin: `6c5c28366`. **48 / 48 Λ axiom tests** + **13 / 13 Λ adapter tests** passing on the same commit. Source: [`papers/v11/README.md`](https://github.com/szl-holdings/ouroboros-thesis/tree/main/papers/v11).
 
-**20. 172 / 172 tests passing on the public reference runtime.** The public [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros) runtime (Apache-2.0) ships at v6.2.0 with a full passing suite. The paper-v3 reference implementation is pinned to commit [`5f6ee65`](https://github.com/szl-holdings/ouroboros/commit/5f6ee65).
+**20. Historical reference-runtime test report.** The dated publication record describes the public [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros) runtime (Apache-2.0) at v6.2.0. Its historical passing-suite claim is not a current platform test result; a current result requires the exact revision and its per-test output. The paper-v3 reference implementation is pinned to commit [`5f6ee65`](https://github.com/szl-holdings/ouroboros/commit/5f6ee65).
 
 **21. Codex v11 — the typed knowledge graph.** Every Codex node is bound to a runnable verification command. `lutar_v10` is one such node, populated by the LaaS surface. Node and edge counts are reproduced by command in the platform's `SOURCE_OF_TRUTH.md` (private — diligence reviewers may request access).
 
@@ -260,7 +260,7 @@ The earlier a platform is built around audit-by-construction, the harder it is t
 - **Procurement officer:** §2 (what is new), §4 (the catalog), §5 (the reference run), then APEX v2 in the platform repo.
 - **Investor:** §8 (why it matters), §4 (catalog), §5 (reference run).
 - **Research collaborator:** v9 (the fiber-bundle treatment in L₈ is where cross-disciplinary work most naturally begins).
-- **Builder / integrator:** the public runtime at [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros) (Apache-2.0, 172/172 tests), then the artifacts in [`szl-holdings/szl-trust`](https://github.com/szl-holdings/szl-trust) and [`szl-holdings/szl-cookbook`](https://github.com/szl-holdings/szl-cookbook).
+- **Builder / integrator:** the public runtime at [`szl-holdings/ouroboros`](https://github.com/szl-holdings/ouroboros) (Apache-2.0; historical reference), then the artifacts in [`szl-holdings/szl-trust`](https://github.com/szl-holdings/szl-trust) and [`szl-holdings/szl-cookbook`](https://github.com/szl-holdings/szl-cookbook).
 
 ---
 
