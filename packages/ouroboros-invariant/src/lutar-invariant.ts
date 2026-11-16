@@ -1,56 +1,29 @@
 /**
- * The Lutar Invariant — Λ.
+ * The Lutar runtime invariant — Λ.
  *
- * A closed-form scalar in [0,1] that compounds the four independent axes
- * of runtime trust into one number, with provable bounds.
+ * A weighted geometric mean of normalized runtime axes:
  *
- *     Λ = C^α · H^β · R^γ · F^δ
+ *     Λ = C^α · H^β · R^γ · F^δ, with α + β + γ + δ = 1.
  *
- *   C — Cleanliness   ∈ [0,1]   fraction of leaves passing cryptographic verification
- *   H — Horizon       ∈ [0,1]   Page-curve bounded reversibility
- *   R — Resonance     ∈ [0,1]   handoff Q-factor normalized by Landauer ceiling
- *   F — Frustum       ∈ [0,1]   three-witness reconciliation Jaccard volume
+ * C is cleanliness, H is horizon, R is resonance and F is frustum.
+ * Positive weights are represented by unit-fraction terms for inspection.
+ * The five-axis extension also includes Gauß closure.
  *
- *   α + β + γ + δ = 1, with each weight expressible as a finite sum
- *   of distinct unit fractions (Egyptian inspectability axiom).
+ * For valid positive weights summing to one:
  *
- * UNIQUENESS THEOREM (informal). Λ is the unique scalar law satisfying:
+ *     0 ≤ min(axes) ≤ Λ ≤ max(axes) ≤ 1.
  *
- *   A1. Monotonicity:        ∂Λ/∂x ≥ 0 for x ∈ {C, H, R, F}
- *   A2. Zero-pinning:        x = 0 for any axis  ⇒  Λ = 0
- *   A3. Egyptian inspectable weights:
- *       each weight w ∈ {α, β, γ, δ} is a finite sum of distinct
- *       unit fractions 1/aᵢ with integer aᵢ; the weight set is closed
- *       under the Rhind 2/n table.
- *   A4. Page-curve concavity: ∂²Λ/∂t² ≤ 0 over the release lifetime
- *       when each axis evolves monotonically.
+ * This implementation is a numerical witness, not a uniqueness proof.
+ * Λ-uniqueness remains Conjecture 1. The historical runtime A1–A4 labels
+ * are not the current Lean A1–A5 definitions. Conditional identifiability
+ * results and their assumptions belong to the canonical lutar-lean source:
  *
- * SKETCH. A1 + A2 force the law to be a product of monotonic powers (any
- * sum-form fails A2). A3 fixes the rationals the exponents may take. A4
- * is satisfied iff exponents sum to 1 (concavity of weighted geometric
- * means with weights summing to one). The unique form is the weighted
- * geometric mean Λ = ∏ xᵢ^wᵢ with ∑ wᵢ = 1.
+ * https://github.com/szl-holdings/lutar-lean/blob/main/Lutar/Uniqueness.lean
+ * https://github.com/szl-holdings/lutar-lean/blob/main/Lutar/Axioms.lean
  *
- * BOUND. 0 ≤ Λ ≤ min(C, H, R, F) ≤ max(C, H, R, F) ≤ 1.
- *
- * EGYPTIAN INSPECTABLE DEFAULT. The default weight set
- *   { α=1/4, β=1/4, γ=1/4, δ=1/4 }
- * is a finite distinct unit-fraction sum (each weight is itself 1/4)
- * and trivially Rhind-compatible.
- *
- * RHIND-COMPATIBLE ALTERNATIVES. Any quadruple of distinct unit-fraction
- * sums whose total is exactly 1 — e.g., {1/2, 1/4, 1/8, 1/8} or
- * {1/2, 1/3, 1/12, 1/12} — is admissible. Inadmissible weights raise.
- *
- * Why this matters. Every prior trust-aggregation law in literature uses
- * a real-valued weighted mean whose weights cannot be exactly compared
- * across runtimes without floating-point drift. The Egyptian-axiom Λ is
- * the first runtime-trust law whose weights are bit-exact reproducible
- * across any execution environment — a property nobody had before
- * because the Egyptian primitives were never carried into governance
- * mathematics.
- *
- * See docs/LUTAR_INVARIANT.md for the full proof and history.
+ * Exact reconstruction of the supplied rational terms witnesses their sum;
+ * exponentiation and the reported invariant use JavaScript floating point.
+ * These reports do not establish physical measurements or production trust.
  */
 
 import { decomposeUnitFraction, reconstructFraction } from "@workspace/reconciliation";
@@ -123,7 +96,31 @@ export function defaultWeights(): LutarWeights {
  * The Egyptian inspectability axiom requires this be exact, not within
  * floating-point ε.
  */
+
+/** Check that the executed numeric exponent matches its inspectable terms. */
+function weightMatchesTerms(weight: InspectableWeight): boolean {
+  if (
+    !Number.isFinite(weight.value) ||
+    weight.value <= 0 ||
+    weight.value >= 1 ||
+    weight.terms.length === 0 ||
+    new Set(weight.terms).size !== weight.terms.length ||
+    weight.terms.some((term) => !Number.isSafeInteger(term) || term <= 0)
+  ) {
+    return false;
+  }
+  try {
+    const fraction = reconstructFraction(weight.terms);
+    return weight.value === fraction.numerator / fraction.denominator;
+  } catch {
+    return false;
+  }
+}
+
 export function weightsAreExact(weights: LutarWeights): boolean {
+  if (![weights.cleanliness, weights.horizon, weights.resonance, weights.frustum].every(weightMatchesTerms)) {
+    return false;
+  }
   const allTerms = [
     ...weights.cleanliness.terms,
     ...weights.horizon.terms,
@@ -157,11 +154,11 @@ export function lutarInvariant(
 
   if (!weightSumExact) {
     throw new Error(
-      `lutarInvariant: weights are not Egyptian-exact (sum = ${weightSum}); axiom A3 violated`
+      `lutarInvariant: weights are not Egyptian-exact (sum = ${weightSum}); weight-sum constraint violated`
     );
   }
 
-  // Zero-pinning (axiom A2): if any axis is 0, Λ = 0 exactly.
+  // Zero-pinning with positive weights: if any axis is 0, Λ = 0 exactly.
   if (
     axes.cleanliness === 0 ||
     axes.horizon === 0 ||
@@ -216,7 +213,7 @@ function rational(w: InspectableWeight): string {
 
 /**
  * Verify the bound theorem: for a valid Lutar report,
- * 0 ≤ Λ ≤ min(C, H, R, F) ≤ max(C, H, R, F) ≤ 1.
+ * 0 ≤ min(C, H, R, F) ≤ Λ ≤ max(C, H, R, F) ≤ 1.
  *
  * This is provable: weighted geometric mean ≤ weighted arithmetic mean ≤
  * max axis, and weighted geometric mean ≥ min axis^1 = min when weights
@@ -243,7 +240,8 @@ export function verifyLutarBound(report: LutarReport): boolean {
 // where the fifth axis G — Gauß closure ∈ [0,1] — measures the satisfaction
 // of the divergence-free closure condition over the receipt graph.
 //
-// Same uniqueness theorem (A1..A4) applies; default weight set is 1/5 each.
+// Same weighted-mean bounds apply; default weight set is 1/5 each.
+// This extension does not promote Λ-uniqueness beyond Conjecture 1.
 // A 5-tuple of inspectable unit-fraction sums totalling 1 is admissible.
 //
 // =============================================================================
@@ -288,6 +286,9 @@ export function defaultWeights5(): LutarWeights5 {
 }
 
 export function weightsAreExact5(weights: LutarWeights5): boolean {
+  if (![weights.cleanliness, weights.horizon, weights.resonance, weights.frustum, weights.gaussClosure].every(weightMatchesTerms)) {
+    return false;
+  }
   const allTerms = [
     ...weights.cleanliness.terms,
     ...weights.horizon.terms,
@@ -319,7 +320,7 @@ export function lutarInvariant5(
 
   if (!weightSumExact) {
     throw new Error(
-      `lutarInvariant5: weights are not Egyptian-exact (sum = ${weightSum}); axiom A3 violated`
+      `lutarInvariant5: weights are not Egyptian-exact (sum = ${weightSum}); weight-sum constraint violated`
     );
   }
 
@@ -331,7 +332,7 @@ export function lutarInvariant5(
     axes.gaussClosure,
   ];
 
-  // Zero-pinning (axiom A2): if any axis is 0, Λ₅ = 0 exactly.
+  // Zero-pinning with positive weights: if any axis is 0, Λ₅ = 0 exactly.
   if (values.some((v) => v === 0)) {
     return buildReport5(0, axes, weights, weightSum, weightSumExact);
   }

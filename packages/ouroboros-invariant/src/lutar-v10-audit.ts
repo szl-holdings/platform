@@ -24,14 +24,18 @@
  *
  *     ρ = Λ₁₀ / Σ_k L_k.
  *
- * The theorem assumes Σ_k L_k > 0. A zero-sum matrix has no defined ratio
- * and is returned as `closureStatus: "indeterminate"` with `rho: null`.
+ * In exact arithmetic, if EVERY L_k > 0, then ρ = 1 iff every
+ * M_{k,j} = 1. A missing cell sets A_k = 0 < L_k; a complete row
+ * contributes A_k = L_k. A positive sum alone is not enough for the
+ * converse: a zero-valued incomplete row is invisible to the ratio.
  *
- * **Closure theorem.** ρ = 1 iff every M_{k,j} = 1 (the artefact matrix
- * has no zero cell). Proof: A_k = L_k · ∏_j M_{k,j}. If every M_{k,j} = 1
- * then ∏ = 1 and A_k = L_k, hence Σ A_k = Σ L_k and ρ = 1. Conversely,
- * if any M_{k,j} = 0 then for that k, ∏ = 0 so A_k = 0 < L_k (assuming
- * L_k > 0), making Σ A_k < Σ L_k and ρ < 1. ∎
+ * Missing cells always keep closure open, even if ρ rounds to 1.
+ * With no missing cells and Σ_k L_k = 0, closure is indeterminate and
+ * rho is null. An unrepresentable finite-input sum is rejected.
+ *
+ * The supplied flags are caller assertions. This operator does not fetch
+ * artefacts, authenticate receipts, prove freshness, or establish that the
+ * matrix includes every expected layer.
  *
  * The function returns the broken (k, j) pairs as a `missingArtifacts`
  * array, so a failing audit names its own remediation.
@@ -82,11 +86,11 @@ export interface LutarV10AuditReport {
   readonly lambda10: number;
   /** Σ L_k (sum of underlying layer values). */
   readonly lambdaSum: number;
-  /** Closure ratio ρ = Λ₁₀ / Σ L_k ∈ [0, 1]. */
+  /** Closure ratio ρ = Λ₁₀ / Σ L_k ∈ [0, 1], or null when Σ L_k = 0. */
   readonly rho: number | null;
   /** True iff every artefact is present and Σ L_k > 0 (ρ = 1 within float tolerance). */
   readonly auditClosed: boolean;
-  /** Closure classification; zero-sum inputs are indeterminate because ρ is undefined. */
+  /** Missing cells are open; a complete zero-sum matrix is indeterminate. */
   readonly closureStatus: "closed" | "open" | "indeterminate";
   /** All (layer, dimension) cells where M_{k,j} = 0. */
   readonly missingArtifacts: readonly MissingArtifact[];
@@ -100,8 +104,8 @@ export interface LutarV10AuditReport {
  * Compute the Audit Closure Operator Λ₁₀ over a Lutar family artefact
  * matrix.
  *
- * Throws if any lambdaValue is non-finite or negative, or if any layer
- * is missing one of the six required dimension keys.
+ * Throws if any lambdaValue is non-finite or negative, the sum overflows,
+ * or any layer is missing one of the six required dimension keys.
  */
 export function lutarV10Audit(
   matrix: readonly LutarLayerArtifacts[]
@@ -134,6 +138,9 @@ export function lutarV10Audit(
 
   for (const row of matrix) {
     lambdaSum += row.lambdaValue;
+    if (!Number.isFinite(lambdaSum)) {
+      throw new Error("lutarV10Audit: sum of layer values must remain finite");
+    }
     let product = 1;
     for (const dim of ARTIFACT_DIMENSIONS) {
       const present = row.artifacts[dim] === true;
@@ -150,11 +157,13 @@ export function lutarV10Audit(
   const rho = lambdaSum > 0 ? lambda10 / lambdaSum : null;
   const eps = 1e-12;
   const closureStatus =
-    lambdaSum === 0
-      ? "indeterminate"
-      : Math.abs((rho ?? 0) - 1) < eps && missing.length === 0
-        ? "closed"
-        : "open";
+    missing.length > 0
+      ? "open"
+      : lambdaSum === 0
+        ? "indeterminate"
+        : Math.abs((rho ?? 0) - 1) < eps
+          ? "closed"
+          : "open";
   const auditClosed = closureStatus === "closed";
 
   return {
