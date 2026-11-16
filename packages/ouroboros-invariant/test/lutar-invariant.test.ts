@@ -44,7 +44,7 @@ describe("lutarInvariant — basic laws", () => {
 });
 
 describe("lutarInvariant — bound theorem", () => {
-  it("0 ≤ Λ ≤ min(axes) for the default uniform weights", () => {
+  it("min(axes) ≤ Λ ≤ max(axes) for the default uniform weights", () => {
     const r = lutarInvariant({
       cleanliness: 0.9,
       horizon: 0.7,
@@ -160,7 +160,7 @@ describe("lutarInvariant — formula and report shape", () => {
       resonance: 0.6,
       frustum: 0.4,
     });
-    expect(r.proof.bound.upper).toBe(0.4);
+    expect(r.proof.bound.lower).toBe(0.4);\n    expect(r.proof.bound.upper).toBe(0.9);
   });
 });
 
