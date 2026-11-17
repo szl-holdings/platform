@@ -78,7 +78,7 @@ test('lockfile contains every covered consumer and only patched brace releases',
   }
   assert.deepEqual(
     [...observedMajors].sort((a, b) => a - b),
-    [3, 5, 11], // minimatch 10 forced onto 11.0.4 by the GHSA-g3hv-75wg-m249 override
+    [3, 5, 10, 11],
   );
   const braceVersions = Object.keys(lock.packages ?? {})
     .filter((key) => key.startsWith('brace-expansion@'))

@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:b36dea61-fdc1-5dbd-9c8b-c1c66a69c3cb",
+  "serialNumber": "urn:uuid:caaedde5-d467-52ff-b1ad-3a344b3da16e",
   "metadata": {
     "tools": [
       {
@@ -35,7 +35,7 @@
       },
       {
         "name": "szl:sbom:component-count",
-        "value": "1801"
+        "value": "1803"
       }
     ]
   },
@@ -1116,6 +1116,12 @@
     },
     {
       "type": "library",
+      "name": "@opentelemetry/api-logs",
+      "version": "0.222.0",
+      "purl": "pkg:npm/%40opentelemetry/api-logs@0.222.0"
+    },
+    {
+      "type": "library",
       "name": "@opentelemetry/auto-instrumentations-node",
       "version": "0.75.0",
       "purl": "pkg:npm/%40opentelemetry/auto-instrumentations-node@0.75.0"
@@ -1242,6 +1248,12 @@
     },
     {
       "type": "library",
+      "name": "@opentelemetry/instrumentation",
+      "version": "0.222.0",
+      "purl": "pkg:npm/%40opentelemetry/instrumentation@0.222.0"
+    },
+    {
+      "type": "library",
       "name": "@opentelemetry/instrumentation-amqplib",
       "version": "0.64.0",
       "purl": "pkg:npm/%40opentelemetry/instrumentation-amqplib@0.64.0"
@@ -1333,8 +1345,8 @@
     {
       "type": "library",
       "name": "@opentelemetry/instrumentation-http",
-      "version": "0.217.0",
-      "purl": "pkg:npm/%40opentelemetry/instrumentation-http@0.217.0"
+      "version": "0.222.0",
+      "purl": "pkg:npm/%40opentelemetry/instrumentation-http@0.222.0"
     },
     {
       "type": "library",
@@ -8309,8 +8321,8 @@
     {
       "type": "library",
       "name": "hono",
-      "version": "4.13.11",
-      "purl": "pkg:npm/hono@4.13.11"
+      "version": "4.13.16",
+      "purl": "pkg:npm/hono@4.13.16"
     },
     {
       "type": "library",

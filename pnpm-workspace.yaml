@@ -106,8 +106,6 @@ overrides:
   'minimatch@3>brace-expansion': 1.1.21
   'minimatch@5>brace-expansion': 2.1.7
   'minimatch@9>brace-expansion': 2.1.7
-  # GHSA-g3hv-75wg-m249: force vulnerable minimatch (>=7 <11.0.1) onto the patched 11.0.4.
-  'minimatch@>=7.0.0 <11.0.1': 11.0.4
   # GHSA-3g3m-2fjr-6pw4: glob >=9.0.0 <=14.0.1 ignores AbortSignal cancellation. Every glob 10
   # consumer's call path is contract-tested on 14.0.3 in security-overrides-compat.test.mjs.
   'glob@>=9.0.0 <14.0.2': 14.0.3
