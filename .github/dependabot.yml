@@ -30,16 +30,19 @@ updates:
       default-days: 3
 
   # Python (pip) dependencies
+  # One entry for every pip directory was cancelled at about 55 minutes on
+  # 2026-11-02, 11-09 and 11-16. On 11-16 it spent about 1.5 minutes per
+  # expanded directory and was cancelled inside /services/* without reaching
+  # /substrate or /workers/*. The same directories are split across three
+  # entries (each listed exactly once, nested globs kept with their parent)
+  # with staggered times so each job has its own budget. Settings are unchanged.
   - package-ecosystem: "pip"
     directories:
       - "/"
       - "/apps/*"
       - "/apps/substrate-inference/engine/*"
-      - "/packages/*"
       - "/scripts/*"
-      - "/services/*"
       - "/substrate"
-      - "/workers/*"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -49,7 +52,70 @@ updates:
       - "dependencies"
     open-pull-requests-limit: 5
     groups:
-      python-deps:
+      python-deps-core:
+        patterns:
+        - '*'
+        update-types:
+        - minor
+        - patch
+        exclude-patterns:
+        - torch*
+        - transformers
+        - accelerate
+        - vllm
+        - unsloth*
+        - openai
+    cooldown:
+      default-days: 7
+      semver-major-days: 21
+      semver-minor-days: 7
+      semver-patch-days: 3
+
+  - package-ecosystem: "pip"
+    directories:
+      - "/packages/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    labels:
+      - "dependencies"
+    open-pull-requests-limit: 5
+    groups:
+      python-deps-packages:
+        patterns:
+        - '*'
+        update-types:
+        - minor
+        - patch
+        exclude-patterns:
+        - torch*
+        - transformers
+        - accelerate
+        - vllm
+        - unsloth*
+        - openai
+    cooldown:
+      default-days: 7
+      semver-major-days: 21
+      semver-minor-days: 7
+      semver-patch-days: 3
+
+  - package-ecosystem: "pip"
+    directories:
+      - "/services/*"
+      - "/workers/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "America/New_York"
+    labels:
+      - "dependencies"
+    open-pull-requests-limit: 5
+    groups:
+      python-deps-services:
         patterns:
         - '*'
         update-types:
@@ -102,18 +168,16 @@ updates:
       default-days: 3
 
   # npm / Node dependencies
+  # One entry for all ten directory globs was cancelled at about 55 minutes on
+  # 2026-11-02, 11-09 and 11-16. On 11-16 the job never left "/": as the pnpm
+  # workspace root it checks workspace-wide dependencies, and each pnpm
+  # release-age block made it retry older versions. "/" is isolated and the
+  # other globs are split across four entries (each listed exactly once, nested
+  # globs kept with their parent) with staggered times so one slow directory
+  # cannot starve the rest. Settings, including cooldown, are unchanged.
   - package-ecosystem: "npm"
     directories:
       - "/"
-      - "/apps/*"
-      - "/artifacts/*"
-      - "/lib/*"
-      - "/lib/services/connectors/*"
-      - "/packages/*"
-      - "/scripts"
-      - "/services/*"
-      - "/services/vsp-otel/stubs/*"
-      - "/workers/*"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -124,7 +188,140 @@ updates:
       - "security"
     open-pull-requests-limit: 10
     groups:
-      npm-deps:
+      npm-deps-root:
+        patterns:
+        - '*'
+        update-types:
+        - minor
+        - patch
+        exclude-patterns:
+        - torch*
+        - transformers
+        - accelerate
+        - vllm
+        - unsloth*
+        - openai
+    cooldown:
+      default-days: 7
+      semver-major-days: 21
+      semver-minor-days: 7
+      semver-patch-days: 3
+
+  - package-ecosystem: "npm"
+    directories:
+      - "/lib/*"
+      - "/lib/services/connectors/*"
+      - "/scripts"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    labels:
+      - "dependencies"
+      - "security"
+    open-pull-requests-limit: 10
+    groups:
+      npm-deps-lib:
+        patterns:
+        - '*'
+        update-types:
+        - minor
+        - patch
+        exclude-patterns:
+        - torch*
+        - transformers
+        - accelerate
+        - vllm
+        - unsloth*
+        - openai
+    cooldown:
+      default-days: 7
+      semver-major-days: 21
+      semver-minor-days: 7
+      semver-patch-days: 3
+
+  - package-ecosystem: "npm"
+    directories:
+      - "/packages/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "America/New_York"
+    labels:
+      - "dependencies"
+      - "security"
+    open-pull-requests-limit: 10
+    groups:
+      npm-deps-packages:
+        patterns:
+        - '*'
+        update-types:
+        - minor
+        - patch
+        exclude-patterns:
+        - torch*
+        - transformers
+        - accelerate
+        - vllm
+        - unsloth*
+        - openai
+    cooldown:
+      default-days: 7
+      semver-major-days: 21
+      semver-minor-days: 7
+      semver-patch-days: 3
+
+  - package-ecosystem: "npm"
+    directories:
+      - "/apps/*"
+      - "/artifacts/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "America/New_York"
+    labels:
+      - "dependencies"
+      - "security"
+    open-pull-requests-limit: 10
+    groups:
+      npm-deps-apps:
+        patterns:
+        - '*'
+        update-types:
+        - minor
+        - patch
+        exclude-patterns:
+        - torch*
+        - transformers
+        - accelerate
+        - vllm
+        - unsloth*
+        - openai
+    cooldown:
+      default-days: 7
+      semver-major-days: 21
+      semver-minor-days: 7
+      semver-patch-days: 3
+
+  - package-ecosystem: "npm"
+    directories:
+      - "/services/*"
+      - "/services/vsp-otel/stubs/*"
+      - "/workers/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "12:00"
+      timezone: "America/New_York"
+    labels:
+      - "dependencies"
+      - "security"
+    open-pull-requests-limit: 10
+    groups:
+      npm-deps-services:
         patterns:
         - '*'
         update-types:
