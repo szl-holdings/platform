@@ -1763,3 +1763,28 @@ dependencies are absent. Current-head hosted admission, durable report retention
 complete cross-run incident coordination and deployed verification remain
 separate closure conditions. See the
 [reconciliation proof](../../audit/PLATFORM_994_CURRENT_MAIN_20261109.md).
+
+
+### 2026-11-17 retained dashboard evidence states
+
+**MEASURED — local UI contract only:** workcell `dashboard-evidence-states-20261116`
+repairs seed-as-live fallbacks in the retained Now Board and Command Surface.
+Each query now keeps its own API_DATA, EMPTY, LOADING, ERROR, STALE or UNAVAILABLE
+state. Missing/null responses remain distinct from empty lists; zero remains zero.
+Cached values are withheld on errors, refreshes and stale results. Fixtures require
+explicit DEMO selection, and local demo choices cannot appear as real approvals.
+Unsupported fixed proof/trust/health metrics and synthetic rate charts are removed.
+Unknown signal severity remains unknown in both the row and selected detail.
+
+The public candidate still excludes these modules. The candidate entry/allowlist,
+backend, provider settings and a11oy gitlink are unchanged. The final source
+`a4cc449fb59cd2b829830b8444d1c0ed76ba2f86` has four exact-source desktop/mobile captures
+using controlled query responses and 33 focused state/render tests. The full
+before/after main-patch typecheck passed 232 tasks; later bounded review corrections
+are documented separately in the proof.
+
+**BLOCKED remains:** live GraphQL integration, tenant/session authority, durable
+persistence, independently governed approval, runtime receipt verification and
+deployed operational evidence. Local UI tests are not evidence that those gaps
+are closed. See the [corrected proof successor](../../audit/A11OY_DASHBOARD_EVIDENCE_STATES_20261117.md)
+and its source-bound screenshot manifest. Existing historical evidence is retained.
