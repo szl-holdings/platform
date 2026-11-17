@@ -42,7 +42,7 @@ Primary implementation: [query classifier](../artifacts/a11oy/src/lib/query-evid
 | Main patch | `pnpm typecheck` | Exit 0; 232 / 232 tasks successful, 230 cache hits |
 | Main patch | `pnpm --filter @workspace/a11oy test` | Exit 0; 51 Node contract tests + 37 Vitest tests |
 | Main patch | `pnpm --filter @workspace/a11oy build` | Exit 0; public candidate bundle contract passed over 4 emitted files |
-| Severity review correction | `pnpm --filter @workspace/a11oy test:dashboard-evidence` | Exit 0; 33 tests passed, including actual selected-signal missing-severity behavior |
+| Severity review correction | `pnpm --filter @workspace/a11oy test:dashboard-evidence` | Focused dashboard cases: 33; exit 0, including actual selected-signal missing-severity behavior |
 | Final layout and capture | `pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture` | Exit 0; all 4 scenarios passed at the exact final captured source |
 | Final source hygiene | `git diff --check` | Exit 0 |
 

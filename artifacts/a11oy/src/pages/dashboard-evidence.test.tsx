@@ -6,8 +6,16 @@ import { SEED_SIGNALS } from '@workspace/a11oy-fabric';
 import { classifyQueryEvidence } from '../lib/query-evidence';
 import { NowBoard } from './NowBoard';
 import { CommandSurface } from './CommandSurface';
-import { useAlloyDashboard, useAlloySignals, useAlloyWorkflows, useAlloyApprovals } from '../graphql/hooks';
-import type { AlloyDashboardStats, AlloySignal, AlloyWorkflow, AlloyApproval } from '../graphql/hooks';
+import {
+  useAlloyDashboard,
+  useAlloySignals,
+  useAlloyWorkflows,
+  useAlloyApprovals,
+  type AlloyDashboardStats,
+  type AlloySignal,
+  type AlloyWorkflow,
+  type AlloyApproval,
+} from '../graphql/hooks';
 
 const mock = vi.hoisted(() => ({
   queries: { dashboard: undefined as unknown, signals: undefined as unknown, workflows: undefined as unknown, approvals: undefined as unknown },

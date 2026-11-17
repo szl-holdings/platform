@@ -53,14 +53,17 @@ let browser;
 const origin = 'http://127.0.0.1:4137';
 const zero = { __typename: 'AlloyDashboardStats', totalWorkflows: 0, totalRuns: 0, runningRuns: 0, pendingApprovals: 0, failedRuns: 0, successRate: 0, avgDurationMs: 0, workflowsByStatus: [], recentActivity: [] };
 const signal = { __typename: 'AlloySignal', id: 'review-signal-001', source: 'controlled-query-fixture', sourceType: 'test', domain: 'alloy-core', severity: 'critical', status: 'active', title: 'Observed query fixture: inspect a governed workflow', description: 'This is a controlled browser-test response, not an operational event.', confidence: null, ownerUserId: null, environment: 'local-review', createdAt: '2026-11-16T23:00:00Z', updatedAt: null };
+const activity = { __typename: 'AlloyAuditEntry', id: 'review-activity-001', entityType: 'workflow', entityId: 'review-workflow-001', action: 'controlled-fixture-observation', actorUserId: null, actorType: 'test', previousState: null, newState: null, notes: 'Controlled keyboard-test response; not a runtime receipt.', correlationId: null, createdAt: '2026-11-16T23:00:00Z' };
 const fields = { AlloyDashboard: 'alloyDashboard', AlloySignals: 'alloySignals', AlloyWorkflows: 'alloyWorkflows', AlloyApprovals: 'alloyApprovals' };
 const cases = [
   { surface: 'now', scenario: 'empty', viewport: { width: 1440, height: 1000 } },
   { surface: 'now', scenario: 'mixed', viewport: { width: 390, height: 844 } },
   { surface: 'command', scenario: 'mixed', viewport: { width: 1440, height: 1000 } },
   { surface: 'command', scenario: 'demo', viewport: { width: 390, height: 844 } },
+  { surface: 'now', scenario: 'keyboard', viewport: { width: 390, height: 844 } },
 ];
 const records = [];
+const keyboardChecks = [];
 try {
   await server.listen();
   browser = await chromium.launch({ headless: true });
@@ -81,7 +84,8 @@ try {
       operations.add(operation);
       const field = fields[operation];
       const unavailable = current.scenario === 'demo' || (current.scenario === 'mixed' && ['AlloyDashboard', 'AlloyWorkflows'].includes(operation));
-      const value = operation === 'AlloyDashboard' ? zero : operation === 'AlloySignals' && current.scenario === 'mixed' ? [signal] : [];
+      const value = operation === 'AlloyDashboard' ? (current.scenario === 'keyboard' ? { ...zero, recentActivity: [activity] } : zero)
+        : operation === 'AlloySignals' && ['mixed', 'keyboard'].includes(current.scenario) ? [signal] : [];
       const response = unavailable ? { data: { [field]: null }, errors: [{ message: 'Controlled review failure' }] } : { data: { [field]: value } };
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(response) });
     });
@@ -89,6 +93,7 @@ try {
     await page.goto(origin + route);
     const expected = current.scenario === 'empty' ? { dashboard: 'API_DATA', signals: 'EMPTY', workflows: 'EMPTY', approvals: 'EMPTY' }
       : current.scenario === 'mixed' ? { dashboard: 'ERROR', signals: 'API_DATA', workflows: 'ERROR', approvals: 'EMPTY' }
+      : current.scenario === 'keyboard' ? { dashboard: 'API_DATA', signals: 'API_DATA', workflows: 'EMPTY', approvals: 'EMPTY' }
       : { dashboard: 'ERROR', signals: 'ERROR', workflows: 'ERROR', approvals: 'ERROR' };
     await page.waitForFunction(states => Object.entries(states).every(([name, state]) => document.querySelector(`[data-source-name="${name}"]`)?.getAttribute('data-source-state') === state), expected);
     assert.equal(operations.size, 4, 'Each query must be observed independently.');
@@ -107,6 +112,22 @@ try {
       await page.getByRole('button', { name: 'Demo: approve', exact: true }).first().click();
       assert.equal(await page.getByText('Demo choice: approved', { exact: true }).count(), 1);
     }
+    if (current.scenario === 'keyboard') {
+      // Start from the untouched page focus; only normal Tab and arrow keys may reach/scroll a region.
+      for (const label of ['Returned signals table', 'Returned activity table']) {
+        const region = page.getByRole('region', { name: label, exact: true });
+        assert.ok(await region.evaluate(element => element.scrollWidth > element.clientWidth), `${label} must overflow locally at this viewport.`);
+        const tabStops = [];
+        while (!(await region.evaluate(element => document.activeElement === element)) && tabStops.length < 40) {
+          await page.keyboard.press('Tab');
+          tabStops.push(await page.evaluate(() => ({ tag: document.activeElement?.tagName, label: document.activeElement?.getAttribute('aria-label') })));
+        }
+        assert.ok(await region.evaluate(element => document.activeElement === element), `${label} must be reachable by Tab; visited ${JSON.stringify(tabStops)}`);
+        await page.keyboard.press('ArrowRight');
+        await page.waitForFunction(name => document.querySelector(`[data-query-scroll][aria-label="${name}"]`)?.scrollLeft > 0, label);
+        keyboardChecks.push({ region: label, tab_presses: tabStops.length, arrow_right_scrolled: true, viewport: current.viewport });
+      }
+    }
     await page.evaluate(() => document.fonts.ready);
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForFunction(() => window.scrollY === 0);
@@ -123,8 +144,8 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false, 'The page must fit the viewport.');
     const capturedAt = new Date().toISOString();
     const date = capturedAt.slice(0, 10);
-    if (capture) {
-      const name = `a11oy-${current.surface}-evidence-${current.scenario}-${date}.png`;
+    if (capture && current.scenario !== 'keyboard') {
+      const name = `a11oy-${current.surface}-evidence-${current.scenario}-${date}-${sourceRevision.slice(0, 12)}.png`;
       const destination = path.join(repoRoot, 'docs/assets/screenshots/current', name);
       await fs.mkdir(path.dirname(destination), { recursive: true });
       await page.screenshot({ path: destination, fullPage: true });
@@ -137,8 +158,8 @@ try {
     await page.close();
   }
   if (capture) {
-    const resultPath = path.join(repoRoot, 'audit/dashboard-evidence-capture-20261116.json');
-    await fs.writeFile(resultPath, JSON.stringify({ source_revision: sourceRevision, records }, null, 2) + '\n');
+    const resultPath = path.join(repoRoot, `audit/dashboard-evidence-capture-${sourceRevision.slice(0, 12)}.json`);
+    await fs.writeFile(resultPath, JSON.stringify({ source_revision: sourceRevision, browser: browser.version(), keyboard_checks: keyboardChecks, records }, null, 2) + '\n');
     console.log(`CAPTURED ${records.length} exact-source UI screenshots at ${sourceRevision}`);
   }
 } finally {

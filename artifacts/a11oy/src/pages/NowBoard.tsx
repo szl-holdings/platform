@@ -96,7 +96,7 @@ export function NowBoard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="min-w-0 lg:col-span-2">
           <SectionTitle>{isDemo ? 'Demo Signals' : 'Signals Returned'} ({activeCount})</SectionTitle>
-          <div role="region" aria-label="Returned signals table" tabIndex={0} data-query-scroll className="rounded-lg border overflow-x-auto" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+          <div role="region" aria-label="Returned signals table" data-query-scroll className="rounded-lg border overflow-x-auto" style={{ borderColor: 'var(--color-a11oy-border)' }}>
             <table className="w-full min-w-[560px] text-xs">
               <thead>
                 <tr style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
@@ -249,7 +249,7 @@ export function NowBoard() {
       {!isDemo && dashboard && dashboard.recentActivity.length > 0 && (
         <>
           <SectionTitle>Recent Activity ({dashboard.recentActivity.length})</SectionTitle>
-          <div role="region" aria-label="Returned activity table" tabIndex={0} data-query-scroll className="rounded-lg border overflow-x-auto mb-6" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+          <div role="region" aria-label="Returned activity table" data-query-scroll className="rounded-lg border overflow-x-auto mb-6" style={{ borderColor: 'var(--color-a11oy-border)' }}>
             <table className="w-full min-w-[560px] text-xs">
               <thead>
                 <tr style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
