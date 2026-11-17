@@ -205,9 +205,9 @@ export function CommandSurface() {
         ))}
       </div>
 
-      <div className="grid xl:grid-cols-3 gap-4 mb-4">
-        <div className="xl:col-span-2 flex flex-col gap-4">
-          <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4">
+        <div className="min-w-0 xl:col-span-2 flex flex-col gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Card className="text-xs"><SectionTitle>Execution History UNAVAILABLE</SectionTitle>No bound time-series source is available. Rates and trends cannot be calculated from these responses.</Card>
             <Card className="text-xs"><SectionTitle>Proof Verification UNAVAILABLE</SectionTitle>No receipt-verification source, agent-trust measure or contract-health evidence is bound to this view.</Card>
           </div>
@@ -370,7 +370,7 @@ export function CommandSurface() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="min-w-0 flex flex-col gap-4">
           <Card className="text-xs"><SectionTitle>Active Agents UNAVAILABLE</SectionTitle>No agent-status query is bound to this view.</Card>
 
           <div>

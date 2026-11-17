@@ -93,15 +93,15 @@ export function NowBoard() {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="min-w-0 lg:col-span-2">
           <SectionTitle>{isDemo ? 'Demo Signals' : 'Signals Returned'} ({activeCount})</SectionTitle>
-          <div className="rounded-lg border overflow-x-auto" style={{ borderColor: 'var(--color-a11oy-border)' }}>
-            <table className="w-full text-xs">
+          <div role="region" aria-label="Returned signals table" tabIndex={0} data-query-scroll className="rounded-lg border overflow-x-auto" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+            <table className="w-full min-w-[560px] text-xs">
               <thead>
                 <tr style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
                   {['Sev', 'Domain', 'Signal', 'Detected', 'Status'].map(h => (
-                    <th key={h} className="text-left px-3 py-2 font-mono uppercase tracking-wide" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: '10px' }}>{h}</th>
+                    <th key={h} className="text-left whitespace-nowrap px-3 py-2 font-mono uppercase tracking-wide" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: '10px' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -177,7 +177,7 @@ export function NowBoard() {
           })()}
         </div>
 
-        <div className="flex flex-col gap-5">
+        <div className="min-w-0 flex flex-col gap-5">
           <div>
             <SectionTitle>{isDemo ? 'Demo Workcells' : 'Active Workflows Returned'} ({isDemo || workflowsQuery.source.usable ? displayWorkcells.length : '—'})</SectionTitle>
             <div className="flex flex-col gap-2">
@@ -249,12 +249,12 @@ export function NowBoard() {
       {!isDemo && dashboard && dashboard.recentActivity.length > 0 && (
         <>
           <SectionTitle>Recent Activity ({dashboard.recentActivity.length})</SectionTitle>
-          <div className="rounded-lg border overflow-x-auto mb-6" style={{ borderColor: 'var(--color-a11oy-border)' }}>
-            <table className="w-full text-xs">
+          <div role="region" aria-label="Returned activity table" tabIndex={0} data-query-scroll className="rounded-lg border overflow-x-auto mb-6" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+            <table className="w-full min-w-[560px] text-xs">
               <thead>
                 <tr style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
                   {['Action', 'Entity', 'Actor', 'Time'].map(h => (
-                    <th key={h} className="text-left px-3 py-2 font-mono uppercase tracking-wide" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: '10px' }}>{h}</th>
+                    <th key={h} className="text-left whitespace-nowrap px-3 py-2 font-mono uppercase tracking-wide" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: '10px' }}>{h}</th>
                   ))}
                 </tr>
               </thead>

@@ -108,6 +108,17 @@ try {
       assert.equal(await page.getByText('Demo choice: approved', { exact: true }).count(), 1);
     }
     await page.evaluate(() => document.fonts.ready);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForFunction(() => window.scrollY === 0);
+    const clippedContent = await page.locator('main').evaluate(main => [...main.querySelectorAll('*')].filter(element => {
+      const scrollRegion = element.closest('[data-query-scroll]');
+      if (scrollRegion && scrollRegion !== element) return false;
+      const style = getComputedStyle(element);
+      if (style.display === 'none' || style.visibility === 'hidden') return false;
+      const bounds = element.getBoundingClientRect();
+      return bounds.width > 0 && (bounds.left < -1 || bounds.right > window.innerWidth + 1);
+    }).slice(0, 8).map(element => ({ tag: element.tagName, text: element.textContent?.slice(0, 50) })));
+    assert.deepEqual(clippedContent, [], 'Content must fit inside the viewport except within a labeled table scroll region.');
     assert.deepEqual(errors, [], 'The reviewed page must render without runtime errors.');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false, 'The page must fit the viewport.');
     const capturedAt = new Date().toISOString();
