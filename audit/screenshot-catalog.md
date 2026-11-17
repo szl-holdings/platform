@@ -1595,3 +1595,94 @@ Every row below is an unedited live PNG with its original byte-bound sidecar. Sh
 | [a11oy-boundary-workflow-3-ultrawide-2026-10-13.png](../docs/assets/screenshots/current/a11oy-boundary-workflow-3-ultrawide-2026-10-13.png) · [sidecar](../docs/assets/screenshots/current/a11oy-boundary-workflow-3-ultrawide-2026-10-13.screenshot.json) | `/security-agents` — Threat Analysis Agent | 2560 × 1440 (ultrawide) | `2026-10-13T20:06:11.629Z` | `60d30f61c7869a5988697b7e6dbcd68a8985c06c1ed77ea7b89c75c6f75afce5` |
 | [a11oy-boundary-workflow-2-portrait-2026-10-13.png](../docs/assets/screenshots/current/a11oy-boundary-workflow-2-portrait-2026-10-13.png) · [sidecar](../docs/assets/screenshots/current/a11oy-boundary-workflow-2-portrait-2026-10-13.screenshot.json) | `/security-agents` — Detection Engineering Agent | 768 × 1024 (portrait) | `2026-10-13T20:06:02.623Z` | `4c66c6e74cf1f36a7776236b7c12d3e4127da5d8a745f06ba60503e00a2aaacf` |
 | [a11oy-boundary-workflow-1-full-hd-2026-10-13.png](../docs/assets/screenshots/current/a11oy-boundary-workflow-1-full-hd-2026-10-13.png) · [sidecar](../docs/assets/screenshots/current/a11oy-boundary-workflow-1-full-hd-2026-10-13.screenshot.json) | `/security-agents` — Alert Triage Agent | 1920 × 1080 (full-hd) | `2026-10-13T20:05:59.229Z` | `2d87b92f7c03a1c8a7edc118c81a2f6dea26e9c9dba4f24f3699db6b13d6a752` |
+
+
+## 2026-11-17 retained dashboard evidence-state correction
+
+This append-only entry is the corrected successor for the retained Now Board and Command Surface modules. Earlier images and catalog entries remain intact. This local UI contract evidence does not expand the public candidate or establish live backend/deployment proof.
+
+- source_revision: `a4cc449fb59cd2b829830b8444d1c0ed76ba2f86`
+- capture_environment: `local-exact-head`, Windows, Node `v24.19.0`, Playwright `1.60.0`, Chromium Headless Shell `148.0.7778.96`
+- workflow_run_or_command: `pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture`
+- captured_by: `live_verification`
+- workcell_id: `dashboard-evidence-states-20261116`
+- proof_level: `UI_CONTRACT_TEST_ONLY`
+- status: `current` for this retained-source contract
+- proof_packet: [A11OY_DASHBOARD_EVIDENCE_STATES_20261117.md](A11OY_DASHBOARD_EVIDENCE_STATES_20261117.md)
+- manifest: [dashboard-evidence-capture-20261116.json](dashboard-evidence-capture-20261116.json)
+- notes: Actual pages/provider/hooks with Playwright-controlled loopback query responses. The harness visibly labels controlled fixtures and deployment BLOCKED. Independent query states, zero/empty values, local-only explicit DEMO choices and mobile bounds were checked. All four final captures were visually reviewed. No live backend, authority, provider execution, publication, durable receipt or operational-readiness claim follows from these images.
+
+- **a11oy-now-evidence-empty-2026-11-17.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=now&scenario=empty`
+  - surface/scenario: Now Board / empty
+  - capture_date: `2026-11-17T00:27:27.449Z`
+  - viewport: `1440 × 1000` (full-page PNG)
+  - artifact_sha256: `cec0a4988dc6c26ac880a978983b95cfb8a3db5d3a1ee46883963cce2b20a6ce`
+  - sidecar: [a11oy-now-evidence-empty-2026-11-17.json](../docs/assets/screenshots/current/a11oy-now-evidence-empty-2026-11-17.json)
+
+- **a11oy-now-evidence-mixed-2026-11-17.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=now&scenario=mixed`
+  - surface/scenario: Now Board / mixed
+  - capture_date: `2026-11-17T00:27:27.999Z`
+  - viewport: `390 × 844` (full-page PNG)
+  - artifact_sha256: `2fc563a9addd595aa93348f609218e57cfae3257fd91cd0d3ad34f89c1d0e9d9`
+  - sidecar: [a11oy-now-evidence-mixed-2026-11-17.json](../docs/assets/screenshots/current/a11oy-now-evidence-mixed-2026-11-17.json)
+
+- **a11oy-command-evidence-mixed-2026-11-17.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=command&scenario=mixed`
+  - surface/scenario: Command Surface / mixed
+  - capture_date: `2026-11-17T00:27:28.537Z`
+  - viewport: `1440 × 1000` (full-page PNG)
+  - artifact_sha256: `bf948f5fbb1e3870c2ffcf2da0c8fcf9a688265c6cd0021e59930d4e937aab6a`
+  - sidecar: [a11oy-command-evidence-mixed-2026-11-17.json](../docs/assets/screenshots/current/a11oy-command-evidence-mixed-2026-11-17.json)
+
+- **a11oy-command-evidence-demo-2026-11-17.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=command&scenario=demo`
+  - surface/scenario: Command Surface / demo
+  - capture_date: `2026-11-17T00:27:29.195Z`
+  - viewport: `390 × 844` (full-page PNG)
+  - artifact_sha256: `1bedcc40e783946e365b37281a5363f428eafb072b38cc36b4169a7f06611aab`
+  - sidecar: [a11oy-command-evidence-demo-2026-11-17.json](../docs/assets/screenshots/current/a11oy-command-evidence-demo-2026-11-17.json)
+
+### 2026-11-17 dashboard CI correction successor
+
+Source revision: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`. These are retained review modules with controlled loopback query fixtures; public-candidate exclusion and deployment BLOCKED remain. Earlier a4cc images, sidecars and manifest are retained unchanged.
+
+Command: `pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture`
+Browser: Chromium Headless Shell `148.0.7778.96`.
+Manifest: [dashboard-evidence-capture-3b3dfa63251f.json](dashboard-evidence-capture-3b3dfa63251f.json).
+Proof: [dashboard evidence states](A11OY_DASHBOARD_EVIDENCE_STATES_20261117.md#ci-correction-and-current-proof-successor).
+
+Normal Tab traversal reached both labeled mobile scroll regions, and ArrowRight scrolled each. These keyboard checks use no programmatic focus and are scoped to this browser.
+
+- **a11oy-now-evidence-empty-2026-11-17-3b3dfa63251f.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=now&scenario=empty`
+  - source_revision: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`
+  - capture_date: `2026-11-17T00:49:53.157Z`
+  - viewport: `1440 x 1000` (full-page PNG)
+  - artifact_sha256: `cec0a4988dc6c26ac880a978983b95cfb8a3db5d3a1ee46883963cce2b20a6ce`
+  - sidecar: [a11oy-now-evidence-empty-2026-11-17-3b3dfa63251f.json](../docs/assets/screenshots/current/a11oy-now-evidence-empty-2026-11-17-3b3dfa63251f.json)
+
+- **a11oy-now-evidence-mixed-2026-11-17-3b3dfa63251f.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=now&scenario=mixed`
+  - source_revision: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`
+  - capture_date: `2026-11-17T00:49:53.666Z`
+  - viewport: `390 x 844` (full-page PNG)
+  - artifact_sha256: `2fc563a9addd595aa93348f609218e57cfae3257fd91cd0d3ad34f89c1d0e9d9`
+  - sidecar: [a11oy-now-evidence-mixed-2026-11-17-3b3dfa63251f.json](../docs/assets/screenshots/current/a11oy-now-evidence-mixed-2026-11-17-3b3dfa63251f.json)
+
+- **a11oy-command-evidence-mixed-2026-11-17-3b3dfa63251f.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=command&scenario=mixed`
+  - source_revision: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`
+  - capture_date: `2026-11-17T00:49:54.165Z`
+  - viewport: `1440 x 1000` (full-page PNG)
+  - artifact_sha256: `c5026583282f1347cd9cbda4f1b43288db16d4135161f567db9319880ab16fc0`
+  - sidecar: [a11oy-command-evidence-mixed-2026-11-17-3b3dfa63251f.json](../docs/assets/screenshots/current/a11oy-command-evidence-mixed-2026-11-17-3b3dfa63251f.json)
+
+- **a11oy-command-evidence-demo-2026-11-17-3b3dfa63251f.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=command&scenario=demo`
+  - source_revision: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`
+  - capture_date: `2026-11-17T00:49:54.971Z`
+  - viewport: `390 x 844` (full-page PNG)
+  - artifact_sha256: `1bedcc40e783946e365b37281a5363f428eafb072b38cc36b4169a7f06611aab`
+  - sidecar: [a11oy-command-evidence-demo-2026-11-17-3b3dfa63251f.json](../docs/assets/screenshots/current/a11oy-command-evidence-demo-2026-11-17-3b3dfa63251f.json)

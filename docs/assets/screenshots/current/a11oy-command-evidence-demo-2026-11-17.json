@@ -1,0 +1,20 @@
+{
+  "filename": "a11oy-command-evidence-demo-2026-11-17.png",
+  "surface": "command",
+  "route": "http://127.0.0.1:4137/__dashboard-review?page=command&scenario=demo",
+  "source_revision": "a4cc449fb59cd2b829830b8444d1c0ed76ba2f86",
+  "capture_environment": "local-exact-head",
+  "capture_date": "2026-11-17T00:27:29.195Z",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "artifact_sha256": "1bedcc40e783946e365b37281a5363f428eafb072b38cc36b4169a7f06611aab",
+  "captured_by": "live_verification",
+  "workcell_id": "dashboard-evidence-states-20261116",
+  "proof_level": "UI_CONTRACT_TEST_ONLY",
+  "scenario": "demo",
+  "query_source": "Playwright-controlled local fixtures; not runtime delivery evidence",
+  "workflow_run_or_command": "pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture",
+  "status": "current"
+}
