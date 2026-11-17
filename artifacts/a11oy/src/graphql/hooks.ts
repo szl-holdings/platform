@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useSubscription } from 'urql';
+import { classifyQueryEvidence } from '../lib/query-evidence';
 import {
   ALLOY_DASHBOARD_QUERY,
   ALLOY_SIGNALS_QUERY,
@@ -170,6 +171,7 @@ export function useAlloyDashboard() {
   });
   return {
     data: result.data?.alloyDashboard ?? null,
+    source: classifyQueryEvidence({ value: result.data?.alloyDashboard, fetching: result.fetching, stale: result.stale, error: result.error }),
     fetching: result.fetching,
     error: result.error,
     refetch: reexecute,
@@ -189,6 +191,7 @@ export function useAlloySignals(vars?: {
   });
   return {
     data: result.data?.alloySignals ?? [],
+    source: classifyQueryEvidence({ value: result.data?.alloySignals, fetching: result.fetching, stale: result.stale, error: result.error }),
     fetching: result.fetching,
     error: result.error,
     refetch: reexecute,
@@ -222,6 +225,7 @@ export function useAlloyWorkflows(vars?: {
   });
   return {
     data: result.data?.alloyWorkflows ?? [],
+    source: classifyQueryEvidence({ value: result.data?.alloyWorkflows, fetching: result.fetching, stale: result.stale, error: result.error }),
     fetching: result.fetching,
     error: result.error,
     refetch: reexecute,
@@ -272,6 +276,7 @@ export function useAlloyApprovals(vars?: {
   });
   return {
     data: result.data?.alloyApprovals ?? [],
+    source: classifyQueryEvidence({ value: result.data?.alloyApprovals, fetching: result.fetching, stale: result.stale, error: result.error }),
     fetching: result.fetching,
     error: result.error,
     refetch: reexecute,
