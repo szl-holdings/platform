@@ -1788,3 +1788,20 @@ persistence, independently governed approval, runtime receipt verification and
 deployed operational evidence. Local UI tests are not evidence that those gaps
 are closed. See the [corrected proof successor](../../audit/A11OY_DASHBOARD_EVIDENCE_STATES_20261117.md)
 and its source-bound screenshot manifest. Existing historical evidence is retained.
+
+#### 2026-11-17 CI correction successor
+
+The retained-dashboard correction source is now
+`3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`. The actual lint chain and claims-drift
+gate pass locally with their rules unchanged. Lint corrections consolidate a
+test import and remove invalid tabindex attributes from the two labeled table
+scroll regions. Normal Tab traversal and ArrowRight scrolling passed for both
+regions in Chromium Headless Shell `148.0.7778.96` at 390 x 844. Other browsers
+and assistive-technology behavior are unmeasured.
+
+Four new source-bound images and matching sidecars preserve the earlier evidence
+and identify the corrected source. See the
+[current manifest](../../audit/dashboard-evidence-capture-3b3dfa63251f.json)
+and [CI proof successor](../../audit/A11OY_DASHBOARD_EVIDENCE_STATES_20261117.md#ci-correction-and-current-proof-successor).
+These local UI and keyboard checks do not close the live integration or admission
+gaps above. Public-candidate exclusion and operational deployment BLOCKED remain.

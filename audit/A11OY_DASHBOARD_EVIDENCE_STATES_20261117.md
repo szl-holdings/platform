@@ -6,7 +6,7 @@ Workcell: `dashboard-evidence-states-20261116`
 
 Base source: `e25a1a0181cd03da8ecb7d9177f2292ac4892a6f`
 
-Final captured source: `a4cc449fb59cd2b829830b8444d1c0ed76ba2f86`
+Current captured source: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64` (CI correction successor; the original reviewed set is retained below).
 
 Environment: isolated Windows checkout, Node `v24.19.0`, pnpm `10.26.1`, Playwright `1.60.0`, Chromium Headless Shell `148.0.7778.96`.
 
@@ -43,7 +43,7 @@ Primary implementation: [query classifier](../artifacts/a11oy/src/lib/query-evid
 | Main patch | `pnpm --filter @workspace/a11oy test` | Exit 0; 51 Node contract tests + 37 Vitest tests |
 | Main patch | `pnpm --filter @workspace/a11oy build` | Exit 0; public candidate bundle contract passed over 4 emitted files |
 | Severity review correction | `pnpm --filter @workspace/a11oy test:dashboard-evidence` | Focused dashboard cases: 33; exit 0, including actual selected-signal missing-severity behavior |
-| Final layout and capture | `pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture` | Exit 0; all 4 scenarios passed at the exact final captured source |
+| Initial layout and capture | `pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture` | Exit 0; all 4 scenarios passed at `a4cc449fb59cd2b829830b8444d1c0ed76ba2f86` |
 | Final source hygiene | `git diff --check` | Exit 0 |
 
 The full typecheck/package sweep preceded the narrow severity and layout follow-ups. Those follow-ups were checked with the focused rendered-page suite and the real-browser scenarios; the earlier full sweep is not represented as a new run at the final capture revision. Root review accepted this bounded validation sequence.
@@ -56,9 +56,9 @@ The [browser harness](../artifacts/a11oy/test/capture-dashboard-evidence.mjs) im
 
 No public route was added or changed, so `pnpm qa:routes` was not an applicable gate.
 
-## Source-bound screenshots
+## Initial source-bound screenshots (retained)
 
-All screenshots were captured from the running retained pages at `a4cc449fb59cd2b829830b8444d1c0ed76ba2f86`, after the source was committed and its relevant paths were clean. Each image has a same-basename JSON sidecar. The [capture manifest](dashboard-evidence-capture-20261116.json) records exact route, viewport, timestamp, source revision, command and SHA-256.
+The initial screenshots were captured from the running retained pages at `a4cc449fb59cd2b829830b8444d1c0ed76ba2f86`, after the source was committed and its relevant paths were clean. Each image has a same-basename JSON sidecar. The [capture manifest](dashboard-evidence-capture-20261116.json) records exact route, viewport, timestamp, source revision, command and SHA-256.
 
 | Surface / scenario | Viewport | Image | SHA-256 |
 |---|---|---|---|
@@ -78,9 +78,36 @@ The source history remains intact:
 1. `c5a4db23d808e21a20b997dc35dea1fd027ce5ce` — query-state and DEMO boundaries.
 2. `a73ba0a0804d85468aa579ae129a45451e2af135` — root-review correction for missing severity/priority.
 3. `a4cc449fb59cd2b829830b8444d1c0ed76ba2f86` — mobile clipping and capture-origin correction.
+4. `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64` — scoped lint corrections, native keyboard-scroll checks and explicit focused-suite wording.
 
-A separate read-only code review by the audit_finish agent at the final captured source found no additional material false-data or approval-authority blocker in the classifier, hooks, controls, pages and rendered-page tests. Root review and this second review are code review evidence; neither is a runtime approval grant.
+A separate read-only code review by the audit_finish agent at `a4cc449fb59cd2b829830b8444d1c0ed76ba2f86` found no additional material false-data or approval-authority blocker in the classifier, hooks, controls, pages and rendered-page tests. Root review and this second review are code review evidence; neither is a runtime approval grant.
 
 This proof is the corrected successor for the retained dashboards. Existing historical screenshots and catalog entries are retained; they do not establish current live data or authority for these pages. Existing public-candidate proof keeps its separate scope.
 
 The evidence establishes local UI behavior with controlled query responses. It does **not** establish live backend integration, tenant/session authority, durable persistence, independent approval custody, signed runtime receipts, live subscriptions, deployment, provider execution or operational readiness. Those integration and admission gaps remain open. No credentials, execution identity variables, signing keys, provider settings or production state were changed by this patch.
+
+## CI correction and current proof successor
+
+Hosted [Lint job 133723754359](https://github.com/szl-holdings/platform/actions/runs/43988727815/job/133723754359) stopped at Oxlint's duplicate `../graphql/hooks` import in the new rendered-page test. Combining the value and type imports exposed two local Biome `noNoninteractiveTabindex` errors in the new table scroll containers. The correction removes those two attributes and preserves both region labels and local overflow. Lint rules and configuration remain unchanged.
+
+Hosted [truth-drift job 133723520754](https://github.com/szl-holdings/platform/actions/runs/43988727624/job/133723520754) interpreted a generic focused-suite count as the unavailable platform-wide test metric. The validation row now names the focused dashboard cases explicitly. The scanner, allowlist and canonical `platform_tests` evidence remain unchanged.
+
+| Correction gate | Command | Observed result |
+|---|---|---|
+| Actual lint chain | `pnpm run lint:ci` | Exit 0 through Oxlint, Biome and environment coverage; existing warnings remain |
+| Actual claim gate | `pnpm run claims:drift` | Exit 0; claims drift PASS |
+| Keyboard and UI contracts | `pnpm --filter @workspace/a11oy test:dashboard-evidence:browser` | Exit 0; five controlled scenarios, including both overflowing tables |
+| Exact-source successor | `pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture` | Exit 0 at `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`; five scenarios and four source-bound images |
+
+The keyboard scenario starts with untouched page focus at 390 x 844. Actual Tab presses reach Returned signals table after six presses and Returned activity table after one further press. ArrowRight changes each region's horizontal scroll position. It never calls element.focus(). This is measured native keyboard behavior in Chromium Headless Shell `148.0.7778.96`; Firefox, Safari and assistive-technology behavior were not tested.
+
+The [current capture manifest](dashboard-evidence-capture-3b3dfa63251f.json) includes the browser version, measured keyboard checks and the four image records. Each image has a same-basename JSON sidecar with the full source SHA, route, viewport, timestamp, command and SHA-256. Source-suffixed filenames preserve the original a4cc screenshots, sidecars and manifest unchanged.
+
+| Surface / scenario | Viewport | Current image | SHA-256 |
+|---|---|---|---|
+| Now Board / empty | 1440 x 1000 | [a11oy-now-evidence-empty-2026-11-17-3b3dfa63251f.png](../docs/assets/screenshots/current/a11oy-now-evidence-empty-2026-11-17-3b3dfa63251f.png) | `cec0a4988dc6c26ac880a978983b95cfb8a3db5d3a1ee46883963cce2b20a6ce` |
+| Now Board / mixed | 390 x 844 | [a11oy-now-evidence-mixed-2026-11-17-3b3dfa63251f.png](../docs/assets/screenshots/current/a11oy-now-evidence-mixed-2026-11-17-3b3dfa63251f.png) | `2fc563a9addd595aa93348f609218e57cfae3257fd91cd0d3ad34f89c1d0e9d9` |
+| Command Surface / mixed | 1440 x 1000 | [a11oy-command-evidence-mixed-2026-11-17-3b3dfa63251f.png](../docs/assets/screenshots/current/a11oy-command-evidence-mixed-2026-11-17-3b3dfa63251f.png) | `c5026583282f1347cd9cbda4f1b43288db16d4135161f567db9319880ab16fc0` |
+| Command Surface / demo | 390 x 844 | [a11oy-command-evidence-demo-2026-11-17-3b3dfa63251f.png](../docs/assets/screenshots/current/a11oy-command-evidence-demo-2026-11-17-3b3dfa63251f.png) | `1bedcc40e783946e365b37281a5363f428eafb072b38cc36b4169a7f06611aab` |
+
+The successor set retains the visible controlled-query and deployment-BLOCKED banner. All five scenarios passed page-error and content-bound checks. The current source does not expand the public candidate or establish a live backend, approval authority, persistence, signed receipts or deployment.

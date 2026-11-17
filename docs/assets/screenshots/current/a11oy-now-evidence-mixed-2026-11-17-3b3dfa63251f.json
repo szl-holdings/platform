@@ -1,0 +1,20 @@
+{
+  "filename": "a11oy-now-evidence-mixed-2026-11-17-3b3dfa63251f.png",
+  "surface": "now",
+  "route": "http://127.0.0.1:4137/__dashboard-review?page=now&scenario=mixed",
+  "source_revision": "3b3dfa63251f77552906ea7b7f7c46ab5c8cef64",
+  "capture_environment": "local-exact-head",
+  "capture_date": "2026-11-17T00:49:53.666Z",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "artifact_sha256": "2fc563a9addd595aa93348f609218e57cfae3257fd91cd0d3ad34f89c1d0e9d9",
+  "captured_by": "live_verification",
+  "workcell_id": "dashboard-evidence-states-20261116",
+  "proof_level": "UI_CONTRACT_TEST_ONLY",
+  "scenario": "mixed",
+  "query_source": "Playwright-controlled local fixtures; not runtime delivery evidence",
+  "workflow_run_or_command": "pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture",
+  "status": "current"
+}

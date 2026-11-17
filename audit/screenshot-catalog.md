@@ -1643,3 +1643,46 @@ This append-only entry is the corrected successor for the retained Now Board and
   - viewport: `390 × 844` (full-page PNG)
   - artifact_sha256: `1bedcc40e783946e365b37281a5363f428eafb072b38cc36b4169a7f06611aab`
   - sidecar: [a11oy-command-evidence-demo-2026-11-17.json](../docs/assets/screenshots/current/a11oy-command-evidence-demo-2026-11-17.json)
+
+### 2026-11-17 dashboard CI correction successor
+
+Source revision: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`. These are retained review modules with controlled loopback query fixtures; public-candidate exclusion and deployment BLOCKED remain. Earlier a4cc images, sidecars and manifest are retained unchanged.
+
+Command: `pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture`
+Browser: Chromium Headless Shell `148.0.7778.96`.
+Manifest: [dashboard-evidence-capture-3b3dfa63251f.json](dashboard-evidence-capture-3b3dfa63251f.json).
+Proof: [dashboard evidence states](A11OY_DASHBOARD_EVIDENCE_STATES_20261117.md#ci-correction-and-current-proof-successor).
+
+Normal Tab traversal reached both labeled mobile scroll regions, and ArrowRight scrolled each. These keyboard checks use no programmatic focus and are scoped to this browser.
+
+- **a11oy-now-evidence-empty-2026-11-17-3b3dfa63251f.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=now&scenario=empty`
+  - source_revision: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`
+  - capture_date: `2026-11-17T00:49:53.157Z`
+  - viewport: `1440 x 1000` (full-page PNG)
+  - artifact_sha256: `cec0a4988dc6c26ac880a978983b95cfb8a3db5d3a1ee46883963cce2b20a6ce`
+  - sidecar: [a11oy-now-evidence-empty-2026-11-17-3b3dfa63251f.json](../docs/assets/screenshots/current/a11oy-now-evidence-empty-2026-11-17-3b3dfa63251f.json)
+
+- **a11oy-now-evidence-mixed-2026-11-17-3b3dfa63251f.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=now&scenario=mixed`
+  - source_revision: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`
+  - capture_date: `2026-11-17T00:49:53.666Z`
+  - viewport: `390 x 844` (full-page PNG)
+  - artifact_sha256: `2fc563a9addd595aa93348f609218e57cfae3257fd91cd0d3ad34f89c1d0e9d9`
+  - sidecar: [a11oy-now-evidence-mixed-2026-11-17-3b3dfa63251f.json](../docs/assets/screenshots/current/a11oy-now-evidence-mixed-2026-11-17-3b3dfa63251f.json)
+
+- **a11oy-command-evidence-mixed-2026-11-17-3b3dfa63251f.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=command&scenario=mixed`
+  - source_revision: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`
+  - capture_date: `2026-11-17T00:49:54.165Z`
+  - viewport: `1440 x 1000` (full-page PNG)
+  - artifact_sha256: `c5026583282f1347cd9cbda4f1b43288db16d4135161f567db9319880ab16fc0`
+  - sidecar: [a11oy-command-evidence-mixed-2026-11-17-3b3dfa63251f.json](../docs/assets/screenshots/current/a11oy-command-evidence-mixed-2026-11-17-3b3dfa63251f.json)
+
+- **a11oy-command-evidence-demo-2026-11-17-3b3dfa63251f.png**
+  - route: `http://127.0.0.1:4137/__dashboard-review?page=command&scenario=demo`
+  - source_revision: `3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`
+  - capture_date: `2026-11-17T00:49:54.971Z`
+  - viewport: `390 x 844` (full-page PNG)
+  - artifact_sha256: `1bedcc40e783946e365b37281a5363f428eafb072b38cc36b4169a7f06611aab`
+  - sidecar: [a11oy-command-evidence-demo-2026-11-17-3b3dfa63251f.json](../docs/assets/screenshots/current/a11oy-command-evidence-demo-2026-11-17-3b3dfa63251f.json)
