@@ -155,8 +155,8 @@ export function NowBoard() {
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <SeverityDot severity={(('severity' in sig ? sig.severity : null) ?? 'medium') as 'critical' | 'high' | 'medium' | 'low' | 'info'} />
-                      <SeverityBadge severity={('severity' in sig ? sig.severity : null) ?? 'medium'} />
+                      <SeverityDot severity={(('severity' in sig ? sig.severity : null) ?? 'unknown') as 'critical' | 'high' | 'medium' | 'low' | 'info'} />
+                      <SeverityBadge severity={('severity' in sig ? sig.severity : null) ?? 'unknown'} />
                       <VerticalBadge vertical={VERTICAL_LABELS[domain] ?? domain} color={VERTICAL_COLORS[domain] ?? '#5e5e5e'} />
                     </div>
                     <div className="font-medium text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{sig.title}</div>

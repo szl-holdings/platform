@@ -130,7 +130,7 @@ export function CommandSurface() {
         approvalState: wf.approvalState,
         description: wf.description ?? '',
         domain: wf.domain ?? '',
-        priority: wf.priority ?? 'medium',
+        priority: wf.priority ?? 'unknown',
         isApiData: true,
         steps: wf.steps.map(st => ({ step: st.step, name: st.name, status: st.status })),
       };

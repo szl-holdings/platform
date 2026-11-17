@@ -191,6 +191,21 @@ for (const [name, Page] of [['Now Board', NowBoard], ['Command Surface', Command
   });
 }
 
+describe('Now Board missing severity', () => {
+  it('keeps a selected signal risk level unknown and consistent with its row', () => {
+    const title = 'Signal with missing severity';
+    mock.queries.signals = response([{ ...SIGNAL, title, severity: null }], {}, true);
+    render(<NowBoard />);
+    const row = screen.getByRole('row', { name: new RegExp(title) });
+    const rowDot = row.querySelector('td:first-child span');
+    expect(rowDot).not.toBeNull();
+    fireEvent.click(screen.getByText(title));
+    const badge = screen.getByText('UNKNOWN', { exact: true });
+    expect(screen.queryByText('MEDIUM', { exact: true })).toBeNull();
+    expect(badge.previousElementSibling?.getAttribute('style')).toBe(rowDot?.getAttribute('style'));
+  });
+});
+
 describe('Command Surface approval boundary', () => {
   it('renders returned approvals read-only and does not expose local approval actions for API workflows', () => {
     mock.queries.signals = response([SIGNAL], {}, true);
