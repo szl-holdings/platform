@@ -57,10 +57,10 @@ test('@hono/node-server override is the patched release Dependabot could not ins
   const workspace = parseYaml(readFileSync(path.join(root, 'pnpm-workspace.yaml'), 'utf8'));
   assert.equal(workspace.overrides['@hono/node-server'], '2.1.7');
   assert.equal(lock.overrides['@hono/node-server'], '2.1.7');
-  assert.equal(lock.packages['@hono/node-server@2.1.7']?.peerDependencies?.hono, '4.13.11');
+  assert.equal(lock.packages['@hono/node-server@2.1.7']?.peerDependencies?.hono, '4.13.16');
   assert.equal(
     lock.snapshots['@modelcontextprotocol/sdk@1.32.0']?.dependencies?.['@hono/node-server'],
-    '2.1.7(hono@4.13.11)',
+    '2.1.7(hono@4.13.16)',
   );
   assert.equal(lock.packages['@hono/node-server@2.1.3'], undefined);
 });
@@ -78,7 +78,7 @@ test('lockfile contains every covered consumer and only patched brace releases',
   }
   assert.deepEqual(
     [...observedMajors].sort((a, b) => a - b),
-    [3, 5, 10, 11],
+    [3, 5, 11], // minimatch 10 forced onto 11.0.4 by the GHSA-g3hv-75wg-m249 override
   );
   const braceVersions = Object.keys(lock.packages ?? {})
     .filter((key) => key.startsWith('brace-expansion@'))
