@@ -1763,3 +1763,45 @@ dependencies are absent. Current-head hosted admission, durable report retention
 complete cross-run incident coordination and deployed verification remain
 separate closure conditions. See the
 [reconciliation proof](../../audit/PLATFORM_994_CURRENT_MAIN_20261109.md).
+
+
+### 2026-11-17 retained dashboard evidence states
+
+**MEASURED — local UI contract only:** workcell `dashboard-evidence-states-20261116`
+repairs seed-as-live fallbacks in the retained Now Board and Command Surface.
+Each query now keeps its own API_DATA, EMPTY, LOADING, ERROR, STALE or UNAVAILABLE
+state. Missing/null responses remain distinct from empty lists; zero remains zero.
+Cached values are withheld on errors, refreshes and stale results. Fixtures require
+explicit DEMO selection, and local demo choices cannot appear as real approvals.
+Unsupported fixed proof/trust/health metrics and synthetic rate charts are removed.
+Unknown signal severity remains unknown in both the row and selected detail.
+
+The public candidate still excludes these modules. The candidate entry/allowlist,
+backend, provider settings and a11oy gitlink are unchanged. The final source
+`a4cc449fb59cd2b829830b8444d1c0ed76ba2f86` has four exact-source desktop/mobile captures
+using controlled query responses and 33 focused state/render tests. The full
+before/after main-patch typecheck passed 232 tasks; later bounded review corrections
+are documented separately in the proof.
+
+**BLOCKED remains:** live GraphQL integration, tenant/session authority, durable
+persistence, independently governed approval, runtime receipt verification and
+deployed operational evidence. Local UI tests are not evidence that those gaps
+are closed. See the [corrected proof successor](../../audit/A11OY_DASHBOARD_EVIDENCE_STATES_20261117.md)
+and its source-bound screenshot manifest. Existing historical evidence is retained.
+
+#### 2026-11-17 CI correction successor
+
+The retained-dashboard correction source is now
+`3b3dfa63251f77552906ea7b7f7c46ab5c8cef64`. The actual lint chain and claims-drift
+gate pass locally with their rules unchanged. Lint corrections consolidate a
+test import and remove invalid tabindex attributes from the two labeled table
+scroll regions. Normal Tab traversal and ArrowRight scrolling passed for both
+regions in Chromium Headless Shell `148.0.7778.96` at 390 x 844. Other browsers
+and assistive-technology behavior are unmeasured.
+
+Four new source-bound images and matching sidecars preserve the earlier evidence
+and identify the corrected source. See the
+[current manifest](../../audit/dashboard-evidence-capture-3b3dfa63251f.json)
+and [CI proof successor](../../audit/A11OY_DASHBOARD_EVIDENCE_STATES_20261117.md#ci-correction-and-current-proof-successor).
+These local UI and keyboard checks do not close the live integration or admission
+gaps above. Public-candidate exclusion and operational deployment BLOCKED remain.

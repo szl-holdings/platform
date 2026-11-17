@@ -1,0 +1,85 @@
+{
+  "source_revision": "a4cc449fb59cd2b829830b8444d1c0ed76ba2f86",
+  "records": [
+    {
+      "filename": "a11oy-now-evidence-empty-2026-11-17.png",
+      "surface": "now",
+      "route": "http://127.0.0.1:4137/__dashboard-review?page=now&scenario=empty",
+      "source_revision": "a4cc449fb59cd2b829830b8444d1c0ed76ba2f86",
+      "capture_environment": "local-exact-head",
+      "capture_date": "2026-11-17T00:27:27.449Z",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "artifact_sha256": "cec0a4988dc6c26ac880a978983b95cfb8a3db5d3a1ee46883963cce2b20a6ce",
+      "captured_by": "live_verification",
+      "workcell_id": "dashboard-evidence-states-20261116",
+      "proof_level": "UI_CONTRACT_TEST_ONLY",
+      "scenario": "empty",
+      "query_source": "Playwright-controlled local fixtures; not runtime delivery evidence",
+      "workflow_run_or_command": "pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture",
+      "status": "current"
+    },
+    {
+      "filename": "a11oy-now-evidence-mixed-2026-11-17.png",
+      "surface": "now",
+      "route": "http://127.0.0.1:4137/__dashboard-review?page=now&scenario=mixed",
+      "source_revision": "a4cc449fb59cd2b829830b8444d1c0ed76ba2f86",
+      "capture_environment": "local-exact-head",
+      "capture_date": "2026-11-17T00:27:27.999Z",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "artifact_sha256": "2fc563a9addd595aa93348f609218e57cfae3257fd91cd0d3ad34f89c1d0e9d9",
+      "captured_by": "live_verification",
+      "workcell_id": "dashboard-evidence-states-20261116",
+      "proof_level": "UI_CONTRACT_TEST_ONLY",
+      "scenario": "mixed",
+      "query_source": "Playwright-controlled local fixtures; not runtime delivery evidence",
+      "workflow_run_or_command": "pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture",
+      "status": "current"
+    },
+    {
+      "filename": "a11oy-command-evidence-mixed-2026-11-17.png",
+      "surface": "command",
+      "route": "http://127.0.0.1:4137/__dashboard-review?page=command&scenario=mixed",
+      "source_revision": "a4cc449fb59cd2b829830b8444d1c0ed76ba2f86",
+      "capture_environment": "local-exact-head",
+      "capture_date": "2026-11-17T00:27:28.537Z",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "artifact_sha256": "bf948f5fbb1e3870c2ffcf2da0c8fcf9a688265c6cd0021e59930d4e937aab6a",
+      "captured_by": "live_verification",
+      "workcell_id": "dashboard-evidence-states-20261116",
+      "proof_level": "UI_CONTRACT_TEST_ONLY",
+      "scenario": "mixed",
+      "query_source": "Playwright-controlled local fixtures; not runtime delivery evidence",
+      "workflow_run_or_command": "pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture",
+      "status": "current"
+    },
+    {
+      "filename": "a11oy-command-evidence-demo-2026-11-17.png",
+      "surface": "command",
+      "route": "http://127.0.0.1:4137/__dashboard-review?page=command&scenario=demo",
+      "source_revision": "a4cc449fb59cd2b829830b8444d1c0ed76ba2f86",
+      "capture_environment": "local-exact-head",
+      "capture_date": "2026-11-17T00:27:29.195Z",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "artifact_sha256": "1bedcc40e783946e365b37281a5363f428eafb072b38cc36b4169a7f06611aab",
+      "captured_by": "live_verification",
+      "workcell_id": "dashboard-evidence-states-20261116",
+      "proof_level": "UI_CONTRACT_TEST_ONLY",
+      "scenario": "demo",
+      "query_source": "Playwright-controlled local fixtures; not runtime delivery evidence",
+      "workflow_run_or_command": "pnpm --filter @workspace/a11oy test:dashboard-evidence:browser --capture",
+      "status": "current"
+    }
+  ]
+}

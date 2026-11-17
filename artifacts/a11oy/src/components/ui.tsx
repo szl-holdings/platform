@@ -117,12 +117,14 @@ export function PageHeader({
   title,
   subtitle,
   status,
+  contextLabel = 'Governed Environment',
   children,
 }: {
   label: string;
   title: string;
   subtitle?: string;
   status?: UiStatus;
+  contextLabel?: string;
   children?: ReactNode;
 }) {
   return (
@@ -140,7 +142,7 @@ export function PageHeader({
             border: '1px solid rgba(201,183,135,0.12)',
           }}
         >
-          Governed Environment
+          {contextLabel}
         </span>
       </div>
       <div className="flex items-start justify-between gap-4 flex-wrap">
