@@ -49,7 +49,7 @@ RUN case "$SUBSTRATE_INSTALL_FLASH_ATTN" in \
 # This target intentionally omits torch/CUDA/oLLM. It is suitable for local
 # contract development only: /healthz is live, while /ready remains 503 and no
 # production inference or model mutation is admitted.
-FROM python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170 AS cpu-stub
+FROM python:3.15-slim@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928 AS cpu-stub
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
