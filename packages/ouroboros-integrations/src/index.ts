@@ -280,6 +280,7 @@ export {
   rhindCylinderVolume,
   rhindTruncatedPyramid,
   incaCequeHuacasPerDay,
+  incaHuacasPerCeque,
   mayaLongCount,
   mayaCalendarRound,
   iChingIndex,
