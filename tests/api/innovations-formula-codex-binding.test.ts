@@ -8,14 +8,11 @@
  *     PI_RHIND=256/81, E8_DIM=248, E8_TRIALITY=3, PHI, Tsirelson 2√2,
  *     TEN_SEFIROT, NOETHER_CANONICAL_PAIRS)
  *
- * This test file proves the innovations are not free-floating labels — every
- * one of the 44 is anchored to a real, executable invariant in either the
- * Lutar formula family or the Supreme Knowledge Codex.
- *
- * Tests are intentionally tolerant of the underlying implementation: we assert
- * mathematical relationships, not implementation details. If a formula
- * function is missing on main, the test will fail loudly and that innovation
- * is flagged as a "label-only" innovation requiring follow-up.
+ * This is a SOURCE-level formula/constant audit for 44 named innovation labels.
+ * A passing formula test does NOT prove a production feature, complete model,
+ * ancient manuscript interpretation, theorem, or deployed integration.
+ * Inputs must satisfy the actual typed formula contracts; missing input
+ * components and inconsistent dimensions must fail rather than be cast to any.
  */
 
 import { describe, it, expect } from "vitest";
@@ -43,9 +40,16 @@ import {
   // Ancient mathematics
   rhindCircleArea,
   incaCequeHuacasPerDay,
+  incaHuacasPerCeque,
   mayaCalendarRound,
   iChingIndex,
   vedicSqrt2,
+} from "../../packages/ouroboros-integrations/src/lutar-formulas";
+import type {
+  LutarV1Input,
+  LutarV2Input,
+  LutarV4Input,
+  LutarV6Input,
 } from "../../packages/ouroboros-integrations/src/lutar-formulas";
 
 import {
@@ -77,6 +81,23 @@ import {
 const TSIRELSON_BOUND = 2 * Math.sqrt(2);
 const PHI = (1 + Math.sqrt(5)) / 2;
 
+// Explicit, dimensionally valid numerical fixtures. The values are SYNTHETIC
+// and do not constitute observed physics, independently proven conservation,
+// or a claim that historical sources derived this model.
+const v1Fixture: LutarV1Input = { E: 2, M: 1e-16, I: 1e20, T: 300 };
+const v2Fixture: LutarV2Input = {
+  ...v1Fixture, R: 0.2, Chi: 0.3, Psi: 0.4, Phi: 2,
+};
+const v4Fixture: LutarV4Input = {
+  ...v1Fixture, R: 0.2, Chi: 0.3, Psi: 0.4,
+  W: 2, Phi_IIT: 0.1, N_Noether: 3,
+};
+const v6Fixture: LutarV6Input = {
+  ...v4Fixture,
+  aeon_n: 0, Omega_n: 1, twistor_Z: [1, 0, 0, 0],
+  bekenstein_area_m2: 1,
+};
+
 // Canonical Codex v11 dimensions (from prior context: 76 nodes / 95 edges / 11 domains)
 // We assert ≥ those values to allow forward growth.
 describe("Codex v11 invariants", () => {
@@ -84,22 +105,24 @@ describe("Codex v11 invariants", () => {
   const summary = codexSummary(codex);
 
   it("Codex has at least 76 nodes (Codex v11 baseline)", () => {
-    expect(summary.nodes).toBeGreaterThanOrEqual(76);
+    expect(summary.totalNodes).toBeGreaterThanOrEqual(76);
   });
 
   it("Codex has at least 95 edges (Codex v11 baseline)", () => {
-    expect(summary.edges).toBeGreaterThanOrEqual(95);
+    expect(summary.totalEdges).toBeGreaterThanOrEqual(95);
   });
 
   it("Codex spans at least 11 domains (Codex v11 baseline)", () => {
-    expect(summary.domains).toBeGreaterThanOrEqual(11);
+    expect(summary.domains.length).toBeGreaterThanOrEqual(11);
   });
 });
 
 describe("Canonical Codex constants", () => {
-  it("INCA: 328 huacas / 41 ceques per day (Q_I_INCA = 328/41 = 8)", () => {
-    expect(Q_I_INCA).toBeCloseTo(8, 10);
-    expect(incaCequeHuacasPerDay()).toBeCloseTo(8, 10);
+  it("INCA: huacas/ceque (328/41) differs from modeled huacas/solar day", () => {
+    expect(Q_I_INCA).toBe(8);
+    expect(incaHuacasPerCeque()).toBe(8);
+    expect(incaCequeHuacasPerDay()).toBeCloseTo(328 / 365.24, 12);
+    expect(incaCequeHuacasPerDay()).not.toBe(incaHuacasPerCeque());
   });
 
   it("MAYA Long Count cycle constant Q_M = 73 (1872000 / 25600)", () => {
@@ -111,9 +134,12 @@ describe("Canonical Codex constants", () => {
     expect(Math.log2(Q_IC_ICHING)).toBe(6);
   });
 
-  it("VEDIC sqrt(2) approximation differs from true sqrt(2) by < 2e-6", () => {
-    expect(Math.abs(Q_V_VEDIC - Math.sqrt(2))).toBeLessThan(2e-6);
-    expect(Math.abs(vedicSqrt2() - Math.sqrt(2))).toBeLessThan(2e-6);
+  it("VEDIC sqrt(2) rational approximation: known nonzero error < 2.2e-6", () => {
+    const reference = 1 + 1 / 3 + 1 / 12 - 1 / 408;
+    expect(vedicSqrt2()).toBeCloseTo(reference, 12);
+    expect(Math.abs(Q_V_VEDIC - Math.sqrt(2))).toBeGreaterThan(2e-6);
+    expect(Math.abs(Q_V_VEDIC - Math.sqrt(2))).toBeLessThan(2.2e-6);
+    expect(Math.abs(vedicSqrt2() - Math.sqrt(2))).toBeLessThan(2.2e-6);
   });
 
   it("DOGON: 50-year Sirius B period", () => {
@@ -139,13 +165,16 @@ describe("Canonical Codex constants", () => {
     expect(TEN_SEFIROT.length).toBe(10);
   });
 
-  it("Noether canonical pairs: each pair is non-empty 2-tuple", () => {
-    const pairs = Object.values(NOETHER_CANONICAL_PAIRS) as unknown[][];
-    expect(pairs.length).toBeGreaterThan(0);
-    for (const p of pairs) {
-      expect(Array.isArray(p)).toBe(true);
-      expect((p as unknown[]).length).toBeGreaterThanOrEqual(2);
+  it("Noether canonical pairs: symmetry → nonempty conservation label", () => {
+    const pairs = Object.entries(NOETHER_CANONICAL_PAIRS);
+    expect(pairs.length).toBeGreaterThanOrEqual(3);
+    for (const [symmetry, conserved] of pairs) {
+      expect(symmetry.length).toBeGreaterThan(0);
+      expect(typeof conserved).toBe("string");
+      expect(conserved.length).toBeGreaterThan(0);
     }
+    expect(NOETHER_CANONICAL_PAIRS.time_translation).toBe("energy conservation");
+    expect(NOETHER_CANONICAL_PAIRS.rotation).toBe("angular momentum");
   });
 });
 
@@ -183,7 +212,8 @@ describe("44 Sovereign Innovations — formula+codex binding", () => {
     const sum = codexSummary(codex);
     // We don't assert exact domain names (impl detail), but the codex must
     // expose ≥11 domains for HCG to have material to guard against.
-    expect(sum.domains).toBeGreaterThanOrEqual(11);
+    expect(sum.domains.length).toBeGreaterThanOrEqual(11);
+    expect(sum.domains).toContain("hermetic");
   });
 
   it("#35 LME (Lutar Master Equation): lutarOmega == weighted sum of v1..v6", () => {
@@ -280,14 +310,17 @@ describe("44 Sovereign Innovations — formula+codex binding", () => {
   // ---------------------------------------------------------------------------
   // sovereign-platform innovations (formula-anchored)
   // ---------------------------------------------------------------------------
-  it("#4 lutarV1 returns finite numeric value for valid input", () => {
-    const r = lutarV1({ rho_T: 0.9, sigma: 0.8, kappa: 0.85, tau: 0.9, mu: 0.95 } as any);
+  it("#4 lutarV1: finite E/M/I/T inputs produce exact term decomposition", () => {
+    const r = lutarV1(v1Fixture);
+    expect(r.version).toBe("v1");
     expect(Number.isFinite(r.value)).toBe(true);
+    expect(r.terms["alpha*E"]).toBe(v1Fixture.E);
+    expect(r.value).toBeCloseTo(Object.values(r.terms).reduce((a, b) => a + b, 0), 9);
   });
 
-  it("#5 E8 lattice: triality cycle order 3 (E8_TRIALITY === 3)", () => {
-    // Triality permutations on 8d vector + 2 spinor reps form Z/3.
-    // We assert E8_TRIALITY = 3 — the order of the cyclic group.
+  it("#5 modeled E8 dimensions: arithmetic constants, not proven fermion decomposition", () => {
+    // 248 / 3 is not an integer and must NOT be represented as 64; this
+    // checks only the declared modeling constant, not an E8 physics theorem.
     expect(E8_TRIALITY).toBe(3);
     // Also: 248 = 240 roots + 8 Cartan
     expect(E8_DIM).toBe(248);
@@ -317,62 +350,61 @@ describe("44 Sovereign Innovations — formula+codex binding", () => {
     expect(noetherClosureCheck(1e-3)).toBe(false);
   });
 
-  it("#10 NJE (lutarV2): adds twistor term to v1 monotonically when twistorScore↑", () => {
-    const base = { rho_T: 0.9, sigma: 0.8, kappa: 0.85, tau: 0.9, mu: 0.95 } as any;
-    const a = lutarV2({ ...base, twistorScore: 0.5 });
-    const b = lutarV2({ ...base, twistorScore: 0.9 });
-    expect(Number.isFinite(a.value)).toBe(true);
-    expect(Number.isFinite(b.value)).toBe(true);
-    // Implementation may use either direction; we just assert different inputs
-    // produce different outputs (the twistor term is wired).
-    expect(a.value).not.toBe(b.value);
+  it("#10 NJE (lutarV2): integer winding enters with its declared coefficient", () => {
+    const a = lutarV2(v2Fixture);
+    const b = lutarV2({ ...v2Fixture, Phi: v2Fixture.Phi + 1 });
+    expect(a.version).toBe("v2");
+    expect(b.value - a.value).toBeCloseTo(1, 9);
+    expect(a.terms["eta*Phi"]).toBe(2);
+    expect(a.closureSatisfied).toBe(true);
   });
 
-  it("#11 v3 incorporates Noether closure flag", () => {
-    const base = {
-      rho_T: 0.9,
-      sigma: 0.8,
-      kappa: 0.85,
-      tau: 0.9,
-      mu: 0.95,
-      twistorScore: 0.7,
-    } as any;
-    const r = lutarV3({ ...base, noetherClosed: true });
-    expect(Number.isFinite(r.value)).toBe(true);
+  it("#11 v3 adds independently measurable modeled Egyptian/Inka terms", () => {
+    const v2 = lutarV2(v2Fixture);
+    const v3 = lutarV3({ ...v2Fixture, seked: 5.5 });
+    expect(v3.version).toBe("v3");
+    expect(v3.terms["iota*Q_I"]).toBe(8);
+    expect(v3.terms["theta*Q_E"]).toBeGreaterThan(0);
+    expect(v3.value).toBeCloseTo(
+      v2.value + v3.terms["theta*Q_E"] + v3.terms["iota*Q_I"], 9,
+    );
   });
 
-  it("#12 v4: produces L_value (mass-curvature path)", () => {
-    const r = lutarV4({ T: 0.9, S: 0.8, C: 0.85, mu: 0.95 } as any);
-    expect(Number.isFinite(r.value)).toBe(true);
+  it("#12 v4: integer W, nonnegative Phi_IIT, and numeric term sum", () => {
+    const r = lutarV4(v4Fixture);
+    const increment = lutarV4({ ...v4Fixture, W: 3 });
+    expect(r.version).toBe("v4");
+    expect(r.closureSatisfied).toBe(true);
+    expect(increment.value - r.value).toBeCloseTo(1, 9);
+    expect(r.value).toBeCloseTo(Object.values(r.terms).reduce((a, b) => a + b, 0), 8);
   });
 
-  it("#13 v5: extends v4 with twistor/topological term", () => {
-    const r = lutarV5({ T: 0.9, S: 0.8, C: 0.85, mu: 0.95, twistorScore: 0.5 } as any);
-    expect(Number.isFinite(r.value)).toBe(true);
+  it("#13 v5: exact I Ching coefficient contributes 64 to the model", () => {
+    const a = lutarV5(v4Fixture);
+    const b = lutarV5({ ...v4Fixture, theta_IC: 2 });
+    expect(a.version).toBe("v5");
+    expect(a.terms["theta_IC*Q_IC"]).toBe(64);
+    expect(b.value - a.value).toBeCloseTo(64, 8);
   });
 
-  it("#14 v6: aeon-recurrence preserved (CCC consistency)", () => {
-    const r = lutarV6({
-      T: 0.9,
-      S: 0.8,
-      C: 0.85,
-      mu: 0.95,
-      twistorScore: 0.5,
-      noetherClosed: true,
-    } as any);
-    expect(Number.isFinite(r.value)).toBe(true);
+  it("#14 v6: conformal rescaling is quadratic in declared Omega_n", () => {
+    const a = lutarV6(v6Fixture);
+    const b = lutarV6({ ...v6Fixture, Omega_n: 2 });
+    expect(a.version).toBe("v6");
+    expect(a.bekenstein_ok).toBe(true);
+    expect(b.value).toBeCloseTo(4 * a.value, 8);
+    expect(a.spacetime).toHaveLength(4);
   });
 
-  it("#15 v7: full unified formula returns L plus axis breakdown", () => {
-    const r = lutarV7({
-      T: 0.9,
-      S: 0.8,
-      C: 0.85,
-      mu: 0.95,
-      twistorScore: 0.5,
-      noetherClosed: true,
-    } as any);
+  it("#15 v7: weighted L values and modeled Bianchi penalty are finite", () => {
+    const r = lutarV7(v6Fixture);
+    expect(r.version).toBe("v7");
+    expect(r.L_values).toHaveLength(6);
     expect(Number.isFinite(r.value)).toBe(true);
+    expect(Number.isFinite(r.bianchiDeviation)).toBe(true);
+    expect(r.unificationStrength).toBeGreaterThanOrEqual(0);
+    expect(r.unificationStrength).toBeLessThanOrEqual(1);
+    expect(r.value).toBeCloseTo(r.L_Omega * r.unificationStrength, 7);
   });
 
   it("#16 Aeon recurrence: ω_{n+1} = ω_n  (cyclic CCC step)", () => {
@@ -408,7 +440,7 @@ describe("44 Sovereign Innovations — formula+codex binding", () => {
     expect(idx).toBeLessThanOrEqual(63);
   });
 
-  it("#21 Maya calendar round: 18,980 days (52 vague years)", () => {
+  it("#21 Maya calendar round: lcm(365, 260) = 18,980 days", () => {
     expect(mayaCalendarRound()).toBe(18980);
   });
 
@@ -431,9 +463,10 @@ describe("44 Sovereign Innovations — formula+codex binding", () => {
     expect(mHigh).toBeGreaterThan(mLow);
   });
 
-  it("#25 ICRC: uses INCA ceques=41, huacas=328 → Q_I = 328/41 = 8", () => {
+  it("#25 ICRC: typed ratio is 8 huacas/ceque, NOT per-day rate", () => {
     expect(Q_I_INCA).toBe(8);
-    expect(incaCequeHuacasPerDay()).toBe(8);
+    expect(incaHuacasPerCeque()).toBe(Q_I_INCA);
+    expect(incaCequeHuacasPerDay()).toBeCloseTo(328 / 365.24, 12);
   });
 
   it("#26 TSA (Twistor-Sefirot Atlas): map exists with 10 sefirot anchors", () => {
