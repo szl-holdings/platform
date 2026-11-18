@@ -18,11 +18,19 @@ on:
     branches: [main]
     paths:
       - 'packages/codex-kernel/**'
+      - 'packages/ouroboros-integrations/src/lutar-formulas.ts'
+      - 'packages/ouroboros-integrations/src/index.ts'
+      - 'tests/api/innovations-formula-codex-binding.test.ts'
+      - 'tests/api/ancient-math-domain-contracts.test.ts'
       - '.github/workflows/codex-kernel-verify.yml'
   pull_request:
     branches: [master, main]
     paths:
       - 'packages/codex-kernel/**'
+      - 'packages/ouroboros-integrations/src/lutar-formulas.ts'
+      - 'packages/ouroboros-integrations/src/index.ts'
+      - 'tests/api/innovations-formula-codex-binding.test.ts'
+      - 'tests/api/ancient-math-domain-contracts.test.ts'
       - '.github/workflows/codex-kernel-verify.yml'
 
 permissions:
@@ -65,6 +73,12 @@ jobs:
 
       - name: Test (kernel) — 29 vitest cases
         run: pnpm --filter @workspace/codex-kernel test
+
+      - name: Typecheck (ancient formula library)
+        run: pnpm --filter @workspace/ouroboros-integrations typecheck
+
+      - name: Test (ancient math binding and domain guards)
+        run: pnpm exec vitest run --config vitest.config.ts tests/api/innovations-formula-codex-binding.test.ts tests/api/ancient-math-domain-contracts.test.ts
 
       - name: Kernel invariant — Dresden Venus replay is bit-exact
         run: |
