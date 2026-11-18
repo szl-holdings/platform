@@ -16,6 +16,48 @@ import {
 const { c, k_B } = PHYSICAL_CONSTANTS;
 const LN2 = Math.LN2;
 
+/** Runtime numeric domain checks; these assert no formal historical theorem. */
+function finiteInputs(
+  input: unknown,
+  required: readonly string[],
+  optional: readonly string[],
+  family: string,
+): void {
+  if (input == null || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error(family + ": input must be an object.");
+  }
+  const obj = input as Record<string, unknown>;
+  for (const key of required) {
+    if (typeof obj[key] !== "number" || !Number.isFinite(obj[key])) {
+      throw new Error(family + ": " + key + " must be finite.");
+    }
+  }
+  for (const key of optional) {
+    const value = obj[key];
+    if (value !== undefined && (typeof value !== "number" || !Number.isFinite(value))) {
+      throw new Error(family + ": " + key + " must be finite.");
+    }
+  }
+}
+
+function finiteResult(value: number, family: string): number {
+  if (!Number.isFinite(value)) {
+    throw new Error(family + ": invalid numeric result or overflow.");
+  }
+  return value;
+}
+
+const BASE_FIELDS = ["E", "M", "I", "T"];
+const BASE_WEIGHTS = ["alpha", "beta", "gamma"];
+const V2_FIELDS = ["R", "Chi", "Psi", "Phi"];
+const V2_WEIGHTS = ["delta", "epsilon", "zeta", "eta"];
+const V4_FIELDS = ["R", "Chi", "Psi", "W", "Phi_IIT", "N_Noether"];
+const V4_WEIGHTS = [
+  "delta", "epsilon", "zeta", "eta", "theta", "iota",
+  "kappa", "lambda", "mu", "seked",
+];
+const V5_WEIGHTS = ["theta_M", "theta_IC", "theta_V", "theta_D", "theta_GT"];
+
 export interface LutarV1Input {
   E: number;
   M: number;
@@ -103,6 +145,7 @@ export interface LutarResult {
 }
 
 export function lutarV1(input: LutarV1Input): LutarResult {
+  finiteInputs(input, BASE_FIELDS, BASE_WEIGHTS, "LutarV1");
   const alpha = input.alpha ?? 1;
   const beta = input.beta ?? 1;
   const gamma = input.gamma ?? 1;
@@ -115,7 +158,7 @@ export function lutarV1(input: LutarV1Input): LutarResult {
 
   return {
     version: "v1",
-    value,
+    value: finiteResult(value, "LutarV1"),
     terms: {
       "alpha*E": energyTerm,
       "beta*M*c^2": massTerm,
@@ -126,6 +169,7 @@ export function lutarV1(input: LutarV1Input): LutarResult {
 }
 
 export function lutarV2(input: LutarV2Input): LutarResult {
+  finiteInputs(input, [...BASE_FIELDS, ...V2_FIELDS], [...BASE_WEIGHTS, ...V2_WEIGHTS], "LutarV2");
   if (!Number.isInteger(input.Phi)) {
     throw new Error("Phi (winding) must be integer.");
   }
@@ -157,7 +201,7 @@ export function lutarV2(input: LutarV2Input): LutarResult {
 
   return {
     version: "v2",
-    value,
+    value: finiteResult(value, "LutarV2"),
     terms: {
       "alpha*E": energyTerm,
       "beta*M*c^2": massTerm,
@@ -172,6 +216,7 @@ export function lutarV2(input: LutarV2Input): LutarResult {
 }
 
 export function lutarV3(input: LutarV3Input): LutarResult {
+  finiteInputs(input, [], ["seked", "theta", "iota"], "LutarV3");
   const seked = input.seked ?? 1.0;
   const theta = input.theta ?? 1;
   const iota = input.iota ?? 1;
@@ -183,7 +228,7 @@ export function lutarV3(input: LutarV3Input): LutarResult {
 
   return {
     version: "v3",
-    value: v2.value + egyptTerm + incaTerm,
+    value: finiteResult(v2.value + egyptTerm + incaTerm, "LutarV3"),
     terms: {
       ...v2.terms,
       "theta*Q_E": egyptTerm,
@@ -194,6 +239,7 @@ export function lutarV3(input: LutarV3Input): LutarResult {
 }
 
 export function lutarV4(input: LutarV4Input): LutarResult {
+  finiteInputs(input, [...BASE_FIELDS, ...V4_FIELDS], [...BASE_WEIGHTS, ...V4_WEIGHTS], "LutarV4");
   if (!Number.isInteger(input.W)) {
     throw new Error("W (winding) must be integer.");
   }
@@ -249,7 +295,7 @@ export function lutarV4(input: LutarV4Input): LutarResult {
 
   return {
     version: "v4",
-    value,
+    value: finiteResult(value, "LutarV4"),
     terms: {
       "alpha*E": energyTerm,
       "beta*M*c^2": massTerm,
@@ -269,6 +315,7 @@ export function lutarV4(input: LutarV4Input): LutarResult {
 }
 
 export function lutarV5(input: LutarV5Input): LutarResult {
+  finiteInputs(input, [], V5_WEIGHTS, "LutarV5");
   const theta_M = input.theta_M ?? 1;
   const theta_IC = input.theta_IC ?? 1;
   const theta_V = input.theta_V ?? 1;
@@ -285,7 +332,7 @@ export function lutarV5(input: LutarV5Input): LutarResult {
 
   return {
     version: "v5",
-    value: v4.value + mayaTerm + ichingTerm + vedicTerm + dogonTerm + gobekliTerm,
+    value: finiteResult(v4.value + mayaTerm + ichingTerm + vedicTerm + dogonTerm + gobekliTerm, "LutarV5"),
     terms: {
       ...v4.terms,
       "theta_M*Q_M": mayaTerm,
@@ -310,8 +357,13 @@ export function rhindTruncatedPyramid(a: number, b: number, h: number): number {
   return (h / 3.0) * (a * a + a * b + b * b);
 }
 
+/** Two different modeled ratios; neither assumes uniform historical distribution. */
+export function incaHuacasPerCeque(): number {
+  return Q_I_INCA; // 328 / 41 = 8, per ceque.
+}
+
 export function incaCequeHuacasPerDay(): number {
-  return 328 / 365.24;
+  return 328 / 365.24; // per modeled solar day, NOT per ceque.
 }
 
 export function mayaLongCount(
@@ -398,22 +450,36 @@ export function aeonRecurrence(L6_n: number, Omega_n: number): number {
 }
 
 export function lutarV6(input: LutarV6Input): LutarV6Result {
+  finiteInputs(input, ["aeon_n", "Omega_n", "bekenstein_area_m2"], [], "LutarV6");
+  if (!Array.isArray(input.twistor_Z) || input.twistor_Z.length !== 4 ||
+      input.twistor_Z.some((value) => typeof value !== "number" || !Number.isFinite(value))) {
+    throw new Error("LutarV6: twistor_Z must contain four finite numbers.");
+  }
+  if (input.bekenstein_area_m2 < 0 ||
+      (input.enforce_bekenstein !== undefined &&
+        typeof input.enforce_bekenstein !== "boolean")) {
+    throw new Error("LutarV6: area or enforcement flag invalid.");
+  }
   if (!Number.isInteger(input.aeon_n) || input.aeon_n < 0) {
     throw new Error("aeon_n must be non-negative integer.");
   }
-  if (input.Omega_n <= 0) {
+  if (!Number.isFinite(input.Omega_n) || input.Omega_n <= 0) {
     throw new Error("Omega_n must be > 0.");
   }
 
   const spacetime = twistorProject(input.twistor_Z);
+  if (spacetime.some((v) => !Number.isFinite(v))) {
+    throw new Error("LutarV6: spacetime numeric overflow.");
+  }
   const v5 = lutarV5(input);
   const L5_val = v5.value;
-  const L6_val = conformalRescale(L5_val, input.Omega_n);
+  const L6_val = finiteResult(conformalRescale(L5_val, input.Omega_n), "LutarV6");
 
   const enforce = input.enforce_bekenstein ?? true;
   const gamma = input.gamma ?? 1;
   const lam = input.lambda ?? 1;
   const S_total = Math.abs(gamma * input.I * k_B * input.T * LN2) + Math.abs(lam * (input.Phi_IIT ?? 0));
+  finiteResult(S_total, "LutarV6");
   const bek = bekensteinCheck(S_total, input.bekenstein_area_m2);
 
   if (enforce && !bek.ok) {
@@ -451,12 +517,24 @@ export interface LutarOmegaResult extends LutarResult {
 }
 
 export function adaptiveWeights(H: number): [number, number, number, number, number, number] {
-  const raw = Array.from({ length: 6 }, (_, k) => Math.exp((k + 1) * H));
-  const s = raw.reduce((a, b) => a + b, 0);
-  return raw.map((r) => r / s) as [number, number, number, number, number, number];
+  if (!Number.isFinite(H)) {
+    throw new Error("adaptiveWeights: H must be finite.");
+  }
+  // Stable softmax: subtract the maximal exponent to prevent Inf / Inf -> NaN.
+  const logits = Array.from({ length: 6 }, (_, k) => (k + 1) * H);
+  if (logits.some((value) => !Number.isFinite(value))) {
+    throw new Error("adaptiveWeights: exponent overflow.");
+  }
+  const maxLogit = Math.max(...logits);
+  const raw = logits.map((value) => Math.exp(value - maxLogit));
+  const total = raw.reduce((a, b) => a + b, 0);
+  return raw.map((value) => value / total) as [number, number, number, number, number, number];
 }
 
 export function lutarOmega(input: LutarOmegaInput): LutarOmegaResult {
+  if (input == null || !Array.isArray(input.L_values)) {
+    throw new Error("LutarOmega: L_values must be an array.");
+  }
   const { L_values } = input;
   if (L_values.length !== 6) {
     throw new Error("L_values must have exactly 6 entries (v1..v6).");
@@ -468,6 +546,10 @@ export function lutarOmega(input: LutarOmegaInput): LutarOmegaResult {
   if (weights.length !== 6) {
     throw new Error("weights must have exactly 6 entries.");
   }
+  if (L_values.some((v) => typeof v !== "number" || !Number.isFinite(v)) ||
+      weights.some((w) => typeof w !== "number" || !Number.isFinite(w))) {
+    throw new Error("LutarOmega: values and weights must be finite.");
+  }
   if (weights.some((w) => w < 0)) {
     throw new Error("weights must be non-negative.");
   }
@@ -476,7 +558,7 @@ export function lutarOmega(input: LutarOmegaInput): LutarOmegaResult {
     throw new Error(`weights must sum to 1 (got ${wSum}).`);
   }
 
-  const value = L_values.reduce((sum, L, i) => sum + weights[i] * L, 0);
+  const value = finiteResult(L_values.reduce((sum, L, i) => sum + weights[i] * L, 0), "LutarOmega");
 
   const terms: Record<string, number> = {};
   for (let i = 0; i < 6; i++) {
@@ -550,7 +632,7 @@ export function lutarV7(input: LutarV7Input): LutarV7Result {
   const L_Omega = omegaResult.value;
 
   const coupling = input.huftCoupling ?? 1.0;
-  if (coupling <= 0) {
+  if (!Number.isFinite(coupling) || coupling <= 0) {
     throw new Error("huftCoupling must be > 0.");
   }
 
@@ -568,9 +650,9 @@ export function lutarV7(input: LutarV7Input): LutarV7Result {
   const bianchiNormSq = d2L.reduce((s, d) => s + d * d, 0);
 
   const epsilon = 1e-30;
-  const bianchiDeviation = bianchiNormSq / (curvatureNormSq + epsilon);
+  const bianchiDeviation = finiteResult(bianchiNormSq / (curvatureNormSq + epsilon), "LutarV7");
 
-  const L7 = L_Omega * Math.exp(-coupling * bianchiDeviation);
+  const L7 = finiteResult(L_Omega * Math.exp(-coupling * bianchiDeviation), "LutarV7");
 
   const unificationStrength = Math.exp(-coupling * bianchiDeviation);
 
