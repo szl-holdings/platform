@@ -1,0 +1,35 @@
+name: DB journal admission (read-only)
+
+on:
+  pull_request:
+    paths:
+      - 'lib/db/drizzle/**'
+      - 'lib/db/scripts/check-journal.mjs'
+      - 'lib/db/scripts/check-journal.test.mjs'
+      - 'lib/db/package.json'
+      - '.github/workflows/db-journal-admission.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/db/drizzle/**'
+      - 'lib/db/scripts/check-journal.mjs'
+      - 'lib/db/scripts/check-journal.test.mjs'
+      - 'lib/db/package.json'
+      - '.github/workflows/db-journal-admission.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  journal-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout immutable submitted source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Verify baseline and reject newly skipped migrations
+        run: node lib/db/scripts/check-journal.mjs
+      - name: Test append-only high-water contract on synthetic fixtures
+        run: node --test lib/db/scripts/check-journal.test.mjs
