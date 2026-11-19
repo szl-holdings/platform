@@ -11,16 +11,21 @@ secret, no trust in this server. Every check is labelled with an HONEST status:
   fail            — the check ran and the receipt is INVALID (loud, never masked)
   unreachable     — an online corroboration source could not be reached right now
   not_applicable  — the receipt does not carry the material this check needs
+  unanchored      — the signature matches a key from an embedded certificate
+                    that was NOT chain-verified to the Fulcio root
   info            — structural observation, not a trust assertion
 
 DOCTRINE / HONESTY
   - An unsigned decision-log is reported as UNSIGNED (structural only) — NEVER
     "verified". We never fabricate a green verdict.
-  - Sigstore-keyless bundles: we verify the DSSE signature against the embedded
-    Fulcio certificate's public key, pin the certificate SAN + OIDC issuer, and
-    look up the Rekor transparency-log entry. The full Fulcio-chain-to-root walk
-    is delegated to `cosign` / `scripts/verify_dsse_real.py` for maximum
-    assurance; we say so plainly rather than implying we did it.
+  - Sigstore-keyless bundles: we compare the embedded certificate's SAN and
+    OIDC issuer against the expected values and check the DSSE signature
+    against its public key, and look up the Rekor transparency-log entry. We do
+    NOT walk the certificate chain to the Fulcio root (ROADMAP; use `cosign` /
+    `scripts/verify_dsse_real.py`), so anyone can mint such a certificate: a
+    signature under it is reported SIGNED-UNANCHORED, never VERIFIED.
+  - VERIFIED requires a caller-pinned public key (pubkey_pem). An embedded
+    certificate never replaces a key the caller pinned.
   - No network call is required for the core signature math; online checks
     (Rekor, Lean citation, URL fetch) degrade to `unreachable`, never to a lie.
 """
@@ -258,6 +263,42 @@ def _load_cert(material: str | bytes):
         return x509.load_der_x509_certificate(material)
 
 
+def _parse_oidc_issuer_extension(value: bytes, *, der_utf8: bool) -> str | None:
+    """Strictly decode a Fulcio v2 DER UTF8String or v1 raw UTF-8 value.
+
+    Refuse malformed/non-minimal DER, trailing bytes, controls and overlong data.
+    A self-signed certificate remains UNANCHORED even when this issuer matches.
+    """
+    if not isinstance(value, bytes) or not 0 < len(value) <= 2048:
+        return None
+    if der_utf8:
+        if len(value) < 2 or value[0] != 0x0C:  # ASN.1 UTF8String tag
+            return None
+        length_byte = value[1]
+        offset = 2
+        if length_byte & 0x80:
+            count = length_byte & 0x7F
+            if count == 0 or count > 2 or len(value) < offset + count:
+                return None  # indefinite / absurd / incomplete length
+            length_bytes = value[offset:offset + count]
+            if length_bytes[0] == 0:
+                return None
+            length = int.from_bytes(length_bytes, "big")
+            if length < 128:  # DER requires shortest definite-length form
+                return None
+            offset += count
+        else:
+            length = length_byte
+        if length == 0 or len(value) != offset + length:
+            return None
+        value = value[offset:]
+    try:
+        text = value.decode("utf-8", "strict")
+    except UnicodeError:
+        return None
+    return text if text and all(32 <= ord(c) != 127 for c in text) else None
+
+
 def _cert_identity(cert) -> dict[str, Any]:
     out: dict[str, Any] = {"san_uris": [], "san_emails": [], "issuer_oidc": None}
     try:
@@ -266,14 +307,20 @@ def _cert_identity(cert) -> dict[str, Any]:
         out["san_emails"] = list(san.get_values_for_type(x509.RFC822Name))
     except Exception:  # noqa: BLE001
         pass
+    # Prefer Fulcio v2. If a v2 extension exists but is malformed, do NOT
+    # silently fall back to a v1 value. The issuer gate must fail closed.
     for oid in (_OID_ISSUER_V2, _OID_ISSUER_V1):
         try:
             ext = cert.extensions.get_extension_for_oid(x509.ObjectIdentifier(oid))
-            val = ext.value.value
-            out["issuer_oidc"] = val.decode("utf-8", "replace").lstrip("\x0c ").strip()
-            break
-        except Exception:  # noqa: BLE001
+        except x509.ExtensionNotFound:
             continue
+        try:
+            out["issuer_oidc"] = _parse_oidc_issuer_extension(
+                ext.value.value, der_utf8=(oid == _OID_ISSUER_V2)
+            )
+        except (AttributeError, TypeError, ValueError):
+            out["issuer_oidc"] = None
+        break
     try:
         out["not_before"] = cert.not_valid_before_utc.isoformat()
         out["not_after"] = cert.not_valid_after_utc.isoformat()
@@ -372,7 +419,7 @@ def _verify_intoto_statement(stmt: dict, checks: list) -> None:
 
 
 def _verify_dsse(env: dict, *, pubkey_pem: str | None, identity: str | None,
-                 do_rekor: bool, checks: list) -> dict | None:
+                 issuer: str | None, do_rekor: bool, checks: list) -> dict | None:
     """Verify a DSSE envelope. Returns the decoded payload object if any."""
     payload_b64 = env.get("payload")
     sigs = env.get("signatures") or []
@@ -406,29 +453,40 @@ def _verify_dsse(env: dict, *, pubkey_pem: str | None, identity: str | None,
             continue
         pubkey = None
         key_src = None
-        if cert_material:
-            try:
-                cert = _load_cert(cert_material)
-                pubkey = cert.public_key()
-                key_src = "embedded Fulcio certificate"
-                ident = _cert_identity(cert)
-                ok_id = True
-                detail = f"SAN={ident.get('san_uris') or ident.get('san_emails')} issuer={ident.get('issuer_oidc')}"
-                if identity:
-                    ok_id = identity in (ident.get("san_uris", []) + ident.get("san_emails", []))
-                    detail += f" | expected_identity {'MATCH' if ok_id else 'MISMATCH'}: {identity}"
-                checks.append({"name": "sigstore.identity",
-                               "status": "pass" if ok_id else "fail",
-                               "identity": ident, "detail": detail})
-            except Exception as exc:  # noqa: BLE001
-                checks.append({"name": "sigstore.certificate", "status": "fail",
-                               "detail": f"could not parse certificate: {exc}"})
-        if pubkey is None and pubkey_pem:
+        anchored = False
+        if pubkey_pem:
             try:
                 pubkey = _load_pubkey(pubkey_pem.encode() if isinstance(pubkey_pem, str) else pubkey_pem)
                 key_src = "caller-supplied public key"
+                anchored = True
             except Exception as exc:  # noqa: BLE001
                 checks.append({"name": "dsse.pubkey", "status": "fail", "detail": str(exc)})
+        if cert_material:
+            try:
+                cert = _load_cert(cert_material)
+                if not pubkey_pem:
+                    pubkey = cert.public_key()
+                    key_src = "embedded certificate (chain NOT verified)"
+                ident = _cert_identity(cert)
+                ok_id = True
+                detail = (f"claimed by an unverified cert: SAN={ident.get('san_uris') or ident.get('san_emails')} "
+                          f"issuer={ident.get('issuer_oidc')}")
+                if identity:
+                    ok_id = identity in (ident.get("san_uris", []) + ident.get("san_emails", []))
+                    detail += f" | expected_identity {'MATCH' if ok_id else 'MISMATCH'}: {identity}"
+                checks.append({"name": "sigstore.identity.claimed",
+                               "status": "info" if ok_id else "fail",
+                               "identity": ident, "detail": detail})
+                want_iss = issuer or _SIGSTORE_OIDC_ISSUER
+                got_iss = ident.get("issuer_oidc")
+                checks.append({"name": "sigstore.issuer",
+                               "status": "pass" if got_iss == want_iss else "fail",
+                               "expected": want_iss, "actual": got_iss,
+                               "detail": f"OIDC issuer {'MATCH' if got_iss == want_iss else 'MISMATCH'}: "
+                                         f"expected {want_iss}, cert claims {got_iss}"})
+            except Exception as exc:  # noqa: BLE001
+                checks.append({"name": "sigstore.certificate", "status": "fail",
+                               "detail": f"could not parse certificate: {exc}"})
         if pubkey is None:
             checks.append({"name": f"dsse.sig[{i}]", "status": "not_applicable",
                            "detail": "no public key available (embed a Fulcio cert or supply pubkey_pem) "
@@ -436,10 +494,16 @@ def _verify_dsse(env: dict, *, pubkey_pem: str | None, identity: str | None,
             continue
         ok, algo = _verify_with_key(pubkey, sig, signed)
         verified_any = verified_any or ok
-        checks.append({"name": f"dsse.sig[{i}]", "status": "pass" if ok else "fail",
-                       "key_source": key_src, "algorithm": algo,
-                       "detail": "DSSE signature verifies over PAE(payloadType,payload)"
-                                 if ok else "DSSE signature DID NOT verify"})
+        if not ok:
+            status, detail = "fail", "DSSE signature DID NOT verify"
+        elif anchored:
+            status, detail = "pass", "DSSE signature verifies over PAE(payloadType,payload)"
+        else:
+            status, detail = "unanchored", ("signature matches the embedded cert key; cert not "
+                                            "chain-verified to the Fulcio root (ROADMAP; use "
+                                            "cosign verify-blob)")
+        checks.append({"name": f"dsse.sig[{i}]", "status": status,
+                       "key_source": key_src, "algorithm": algo, "detail": detail})
 
     if sig_block.get("bundle") and not verified_any:
         checks.append({"name": "sigstore.bundle", "status": "info",
@@ -476,7 +540,7 @@ def _scan_lean_citations(obj: Any, checks: list, _depth: int = 0) -> None:
 # top-level
 # --------------------------------------------------------------------------- #
 def verify(target: dict, *, pubkey_pem: str | None = None, identity: str | None = None,
-           rekor: bool = True, lean: bool = True) -> dict[str, Any]:
+           issuer: str | None = None, rekor: bool = True, lean: bool = True) -> dict[str, Any]:
     """Verify a receipt / DSSE envelope / in-toto statement. Honest report."""
     checks: list[dict] = []
     kinds: list[str] = []
@@ -488,7 +552,7 @@ def verify(target: dict, *, pubkey_pem: str | None = None, identity: str | None 
     if "payload" in target and "signatures" in target:
         kinds.append("dsse-envelope")
         payload_obj = _verify_dsse(target, pubkey_pem=pubkey_pem, identity=identity,
-                                   do_rekor=rekor, checks=checks)
+                                   issuer=issuer, do_rekor=rekor, checks=checks)
 
     # 2. in-toto statement (raw, or unwrapped from the DSSE payload) ------- #
     stmt = payload_obj if isinstance(payload_obj, dict) else target
@@ -527,6 +591,10 @@ def verify(target: dict, *, pubkey_pem: str | None = None, identity: str | None 
     elif crypto_pass:
         verdict, ok = "VERIFIED", True
         detail = "cryptographic signature verified; see per-check detail for corroboration"
+    elif any(c["status"] == "unanchored" for c in checks):
+        verdict, ok = "SIGNED-UNANCHORED", False
+        detail = ("signature is valid under an embedded certificate that was NOT chain-verified "
+                  "to the Fulcio root; pin a public key or run `cosign verify-blob` to verify")
     elif struct_pass:
         verdict, ok = "STRUCTURAL-ONLY", True
         detail = ("structurally well-formed and corroborated where reachable, but no cryptographic "
