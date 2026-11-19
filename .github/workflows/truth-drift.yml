@@ -64,12 +64,20 @@ jobs:
 
       - name: Verify live public surface evidence
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          # Optional edge-probe identity; skips only the Cloudflare bot challenge
+          # on a-11-oy.com / a11oy.net for GET/HEAD. Never echoed or logged.
+          TRUTH_PROBE_HEADER: ${{ secrets.TRUTH_PROBE_HEADER }}
         run: pnpm surfaces:check
 
       - name: Require a current public surface observation
         if: >-
           github.event_name == 'schedule' ||
           (github.event_name == 'workflow_dispatch' && inputs.require_surface_freshness)
+        env:
+          # Optional edge-probe identity; skips only the Cloudflare bot challenge
+          # on a-11-oy.com / a11oy.net for GET/HEAD. Never echoed or logged.
+          TRUTH_PROBE_HEADER: ${{ secrets.TRUTH_PROBE_HEADER }}
         run: pnpm surfaces:freshness
 
       - name: Verify deterministic local truth
