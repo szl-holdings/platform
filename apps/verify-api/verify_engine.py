@@ -263,6 +263,42 @@ def _load_cert(material: str | bytes):
         return x509.load_der_x509_certificate(material)
 
 
+def _parse_oidc_issuer_extension(value: bytes, *, der_utf8: bool) -> str | None:
+    """Strictly decode a Fulcio v2 DER UTF8String or v1 raw UTF-8 value.
+
+    Refuse malformed/non-minimal DER, trailing bytes, controls and overlong data.
+    A self-signed certificate remains UNANCHORED even when this issuer matches.
+    """
+    if not isinstance(value, bytes) or not 0 < len(value) <= 2048:
+        return None
+    if der_utf8:
+        if len(value) < 2 or value[0] != 0x0C:  # ASN.1 UTF8String tag
+            return None
+        length_byte = value[1]
+        offset = 2
+        if length_byte & 0x80:
+            count = length_byte & 0x7F
+            if count == 0 or count > 2 or len(value) < offset + count:
+                return None  # indefinite / absurd / incomplete length
+            length_bytes = value[offset:offset + count]
+            if length_bytes[0] == 0:
+                return None
+            length = int.from_bytes(length_bytes, "big")
+            if length < 128:  # DER requires shortest definite-length form
+                return None
+            offset += count
+        else:
+            length = length_byte
+        if length == 0 or len(value) != offset + length:
+            return None
+        value = value[offset:]
+    try:
+        text = value.decode("utf-8", "strict")
+    except UnicodeError:
+        return None
+    return text if text and all(32 <= ord(c) != 127 for c in text) else None
+
+
 def _cert_identity(cert) -> dict[str, Any]:
     out: dict[str, Any] = {"san_uris": [], "san_emails": [], "issuer_oidc": None}
     try:
@@ -271,14 +307,20 @@ def _cert_identity(cert) -> dict[str, Any]:
         out["san_emails"] = list(san.get_values_for_type(x509.RFC822Name))
     except Exception:  # noqa: BLE001
         pass
+    # Prefer Fulcio v2. If a v2 extension exists but is malformed, do NOT
+    # silently fall back to a v1 value. The issuer gate must fail closed.
     for oid in (_OID_ISSUER_V2, _OID_ISSUER_V1):
         try:
             ext = cert.extensions.get_extension_for_oid(x509.ObjectIdentifier(oid))
-            val = ext.value.value
-            out["issuer_oidc"] = val.decode("utf-8", "replace").lstrip("\x0c ").strip()
-            break
-        except Exception:  # noqa: BLE001
+        except x509.ExtensionNotFound:
             continue
+        try:
+            out["issuer_oidc"] = _parse_oidc_issuer_extension(
+                ext.value.value, der_utf8=(oid == _OID_ISSUER_V2)
+            )
+        except (AttributeError, TypeError, ValueError):
+            out["issuer_oidc"] = None
+        break
     try:
         out["not_before"] = cert.not_valid_before_utc.isoformat()
         out["not_after"] = cert.not_valid_after_utc.isoformat()
