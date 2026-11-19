@@ -104,6 +104,43 @@ def test_configured_endpoint_is_handed_to_the_daemon():
     ok("configured endpoints reach the daemon; invalid configuration raises")
 
 
+# Byte sequences left behind when UTF-8 text is decoded as cp1252 and
+# re-encoded (an em dash turns into a run of accented Latin letters). Spelled
+# with escapes so this test file cannot itself trip the check.
+_MOJIBAKE_MARKERS = ("Ã¢", "â€", "Ãƒ", "Â ")
+
+
+def test_source_is_clean_utf8_without_mojibake():
+    with open(vb.__file__, encoding="utf-8") as fh:
+        lines = fh.read().splitlines()
+    bad = [i for i, line in enumerate(lines, 1)
+           if any(m in line for m in _MOJIBAKE_MARKERS)
+           or any(0x80 <= ord(ch) <= 0x9F for ch in line)]
+    assert bad == [], f"mojibake on lines {bad}"
+    ok("vllm_backend.py has no double-encoded characters")
+
+
+def test_router_fallback_note_is_readable():
+    choice = vb.select_backend(environ={}, vllm_probe=lambda: False,
+                               ollama_probe=lambda: False)
+    assert "Neither local endpoint answered — honest router fallback." in choice.note
+    assert not any(m in choice.note for m in _MOJIBAKE_MARKERS)
+    ok("router-fallback note reaches callers as readable text")
+
+
+def test_daemon_probe_matches_the_selected_backend():
+    env = {vb.VLLM_ENDPOINT_ENV: "http://127.0.0.1:8000/v1",
+           vb.OLLAMA_ENDPOINT_ENV: "http://127.0.0.1:11434/v1"}
+    up = vb.select_backend(environ=env, vllm_probe=lambda: True, ollama_probe=lambda: True)
+    assert vb.daemon_kwargs(up)["probe"] is vb.probe_vllm_health
+    ol = vb.select_backend(environ=env, vllm_probe=lambda: False, ollama_probe=lambda: True)
+    assert vb.daemon_kwargs(ol)["probe"] is vb.probe_ollama
+    down = vb.select_backend(environ=env, vllm_probe=lambda: False, ollama_probe=lambda: False)
+    kw = vb.daemon_kwargs(down)
+    assert kw["probe"]("http://127.0.0.1:8000/v1") is False and kw["_sovereign"] is False
+    ok("daemon probe is the selected backend's probe; fallback never reports live")
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

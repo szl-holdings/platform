@@ -1,18 +1,18 @@
 """
-SZL Agentic-GPU Ã¢â‚¬â€ vllm_backend.py
+SZL Agentic-GPU — vllm_backend.py
 =================================
 The endpoint ADAPTER the resident daemon can flip to when the betterwithage
-RTX 5000 is upgraded from **Ollama** to **vLLM** (Agent.xpu STEP 1 Ã¢â‚¬â€ the
+RTX 5000 is upgraded from **Ollama** to **vLLM** (Agent.xpu STEP 1 — the
 throughput server). It chooses which OpenAI-compatible endpoint the daemon
 talks to and probes liveness honestly, keeping Ollama as a fallback.
 
 Both servers speak the same OpenAI-compatible wire protocol, so the scheduler
-and the daemon's reactive/proactive logic do NOT change Ã¢â‚¬â€ this module only
+and the daemon's reactive/proactive logic do NOT change — this module only
 decides *which base URL* the daemon's injectable `endpoint=`/`probe=` point at:
 
-  - **vLLM**   `$SZL_VLLM_ENDPOINT` (e.g. `https://gpu.example/v1`) Ã¢â‚¬â€ preferred
+  - **vLLM**   `$SZL_VLLM_ENDPOINT` (e.g. `https://gpu.example/v1`) — preferred
                when it serves; exposes `/health` (liveness) + `/metrics`.
-  - **Ollama** `$SZL_OLLAMA_ENDPOINT` Ã¢â‚¬â€ honest fallback; current open-weight,
+  - **Ollama** `$SZL_OLLAMA_ENDPOINT` — honest fallback; current open-weight,
                no-key server. Liveness via `GET /v1/models`.
 
 Endpoints are configuration, never source constants. Accepted: `https://`, or
@@ -23,16 +23,16 @@ unset endpoint is "not configured": it is never probed and cannot serve.
 DOCTRINE (v11/v12):
   - **No box access inferred here.** This control plane runs OFF-box today; the
     probes never raise, send no key, and a probe miss is reported honestly (not
-    masked). Real serving + the `vllm serve Ã¢â‚¬Â¦` bring-up is a Forge/box step.
+    masked). Real serving + the `vllm serve …` bring-up is a Forge/box step.
   - **open-weight only; never commit a key.** `qwen2.5-coder:32b` is open; both
     endpoints are no-key on the LAN.
   - **`sovereign:true` ONLY when a local endpoint actually serves.** The adapter
-    reports which endpoint answered (or that NEITHER did Ã¢â€ â€™ router fallback); it
+    reports which endpoint answered (or that NEITHER did → router fallback); it
     never claims sovereignty for an endpoint that didn't respond. The half-state
     (banner sovereign while a router serves) is the only unacceptable outcome.
   - Pure stdlib (urllib). No scheduler change. Reactive is never gated here.
 
-Pattern + motivation: **Agent.xpu** (Han et al., arXiv:2506.24045, 2025) Ã¢â‚¬â€
+Pattern + motivation: **Agent.xpu** (Han et al., arXiv:2506.24045, 2025) —
 keep inference local on the device; vLLM is the throughput-flow server that the
 slack signal (`vllm_metrics.py`) reads to fill idle GPU cycles with proactive
 work without starving reactive turns.
@@ -184,13 +184,15 @@ def probe_ollama(base: Optional[str] = None,
         return False
     status = _http_get(f"{base.rstrip('/')}/models", timeout)
     return status is not None and 200 <= status < 300
+
+
 @dataclass
 class BackendChoice:
     """The honestly-resolved serving backend for the daemon to use.
 
     `sovereign` is True ONLY when a LOCAL endpoint actually answered. When both
     probes miss, `backend == "router-fallback"`, `endpoint is None`, and
-    `sovereign is False` Ã¢â‚¬â€ the daemon must then report router fallback, never a
+    `sovereign is False` — the daemon must then report router fallback, never a
     sovereign banner.
     """
     backend: str                 # "vllm" | "ollama" | "router-fallback"
@@ -263,7 +265,7 @@ def select_backend(prefer_vllm: bool = True,
         backend="router-fallback", endpoint=None, sovereign=False,
         vllm_live=vllm_live, ollama_live=ollama_live, model=model,
         has_metrics=False,
-        note=("Neither local endpoint answered Ã¢â‚¬â€ honest router fallback. "
+        note=("Neither local endpoint answered — honest router fallback. "
               "sovereign:false; do NOT show a sovereign banner."))
 
 
@@ -278,14 +280,13 @@ def daemon_kwargs(choice: Optional[BackendChoice] = None,
     (`sovereign:false`) rather than silently claiming a local serve.
     """
     c = choice or select_backend(prefer_vllm=prefer_vllm)
-    target = c.endpoint or endpoint_from_env(VLLM_ENDPOINT_ENV)
-    is_vllm = c.backend == "vllm"
     target = c.endpoint or VLLM_ENDPOINT
-    # daemon.ResidentDaemon expects `probe(endpoint) -> bool`; match that arity.
+    # daemon.ResidentDaemon expects `probe(endpoint) -> bool`; both probes take
+    # the endpoint as their first argument, so they are passed directly.
     if c.backend == "vllm":
-        probe = lambda ep: probe_vllm_health(ep)
+        probe = probe_vllm_health
     elif c.backend == "ollama":
-        probe = lambda ep: probe_ollama(ep)
+        probe = probe_ollama
     else:
         # Recovery requires a new selection, not an Ollama probe against the
         # fallback vLLM target that silently changes the selected posture.
@@ -295,7 +296,7 @@ def daemon_kwargs(choice: Optional[BackendChoice] = None,
 
 
 # ===========================================================================
-# SELF-TEST Ã¢â‚¬â€ no network. Probes are injected so the resolution logic is
+# SELF-TEST — no network. Probes are injected so the resolution logic is
 # exercised deterministically across all three states.
 #   - vLLM up                  -> backend "vllm", /metrics available, sovereign
 #   - vLLM down, Ollama up      -> backend "ollama" fallback, no /metrics, sovereign
@@ -363,15 +364,15 @@ def _selftest() -> dict:
         check("daemon_wiring_skipped_cleanly", True)
     else:
         # Inject a deterministic live probe (no network in the self-test); the
-        # real bring-up uses daemon_kwargs(choice).probe Ã¢â€ â€™ probe_vllm_health.
+        # real bring-up uses daemon_kwargs(choice).probe → probe_vllm_health.
         d = ResidentDaemon(endpoint=c_vllm.endpoint, probe=lambda _ep: True)
         check("daemon_accepts_vllm_endpoint",
               getattr(d, "endpoint", None) == _SELFTEST_VLLM)
         d._update_posture()
-        # Posture tracks the probe honestly: live probe Ã¢â€ â€™ sovereign.
+        # Posture tracks the probe honestly: live probe → sovereign.
         check("daemon_posture_sovereign_when_probe_live",
               d.serving_local is True)
-        # And a dead probe Ã¢â€ â€™ honest router fallback (no fabricated sovereignty).
+        # And a dead probe → honest router fallback (no fabricated sovereignty).
         d_dead = ResidentDaemon(endpoint=c_vllm.endpoint, probe=lambda _ep: False)
         d_dead._update_posture()
         check("daemon_posture_fallback_when_probe_dead",
@@ -390,4 +391,3 @@ def _selftest() -> dict:
 
 if __name__ == "__main__":
     print(json.dumps(_selftest(), indent=2))
-
