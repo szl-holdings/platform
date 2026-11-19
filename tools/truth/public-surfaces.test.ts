@@ -10,6 +10,8 @@ import {
   type PublicSurface,
   type PublicSurfaceRegistry,
   parseDuplicateFreeJson,
+  TRUTH_PROBE_HEADER_NAME,
+  truthProbeHeadersFor,
   validatePublicSurfaceManifest,
   validatePublicSurfaceObservationFreshness,
   validatePublicSurfaceRegistry,
@@ -1995,4 +1997,49 @@ test('rejects a non-301 response from the approved A11oy.net gateway', async () 
   assert.deepEqual(failures, [
     'a11oy-net-code-gap: expected HTTP 301 redirect from https://a11oy.net/code, observed 307',
   ]);
+});
+
+test('sends the truth-probe header only to first-party HTTPS hosts and only when configured', () => {
+  const configured = { TRUTH_PROBE_HEADER: 'probe-value-for-test' };
+  assert.equal(TRUTH_PROBE_HEADER_NAME, 'x-szl-truth-probe');
+  assert.deepEqual(truthProbeHeadersFor('https://a-11-oy.com/docs', configured), {
+    'x-szl-truth-probe': 'probe-value-for-test',
+  });
+  assert.deepEqual(truthProbeHeadersFor('https://a11oy.net/sitemap.xml', configured), {
+    'x-szl-truth-probe': 'probe-value-for-test',
+  });
+  // Unset or blank: the anonymous probe is unchanged.
+  assert.equal(truthProbeHeadersFor('https://a-11-oy.com/docs', {}), undefined);
+  assert.equal(
+    truthProbeHeadersFor('https://a-11-oy.com/docs', { TRUTH_PROBE_HEADER: '  ' }),
+    undefined,
+  );
+  // Never leak the value to third-party, look-alike, subdomain or plaintext targets.
+  for (const url of [
+    'https://szlholdings-a11oy.hf.space/readyz',
+    'https://a-11-oy.com.evil.example/docs',
+    'https://www.a-11-oy.com/docs',
+    'http://a-11-oy.com/docs',
+    'not a url',
+  ]) {
+    assert.equal(truthProbeHeadersFor(url, configured), undefined, url);
+  }
+});
+
+test('anonymous live probes carry no request headers when the truth-probe secret is unset', async () => {
+  const previous = process.env.TRUTH_PROBE_HEADER;
+  delete process.env.TRUTH_PROBE_HEADER;
+  try {
+    const candidate = configuredSurface('a11oy-net-chat-gap');
+    const inits: Array<{ headers?: Record<string, string> }> = [];
+    await verifyLivePublicSurfaces(registry([candidate]), async (url, init) => {
+      inits.push(init);
+      return { status: 404, url, body: null, headers: { get: () => null } };
+    });
+    assert.ok(inits.length > 0);
+    for (const init of inits) assert.equal('headers' in init, false);
+  } finally {
+    if (previous === undefined) delete process.env.TRUTH_PROBE_HEADER;
+    else process.env.TRUTH_PROBE_HEADER = previous;
+  }
 });

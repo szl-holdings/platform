@@ -583,8 +583,41 @@ type SurfaceFetchResponse = {
 };
 export type SurfaceFetch = (
   url: string,
-  init: { method: 'GET'; redirect: 'manual'; signal: AbortSignal },
+  init: {
+    method: 'GET';
+    redirect: 'manual';
+    signal: AbortSignal;
+    headers?: Record<string, string>;
+  },
 ) => Promise<SurfaceFetchResponse>;
+
+/**
+ * Optional edge-probe identity for scheduled CI runs. Cloudflare challenges
+ * GitHub-hosted runner IPs on the SZL zones; a narrowly scoped zone rule skips
+ * only the bot challenge (not WAF/managed rules) for GET/HEAD requests that
+ * carry this header with the repository secret TRUTH_PROBE_HEADER. The value
+ * is sent only to the first-party hosts below, over HTTPS, and is never logged
+ * or included in failure messages. When the variable is unset the probe is
+ * byte-for-byte the anonymous request it was before.
+ */
+export const TRUTH_PROBE_HEADER_NAME = 'x-szl-truth-probe';
+const TRUTH_PROBE_HOSTS: ReadonlySet<string> = new Set(['a-11-oy.com', 'a11oy.net']);
+
+export function truthProbeHeadersFor(
+  url: string,
+  env: Record<string, string | undefined> = process.env,
+): Record<string, string> | undefined {
+  const value = env.TRUTH_PROBE_HEADER?.trim();
+  if (!value) return undefined;
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return undefined;
+  }
+  if (parsed.protocol !== 'https:' || !TRUTH_PROBE_HOSTS.has(parsed.hostname)) return undefined;
+  return { [TRUTH_PROBE_HEADER_NAME]: value };
+}
 
 async function cancelResponseBody(response: SurfaceFetchResponse): Promise<void> {
   await response.body?.cancel();
@@ -1337,10 +1370,12 @@ async function requestSurface(
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     let response: SurfaceFetchResponse | null = null;
     try {
+      const probeHeaders = truthProbeHeadersFor(url);
       response = await fetchSurface(url, {
         method: 'GET',
         redirect: 'manual',
         signal: AbortSignal.timeout(15_000),
+        ...(probeHeaders ? { headers: probeHeaders } : {}),
       });
       const responseFailures = validateResponse ? await validateResponse(response) : null;
       return { response, responseFailures };
