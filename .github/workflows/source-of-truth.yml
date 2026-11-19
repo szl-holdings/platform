@@ -64,6 +64,10 @@ jobs:
         with:
           node-version: '24'
       - run: node scripts/audit/validate-source-of-truth.js
+      - name: Reject skipped or rewritten database migrations
+        run: node lib/db/scripts/check-journal.mjs
+      - name: Test database journal high-water and append-only invariants
+        run: node --test lib/db/scripts/check-journal.test.mjs
       - name: Test Hugging Face cursor pagination and snapshot invariants
         run: node --test tools/hf-catalog/catalog.test.mjs
       - name: Validate the tracked Hugging Face snapshot without network access
