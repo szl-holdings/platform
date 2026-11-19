@@ -84,7 +84,20 @@ def _ollama_node(name, base_url, sovereign, source):
 
 
 def _sovereign_gpu():
-    base = os.environ.get("A11OY_MODEL_BASE_URL", "http://100.125.77.31:11434")
+    base = os.environ.get("A11OY_MODEL_BASE_URL", "").strip()
+    if not base:
+        # No hard-coded fallback address: an unconfigured RTX is reported, not probed.
+        return {
+            "name": "rtx-betterwithage",
+            "kind": "sovereign-gpu",
+            "endpoint": None,
+            "reachable": False,
+            "sovereign": True,
+            "capabilities": ["inference", "embeddings", "ml-proof-search"],
+            "models": None,
+            "source": "Tailscale self-hosted RTX (A11OY_MODEL_BASE_URL)",
+            "detail": "not configured: set A11OY_MODEL_BASE_URL",
+        }
     # strip a trailing /v1 if present so /api/tags resolves
     if base.rstrip("/").endswith("/v1"):
         base = base.rstrip("/")[:-3]
