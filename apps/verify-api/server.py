@@ -54,11 +54,13 @@ _USAGE = {
     "what": "Public, honest, offline-first verification of a11oy receipts, DSSE "
             "envelopes (incl. Sigstore-keyless), and in-toto attestations.",
     "checks": ["DSSE PAE + signature (Ed25519 / ECDSA / RSA via `cryptography`)",
-               "Sigstore certificate SAN + OIDC issuer identity binding",
+               "Sigstore certificate SAN + OIDC issuer comparison (no Fulcio chain walk: ROADMAP)",
                "Rekor public transparency-log inclusion lookup",
                "in-toto predicateType + subject digest well-formedness",
                "Lean citation existence in public lutar-lean@main"],
-    "honesty": "Unsigned input => STRUCTURAL-ONLY (never 'verified'). Any failed "
+    "honesty": "Unsigned input => STRUCTURAL-ONLY (never 'verified'). A signature under "
+               "an embedded cert that is not chain-verified => SIGNED-UNANCHORED (not "
+               "'verified'; pin pubkey_pem for VERIFIED). Any failed "
                "check => FAILED (loud). Online sources degrade to 'unreachable', "
                "never to a false green. No server trust required.",
     "usage": {
