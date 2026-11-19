@@ -454,17 +454,29 @@ def health() -> dict:
         soak = bool((_LAST_TICK.get("soak_plan") or {}).get("admitted"))
 
     sovereign_hint = "sovereign:unknown"
+    # The local model server is configuration ($SZL_OLLAMA_ENDPOINT, validated by
+    # vllm_backend). Unset or invalid means not serving, and nothing is probed.
     try:
-        import urllib.request
-        req = urllib.request.Request(
-            "http://100.125.77.31:11434/v1/models",
-            headers={"User-Agent": "harvest_runner/healthz"},
-        )
-        with urllib.request.urlopen(req, timeout=2) as r:
-            if r.status == 200:
-                sovereign_hint = "sovereign:true (local ollama serves)"
-    except Exception:
-        sovereign_hint = "sovereign:false (local endpoint not reachable)"
+        from vllm_backend import OLLAMA_ENDPOINT_ENV, endpoint_from_env
+        base = endpoint_from_env(OLLAMA_ENDPOINT_ENV)
+    except ValueError as exc:
+        base = None
+        sovereign_hint = f"sovereign:false (SZL_OLLAMA_ENDPOINT refused: {exc})"
+    else:
+        if base is None:
+            sovereign_hint = "sovereign:false (local endpoint not configured: set SZL_OLLAMA_ENDPOINT)"
+    if base is not None:
+        try:
+            import urllib.request
+            req = urllib.request.Request(
+                f"{base}/models",
+                headers={"User-Agent": "harvest_runner/healthz"},
+            )
+            with urllib.request.urlopen(req, timeout=2) as r:
+                if r.status == 200:
+                    sovereign_hint = "sovereign:true (local ollama serves)"
+        except Exception:
+            sovereign_hint = "sovereign:false (local endpoint not reachable)"
 
     return {
         "ok": _LAST_TICK is not None,

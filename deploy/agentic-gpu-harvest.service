@@ -27,8 +27,8 @@
 #     mkdir -p ~/.config/systemd/user/agentic-gpu-harvest.service.d/
 #     cat > ~/.config/systemd/user/agentic-gpu-harvest.service.d/env.conf <<EOF
 #     [Service]
-#     Environment="HARVEST_OLLAMA_ENDPOINT=http://127.0.0.1:11434/v1"
-#     Environment="HARVEST_VLLM_ENDPOINT=http://127.0.0.1:8000/v1"
+#     Environment="SZL_OLLAMA_ENDPOINT=http://127.0.0.1:11434/v1"
+#     Environment="SZL_VLLM_ENDPOINT=http://127.0.0.1:8000/v1"
 #     EOF
 #     systemctl --user daemon-reload && systemctl --user restart agentic-gpu-harvest.service
 #
@@ -68,9 +68,12 @@ StartLimitIntervalSec=300
 StartLimitBurst=5
 
 # --- Environment ---
-# Endpoint URLs for the local model server (override via drop-in if needed)
-Environment="HARVEST_OLLAMA_ENDPOINT=http://100.125.77.31:11434/v1"
-Environment="HARVEST_VLLM_ENDPOINT=http://100.125.77.31:8000/v1"
+# Endpoint URLs for the local model server (override via drop-in if needed).
+# These are the variables the code reads (vllm_backend.py). The unit runs on the
+# GPU box itself, so loopback is the default; plaintext to a tailnet/LAN address
+# additionally needs SZL_ALLOW_INSECURE_LAN=1.
+Environment="SZL_OLLAMA_ENDPOINT=http://127.0.0.1:11434/v1"
+Environment="SZL_VLLM_ENDPOINT=http://127.0.0.1:8000/v1"
 # Python path includes the agentic-gpu app directory so sibling imports resolve
 Environment="PYTHONPATH=%h/platform/apps/agentic-gpu"
 # Unbuffered stdout → journald gets JSON log lines immediately

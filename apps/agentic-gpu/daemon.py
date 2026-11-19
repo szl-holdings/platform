@@ -11,10 +11,10 @@ WHAT THIS FILE IS (honesty, doctrine v11/v12):
   Real serving + deployment on the box is a separate Forge step (see README
   "Deployment"). This module is import-safe and ast-clean; its proactive task
   bodies are no-op stubs that represent the on-device agenda.
-- It probes the OpenAI-compatible local endpoint at
-  http://100.125.77.31:11434/v1 (Ollama today; vLLM at :8000/v1 after the
-  upgrade) for health/warmth ONLY — using the stdlib, short timeout, never
-  raising. NO key is read or sent here; the local box endpoint is open-weight,
+- It probes the OpenAI-compatible local endpoint it is handed (resolved from
+  `$SZL_OLLAMA_ENDPOINT` / `$SZL_VLLM_ENDPOINT` by
+  `vllm_backend.daemon_kwargs()`) for health/warmth ONLY — using the stdlib,
+  short timeout, never raising. NO key is read or sent here; the local box endpoint is open-weight,
   no-key (sovereign:true ONLY when this local endpoint actually serves).
 - Energy figures are SAMPLE/ESTIMATE until a real meter is wired (labeled).
 
@@ -46,18 +46,26 @@ except Exception:  # noqa: BLE001 - adapter/feed absent => keep stdlib default.
     _feed_power_signal = None
 
 
-LOCAL_ENDPOINT = "http://100.125.77.31:11434/v1"  # Ollama today; vLLM :8000/v1 next.
-VLLM_ENDPOINT = "http://100.125.77.31:8000/v1"      # STEP 1 upgrade target.
+# The daemon is endpoint-agnostic. Endpoints are configuration, resolved and
+# validated by vllm_backend (`$SZL_OLLAMA_ENDPOINT` / `$SZL_VLLM_ENDPOINT`) and
+# handed in through `vllm_backend.daemon_kwargs()`. Importing vllm_backend here
+# would close an import cycle (vllm_backend wires this daemon), so the defaults
+# are None: "not configured", never probed, never serving (sovereign:false).
+LOCAL_ENDPOINT: Optional[str] = None
+VLLM_ENDPOINT: Optional[str] = None
 
 
-def probe_endpoint(base: str = LOCAL_ENDPOINT, timeout: float = 2.0) -> bool:
+def probe_endpoint(base: Optional[str] = LOCAL_ENDPOINT, timeout: float = 2.0) -> bool:
     """Liveness/warmth probe of the OpenAI-compatible local endpoint.
 
     HONEST GATE (mirrors the a11oy orchestrator's reachability check): a
     configured endpoint is INTENT, not proof it serves. We only treat the box
     as serving-local when /models (or root) actually answers. Pure stdlib, short
     timeout, never raises. No key sent — the box endpoint is open-weight/no-key.
+    An unconfigured (None) endpoint is never probed.
     """
+    if not base:
+        return False
     for path in ("/models", ""):
         try:
             req = urllib.request.Request(base.rstrip("/") + path, method="GET")
@@ -129,8 +137,8 @@ class ResidentDaemon:
     def __init__(self, agenda: Optional[list[ProactiveJob]] = None,
                  power_signal: PowerSignal = default_power_signal,
                  reactive_ingress: Optional[Callable[[int], list[tuple[str, int]]]] = None,
-                 endpoint: str = LOCAL_ENDPOINT,
-                 probe: Callable[[str], bool] = probe_endpoint) -> None:
+                 endpoint: Optional[str] = LOCAL_ENDPOINT,
+                 probe: Callable[[Optional[str]], bool] = probe_endpoint) -> None:
         self.agenda = agenda if agenda is not None else list(DEFAULT_AGENDA)
         self.power_signal = power_signal
         # reactive_ingress(now) -> list of (name, cost_ticks) reactive turns that
