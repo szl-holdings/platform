@@ -59,18 +59,17 @@ export function gateBrief(
     },
   );
 
-  const passed = decision.action === 'approve' || decision.action === 'revise';
-  const blocked = decision.action === 'block' || decision.action === 'escalate';
+  const passed = decision.action === 'approve';
 
   const feedbackParts: string[] = [];
-  for (const r of (decision as any).results ?? []) {
-    if (r.outcome === 'fail' || r.outcome === 'blocked') {
-      feedbackParts.push(`[${r.check}] ${r.reasoning ?? r.outcome}`);
+  for (const c of decision.checks) {
+    if (c.outcome === 'fail' || c.outcome === 'blocked' || (!passed && c.outcome === 'warn')) {
+      feedbackParts.push(`[${c.name}] ${c.message ?? c.outcome}`);
     }
   }
 
   return {
-    status: blocked ? 'revision_required' : passed ? 'passed' : 'revision_required',
+    status: passed ? 'passed' : 'revision_required',
     decision,
     feedback: feedbackParts.length > 0 ? feedbackParts.join('; ') : null,
   };
