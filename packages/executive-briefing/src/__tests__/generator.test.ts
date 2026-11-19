@@ -217,7 +217,7 @@ Here is the brief:
 });
 
 describe('gateBrief', () => {
-  it('passes a well-formed brief with evidence', () => {
+  function wellFormedBrief() {
     const ctx = buildBriefContext('vessels', mockEntities, mockMemories, mockReflections);
     const citations: Citation[] = buildCitations(ctx).map((c) => ({
       ...c,
@@ -259,9 +259,60 @@ describe('gateBrief', () => {
       sourceTraceIds: [],
       sections: [],
     };
+    return brief;
+  }
 
+  it('passes a well-formed brief with evidence', () => {
+    const result = gateBrief(wellFormedBrief());
+    expect(result.status).toBe('passed');
+    expect(result.decision.action).toBe('approve');
+    expect(result.feedback).toBeNull();
+  });
+
+  it('requires revision for a brief that fails verifier checks, naming each failure', () => {
+    const result = gateBrief({
+      domain: 'vessels',
+      headline: 'I made that up',
+      situation: '',
+      whatWeBelieve: [
+        {
+          id: 'b-bad',
+          claim: 'The fleet is entirely safe.',
+          confidence: 0.99,
+          citationIds: ['cit-missing'],
+          supported: false,
+          caveats: [],
+        },
+      ],
+      whyCitations: [],
+      whatWeRecommend: [],
+      autonomyTier: undefined as unknown as 'supervised-autonomy',
+      confidence: 0.99,
+      overallRisk: 'LOW' as const,
+      entityProvenance: [],
+      sections: [],
+    });
+    expect(result.status).toBe('revision_required');
+    expect(result.decision.action).not.toBe('approve');
+    expect(result.feedback).not.toBeNull();
+    for (const check of [
+      'citation-fidelity',
+      'unsupported-claims',
+      'hallucination-signals',
+      'output-completeness',
+    ]) {
+      expect(result.feedback).toContain(`[${check}]`);
+    }
+  });
+
+  it('requires revision when a single citation fails to resolve', () => {
+    const brief = wellFormedBrief();
+    brief.whatWeBelieve[0].citationIds = [...brief.whatWeBelieve[0].citationIds, 'cit-missing'];
     const result = gateBrief(brief);
-    expect(['passed', 'revision_required']).toContain(result.status);
-    expect(result.decision).toBeDefined();
+    expect(result.decision.checks.filter((c) => c.outcome !== 'pass').map((c) => c.name)).toEqual([
+      'citation-fidelity',
+    ]);
+    expect(result.status).toBe('revision_required');
+    expect(result.feedback).toContain('[citation-fidelity]');
   });
 });
