@@ -7,6 +7,7 @@ contracts prove it is gone and that every former call site now:
   - refuses an invalid configured endpoint instead of probing it.
 Any probe that could leave the process is replaced by a mock that records it.
 """
+import ast
 import json
 import os
 import subprocess
@@ -46,14 +47,16 @@ def _fresh_import(code, **extra):
 
 
 _DEFAULTS = (
-    "import json, daemon, swarm, vllm_metrics\n"
+    "import json, daemon, swarm, vllm_backend, vllm_metrics\n"
     "d = daemon.ResidentDaemon(probe=daemon.probe_endpoint)\n"
     "d._update_posture()\n"
     "a = swarm.default_anchor()\n"
+    "c = vllm_backend.select_backend(vllm_probe=lambda: True, ollama_probe=lambda: False)\n"
     "print(json.dumps({'local': daemon.LOCAL_ENDPOINT, 'vllm': daemon.VLLM_ENDPOINT,"
     " 'metrics': vllm_metrics.DEFAULT_METRICS_URL,"
     " 'anchor': a.base_url if a else None,"
-    " 'daemon_endpoint': d.endpoint, 'serving_local': d.serving_local}))\n"
+    " 'daemon_endpoint': d.endpoint, 'serving_local': d.serving_local,"
+    " 'wired': vllm_backend.daemon_kwargs(c)['endpoint']}))\n"
 )
 
 
@@ -71,16 +74,30 @@ class ImportTimeDefaults(unittest.TestCase):
         got = _fresh_import(_DEFAULTS)
         self.assertEqual(got, {"local": None, "vllm": None, "metrics": None,
                                "anchor": None, "daemon_endpoint": None,
-                               "serving_local": False})
+                               "serving_local": False, "wired": None})
 
     def test_configured_environment_reaches_every_call_site(self):
         got = _fresh_import(_DEFAULTS.replace("d._update_posture()\n", ""),
                             SZL_OLLAMA_ENDPOINT=OLLAMA, SZL_VLLM_ENDPOINT=VLLM)
-        self.assertEqual(got["local"], OLLAMA)
-        self.assertEqual(got["vllm"], VLLM)
         self.assertEqual(got["metrics"], "http://127.0.0.1:8000/metrics")
         self.assertEqual(got["anchor"], OLLAMA)
-        self.assertEqual(got["daemon_endpoint"], OLLAMA)
+        # The daemon is endpoint-agnostic: vllm_backend resolves the
+        # configuration and hands the endpoint in via daemon_kwargs().
+        self.assertEqual(got["wired"], VLLM)
+        self.assertIsNone(got["local"])
+        self.assertIsNone(got["daemon_endpoint"])
+
+
+class NoImportCycle(unittest.TestCase):
+    def test_daemon_does_not_import_vllm_backend(self):
+        # vllm_backend wires the daemon (and imports it in its self-test), so a
+        # daemon -> vllm_backend import would close a cycle.
+        tree = ast.parse((HERE / "daemon.py").read_text(encoding="utf-8"))
+        imported = {alias.name for node in ast.walk(tree)
+                    if isinstance(node, ast.Import) for alias in node.names}
+        imported |= {node.module for node in ast.walk(tree)
+                     if isinstance(node, ast.ImportFrom) and node.module}
+        self.assertNotIn("vllm_backend", imported)
 
 
 class MetricsFailClosed(unittest.TestCase):

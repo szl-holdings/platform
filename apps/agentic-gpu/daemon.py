@@ -11,10 +11,10 @@ WHAT THIS FILE IS (honesty, doctrine v11/v12):
   Real serving + deployment on the box is a separate Forge step (see README
   "Deployment"). This module is import-safe and ast-clean; its proactive task
   bodies are no-op stubs that represent the on-device agenda.
-- It probes the OpenAI-compatible local endpoint configured in
-  `$SZL_OLLAMA_ENDPOINT` (Ollama today; `$SZL_VLLM_ENDPOINT` after the vLLM
-  upgrade) for health/warmth ONLY — using the stdlib, short timeout, never
-  raising. NO key is read or sent here; the local box endpoint is open-weight,
+- It probes the OpenAI-compatible local endpoint it is handed (resolved from
+  `$SZL_OLLAMA_ENDPOINT` / `$SZL_VLLM_ENDPOINT` by
+  `vllm_backend.daemon_kwargs()`) for health/warmth ONLY — using the stdlib,
+  short timeout, never raising. NO key is read or sent here; the local box endpoint is open-weight,
   no-key (sovereign:true ONLY when this local endpoint actually serves).
 - Energy figures are SAMPLE/ESTIMATE until a real meter is wired (labeled).
 
@@ -35,8 +35,6 @@ import time
 import urllib.request
 
 from scheduler import AgenticGpuScheduler, Task, EnergyGate
-from vllm_backend import OLLAMA_ENDPOINT as _OLLAMA_ENDPOINT
-from vllm_backend import VLLM_ENDPOINT as _VLLM_ENDPOINT
 
 # Integration seam (PR #356 <-> #357): the energy-signal feed drives the gate.
 # Defensive — if the feed module is not present on this branch, the adapter
@@ -48,10 +46,13 @@ except Exception:  # noqa: BLE001 - adapter/feed absent => keep stdlib default.
     _feed_power_signal = None
 
 
-# Endpoints are configuration, validated by vllm_backend: None means "not
-# configured", which is never probed and never serves (sovereign:false).
-LOCAL_ENDPOINT: Optional[str] = _OLLAMA_ENDPOINT  # $SZL_OLLAMA_ENDPOINT (Ollama today)
-VLLM_ENDPOINT: Optional[str] = _VLLM_ENDPOINT     # $SZL_VLLM_ENDPOINT (STEP 1 upgrade)
+# The daemon is endpoint-agnostic. Endpoints are configuration, resolved and
+# validated by vllm_backend (`$SZL_OLLAMA_ENDPOINT` / `$SZL_VLLM_ENDPOINT`) and
+# handed in through `vllm_backend.daemon_kwargs()`. Importing vllm_backend here
+# would close an import cycle (vllm_backend wires this daemon), so the defaults
+# are None: "not configured", never probed, never serving (sovereign:false).
+LOCAL_ENDPOINT: Optional[str] = None
+VLLM_ENDPOINT: Optional[str] = None
 
 
 def probe_endpoint(base: Optional[str] = LOCAL_ENDPOINT, timeout: float = 2.0) -> bool:
