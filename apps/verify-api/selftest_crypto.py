@@ -38,16 +38,24 @@ def _status(res, name):
 _SAN = "https://github.com/szl-holdings/a11oy/.github/workflows/release.yml@refs/heads/main"
 
 
-def _self_signed_env(issuer: str):
+def _self_signed_env(issuer: str, *, fulcio_v2: bool = False, malformed_der: bool = False):
     """An attacker-built envelope: own EC key, self-signed cert claiming a real SAN."""
     k = ec.generate_private_key(ec.SECP256R1())
     n = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "attacker")])
     now = datetime.datetime.now(datetime.timezone.utc)
+    issuer_bytes = issuer.encode("utf-8")
+    if fulcio_v2:
+        # Fulcio v2 stores a DER UTF8String rather than v1's plain UTF-8.
+        nbytes = len(issuer_bytes)
+        length = bytes([nbytes]) if nbytes < 128 else bytes([0x81, nbytes])
+        issuer_bytes = b"\x0c" + length + issuer_bytes
+        if malformed_der:
+            issuer_bytes += b"\x00"  # reject trailing bytes
+    oid = "1.3.6.1.4.1.57264.1.8" if fulcio_v2 else "1.3.6.1.4.1.57264.1.1"
     cert = (x509.CertificateBuilder().subject_name(n).issuer_name(n).public_key(k.public_key())
             .serial_number(1).not_valid_before(now).not_valid_after(now + datetime.timedelta(days=1))
             .add_extension(x509.SubjectAlternativeName([x509.UniformResourceIdentifier(_SAN)]), False)
-            .add_extension(x509.UnrecognizedExtension(
-                x509.ObjectIdentifier("1.3.6.1.4.1.57264.1.1"), issuer.encode()), False)
+            .add_extension(x509.UnrecognizedExtension(x509.ObjectIdentifier(oid), issuer_bytes), False)
             .sign(k, hashes.SHA256()))
     pt = "application/vnd.in-toto+json"
     payload = json.dumps({"_type": "https://in-toto.io/Statement/v1", "predicateType": "x",
@@ -144,6 +152,34 @@ def main() -> int:
     if r6["verdict"] != "FAILED" or s6 != "fail":
         failures.append(f"forged cert overrode pinned key: verdict={r6['verdict']} "
                         f"dsse.sig[0]={s6} (expected FAILED, fail)")
+
+    # 7) A valid Fulcio v2 DER issuer must match, but not anchor trust.
+    env7 = _self_signed_env("https://token.actions.githubusercontent.com", fulcio_v2=True)
+    r7 = ve.verify(env7, identity=_SAN, rekor=False, lean=False)
+    s7 = _status(r7, "sigstore.issuer")
+    print(f"[7] v2 DER    -> verdict={r7['verdict']:16} issuer={s7}")
+    if r7["verdict"] != "SIGNED-UNANCHORED" or s7 != "pass" or r7["ok"] is not False:
+        failures.append("valid DER issuer not accepted as unanchored")
+
+    # 8) Malformed Fulcio v2 DER must fail even with expected issuer bytes.
+    env8 = _self_signed_env("https://token.actions.githubusercontent.com",
+                            fulcio_v2=True, malformed_der=True)
+    r8 = ve.verify(env8, identity=_SAN, rekor=False, lean=False)
+    s8 = _status(r8, "sigstore.issuer")
+    print(f"[8] bad DER   -> verdict={r8['verdict']:16} issuer={s8}")
+    if r8["verdict"] != "FAILED" or s8 != "fail":
+        failures.append("malformed DER issuer accepted")
+
+    # 9) Valid long-form DER lengths and non-minimal lengths are distinct.
+    candidate = "https://example.test/" + "a" * 120
+    payload = candidate.encode("utf-8")
+    good_tlv = b"\x0c\x81" + bytes([len(payload)]) + payload
+    bad_tlv = b"\x0c\x81\x01x"
+    if ve._parse_oidc_issuer_extension(good_tlv, der_utf8=True) != candidate:
+        failures.append("valid long-form UTF8String rejected")
+    if ve._parse_oidc_issuer_extension(bad_tlv, der_utf8=True) is not None:
+        failures.append("non-minimal DER UTF8String accepted")
+
 
     if failures:
         print("\nFAIL:")
