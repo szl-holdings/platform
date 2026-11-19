@@ -48,8 +48,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Callable, Optional
+from typing import Callable, Mapping, Optional
 import json
+
+from vllm_backend import OLLAMA_ENDPOINT_ENV, endpoint_from_env
 
 
 class Tier(IntEnum):
@@ -291,13 +293,21 @@ class Swarm:
 # A conventional default fabric (the RESILIENCE_FABRIC tiers). The anchor is the
 # RTX 5000 @ betterwithage. Bonus/cloud/router are OPTIONAL and only added if an
 # operator registers them. No node here is reachable without a real probe + the
-# operator having opted it in; base_urls are the documented endpoints, not keys.
+# operator having opted it in; base_urls come from configuration, never keys.
 # ---------------------------------------------------------------------------
-def default_anchor() -> Node:
-    """The Tier-0 anchor: RTX 5000 @ betterwithage (Ollama today, vLLM next)."""
+def default_anchor(environ: Optional[Mapping[str, str]] = None) -> Optional[Node]:
+    """The Tier-0 anchor: RTX 5000 @ betterwithage (Ollama today, vLLM next).
+
+    Its base URL is `$SZL_OLLAMA_ENDPOINT` (validated by vllm_backend). Unset
+    means the anchor is not registered (None); an invalid value raises
+    ValueError rather than registering a node nobody configured.
+    """
+    base_url = endpoint_from_env(OLLAMA_ENDPOINT_ENV, environ)
+    if base_url is None:
+        return None
     return Node(
         node_id="tier0-betterwithage-rtx5000",
-        base_url="http://100.125.77.31:11434/v1",
+        base_url=base_url,
         tier=Tier.ANCHOR,
         owned=True, consent=True, capacity_weight=4.0,
         note="RTX 5000 @ betterwithage — always-warm anchor (KEEP_ALIVE=-1).",
@@ -319,7 +329,9 @@ def default_anchor() -> Node:
 def _selftest() -> dict:
     out: dict = {}
 
-    anchor = default_anchor()
+    # Explicit loopback base: the self-test never depends on the environment.
+    anchor = default_anchor({OLLAMA_ENDPOINT_ENV: "http://127.0.0.1:11434/v1"})
+    assert anchor is not None
     bonus = Node("tierB-laptop-gpu", "http://100.64.0.9:11434/v1", Tier.BONUS_LOCAL,
                  owned=True, consent=True, capacity_weight=2.0)
     cloud = Node("tierC-runpod-4090", "http://runpod.example/v1", Tier.CLOUD_BURST,

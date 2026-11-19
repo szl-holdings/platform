@@ -44,9 +44,24 @@ import urllib.request
 from dataclasses import dataclass, asdict
 from typing import Callable, Dict, Optional
 
-# vLLM server metrics endpoint (Prometheus text) lives at the SERVER root, a
-# sibling of /v1 — e.g. http://100.125.77.31:8000/metrics .
-DEFAULT_METRICS_URL = "http://100.125.77.31:8000/metrics"
+from vllm_backend import VLLM_ENDPOINT as _VLLM_ENDPOINT
+
+
+def metrics_url_for(vllm_base: Optional[str]) -> Optional[str]:
+    """The Prometheus `/metrics` URL for a vLLM `/v1` base, or None if unset.
+
+    vLLM serves metrics at the SERVER root, a sibling of `/v1`
+    (`https://gpu.example/v1` -> `https://gpu.example/metrics`).
+    """
+    if not vllm_base:
+        return None
+    root = vllm_base.rstrip("/").removesuffix("/v1")
+    return f"{root}/metrics"
+
+
+# Derived from the validated `$SZL_VLLM_ENDPOINT`; None when not configured, in
+# which case nothing is scraped and slack stays the SAMPLE model.
+DEFAULT_METRICS_URL: Optional[str] = metrics_url_for(_VLLM_ENDPOINT)
 
 _FETCH_TIMEOUT_S = 2.0
 
@@ -211,7 +226,7 @@ def _fetch_metrics_text(url: str, timeout: float) -> Optional[str]:
         return None
 
 
-def read_slack(url: str = DEFAULT_METRICS_URL,
+def read_slack(url: Optional[str] = DEFAULT_METRICS_URL,
                timeout: float = _FETCH_TIMEOUT_S,
                fetch_fn: Optional[Callable[[str, float], Optional[str]]] = None
                ) -> SlackSignal:
@@ -220,7 +235,10 @@ def read_slack(url: str = DEFAULT_METRICS_URL,
     Honest by construction — the returned signal's `measured` flag is True ONLY
     when a live scrape succeeded. Off-box the fetch fails and we return the
     SAMPLE model with `measured=False`. `fetch_fn` is injectable for tests.
+    An unconfigured (None) metrics URL is never fetched.
     """
+    if not url:
+        return sample_slack()
     fetch = fetch_fn or _fetch_metrics_text
     text = fetch(url, timeout)
     if text is None:
@@ -231,7 +249,7 @@ def read_slack(url: str = DEFAULT_METRICS_URL,
     return slack_from_metrics(metrics, measured=True)
 
 
-def slack_signal_fn(url: str = DEFAULT_METRICS_URL) -> Callable[[], float]:
+def slack_signal_fn(url: Optional[str] = DEFAULT_METRICS_URL) -> Callable[[], float]:
     """A zero-arg `() -> slack` the scheduler can poll each tick (0.0..1.0)."""
     def _signal() -> float:
         return read_slack(url).slack
@@ -300,24 +318,34 @@ def _selftest() -> dict:
     check("busy_zero_slack_under_backpressure", busy.slack == 0.0)
     check("busy_does_not_admit_proactive", busy.admit_proactive is False)
 
+    # Explicit loopback URL: the self-test never depends on the environment.
+    url = metrics_url_for("http://127.0.0.1:8000/v1")
+    check("metrics_url_is_server_root", url == "http://127.0.0.1:8000/metrics")
+
+    # --- unconfigured /metrics: never fetched, honest SAMPLE ---------------
+    fetched = []
+    unset = read_slack(url=None, fetch_fn=lambda u, t: fetched.append(u))
+    check("unconfigured_url_never_fetched", fetched == [])
+    check("unconfigured_falls_back_to_sample", unset.measured is False)
+
     # --- unreachable /metrics: honest SAMPLE fallback ---------------------
-    s = read_slack(fetch_fn=lambda url, t: None)   # simulate off-box: no answer
+    s = read_slack(url, fetch_fn=lambda u, t: None)   # simulate off-box: no answer
     check("offbox_falls_back_to_sample", s.measured is False)
     check("offbox_sample_label", s.as_dict()["label"].startswith("SAMPLE"))
     check("offbox_slack_in_range", 0.0 <= s.slack <= 1.0)
 
     # --- live scrape path: injected text → MEASURED -----------------------
-    live = read_slack(fetch_fn=lambda url, t: _SAMPLE_METRICS_TEXT)
+    live = read_slack(url, fetch_fn=lambda u, t: _SAMPLE_METRICS_TEXT)
     check("live_scrape_measured", live.measured is True)
     check("live_scrape_admits_when_idle", live.admit_proactive is True)
 
     # --- empty/garbage metrics → SAMPLE fallback (never crash) ------------
-    empty = read_slack(fetch_fn=lambda url, t: "# only comments\n")
+    empty = read_slack(url, fetch_fn=lambda u, t: "# only comments\n")
     check("empty_metrics_sample_fallback", empty.measured is False)
 
     # --- the polled signal fn returns a bounded float ---------------------
-    sig = slack_signal_fn()
-    val = sig()   # off-box → SAMPLE slack
+    sig = slack_signal_fn(None)
+    val = sig()   # not configured → SAMPLE slack, no fetch
     check("signal_fn_returns_float", isinstance(val, float))
     check("signal_fn_in_range", 0.0 <= val <= 1.0)
 
