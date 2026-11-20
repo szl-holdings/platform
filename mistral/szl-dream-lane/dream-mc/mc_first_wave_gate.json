@@ -1,0 +1,36 @@
+{
+  "gate": "mc-first-wave.v1",
+  "created_utc": "2026-11-20T22:05:00Z",
+  "ruling": "WAIT:HF_TOKEN,GATE_OWNER_SIGNOFF",
+  "rails": {
+    "kimi_handler_kimi-k3.1-pro": "WAIT:OWNER_SPEND_CONSENT+SCOPED_HF_TOKEN+GATES (reuse only 5e78da67 after exclusivity proof)",
+    "mistral_parallel_mistral-large-latest": "WAIT:HF_TOKEN+gate-file (one NEW A6000 spot, no-stomp on the 4 existing nodes)",
+    "astra_watcher_gpt-6": "WAIT:HF_TOKEN (reuse A6000 tier)",
+    "gpt6_watcher_sibling_capture": "house-400 = host+train stack400 on MC A6000 tier 1, Blackwell optional"
+  },
+  "node": "one NEW A6000 spot instance from $0.35/hr; the 4 running nodes are sibling production lanes (cuda-dev, high-ram, mcp-production-v7, frontier-gate-1) and are NOT scheduled onto (no-stomp). Kimi minority position (reuse 5e78da67 only after proving ownership/idleness/absence of sibling work) noted and overridden by no-stomp doctrine.",
+  "wave": "Step-B equivalent: 2 workers x 3 models = 6 jobs, at most 2 concurrent, worker v7 image pinned to digest (PIN_PENDING)",
+  "budget": {
+    "ceiling_usd_hard": 10.0,
+    "est_cost_usd": [1.4, 4.0],
+    "runtime_cap_s": 14400,
+    "auto_terminate": ["wall_clock", "spend"],
+    "cleanup": ["terminate_instance", "delete_volumes"],
+    "affordability_condition": "wave <= $18.95 (balance $28.95 minus $10 reserve); auto-recharge must not fire"
+  },
+  "hf_token": {
+    "status": "MISSING",
+    "required_scope": "write:SZLHOLDINGS/stack400-runs",
+    "activation_test": "one canary additive claim-file write, then aggregation dry-run"
+  },
+  "owner_spend_consent": "given in chat 2026-11-20 (do-it-now directive); recorded, activation still gated on the HF token + one-line owner signoff of THIS file",
+  "flip_to_go": [
+    "mint scoped HF token with write access to SZLHOLDINGS/stack400-runs",
+    "owner one-line signoff on this gate file"
+  ],
+  "zero_spend_artifacts_delivered": [
+    "aggregate_claims.py (with two-worker-race + killed-worker-TTL rehearsal)",
+    "watchdog.py (W1-W6 alert-only, GET-only, 30s poll, fixture selftest)",
+    "mc_first_wave_gate.json (this file)"
+  ]
+}

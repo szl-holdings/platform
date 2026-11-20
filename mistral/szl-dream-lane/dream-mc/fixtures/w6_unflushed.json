@@ -1,0 +1,1 @@
+{"case":"W6_unflushed_receipt_at_death","snap":{"now_s":70000,"instances":[],"stages":[],"quota":{"replicas":1},"hf":{"commits_last_hour":10,"failed_commits":0},"receipts":{"active_progress_expected":false,"last_verified_s":69990,"non_monotonic":false},"dead_jobs":[{"id":"job-77","receipt_local":true,"receipt_hf":false}]},"prev":null,"expect":["W6_UNFLUSHED_RECEIPT"]}

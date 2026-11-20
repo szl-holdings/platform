@@ -1,0 +1,1 @@
+{"case":"W2_stage_stalled_600s","snap":{"now_s":30000,"instances":[{"id":"mc-a6000-04","state":"running","state_change_s":29000,"last_stage_beacon_s":29950}],"stages":[{"key":"model-042:train","state":"active","entered_s":29300}],"quota":{},"hf":{},"receipts":{}},"prev":null,"expect":["W2_STAGE_STALLED"]}

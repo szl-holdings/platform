@@ -1,0 +1,1 @@
+{"case":"W1b_instance_lost_zero_beacons","snap":{"now_s":12000,"instances":[],"stages":[],"quota":{},"hf":{},"receipts":{}},"prev":{"instances":[{"id":"mc-a6000-02","state":"running","state_change_s":11000,"last_stage_beacon_s":11000}]},"expect":["W1b_INSTANCE_LOST"]}
