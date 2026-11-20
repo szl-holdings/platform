@@ -81,7 +81,20 @@ async def dream_chat_complete(ask: DreamAsk) -> str:
     response = await client.chat.complete_async(**request.model_dump(exclude={"stream"}))
     if response is None or not response.choices:
         raise RuntimeError("dream_chat_complete: provider response has no choices; refusing to produce a receipt")
-    content = response.choices[0].message.content or ""
+    raw = response.choices[0].message.content
+    if isinstance(raw, str):
+        content = raw
+    elif isinstance(raw, list):
+        # SDK 3.20+: content arrives as a list of chunk objects/dicts with a "text" part.
+        parts = []
+        for chunk in raw:
+            if isinstance(chunk, dict):
+                parts.append(str(chunk.get("text", "")))
+            else:
+                parts.append(str(getattr(chunk, "text", "") or ""))
+        content = "".join(parts)
+    else:
+        content = ""
     if not content.strip():
         raise RuntimeError("dream_chat_complete: provider response content is empty; refusing to produce a receipt")
     return content
