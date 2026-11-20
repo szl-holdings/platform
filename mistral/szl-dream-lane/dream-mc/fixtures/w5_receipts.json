@@ -1,0 +1,1 @@
+{"case":"W5_receip_stall_and_nonmonotonic","snap":{"now_s":60000,"instances":[],"stages":[],"quota":{"replicas":2},"hf":{"commits_last_hour":40,"failed_commits":0},"receipts":{"active_progress_expected":true,"last_verified_s":57000,"non_monotonic":true}},"prev":null,"expect":["W5_RECEIPT_STALLED","W5_RECEIPT_NON_MONOTONIC"]}
