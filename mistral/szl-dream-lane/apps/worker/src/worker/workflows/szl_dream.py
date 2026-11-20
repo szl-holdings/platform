@@ -67,13 +67,13 @@ class DreamOutput(BaseModel):
     model: str = Field(description="Requested model alias, not immutable identity.")
     observed_model: str | None = Field(description="Provider-reported model string, not attested.")
     provider_request_id: str | None = Field(description="Provider response ID, not a signature.")
-    input_sha256: str = Field(description="Canonical request digest, NOT provenance proof.")
+    input_sha256: str = Field(description="Digest of validated fields; not raw wire bytes or provenance proof.")
     verification_status: Literal["UNVERIFIED"] = "UNVERIFIED"
     verification_holds: list[str] = Field(default_factory=list)
 
 
 def input_digest(data: DreamInput) -> str:
-    """Produce a stable content hash; this does not verify authorship."""
+    """Hash validated model fields, not original wire bytes or authorship."""
     canonical = json.dumps(data.model_dump(mode="json"), sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
