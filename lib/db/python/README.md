@@ -44,7 +44,10 @@ an invented zero.
 
 `backup_and_verify_synthetic` creates a new SQLite backup and restores
 it into another new file, checks SQLite integrity plus canonical row digest,
-refuses overwrite, and closes file handles on Windows. This does **not**
+refuses overwrite (including existing directories), and closes file handles
+on Windows. Synthetic backup digests are bounded to 10,000 rows; excess
+rows fail closed before creating a backup. Malformed authorization values
+return 403 rather than an uncaught TypeError. This does **not**
 test a PostgreSQL physical or logical backup. It neither calls nor wraps
 `pg_basebackup`, `pg_verifybackup`, `pg_dump`, nor `pg_restore`.
 
@@ -85,7 +88,7 @@ test a PostgreSQL physical or logical backup. It neither calls nor wraps
    approvals intact. No production migration, payment action, or deployment
    is included here.
 
-**Proof boundary:** source pattern matching, 22 offline regression tests
+**Proof boundary:** source pattern matching, 26 offline regression tests
 (including actual 127.0.0.1 HTTP), synthetic backup/restore, and JS journal
 gate; no signed production evidence, live data, deployment or restored
 PostgreSQL recovery point.

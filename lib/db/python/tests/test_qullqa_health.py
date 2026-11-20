@@ -253,6 +253,55 @@ class QullqaHealthTests(unittest.TestCase):
             server.server_close()
             t.join(timeout=2)
 
+    def test_directory_backup_destination_is_typed_hold(self):
+        self.mkdemo()
+        directory = self.root / "existing_backup_dir"
+        directory.mkdir()
+        with self.assertRaisesRegex(HoldError, "DESTINATION_ALREADY_EXISTS"):
+            backup_and_verify_synthetic(
+                self.database, directory, self.root / "restored.sqlite"
+            )
+        self.assertTrue(directory.is_dir())
+
+    def test_synthetic_backup_row_cap_fails_before_creating_file(self):
+        self.mkdemo()
+        with closing(sqlite3.connect(self.database)) as db, db:
+            db.executemany(
+                "INSERT INTO health_checks (service,status,response_time_ms,checked_at) "
+                "VALUES (?,?,?,?)",
+                [("synthetic", "degraded", None, "2026-01-01T00:00:00+00:00")] * 10000,
+            )
+        backup = self.root / "backup.sqlite"
+        with self.assertRaisesRegex(HoldError, "SYNTHETIC_DB_ROW_LIMIT"):
+            backup_and_verify_synthetic(
+                self.database, backup, self.root / "restored.sqlite"
+            )
+        self.assertFalse(backup.exists())
+
+    def test_malformed_wsgi_authorization_value_denied_not_server_error(self):
+        self.mkdemo()
+        app = CandidateApp(self.database, token="synthetic-test-token")
+        route = "/api/qullqa/v1/health-checks"
+        for malformed in (None, b"Bearer synthetic-test-token", ["Bearer"], 123):
+            out = {}
+            data = b"".join(
+                app(
+                    {
+                        "REQUEST_METHOD": "GET",
+                        "PATH_INFO": route,
+                        "HTTP_AUTHORIZATION": malformed,
+                    },
+                    lambda status, h, current=out: current.update(status=status),
+                )
+            )
+            self.assertEqual(out["status"], "403 Forbidden")
+            self.assertIsNone(json.loads(data)["rows"])
+
+    def test_invalid_local_auth_token_configuration_fails_closed(self):
+        for token in (123, ["synthetic-test-token"]):
+            with self.assertRaises(ValueError):
+                CandidateApp(self.database, token=token)
+
 
 if __name__ == "__main__":
     unittest.main()

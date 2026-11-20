@@ -31,6 +31,7 @@ SOURCE_FIELDS = (
     "checkedAt: timestamp('checked_at')",
 )
 MARKER = "QULLQA_SQLITE_SYNTHETIC_V1"
+MAX_SYNTHETIC_ROWS_FOR_BACKUP = 10_000
 
 
 class HoldError(RuntimeError):
@@ -64,11 +65,16 @@ def _reserve_new(path: Path) -> None:
     if path.is_symlink():
         raise HoldError("REFUSE_SYMLINK_DESTINATION")
     path.parent.mkdir(parents=True, exist_ok=True)
+    # Windows may raise PermissionError, not FileExistsError, for a directory.
+    if path.exists():
+        raise HoldError("DESTINATION_ALREADY_EXISTS")
     flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
     try:
         fd = os.open(path, flags, 0o600)
     except FileExistsError as exc:
         raise HoldError("DESTINATION_ALREADY_EXISTS") from exc
+    except OSError as exc:
+        raise HoldError("DESTINATION_CREATE_FAILED") from exc
     else:
         os.close(fd)
 
@@ -192,8 +198,11 @@ def _row_digest(path: Path) -> str:
     with _open_readonly(path) as db:
         data = db.execute(
             "SELECT id,service,status,response_time_ms,checked_at "
-            "FROM health_checks ORDER BY id"
+            "FROM health_checks ORDER BY id LIMIT ?",
+            (MAX_SYNTHETIC_ROWS_FOR_BACKUP + 1,),
         ).fetchall()
+    if len(data) > MAX_SYNTHETIC_ROWS_FOR_BACKUP:
+        raise HoldError("SYNTHETIC_DB_ROW_LIMIT")
     return hashlib.sha256(
         json.dumps(data, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
     ).hexdigest()
@@ -234,6 +243,8 @@ class CandidateApp:
     """Read-only WSGI demo. A configured local token is required to reveal demo rows."""
 
     def __init__(self, store: Path | None = None, *, token: str | None = None):
+        if token is not None and (not isinstance(token, str) or len(token) > 256):
+            raise ValueError("INVALID_SYNTHETIC_TOKEN")
         self.store = Path(store) if store is not None else None
         self.token = token if token else None
 
@@ -263,8 +274,12 @@ class CandidateApp:
             if self.token is None:
                 status = "503 Service Unavailable"
                 data = {"reason": "READ_AUTH_UNCONFIGURED", "rows": None}
-            elif not hmac.compare_digest(
-                environ.get("HTTP_AUTHORIZATION", ""), "Bearer " + self.token
+            elif (
+                not isinstance(environ.get("HTTP_AUTHORIZATION"), str)
+                or len(environ["HTTP_AUTHORIZATION"]) > 512
+                or not hmac.compare_digest(
+                    environ["HTTP_AUTHORIZATION"], "Bearer " + self.token
+                )
             ):
                 status = "403 Forbidden"
                 data = {"reason": "DENIED", "rows": None}
