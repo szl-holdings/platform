@@ -11,7 +11,7 @@ import hashlib
 import json
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 import mistralai.workflows as workflows
 from mistralai.workflows.plugins.mistralai import (
@@ -39,6 +39,10 @@ SYSTEM_PROMPT = (
 
 class DreamInput(BaseModel):
     """Bounded request; the caller must supply a traceable round identifier."""
+
+    # Prevent undeclared authority-like fields from silently disappearing
+    # from input_digest(data.model_dump()), which is only a validated-payload hash.
+    model_config = ConfigDict(extra="forbid")
 
     round_id: str = Field(min_length=1, max_length=128, description="Required round identifier.")
     topic: str = Field(min_length=1, max_length=512, description="Dream question or topic.")
