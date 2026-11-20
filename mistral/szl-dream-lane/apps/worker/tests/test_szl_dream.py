@@ -66,10 +66,17 @@ def test_no_false_success_on_invalid_response(choices, error):
         module._provider_text(SimpleNamespace(choices=choices))
 
 
-
 @pytest.mark.parametrize(
     "finish_reason",
-    ["length", "model_length", "content_filter", "tool_calls", "error", None, "unknown"],
+    [
+        "length",
+        "model_length",
+        "content_filter",
+        "tool_calls",
+        "error",
+        None,
+        "unknown",
+    ],
 )
 def test_incomplete_provider_finish_reason_is_refused(finish_reason):
     # Nonempty text is not evidence of an actually completed generation.
@@ -86,7 +93,9 @@ def test_provider_explicit_stop_allows_unverified_draft():
         message=SimpleNamespace(content="Source-only draft"),
         finish_reason="stop",
     )
-    assert module._provider_text(SimpleNamespace(choices=[choice])) == "Source-only draft"
+    assert (
+        module._provider_text(SimpleNamespace(choices=[choice])) == "Source-only draft"
+    )
 
 
 def test_kimi_notes_untrusted_and_never_verified(monkeypatch):
@@ -96,7 +105,10 @@ def test_kimi_notes_untrusted_and_never_verified(monkeypatch):
         observed["request"] = request
         return SimpleNamespace(
             choices=[
-                SimpleNamespace(message=SimpleNamespace(content="Review, not proof"), finish_reason="stop")
+                SimpleNamespace(
+                    message=SimpleNamespace(content="Review, not proof"),
+                    finish_reason="stop",
+                )
             ],
             model="mistral-large-2026-11-01",
             id="req-1",
@@ -120,7 +132,11 @@ def test_kimi_notes_untrusted_and_never_verified(monkeypatch):
 def test_provider_without_identity_stays_unverified(monkeypatch):
     async def fake_complete(request):
         return SimpleNamespace(
-            choices=[SimpleNamespace(message=SimpleNamespace(content="Draft text"), finish_reason="stop")]
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(content="Draft text"), finish_reason="stop"
+                )
+            ]
         )
 
     monkeypatch.setattr(module, "mistralai_chat_complete", fake_complete)
