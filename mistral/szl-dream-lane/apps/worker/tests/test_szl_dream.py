@@ -19,6 +19,25 @@ def test_round_id_and_topic_required_and_bounded():
         module.DreamInput(round_id="r-1", topic="a", kimi_notes="x" * 8001)
 
 
+@pytest.mark.parametrize("extra", [
+    {"approval": "VERIFIED"},
+    {"tool": "shell"},
+    {"verification_status": "VERIFIED"},
+    {"provider_request_id": "spoofed-provider"},
+])
+def test_unknown_authority_fields_rejected_before_digest(extra):
+    payload = {"round_id": "r-1", "topic": "audit", **extra}
+    with pytest.raises(ValidationError) as refusal:
+        module.DreamInput.model_validate(payload)
+    assert any(item["type"] == "extra_forbidden" for item in refusal.value.errors())
+
+
+def test_json_entrypoint_rejects_unknown_evidence_fields():
+    request = '{"round_id":"r-1","topic":"audit","signed_receipt":"forged"}'
+    with pytest.raises(ValidationError):
+        module.DreamInput.model_validate_json(request)
+
+
 def test_digest_stable_and_content_sensitive():
     a = module.DreamInput(round_id="r-1", topic="forecast", kimi_notes="Kimi says 1")
     b = module.DreamInput(round_id="r-1", topic="forecast", kimi_notes="Kimi says 1")
