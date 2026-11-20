@@ -44,10 +44,18 @@ class DreamInput(BaseModel):
     # from input_digest(data.model_dump()), which is only a validated-payload hash.
     model_config = ConfigDict(extra="forbid")
 
-    round_id: str = Field(min_length=1, max_length=128, description="Required round identifier.")
-    topic: str = Field(min_length=1, max_length=512, description="Dream question or topic.")
-    briefing: str = Field(default="", max_length=24000, description="Untrusted estate briefing.")
-    kimi_notes: str = Field(default="", max_length=8000, description="Unverified, untrusted partner notes.")
+    round_id: str = Field(
+        min_length=1, max_length=128, description="Required round identifier."
+    )
+    topic: str = Field(
+        min_length=1, max_length=512, description="Dream question or topic."
+    )
+    briefing: str = Field(
+        default="", max_length=24000, description="Untrusted estate briefing."
+    )
+    kimi_notes: str = Field(
+        default="", max_length=8000, description="Unverified, untrusted partner notes."
+    )
     ask: str = Field(default="", max_length=4000, description="Untrusted user request.")
 
     @field_validator("round_id", "topic")
@@ -65,16 +73,27 @@ class DreamOutput(BaseModel):
     topic: str
     dream: str
     model: str = Field(description="Requested model alias, not immutable identity.")
-    observed_model: str | None = Field(description="Provider-reported model string, not attested.")
-    provider_request_id: str | None = Field(description="Provider response ID, not a signature.")
-    input_sha256: str = Field(description="Digest of validated fields; not raw wire bytes or provenance proof.")
+    observed_model: str | None = Field(
+        description="Provider-reported model string, not attested."
+    )
+    provider_request_id: str | None = Field(
+        description="Provider response ID, not a signature."
+    )
+    input_sha256: str = Field(
+        description="Digest of validated fields; not raw wire bytes or provenance proof."
+    )
     verification_status: Literal["UNVERIFIED"] = "UNVERIFIED"
     verification_holds: list[str] = Field(default_factory=list)
 
 
 def input_digest(data: DreamInput) -> str:
     """Hash validated model fields, not original wire bytes or authorship."""
-    canonical = json.dumps(data.model_dump(mode="json"), sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    canonical = json.dumps(
+        data.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
@@ -103,12 +122,17 @@ class SzlDreamRound:
         if data.briefing:
             parts.append(f"UNVERIFIED ESTATE BRIEFING:\n{data.briefing}")
         if data.kimi_notes:
-            parts.append(f"UNVERIFIED KIMI NOTES (identity NOT attested):\n{data.kimi_notes}")
+            parts.append(
+                f"UNVERIFIED KIMI NOTES (identity NOT attested):\n{data.kimi_notes}"
+            )
         if data.ask:
             parts.append(f"UNVERIFIED SPECIFIC ASK:\n{data.ask}")
         request = ChatCompletionRequest(
             model=DREAM_MODEL,
-            messages=[SystemMessage(content=SYSTEM_PROMPT), UserMessage(content="\n\n".join(parts))],
+            messages=[
+                SystemMessage(content=SYSTEM_PROMPT),
+                UserMessage(content="\n\n".join(parts)),
+            ],
         )
         result = await mistralai_chat_complete(request)
         dream = _provider_text(result)
