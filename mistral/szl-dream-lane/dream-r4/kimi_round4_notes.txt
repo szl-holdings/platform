@@ -1,0 +1,47 @@
+Use one shared synthetic trace, **`R4-AUTH-001`**, so these are three slices of one vertical test—not three new platforms.
+
+1. **Make a receipt deny dispatch and survive revocation.**
+
+   - **Discipline:** Authority is decided at dispatch time against current budget and revocation state. A denial must be both side-effect-free and independently visible; revocation/status failures cannot fail open.
+   - **Concrete artifact:** In **`szl-holdings/szl-router`**, add a conformance fixture around the RoutePolicy/RouteGrant path:
+     1. An in-budget request is allowed and reaches a mock provider once.
+     2. A second request exceeding remaining budget is denied before dispatch.
+     3. The grant is revoked; a fresh request is denied before dispatch.
+     4. Revocation/status evidence is unavailable; dispatch is denied.
+     
+     Across all four cases, the provider spy must record exactly one call. Extend the routing receipt with `grant_digest`, `policy_digest`, `authorization_id`, decision/reason, revocation-evidence digest, attempt digest, and provider-call count. Use the smallest existing status interface and a test double—do not build a separate revocation service.
+   - **Falsifier:** Roll back the adoption claim if any denied case reaches the provider, a status outage permits dispatch, a retry bypasses revocation, or the receipt cannot reconstruct the decision order.
+   - **Receipt shape:** CI-signed `authority-receipt.json` containing the immutable fixture-bytes digest, router commit, ordered decision/attempt digests, revocation evidence, per-case provider-call counts, and the final count of one. It must state that this proves the mock-provider test path, not production enforcement coverage.
+
+2. **Make the same authorization conserve money across retries and payment rails.**
+
+   - **Discipline:** Authorization, reservation, usage, settlement, release, and reconciliation are distinct append-only events. External payment events and usage reports are idempotent inputs, not permission to rewrite ledger history.
+   - **Concrete artifact:**  
+     - In **`szl-holdings/szl-billing`**, exercise the smallest reservation → settlement/release state machine behind the existing credit interface, keyed by `authorization_id` and idempotency key. Require balanced postings, `0 ≤ settled ≤ authorized_cap`, and—for a terminal credit reservation—`settled + released = reserved`.
+     - In **`szl-holdings/szl-inference-gateway`**, feed signed synthetic usage, recorded Stripe test events, and mocked x402 payment events into that interface. Never use real funds.
+     - In **`szl-holdings/szl-router`**, test one failover with both attempts sharing one authorization and one customer settlement under the declared charging policy.
+     
+     The matrix needs only: success, pre-dispatch failure, failover, duplicate usage report, duplicate Stripe test webhook, replayed x402 reference, and ambiguous post-dispatch failure without an idempotency key.
+   - **Falsifier:** Block outcome-pricing work if any event produces an unbalanced posting, settlement exceeds the cap, a duplicate external event settles or credits twice, pre-dispatch failure settles usage, or an ambiguous post-dispatch failure is automatically retried without idempotency protection.
+   - **Receipt shape:** CI-signed `settlement-receipt.json` with rail-fixture digests, synthetic idempotency keys, ordered ledger-event hashes, before/after ledger-state hashes, amounts in explicit minor units, conservation checks, route-attempt links, and duplicate-event results. Provider cost and customer charge must remain separate fields.
+
+3. **Pin the Mistral handoff and independently verify both receipts.**
+
+   - **Discipline:** Model prose is a proposal, not evidence. A dream round is trustworthy only when its exact inputs, build environment, outputs, and verification result are bound together—and a clean process can reject mutations.
+   - **Concrete artifact:**  
+     - On the existing `szl/mistral-dream-lane` branch in **`szl-holdings/platform`**, make CI enforce the committed `uv.lock` with uv lock checking, record its digest, and emit a minimal handoff envelope containing workflow/build identity, source commits, `kimi_notes` digest, `mistral_notes` digest, and authority/settlement bundle digests. Missing output or a red build must produce `BLOCKED`, never a success marker.
+     - In **`szl-holdings/szl-evidence-core`**, add a narrow clean-process verifier for this fixture only. Hash exact payload bytes rather than inventing JSON canonicalization. Verify signatures, digest links, decision/revocation ordering, and ledger invariants. Include mutations that alter a grant digest, move revocation after a decision, increase settlement, and modify either notes payload without updating its signed binding.
+     
+     Full NovaFabric mapping, replay modes, Merkle publication, UI, and package distribution remain deferred; none may be claimed from this slice.
+   - **Falsifier:** Block the lane if a clean build re-resolves or changes the lockfile, missing/mismatched notes are accepted, a failed build is reported as successful, verification requires a private application database, or any protected mutation still returns `VALID`.
+   - **Receipt shape:** CI-signed `r4-verification.json` containing lockfile and environment digests, all note/bundle digests, `VALID` for the untouched bundle, and a specific expected `INVALID:<reason>` for every mutation. Its trust boundary must say: green proves this synthetic CI path only—not production payment finality, universal authorization coverage, attestation, or robot safety.
+
+4. **Divide the lanes by artifact ownership, not by writing two versions of the same dream.**
+
+   - **Kimi dreams:** the single fixture semantics, cross-repo invariants, mutation matrix, and trust boundary. Kimi does not produce a parallel implementation plan or additional schema.
+   - **Mistral dreams:** the commit-pinned implementation mapping against existing interfaces, the `platform` handoff mechanics, and the strongest implementation-level counterexamples. It should mark unavailable fields as `MISSING_INTERFACE` rather than inventing them.
+   - **Mistral checks Kimi:** whether each requirement is implementable, whether test timing and idempotency semantics are coherent, and whether the fixture accidentally assumes an interface that does not exist.
+   - **Kimi checks Mistral:** whether the response actually attempts falsification, preserves fail-closed behavior, avoids duplicate scopes and unsupported claims, and distinguishes executed CI evidence from model assertions.
+   - **Acceptance authority:** repo CI and the clean verifier—not either model—determine green. Generated cases remain untrusted proposals until frozen and executed. Disagreement produces one recorded `BLOCKED` state, not two lanes proceeding independently.
+
+5. **One joint next step:** Within 24 hours, execute one `R4-AUTH-001` handoff through the existing **`platform`** branch: Mistral returns `mistral_notes` containing `kimi_notes_sha256`, a commit-pinned implementation map, and its strongest counterexample; Kimi’s round-5 review returns only `ACCEPT_FOR_CI` or `BLOCKED:<first defect>`. The handoff is complete only when both note digests and the CI bundle are recorded, the untouched bundle verifies, and every mutation is rejected; otherwise there is no merge or adoption claim.

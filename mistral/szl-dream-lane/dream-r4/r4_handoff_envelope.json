@@ -1,0 +1,61 @@
+{
+  "artifact": "szl-dream-r4-handoff-frozen-notes-v1",
+  "round_id": "r4-20261120",
+  "trace": "R4-AUTH-001",
+  "recorded_utc": "2026-11-20T12:00:00Z",
+  "pipeline": {
+    "workflow_name": "szl_dream_round",
+    "workflow_id": "01a1f797-2a46-76dd-bc11-9ceb8b634422",
+    "deployment_name": "szl-dream-lane-worker",
+    "served_revision": "5b6bc7119a5416407bbadba5ae1048470a26acc5",
+    "lane_original_revision": "1d9aef204d215437e0478d3073f27acf6cc4d400",
+    "execution_id": "7847f769b83858cea5de88ae937c5eddc0b3ab60d7ed5a8a93d750f481edd0fe",
+    "trace_id": "971cba2ffe3a99442b6f475373f0642d",
+    "model": "mistral-large-latest",
+    "status": "COMPLETED",
+    "start_time": "2026-11-20T11:38:40.832632Z",
+    "end_time": "2026-11-20T11:41:33.501125Z",
+    "approx_duration_s": 173
+  },
+  "notes": {
+    "kimi_round4": {
+      "path": "dream-r4/kimi_round4_notes.txt",
+      "encoding": "UTF-8, LF line endings, no trailing newline",
+      "bytes": 7430,
+      "sha256_lf": "d910b0a9dc5be7c9d0a31bf39b15a2fe0a568a5883fbe2722b39be658155e1ea",
+      "device_canonical_crlf_sha256": "ccb38d44f62a94585dc4ec9f3cc106a14bfdf1809725e62c382e518ec285301a",
+      "device_canonical_bytes": 7476,
+      "provenance": "kimi-k3.1-pro:cloud resident on owner device, prompt kimi_dream4_prompt.txt; owner-ACCEPTED verbatim"
+    },
+    "mistral_round4": {
+      "path": "dream-r4/mistral_round4_notes.txt",
+      "encoding": "UTF-8, LF line endings",
+      "bytes": 12757,
+      "sha256": "fa535fd1d0d5633fce5d147d4a5baed6be6aee43c0cae70c2fee94f5f9e21677",
+      "provenance": "execution result of szl_dream_round (mistral-large-latest) served by deployment szl-dream-lane-worker at revision 5b6bc711; device-runner recomputed digest matches"
+    },
+    "kimi_round5_verdict": {
+      "path": "dream-r4/kimi_round5_verdict.txt",
+      "encoding": "UTF-8, LF line endings",
+      "provenance": "kimi-k3.1-pro:cloud resident on owner device, prompt kimi_dream5_prompt.txt; digest header runner-computed",
+      "verdict": "ACCEPT_FOR_CI",
+      "conditions_count": 6,
+      "conditions_summary": [
+        "CI recomputes all digests over committed bytes; silent transformation => BLOCKED:notes-digest-mismatch",
+        "dispatch-time revocation recheck interposed in CI or BLOCKED:revocation-toctou; status-availability dependency stated in trust boundary",
+        "ambiguous no-key case parked AMBIGUOUS_PENDING, never auto-retried; conservation checks mandatory",
+        "deterministic hashing narrowly interpreted; no invented canonicalization, no weakened digest coverage",
+        "MISSING_INTERFACE and PIN_PENDING_CI resolved by CI before green; red build always BLOCKED",
+        "acceptance narrowly scoped to synthetic CI path until authority, settlement, verification receipts with full mutation-matrix rejection"
+      ],
+      "bytes": 3642,
+      "sha256": "01748792f42ea877b1d1336167909d98fcea6bd565d8739101a7d4a3e26026a3"
+    }
+  },
+  "ci_authority": "PENDING_CI",
+  "trust_boundary": "This bundle records a frozen model handoff: it proves generation, dispatch, and cross-review of these exact payloads, NOT router/billing/gateway/verifier test success, NOT production payment finality, authorization coverage, attestation, or robot safety. Authoritative green is repo CI plus the clean verifier per the R4-AUTH-001 contract: ACCEPT_FOR_CI admits the fixture to CI, nothing more.",
+  "receivers": {
+    "szl_org_health_348_milestone": "https://github.com/szl-holdings/szl-org-health/issues/348#issuecomment-7038666403",
+    "szl_org_health_348_verdict": "https://github.com/szl-holdings/szl-org-health/issues/348#issuecomment-7038702122"
+  }
+}
