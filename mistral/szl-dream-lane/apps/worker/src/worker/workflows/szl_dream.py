@@ -101,10 +101,15 @@ def _provider_text(result: object) -> str:
     choices = getattr(result, "choices", None)
     if not choices:
         raise RuntimeError("DREAM_RESPONSE_MISSING_CHOICES")
-    message = getattr(choices[0], "message", None)
+    choice = choices[0]
+    message = getattr(choice, "message", None)
     content = getattr(message, "content", None)
     if not isinstance(content, str) or not content.strip():
         raise RuntimeError("DREAM_RESPONSE_EMPTY_OR_NON_TEXT")
+    # Mistral may return nonempty text even when generation was truncated,
+    # filtered, or stopped to request a tool. Only a completed draft qualifies.
+    if getattr(choice, "finish_reason", None) != "stop":
+        raise RuntimeError("DREAM_RESPONSE_NOT_COMPLETE")
     return content
 
 
