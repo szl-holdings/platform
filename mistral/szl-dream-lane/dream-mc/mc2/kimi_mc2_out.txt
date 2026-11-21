@@ -1,0 +1,9 @@
+MODEL kimi-k3.1-pro:cloud
+SECONDS 114.2 DONE_REASON stop SIZE 1871
+1. **Falsifiers:** Inject TERM during write, post-fsync/pre-upload, and mid-upload. Green requires: intake stops; every completed claim and pending manifest is atomically written with file+directory fsync; exit ≤30s; no truncated “complete” claim. Restart HF-down, reconstruct exclusively from local files, hash/schema-check, then upload idempotently. Expected, local, and HF digest sets must match exactly: no lost, duplicated, or rerun completed claims; fingerprint conflicts quarantined. Let \(T_s\)=fastest possible cycle seconds and \(k_s\)=retry-inclusive commits/cycle. Require \(3600k_s/T_s\le320\), plus rolling-3600s commits ≤320. Nominal \(k=(1,6,1,1,1,1,1)\) at \(1,2×3,5×4,8–10,15,25,\)steady; thus \(T_{\min}=(11.25,67.5,11.25,11.25,11.25,11.25,11.25)\)s through 400.
+
+2. **Divergences:** 2×3-first versus 1×canary: **G5 wins**. Dream/D2 scaling versus additive \([1,9,40,350]\): **pack controls MC capacity; D2 only claim/batch cadence**. Live-wave wording versus DRY-RUN/rc=2: **pack wins**. HF/owner waits versus receipt/G2–G6: **union; none waivable**. Dream additionally binds one NEW A6000 spot, excludes existing four, and imposes $10/4h/dual-termination; lower ceilings win. **Order:** owner sentence binding registry-SHA+numeric ceiling → receipt+F5 → G1→G2(billing/auto-recharge-off)→G3→G4→G6→G5 → dry-run PASS → authorized executor: canary-1 c1–c6 PASS → +9 → +40 → +350 (=400), receipt-verified promotion; repeat canary per sku/region/image.
+
+3. **Build/test `mc_gate_compat.py` offline:** rc=2 on canary bypass, hash/ceiling mismatch, rollout sum≠400, or missing c5/c6; emit unified-plan hash. Zero network.
+
+4. **No.** No device/MC network or key access exists here; claiming a snapshot would fabricate a receipt. Condition: device-side, key in memory only, GET-only, alert-only, zero writes; return timestamped redacted W1–W3 JSON and alerts.
