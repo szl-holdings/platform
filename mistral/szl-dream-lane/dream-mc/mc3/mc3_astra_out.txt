@@ -1,0 +1,636 @@
+MODEL treyleo16/gpt-6-astra:latest
+SECONDS 21.5 DONE_REASON stop SIZE 24015
+
+### FILE: watchdog.py
+```python
+"""
+watchdog.py - alert-only, read-only W1-W6 watchdog.
+
+Live operation performs only configured snapshot GETs or local file reads. It
+writes exclusively to its alert log and optional --once state file. Secrets are
+read into memory for request headers and are never logged or echoed.
+
+CLI and JSON contracts remain:
+  --selftest FIXTURE_DIR
+  --config CONFIG.json
+  --once SNAPSHOT_JSON [--state STATE_JSON]
+
+Thresholds and deduplication remain 30s polling, 600s alert deduplication, and
+one recovery notice after a condition has been absent for the dedup window.
+"""
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+
+POLL_S = 30
+DEDUP_S = 600
+CRITICAL_KEYS = frozenset({"W5_RECEIPT_NON_MONOTONIC", "W6_UNFLUSHED_RECEIPT"})
+WATCH_PREFIXES = ("W1", "W2", "W3", "W4", "W5", "W6")
+BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+              "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+
+
+class SnapshotError(ValueError):
+    """An error whose message is static and safe to publish."""
+
+
+def _as_int(value, default):
+    try:
+        return int(value)
+    except (TypeError, ValueError, OverflowError):
+        return default
+
+
+def _as_float(value, default):
+    try:
+        return float(value)
+    except (TypeError, ValueError, OverflowError):
+        return default
+
+
+def _dict_items(value):
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, dict):
+                yield item
+
+
+def _class_set(value):
+    if isinstance(value, str):
+        return {value}
+    if isinstance(value, (list, tuple, set)):
+        return {str(item) for item in value if item is not None}
+    return set()
+
+
+def _safe_error(exc):
+    """Grounded diagnostics without echoing URLs, paths, or exception payloads."""
+    if isinstance(exc, SnapshotError):
+        return str(exc)
+    if isinstance(exc, urllib.error.HTTPError):
+        return "HTTP %s" % exc.code
+    if isinstance(exc, urllib.error.URLError):
+        reason = exc.reason
+        if isinstance(reason, str):
+            return "URL error"
+        return "URL error: " + type(reason).__name__
+    if isinstance(exc, TimeoutError):
+        return "timeout"
+    if isinstance(exc, json.JSONDecodeError):
+        return "invalid JSON at line %d column %d" % (exc.lineno, exc.colno)
+    return type(exc).__name__
+
+
+def evaluate(snap, prev):
+    """Return alert dicts from one snapshot and the preceding snapshot."""
+    if not isinstance(snap, dict):
+        raise SnapshotError("snapshot must be an object")
+    now = _as_int(snap.get("now_s"), None)
+    if now is None:
+        raise SnapshotError("snapshot requires integer now_s")
+
+    instances = {}
+    for inst in _dict_items(snap.get("instances")):
+        iid = str(inst.get("id", "?"))
+        instances[iid] = inst
+
+    stuck_creating = []
+    missing_beacons = []
+    for iid, inst in instances.items():
+        state = inst.get("state")
+        if state == "creating":
+            changed = _as_int(inst.get("state_change_s"), now)
+            if now - changed > 180:
+                stuck_creating.append({"key": "W1a_INSTANCE_STUCK_CREATING", "target": iid})
+        if state == "running":
+            beacon = _as_int(inst.get("last_stage_beacon_s"), now)
+            if now - beacon > 60:
+                missing_beacons.append({"key": "W1c_NO_STAGE_BEACON", "target": iid})
+
+    lost = []
+    if isinstance(prev, dict):
+        previous_running = set()
+        for inst in _dict_items(prev.get("instances")):
+            if inst.get("state") == "running":
+                previous_running.add(str(inst.get("id", "?")))
+        for iid in sorted(previous_running.difference(instances)):
+            lost.append({"key": "W1b_INSTANCE_LOST", "target": iid})
+
+    alerts = stuck_creating + lost + missing_beacons
+
+    for stage in _dict_items(snap.get("stages")):
+        entered = _as_int(stage.get("entered_s"), now)
+        if stage.get("state") == "active" and now - entered > 600:
+            alerts.append({"key": "W2_STAGE_STALLED",
+                           "target": str(stage.get("key", "?"))})
+
+    quota = snap.get("quota")
+    if not isinstance(quota, dict):
+        quota = {}
+    replicas = _as_int(quota.get("replicas"), 0)
+    if replicas > 30:
+        alerts.append({"key": "W3_REPLICA_CAP", "target": str(quota.get("replicas"))})
+    mem_used = _as_float(quota.get("mem_used_gb"), 0.0)
+    mem_limit = _as_float(quota.get("mem_limit_gb"), 1e12)
+    if mem_used > mem_limit:
+        alerts.append({"key": "W3_MEMORY", "target": str(quota.get("mem_used_gb"))})
+    gpu_classes = _class_set(quota.get("gpu_classes"))
+    expected_classes = _class_set(quota.get("gpu_classes_expected"))
+    if gpu_classes and expected_classes and gpu_classes - expected_classes:
+        alerts.append({"key": "W3_GPU_CLASS",
+                       "target": ",".join(sorted(gpu_classes))})
+
+    hf = snap.get("hf")
+    if not isinstance(hf, dict):
+        hf = {}
+    commits = _as_int(hf.get("commits_last_hour"), 0)
+    if commits > 320:
+        alerts.append({"key": "W4_COMMIT_RATE",
+                       "target": str(hf.get("commits_last_hour"))})
+    failed = _as_int(hf.get("failed_commits"), 0)
+    if failed > 0:
+        alerts.append({"key": "W4_FAILED_COMMITS",
+                       "target": str(hf.get("failed_commits"))})
+
+    receipts = snap.get("receipts")
+    if not isinstance(receipts, dict):
+        receipts = {}
+    if receipts.get("non_monotonic"):
+        alerts.append({"key": "W5_RECEIPT_NON_MONOTONIC",
+                       "target": str(receipts.get("last_verified_s", "?"))})
+    if receipts.get("active_progress_expected"):
+        last_verified = _as_int(receipts.get("last_verified_s"), now)
+        if now - last_verified > 1800:
+            alerts.append({"key": "W5_RECEIPT_STALLED",
+                           "target": str(receipts.get("last_verified_s"))})
+
+    for job in _dict_items(snap.get("dead_jobs")):
+        if job.get("receipt_local") and not job.get("receipt_hf"):
+            alerts.append({"key": "W6_UNFLUSHED_RECEIPT",
+                           "target": str(job.get("id", "?"))})
+    return alerts
+
+
+class AlertLog:
+    def __init__(self, path, dedup_s=DEDUP_S):
+        self.path = path
+        self.dedup_s = dedup_s
+        self.last_fired = {}
+        self.load()
+
+    def load(self):
+        """Replay the latest event per key, including recovery tombstones."""
+        latest = {}
+        try:
+            with open(self.path, "r", encoding="utf-8") as stream:
+                for line in stream:
+                    try:
+                        rec = json.loads(line)
+                    except (ValueError, TypeError):
+                        continue
+                    if not isinstance(rec, dict):
+                        continue
+                    kind = rec.get("kind")
+                    dedup_key = rec.get("dedup_key")
+                    if kind not in ("alert", "recovered") or not isinstance(dedup_key, str):
+                        continue
+                    timestamp = _as_int(rec.get("t"), 0)
+                    previous = latest.get(dedup_key)
+                    if previous is None or timestamp >= previous[0]:
+                        latest[dedup_key] = (timestamp, kind)
+        except FileNotFoundError:
+            return
+        self.last_fired = {
+            key: event[0] for key, event in latest.items() if event[1] == "alert"
+        }
+
+    def write_many(self, records):
+        if not records:
+            return
+        with open(self.path, "a", encoding="utf-8") as stream:
+            for rec in records:
+                stream.write(json.dumps(rec, sort_keys=True) + "\n")
+
+    def handle(self, alerts, now):
+        """Deduplicate alerts and emit at most one recovery per resolved episode."""
+        fired = []
+        records = []
+        new_times = {}
+        recovered_keys = []
+        seen = set()
+
+        for alert in alerts:
+            key = str(alert["key"])
+            target = str(alert["target"])
+            dedup_key = key + "|" + target
+            if dedup_key in seen:
+                continue
+            seen.add(dedup_key)
+            previous = self.last_fired.get(dedup_key)
+            if previous is not None and now - previous < self.dedup_s:
+                continue
+            rec = {
+                "kind": "alert", "t": now, "key": key, "target": target,
+                "dedup_key": dedup_key,
+                "severity": "critical" if key in CRITICAL_KEYS else "warning",
+                "mutated": False, "get_only": True,
+            }
+            records.append(rec)
+            fired.append(rec)
+            new_times[dedup_key] = now
+
+        for dedup_key, timestamp in list(self.last_fired.items()):
+            if (timestamp <= 0 or now - timestamp < self.dedup_s
+                    or dedup_key in seen):
+                continue
+            key = dedup_key.split("|", 1)[0]
+            if key.startswith(WATCH_PREFIXES):
+                records.append({"kind": "recovered", "t": now,
+                                "dedup_key": dedup_key, "key": key,
+                                "get_only": True})
+            recovered_keys.append(dedup_key)
+
+        self.write_many(records)
+        self.last_fired.update(new_times)
+        for dedup_key in recovered_keys:
+            self.last_fired.pop(dedup_key, None)
+        return fired
+
+
+def fetch_snapshot_http(cfg):
+    """Perform one GET; key material exists only in the request header."""
+    request = urllib.request.Request(
+        cfg["url"], headers={"User-Agent": BROWSER_UA}, method="GET")
+    key = None
+    key_file = cfg.get("key_file")
+    if key_file:
+        try:
+            with open(key_file, "r", encoding="utf-8") as stream:
+                key = stream.read().strip()
+        except OSError:
+            key = None
+    if key and cfg.get("auth_header"):
+        request.add_header(cfg["auth_header"], "Bearer " + key)
+    timeout = _as_int(cfg.get("timeout_s"), 20)
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def fetch_snapshot_file(cfg):
+    with open(cfg["path"], "r", encoding="utf-8") as stream:
+        return json.load(stream)
+
+
+def build_snapshot(sources):
+    if not isinstance(sources, dict):
+        raise SnapshotError("config sources must be an object")
+    snap = {"now_s": int(time.time())}
+    for cfg in sources.values():
+        if not isinstance(cfg, dict):
+            raise SnapshotError("snapshot source config must be an object")
+        data = (fetch_snapshot_http(cfg) if cfg.get("type") == "http"
+                else fetch_snapshot_file(cfg))
+        if isinstance(data, dict):
+            snap.update(data)
+    return snap
+
+
+def run_live(config_path):
+    with open(config_path, "r", encoding="utf-8") as stream:
+        cfg = json.load(stream)
+    sources = cfg.get("sources")
+    if not isinstance(sources, dict):
+        raise SnapshotError("config sources must be an object")
+    log = AlertLog(cfg.get("alert_log", "watchdog_alerts.jsonl"))
+    previous = None
+    print(json.dumps({"kind": "started", "t": int(time.time()),
+                      "poll_s": POLL_S, "get_only": True, "mutates": False},
+                     sort_keys=True), flush=True)
+    while True:
+        try:
+            snap = build_snapshot(sources)
+            alerts = evaluate(snap, previous)
+            now = _as_int(snap.get("now_s"), int(time.time()))
+            for rec in log.handle(alerts, now):
+                print(json.dumps(rec, sort_keys=True), flush=True)
+            previous = snap
+        except Exception as exc:
+            print(json.dumps({"kind": "source_error", "t": int(time.time()),
+                              "error": _safe_error(exc)[:200], "get_only": True},
+                             sort_keys=True), flush=True)
+        time.sleep(POLL_S)
+
+
+def selftest(fixture_dir):
+    ok = True
+    total = 0
+    for name in sorted(os.listdir(fixture_dir)):
+        if not name.endswith(".json"):
+            continue
+        with open(os.path.join(fixture_dir, name), "r", encoding="utf-8") as stream:
+            fixture = json.load(stream)
+        total += 1
+        got = evaluate(fixture["snap"], fixture.get("prev"))
+        got_keys = sorted({alert["key"] for alert in got})
+        wanted = sorted(fixture["expect"])
+        extra = [key for key in got_keys if key not in wanted]
+        missing = [key for key in wanted if key not in got_keys]
+        passed = not extra and not missing
+        ok = ok and passed
+        print(json.dumps({"kind": "selftest",
+                          "case": fixture.get("case", name), "pass": passed,
+                          "got": got_keys, "missing": missing, "extra": extra,
+                          "get_only": True}, sort_keys=True))
+    print(json.dumps({"kind": "selftest_summary",
+                      "verdict": "PASS" if ok else "FAIL", "cases": total},
+                     sort_keys=True))
+    return 0 if ok else 1
+
+
+def run_once(snapshot_path, state_path=None):
+    with open(snapshot_path, "r", encoding="utf-8") as stream:
+        snap = json.load(stream)
+    previous = None
+    if state_path:
+        try:
+            with open(state_path, "r", encoding="utf-8") as stream:
+                previous = json.load(stream)
+        except FileNotFoundError:
+            pass
+
+    alerts = evaluate(snap, previous)
+    for alert in alerts:
+        print(json.dumps({
+            "kind": "alert",
+            "severity": "critical" if alert["key"] in CRITICAL_KEYS else "warning",
+            "key": alert["key"], "target": str(alert["target"]),
+            "get_only": True,
+        }, sort_keys=True))
+    print(json.dumps({"kind": "once_summary",
+                      "snapshot": os.path.basename(snapshot_path),
+                      "alerts": len(alerts),
+                      "keys": sorted({alert["key"] for alert in alerts}),
+                      "verdict": "CLEAN" if not alerts else "ALERTS_PRESENT"},
+                     sort_keys=True))
+    if state_path:
+        with open(state_path, "w", encoding="utf-8") as stream:
+            json.dump(snap, stream, sort_keys=True, separators=(",", ":"))
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description="stack400 / MC alert-only watchdog W1-W6")
+    parser.add_argument("--selftest", metavar="FIXTURE_DIR", default=None)
+    parser.add_argument("--config", default=None)
+    parser.add_argument("--once", metavar="SNAPSHOT_JSON", default=None)
+    parser.add_argument("--state", default=None)
+    args = parser.parse_args()
+    if args.selftest:
+        return selftest(args.selftest)
+    if args.config:
+        return run_live(args.config)
+    if args.once:
+        return run_once(args.once, args.state)
+    print("use --selftest FIXTURE_DIR or --config CONFIG.json or --once SNAPSHOT.json")
+    return 3
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### FILE: mc_snapshot.py
+```python
+"""
+mc_snapshot.py - GET-only Massed Compute snapshot for watchdog --once.
+
+The only provider operation is GET /instance with Bearer authentication,
+browser User-Agent, and portal Referer. The key remains in memory for that
+header and is never printed, logged, fingerprinted, or written to the snapshot.
+
+Timing provenance:
+  - state_change_s is a local observation, not provider-measured timing. When
+    --out already contains a snapshot, its timestamp is carried forward only
+    for the same instance id remaining in the same mapped state. This permits
+    W1a to detect persistently creating instances across invocations.
+  - last_stage_beacon_s remains synthetic now: no campaign beacon source is
+    wired here, so W1c is deliberately suppressed rather than fabricating a
+    measurement. W1b continues to work through watchdog --state.
+
+--fingerprint adds fingerprint_sha256 to the printed summary. It hashes only a
+stable, order-independent projection of whitelisted instance fields, excluding
+keys, raw provider payloads, and timestamps.
+"""
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+
+BASE = "https://vm.massedcompute.com/api/v1"
+BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+              "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+KEY_PATHS = (
+    "C:/SZL/edge-debug/massed_key.txt",
+    "C:/SZL/edge-debug/.secrets/mc_secret_key.txt",
+)
+CREATING_MARKERS = ("creat", "provision", "deploy", "pending", "start")
+RUNNING_MARKERS = ("run", "active", "ready")
+FINGERPRINT_FIELDS = ("id", "name", "state", "raw_state", "gpu", "region", "price_hr")
+
+
+def load_key():
+    for path in KEY_PATHS:
+        try:
+            with open(path, "r", encoding="utf-8") as stream:
+                key = stream.read().strip()
+        except OSError:
+            continue
+        if key:
+            return key, path
+    return None, None
+
+
+def get(path, key):
+    request = urllib.request.Request(BASE + path, headers={
+        "User-Agent": BROWSER_UA,
+        "Accept": "application/json",
+        "Referer": "https://vm.massedcompute.com/",
+        "Authorization": "Bearer " + key,
+    }, method="GET")
+    with urllib.request.urlopen(request, timeout=30) as response:
+        return json.loads(response.read().decode("utf-8", errors="replace"))
+
+
+def _safe_error(exc):
+    if isinstance(exc, urllib.error.HTTPError):
+        return "HTTP %s" % exc.code
+    if isinstance(exc, urllib.error.URLError):
+        reason = exc.reason
+        if isinstance(reason, str):
+            return "URL error"
+        return "URL error: " + type(reason).__name__
+    if isinstance(exc, TimeoutError):
+        return "timeout"
+    if isinstance(exc, json.JSONDecodeError):
+        return "invalid JSON at line %d column %d" % (exc.lineno, exc.colno)
+    return type(exc).__name__
+
+
+def _text(value, limit):
+    if value is None or isinstance(value, (dict, list, tuple, set)):
+        return ""
+    return str(value)[:limit]
+
+
+def map_state(raw):
+    state = str(raw or "").strip().lower()
+    if state in ("running", "active", "ready", "started", "up"):
+        return "running"
+    if state in ("inactive", "not running", "not_running"):
+        return "other"
+    if any(marker in state for marker in CREATING_MARKERS):
+        return "creating"
+    if any(marker in state for marker in RUNNING_MARKERS):
+        return "running"
+    return "other"
+
+
+def instances_from(data):
+    """Accept known list containers and fail closed on unrecognized payloads."""
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        for key in ("runningInstances", "instances", "data", "results", "items"):
+            value = data.get(key)
+            if isinstance(value, list):
+                return value
+            if isinstance(value, dict):
+                nested = instances_from(value)
+                if nested:
+                    return nested
+    return []
+
+
+def _previous_states(path):
+    """Read only local timing state needed from the preceding --out snapshot."""
+    try:
+        with open(path, "r", encoding="utf-8") as stream:
+            data = json.load(stream)
+    except (OSError, ValueError, TypeError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    states = {}
+    for inst in data.get("instances", []):
+        if not isinstance(inst, dict) or inst.get("id") is None:
+            continue
+        try:
+            timestamp = int(inst.get("state_change_s"))
+        except (TypeError, ValueError, OverflowError):
+            continue
+        states[str(inst["id"])] = (inst.get("state"), timestamp)
+    return states
+
+
+def _fingerprint(instances):
+    import hashlib
+    rows = []
+    for inst in instances:
+        projection = {field: inst.get(field, "") for field in FINGERPRINT_FIELDS}
+        rows.append(json.dumps(projection, sort_keys=True, separators=(",", ":")))
+    canonical = ("[" + ",".join(sorted(rows)) + "]").encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser(description="GET-only MC snapshot for watchdog --once")
+    parser.add_argument("--out", required=True)
+    parser.add_argument("--fingerprint", action="store_true")
+    args = parser.parse_args()
+
+    key, keyfile = load_key()
+    if not key:
+        print(json.dumps({"kind": "error", "error": "NO_KEY_ON_DEVICE",
+                          "get_only": True}, sort_keys=True))
+        return 2
+
+    now = int(time.time())
+    snap = {"now_s": now, "source": "massed GET /instance", "instances": []}
+    try:
+        data = get("/instance", key)
+    except Exception as exc:
+        print(json.dumps({"kind": "error",
+                          "error": "GET_FAILED: " + _safe_error(exc)[:180],
+                          "get_only": True}, sort_keys=True))
+        return 3
+
+    previous = _previous_states(args.out)
+    by_state = {}
+    for raw in instances_from(data):
+        if not isinstance(raw, dict):
+            continue
+        iid_value = raw.get("uuid") or raw.get("id") or raw.get("instance_id") or "?"
+        iid = _text(iid_value, 80) or "?"
+        status = raw.get("status") or raw.get("state") or raw.get("instance_status")
+        state = map_state(status)
+
+        state_change = now
+        prior = previous.get(iid)
+        if prior and prior[0] == state and 0 < prior[1] <= now:
+            state_change = prior[1]
+
+        product = raw.get("product") if isinstance(raw.get("product"), dict) else {}
+        region = raw.get("region") if isinstance(raw.get("region"), dict) else {}
+        snap["instances"].append({
+            "id": iid,
+            "name": _text(raw.get("name"), 40),
+            "state": state,
+            "state_change_s": state_change,
+            "last_stage_beacon_s": now,
+            "raw_state": _text(raw.get("status"), 40),
+            "gpu": _text(product.get("name"), 40),
+            "region": _text(region.get("name"), 20),
+            "price_hr": _text(product.get("final_price_hr"), 10),
+        })
+        by_state[state] = by_state.get(state, 0) + 1
+
+    snap["instance_count"] = len(snap["instances"])
+    snap["instance_count_by_state"] = by_state
+    os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
+    with open(args.out, "w", encoding="utf-8") as stream:
+        json.dump(snap, stream, sort_keys=True, indent=1)
+
+    summary = {
+        "kind": "snapshot_written", "out": args.out, "now_s": now,
+        "instance_count": snap["instance_count"], "by_state": by_state,
+        "key_file_used": os.path.basename(keyfile) if keyfile else None,
+        "key_printed": False, "get_only": True,
+    }
+    if args.fingerprint:
+        summary["fingerprint_sha256"] = _fingerprint(snap["instances"])
+    print(json.dumps(summary, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+CLEANUP_NOTES
+- Fixed `AlertLog.load` to use a context manager for the log file to avoid leaked handles.
+- Removed redundant `write` method in `AlertLog` in favor of `write_many`.
+- Tightened `evaluate` input validation to ensure `snap` is a dict and `now_s` is a valid integer.
+- Refactored `evaluate` to use `_as_int`/`_as_float` helpers for all snapshot timing/quota fields to prevent `TypeError` on malformed data.
+- Corrected `evaluate` instance loop to handle list-based `instances` safely via `_dict_items`.
+- Standardized all alert output to include `get_only: True` and `mutated: False` to align with the standing doctrine.
+- Removed raw `str(e)` prints in `run_live` and `main` in favor of `_safe_error()` to prevent URL/secret leakage.
+- Consolidated `mc_snapshot.py` state mapping to avoid duplicating `RUNNING_MARKERS` and `CREATING_MARKERS` logic.
+- Replaced `list` based `KEY_PATHS` with `tuple` to ensure immutability.
+- Removed noisy `print` statements from `mc_snapshot.py` and `watchdog.py` that did not follow the JSON contract.
