@@ -213,8 +213,15 @@ def main():
         "c_states": states,
     }
     receipt = {
-        "kind": "gate_compat", "verdict": verdict,
-        "checks": checks, "breaks": len(breaks), "holds": holds,
+        "kind": "gate_compat",
+        "verdict": verdict,
+        "checks": checks,
+        "breaks": len(breaks),
+        "holds": holds,
+        # Keep generator output aligned with the checked-in receipt contract.
+        # These are source metadata, not an approval or a launch authorization.
+        "doctrine": "v11",
+        "lambda_uniqueness": "Conjecture 1",
         "unified_plan_hash": digest(unified),
     }
     out = json.dumps(receipt, indent=1, sort_keys=True)
