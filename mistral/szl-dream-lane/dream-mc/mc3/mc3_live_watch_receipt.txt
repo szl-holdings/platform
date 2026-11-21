@@ -1,0 +1,4 @@
+# mc3 live watch receipt (evolved pair snapshot_v2.py + watchdog_v2.py, GET-only, alert-only, key in-memory, zero MC writes) - 2026-11-21T01:2xZ
+# Note: by-state measured differs from round-2 (5 running) -> 3 running + 2 other; estate churn observed GET-only, not modified.
+{"by_state": {"other": 2, "running": 3}, "get_only": true, "instance_count": 5, "key_file_used": "massed_key.txt", "key_printed": false, "kind": "snapshot_written", "now_s": 1795224317, "out": "watchdog_state/mc_snapshot_v2_1.json"}
+{"alerts": 0, "keys": [], "kind": "once_summary", "snapshot": "mc_snapshot_v2_1.json", "verdict": "CLEAN"}
