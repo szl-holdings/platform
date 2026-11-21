@@ -1,0 +1,30 @@
+{
+  "gate": "mc-first-wave.v1.1",
+  "supersedes": "mc-first-wave.v1 (dream-lane round mc-20261120)",
+  "updated_utc": "2026-11-20T23:25:00Z",
+  "updated_by": "dream-lane trio round mc2: Kimi (handler) + Astra (watcher seat) + Sol (seat, all three answered, 23:0x-23:1xZ Ollama rails)",
+  "ruling": "WAIT:HF_TOKEN,GATE_OWNER_SIGNOFF",
+  "canary_first": "ACKNOWLEDGED-AND-GOVERNING: canary-1 (1x A6000 96GB-class spot, c1-c6 ALL PASS required) precedes every stage; this is the unified order per all three seats: ratification sentence (registry-sha + numeric ceiling) -> receipt/F5 -> G1 -> G2 (billing, auto-recharge disposition) -> G3 -> G4 -> G6 -> G5 -> dry-run PASS -> authorized executor -> canary-1 c1-c6 PASS -> +9 -> +40 -> +350 (=400, receipt-verified promotion, canary repeated per sku/region/image)",
+  "node": "one NEW A6000 spot instance from $0.35/hr; the 4 running nodes are sibling production lanes (cuda-dev, high-ram, mcp-production-v7, frontier-gate-1) and are NOT scheduled onto (no-stomp). Kimi minority position overridden by no-stomp doctrine, recorded in round mc-20261120.",
+  "wave": "SUPERSEDED: the old 2x3 first-wave wording is replaced by pack rollout_stages [1,9,40,350]; capacity and scale are governed by the mc-launch-pack spec; the D2 ladder governs claim/batch cadence only (per Kimi mc2: pack controls MC capacity, D2 only cadence)",
+  "budget": {
+    "ceiling_usd_hard": 10.0,
+    "est_cost_usd": [1.4, 4.0],
+    "runtime_cap_s": 14400,
+    "auto_terminate": ["wall_clock", "spend"],
+    "cleanup": ["terminate_instance", "delete_volumes"],
+    "affordability_condition": "wave <= $18.95 (balance $28.95 minus $10 reserve); auto-recharge must not fire"
+  },
+  "hf_token": {
+    "status": "MISSING",
+    "required_scope": "write:SZLHOLDINGS/stack400-runs",
+    "activation_test": "one canary additive claim-file write, then aggregation dry-run"
+  },
+  "owner_spend_consent": "given in chat 2026-11-20 (do-it-now directive); recorded, activation still gated on the HF token + ratification sentence + canary-1 c1-c6 PASS",
+  "flip_to_go": [
+    "mint scoped HF token with write access to SZLHOLDINGS/stack400-runs",
+    "ratification sentence binding registry hash + numeric ceiling",
+    "canary-1 c1-c6 all PASS per pack G5",
+    "owner one-line signoff of THIS file"
+  ]
+}

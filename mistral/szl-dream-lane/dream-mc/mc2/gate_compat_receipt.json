@@ -1,0 +1,44 @@
+{
+ "breaks": 0,
+ "checks": [
+  {
+   "check": "C1_rollout_sum_400",
+   "detail": "stages=[1, 9, 40, 350]",
+   "pass": true
+  },
+  {
+   "check": "C2_canary_first_acknowledged",
+   "detail": "dream gate must record canary-first before any wave",
+   "pass": true
+  },
+  {
+   "check": "C3_ceiling_consistency",
+   "detail": "dream=10.0 ratified_pack_ceiling=None (PENDING template is honest, not a break)",
+   "pass": true
+  },
+  {
+   "check": "C4_registry_binding",
+   "detail": "dream_sha=PENDING pack_sha=PENDING (PENDING is acceptable; MISMATCH is not)",
+   "pass": true
+  },
+  {
+   "check": "C5_c5_c6_terminal_evidence",
+   "detail": "c5=None c6=None (PENDING is an honest HOLD, not a compat break)",
+   "pass": false
+  },
+  {
+   "check": "C6_dream_bindings_retained",
+   "detail": "node_new=True dual_terminate=True runtime_cap=True",
+   "pass": true
+  }
+ ],
+ "holds": [
+  "ratification_ceiling_pending",
+  "c5_c6_terminal_pending",
+  "hf_token_missing",
+  "WAIT:HF_TOKEN,GATE_OWNER_SIGNOFF"
+ ],
+ "kind": "gate_compat",
+ "unified_plan_hash": "d2c8de75f4209c5944b746959775c5f2e554c38d2b2f52ca1cca1a4d8bb49870",
+ "verdict": "GATE_COMPAT:HOLD:WAIT:HF_TOKEN,GATE_OWNER_SIGNOFF+c5_c6_terminal_pending+hf_token_missing+ratification_ceiling_pending"
+}

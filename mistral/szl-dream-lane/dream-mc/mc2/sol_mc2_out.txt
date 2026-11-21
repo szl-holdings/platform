@@ -1,0 +1,23 @@
+MODEL treyleo16/gpt-6-1-sol:latest
+SECONDS 1.5 DONE_REASON stop SIZE 1210
+Q1
+1. **TERM-trap flush**: `fsync` count on `local_append` must equal total processed records at $T_{signal}$; 0 records lost.
+2. **Resume-from-local**: Pointer offset in `resume_log` must match exact byte-position of last successful local write, resulting in 0 duplicate uploads.
+3. **Commit-rate**: $\text{Batch\_Size} \times \text{Frequency} \le 320/\text{hr}$.
+   - $1 \to 2\times3$: $\sim 6/\text{hr}$
+   - $5\times4$: $\sim 20/\text{hr}$
+   - $8\text{--}10$: $\sim 10/\text{hr}$
+   - $15 \to 25 \to 400$: $\text{Scaling rate} \le 5.33\text{/min}$.
+
+Q2
+**Divergences**:
+- **Wave Size**: First wave (2x3) vs. Canary (1). **Prevails**: Canary (1) first.
+- **Rollout**: Fixed wave (2x3) vs. Ladder ([1,9,40,350]). **Prevails**: Ladder.
+- **Gate Logic**: JSON-based vs. G1-G6 Python. **Prevails**: G1-G6.
+**Unified Order**: Ratification Sentence $\to$ G1 (Registry/Ceiling) $\to$ G2-G6 $\to$ Canary 1 $\to$ Stage 9 $\to$ Stage 40 $\to$ Steady 400 (Wait: HF_TOKEN).
+
+Q3
+**Wiring the laptop watchdog** (W1-W6) to the 4 running nodes. It moves the project from "blind trust" to "active telemetry" without spend.
+
+Q4
+**Yes**. Condition: Alert-only, zero-writes, key in-memory only. Ready to map snapshot to W1-W3.
