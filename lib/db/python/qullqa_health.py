@@ -137,7 +137,7 @@ def record_synthetic(
         raise ValueError("INVALID_SYNTHETIC_SERVICE")
     if not re.fullmatch(r"[A-Za-z0-9_.-]+", service):
         raise ValueError("INVALID_SYNTHETIC_SERVICE")
-    if status not in STATES:
+    if not isinstance(status, str) or status not in STATES:
         raise ValueError("INVALID_SYNTHETIC_STATUS")
     if response_time_ms is not None and (
         not isinstance(response_time_ms, int)

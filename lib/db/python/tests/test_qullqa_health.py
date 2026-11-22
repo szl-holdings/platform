@@ -92,6 +92,14 @@ class QullqaHealthTests(unittest.TestCase):
                 record_synthetic(self.database, service="test", status=value)
         self.assertEqual(len(read_synthetic(self.database)), 1)
 
+    def test_unhashable_status_is_rejected_without_touching_synthetic_rows(self):
+        self.mkdemo()
+        for malformed in ([], {}, ["healthy"], {"status": "healthy"}):
+            with self.subTest(status=malformed):
+                with self.assertRaisesRegex(ValueError, "INVALID_SYNTHETIC_STATUS"):
+                    record_synthetic(self.database, service="test", status=malformed)
+        self.assertEqual(len(read_synthetic(self.database)), 1)
+
     def test_sql_injection_service_refused(self):
         self.mkdemo()
         with self.assertRaisesRegex(ValueError, "INVALID_SYNTHETIC_SERVICE"):
