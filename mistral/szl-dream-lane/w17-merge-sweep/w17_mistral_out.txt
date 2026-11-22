@@ -1,0 +1,36 @@
+MODEL mistral-large-4:cloud
+SECONDS 35.9 DONE_REASON stop SIZE 3433
+
+```json
+{
+  "go": [],
+  "hold": [
+    {"pr": "szl-holdings/a11oy#3852", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/killinchu#655", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/immune#235", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/curation-atlas#66", "reason": "UNSTABLE not CLEAN; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/holographic-unify#62", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/curation-atlas#64", "reason": "UNSTABLE not CLEAN; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/agents-studio#58", "reason": "BLOCKED; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/yarqa#117", "reason": "BLOCKED; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/szl-gpu-bridge#336", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/szl-typesafe-triage#97", "reason": "BLOCKED; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/szl-router#164", "reason": "UNSTABLE not CLEAN; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/szl-gpu-bridge#335", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/a11oy#3846", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/szl-router#163", "reason": "BLOCKED; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/szl-router#162", "reason": "BLOCKED; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/szl-gpu-bridge#334", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/szl-gpu-bridge#333", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/a11oy-factory#111", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/szl-org-health#420", "reason": "BLOCKED; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/szl-org-health#419", "reason": "BLOCKED; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/david-leads#185", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/a11oy#3835", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/killinchu#654", "reason": "BLOCKED; head checks UNVERIFIED; REVIEW_REQUIRED open; no success-at-head"},
+    {"pr": "szl-holdings/szl-command-lab#106", "reason": "BLOCKED; head checks UNVERIFIED; no success-at-head"},
+    {"pr": "szl-holdings/szl-hf-frontier#88", "reason": "BLOCKED (line truncated); head checks UNVERIFIED; no success-at-head"}
+  ],
+  "watch": "Reviewer seat 5: independent fail-closed second opinion — 0 of 119 confirmed green, so MERGE-GO set is empty tonight; every visible PR is BLOCKED/UNSTABLE with UNVERIFIED head checks and often REVIEW_REQUIRED, so I receipt HOLDs only: never force, never bypass branch protection, never fabricate a green."
+}
+```

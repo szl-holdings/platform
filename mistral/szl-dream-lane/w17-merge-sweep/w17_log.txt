@@ -1,0 +1,137 @@
+2026-11-22T22:16:11Z runner v2 start
+2026-11-22T22:16:22Z STAGE0 FAILED honest: gh graphql rc=1 err=gh: HTTP 502
+
+2026-11-22T22:19:59Z runner v3 start
+2026-11-22T22:20:39Z sweep paged: issueCount=119 fetched=119 pages=5
+2026-11-22T22:20:39Z mechanical CLEAN candidates: 27
+2026-11-22T22:20:39Z candidate downgraded szl-holdings/szl-capability-ledger#17 checks=pending
+2026-11-22T22:20:40Z candidate downgraded szl-holdings/curation-atlas#68 checks=pending
+2026-11-22T22:20:40Z candidate downgraded szl-holdings/curation-atlas#67 checks=pending
+2026-11-22T22:20:40Z candidate downgraded szl-holdings/curation-atlas#65 checks=pending
+2026-11-22T22:20:41Z candidate downgraded szl-holdings/szl-forge#780 checks=pending
+2026-11-22T22:20:41Z candidate downgraded szl-holdings/szl-cram#13 checks=pending
+2026-11-22T22:20:42Z candidate downgraded szl-holdings/wink-observatory#25 checks=pending
+2026-11-22T22:20:42Z candidate downgraded szl-holdings/curation-atlas#63 checks=pending
+2026-11-22T22:20:42Z candidate downgraded szl-holdings/the-grid#40 checks=pending
+2026-11-22T22:20:43Z candidate downgraded szl-holdings/szl-portal#4 checks=pending
+2026-11-22T22:20:43Z candidate downgraded szl-holdings/szl-khipu#164 checks=pending
+2026-11-22T22:20:44Z candidate downgraded szl-holdings/szl-microscopy-pilot#21 checks=pending
+2026-11-22T22:20:44Z candidate downgraded szl-holdings/szl-science-forum-corpus#49 checks=pending
+2026-11-22T22:20:44Z candidate downgraded szl-holdings/szl-provctl#45 checks=pending
+2026-11-22T22:20:45Z candidate downgraded szl-holdings/formal-ai-underwriting#21 checks=pending
+2026-11-22T22:20:45Z candidate downgraded szl-holdings/szl-muhu-frontier#13 checks=pending
+2026-11-22T22:20:46Z candidate downgraded szl-holdings/szl-vertical-forge#30 checks=pending
+2026-11-22T22:20:46Z candidate downgraded szl-holdings/szl-specdecode#13 checks=pending
+2026-11-22T22:20:46Z candidate downgraded szl-holdings/szl-quant-bench#27 checks=pending
+2026-11-22T22:20:47Z candidate downgraded szl-holdings/szl-quant-witness#25 checks=pending
+2026-11-22T22:20:47Z candidate downgraded szl-holdings/szl-billing#15 checks=pending
+2026-11-22T22:20:48Z candidate downgraded szl-holdings/estate-cards#7 checks=pending
+2026-11-22T22:20:49Z candidate downgraded szl-holdings/szl-specdecode#12 checks=pending
+2026-11-22T22:20:49Z candidate downgraded szl-holdings/szl-billing#13 checks=pending
+2026-11-22T22:20:52Z candidate downgraded szl-holdings/estate-cards#4 checks=pending
+2026-11-22T22:20:52Z candidate downgraded szl-holdings/szl-asset-registry#17 checks=pending
+2026-11-22T22:20:53Z candidate downgraded szl-holdings/szl-retrieval-bench#42 checks=pending
+2026-11-22T22:20:53Z confirmed green (mergeState CLEAN + commit status success): 0
+2026-11-22T22:21:14Z kimi done 21.4s size=1168
+2026-11-22T22:21:22Z astra done 7.4s size=321
+2026-11-22T22:21:28Z sol done 6.5s size=357
+2026-11-22T22:21:49Z glm done 20.7s size=2577
+2026-11-22T22:22:25Z mistral done 35.9s size=3433
+2026-11-22T22:22:43Z kimi_ruling done 17.5s size=2145
+2026-11-22T22:22:43Z crew lap complete: plan parse_ok=True confirmed=0
+2026-11-22T22:25:12Z verify candidates to verify with check-runs: 27
+2026-11-22T22:25:13Z verify szl-holdings/szl-capability-ledger#17 -> ALL_SUCCESS_AT_HEAD (3 runs)
+2026-11-22T22:25:13Z verify szl-holdings/curation-atlas#68 -> ALL_SUCCESS_AT_HEAD (8 runs)
+2026-11-22T22:25:14Z verify szl-holdings/curation-atlas#67 -> ALL_SUCCESS_AT_HEAD (8 runs)
+2026-11-22T22:25:14Z verify szl-holdings/curation-atlas#65 -> ALL_SUCCESS_AT_HEAD (8 runs)
+2026-11-22T22:25:15Z verify szl-holdings/szl-forge#780 -> ALL_SUCCESS_AT_HEAD (18 runs)
+2026-11-22T22:25:15Z verify szl-holdings/szl-cram#13 -> ALL_SUCCESS_AT_HEAD (9 runs)
+2026-11-22T22:25:16Z verify szl-holdings/wink-observatory#25 -> ALL_SUCCESS_AT_HEAD (12 runs)
+2026-11-22T22:25:16Z verify szl-holdings/curation-atlas#63 -> ALL_SUCCESS_AT_HEAD (9 runs)
+2026-11-22T22:25:17Z verify szl-holdings/the-grid#40 -> ALL_SUCCESS_AT_HEAD (4 runs)
+2026-11-22T22:25:17Z verify szl-holdings/szl-portal#4 -> ALL_SUCCESS_AT_HEAD (4 runs)
+2026-11-22T22:25:18Z verify szl-holdings/szl-khipu#164 -> ALL_SUCCESS_AT_HEAD (18 runs)
+2026-11-22T22:25:19Z verify szl-holdings/szl-microscopy-pilot#21 -> ALL_SUCCESS_AT_HEAD (6 runs)
+2026-11-22T22:25:19Z verify szl-holdings/szl-science-forum-corpus#49 -> ALL_SUCCESS_AT_HEAD (16 runs)
+2026-11-22T22:25:20Z verify szl-holdings/szl-provctl#45 -> ALL_SUCCESS_AT_HEAD (11 runs)
+2026-11-22T22:25:20Z verify szl-holdings/formal-ai-underwriting#21 -> ALL_SUCCESS_AT_HEAD (8 runs)
+2026-11-22T22:25:21Z verify szl-holdings/szl-muhu-frontier#13 -> ALL_SUCCESS_AT_HEAD (7 runs)
+2026-11-22T22:25:22Z verify szl-holdings/szl-vertical-forge#30 -> ALL_SUCCESS_AT_HEAD (7 runs)
+2026-11-22T22:25:22Z verify szl-holdings/szl-specdecode#13 -> ALL_SUCCESS_AT_HEAD (7 runs)
+2026-11-22T22:25:23Z verify szl-holdings/szl-quant-bench#27 -> ALL_SUCCESS_AT_HEAD (8 runs)
+2026-11-22T22:25:23Z verify szl-holdings/szl-quant-witness#25 -> ALL_SUCCESS_AT_HEAD (5 runs)
+2026-11-22T22:25:24Z verify szl-holdings/szl-billing#15 -> ALL_SUCCESS_AT_HEAD (3 runs)
+2026-11-22T22:25:24Z verify szl-holdings/estate-cards#7 -> ALL_SUCCESS_AT_HEAD (3 runs)
+2026-11-22T22:25:25Z verify szl-holdings/szl-specdecode#12 -> ALL_SUCCESS_AT_HEAD (7 runs)
+2026-11-22T22:25:25Z verify szl-holdings/szl-billing#13 -> ALL_SUCCESS_AT_HEAD (3 runs)
+2026-11-22T22:25:26Z verify szl-holdings/estate-cards#4 -> ALL_SUCCESS_AT_HEAD (3 runs)
+2026-11-22T22:25:26Z verify szl-holdings/szl-asset-registry#17 -> ALL_SUCCESS_AT_HEAD (2 runs)
+2026-11-22T22:25:27Z verify szl-holdings/szl-retrieval-bench#42 -> ALL_SUCCESS_AT_HEAD (9 runs)
+2026-11-22T22:25:27Z verify verified ALL_SUCCESS_AT_HEAD: 27; not green: 0
+2026-11-22T22:25:52Z verify kimi_ruling2 done 25.7s size=2051
+2026-11-22T22:25:52Z verify ruling2 parse_ok=True
+2026-11-22T22:28:55Z merge sweep start candidates=27
+2026-11-22T22:28:56Z merge hold szl-holdings/szl-capability-ledger#17 state=clean head=5ef5ddb05e verified=5ef5ddb05e
+2026-11-22T22:28:56Z merge hold szl-holdings/curation-atlas#68 state=clean head=be4c7b6df0 verified=be4c7b6df0
+2026-11-22T22:28:57Z merge hold szl-holdings/curation-atlas#67 state=clean head=5ed79a5dee verified=5ed79a5dee
+2026-11-22T22:28:58Z merge hold szl-holdings/curation-atlas#65 state=clean head=0db82ba1c2 verified=0db82ba1c2
+2026-11-22T22:28:59Z merge hold szl-holdings/szl-forge#780 state=clean head=1ec195f0fc verified=1ec195f0fc
+2026-11-22T22:29:00Z merge hold szl-holdings/szl-cram#13 state=clean head=845fb795c1 verified=845fb795c1
+2026-11-22T22:29:00Z merge hold szl-holdings/wink-observatory#25 state=clean head=94ef312581 verified=94ef312581
+2026-11-22T22:29:01Z merge hold szl-holdings/curation-atlas#63 state=clean head=1332c4a874 verified=1332c4a874
+2026-11-22T22:29:02Z merge hold szl-holdings/the-grid#40 state=clean head=3e6502d6d4 verified=3e6502d6d4
+2026-11-22T22:29:03Z merge hold szl-holdings/szl-portal#4 state=clean head=f8b1ce0429 verified=f8b1ce0429
+2026-11-22T22:29:03Z merge hold szl-holdings/szl-khipu#164 state=clean head=00e993b87f verified=00e993b87f
+2026-11-22T22:29:04Z merge hold szl-holdings/szl-microscopy-pilot#21 state=clean head=c30f8a0397 verified=c30f8a0397
+2026-11-22T22:29:05Z merge hold szl-holdings/szl-science-forum-corpus#49 state=clean head=a089c811ee verified=a089c811ee
+2026-11-22T22:29:06Z merge hold szl-holdings/szl-provctl#45 state=clean head=6f609b4881 verified=6f609b4881
+2026-11-22T22:29:06Z merge hold szl-holdings/formal-ai-underwriting#21 state=clean head=6572f5ab69 verified=6572f5ab69
+2026-11-22T22:29:07Z merge hold szl-holdings/szl-muhu-frontier#13 state=clean head=d894c014af verified=d894c014af
+2026-11-22T22:29:08Z merge hold szl-holdings/szl-vertical-forge#30 state=clean head=ed99cd4e3a verified=ed99cd4e3a
+2026-11-22T22:29:08Z merge hold szl-holdings/szl-specdecode#13 state=clean head=5cc0eb2759 verified=5cc0eb2759
+2026-11-22T22:29:09Z merge hold szl-holdings/szl-quant-bench#27 state=clean head=54f37abe89 verified=54f37abe89
+2026-11-22T22:29:10Z merge hold szl-holdings/szl-quant-witness#25 state=clean head=f94628313b verified=f94628313b
+2026-11-22T22:29:11Z merge hold szl-holdings/szl-billing#15 state=clean head=8a008c56af verified=8a008c56af
+2026-11-22T22:29:11Z merge hold szl-holdings/estate-cards#7 state=clean head=445f9b8129 verified=445f9b8129
+2026-11-22T22:29:12Z merge hold szl-holdings/szl-specdecode#12 state=clean head=5a6b554018 verified=5a6b554018
+2026-11-22T22:29:13Z merge hold szl-holdings/szl-billing#13 state=clean head=7d14ca92c8 verified=7d14ca92c8
+2026-11-22T22:29:13Z merge hold szl-holdings/estate-cards#4 state=clean head=51d602e9da verified=51d602e9da
+2026-11-22T22:29:14Z merge hold szl-holdings/szl-asset-registry#17 state=clean head=de3b9eff05 verified=de3b9eff05
+2026-11-22T22:29:15Z merge hold szl-holdings/szl-retrieval-bench#42 state=clean head=120dc4d2b2 verified=120dc4d2b2
+2026-11-22T22:29:15Z merge sweep done merged=0 held=27 skipped=0
+2026-11-22T22:29:54Z merge2 sweep2 start candidates=27
+2026-11-22T22:29:58Z merge2 MERGED szl-holdings/szl-capability-ledger#17 squash sha=2c4ba89f4b
+2026-11-22T22:30:02Z merge2 MERGED szl-holdings/curation-atlas#68 squash sha=64239bfc85
+2026-11-22T22:30:07Z merge2 MERGED szl-holdings/curation-atlas#67 squash sha=12a7fc2a4b
+2026-11-22T22:30:07Z merge2 hold szl-holdings/curation-atlas#65 state=unknown head=0db82ba1c2 verified=0db82ba1c2
+2026-11-22T22:30:12Z merge2 MERGED szl-holdings/szl-forge#780 squash sha=397bc50b1a
+2026-11-22T22:30:17Z merge2 MERGED szl-holdings/szl-cram#13 squash sha=6b4b8b50a0
+2026-11-22T22:30:21Z merge2 MERGED szl-holdings/wink-observatory#25 squash sha=2d216ed62a
+2026-11-22T22:30:22Z merge2 hold szl-holdings/curation-atlas#63 state=unknown head=1332c4a874 verified=1332c4a874
+2026-11-22T22:30:26Z merge2 MERGED szl-holdings/the-grid#40 squash sha=d2e6c94a42
+2026-11-22T22:30:30Z merge2 MERGED szl-holdings/szl-portal#4 squash sha=cafdcfa6f3
+2026-11-22T22:30:34Z merge2 MERGED szl-holdings/szl-khipu#164 squash sha=cfb6baefa1
+2026-11-22T22:30:38Z merge2 MERGED szl-holdings/szl-microscopy-pilot#21 squash sha=fc44f261df
+2026-11-22T22:30:43Z merge2 MERGED szl-holdings/szl-science-forum-corpus#49 squash sha=11620747ee
+2026-11-22T22:30:47Z merge2 MERGED szl-holdings/szl-provctl#45 squash sha=f987d42fb4
+2026-11-22T22:30:50Z merge2 MERGED szl-holdings/formal-ai-underwriting#21 squash sha=964b215fba
+2026-11-22T22:30:55Z merge2 MERGED szl-holdings/szl-muhu-frontier#13 squash sha=bd9121881e
+2026-11-22T22:30:59Z merge2 MERGED szl-holdings/szl-vertical-forge#30 squash sha=c06e46b530
+2026-11-22T22:31:03Z merge2 MERGED szl-holdings/szl-specdecode#13 squash sha=da7fa996c2
+2026-11-22T22:31:07Z merge2 MERGED szl-holdings/szl-quant-bench#27 squash sha=066b4611d2
+2026-11-22T22:31:12Z merge2 MERGED szl-holdings/szl-quant-witness#25 squash sha=0f7b407d04
+2026-11-22T22:31:16Z merge2 MERGED szl-holdings/szl-billing#15 squash sha=4d71aaaa97
+2026-11-22T22:31:20Z merge2 MERGED szl-holdings/estate-cards#7 squash sha=fcb5d9e252
+2026-11-22T22:31:20Z merge2 hold szl-holdings/szl-specdecode#12 state=unknown head=5a6b554018 verified=5a6b554018
+2026-11-22T22:31:21Z merge2 hold szl-holdings/szl-billing#13 state=unknown head=7d14ca92c8 verified=7d14ca92c8
+2026-11-22T22:31:21Z merge2 hold szl-holdings/estate-cards#4 state=unknown head=51d602e9da verified=51d602e9da
+2026-11-22T22:31:25Z merge2 MERGED szl-holdings/szl-asset-registry#17 squash sha=65de4ed09a
+2026-11-22T22:31:30Z merge2 MERGED szl-holdings/szl-retrieval-bench#42 squash sha=502be81f26
+2026-11-22T22:31:30Z merge2 sweep2 done merged=22 held=5
+2026-11-22T22:32:06Z merge3 retry pass start pending=5
+2026-11-22T22:32:06Z merge3 hold szl-holdings/curation-atlas#65 head drift head=c217bb2a49
+2026-11-22T22:32:12Z merge3 MERGED szl-holdings/curation-atlas#63 squash attempt=1 sha=440bc3ed3b
+2026-11-22T22:32:16Z merge3 MERGED szl-holdings/szl-specdecode#12 squash attempt=1 sha=81fdb414a9
+2026-11-22T22:32:20Z merge3 MERGED szl-holdings/szl-billing#13 squash attempt=1 sha=14dd9f983a
+2026-11-22T22:32:24Z merge3 MERGED szl-holdings/estate-cards#4 squash attempt=1 sha=bafcc9d683
+2026-11-22T22:32:24Z merge3 retry pass done merged=4 still-held=1

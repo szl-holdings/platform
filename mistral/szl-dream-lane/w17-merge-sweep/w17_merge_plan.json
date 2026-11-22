@@ -1,0 +1,47 @@
+{
+ "parse_ok": true,
+ "plan": {
+  "merge_now": [],
+  "hold": [
+   {
+    "pr": "ALL 119 OPEN PRs",
+    "reason": "Zero confirmed-green candidates. Omission from truncated context is not evidence of eligibility; no merge order is authorized."
+   },
+   {
+    "pr": "CLASS:BLOCKED|UNVERIFIED x62",
+    "reason": "Resolve the actual review, protection, or check cause, then obtain fresh GitHub verification at the final head. Never force or bypass."
+   },
+   {
+    "pr": "CLASS:BEHIND|UNVERIFIED x14",
+    "reason": "Update the branch, then re-verify checks, reviews, commit status, and protections at the resulting head."
+   },
+   {
+    "pr": "CLASS:DIRTY|UNVERIFIED x11",
+    "reason": "Resolve merge conflicts, then obtain fresh verified-green evidence at the resulting head."
+   },
+   {
+    "pr": "CLASS:UNSTABLE|UNVERIFIED x5",
+    "reason": "Failing or pending checks and unverified heads are not green; fix genuine causes and re-verify."
+   },
+   {
+    "pr": "CLASS:CLEAN|pending x27",
+    "reason": "CLEAN alone is insufficient. Hold until required checks and commit status succeed, with reviews and protections satisfied at the final head."
+   },
+   {
+    "pr": "szl-holdings/szl-org-health#420",
+    "reason": "Audit the diff: enlarging a readiness-probe bound to accept a 9.7KiB campaign may be check-shaping; later green does not cure an unaudited band-aid."
+   },
+   {
+    "pr": "szl-holdings/holographic-unify#62",
+    "reason": "Retry-on-stale-readback is a rerun-to-green risk; prove admission is never relaxed and obtain required review and check verification."
+   },
+   {
+    "pr": "szl-holdings/szl-org-health#419",
+    "reason": "Audit before green: failure-precedence reordering could mask real SHA drift."
+   }
+  ],
+  "merge_method": "squash where allowed else merge",
+  "notes": "Empty GO is the honest fail-closed result. After genuine fixes, admit only freshly verified-green PRs, dependency-first and one at a time; revalidate head, reviews, checks, and protections after every merge. Never force, bypass, edit protections, use empty-commit retriggers, or rerun merely to obtain green."
+ },
+ "confirmed_candidates": []
+}

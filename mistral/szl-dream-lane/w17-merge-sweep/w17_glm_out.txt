@@ -1,0 +1,24 @@
+MODEL glm-5.3:cloud
+SECONDS 20.7 DONE_REASON stop SIZE 2577
+
+```json
+{
+  "go": [],
+  "hold": [
+    {"pr": "CLASS:CLEAN|pending x27", "reason": "mergeable CLEAN but checks pending, not GitHub-verified at head; commit status unverified; merging tonight = unverified merge, violates green-only/fail-closed; my seat also lacks the codex verification rail to confirm these tonight"},
+    {"pr": "CLASS:BLOCKED|UNVERIFIED x62", "reason": "branch protection failing (REVIEW_REQUIRED and/or unverified checks); any merge would require force or bypass; must HOLD, receipted"},
+    {"pr": "CLASS:UNSTABLE|UNVERIFIED x5", "reason": "failing/pending checks at head; not green under any reading"},
+    {"pr": "CLASS:BEHIND|UNVERIFIED x14", "reason": "head behind base; update-branch then re-verify required before any merge consideration"},
+    {"pr": "CLASS:DIRTY|UNVERIFIED x11", "reason": "merge conflicts at head; not mergeable CLEAN"},
+    {"pr": "szl-holdings/curation-atlas#66", "reason": "UNSTABLE dependabot bump, checks unverified; auto-merge temptation; verify at head first"},
+    {"pr": "szl-holdings/curation-atlas#64", "reason": "UNSTABLE readiness change; unverified; no review; HOLD"},
+    {"pr": "szl-holdings/szl-router#164", "reason": "UNSTABLE; citation-rejection fix needs verified checks and review before green"},
+    {"pr": "szl-holdings/szl-org-health#420", "reason": "enlarging readiness probe bound to accept a 9.7KiB campaign smells like check-shaping bandaid; HOLD pending diff audit even if checks later pass"},
+    {"pr": "szl-holdings/holographic-unify#62", "reason": "retry-on-stale-readback is a rerun-to-green vector; must prove admission is never relaxed, not just retried"},
+    {"pr": "szl-holdings/szl-org-health#419", "reason": "failure-precedence reorder could mask real SHA drift; audit before green"},
+    {"pr": "szl-holdings/killinchu#655", "reason": "BLOCKED + REVIEW_REQUIRED + UNVERIFIED; fail-closed signer fix still needs verified checks plus human review; representative of all 62"},
+    {"pr": "PROCESS:owner-directive pressure", "reason": "'get all green and merge' must not drive re-runs, empty-commit retriggers, rebase-to-refresh, or protection edits tonight; that is the rerun-to-green smell; an empty go is the honest state"}
+  ],
+  "watch": "Adversarial watcher: 0/119 verified green means go must be empty by fail-closed doctrine; tonight's real risk is directive pressure converting pending/blocked into fake green via re-runs, bypasses, or bandaid fixes like #420/#62 — HOLD everything unverified, behind, dirty, review-required, or bandaid-scented; receipt all holds; never force."
+}
+```

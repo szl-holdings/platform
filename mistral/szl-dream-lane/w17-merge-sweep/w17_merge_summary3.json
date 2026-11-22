@@ -1,0 +1,133 @@
+{
+ "merged": [
+  {
+   "repo": "szl-holdings/szl-capability-ledger",
+   "number": 17
+  },
+  {
+   "repo": "szl-holdings/curation-atlas",
+   "number": 68
+  },
+  {
+   "repo": "szl-holdings/curation-atlas",
+   "number": 67
+  },
+  {
+   "repo": "szl-holdings/szl-forge",
+   "number": 780
+  },
+  {
+   "repo": "szl-holdings/szl-cram",
+   "number": 13
+  },
+  {
+   "repo": "szl-holdings/wink-observatory",
+   "number": 25
+  },
+  {
+   "repo": "szl-holdings/the-grid",
+   "number": 40
+  },
+  {
+   "repo": "szl-holdings/szl-portal",
+   "number": 4
+  },
+  {
+   "repo": "szl-holdings/szl-khipu",
+   "number": 164
+  },
+  {
+   "repo": "szl-holdings/szl-microscopy-pilot",
+   "number": 21
+  },
+  {
+   "repo": "szl-holdings/szl-science-forum-corpus",
+   "number": 49
+  },
+  {
+   "repo": "szl-holdings/szl-provctl",
+   "number": 45
+  },
+  {
+   "repo": "szl-holdings/formal-ai-underwriting",
+   "number": 21
+  },
+  {
+   "repo": "szl-holdings/szl-muhu-frontier",
+   "number": 13
+  },
+  {
+   "repo": "szl-holdings/szl-vertical-forge",
+   "number": 30
+  },
+  {
+   "repo": "szl-holdings/szl-specdecode",
+   "number": 13
+  },
+  {
+   "repo": "szl-holdings/szl-quant-bench",
+   "number": 27
+  },
+  {
+   "repo": "szl-holdings/szl-quant-witness",
+   "number": 25
+  },
+  {
+   "repo": "szl-holdings/szl-billing",
+   "number": 15
+  },
+  {
+   "repo": "szl-holdings/estate-cards",
+   "number": 7
+  },
+  {
+   "repo": "szl-holdings/szl-asset-registry",
+   "number": 17
+  },
+  {
+   "repo": "szl-holdings/szl-retrieval-bench",
+   "number": 42
+  },
+  {
+   "repo": "szl-holdings/curation-atlas",
+   "number": 63
+  },
+  {
+   "repo": "szl-holdings/szl-specdecode",
+   "number": 12
+  },
+  {
+   "repo": "szl-holdings/szl-billing",
+   "number": 13
+  },
+  {
+   "repo": "szl-holdings/estate-cards",
+   "number": 4
+  }
+ ],
+ "retry_merged": [
+  {
+   "repo": "szl-holdings/curation-atlas",
+   "number": 63
+  },
+  {
+   "repo": "szl-holdings/szl-specdecode",
+   "number": 12
+  },
+  {
+   "repo": "szl-holdings/szl-billing",
+   "number": 13
+  },
+  {
+   "repo": "szl-holdings/estate-cards",
+   "number": 4
+  }
+ ],
+ "still_held": [
+  {
+   "repo": "szl-holdings/curation-atlas",
+   "number": 65,
+   "reason": "drift"
+  }
+ ]
+}
