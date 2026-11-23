@@ -116,7 +116,6 @@ def main():
     # C2 canary-first: dream gate must acknowledge canary-first; a wave scheduled
     # without it would be a bypass
     dream_blob = canonical(dream).lower()
-    pack_gates_text = files.get("mc_gates.py", "")
     canary_first_ack = ("canary" in dream_blob and "first" in dream_blob) or "canary_first" in dream_blob
     check("C2_canary_first_acknowledged", canary_first_ack,
           "dream gate must record canary-first before any wave")
