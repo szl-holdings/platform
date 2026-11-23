@@ -4,14 +4,15 @@ The durable activity performs provider I/O; the workflow sandbox exchanges only
 Pydantic input and a bounded JSON string. No signed Kimi attestation, immutable
 Mistral model identity, deployment readiness, or release authority is inferred.
 """
+
 from __future__ import annotations
 
 import hashlib
 import json
 from typing import Literal
 
+from mistralai import workflows
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-import mistralai.workflows as workflows
 
 # This is a mutable provider alias, never an immutable executing-artifact ID.
 DREAM_MODEL = "mistral-large-latest"
@@ -72,8 +73,10 @@ class DreamAsk(BaseModel):
 def input_digest(data: DreamInput) -> str:
     """Exact digest of validated fields, not original raw wire bytes."""
     raw = json.dumps(
-        data.model_dump(mode="json"), sort_keys=True,
-        separators=(",", ":"), ensure_ascii=False,
+        data.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
     )
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
@@ -87,9 +90,10 @@ def _text_chunk(chunk: object) -> str:
     else:
         kind = getattr(chunk, "type", None)
         body = getattr(chunk, "text", None)
-        if any(getattr(chunk, key, None) for key in (
-            "citations", "annotations", "tool_calls", "function_call"
-        )):
+        if any(
+            getattr(chunk, key, None)
+            for key in ("citations", "annotations", "tool_calls", "function_call")
+        ):
             raise RuntimeError("DREAM_NON_TEXT_OR_ANNOTATED_CHUNK")
     if kind not in (None, "text") or not isinstance(body, str):
         raise RuntimeError("DREAM_NON_TEXT_OR_ANNOTATED_CHUNK")
@@ -130,11 +134,16 @@ def _unpack_activity(raw: object) -> dict[str, str | None]:
     except (TypeError, ValueError) as exc:
         raise RuntimeError("DREAM_ACTIVITY_INVALID") from exc
     if not isinstance(value, dict) or set(value) != {
-        "text", "observed_model", "provider_request_id"
+        "text",
+        "observed_model",
+        "provider_request_id",
     }:
         raise RuntimeError("DREAM_ACTIVITY_INVALID")
-    if (not isinstance(value["text"], str) or not value["text"].strip()
-            or len(value["text"]) > MAX_DREAM_CHARS):
+    if (
+        not isinstance(value["text"], str)
+        or not value["text"].strip()
+        or len(value["text"]) > MAX_DREAM_CHARS
+    ):
         raise RuntimeError("DREAM_ACTIVITY_INVALID")
     for key in ("observed_model", "provider_request_id"):
         if value[key] is not None and _optional_string(value[key]) != value[key]:
@@ -145,7 +154,11 @@ def _unpack_activity(raw: object) -> dict[str, str | None]:
 @workflows.activity()
 async def dream_chat_complete(ask: DreamAsk) -> str:
     """Provider I/O exclusively in activity; return bounded JSON as a string."""
-    from mistralai.client.models import ChatCompletionRequest, SystemMessage, UserMessage
+    from mistralai.client.models import (
+        ChatCompletionRequest,
+        SystemMessage,
+        UserMessage,
+    )
     from utils.mistral import mistral_client
 
     request = ChatCompletionRequest(
@@ -160,11 +173,15 @@ async def dream_chat_complete(ask: DreamAsk) -> str:
         **request.model_dump(exclude={"stream"})
     )
     text = _provider_text(response)
-    return json.dumps({
-        "text": text,
-        "observed_model": _optional_string(getattr(response, "model", None)),
-        "provider_request_id": _optional_string(getattr(response, "id", None), 128),
-    }, sort_keys=True, separators=(",", ":"))
+    return json.dumps(
+        {
+            "text": text,
+            "observed_model": _optional_string(getattr(response, "model", None)),
+            "provider_request_id": _optional_string(getattr(response, "id", None), 128),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    )
 
 
 @workflows.workflow.define(name="szl_dream_round")
@@ -177,15 +194,21 @@ class SzlDreamRound:
         if data.briefing:
             parts.append(f"UNVERIFIED ESTATE BRIEFING:\n{data.briefing}")
         if data.kimi_notes:
-            parts.append(f"UNVERIFIED KIMI NOTES (identity NOT attested):\n{data.kimi_notes}")
+            parts.append(
+                f"UNVERIFIED KIMI NOTES (identity NOT attested):\n{data.kimi_notes}"
+            )
         if data.ask:
             parts.append(f"UNVERIFIED SPECIFIC ASK:\n{data.ask}")
         returned = await dream_chat_complete(
             DreamAsk(model=DREAM_MODEL, system=SYSTEM_PROMPT, user="\n\n".join(parts))
         )
         result = _unpack_activity(returned)
-        holds = ["PROVIDER_RESPONSE_UNATTESTED", "RELEASE_READBACK_MISSING",
-                 "SOURCE_REVISION_NOT_ATTESTED", "MODEL_ALIAS_MUTABLE"]
+        holds = [
+            "PROVIDER_RESPONSE_UNATTESTED",
+            "RELEASE_READBACK_MISSING",
+            "SOURCE_REVISION_NOT_ATTESTED",
+            "MODEL_ALIAS_MUTABLE",
+        ]
         if result["observed_model"] is None:
             holds.append("PROVIDER_MODEL_UNOBSERVED")
         if result["provider_request_id"] is None:
