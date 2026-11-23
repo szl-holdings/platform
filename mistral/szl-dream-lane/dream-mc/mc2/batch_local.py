@@ -133,12 +133,16 @@ def term_trap(root):
         signal.signal(signal.SIGTERM, handler)
         armed_signals.append("SIGTERM")
     except (ValueError, OSError):
+        # guarded registration (see note above): this channel is unavailable
+        # on some Windows builds; the control-file channel remains engaged
         pass
     if hasattr(signal, "CTRL_BREAK_EVENT"):
         try:
             signal.signal(signal.CTRL_BREAK_EVENT, handler)
             armed_signals.append("CTRL_BREAK_EVENT")
         except (ValueError, OSError):
+            # guarded registration (see note above): CTRL_BREAK_EVENT
+            # unavailable on some Windows builds; control file remains
             pass
     return store_path, marker, armed_signals
 
@@ -258,15 +262,16 @@ def selftest():
     self_path = os.path.abspath(__file__)
     flags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
     child_err = os.path.join(drill_dir, "child_err.txt")
-    child = subprocess.Popen(
-        [sys.executable, "-u", self_path, "--term-drill", drill_dir],
-        stdout=subprocess.DEVNULL, stderr=open(child_err, "w"), creationflags=flags)
+    with open(child_err, "w") as child_err_fh:
+        child = subprocess.Popen(
+            [sys.executable, "-u", self_path, "--term-drill", drill_dir],
+            stdout=subprocess.DEVNULL, stderr=child_err_fh, creationflags=flags)
     armed = os.path.join(drill_dir, "drill_armed.json")
     for _ in range(200):
         if os.path.exists(armed):
             break
         time.sleep(0.05)
-    channel = fire_term_at_child(child, os.path.join(drill_dir, "term_go.json"), drill_dir)
+    fire_term_at_child(child, os.path.join(drill_dir, "term_go.json"), drill_dir)  # channel recorded by the marker, not consumed here
     child.wait(timeout=60)
     drill_local = os.path.join(drill_dir, "term_local.jsonl")
     marker_path = os.path.join(drill_dir, "term_flush_marker.json")
