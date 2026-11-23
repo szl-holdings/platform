@@ -1,6 +1,6 @@
 # mc3_pipeline.py - dream-mc round 3: Kimi evolves, Astra 6.2 cleans up after Kimi, Sol 6.1 makes it more efficient.
 # Zero MC API calls here. Ollama localhost only. Doctrine: GET-only/alert-only tools, key-in-memory, no secrets printed, selftest must stay green.
-import json, time, os, re, urllib.request
+import json, time, re, urllib.request
 
 BASE = 'http://127.0.0.1:11434/api/chat'
 ED = 'C:/SZL/edge-debug'
