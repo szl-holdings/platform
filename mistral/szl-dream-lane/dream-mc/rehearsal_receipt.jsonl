@@ -1,0 +1,29 @@
+{"case": "F1_max_attempt_wins", "detail": "", "pass": true, "rehearsal": "claim-dedupe-v1", "run": "mc-20261120"}
+{"case": "F2_tiebreak_greatest_worker", "detail": "", "pass": true, "rehearsal": "claim-dedupe-v1", "run": "mc-20261120"}
+{"case": "F2_duplicate_alert_fired", "detail": "", "pass": true, "rehearsal": "claim-dedupe-v1", "run": "mc-20261120"}
+{"case": "F3_quarantine_no_winner", "detail": "", "pass": true, "rehearsal": "claim-dedupe-v1", "run": "mc-20261120"}
+{"case": "F4_reattempt_after_expiry_wins_silently_by_design", "detail": "", "pass": true, "rehearsal": "claim-dedupe-v1", "run": "mc-20261120"}
+{"case": "F4b_stuck_index_winner_expired_alerts_not_steals", "detail": "", "pass": true, "rehearsal": "claim-dedupe-v1", "run": "mc-20261120"}
+{"case": "F5_live_higher_attempt_wins", "detail": "", "pass": true, "rehearsal": "claim-dedupe-v1", "run": "mc-20261120"}
+{"case": "F5_no_false_expired_alert_on_live_winner", "detail": "", "pass": true, "rehearsal": "claim-dedupe-v1", "run": "mc-20261120"}
+{"case": "DETERMINISM_same_digest", "detail": "", "pass": true, "rehearsal": "claim-dedupe-v1", "run": "mc-20261120"}
+{"cases": 9, "failed": 0, "rehearsal": "claim-dedupe-v1", "verdict": "PASS"}
+{"case": "healthy_canary_no_false_alerts", "extra": [], "get_only": true, "got": [], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W1a_stuck_creating", "extra": [], "get_only": true, "got": ["W1a_INSTANCE_STUCK_CREATING"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W1b_instance_lost_zero_beacons", "extra": [], "get_only": true, "got": ["W1b_INSTANCE_LOST"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W1c_no_stage_beacon_60s", "extra": [], "get_only": true, "got": ["W1c_NO_STAGE_BEACON"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W2_stage_stalled_600s", "extra": [], "get_only": true, "got": ["W2_STAGE_STALLED"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W3_replica_and_memory_breach", "extra": [], "get_only": true, "got": ["W3_GPU_CLASS", "W3_MEMORY", "W3_REPLICA_CAP"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W4_commit_rate_and_failures", "extra": [], "get_only": true, "got": ["W4_COMMIT_RATE", "W4_FAILED_COMMITS"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W5_receip_stall_and_nonmonotonic", "extra": [], "get_only": true, "got": ["W5_RECEIPT_NON_MONOTONIC", "W5_RECEIPT_STALLED"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W6_unflushed_receipt_at_death", "extra": [], "get_only": true, "got": ["W6_UNFLUSHED_RECEIPT"], "kind": "selftest", "missing": [], "pass": true}
+{"cases": 9, "kind": "selftest_summary", "verdict": "PASS"}
+{"exit": 0, "rehearsal": "mc-20261120-bundle", "tool": "aggregate_claims.py"}
+{"exit": 0, "rehearsal": "mc-20261120-bundle", "tool": "watchdog.py"}
+{"artifact": "aggregate_claims.py", "rehearsal": "mc-20261120-bundle", "sha256": "5b1652f39457bbfe44cd2cacca627a4dea7b07af0e40b99593ebbca652cdb84d"}
+{"artifact": "watchdog.py", "rehearsal": "mc-20261120-bundle", "sha256": "cc73b84054fc38496c22c67dfe8185a710480d73ed257b154747f42d58516a9a"}
+{"artifact": "trio_adjudication_20261120.md", "rehearsal": "mc-20261120-bundle", "sha256": "b589fcac08fe669f29bfff9fbeb6eec94892b652ff5024952245a39f8ec671bf"}
+{"artifact": "mc_first_wave_gate.json", "rehearsal": "mc-20261120-bundle", "sha256": "cd0a6ddac24d38f8ba3635bb317d5d264450ee4a7206325c3e8b044bb87edda5"}
+{"note": "aggregator 9/9 cases, watchdog 9/9 fixtures incl healthy-canary zero-false-alert case; GET-only by construction in fixture mode", "recorded_utc": "2026-11-20T21:52:38Z", "rehearsal": "mc-20261120-bundle", "verdict": "PASS"}
+{"rehearsal":"mc-20261120-bundle","env":"device/betterwithage/sovereign-python","tool":"aggregate_claims.py --selftest","verdict":"PASS","cases":9,"exit":0,"output_file":"C:/SZL/edge-debug/mc_agg_device_out.txt"}
+{"rehearsal":"mc-20261120-bundle","env":"device/betterwithage/sovereign-python","tool":"watchdog.py --selftest fixtures","verdict":"PASS","cases":9,"exit":0,"output_file":"C:/SZL/edge-debug/mc_wd_device_out.txt"}

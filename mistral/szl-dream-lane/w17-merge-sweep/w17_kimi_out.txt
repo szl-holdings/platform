@@ -1,0 +1,23 @@
+MODEL kimi-k3.1-pro:cloud
+SECONDS 21.4 DONE_REASON stop SIZE 1168
+
+```json
+{
+  "go": [],
+  "hold": [
+    {
+      "pr": "ALL 119 OPEN PRs",
+      "reason": "Zero confirmed-green candidates. On the supplied evidence, none meets MERGE-GO; omission from the truncated context is not evidence of eligibility."
+    },
+    {
+      "pr": "62 BLOCKED|UNVERIFIED; 14 BEHIND|UNVERIFIED; 11 DIRTY|UNVERIFIED; 5 UNSTABLE|UNVERIFIED",
+      "reason": "HOLD. Resolve the actual block, review, conflict, behind-base, or failing-check cause, then obtain fresh GitHub verification at the resulting head. Any branch-protection failure remains a receipted HOLD; never force, bypass, or rerun merely to obtain green."
+    },
+    {
+      "pr": "27 CLEAN|pending",
+      "reason": "HOLD while pending. CLEAN alone is insufficient: required checks and commit status must be successful at the final head, with no draft or CHANGES_REQUESTED and every required review and protection satisfied."
+    }
+  ],
+  "watch": "GOVERNING+CODER: no merge order is authorized now; after genuine fixes, admit only fully verified-green PRs dependency-first, one at a time, revalidating head and protections after every merge, with honest HOLD receipts and no band-aids."
+}
+```

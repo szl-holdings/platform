@@ -1,0 +1,20 @@
+MODEL treyleo16/gpt-6-astra:latest
+SECONDS 1.4 DONE_REASON stop SIZE 1250
+1. **Falsifiers:**
+- **TERM-trap:** `local_append` must commit current batch to disk *before* process exit; `diff(last_fsync, last_upload)` must be $\le$ 1 batch.
+- **Resume-from-local:** On restart, `local_append` must detect existing `.tmp` files and upload prior to starting new compute.
+- **Commit-Rate:** Formula: $\text{Commits/hr} = (\text{Nodes} \times \text{Batches/hr})$.
+    - $1 \to 2\times3$: $6 \times \text{rate} < 320$
+    - $5\times4$: $20 \times \text{rate} < 320$
+    - $400$: $400 \times \text{rate}$ must be throttled via sleep/batch-size to stay $\le 320$.
+
+2. **Reconciliation:**
+- **Divergences:** 
+    - Scale: Wave (2x3) vs. Stages [1, 9, 40, 350]. **Prevails:** Stages.
+    - Hardware: 1 NEW A6000 vs. Canary 1x A6000. **Prevails:** Canary.
+    - Trigger: Sign-off vs. Ratification Receipt. **Prevails:** Ratification.
+- **Unified Order:** Ratification Sentence (Hash+Ceiling) $\to$ G1-G6 Checks $\to$ Canary (1x A6000) $\to$ Stage 9 $\to$ Stage 40 $\to$ Steady 400.
+
+3. **Execution:** `mc_spec_hash.py` run on the final combined spec to generate the exact SHA required for the ratification sentence.
+
+4. **Watchdog:** **Yes**. Condition: Alert-only, GET-only, zero writes, key in-memory, mapping existing 4 nodes to W1-W3.

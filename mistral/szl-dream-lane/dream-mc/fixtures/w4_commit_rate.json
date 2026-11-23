@@ -1,0 +1,1 @@
+{"case":"W4_commit_rate_and_failures","snap":{"now_s":50000,"instances":[],"stages":[],"quota":{"replicas":2},"hf":{"commits_last_hour":341,"failed_commits":2},"receipts":{}},"prev":null,"expect":["W4_COMMIT_RATE","W4_FAILED_COMMITS"]}

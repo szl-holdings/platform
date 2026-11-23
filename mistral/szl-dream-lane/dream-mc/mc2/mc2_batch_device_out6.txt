@@ -1,0 +1,20 @@
+PASS F1_local_durability_100_appends 
+PASS F2_term_trap_flush_zero_lost rc=0 n=5 marker=3 channel=control_file simulated=True child_err_tail=empty
+PASS F2b_term_order_preserved 
+PASS F3_resume_exactly_uncommitted_once 
+PASS F3b_manifests_idempotent_by_id 
+PASS F4_batched_plan_never_over_320 worst batched/hr = 150 at cycle 600s
+PASS F4b_nonbatched_blows_ceiling_at_scale steps over ceiling: 15w4m=360,25w4m=600
+PASS F4c_slow_cycle_top_step_fits 
+PASS F5_determinism 96214f59e4c0188c
+{"consequence": "console events are not a valid TERM channel on this runtime; control-file channel drives the same flush code, labeled simulated; POSIX SIGTERM drill is the binding proof", "measured_rc": "0xC000013A_STATUS_CONTROL_C_EXIT", "platform_finding": "WINDOWS_CONSOLE_CTRL_BREAK_EVENTS_DO_NOT_RUN_PYTHON_TRAP", "rehearsal": "batch-term-v1", "run": "mc2"}
+{"case": "F1_local_durability_100_appends", "detail": "", "pass": true, "rehearsal": "batch-term-v1", "run": "mc2"}
+{"case": "F2_term_trap_flush_zero_lost", "detail": "rc=0 n=5 marker=3 channel=control_file simulated=True child_err_tail=empty", "pass": true, "rehearsal": "batch-term-v1", "run": "mc2"}
+{"case": "F2b_term_order_preserved", "detail": "", "pass": true, "rehearsal": "batch-term-v1", "run": "mc2"}
+{"case": "F3_resume_exactly_uncommitted_once", "detail": "", "pass": true, "rehearsal": "batch-term-v1", "run": "mc2"}
+{"case": "F3b_manifests_idempotent_by_id", "detail": "", "pass": true, "rehearsal": "batch-term-v1", "run": "mc2"}
+{"case": "F4_batched_plan_never_over_320", "detail": "worst batched/hr = 150 at cycle 600s", "pass": true, "rehearsal": "batch-term-v1", "run": "mc2"}
+{"case": "F4b_nonbatched_blows_ceiling_at_scale", "detail": "steps over ceiling: 15w4m=360,25w4m=600", "pass": true, "rehearsal": "batch-term-v1", "run": "mc2"}
+{"case": "F4c_slow_cycle_top_step_fits", "detail": "", "pass": true, "rehearsal": "batch-term-v1", "run": "mc2"}
+{"case": "F5_determinism", "detail": "96214f59e4c0188c", "pass": true, "rehearsal": "batch-term-v1", "run": "mc2"}
+{"cases": 9, "failed": 0, "rehearsal": "batch-term-v1", "verdict": "PASS"}

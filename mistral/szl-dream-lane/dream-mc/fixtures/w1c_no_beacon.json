@@ -1,0 +1,1 @@
+{"case":"W1c_no_stage_beacon_60s","snap":{"now_s":20000,"instances":[{"id":"mc-a6000-03","state":"running","state_change_s":19000,"last_stage_beacon_s":19900}],"stages":[],"quota":{},"hf":{},"receipts":{}},"prev":null,"expect":["W1c_NO_STAGE_BEACON"]}
