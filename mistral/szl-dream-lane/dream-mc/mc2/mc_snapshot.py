@@ -91,7 +91,6 @@ def main():
         return 2
     now = int(time.time())
     snap = {"now_s": now, "source": "massed GET /instance", "instances": []}
-    fp = ""
     try:
         data = get("/instance", key)
     except Exception as e:
