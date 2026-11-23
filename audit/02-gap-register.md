@@ -1,6 +1,9 @@
 # SZL Holdings — Gap Register
 
 **Audit date:** 2026-04-21  
+
+> **Historical snapshot warning:** This file records the 2026-04-21 audit state. Its `OPEN` labels are historical and must not be treated as current security status. Later evidence in `audit/credential-dependency-matrix.md` and `audit/auth-verification.md` may supersede individual rows, but conflicting controls remain `UNVERIFIED` until reverified against the current runtime. Use the current source-of-truth and publication audit before making release decisions.
+
 **Scope:** All gaps between claimed state and verified state, plus structural gaps with no covering task.
 
 **Truth labels** (per audit standard): VERIFIED · PARTIALLY VERIFIED · UNVERIFIED · BROKEN · OUT OF SCOPE  
@@ -118,4 +121,4 @@ Each gap has:
 
 ---
 
-*Items marked COVERED with a task number have existing backlog coverage. Items marked OPEN with no task number are net-new gaps requiring action in the next 30 days.*
+*Items marked COVERED with a task number have existing backlog coverage. Items marked OPEN with no task number are historical gaps from the 2026-04-21 snapshot. Use current source-of-truth evidence before treating any item as an active remediation requirement.*
