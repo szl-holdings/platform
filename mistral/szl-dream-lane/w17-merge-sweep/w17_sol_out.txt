@@ -1,0 +1,15 @@
+MODEL treyleo16/gpt-6-1-sol:latest
+SECONDS 6.5 DONE_REASON stop SIZE 357
+
+```json
+{
+  "go": [],
+  "hold": [
+    {
+      "pr": "all",
+      "reason": "0 confirmed green candidates. 119 open PRs are either BLOCKED, UNSTABLE, or UNVERIFIED. MERGE-GO requires GitHub-verified CLEAN head status and no pending blockers."
+    }
+  ],
+  "watch": "EFFICIENCY: Ranking candidates by merge value vs waiting cost; flagging stale checks."
+}
+```

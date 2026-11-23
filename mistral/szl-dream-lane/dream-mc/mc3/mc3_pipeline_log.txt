@@ -1,0 +1,8 @@
+2026-11-21T01:18:19Z mc3 pipeline start; sources: watchdog=12015B snapshot=5483B
+2026-11-21T01:22:18Z kimi done: 239.5s size=23795 done_reason=stop
+2026-11-21T01:22:18Z stage1 kimi extracted: ['mc_snapshot.py', 'watchdog.py']
+2026-11-21T01:22:40Z astra done: 21.5s size=24015 done_reason=stop
+2026-11-21T01:22:40Z stage2 astra extracted: ['mc_snapshot.py', 'watchdog.py']
+2026-11-21T01:22:57Z sol done: 17.4s size=18501 done_reason=stop
+2026-11-21T01:22:57Z stage3 sol extracted: ['mc_snapshot.py', 'watchdog.py']
+2026-11-21T01:22:57Z pipeline complete: watchdog_v2.py 12469B, snapshot_v2.py 5086B

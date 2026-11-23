@@ -1,0 +1,15 @@
+MODEL treyleo16/gpt-6-astra:latest
+SECONDS 7.4 DONE_REASON stop SIZE 321
+
+```json
+{
+  "go": [],
+  "hold": [
+    {
+      "pr": "all",
+      "reason": "Zero confirmed green candidates provided; all listed PRs are either BLOCKED, UNSTABLE, or UNVERIFIED."
+    }
+  ],
+  "watch": "CLEANUP SEAT: Verifying candidates for true green status; fail-closed on all unverified/blocked/unstable states."
+}
+```

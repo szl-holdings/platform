@@ -1,0 +1,1 @@
+{"case":"W1a_stuck_creating","snap":{"now_s":10000,"instances":[{"id":"mc-a6000-01","state":"creating","state_change_s":9700,"last_stage_beacon_s":9700}],"stages":[],"quota":{},"hf":{},"receipts":{}},"prev":null,"expect":["W1a_INSTANCE_STUCK_CREATING"]}

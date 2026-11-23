@@ -1,0 +1,12 @@
+# mc3 selftest receipt (watchdog_v2.py, evolved by Kimi->cleaned Astra 6.2->efficiency Sol 6.1) - 2026-11-21T01:2xZ
+# Fixtures: C:/SZL/edge-debug/watchdog_fixtures (9 cases, identical alert codes to round 2)
+{"case": "healthy_canary_no_false_alerts", "extra": [], "get_only": true, "got": [], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W1a_stuck_creating", "extra": [], "get_only": true, "got": ["W1a_INSTANCE_STUCK_CREATING"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W1b_instance_lost_zero_beacons", "extra": [], "get_only": true, "got": ["W1b_INSTANCE_LOST"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W1c_no_stage_beacon_60s", "extra": [], "get_only": true, "got": ["W1c_NO_STAGE_BEACON"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W2_stage_stalled_600s", "extra": [], "get_only": true, "got": ["W2_STAGE_STALLED"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W3_replica_and_memory_breach", "extra": [], "get_only": true, "got": ["W3_GPU_CLASS", "W3_MEMORY", "W3_REPLICA_CAP"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W4_commit_rate_and_failures", "extra": [], "get_only": true, "got": ["W4_COMMIT_RATE", "W4_FAILED_COMMITS"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W5_receip_stall_and_nonmonotonic", "extra": [], "get_only": true, "got": ["W5_RECEIPT_NON_MONOTONIC", "W5_RECEIPT_STALLED"], "kind": "selftest", "missing": [], "pass": true}
+{"case": "W6_unflushed_receipt_at_death", "extra": [], "get_only": true, "got": ["W6_UNFLUSHED_RECEIPT"], "kind": "selftest", "missing": [], "pass": true}
+{"cases": 9, "kind": "selftest_summary", "verdict": "PASS"}

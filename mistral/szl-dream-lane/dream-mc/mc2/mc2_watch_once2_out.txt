@@ -1,0 +1,1 @@
+{"alerts": 0, "keys": [], "kind": "once_summary", "snapshot": "mc_snapshot2.json", "verdict": "CLEAN"}
