@@ -285,6 +285,26 @@ useDefault = true
     #   d7d8936b:memory.tsx:generic-api-key:174
     #   36c17af9:memory.tsx:generic-api-key:167
     "artifacts/command/src/pages/cognitive/memory\\.tsx",
+
+    # Dream-MC watchdog alert records use a domain field named `key` with
+    # W1-W6 alert-code labels. These historical model-output receipts and
+    # watchdog implementations contain no provider tokens.
+    "mistral/szl-dream-lane/dream-mc/mc3/mc3_astra_out\\.txt",
+    "mistral/szl-dream-lane/dream-mc/mc3/mc3_kimi_out\\.txt",
+    "mistral/szl-dream-lane/dream-mc/mc3/mc3_sol_out\\.txt",
+    "mistral/szl-dream-lane/dream-mc/mc3/watchdog_v2\\.py",
+    "mistral/szl-dream-lane/dream-mc/watchdog\\.py",
+    # Additional historical false positives verified against their exact commits.
+    # These paths contain alert-code fields, scanner names, generated test PEMs,
+    # example key identifiers, or documented placeholder material, not secrets.
+    "mistral/szl-dream-lane/dream-mc/mc2/watchdog\\.py",
+    "scripts/qa/scan-secrets\\.test\\.js",
+    "security/ALLOWLIST-JUSTIFICATIONS\\.md",
+    "platform/deploy/SOVEREIGN_DELIVERY\\.md",
+    "replit-sync/NEXT_ORDER\\.md",
+    "replit-sync/uds/parity_uds_payload\\.md",
+    "replit-sync/uds/UDS_DEPLOY_GAP_FIX_REPORT\\.md",
+    "packages/hatun-mcp/hatun_mcp/governance\\.py",
   ]
 
   # ── Regex patterns that are always safe ─────────────────────────────────────
