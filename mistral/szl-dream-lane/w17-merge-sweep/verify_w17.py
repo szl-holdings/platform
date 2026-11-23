@@ -1,6 +1,6 @@
 # verify_w17.py - W17 lap stage 2: correct-instrument verification of the 27 CLEAN|pending candidates.
 # check-runs at EXACT head sha; green only if every check run conclusion is success/neutral/skipped and none pending.
-import json, time, os, re, subprocess, sys, urllib.request
+import json, time, re, subprocess, sys, urllib.request
 
 OUT = 'C:/SZL/edge-debug/w17'
 LOGP = OUT + '/w17_log.txt'
@@ -30,7 +30,8 @@ def ollama(model, prompt, tag, timeout=600):
     return c
 
 def main():
-    sweep = json.load(open(OUT + '/w17_pr_sweep.json', encoding='utf-8'))
+    with open(OUT + '/w17_pr_sweep.json', encoding='utf-8') as sf:
+        sweep = json.load(sf)
     rows = sweep['prs']
     cands = [r for r in rows if r['mergeState'] == 'CLEAN' and not r['draft'] and r['review'] != 'CHANGES_REQUESTED']
     log('candidates to verify with check-runs: %d' % len(cands))
@@ -58,7 +59,8 @@ def main():
             r['verified'] = 'ERROR ' + str(e)[:80]
             still.append(r)
             log('%s#%s ERROR %s' % (r['repo'], r['number'], str(e)[:80]))
-    json.dump({'verified_green': verified, 'not_green': still}, open(OUT + '/w17_verified.json', 'w', encoding='utf-8'), indent=1)
+    with open(OUT + '/w17_verified.json', 'w', encoding='utf-8') as vf:
+        json.dump({'verified_green': verified, 'not_green': still}, vf, indent=1)
     log('verified ALL_SUCCESS_AT_HEAD: %d; not green: %d' % (len(verified), len(still)))
 
     # fresh binding ruling from Kimi on the correctly-verified table
@@ -88,8 +90,8 @@ def main():
             plan = json.loads(m.group(1))
         except Exception as e:
             log('ruling2 parse fail honest: ' + str(e)[:120])
-    json.dump({'parse_ok': plan is not None, 'plan': plan},
-              open(OUT + '/w17_merge_plan_v2.json', 'w', encoding='utf-8'), indent=1)
+    with open(OUT + '/w17_merge_plan_v2.json', 'w', encoding='utf-8') as pf:
+        json.dump({'parse_ok': plan is not None, 'plan': plan}, pf, indent=1)
     log('ruling2 parse_ok=%s' % (plan is not None))
     return 0
 
