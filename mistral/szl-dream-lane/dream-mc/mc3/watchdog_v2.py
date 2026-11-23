@@ -63,12 +63,14 @@ def evaluate(snap, prev):
                 try:
                     if now - int(inst.get("state_change_s", now)) > 180:
                         alerts.append({"key": "W1a_INSTANCE_STUCK_CREATING", "target": iid})
-                except (TypeError, ValueError): pass
+                except (TypeError, ValueError):  # malformed or absent snapshot field: skip this single check honestly, never fabricate data
+                    pass
             elif state == "running":
                 try:
                     if now - int(inst.get("last_stage_beacon_s", now)) > 60:
                         alerts.append({"key": "W1c_NO_STAGE_BEACON", "target": iid})
-                except (TypeError, ValueError): pass
+                except (TypeError, ValueError):  # malformed or absent snapshot field: skip this single check honestly, never fabricate data
+                    pass
 
         if isinstance(prev, dict):
             prev_instances = prev.get("instances")
@@ -82,7 +84,8 @@ def evaluate(snap, prev):
             try:
                 if now - int(stage.get("entered_s", now)) > 600:
                     alerts.append({"key": "W2_STAGE_STALLED", "target": str(stage.get("key", "?"))})
-            except (TypeError, ValueError): pass
+            except (TypeError, ValueError):  # malformed or absent snapshot field: skip this single check honestly, never fabricate data
+                pass
 
     quota = snap.get("quota")
     if isinstance(quota, dict):
@@ -103,7 +106,8 @@ def evaluate(snap, prev):
                                 set(exp) if isinstance(exp, (list, set)) else {exp})
                 if g_set - e_set:
                     alerts.append({"key": "W3_GPU_CLASS", "target": ",".join(sorted(map(str, g_set)))})
-        except (TypeError, ValueError): pass
+        except (TypeError, ValueError):  # malformed or absent snapshot field: skip this single check honestly, never fabricate data
+            pass
 
     hf = snap.get("hf")
     if isinstance(hf, dict):
@@ -113,7 +117,8 @@ def evaluate(snap, prev):
                 alerts.append({"key": "W4_COMMIT_RATE", "target": str(commits)})
             if int(hf.get("failed_commits", 0)) > 0:
                 alerts.append({"key": "W4_FAILED_COMMITS", "target": str(hf.get("failed_commits"))})
-        except (TypeError, ValueError): pass
+        except (TypeError, ValueError):  # malformed or absent snapshot field: skip this single check honestly, never fabricate data
+            pass
 
     receipts = snap.get("receipts")
     if isinstance(receipts, dict):
@@ -124,7 +129,8 @@ def evaluate(snap, prev):
                 last_v = int(receipts.get("last_verified_s", now))
                 if now - last_v > 1800:
                     alerts.append({"key": "W5_RECEIPT_STALLED", "target": str(last_v)})
-            except (TypeError, ValueError): pass
+            except (TypeError, ValueError):  # malformed or absent snapshot field: skip this single check honestly, never fabricate data
+                pass
 
     for job in (snap.get("dead_jobs") if isinstance(snap.get("dead_jobs"), list) else []):
         if isinstance(job, dict) and job.get("receipt_local") and not job.get("receipt_hf"):
@@ -151,7 +157,8 @@ class AlertLog:
                             if dk and (dk not in self.last_fired or t >= self.last_fired[dk]):
                                 self.last_fired[dk] = t
                     except (ValueError, TypeError, KeyError): continue
-        except FileNotFoundError: pass
+        except FileNotFoundError:  # no prior alert log yet: fresh start with empty dedup state
+            pass
 
     def handle(self, alerts, now):
         fired, records = [], []
@@ -193,7 +200,8 @@ def fetch_snapshot_http(cfg):
                 key = stream.read().strip()
                 if key and cfg.get("auth_header"):
                     req.add_header(cfg["auth_header"], f"Bearer {key}")
-        except OSError: pass
+        except OSError:  # unreadable key file: proceed without auth header; secrets are never printed
+            pass
     with urllib.request.urlopen(req, timeout=int(cfg.get("timeout_s", 20))) as response:
         return json.loads(response.read().decode("utf-8"))
 
@@ -256,7 +264,8 @@ def run_once(snapshot_path, state_path=None):
         try:
             with open(state_path, "r", encoding="utf-8") as stream:
                 prev = json.load(stream)
-        except (OSError, ValueError): pass
+        except (OSError, ValueError):  # absent or invalid prior state file: evaluate against a fresh baseline
+            pass
     alerts = evaluate(snap, prev)
     for a in alerts:
         print(json.dumps({"kind": "alert", "severity": "critical" if a["key"] in CRITICAL_KEYS else "warning", "key": a["key"], "target": str(a["target"]), "get_only": True}, sort_keys=True))
