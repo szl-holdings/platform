@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:caaedde5-d467-52ff-b1ad-3a344b3da16e",
+  "serialNumber": "urn:uuid:8f514d2c-87d0-5276-a26d-966b6a783c0c",
   "metadata": {
     "tools": [
       {
@@ -8387,8 +8387,8 @@
     {
       "type": "library",
       "name": "i18next",
-      "version": "26.3.1",
-      "purl": "pkg:npm/i18next@26.3.1"
+      "version": "26.3.4",
+      "purl": "pkg:npm/i18next@26.3.4"
     },
     {
       "type": "library",
