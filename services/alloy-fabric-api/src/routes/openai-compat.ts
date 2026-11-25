@@ -19,7 +19,10 @@ function stubEmbedVector(text: string, dims = 1536): number[] {
   if (d > MAX_EMBEDDING_DIMS) {
     d = MAX_EMBEDDING_DIMS;
   }
-  const v = new Array<number>(d).fill(0);
+  const v: number[] = [];
+  for (let i = 0; i < d; i++) {
+    v.push(0);
+  }
   let len = text.length;
   if (len > MAX_EMBEDDING_INPUT_CHARS) {
     len = MAX_EMBEDDING_INPUT_CHARS;
