@@ -3768,11 +3768,11 @@ function _dialogEntropy(history: Array<{ role: string; content: string }>): numb
     toks.push(...words);
   }
   if (toks.length === 0) return 0;
-  const freq: Record<string, number> = {};
-  for (const t of toks) freq[t] = (freq[t] ?? 0) + 1;
+  const freq = new Map<string, number>();
+  for (const t of toks) freq.set(t, (freq.get(t) ?? 0) + 1);
   const n = toks.length;
   let H = 0;
-  for (const c of Object.values(freq)) {
+  for (const c of freq.values()) {
     const p = c / n;
     H -= p * Math.log(p + 1e-9);
   }
