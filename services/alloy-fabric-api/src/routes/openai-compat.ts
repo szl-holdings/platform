@@ -7,10 +7,29 @@ import { logger } from '../logger.js';
 import { getRequestId } from '../middleware/request-id.js';
 import { getTenantId } from '../middleware/tenant.js';
 
+const MAX_EMBEDDING_DIMS = 4096;
+const MAX_EMBEDDING_INPUT_CHARS = 131_072;
+const MAX_EMBEDDING_BATCH_ITEMS = 256;
+
 function stubEmbedVector(text: string, dims = 1536): number[] {
-  const v = new Array<number>(dims).fill(0);
-  for (let i = 0; i < text.length; i++) {
-    v[i % dims] = v[i % dims]! + text.charCodeAt(i) / 255;
+  let d = Number.isFinite(dims) ? Math.floor(dims) : 1536;
+  if (d < 1) {
+    d = 1;
+  }
+  if (d > MAX_EMBEDDING_DIMS) {
+    d = MAX_EMBEDDING_DIMS;
+  }
+  const v: number[] = [];
+  for (let i = 0; i < d; i++) {
+    v.push(0);
+  }
+  let len = text.length;
+  if (len > MAX_EMBEDDING_INPUT_CHARS) {
+    len = MAX_EMBEDDING_INPUT_CHARS;
+  }
+  for (let i = 0; i < len; i++) {
+    const j = i % d;
+    v[j] = v[j]! + text.charCodeAt(i) / 255;
   }
   const norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1;
   return v.map((x) => x / norm);
@@ -50,7 +69,17 @@ export function registerOpenAICompatRoute(router: Router): void {
     }
 
     const texts = Array.isArray(input) ? input : [input];
-    const dims = dimensions ?? 1536;
+    if (texts.length > MAX_EMBEDDING_BATCH_ITEMS) {
+      res.status(400).json({
+        error: {
+          message: 'Too many embedding items; max ' + MAX_EMBEDDING_BATCH_ITEMS,
+          type: 'invalid_request_error',
+          code: 'validation_error',
+        },
+      });
+      return;
+    }
+    const dims = Math.min(Math.max(1, Math.floor(dimensions ?? 1536)), MAX_EMBEDDING_DIMS);
     const resolvedModel = model ?? 'aef-embed-cpu-v1';
 
     const data = texts.map((text, index) => ({

@@ -42,7 +42,8 @@ function cosineNormalize(v: number[]): number[] {
 
 function deterministicEmbed(text: string, dims: number): number[] {
   const v = new Array<number>(dims).fill(0);
-  for (let i = 0; i < text.length; i++) {
+  const n = Math.min(text.length, 131_072);
+  for (let i = 0; i < n; i++) {
     v[i % dims] = (v[i % dims] ?? 0) + (text.charCodeAt(i) / 255) * 2 - 1;
   }
   return cosineNormalize(v);

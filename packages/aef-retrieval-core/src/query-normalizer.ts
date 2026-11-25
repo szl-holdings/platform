@@ -1,3 +1,4 @@
+const PROFILE_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const WHITESPACE_RE = /\s+/g;
 const PUNCTUATION_RE = /[^\w\s\-./]/g;
 
@@ -42,10 +43,10 @@ export function applyProfilePromptTransform(
   normalizedQuery: string,
   profileId: string | undefined,
 ): string {
-  if (!profileId) return normalizedQuery;
-
-  const hook = registeredTransforms.get(profileId);
-  if (!hook) return normalizedQuery;
+  if (!profileId || !PROFILE_ID_RE.test(profileId)) return normalizedQuery;
+  if (!registeredTransforms.has(profileId)) return normalizedQuery;
+  const hook: ProfilePromptTransformHook | undefined = registeredTransforms.get(profileId);
+  if (typeof hook !== 'function') return normalizedQuery;
 
   return hook(normalizedQuery, profileId);
 }
