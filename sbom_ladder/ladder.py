@@ -79,8 +79,11 @@ class Component:
                            ("build_digest", self.build_digest)):
             if dig is not None and not (isinstance(dig, str) and HEX64.match(dig)):
                 raise ComponentError(field + " must be 64-char lowercase hex sha256")
-        if self.provenance_ref is not None and not self.provenance_ref.strip():
-            raise ComponentError("provenance_ref must be nonempty when supplied")
+        if self.provenance_ref is not None:
+            if not isinstance(self.provenance_ref, str):
+                raise ComponentError("provenance_ref must be a string when supplied")
+            if not self.provenance_ref.strip():
+                raise ComponentError("provenance_ref must be nonempty when supplied")
         # Signature claims fail closed FIRST, whether alone or alongside
         # lower-level evidence.
         if self.signature_ref is not None:

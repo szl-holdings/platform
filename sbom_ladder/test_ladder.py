@@ -98,6 +98,12 @@ class ReportTests(unittest.TestCase):
         with self.assertRaises(ComponentError):
             ladder_report([{"name": "x"}])
 
+    def test_non_string_provenance_ref_rejected(self):
+        with self.assertRaises(ComponentError):
+            Component(name="pkg", version="1.0", provenance_ref=42)
+        with self.assertRaises(ComponentError):
+            Component(name="pkg", version="1.0", provenance_ref=" ")
+
 
 if __name__ == "__main__":
     unittest.main()
