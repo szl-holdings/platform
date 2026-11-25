@@ -12,9 +12,18 @@ const MAX_EMBEDDING_INPUT_CHARS = 131_072;
 const MAX_EMBEDDING_BATCH_ITEMS = 256;
 
 function stubEmbedVector(text: string, dims = 1536): number[] {
-  const d = Math.min(Math.max(1, Math.floor(dims)), MAX_EMBEDDING_DIMS);
+  let d = Number.isFinite(dims) ? Math.floor(dims) : 1536;
+  if (d < 1) {
+    d = 1;
+  }
+  if (d > MAX_EMBEDDING_DIMS) {
+    d = MAX_EMBEDDING_DIMS;
+  }
   const v = new Array<number>(d).fill(0);
-  const len = Math.min(text.length, MAX_EMBEDDING_INPUT_CHARS);
+  let len = text.length;
+  if (len > MAX_EMBEDDING_INPUT_CHARS) {
+    len = MAX_EMBEDDING_INPUT_CHARS;
+  }
   for (let i = 0; i < len; i++) {
     const j = i % d;
     v[j] = v[j]! + text.charCodeAt(i) / 255;
