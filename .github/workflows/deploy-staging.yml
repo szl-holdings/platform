@@ -1,110 +1,49 @@
-name: Deploy — Staging
+name: Staging — Provider-Neutral Validation
 
 on:
   push:
     branches: [main, master]
-    paths-ignore:
-      - 'replit-sync/**'
 
 permissions:
   contents: read
 
 concurrency:
-  group: deploy-staging-${{ github.ref }}
+  group: staging-validation-\${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy-staging:
-    name: Deploy to Staging
+  staging-validation:
+    name: Staging source validation
     runs-on: ubuntu-latest
-    environment: staging
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.sha }}
+          ref: \${{ github.sha }}
 
-      - name: Determine deploy info
-        run: |
-          echo "Deploying to staging"
-          echo "Commit: ${{ github.sha }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Actor: ${{ github.actor }}"
-          echo "Triggered by: ${{ github.event_name }}"
-
-      - name: Verify staging configuration
-        id: verify
+      - name: Validate staging source
+        id: validate
         shell: bash
-        env:
-          REPLIT_APP_ID: ${{ secrets.REPLIT_STAGING_APP_ID }}
-          REPLIT_DEPLOY_TOKEN: ${{ secrets.REPLIT_STAGING_DEPLOY_TOKEN }}
         run: |
           set -euo pipefail
-          if [ -z "$REPLIT_APP_ID" ] || [ -z "$REPLIT_DEPLOY_TOKEN" ]; then
-            echo "::error::BLOCKED: staging app ID or deployment token is not configured; no request sent"
-            exit 1
-          fi
-          echo "Required staging configuration is present; provider authority remains unverified"
-
-      - name: Trigger staging deployment
-        id: trigger
-        shell: bash
-        env:
-          REPLIT_APP_ID: ${{ secrets.REPLIT_STAGING_APP_ID }}
-          REPLIT_DEPLOY_TOKEN: ${{ secrets.REPLIT_STAGING_DEPLOY_TOKEN }}
-        run: |
-          set -euo pipefail
-          if [ -z "$REPLIT_APP_ID" ] || [ -z "$REPLIT_DEPLOY_TOKEN" ]; then
-            echo "::error::BLOCKED: staging app ID or deployment token is not configured; no request sent"
-            exit 1
-          fi
-
-          # One bounded request; do not retry or follow redirects after rejection.
-          # Replit returns HTTP 403 "Expected X-Requested-With header", then
-          # "Expected referrer, referer, or origin header", before it evaluates
-          # the bearer. Origin must be https://replit.com; a foreign Origin is
-          # "Invalid referrer". These headers do not authenticate the request.
-          if RESPONSE=$(curl -q --globoff --silent --connect-timeout 10 --max-time 60 \
-            --output /dev/null --write-out "%{http_code}" \
-            -X POST \
-            -H "Authorization: Bearer $REPLIT_DEPLOY_TOKEN" \
-            -H "Content-Type: application/json" \
-            -H "X-Requested-With: XMLHttpRequest" \
-            -H "Origin: https://replit.com" \
-            "https://replit.com/api/v1/repls/$REPLIT_APP_ID/deployments"); then
-            if ! [[ "$RESPONSE" =~ ^[0-9]{3}$ ]]; then
-              echo "::error::Replit staging API returned an invalid HTTP status; request acceptance is unverified"
-              exit 1
-            fi
-          else
-            CURL_EXIT=$?
-            echo "::error::Replit staging request failed (curl exit=$CURL_EXIT); request acceptance is unverified"
-            exit 1
-          fi
-
-          if [[ "$RESPONSE" =~ ^2[0-9]{2}$ ]]; then
-            echo "Staging deployment request accepted (HTTP $RESPONSE); deployment readiness is unverified"
-          else
-            echo "::error::Replit staging API returned HTTP $RESPONSE; request rejected or acceptance unverified"
-            exit 1
-          fi
+          git diff --check
+          test -d .github/workflows
+          echo "Staging source validation passed for $GITHUB_SHA"
+          echo "External deployment provider is disabled. No Replit request was sent."
 
       - name: Deployment summary
         if: always()
         env:
-          CONFIGURATION_OUTCOME: ${{ steps.verify.outcome }}
-          REQUEST_OUTCOME: ${{ steps.trigger.outcome }}
+          VALIDATION_OUTCOME: \${{ steps.validate.outcome }}
         run: |
-          echo "## Staging Deployment Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Staging Validation Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Configuration check:** $CONFIGURATION_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Deployment request step:** $REQUEST_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Deployment readiness:** UNKNOWN (request acceptance is not runtime verification)" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Environment:** staging" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Commit:** ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Branch:** ${{ github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Actor:** ${{ github.actor }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Trigger:** ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "To configure staging deployment secrets, see Settings → Environments → staging." >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Source validation:** $VALIDATION_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Deployment provider:** disabled" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Deployment request:** skipped by configuration" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Runtime readiness:** unverified because no external provider is configured" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Commit:** \${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Branch:** \${{ github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Actor:** \${{ github.actor }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Trigger:** \${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
