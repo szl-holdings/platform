@@ -1,4 +1,4 @@
-name: Deploy â€” Staging
+name: Deploy — Staging
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
         run: |
           echo "## Staging Validation Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Source validation:** ${{ steps.validate.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Source validation:** $VALIDATION_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Deployment provider:** disabled" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Deployment request:** skipped by configuration" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Runtime readiness:** unverified because no external provider is configured" >> "$GITHUB_STEP_SUMMARY"
