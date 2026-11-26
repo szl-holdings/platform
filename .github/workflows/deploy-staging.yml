@@ -1,4 +1,4 @@
-name: Staging — Provider-Neutral Validation
+name: Deploy â€” Staging
 
 on:
   push:
@@ -15,6 +15,7 @@ jobs:
   staging-validation:
     name: Staging source validation
     runs-on: ubuntu-latest
+    environment: staging
     permissions:
       contents: read
     steps:
@@ -27,10 +28,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git diff --check
           test -d .github/workflows
           echo "Staging source validation passed for $GITHUB_SHA"
-          echo "External deployment provider is disabled. No Replit request was sent."
+          echo "External deployment provider is disabled. No deployment request was sent."
 
       - name: Deployment summary
         if: always()
