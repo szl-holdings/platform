@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: staging-validation-\${{ github.ref }}
+  group: staging-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: \${{ github.sha }}
+          ref: ${{ github.sha }}
 
       - name: Validate staging source
         id: validate
@@ -35,7 +35,7 @@ jobs:
       - name: Deployment summary
         if: always()
         env:
-          VALIDATION_OUTCOME: \${{ steps.validate.outcome }}
+          VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
         run: |
           echo "## Staging Validation Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -43,7 +43,7 @@ jobs:
           echo "- **Deployment provider:** disabled" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Deployment request:** skipped by configuration" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Runtime readiness:** unverified because no external provider is configured" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Commit:** \${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Branch:** \${{ github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Actor:** \${{ github.actor }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Trigger:** \${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Commit:** ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Branch:** ${{ github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Actor:** ${{ github.actor }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Trigger:** ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
