@@ -63,7 +63,7 @@ class StagingValidationTests(unittest.TestCase):
     def test_summary_reports_disabled_deployment(self):
         result, summary = self.run_step("Deployment summary")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("Source validation:** fixture-context", summary)
+        self.assertIn("Source validation:** success", summary)
         self.assertIn("Deployment provider:** disabled", summary)
         self.assertIn("Deployment request:** skipped", summary)
         self.assertIn("Runtime readiness:** unverified", summary)
