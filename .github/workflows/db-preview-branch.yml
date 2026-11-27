@@ -1,0 +1,105 @@
+name: DB preview branch (Neon)
+
+# Gap G1: one copy-on-write Neon branch per PR that touches lib/db, so schema
+# changes are migrated and tested against an isolated preview database.
+#
+# PII safety: branches are created from PREVIEW_PARENT_BRANCH_ID, which must be
+# a schema-only root branch ("preview-base", built with rebuild:fresh and
+# synthetic data only), NEVER the production branch. Preview branches expire
+# automatically (7 days) and are deleted when the PR closes.
+#
+# Inert unless vars.NEON_PROJECT_ID and vars.NEON_PREVIEW_PARENT_BRANCH_ID are
+# set (both are named decisions). Needs secrets.NEON_API_KEY (project-scoped key).
+# Fork PRs never receive secrets, so they skip automatically.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - 'lib/db/**'
+      - '.github/workflows/db-preview-branch.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+env:
+  NEON_API: https://console.neon.tech/api/v2
+  BRANCH_NAME: preview/pr-${{ github.event.pull_request.number }}
+
+jobs:
+  migrate-preview:
+    name: Create/refresh preview branch and migrate it
+    if: github.event.action != 'closed' && vars.NEON_PROJECT_ID != '' && vars.NEON_PREVIEW_PARENT_BRANCH_ID != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Create or reuse the preview branch (expires in 7 days)
+        id: branch
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          PROJECT: ${{ vars.NEON_PROJECT_ID }}
+          PARENT: ${{ vars.NEON_PREVIEW_PARENT_BRANCH_ID }}
+          DB_NAME: ${{ vars.NEON_DATABASE_NAME || 'platform' }}
+          DB_ROLE: ${{ vars.NEON_MIGRATION_ROLE || 'platform_migrator' }}
+        run: |
+          set -euo pipefail
+          [ -n "$NEON_API_KEY" ] || { echo "::error::NEON_API_KEY secret missing"; exit 1; }
+          auth=(-H "Authorization: Bearer $NEON_API_KEY" -H 'Accept: application/json')
+          id=$(curl -fsS "${auth[@]}" "$NEON_API/projects/$PROJECT/branches?search=$BRANCH_NAME" \
+                 | jq -r --arg n "$BRANCH_NAME" '.branches[] | select(.name == $n) | .id' | head -n1)
+          if [ -z "$id" ]; then
+            expires=$(date -u -d '+7 days' +%Y-%m-%dT%H:%M:%SZ)
+            body=$(jq -n --arg p "$PARENT" --arg n "$BRANCH_NAME" --arg e "$expires" \
+              '{branch: {parent_id: $p, name: $n, expires_at: $e}, endpoints: [{type: "read_write"}]}')
+            id=$(curl -fsS "${auth[@]}" -H 'Content-Type: application/json' -X POST \
+                   "$NEON_API/projects/$PROJECT/branches" -d "$body" | jq -r '.branch.id')
+          fi
+          [ -n "$id" ] && [ "$id" != "null" ] || { echo "::error::could not create preview branch"; exit 1; }
+          if [ "$id" = "$PARENT" ]; then echo "::error::refusing to migrate the parent branch"; exit 1; fi
+          # Direct (unpooled) URI for migrations; masked before it can reach any log.
+          uri=$(curl -fsS "${auth[@]}" "$NEON_API/projects/$PROJECT/connection_uri?branch_id=$id&database_name=$DB_NAME&role_name=$DB_ROLE&pooled=false" | jq -r '.uri')
+          echo "::add-mask::$uri"
+          echo "branch_id=$id" >> "$GITHUB_OUTPUT"
+          echo "DATABASE_URL_DIRECT=$uri" >> "$GITHUB_ENV"
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter '@szl-holdings/db...'
+      - name: Journal guard, then migrate the preview branch (direct URL)
+        working-directory: lib/db
+        run: |
+          set -euo pipefail
+          node scripts/check-journal.mjs
+          pnpm run migrate
+          node scripts/audit-journal-skips.mjs --db
+      - name: Summary
+        run: echo "Preview branch \`$BRANCH_NAME\` (${{ steps.branch.outputs.branch_id }}) migrated." >> "$GITHUB_STEP_SUMMARY"
+
+  delete-preview:
+    name: Delete preview branch
+    if: github.event.action == 'closed' && vars.NEON_PROJECT_ID != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          PROJECT: ${{ vars.NEON_PROJECT_ID }}
+          PARENT: ${{ vars.NEON_PREVIEW_PARENT_BRANCH_ID }}
+        run: |
+          set -euo pipefail
+          auth=(-H "Authorization: Bearer $NEON_API_KEY" -H 'Accept: application/json')
+          for id in $(curl -fsS "${auth[@]}" "$NEON_API/projects/$PROJECT/branches?search=$BRANCH_NAME" \
+                       | jq -r --arg n "$BRANCH_NAME" '.branches[] | select(.name == $n and .default != true) | .id'); do
+            [ "$id" = "$PARENT" ] && continue
+            curl -fsS "${auth[@]}" -X DELETE "$NEON_API/projects/$PROJECT/branches/$id" >/dev/null
+            echo "deleted $BRANCH_NAME ($id)"
+          done

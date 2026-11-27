@@ -1,0 +1,27 @@
+{
+  // Platform Postgres data-access Worker (gap G1). NOT deployed.
+  // Deploying needs: a named Postgres host, a Hyperdrive config created from its
+  // POOLED connection string with a least-privilege app role (never the owner),
+  // and the real Hyperdrive id below. Each is a separate named yes.
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "platform-db-gateway",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-27",
+  "compatibility_flags": ["nodejs_compat"],
+  // No public surface: no workers.dev URL, no routes. Callers use a service binding.
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "REPLACE_WITH_HYPERDRIVE_CONFIG_ID",
+      // `wrangler dev` only: a local Postgres, never production.
+      "localConnectionString": "postgresql://postgres@127.0.0.1:5432/platform_dev"
+    }
+  ],
+  "vars": {
+    // Fail closed unless this is set by the deploy that owns production.
+    "SZL_ENV": "production"
+  }
+}
