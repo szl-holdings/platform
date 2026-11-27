@@ -38,6 +38,7 @@
     "migrate": "DRY_RUN=1 node ./scripts/apply-manual-migrations.mjs && drizzle-kit migrate --config ./drizzle.config.ts && node ./scripts/apply-manual-migrations.mjs",
     "migrate:backfill": "node ./scripts/backfill-migrations.mjs",
     "check:journal": "node ./scripts/check-journal.mjs",
+    "audit:journal-skips": "node ./scripts/audit-journal-skips.mjs",
     "migrate:apply": "drizzle-kit migrate --config ./drizzle.config.ts",
     "migrate:manual": "node ./scripts/apply-manual-migrations.mjs",
     "migrate:manual:dry": "DRY_RUN=1 node ./scripts/apply-manual-migrations.mjs",
@@ -60,6 +61,6 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/pg": "^8.20.0",
-    "drizzle-kit": "^0.31.10"
+    "drizzle-kit": "0.31.11"
   }
 }
