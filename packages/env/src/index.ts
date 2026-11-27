@@ -58,6 +58,9 @@ export const envSchema = z.object({
 
   // ── Database ────────────────────────────────────────────────────────────
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required").optional(),
+  // Direct (unpooled) URL for migrations, backups and restore drills. Runtime
+  // traffic uses DATABASE_URL (pooled) or the Hyperdrive binding in Workers.
+  DATABASE_URL_DIRECT: optionalStr,
   DB_POOL_MIN: optionalInt("1"),
   // DB_POOL_MAX default reduced from 100 → 12 (Phase 4 hardening, 2026-04-23).
   // Rationale: Replit's shared Postgres has a finite per-instance connection

@@ -75,7 +75,7 @@ jobs:
         id: dump
         working-directory: lib/db
         env:
-          DATABASE_URL: ${{ secrets.PLATFORM_BACKUP_DATABASE_URL }}
+          DATABASE_URL_DIRECT: ${{ secrets.PLATFORM_BACKUP_DATABASE_URL }}
           BACKUP_AGE_RECIPIENT: ${{ vars.PLATFORM_BACKUP_AGE_RECIPIENT }}
           BACKUP_OUT_DIR: ${{ runner.temp }}/backup
           PG_DUMP_BIN: /usr/lib/postgresql/18/bin/pg_dump

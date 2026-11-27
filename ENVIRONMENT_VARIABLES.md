@@ -78,7 +78,16 @@ Secret used to sign OAuth state parameters. Generate with `openssl rand -hex 32`
 | Classification | **required-local**, **required-prod** |
 | Format | `postgresql://user:password@host:5432/dbname` |
 
-Primary PostgreSQL connection string.
+Primary PostgreSQL connection string. In production this is the POOLED endpoint (Neon `-pooler` host); Workers use the Hyperdrive binding instead.
+
+### `DATABASE_URL_DIRECT`
+
+| Property | Value |
+|----------|-------|
+| Classification | **optional-local**, **required-prod** (migrations, backups, restore drills) |
+| Format | `postgresql://user:password@host:5432/dbname` (direct, unpooled) |
+
+Direct connection used by `drizzle-kit migrate`, `migrate:manual`, `rebuild:fresh`, `backup-encrypted.mjs` and preview-branch migrations. Pooled endpoints are refused (`lib/db/scripts/migration-url.mjs`). Falls back to `DATABASE_URL` when unset.
 
 ---
 
