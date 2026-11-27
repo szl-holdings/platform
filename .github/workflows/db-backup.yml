@@ -1,0 +1,103 @@
+name: Platform Postgres encrypted backup
+
+# Gap G2: scheduled, encrypted, full pg_dump of the production Platform Postgres
+# to a PRIVATE Cloudflare R2 bucket. Fails closed:
+#   - does nothing unless repository variable PLATFORM_BACKUP_ENABLED == 'true'
+#   - when enabled, fails if any required secret/variable is missing or the
+#     bucket is still the placeholder
+#   - encryption is age public-key only; the private identity never enters CI
+# Nothing here provisions a database or a bucket. Turning it on is a named
+# decision (host, bucket, retention, recipient key) for the data owner.
+#
+# Required when enabled:
+#   secrets.PLATFORM_BACKUP_DATABASE_URL  read-only backup role (pg_read_all_data), sslmode=verify-full
+#   secrets.R2_BACKUP_ACCESS_KEY_ID / secrets.R2_BACKUP_SECRET_ACCESS_KEY  R2 token scoped to the one bucket, write-only if possible
+#   vars.R2_ACCOUNT_ID
+#   vars.PLATFORM_BACKUP_BUCKET           e.g. the approved private bucket (placeholder below)
+#   vars.PLATFORM_BACKUP_AGE_RECIPIENT    age public key (age1...)
+
+on:
+  schedule:
+    - cron: '23 7 * * *'   # daily 07:23 UTC (02:23 ET)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: platform-db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Encrypted full backup to private R2
+    if: vars.PLATFORM_BACKUP_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      BUCKET: ${{ vars.PLATFORM_BACKUP_BUCKET || 'REPLACE_WITH_APPROVED_PRIVATE_R2_BUCKET' }}
+    steps:
+      - name: Preflight (fail closed)
+        env:
+          HAS_DB: ${{ secrets.PLATFORM_BACKUP_DATABASE_URL != '' }}
+          HAS_KEY_ID: ${{ secrets.R2_BACKUP_ACCESS_KEY_ID != '' }}
+          HAS_SECRET: ${{ secrets.R2_BACKUP_SECRET_ACCESS_KEY != '' }}
+          ACCOUNT: ${{ vars.R2_ACCOUNT_ID }}
+          RECIPIENT: ${{ vars.PLATFORM_BACKUP_AGE_RECIPIENT }}
+        run: |
+          set -euo pipefail
+          fail=0
+          [ "$HAS_DB" = "true" ] || { echo "::error::PLATFORM_BACKUP_DATABASE_URL secret missing"; fail=1; }
+          [ "$HAS_KEY_ID" = "true" ] && [ "$HAS_SECRET" = "true" ] || { echo "::error::R2 backup credentials missing"; fail=1; }
+          [ -n "$ACCOUNT" ] || { echo "::error::vars.R2_ACCOUNT_ID missing"; fail=1; }
+          [[ "$RECIPIENT" =~ ^age1[0-9a-z]{58}$ ]] || { echo "::error::vars.PLATFORM_BACKUP_AGE_RECIPIENT is not an age public key"; fail=1; }
+          [ "$BUCKET" != "REPLACE_WITH_APPROVED_PRIVATE_R2_BUCKET" ] || { echo "::error::backup bucket is still the placeholder"; fail=1; }
+          exit $fail
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Install PostgreSQL 18 client and age
+        run: |
+          set -euo pipefail
+          sudo apt-get update -q
+          sudo apt-get install -y -q postgresql-common age
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -q postgresql-client-18
+          /usr/lib/postgresql/18/bin/pg_dump --version
+      - name: Install lib/db deps only
+        run: pnpm install --frozen-lockfile --filter '@szl-holdings/db...'
+      - name: Encrypted full dump (plaintext never written to disk)
+        id: dump
+        working-directory: lib/db
+        env:
+          DATABASE_URL: ${{ secrets.PLATFORM_BACKUP_DATABASE_URL }}
+          BACKUP_AGE_RECIPIENT: ${{ vars.PLATFORM_BACKUP_AGE_RECIPIENT }}
+          BACKUP_OUT_DIR: ${{ runner.temp }}/backup
+          PG_DUMP_BIN: /usr/lib/postgresql/18/bin/pg_dump
+        run: |
+          set -euo pipefail
+          manifest=$(node scripts/backup-encrypted.mjs | tail -n 1)
+          echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
+      - name: Upload artifact + manifest to private R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_BACKUP_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_BACKUP_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          ENDPOINT: https://${{ vars.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          MANIFEST: ${{ steps.dump.outputs.manifest }}
+        run: |
+          set -euo pipefail
+          dir=$(dirname "$MANIFEST"); artifact=$(jq -r .artifact "$MANIFEST"); name=$(jq -r .name "$MANIFEST")
+          prefix="platform/$(date -u +%Y/%m/%d)/$name"
+          # data first, manifest last: a manifest in R2 implies its artifact is complete
+          aws s3 cp "$dir/$artifact" "s3://$BUCKET/$prefix/$artifact" --endpoint-url "$ENDPOINT" --only-show-errors
+          aws s3 cp "$MANIFEST" "s3://$BUCKET/$prefix/$name.manifest.json" --endpoint-url "$ENDPOINT" --only-show-errors
+          jq '{name, server_version, pg_dump_version, table_count, plaintext_bytes, ciphertext_bytes, ciphertext_sha256, duration_ms}' "$MANIFEST" >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove local encrypted copy
+        if: always()
+        run: rm -rf "${{ runner.temp }}/backup"
