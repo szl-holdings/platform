@@ -12,6 +12,7 @@ permissions:
 jobs:
   sign:
     name: Sign container image (keyless OIDC)
+    environment: production
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
