@@ -20,8 +20,33 @@ def _emit(chain: KhipuChain, *, operation_id: str):
     )
 
 
-def _install_mcp_import_stub() -> None:
-    """Provide only the decorators needed to import the offline server module."""
+def _install_import_stubs() -> None:
+    """Provide only the symbols needed to import the offline server module.
+
+    The package does not declare its MCP SDK or httpx dependencies. The
+    chain-gate regression never starts a server or opens an HTTP client.
+    """
+
+    if "httpx" not in sys.modules:
+        try:
+            __import__("httpx")
+        except ModuleNotFoundError:
+            httpx_module = types.ModuleType("httpx")
+
+            class AsyncClient:
+                def __init__(self, *args, **kwargs):  # pragma: no cover - import contract only
+                    raise AssertionError("the import stub must never open an HTTP client")
+
+            class TimeoutException(Exception):
+                pass
+
+            class TransportError(Exception):
+                pass
+
+            httpx_module.AsyncClient = AsyncClient
+            httpx_module.TimeoutException = TimeoutException
+            httpx_module.TransportError = TransportError
+            sys.modules["httpx"] = httpx_module
 
     try:
         __import__("mcp.server.fastmcp")
@@ -81,7 +106,7 @@ def test_emit_reports_actual_pre_append_chain_state() -> None:
 
 
 def test_corrupt_chain_declines_before_state_changing_backend(monkeypatch) -> None:
-    _install_mcp_import_stub()
+    _install_import_stubs()
     from hatun_mcp import server
 
     chain = KhipuChain()
