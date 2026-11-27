@@ -1,0 +1,65 @@
+{
+  "_doc": "Reviewed journal statements that may fail during rebuild-fresh on a source-derived baseline. Key = tag + statement index ('i' or 'i/k' for the k-th top-level statement inside block i) + SQLSTATE. Every entry needs a reason. Adding an entry is a reviewed change; rebuild-fresh fails closed on anything not listed.",
+  "entries": [
+    {
+      "tag": "0021_simulation_persistence",
+      "statement": "31",
+      "sqlstate": "42703",
+      "reason": "src/schema/nuro_mesh.ts alloy_evidence_index has no updated_at column, so idx_alloy_evidence_updated cannot exist on a schema built from source. Whether production has the column/index is UNKNOWN until a read-only schema-only dump of the named host is compared (audit A1-equivalent)."
+    },
+    {
+      "tag": "0022_consolidated_runtime_tables",
+      "statement": "0/12",
+      "sqlstate": "42703",
+      "reason": "src/schema/nuro_mesh.ts alloy_evidence_index has no updated_at column, so idx_alloy_evidence_updated cannot exist on a schema built from source. Whether production has the column/index is UNKNOWN until a read-only schema-only dump of the named host is compared (audit A1-equivalent)."
+    },
+    {
+      "tag": "0046_cognitive_runtime_schema",
+      "statement": "82",
+      "sqlstate": "42703",
+      "reason": "Two TS tables are named rollback_events (src/schema/guardian_tools.ts:131 and src/schema/cognitive_runtime.ts:711); drizzle-kit generated the guardian_tools shape, which lacks this column. Name collision is a source defect to resolve separately (founder review); production shape UNKNOWN until schema-only dump."
+    },
+    {
+      "tag": "0046_cognitive_runtime_schema",
+      "statement": "84",
+      "sqlstate": "42703",
+      "reason": "Two TS tables are named rollback_events (src/schema/guardian_tools.ts:131 and src/schema/cognitive_runtime.ts:711); drizzle-kit generated the guardian_tools shape, which lacks this column. Name collision is a source defect to resolve separately (founder review); production shape UNKNOWN until schema-only dump."
+    },
+    {
+      "tag": "0046_cognitive_runtime_schema",
+      "statement": "85",
+      "sqlstate": "42703",
+      "reason": "Two TS tables are named rollback_events (src/schema/guardian_tools.ts:131 and src/schema/cognitive_runtime.ts:711); drizzle-kit generated the guardian_tools shape, which lacks this column. Name collision is a source defect to resolve separately (founder review); production shape UNKNOWN until schema-only dump."
+    },
+    {
+      "tag": "0046_cognitive_runtime_schema",
+      "statement": "86",
+      "sqlstate": "42703",
+      "reason": "Two TS tables are named rollback_events (src/schema/guardian_tools.ts:131 and src/schema/cognitive_runtime.ts:711); drizzle-kit generated the guardian_tools shape, which lacks this column. Name collision is a source defect to resolve separately (founder review); production shape UNKNOWN until schema-only dump."
+    },
+    {
+      "tag": "0110_backfill_last_digest_sent_at",
+      "statement": "0",
+      "sqlstate": "42P01",
+      "reason": "Data backfill (UPDATE) joining digest_emails_sent, which no TS schema file defines. On a freshly built database there are no rows to backfill, so skipping it loses nothing."
+    },
+    {
+      "tag": "0005_enterprise_platform_capabilities.sql",
+      "statement": "30",
+      "sqlstate": "42703",
+      "reason": "Hand-authored index on billing_disputes.external_dispute_id; the TS schema (src/schema/billing_disputes.ts) defines billing_disputes without external_dispute_id, and the file's CREATE TABLE IF NOT EXISTS is a no-op after the baseline. Production shape UNKNOWN until schema-only dump."
+    },
+    {
+      "tag": "0005_enterprise_platform_capabilities.sql",
+      "statement": "31",
+      "sqlstate": "42703",
+      "reason": "Hand-authored index on billing_disputes.respond_by_date; the TS schema (src/schema/billing_disputes.ts) defines billing_disputes without respond_by_date, and the file's CREATE TABLE IF NOT EXISTS is a no-op after the baseline. Production shape UNKNOWN until schema-only dump."
+    },
+    {
+      "tag": "0005_enterprise_platform_capabilities.sql",
+      "statement": "37",
+      "sqlstate": "42703",
+      "reason": "Hand-authored index on treasury_balance_snapshots.snapped_at; the TS schema (src/schema/treasury.ts) defines treasury_balance_snapshots without snapped_at, and the file's CREATE TABLE IF NOT EXISTS is a no-op after the baseline. Production shape UNKNOWN until schema-only dump."
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+name: DB rebuild from migrations
+
+# Gap G2 / audit F1: proves the platform schema can be built on an EMPTY
+# PostgreSQL 18 database from source (baseline + journal + manual migrations),
+# with no `drizzle-kit push`, and that `migrate` is a no-op afterwards; also
+# round-trips an encrypted backup through the restore drill on synthetic data.
+# Uses only a throwaway service container. No secrets, no remote database.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lib/db/**'
+      - '.github/workflows/db-rebuild.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/db/**'
+      - '.github/workflows/db-rebuild.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-rebuild-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  rebuild:
+    name: Clean-database rebuild (PostgreSQL 18 + pgvector)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        # pgvector 0.8.1 on PostgreSQL 18 (Debian trixie), pinned by digest.
+        image: pgvector/pgvector:0.8.1-pg18-trixie@sha256:2fd905ba95f99a51be207d0ff0b8d5b8538cbce7e9083b3ccfa65b93bb28b938
+        env:
+          POSTGRES_PASSWORD: throwaway-ci-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Install PostgreSQL 18 client tools and age (backup/restore round-trip test)
+        run: |
+          set -euo pipefail
+          sudo apt-get update -q
+          sudo apt-get install -y -q postgresql-common age
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -q postgresql-client-18
+          echo /usr/lib/postgresql/18/bin >> "$GITHUB_PATH"
+      - name: Install lib/db and its workspace deps only
+        run: pnpm install --frozen-lockfile --filter '@szl-holdings/db...'
+      - name: Baseline matches src/schema (offline drizzle-kit generate)
+        working-directory: lib/db
+        run: node scripts/baseline.mjs --check
+      - name: Journal guard
+        run: node lib/db/scripts/check-journal.mjs
+      - name: Rebuild an empty database and verify trackers (node:test)
+        working-directory: lib/db
+        env:
+          SZL_DB_TEST_ADMIN_URL: postgresql://postgres:throwaway-ci-only@127.0.0.1:5432/postgres
+        run: node --test scripts/*.test.mjs   # includes the encrypted backup -> restore drill round trip

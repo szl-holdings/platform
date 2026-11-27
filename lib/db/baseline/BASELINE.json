@@ -1,0 +1,9 @@
+{
+  "file": "0000_baseline_from_schema.sql",
+  "sha256": "f58a4cdf6b969512c8cfd8b7a296edc176ba73361015f0843c480092761de754",
+  "generated_by": "drizzle-kit 0.31.11 generate (drizzle-orm 0.45.2) from lib/db/src/schema/index.ts",
+  "source_commit": "26e3a8e4314e4c50b885fa7094121675d171b3d0",
+  "generated_at": "2026-11-27",
+  "extensions": ["pgcrypto", "vector"],
+  "status": "PROPOSED — must be reviewed against a read-only schema-only dump of the named production host before it is treated as the authoritative baseline (audit A2)."
+}
