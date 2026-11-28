@@ -101,6 +101,7 @@ jobs:
   publish-packages:
     name: zarf publish ${{ matrix.package }}
     needs: check-version-sync
+    environment: production
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -237,6 +238,7 @@ jobs:
   publish-bundle:
     name: uds bundle publish szl-mesh
     needs: [check-version-sync, publish-packages]
+    environment: production
     runs-on: ubuntu-latest
     permissions:
       contents: read
