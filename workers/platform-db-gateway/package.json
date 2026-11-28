@@ -1,0 +1,18 @@
+{
+  "name": "@workspace/platform-db-gateway",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare Worker data-access path to the Platform Postgres through Hyperdrive (postgres.js). No public route; reached via service binding only.",
+  "scripts": {
+    "test": "node --experimental-strip-types --test src/*.test.ts",
+    "check": "wrangler deploy --dry-run --outdir .wrangler-dryrun"
+  },
+  "dependencies": {
+    "postgres": "3.4.9"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261125.1",
+    "wrangler": "4.168.0"
+  }
+}
